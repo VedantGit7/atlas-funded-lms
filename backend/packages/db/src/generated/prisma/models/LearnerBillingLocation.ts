@@ -222,6 +222,7 @@ export type LearnerBillingLocationWhereInput = {
   is_default?: Prisma.BoolFilter<"LearnerBillingLocation"> | boolean
   created_at?: Prisma.DateTimeFilter<"LearnerBillingLocation"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LearnerBillingLocation"> | Date | string
+  payment_gateways?: Prisma.PaymentGatewayListRelationFilter
 }
 
 export type LearnerBillingLocationOrderByWithRelationInput = {
@@ -235,10 +236,12 @@ export type LearnerBillingLocationOrderByWithRelationInput = {
   is_default?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  payment_gateways?: Prisma.PaymentGatewayOrderByRelationAggregateInput
 }
 
 export type LearnerBillingLocationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.LearnerBillingLocationTenant_idIdCompoundUniqueInput
   AND?: Prisma.LearnerBillingLocationWhereInput | Prisma.LearnerBillingLocationWhereInput[]
   OR?: Prisma.LearnerBillingLocationWhereInput[]
   NOT?: Prisma.LearnerBillingLocationWhereInput | Prisma.LearnerBillingLocationWhereInput[]
@@ -251,7 +254,8 @@ export type LearnerBillingLocationWhereUniqueInput = Prisma.AtLeast<{
   is_default?: Prisma.BoolFilter<"LearnerBillingLocation"> | boolean
   created_at?: Prisma.DateTimeFilter<"LearnerBillingLocation"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LearnerBillingLocation"> | Date | string
-}, "id">
+  payment_gateways?: Prisma.PaymentGatewayListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type LearnerBillingLocationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -296,6 +300,7 @@ export type LearnerBillingLocationCreateInput = {
   is_default?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  payment_gateways?: Prisma.PaymentGatewayCreateNestedManyWithoutBilling_locationInput
 }
 
 export type LearnerBillingLocationUncheckedCreateInput = {
@@ -309,6 +314,7 @@ export type LearnerBillingLocationUncheckedCreateInput = {
   is_default?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  payment_gateways?: Prisma.PaymentGatewayUncheckedCreateNestedManyWithoutBilling_locationInput
 }
 
 export type LearnerBillingLocationUpdateInput = {
@@ -322,6 +328,7 @@ export type LearnerBillingLocationUpdateInput = {
   is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_gateways?: Prisma.PaymentGatewayUpdateManyWithoutBilling_locationNestedInput
 }
 
 export type LearnerBillingLocationUncheckedUpdateInput = {
@@ -335,6 +342,7 @@ export type LearnerBillingLocationUncheckedUpdateInput = {
   is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_gateways?: Prisma.PaymentGatewayUncheckedUpdateManyWithoutBilling_locationNestedInput
 }
 
 export type LearnerBillingLocationCreateManyInput = {
@@ -376,6 +384,11 @@ export type LearnerBillingLocationUncheckedUpdateManyInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type LearnerBillingLocationTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type LearnerBillingLocationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -415,6 +428,124 @@ export type LearnerBillingLocationMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type LearnerBillingLocationNullableScalarRelationFilter = {
+  is?: Prisma.LearnerBillingLocationWhereInput | null
+  isNot?: Prisma.LearnerBillingLocationWhereInput | null
+}
+
+export type LearnerBillingLocationCreateNestedOneWithoutPayment_gatewaysInput = {
+  create?: Prisma.XOR<Prisma.LearnerBillingLocationCreateWithoutPayment_gatewaysInput, Prisma.LearnerBillingLocationUncheckedCreateWithoutPayment_gatewaysInput>
+  connectOrCreate?: Prisma.LearnerBillingLocationCreateOrConnectWithoutPayment_gatewaysInput
+  connect?: Prisma.LearnerBillingLocationWhereUniqueInput
+}
+
+export type LearnerBillingLocationUpdateOneWithoutPayment_gatewaysNestedInput = {
+  create?: Prisma.XOR<Prisma.LearnerBillingLocationCreateWithoutPayment_gatewaysInput, Prisma.LearnerBillingLocationUncheckedCreateWithoutPayment_gatewaysInput>
+  connectOrCreate?: Prisma.LearnerBillingLocationCreateOrConnectWithoutPayment_gatewaysInput
+  upsert?: Prisma.LearnerBillingLocationUpsertWithoutPayment_gatewaysInput
+  disconnect?: Prisma.LearnerBillingLocationWhereInput | boolean
+  delete?: Prisma.LearnerBillingLocationWhereInput | boolean
+  connect?: Prisma.LearnerBillingLocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LearnerBillingLocationUpdateToOneWithWhereWithoutPayment_gatewaysInput, Prisma.LearnerBillingLocationUpdateWithoutPayment_gatewaysInput>, Prisma.LearnerBillingLocationUncheckedUpdateWithoutPayment_gatewaysInput>
+}
+
+export type LearnerBillingLocationCreateWithoutPayment_gatewaysInput = {
+  id: string
+  tenant_id: string
+  name: string
+  country: string
+  currency: string
+  description?: string | null
+  status?: string
+  is_default?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type LearnerBillingLocationUncheckedCreateWithoutPayment_gatewaysInput = {
+  id: string
+  tenant_id: string
+  name: string
+  country: string
+  currency: string
+  description?: string | null
+  status?: string
+  is_default?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type LearnerBillingLocationCreateOrConnectWithoutPayment_gatewaysInput = {
+  where: Prisma.LearnerBillingLocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LearnerBillingLocationCreateWithoutPayment_gatewaysInput, Prisma.LearnerBillingLocationUncheckedCreateWithoutPayment_gatewaysInput>
+}
+
+export type LearnerBillingLocationUpsertWithoutPayment_gatewaysInput = {
+  update: Prisma.XOR<Prisma.LearnerBillingLocationUpdateWithoutPayment_gatewaysInput, Prisma.LearnerBillingLocationUncheckedUpdateWithoutPayment_gatewaysInput>
+  create: Prisma.XOR<Prisma.LearnerBillingLocationCreateWithoutPayment_gatewaysInput, Prisma.LearnerBillingLocationUncheckedCreateWithoutPayment_gatewaysInput>
+  where?: Prisma.LearnerBillingLocationWhereInput
+}
+
+export type LearnerBillingLocationUpdateToOneWithWhereWithoutPayment_gatewaysInput = {
+  where?: Prisma.LearnerBillingLocationWhereInput
+  data: Prisma.XOR<Prisma.LearnerBillingLocationUpdateWithoutPayment_gatewaysInput, Prisma.LearnerBillingLocationUncheckedUpdateWithoutPayment_gatewaysInput>
+}
+
+export type LearnerBillingLocationUpdateWithoutPayment_gatewaysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LearnerBillingLocationUncheckedUpdateWithoutPayment_gatewaysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type LearnerBillingLocationCountOutputType
+ */
+
+export type LearnerBillingLocationCountOutputType = {
+  payment_gateways: number
+}
+
+export type LearnerBillingLocationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  payment_gateways?: boolean | LearnerBillingLocationCountOutputTypeCountPayment_gatewaysArgs
+}
+
+/**
+ * LearnerBillingLocationCountOutputType without action
+ */
+export type LearnerBillingLocationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LearnerBillingLocationCountOutputType
+   */
+  select?: Prisma.LearnerBillingLocationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * LearnerBillingLocationCountOutputType without action
+ */
+export type LearnerBillingLocationCountOutputTypeCountPayment_gatewaysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentGatewayWhereInput
+}
 
 
 export type LearnerBillingLocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -428,6 +559,8 @@ export type LearnerBillingLocationSelect<ExtArgs extends runtime.Types.Extension
   is_default?: boolean
   created_at?: boolean
   updated_at?: boolean
+  payment_gateways?: boolean | Prisma.LearnerBillingLocation$payment_gatewaysArgs<ExtArgs>
+  _count?: boolean | Prisma.LearnerBillingLocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learnerBillingLocation"]>
 
 export type LearnerBillingLocationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -470,10 +603,18 @@ export type LearnerBillingLocationSelectScalar = {
 }
 
 export type LearnerBillingLocationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "name" | "country" | "currency" | "description" | "status" | "is_default" | "created_at" | "updated_at", ExtArgs["result"]["learnerBillingLocation"]>
+export type LearnerBillingLocationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  payment_gateways?: boolean | Prisma.LearnerBillingLocation$payment_gatewaysArgs<ExtArgs>
+  _count?: boolean | Prisma.LearnerBillingLocationCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type LearnerBillingLocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type LearnerBillingLocationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $LearnerBillingLocationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LearnerBillingLocation"
-  objects: {}
+  objects: {
+    payment_gateways: Prisma.$PaymentGatewayPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -879,6 +1020,7 @@ readonly fields: LearnerBillingLocationFieldRefs;
  */
 export interface Prisma__LearnerBillingLocationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  payment_gateways<T extends Prisma.LearnerBillingLocation$payment_gatewaysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LearnerBillingLocation$payment_gatewaysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentGatewayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -935,6 +1077,10 @@ export type LearnerBillingLocationFindUniqueArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
+  /**
    * Filter, which LearnerBillingLocation to fetch.
    */
   where: Prisma.LearnerBillingLocationWhereUniqueInput
@@ -953,6 +1099,10 @@ export type LearnerBillingLocationFindUniqueOrThrowArgs<ExtArgs extends runtime.
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
+  /**
    * Filter, which LearnerBillingLocation to fetch.
    */
   where: Prisma.LearnerBillingLocationWhereUniqueInput
@@ -970,6 +1120,10 @@ export type LearnerBillingLocationFindFirstArgs<ExtArgs extends runtime.Types.Ex
    * Omit specific fields from the LearnerBillingLocation
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
   /**
    * Filter, which LearnerBillingLocation to fetch.
    */
@@ -1019,6 +1173,10 @@ export type LearnerBillingLocationFindFirstOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
+  /**
    * Filter, which LearnerBillingLocation to fetch.
    */
   where?: Prisma.LearnerBillingLocationWhereInput
@@ -1066,6 +1224,10 @@ export type LearnerBillingLocationFindManyArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the LearnerBillingLocation
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
   /**
    * Filter, which LearnerBillingLocations to fetch.
    */
@@ -1115,6 +1277,10 @@ export type LearnerBillingLocationCreateArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
+  /**
    * The data needed to create a LearnerBillingLocation.
    */
   data: Prisma.XOR<Prisma.LearnerBillingLocationCreateInput, Prisma.LearnerBillingLocationUncheckedCreateInput>
@@ -1162,6 +1328,10 @@ export type LearnerBillingLocationUpdateArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the LearnerBillingLocation
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
   /**
    * The data needed to update a LearnerBillingLocation.
    */
@@ -1229,6 +1399,10 @@ export type LearnerBillingLocationUpsertArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
+  /**
    * The filter to search for the LearnerBillingLocation to update in case it exists.
    */
   where: Prisma.LearnerBillingLocationWhereUniqueInput
@@ -1255,6 +1429,10 @@ export type LearnerBillingLocationDeleteArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
+  /**
    * Filter which LearnerBillingLocation to delete.
    */
   where: Prisma.LearnerBillingLocationWhereUniqueInput
@@ -1275,6 +1453,30 @@ export type LearnerBillingLocationDeleteManyArgs<ExtArgs extends runtime.Types.E
 }
 
 /**
+ * LearnerBillingLocation.payment_gateways
+ */
+export type LearnerBillingLocation$payment_gatewaysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentGateway
+   */
+  select?: Prisma.PaymentGatewaySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentGateway
+   */
+  omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
+  where?: Prisma.PaymentGatewayWhereInput
+  orderBy?: Prisma.PaymentGatewayOrderByWithRelationInput | Prisma.PaymentGatewayOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentGatewayWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentGatewayScalarFieldEnum | Prisma.PaymentGatewayScalarFieldEnum[]
+}
+
+/**
  * LearnerBillingLocation without action
  */
 export type LearnerBillingLocationDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1286,4 +1488,8 @@ export type LearnerBillingLocationDefaultArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the LearnerBillingLocation
    */
   omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
 }

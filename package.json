@@ -114,6 +114,7 @@
     "perf:local": "node scripts/perf/local-smoke.mjs",
     "perf:build": "node scripts/perf/local-web.mjs build",
     "perf:mobile": "node scripts/e2e/local-run.mjs test --config playwright.performance.config.mjs",
+    "perf:web-vitals": "playwright test --config playwright.web-vitals.config.mjs",
     "perf:budget": "node scripts/perf/connection-budget.mjs",
     "perf:telemetry": "node scripts/perf/telemetry.mjs",
     "perf:tooling-tests": "node --test scripts/perf/*.test.mjs tests/performance/*.test.mjs",

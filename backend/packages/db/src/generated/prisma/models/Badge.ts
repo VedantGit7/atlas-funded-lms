@@ -210,6 +210,7 @@ export type BadgeWhereInput = {
   status?: Prisma.EnumEntityStatusFilter<"Badge"> | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFilter<"Badge"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Badge"> | Date | string
+  badge_awards?: Prisma.BadgeAwardListRelationFilter
 }
 
 export type BadgeOrderByWithRelationInput = {
@@ -222,10 +223,12 @@ export type BadgeOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  badge_awards?: Prisma.BadgeAwardOrderByRelationAggregateInput
 }
 
 export type BadgeWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.BadgeTenant_idIdCompoundUniqueInput
   tenant_id_key?: Prisma.BadgeTenant_idKeyCompoundUniqueInput
   AND?: Prisma.BadgeWhereInput | Prisma.BadgeWhereInput[]
   OR?: Prisma.BadgeWhereInput[]
@@ -238,7 +241,8 @@ export type BadgeWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumEntityStatusFilter<"Badge"> | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFilter<"Badge"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Badge"> | Date | string
-}, "id" | "tenant_id_key">
+  badge_awards?: Prisma.BadgeAwardListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_key">
 
 export type BadgeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -280,6 +284,7 @@ export type BadgeCreateInput = {
   status?: $Enums.EntityStatus
   created_at?: Date | string
   updated_at?: Date | string
+  badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutBadgeInput
 }
 
 export type BadgeUncheckedCreateInput = {
@@ -292,6 +297,7 @@ export type BadgeUncheckedCreateInput = {
   status?: $Enums.EntityStatus
   created_at?: Date | string
   updated_at?: Date | string
+  badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutBadgeInput
 }
 
 export type BadgeUpdateInput = {
@@ -304,6 +310,7 @@ export type BadgeUpdateInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  badge_awards?: Prisma.BadgeAwardUpdateManyWithoutBadgeNestedInput
 }
 
 export type BadgeUncheckedUpdateInput = {
@@ -316,6 +323,7 @@ export type BadgeUncheckedUpdateInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutBadgeNestedInput
 }
 
 export type BadgeCreateManyInput = {
@@ -352,6 +360,11 @@ export type BadgeUncheckedUpdateManyInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BadgeTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type BadgeTenant_idKeyCompoundUniqueInput = {
@@ -393,6 +406,118 @@ export type BadgeMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type BadgeScalarRelationFilter = {
+  is?: Prisma.BadgeWhereInput
+  isNot?: Prisma.BadgeWhereInput
+}
+
+export type BadgeCreateNestedOneWithoutBadge_awardsInput = {
+  create?: Prisma.XOR<Prisma.BadgeCreateWithoutBadge_awardsInput, Prisma.BadgeUncheckedCreateWithoutBadge_awardsInput>
+  connectOrCreate?: Prisma.BadgeCreateOrConnectWithoutBadge_awardsInput
+  connect?: Prisma.BadgeWhereUniqueInput
+}
+
+export type BadgeUpdateOneRequiredWithoutBadge_awardsNestedInput = {
+  create?: Prisma.XOR<Prisma.BadgeCreateWithoutBadge_awardsInput, Prisma.BadgeUncheckedCreateWithoutBadge_awardsInput>
+  connectOrCreate?: Prisma.BadgeCreateOrConnectWithoutBadge_awardsInput
+  upsert?: Prisma.BadgeUpsertWithoutBadge_awardsInput
+  connect?: Prisma.BadgeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BadgeUpdateToOneWithWhereWithoutBadge_awardsInput, Prisma.BadgeUpdateWithoutBadge_awardsInput>, Prisma.BadgeUncheckedUpdateWithoutBadge_awardsInput>
+}
+
+export type BadgeCreateWithoutBadge_awardsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  icon_key?: string | null
+  criteria_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.EntityStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type BadgeUncheckedCreateWithoutBadge_awardsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  icon_key?: string | null
+  criteria_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.EntityStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type BadgeCreateOrConnectWithoutBadge_awardsInput = {
+  where: Prisma.BadgeWhereUniqueInput
+  create: Prisma.XOR<Prisma.BadgeCreateWithoutBadge_awardsInput, Prisma.BadgeUncheckedCreateWithoutBadge_awardsInput>
+}
+
+export type BadgeUpsertWithoutBadge_awardsInput = {
+  update: Prisma.XOR<Prisma.BadgeUpdateWithoutBadge_awardsInput, Prisma.BadgeUncheckedUpdateWithoutBadge_awardsInput>
+  create: Prisma.XOR<Prisma.BadgeCreateWithoutBadge_awardsInput, Prisma.BadgeUncheckedCreateWithoutBadge_awardsInput>
+  where?: Prisma.BadgeWhereInput
+}
+
+export type BadgeUpdateToOneWithWhereWithoutBadge_awardsInput = {
+  where?: Prisma.BadgeWhereInput
+  data: Prisma.XOR<Prisma.BadgeUpdateWithoutBadge_awardsInput, Prisma.BadgeUncheckedUpdateWithoutBadge_awardsInput>
+}
+
+export type BadgeUpdateWithoutBadge_awardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  icon_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criteria_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BadgeUncheckedUpdateWithoutBadge_awardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  icon_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criteria_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type BadgeCountOutputType
+ */
+
+export type BadgeCountOutputType = {
+  badge_awards: number
+}
+
+export type BadgeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  badge_awards?: boolean | BadgeCountOutputTypeCountBadge_awardsArgs
+}
+
+/**
+ * BadgeCountOutputType without action
+ */
+export type BadgeCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BadgeCountOutputType
+   */
+  select?: Prisma.BadgeCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * BadgeCountOutputType without action
+ */
+export type BadgeCountOutputTypeCountBadge_awardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BadgeAwardWhereInput
+}
 
 
 export type BadgeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -405,6 +530,8 @@ export type BadgeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  badge_awards?: boolean | Prisma.Badge$badge_awardsArgs<ExtArgs>
+  _count?: boolean | Prisma.BadgeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["badge"]>
 
 export type BadgeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -444,10 +571,18 @@ export type BadgeSelectScalar = {
 }
 
 export type BadgeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "icon_key" | "criteria_json" | "status" | "created_at" | "updated_at", ExtArgs["result"]["badge"]>
+export type BadgeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  badge_awards?: boolean | Prisma.Badge$badge_awardsArgs<ExtArgs>
+  _count?: boolean | Prisma.BadgeCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type BadgeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type BadgeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $BadgePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Badge"
-  objects: {}
+  objects: {
+    badge_awards: Prisma.$BadgeAwardPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -852,6 +987,7 @@ readonly fields: BadgeFieldRefs;
  */
 export interface Prisma__BadgeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  badge_awards<T extends Prisma.Badge$badge_awardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Badge$badge_awardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BadgeAwardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -907,6 +1043,10 @@ export type BadgeFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
+  /**
    * Filter, which Badge to fetch.
    */
   where: Prisma.BadgeWhereUniqueInput
@@ -925,6 +1065,10 @@ export type BadgeFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
+  /**
    * Filter, which Badge to fetch.
    */
   where: Prisma.BadgeWhereUniqueInput
@@ -942,6 +1086,10 @@ export type BadgeFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the Badge
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
   /**
    * Filter, which Badge to fetch.
    */
@@ -991,6 +1139,10 @@ export type BadgeFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
+  /**
    * Filter, which Badge to fetch.
    */
   where?: Prisma.BadgeWhereInput
@@ -1038,6 +1190,10 @@ export type BadgeFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Badge
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
   /**
    * Filter, which Badges to fetch.
    */
@@ -1087,6 +1243,10 @@ export type BadgeCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
+  /**
    * The data needed to create a Badge.
    */
   data: Prisma.XOR<Prisma.BadgeCreateInput, Prisma.BadgeUncheckedCreateInput>
@@ -1134,6 +1294,10 @@ export type BadgeUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Badge
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
   /**
    * The data needed to update a Badge.
    */
@@ -1201,6 +1365,10 @@ export type BadgeUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
+  /**
    * The filter to search for the Badge to update in case it exists.
    */
   where: Prisma.BadgeWhereUniqueInput
@@ -1227,6 +1395,10 @@ export type BadgeDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
+  /**
    * Filter which Badge to delete.
    */
   where: Prisma.BadgeWhereUniqueInput
@@ -1247,6 +1419,30 @@ export type BadgeDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
+ * Badge.badge_awards
+ */
+export type Badge$badge_awardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BadgeAward
+   */
+  select?: Prisma.BadgeAwardSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BadgeAward
+   */
+  omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
+  where?: Prisma.BadgeAwardWhereInput
+  orderBy?: Prisma.BadgeAwardOrderByWithRelationInput | Prisma.BadgeAwardOrderByWithRelationInput[]
+  cursor?: Prisma.BadgeAwardWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BadgeAwardScalarFieldEnum | Prisma.BadgeAwardScalarFieldEnum[]
+}
+
+/**
  * Badge without action
  */
 export type BadgeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1258,4 +1454,8 @@ export type BadgeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the Badge
    */
   omit?: Prisma.BadgeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeInclude<ExtArgs> | null
 }

@@ -226,6 +226,8 @@ export type ItemCollectionWhereInput = {
   created_at?: Prisma.DateTimeFilter<"ItemCollection"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ItemCollection"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"ItemCollection"> | Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemListRelationFilter
+  practice_sessions?: Prisma.PracticeSessionListRelationFilter
 }
 
 export type ItemCollectionOrderByWithRelationInput = {
@@ -240,10 +242,13 @@ export type ItemCollectionOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  item_collection_items?: Prisma.ItemCollectionItemOrderByRelationAggregateInput
+  practice_sessions?: Prisma.PracticeSessionOrderByRelationAggregateInput
 }
 
 export type ItemCollectionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.ItemCollectionTenant_idIdCompoundUniqueInput
   AND?: Prisma.ItemCollectionWhereInput | Prisma.ItemCollectionWhereInput[]
   OR?: Prisma.ItemCollectionWhereInput[]
   NOT?: Prisma.ItemCollectionWhereInput | Prisma.ItemCollectionWhereInput[]
@@ -257,7 +262,9 @@ export type ItemCollectionWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"ItemCollection"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ItemCollection"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"ItemCollection"> | Date | string | null
-}, "id">
+  item_collection_items?: Prisma.ItemCollectionItemListRelationFilter
+  practice_sessions?: Prisma.PracticeSessionListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type ItemCollectionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -305,6 +312,8 @@ export type ItemCollectionCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutCollectionInput
+  practice_sessions?: Prisma.PracticeSessionCreateNestedManyWithoutCollectionInput
 }
 
 export type ItemCollectionUncheckedCreateInput = {
@@ -319,6 +328,8 @@ export type ItemCollectionUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutCollectionInput
+  practice_sessions?: Prisma.PracticeSessionUncheckedCreateNestedManyWithoutCollectionInput
 }
 
 export type ItemCollectionUpdateInput = {
@@ -333,6 +344,8 @@ export type ItemCollectionUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutCollectionNestedInput
+  practice_sessions?: Prisma.PracticeSessionUpdateManyWithoutCollectionNestedInput
 }
 
 export type ItemCollectionUncheckedUpdateInput = {
@@ -347,6 +360,8 @@ export type ItemCollectionUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutCollectionNestedInput
+  practice_sessions?: Prisma.PracticeSessionUncheckedUpdateManyWithoutCollectionNestedInput
 }
 
 export type ItemCollectionCreateManyInput = {
@@ -391,6 +406,11 @@ export type ItemCollectionUncheckedUpdateManyInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type ItemCollectionTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type ItemCollectionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -431,6 +451,236 @@ export type ItemCollectionMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type ItemCollectionScalarRelationFilter = {
+  is?: Prisma.ItemCollectionWhereInput
+  isNot?: Prisma.ItemCollectionWhereInput
+}
+
+export type ItemCollectionNullableScalarRelationFilter = {
+  is?: Prisma.ItemCollectionWhereInput | null
+  isNot?: Prisma.ItemCollectionWhereInput | null
+}
+
+export type ItemCollectionCreateNestedOneWithoutItem_collection_itemsInput = {
+  create?: Prisma.XOR<Prisma.ItemCollectionCreateWithoutItem_collection_itemsInput, Prisma.ItemCollectionUncheckedCreateWithoutItem_collection_itemsInput>
+  connectOrCreate?: Prisma.ItemCollectionCreateOrConnectWithoutItem_collection_itemsInput
+  connect?: Prisma.ItemCollectionWhereUniqueInput
+}
+
+export type ItemCollectionUpdateOneRequiredWithoutItem_collection_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCollectionCreateWithoutItem_collection_itemsInput, Prisma.ItemCollectionUncheckedCreateWithoutItem_collection_itemsInput>
+  connectOrCreate?: Prisma.ItemCollectionCreateOrConnectWithoutItem_collection_itemsInput
+  upsert?: Prisma.ItemCollectionUpsertWithoutItem_collection_itemsInput
+  connect?: Prisma.ItemCollectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemCollectionUpdateToOneWithWhereWithoutItem_collection_itemsInput, Prisma.ItemCollectionUpdateWithoutItem_collection_itemsInput>, Prisma.ItemCollectionUncheckedUpdateWithoutItem_collection_itemsInput>
+}
+
+export type ItemCollectionCreateNestedOneWithoutPractice_sessionsInput = {
+  create?: Prisma.XOR<Prisma.ItemCollectionCreateWithoutPractice_sessionsInput, Prisma.ItemCollectionUncheckedCreateWithoutPractice_sessionsInput>
+  connectOrCreate?: Prisma.ItemCollectionCreateOrConnectWithoutPractice_sessionsInput
+  connect?: Prisma.ItemCollectionWhereUniqueInput
+}
+
+export type ItemCollectionUpdateOneWithoutPractice_sessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCollectionCreateWithoutPractice_sessionsInput, Prisma.ItemCollectionUncheckedCreateWithoutPractice_sessionsInput>
+  connectOrCreate?: Prisma.ItemCollectionCreateOrConnectWithoutPractice_sessionsInput
+  upsert?: Prisma.ItemCollectionUpsertWithoutPractice_sessionsInput
+  disconnect?: Prisma.ItemCollectionWhereInput | boolean
+  delete?: Prisma.ItemCollectionWhereInput | boolean
+  connect?: Prisma.ItemCollectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemCollectionUpdateToOneWithWhereWithoutPractice_sessionsInput, Prisma.ItemCollectionUpdateWithoutPractice_sessionsInput>, Prisma.ItemCollectionUncheckedUpdateWithoutPractice_sessionsInput>
+}
+
+export type ItemCollectionCreateWithoutItem_collection_itemsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  collection_type: string
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  practice_sessions?: Prisma.PracticeSessionCreateNestedManyWithoutCollectionInput
+}
+
+export type ItemCollectionUncheckedCreateWithoutItem_collection_itemsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  collection_type: string
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  practice_sessions?: Prisma.PracticeSessionUncheckedCreateNestedManyWithoutCollectionInput
+}
+
+export type ItemCollectionCreateOrConnectWithoutItem_collection_itemsInput = {
+  where: Prisma.ItemCollectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCollectionCreateWithoutItem_collection_itemsInput, Prisma.ItemCollectionUncheckedCreateWithoutItem_collection_itemsInput>
+}
+
+export type ItemCollectionUpsertWithoutItem_collection_itemsInput = {
+  update: Prisma.XOR<Prisma.ItemCollectionUpdateWithoutItem_collection_itemsInput, Prisma.ItemCollectionUncheckedUpdateWithoutItem_collection_itemsInput>
+  create: Prisma.XOR<Prisma.ItemCollectionCreateWithoutItem_collection_itemsInput, Prisma.ItemCollectionUncheckedCreateWithoutItem_collection_itemsInput>
+  where?: Prisma.ItemCollectionWhereInput
+}
+
+export type ItemCollectionUpdateToOneWithWhereWithoutItem_collection_itemsInput = {
+  where?: Prisma.ItemCollectionWhereInput
+  data: Prisma.XOR<Prisma.ItemCollectionUpdateWithoutItem_collection_itemsInput, Prisma.ItemCollectionUncheckedUpdateWithoutItem_collection_itemsInput>
+}
+
+export type ItemCollectionUpdateWithoutItem_collection_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  collection_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  practice_sessions?: Prisma.PracticeSessionUpdateManyWithoutCollectionNestedInput
+}
+
+export type ItemCollectionUncheckedUpdateWithoutItem_collection_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  collection_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  practice_sessions?: Prisma.PracticeSessionUncheckedUpdateManyWithoutCollectionNestedInput
+}
+
+export type ItemCollectionCreateWithoutPractice_sessionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  collection_type: string
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutCollectionInput
+}
+
+export type ItemCollectionUncheckedCreateWithoutPractice_sessionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  collection_type: string
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutCollectionInput
+}
+
+export type ItemCollectionCreateOrConnectWithoutPractice_sessionsInput = {
+  where: Prisma.ItemCollectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCollectionCreateWithoutPractice_sessionsInput, Prisma.ItemCollectionUncheckedCreateWithoutPractice_sessionsInput>
+}
+
+export type ItemCollectionUpsertWithoutPractice_sessionsInput = {
+  update: Prisma.XOR<Prisma.ItemCollectionUpdateWithoutPractice_sessionsInput, Prisma.ItemCollectionUncheckedUpdateWithoutPractice_sessionsInput>
+  create: Prisma.XOR<Prisma.ItemCollectionCreateWithoutPractice_sessionsInput, Prisma.ItemCollectionUncheckedCreateWithoutPractice_sessionsInput>
+  where?: Prisma.ItemCollectionWhereInput
+}
+
+export type ItemCollectionUpdateToOneWithWhereWithoutPractice_sessionsInput = {
+  where?: Prisma.ItemCollectionWhereInput
+  data: Prisma.XOR<Prisma.ItemCollectionUpdateWithoutPractice_sessionsInput, Prisma.ItemCollectionUncheckedUpdateWithoutPractice_sessionsInput>
+}
+
+export type ItemCollectionUpdateWithoutPractice_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  collection_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutCollectionNestedInput
+}
+
+export type ItemCollectionUncheckedUpdateWithoutPractice_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  collection_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutCollectionNestedInput
+}
+
+
+/**
+ * Count Type ItemCollectionCountOutputType
+ */
+
+export type ItemCollectionCountOutputType = {
+  item_collection_items: number
+  practice_sessions: number
+}
+
+export type ItemCollectionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item_collection_items?: boolean | ItemCollectionCountOutputTypeCountItem_collection_itemsArgs
+  practice_sessions?: boolean | ItemCollectionCountOutputTypeCountPractice_sessionsArgs
+}
+
+/**
+ * ItemCollectionCountOutputType without action
+ */
+export type ItemCollectionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemCollectionCountOutputType
+   */
+  select?: Prisma.ItemCollectionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ItemCollectionCountOutputType without action
+ */
+export type ItemCollectionCountOutputTypeCountItem_collection_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ItemCollectionItemWhereInput
+}
+
+/**
+ * ItemCollectionCountOutputType without action
+ */
+export type ItemCollectionCountOutputTypeCountPractice_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PracticeSessionWhereInput
+}
 
 
 export type ItemCollectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -445,6 +695,9 @@ export type ItemCollectionSelect<ExtArgs extends runtime.Types.Extensions.Intern
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  item_collection_items?: boolean | Prisma.ItemCollection$item_collection_itemsArgs<ExtArgs>
+  practice_sessions?: boolean | Prisma.ItemCollection$practice_sessionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ItemCollectionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemCollection"]>
 
 export type ItemCollectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -490,10 +743,20 @@ export type ItemCollectionSelectScalar = {
 }
 
 export type ItemCollectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "slug" | "title" | "collection_type" | "status" | "metadata_json" | "created_by_membership_id" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["itemCollection"]>
+export type ItemCollectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item_collection_items?: boolean | Prisma.ItemCollection$item_collection_itemsArgs<ExtArgs>
+  practice_sessions?: boolean | Prisma.ItemCollection$practice_sessionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ItemCollectionCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ItemCollectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ItemCollectionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ItemCollectionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ItemCollection"
-  objects: {}
+  objects: {
+    item_collection_items: Prisma.$ItemCollectionItemPayload<ExtArgs>[]
+    practice_sessions: Prisma.$PracticeSessionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -903,6 +1166,8 @@ readonly fields: ItemCollectionFieldRefs;
  */
 export interface Prisma__ItemCollectionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  item_collection_items<T extends Prisma.ItemCollection$item_collection_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ItemCollection$item_collection_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemCollectionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  practice_sessions<T extends Prisma.ItemCollection$practice_sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ItemCollection$practice_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PracticeSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -960,6 +1225,10 @@ export type ItemCollectionFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
+  /**
    * Filter, which ItemCollection to fetch.
    */
   where: Prisma.ItemCollectionWhereUniqueInput
@@ -978,6 +1247,10 @@ export type ItemCollectionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
+  /**
    * Filter, which ItemCollection to fetch.
    */
   where: Prisma.ItemCollectionWhereUniqueInput
@@ -995,6 +1268,10 @@ export type ItemCollectionFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the ItemCollection
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
   /**
    * Filter, which ItemCollection to fetch.
    */
@@ -1044,6 +1321,10 @@ export type ItemCollectionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
+  /**
    * Filter, which ItemCollection to fetch.
    */
   where?: Prisma.ItemCollectionWhereInput
@@ -1091,6 +1372,10 @@ export type ItemCollectionFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ItemCollection
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
   /**
    * Filter, which ItemCollections to fetch.
    */
@@ -1140,6 +1425,10 @@ export type ItemCollectionCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
+  /**
    * The data needed to create a ItemCollection.
    */
   data: Prisma.XOR<Prisma.ItemCollectionCreateInput, Prisma.ItemCollectionUncheckedCreateInput>
@@ -1187,6 +1476,10 @@ export type ItemCollectionUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the ItemCollection
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
   /**
    * The data needed to update a ItemCollection.
    */
@@ -1254,6 +1547,10 @@ export type ItemCollectionUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
+  /**
    * The filter to search for the ItemCollection to update in case it exists.
    */
   where: Prisma.ItemCollectionWhereUniqueInput
@@ -1280,6 +1577,10 @@ export type ItemCollectionDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
+  /**
    * Filter which ItemCollection to delete.
    */
   where: Prisma.ItemCollectionWhereUniqueInput
@@ -1300,6 +1601,54 @@ export type ItemCollectionDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * ItemCollection.item_collection_items
+ */
+export type ItemCollection$item_collection_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemCollectionItem
+   */
+  select?: Prisma.ItemCollectionItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItemCollectionItem
+   */
+  omit?: Prisma.ItemCollectionItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionItemInclude<ExtArgs> | null
+  where?: Prisma.ItemCollectionItemWhereInput
+  orderBy?: Prisma.ItemCollectionItemOrderByWithRelationInput | Prisma.ItemCollectionItemOrderByWithRelationInput[]
+  cursor?: Prisma.ItemCollectionItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ItemCollectionItemScalarFieldEnum | Prisma.ItemCollectionItemScalarFieldEnum[]
+}
+
+/**
+ * ItemCollection.practice_sessions
+ */
+export type ItemCollection$practice_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PracticeSession
+   */
+  select?: Prisma.PracticeSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PracticeSession
+   */
+  omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
+  where?: Prisma.PracticeSessionWhereInput
+  orderBy?: Prisma.PracticeSessionOrderByWithRelationInput | Prisma.PracticeSessionOrderByWithRelationInput[]
+  cursor?: Prisma.PracticeSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PracticeSessionScalarFieldEnum | Prisma.PracticeSessionScalarFieldEnum[]
+}
+
+/**
  * ItemCollection without action
  */
 export type ItemCollectionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1311,4 +1660,8 @@ export type ItemCollectionDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ItemCollection
    */
   omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
 }

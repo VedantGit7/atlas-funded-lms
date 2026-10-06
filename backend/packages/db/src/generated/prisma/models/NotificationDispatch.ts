@@ -230,6 +230,7 @@ export type NotificationDispatchWhereInput = {
   error_json?: Prisma.JsonNullableFilter<"NotificationDispatch">
   created_at?: Prisma.DateTimeFilter<"NotificationDispatch"> | Date | string
   sent_at?: Prisma.DateTimeNullableFilter<"NotificationDispatch"> | Date | string | null
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }
 
 export type NotificationDispatchOrderByWithRelationInput = {
@@ -245,6 +246,7 @@ export type NotificationDispatchOrderByWithRelationInput = {
   error_json?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   sent_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type NotificationDispatchWhereUniqueInput = Prisma.AtLeast<{
@@ -264,6 +266,7 @@ export type NotificationDispatchWhereUniqueInput = Prisma.AtLeast<{
   error_json?: Prisma.JsonNullableFilter<"NotificationDispatch">
   created_at?: Prisma.DateTimeFilter<"NotificationDispatch"> | Date | string
   sent_at?: Prisma.DateTimeNullableFilter<"NotificationDispatch"> | Date | string | null
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }, "id" | "tenant_id_idempotency_key">
 
 export type NotificationDispatchOrderByWithAggregationInput = {
@@ -304,8 +307,6 @@ export type NotificationDispatchScalarWhereWithAggregatesInput = {
 
 export type NotificationDispatchCreateInput = {
   id: string
-  tenant_id: string
-  membership_id?: string | null
   channel: string
   template_key?: string | null
   destination?: string | null
@@ -315,6 +316,7 @@ export type NotificationDispatchCreateInput = {
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   sent_at?: Date | string | null
+  membership?: Prisma.MembershipCreateNestedOneWithoutNotification_dispatchesInput
 }
 
 export type NotificationDispatchUncheckedCreateInput = {
@@ -334,8 +336,6 @@ export type NotificationDispatchUncheckedCreateInput = {
 
 export type NotificationDispatchUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   template_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -345,6 +345,7 @@ export type NotificationDispatchUpdateInput = {
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneWithoutNotification_dispatchesNestedInput
 }
 
 export type NotificationDispatchUncheckedUpdateInput = {
@@ -379,8 +380,6 @@ export type NotificationDispatchCreateManyInput = {
 
 export type NotificationDispatchUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   channel?: Prisma.StringFieldUpdateOperationsInput | string
   template_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -405,6 +404,16 @@ export type NotificationDispatchUncheckedUpdateManyInput = {
   error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type NotificationDispatchListRelationFilter = {
+  every?: Prisma.NotificationDispatchWhereInput
+  some?: Prisma.NotificationDispatchWhereInput
+  none?: Prisma.NotificationDispatchWhereInput
+}
+
+export type NotificationDispatchOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type NotificationDispatchTenant_idIdempotency_keyCompoundUniqueInput = {
@@ -453,6 +462,170 @@ export type NotificationDispatchMinOrderByAggregateInput = {
   sent_at?: Prisma.SortOrder
 }
 
+export type NotificationDispatchCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.NotificationDispatchCreateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput> | Prisma.NotificationDispatchCreateWithoutMembershipInput[] | Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput | Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.NotificationDispatchCreateManyMembershipInputEnvelope
+  connect?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+}
+
+export type NotificationDispatchUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.NotificationDispatchCreateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput> | Prisma.NotificationDispatchCreateWithoutMembershipInput[] | Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput | Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.NotificationDispatchCreateManyMembershipInputEnvelope
+  connect?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+}
+
+export type NotificationDispatchUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.NotificationDispatchCreateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput> | Prisma.NotificationDispatchCreateWithoutMembershipInput[] | Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput | Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.NotificationDispatchUpsertWithWhereUniqueWithoutMembershipInput | Prisma.NotificationDispatchUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.NotificationDispatchCreateManyMembershipInputEnvelope
+  set?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  disconnect?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  delete?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  connect?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  update?: Prisma.NotificationDispatchUpdateWithWhereUniqueWithoutMembershipInput | Prisma.NotificationDispatchUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.NotificationDispatchUpdateManyWithWhereWithoutMembershipInput | Prisma.NotificationDispatchUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.NotificationDispatchScalarWhereInput | Prisma.NotificationDispatchScalarWhereInput[]
+}
+
+export type NotificationDispatchUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.NotificationDispatchCreateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput> | Prisma.NotificationDispatchCreateWithoutMembershipInput[] | Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput | Prisma.NotificationDispatchCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.NotificationDispatchUpsertWithWhereUniqueWithoutMembershipInput | Prisma.NotificationDispatchUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.NotificationDispatchCreateManyMembershipInputEnvelope
+  set?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  disconnect?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  delete?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  connect?: Prisma.NotificationDispatchWhereUniqueInput | Prisma.NotificationDispatchWhereUniqueInput[]
+  update?: Prisma.NotificationDispatchUpdateWithWhereUniqueWithoutMembershipInput | Prisma.NotificationDispatchUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.NotificationDispatchUpdateManyWithWhereWithoutMembershipInput | Prisma.NotificationDispatchUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.NotificationDispatchScalarWhereInput | Prisma.NotificationDispatchScalarWhereInput[]
+}
+
+export type NotificationDispatchCreateWithoutMembershipInput = {
+  id: string
+  channel: string
+  template_key?: string | null
+  destination?: string | null
+  idempotency_key: string
+  status?: $Enums.DispatchStatus
+  payload_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  sent_at?: Date | string | null
+}
+
+export type NotificationDispatchUncheckedCreateWithoutMembershipInput = {
+  id: string
+  channel: string
+  template_key?: string | null
+  destination?: string | null
+  idempotency_key: string
+  status?: $Enums.DispatchStatus
+  payload_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  sent_at?: Date | string | null
+}
+
+export type NotificationDispatchCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.NotificationDispatchWhereUniqueInput
+  create: Prisma.XOR<Prisma.NotificationDispatchCreateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput>
+}
+
+export type NotificationDispatchCreateManyMembershipInputEnvelope = {
+  data: Prisma.NotificationDispatchCreateManyMembershipInput | Prisma.NotificationDispatchCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type NotificationDispatchUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.NotificationDispatchWhereUniqueInput
+  update: Prisma.XOR<Prisma.NotificationDispatchUpdateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.NotificationDispatchCreateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedCreateWithoutMembershipInput>
+}
+
+export type NotificationDispatchUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.NotificationDispatchWhereUniqueInput
+  data: Prisma.XOR<Prisma.NotificationDispatchUpdateWithoutMembershipInput, Prisma.NotificationDispatchUncheckedUpdateWithoutMembershipInput>
+}
+
+export type NotificationDispatchUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.NotificationDispatchScalarWhereInput
+  data: Prisma.XOR<Prisma.NotificationDispatchUpdateManyMutationInput, Prisma.NotificationDispatchUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type NotificationDispatchScalarWhereInput = {
+  AND?: Prisma.NotificationDispatchScalarWhereInput | Prisma.NotificationDispatchScalarWhereInput[]
+  OR?: Prisma.NotificationDispatchScalarWhereInput[]
+  NOT?: Prisma.NotificationDispatchScalarWhereInput | Prisma.NotificationDispatchScalarWhereInput[]
+  id?: Prisma.UuidFilter<"NotificationDispatch"> | string
+  tenant_id?: Prisma.UuidFilter<"NotificationDispatch"> | string
+  membership_id?: Prisma.UuidNullableFilter<"NotificationDispatch"> | string | null
+  channel?: Prisma.StringFilter<"NotificationDispatch"> | string
+  template_key?: Prisma.StringNullableFilter<"NotificationDispatch"> | string | null
+  destination?: Prisma.StringNullableFilter<"NotificationDispatch"> | string | null
+  idempotency_key?: Prisma.StringFilter<"NotificationDispatch"> | string
+  status?: Prisma.EnumDispatchStatusFilter<"NotificationDispatch"> | $Enums.DispatchStatus
+  payload_json?: Prisma.JsonFilter<"NotificationDispatch">
+  error_json?: Prisma.JsonNullableFilter<"NotificationDispatch">
+  created_at?: Prisma.DateTimeFilter<"NotificationDispatch"> | Date | string
+  sent_at?: Prisma.DateTimeNullableFilter<"NotificationDispatch"> | Date | string | null
+}
+
+export type NotificationDispatchCreateManyMembershipInput = {
+  id: string
+  channel: string
+  template_key?: string | null
+  destination?: string | null
+  idempotency_key: string
+  status?: $Enums.DispatchStatus
+  payload_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  sent_at?: Date | string | null
+}
+
+export type NotificationDispatchUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  template_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
+  payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type NotificationDispatchUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  template_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
+  payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type NotificationDispatchUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  channel?: Prisma.StringFieldUpdateOperationsInput | string
+  template_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  destination?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
+  payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 
 
 export type NotificationDispatchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +641,7 @@ export type NotificationDispatchSelect<ExtArgs extends runtime.Types.Extensions.
   error_json?: boolean
   created_at?: boolean
   sent_at?: boolean
+  membership?: boolean | Prisma.NotificationDispatch$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["notificationDispatch"]>
 
 export type NotificationDispatchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -483,6 +657,7 @@ export type NotificationDispatchSelectCreateManyAndReturn<ExtArgs extends runtim
   error_json?: boolean
   created_at?: boolean
   sent_at?: boolean
+  membership?: boolean | Prisma.NotificationDispatch$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["notificationDispatch"]>
 
 export type NotificationDispatchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -498,6 +673,7 @@ export type NotificationDispatchSelectUpdateManyAndReturn<ExtArgs extends runtim
   error_json?: boolean
   created_at?: boolean
   sent_at?: boolean
+  membership?: boolean | Prisma.NotificationDispatch$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["notificationDispatch"]>
 
 export type NotificationDispatchSelectScalar = {
@@ -516,10 +692,21 @@ export type NotificationDispatchSelectScalar = {
 }
 
 export type NotificationDispatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "channel" | "template_key" | "destination" | "idempotency_key" | "status" | "payload_json" | "error_json" | "created_at" | "sent_at", ExtArgs["result"]["notificationDispatch"]>
+export type NotificationDispatchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.NotificationDispatch$membershipArgs<ExtArgs>
+}
+export type NotificationDispatchIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.NotificationDispatch$membershipArgs<ExtArgs>
+}
+export type NotificationDispatchIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.NotificationDispatch$membershipArgs<ExtArgs>
+}
 
 export type $NotificationDispatchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "NotificationDispatch"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -927,6 +1114,7 @@ readonly fields: NotificationDispatchFieldRefs;
  */
 export interface Prisma__NotificationDispatchClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.NotificationDispatch$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.NotificationDispatch$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -985,6 +1173,10 @@ export type NotificationDispatchFindUniqueArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
+  /**
    * Filter, which NotificationDispatch to fetch.
    */
   where: Prisma.NotificationDispatchWhereUniqueInput
@@ -1003,6 +1195,10 @@ export type NotificationDispatchFindUniqueOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
+  /**
    * Filter, which NotificationDispatch to fetch.
    */
   where: Prisma.NotificationDispatchWhereUniqueInput
@@ -1020,6 +1216,10 @@ export type NotificationDispatchFindFirstArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the NotificationDispatch
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
   /**
    * Filter, which NotificationDispatch to fetch.
    */
@@ -1069,6 +1269,10 @@ export type NotificationDispatchFindFirstOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
+  /**
    * Filter, which NotificationDispatch to fetch.
    */
   where?: Prisma.NotificationDispatchWhereInput
@@ -1116,6 +1320,10 @@ export type NotificationDispatchFindManyArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the NotificationDispatch
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
   /**
    * Filter, which NotificationDispatches to fetch.
    */
@@ -1165,6 +1373,10 @@ export type NotificationDispatchCreateArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
+  /**
    * The data needed to create a NotificationDispatch.
    */
   data: Prisma.XOR<Prisma.NotificationDispatchCreateInput, Prisma.NotificationDispatchUncheckedCreateInput>
@@ -1198,6 +1410,10 @@ export type NotificationDispatchCreateManyAndReturnArgs<ExtArgs extends runtime.
    */
   data: Prisma.NotificationDispatchCreateManyInput | Prisma.NotificationDispatchCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1212,6 +1428,10 @@ export type NotificationDispatchUpdateArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the NotificationDispatch
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
   /**
    * The data needed to update a NotificationDispatch.
    */
@@ -1264,6 +1484,10 @@ export type NotificationDispatchUpdateManyAndReturnArgs<ExtArgs extends runtime.
    * Limit how many NotificationDispatches to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1278,6 +1502,10 @@ export type NotificationDispatchUpsertArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the NotificationDispatch
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
   /**
    * The filter to search for the NotificationDispatch to update in case it exists.
    */
@@ -1305,6 +1533,10 @@ export type NotificationDispatchDeleteArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
+  /**
    * Filter which NotificationDispatch to delete.
    */
   where: Prisma.NotificationDispatchWhereUniqueInput
@@ -1325,6 +1557,25 @@ export type NotificationDispatchDeleteManyArgs<ExtArgs extends runtime.Types.Ext
 }
 
 /**
+ * NotificationDispatch.membership
+ */
+export type NotificationDispatch$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
+}
+
+/**
  * NotificationDispatch without action
  */
 export type NotificationDispatchDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1336,4 +1587,8 @@ export type NotificationDispatchDefaultArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the NotificationDispatch
    */
   omit?: Prisma.NotificationDispatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationDispatchInclude<ExtArgs> | null
 }

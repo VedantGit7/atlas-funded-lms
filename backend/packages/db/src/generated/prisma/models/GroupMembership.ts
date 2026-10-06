@@ -190,6 +190,8 @@ export type GroupMembershipWhereInput = {
   membership_id?: Prisma.UuidFilter<"GroupMembership"> | string
   role_key?: Prisma.StringFilter<"GroupMembership"> | string
   joined_at?: Prisma.DateTimeFilter<"GroupMembership"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  space?: Prisma.XOR<Prisma.CommunitySpaceScalarRelationFilter, Prisma.CommunitySpaceWhereInput>
 }
 
 export type GroupMembershipOrderByWithRelationInput = {
@@ -199,6 +201,8 @@ export type GroupMembershipOrderByWithRelationInput = {
   membership_id?: Prisma.SortOrder
   role_key?: Prisma.SortOrder
   joined_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  space?: Prisma.CommunitySpaceOrderByWithRelationInput
 }
 
 export type GroupMembershipWhereUniqueInput = Prisma.AtLeast<{
@@ -212,6 +216,8 @@ export type GroupMembershipWhereUniqueInput = Prisma.AtLeast<{
   membership_id?: Prisma.UuidFilter<"GroupMembership"> | string
   role_key?: Prisma.StringFilter<"GroupMembership"> | string
   joined_at?: Prisma.DateTimeFilter<"GroupMembership"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  space?: Prisma.XOR<Prisma.CommunitySpaceScalarRelationFilter, Prisma.CommunitySpaceWhereInput>
 }, "id" | "tenant_id_space_id_membership_id">
 
 export type GroupMembershipOrderByWithAggregationInput = {
@@ -240,11 +246,10 @@ export type GroupMembershipScalarWhereWithAggregatesInput = {
 
 export type GroupMembershipCreateInput = {
   id: string
-  tenant_id: string
-  space_id: string
-  membership_id: string
   role_key?: string
   joined_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutGroup_membershipsInput
+  space: Prisma.CommunitySpaceCreateNestedOneWithoutGroup_membershipsInput
 }
 
 export type GroupMembershipUncheckedCreateInput = {
@@ -258,11 +263,10 @@ export type GroupMembershipUncheckedCreateInput = {
 
 export type GroupMembershipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  space_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   role_key?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutGroup_membershipsNestedInput
+  space?: Prisma.CommunitySpaceUpdateOneRequiredWithoutGroup_membershipsNestedInput
 }
 
 export type GroupMembershipUncheckedUpdateInput = {
@@ -285,9 +289,6 @@ export type GroupMembershipCreateManyInput = {
 
 export type GroupMembershipUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  space_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   role_key?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -299,6 +300,16 @@ export type GroupMembershipUncheckedUpdateManyInput = {
   membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   role_key?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GroupMembershipListRelationFilter = {
+  every?: Prisma.GroupMembershipWhereInput
+  some?: Prisma.GroupMembershipWhereInput
+  none?: Prisma.GroupMembershipWhereInput
+}
+
+export type GroupMembershipOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type GroupMembershipTenant_idSpace_idMembership_idCompoundUniqueInput = {
@@ -334,6 +345,238 @@ export type GroupMembershipMinOrderByAggregateInput = {
   joined_at?: Prisma.SortOrder
 }
 
+export type GroupMembershipCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutMembershipInput, Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput> | Prisma.GroupMembershipCreateWithoutMembershipInput[] | Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput | Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.GroupMembershipCreateManyMembershipInputEnvelope
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+}
+
+export type GroupMembershipUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutMembershipInput, Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput> | Prisma.GroupMembershipCreateWithoutMembershipInput[] | Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput | Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.GroupMembershipCreateManyMembershipInputEnvelope
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+}
+
+export type GroupMembershipUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutMembershipInput, Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput> | Prisma.GroupMembershipCreateWithoutMembershipInput[] | Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput | Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.GroupMembershipUpsertWithWhereUniqueWithoutMembershipInput | Prisma.GroupMembershipUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.GroupMembershipCreateManyMembershipInputEnvelope
+  set?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  disconnect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  delete?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  update?: Prisma.GroupMembershipUpdateWithWhereUniqueWithoutMembershipInput | Prisma.GroupMembershipUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.GroupMembershipUpdateManyWithWhereWithoutMembershipInput | Prisma.GroupMembershipUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.GroupMembershipScalarWhereInput | Prisma.GroupMembershipScalarWhereInput[]
+}
+
+export type GroupMembershipUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutMembershipInput, Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput> | Prisma.GroupMembershipCreateWithoutMembershipInput[] | Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput | Prisma.GroupMembershipCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.GroupMembershipUpsertWithWhereUniqueWithoutMembershipInput | Prisma.GroupMembershipUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.GroupMembershipCreateManyMembershipInputEnvelope
+  set?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  disconnect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  delete?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  update?: Prisma.GroupMembershipUpdateWithWhereUniqueWithoutMembershipInput | Prisma.GroupMembershipUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.GroupMembershipUpdateManyWithWhereWithoutMembershipInput | Prisma.GroupMembershipUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.GroupMembershipScalarWhereInput | Prisma.GroupMembershipScalarWhereInput[]
+}
+
+export type GroupMembershipCreateNestedManyWithoutSpaceInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutSpaceInput, Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput> | Prisma.GroupMembershipCreateWithoutSpaceInput[] | Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput | Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput[]
+  createMany?: Prisma.GroupMembershipCreateManySpaceInputEnvelope
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+}
+
+export type GroupMembershipUncheckedCreateNestedManyWithoutSpaceInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutSpaceInput, Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput> | Prisma.GroupMembershipCreateWithoutSpaceInput[] | Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput | Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput[]
+  createMany?: Prisma.GroupMembershipCreateManySpaceInputEnvelope
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+}
+
+export type GroupMembershipUpdateManyWithoutSpaceNestedInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutSpaceInput, Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput> | Prisma.GroupMembershipCreateWithoutSpaceInput[] | Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput | Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput[]
+  upsert?: Prisma.GroupMembershipUpsertWithWhereUniqueWithoutSpaceInput | Prisma.GroupMembershipUpsertWithWhereUniqueWithoutSpaceInput[]
+  createMany?: Prisma.GroupMembershipCreateManySpaceInputEnvelope
+  set?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  disconnect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  delete?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  update?: Prisma.GroupMembershipUpdateWithWhereUniqueWithoutSpaceInput | Prisma.GroupMembershipUpdateWithWhereUniqueWithoutSpaceInput[]
+  updateMany?: Prisma.GroupMembershipUpdateManyWithWhereWithoutSpaceInput | Prisma.GroupMembershipUpdateManyWithWhereWithoutSpaceInput[]
+  deleteMany?: Prisma.GroupMembershipScalarWhereInput | Prisma.GroupMembershipScalarWhereInput[]
+}
+
+export type GroupMembershipUncheckedUpdateManyWithoutSpaceNestedInput = {
+  create?: Prisma.XOR<Prisma.GroupMembershipCreateWithoutSpaceInput, Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput> | Prisma.GroupMembershipCreateWithoutSpaceInput[] | Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput | Prisma.GroupMembershipCreateOrConnectWithoutSpaceInput[]
+  upsert?: Prisma.GroupMembershipUpsertWithWhereUniqueWithoutSpaceInput | Prisma.GroupMembershipUpsertWithWhereUniqueWithoutSpaceInput[]
+  createMany?: Prisma.GroupMembershipCreateManySpaceInputEnvelope
+  set?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  disconnect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  delete?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  connect?: Prisma.GroupMembershipWhereUniqueInput | Prisma.GroupMembershipWhereUniqueInput[]
+  update?: Prisma.GroupMembershipUpdateWithWhereUniqueWithoutSpaceInput | Prisma.GroupMembershipUpdateWithWhereUniqueWithoutSpaceInput[]
+  updateMany?: Prisma.GroupMembershipUpdateManyWithWhereWithoutSpaceInput | Prisma.GroupMembershipUpdateManyWithWhereWithoutSpaceInput[]
+  deleteMany?: Prisma.GroupMembershipScalarWhereInput | Prisma.GroupMembershipScalarWhereInput[]
+}
+
+export type GroupMembershipCreateWithoutMembershipInput = {
+  id: string
+  role_key?: string
+  joined_at?: Date | string
+  space: Prisma.CommunitySpaceCreateNestedOneWithoutGroup_membershipsInput
+}
+
+export type GroupMembershipUncheckedCreateWithoutMembershipInput = {
+  id: string
+  space_id: string
+  role_key?: string
+  joined_at?: Date | string
+}
+
+export type GroupMembershipCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.GroupMembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.GroupMembershipCreateWithoutMembershipInput, Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput>
+}
+
+export type GroupMembershipCreateManyMembershipInputEnvelope = {
+  data: Prisma.GroupMembershipCreateManyMembershipInput | Prisma.GroupMembershipCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type GroupMembershipUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.GroupMembershipWhereUniqueInput
+  update: Prisma.XOR<Prisma.GroupMembershipUpdateWithoutMembershipInput, Prisma.GroupMembershipUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.GroupMembershipCreateWithoutMembershipInput, Prisma.GroupMembershipUncheckedCreateWithoutMembershipInput>
+}
+
+export type GroupMembershipUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.GroupMembershipWhereUniqueInput
+  data: Prisma.XOR<Prisma.GroupMembershipUpdateWithoutMembershipInput, Prisma.GroupMembershipUncheckedUpdateWithoutMembershipInput>
+}
+
+export type GroupMembershipUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.GroupMembershipScalarWhereInput
+  data: Prisma.XOR<Prisma.GroupMembershipUpdateManyMutationInput, Prisma.GroupMembershipUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type GroupMembershipScalarWhereInput = {
+  AND?: Prisma.GroupMembershipScalarWhereInput | Prisma.GroupMembershipScalarWhereInput[]
+  OR?: Prisma.GroupMembershipScalarWhereInput[]
+  NOT?: Prisma.GroupMembershipScalarWhereInput | Prisma.GroupMembershipScalarWhereInput[]
+  id?: Prisma.UuidFilter<"GroupMembership"> | string
+  tenant_id?: Prisma.UuidFilter<"GroupMembership"> | string
+  space_id?: Prisma.UuidFilter<"GroupMembership"> | string
+  membership_id?: Prisma.UuidFilter<"GroupMembership"> | string
+  role_key?: Prisma.StringFilter<"GroupMembership"> | string
+  joined_at?: Prisma.DateTimeFilter<"GroupMembership"> | Date | string
+}
+
+export type GroupMembershipCreateWithoutSpaceInput = {
+  id: string
+  role_key?: string
+  joined_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutGroup_membershipsInput
+}
+
+export type GroupMembershipUncheckedCreateWithoutSpaceInput = {
+  id: string
+  membership_id: string
+  role_key?: string
+  joined_at?: Date | string
+}
+
+export type GroupMembershipCreateOrConnectWithoutSpaceInput = {
+  where: Prisma.GroupMembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.GroupMembershipCreateWithoutSpaceInput, Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput>
+}
+
+export type GroupMembershipCreateManySpaceInputEnvelope = {
+  data: Prisma.GroupMembershipCreateManySpaceInput | Prisma.GroupMembershipCreateManySpaceInput[]
+  skipDuplicates?: boolean
+}
+
+export type GroupMembershipUpsertWithWhereUniqueWithoutSpaceInput = {
+  where: Prisma.GroupMembershipWhereUniqueInput
+  update: Prisma.XOR<Prisma.GroupMembershipUpdateWithoutSpaceInput, Prisma.GroupMembershipUncheckedUpdateWithoutSpaceInput>
+  create: Prisma.XOR<Prisma.GroupMembershipCreateWithoutSpaceInput, Prisma.GroupMembershipUncheckedCreateWithoutSpaceInput>
+}
+
+export type GroupMembershipUpdateWithWhereUniqueWithoutSpaceInput = {
+  where: Prisma.GroupMembershipWhereUniqueInput
+  data: Prisma.XOR<Prisma.GroupMembershipUpdateWithoutSpaceInput, Prisma.GroupMembershipUncheckedUpdateWithoutSpaceInput>
+}
+
+export type GroupMembershipUpdateManyWithWhereWithoutSpaceInput = {
+  where: Prisma.GroupMembershipScalarWhereInput
+  data: Prisma.XOR<Prisma.GroupMembershipUpdateManyMutationInput, Prisma.GroupMembershipUncheckedUpdateManyWithoutSpaceInput>
+}
+
+export type GroupMembershipCreateManyMembershipInput = {
+  id: string
+  space_id: string
+  role_key?: string
+  joined_at?: Date | string
+}
+
+export type GroupMembershipUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role_key?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  space?: Prisma.CommunitySpaceUpdateOneRequiredWithoutGroup_membershipsNestedInput
+}
+
+export type GroupMembershipUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  space_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role_key?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GroupMembershipUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  space_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role_key?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GroupMembershipCreateManySpaceInput = {
+  id: string
+  membership_id: string
+  role_key?: string
+  joined_at?: Date | string
+}
+
+export type GroupMembershipUpdateWithoutSpaceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role_key?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutGroup_membershipsNestedInput
+}
+
+export type GroupMembershipUncheckedUpdateWithoutSpaceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role_key?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GroupMembershipUncheckedUpdateManyWithoutSpaceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  role_key?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type GroupMembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -343,6 +586,8 @@ export type GroupMembershipSelect<ExtArgs extends runtime.Types.Extensions.Inter
   membership_id?: boolean
   role_key?: boolean
   joined_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupMembership"]>
 
 export type GroupMembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -352,6 +597,8 @@ export type GroupMembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   membership_id?: boolean
   role_key?: boolean
   joined_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupMembership"]>
 
 export type GroupMembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -361,6 +608,8 @@ export type GroupMembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   membership_id?: boolean
   role_key?: boolean
   joined_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupMembership"]>
 
 export type GroupMembershipSelectScalar = {
@@ -373,10 +622,25 @@ export type GroupMembershipSelectScalar = {
 }
 
 export type GroupMembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "space_id" | "membership_id" | "role_key" | "joined_at", ExtArgs["result"]["groupMembership"]>
+export type GroupMembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
+}
+export type GroupMembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
+}
+export type GroupMembershipIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
+}
 
 export type $GroupMembershipPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GroupMembership"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    space: Prisma.$CommunitySpacePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -778,6 +1042,8 @@ readonly fields: GroupMembershipFieldRefs;
  */
 export interface Prisma__GroupMembershipClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  space<T extends Prisma.CommunitySpaceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunitySpaceDefaultArgs<ExtArgs>>): Prisma.Prisma__CommunitySpaceClient<runtime.Types.Result.GetResult<Prisma.$CommunitySpacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -830,6 +1096,10 @@ export type GroupMembershipFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
+  /**
    * Filter, which GroupMembership to fetch.
    */
   where: Prisma.GroupMembershipWhereUniqueInput
@@ -848,6 +1118,10 @@ export type GroupMembershipFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
+  /**
    * Filter, which GroupMembership to fetch.
    */
   where: Prisma.GroupMembershipWhereUniqueInput
@@ -865,6 +1139,10 @@ export type GroupMembershipFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the GroupMembership
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
   /**
    * Filter, which GroupMembership to fetch.
    */
@@ -914,6 +1192,10 @@ export type GroupMembershipFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
+  /**
    * Filter, which GroupMembership to fetch.
    */
   where?: Prisma.GroupMembershipWhereInput
@@ -961,6 +1243,10 @@ export type GroupMembershipFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the GroupMembership
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
   /**
    * Filter, which GroupMemberships to fetch.
    */
@@ -1010,6 +1296,10 @@ export type GroupMembershipCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
+  /**
    * The data needed to create a GroupMembership.
    */
   data: Prisma.XOR<Prisma.GroupMembershipCreateInput, Prisma.GroupMembershipUncheckedCreateInput>
@@ -1043,6 +1333,10 @@ export type GroupMembershipCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.GroupMembershipCreateManyInput | Prisma.GroupMembershipCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1057,6 +1351,10 @@ export type GroupMembershipUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the GroupMembership
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
   /**
    * The data needed to update a GroupMembership.
    */
@@ -1109,6 +1407,10 @@ export type GroupMembershipUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many GroupMemberships to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1123,6 +1425,10 @@ export type GroupMembershipUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the GroupMembership
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
   /**
    * The filter to search for the GroupMembership to update in case it exists.
    */
@@ -1149,6 +1455,10 @@ export type GroupMembershipDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the GroupMembership
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
   /**
    * Filter which GroupMembership to delete.
    */
@@ -1181,4 +1491,8 @@ export type GroupMembershipDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the GroupMembership
    */
   omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
 }

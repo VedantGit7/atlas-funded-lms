@@ -252,6 +252,7 @@ export type EventDeliveryWhereInput = {
   next_attempt_at?: Prisma.DateTimeNullableFilter<"EventDelivery"> | Date | string | null
   response_json?: Prisma.JsonNullableFilter<"EventDelivery">
   created_at?: Prisma.DateTimeFilter<"EventDelivery"> | Date | string
+  outbox_event?: Prisma.XOR<Prisma.OutboxEventNullableScalarRelationFilter, Prisma.OutboxEventWhereInput> | null
 }
 
 export type EventDeliveryOrderByWithRelationInput = {
@@ -265,6 +266,7 @@ export type EventDeliveryOrderByWithRelationInput = {
   next_attempt_at?: Prisma.SortOrderInput | Prisma.SortOrder
   response_json?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  outbox_event?: Prisma.OutboxEventOrderByWithRelationInput
 }
 
 export type EventDeliveryWhereUniqueInput = Prisma.AtLeast<{
@@ -282,6 +284,7 @@ export type EventDeliveryWhereUniqueInput = Prisma.AtLeast<{
   next_attempt_at?: Prisma.DateTimeNullableFilter<"EventDelivery"> | Date | string | null
   response_json?: Prisma.JsonNullableFilter<"EventDelivery">
   created_at?: Prisma.DateTimeFilter<"EventDelivery"> | Date | string
+  outbox_event?: Prisma.XOR<Prisma.OutboxEventNullableScalarRelationFilter, Prisma.OutboxEventWhereInput> | null
 }, "id" | "outbox_event_id_destination_key_attempt_count">
 
 export type EventDeliveryOrderByWithAggregationInput = {
@@ -320,8 +323,6 @@ export type EventDeliveryScalarWhereWithAggregatesInput = {
 
 export type EventDeliveryCreateInput = {
   id: string
-  tenant_id?: string | null
-  outbox_event_id: string
   destination_key: string
   status?: $Enums.DispatchStatus
   attempt_count?: number
@@ -329,6 +330,7 @@ export type EventDeliveryCreateInput = {
   next_attempt_at?: Date | string | null
   response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
+  outbox_event?: Prisma.OutboxEventCreateNestedOneWithoutEvent_deliveriesInput
 }
 
 export type EventDeliveryUncheckedCreateInput = {
@@ -346,8 +348,6 @@ export type EventDeliveryUncheckedCreateInput = {
 
 export type EventDeliveryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  outbox_event_id?: Prisma.StringFieldUpdateOperationsInput | string
   destination_key?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
   attempt_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -355,6 +355,7 @@ export type EventDeliveryUpdateInput = {
   next_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  outbox_event?: Prisma.OutboxEventUpdateOneWithoutEvent_deliveriesNestedInput
 }
 
 export type EventDeliveryUncheckedUpdateInput = {
@@ -385,8 +386,6 @@ export type EventDeliveryCreateManyInput = {
 
 export type EventDeliveryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  outbox_event_id?: Prisma.StringFieldUpdateOperationsInput | string
   destination_key?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
   attempt_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -407,6 +406,16 @@ export type EventDeliveryUncheckedUpdateManyInput = {
   next_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EventDeliveryListRelationFilter = {
+  every?: Prisma.EventDeliveryWhereInput
+  some?: Prisma.EventDeliveryWhereInput
+  none?: Prisma.EventDeliveryWhereInput
+}
+
+export type EventDeliveryOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type EventDeliveryOutbox_event_idDestination_keyAttempt_countCompoundUniqueInput = {
@@ -460,8 +469,158 @@ export type EventDeliverySumOrderByAggregateInput = {
   attempt_count?: Prisma.SortOrder
 }
 
+export type EventDeliveryCreateNestedManyWithoutOutbox_eventInput = {
+  create?: Prisma.XOR<Prisma.EventDeliveryCreateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput> | Prisma.EventDeliveryCreateWithoutOutbox_eventInput[] | Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput | Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput[]
+  createMany?: Prisma.EventDeliveryCreateManyOutbox_eventInputEnvelope
+  connect?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+}
+
+export type EventDeliveryUncheckedCreateNestedManyWithoutOutbox_eventInput = {
+  create?: Prisma.XOR<Prisma.EventDeliveryCreateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput> | Prisma.EventDeliveryCreateWithoutOutbox_eventInput[] | Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput | Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput[]
+  createMany?: Prisma.EventDeliveryCreateManyOutbox_eventInputEnvelope
+  connect?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+}
+
+export type EventDeliveryUpdateManyWithoutOutbox_eventNestedInput = {
+  create?: Prisma.XOR<Prisma.EventDeliveryCreateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput> | Prisma.EventDeliveryCreateWithoutOutbox_eventInput[] | Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput | Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput[]
+  upsert?: Prisma.EventDeliveryUpsertWithWhereUniqueWithoutOutbox_eventInput | Prisma.EventDeliveryUpsertWithWhereUniqueWithoutOutbox_eventInput[]
+  createMany?: Prisma.EventDeliveryCreateManyOutbox_eventInputEnvelope
+  set?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  delete?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  connect?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  update?: Prisma.EventDeliveryUpdateWithWhereUniqueWithoutOutbox_eventInput | Prisma.EventDeliveryUpdateWithWhereUniqueWithoutOutbox_eventInput[]
+  updateMany?: Prisma.EventDeliveryUpdateManyWithWhereWithoutOutbox_eventInput | Prisma.EventDeliveryUpdateManyWithWhereWithoutOutbox_eventInput[]
+  deleteMany?: Prisma.EventDeliveryScalarWhereInput | Prisma.EventDeliveryScalarWhereInput[]
+}
+
+export type EventDeliveryUncheckedUpdateManyWithoutOutbox_eventNestedInput = {
+  create?: Prisma.XOR<Prisma.EventDeliveryCreateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput> | Prisma.EventDeliveryCreateWithoutOutbox_eventInput[] | Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput | Prisma.EventDeliveryCreateOrConnectWithoutOutbox_eventInput[]
+  upsert?: Prisma.EventDeliveryUpsertWithWhereUniqueWithoutOutbox_eventInput | Prisma.EventDeliveryUpsertWithWhereUniqueWithoutOutbox_eventInput[]
+  createMany?: Prisma.EventDeliveryCreateManyOutbox_eventInputEnvelope
+  set?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  disconnect?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  delete?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  connect?: Prisma.EventDeliveryWhereUniqueInput | Prisma.EventDeliveryWhereUniqueInput[]
+  update?: Prisma.EventDeliveryUpdateWithWhereUniqueWithoutOutbox_eventInput | Prisma.EventDeliveryUpdateWithWhereUniqueWithoutOutbox_eventInput[]
+  updateMany?: Prisma.EventDeliveryUpdateManyWithWhereWithoutOutbox_eventInput | Prisma.EventDeliveryUpdateManyWithWhereWithoutOutbox_eventInput[]
+  deleteMany?: Prisma.EventDeliveryScalarWhereInput | Prisma.EventDeliveryScalarWhereInput[]
+}
+
 export type EnumDispatchStatusFieldUpdateOperationsInput = {
   set?: $Enums.DispatchStatus
+}
+
+export type EventDeliveryCreateWithoutOutbox_eventInput = {
+  id: string
+  destination_key: string
+  status?: $Enums.DispatchStatus
+  attempt_count?: number
+  last_attempt_at?: Date | string | null
+  next_attempt_at?: Date | string | null
+  response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+}
+
+export type EventDeliveryUncheckedCreateWithoutOutbox_eventInput = {
+  id: string
+  destination_key: string
+  status?: $Enums.DispatchStatus
+  attempt_count?: number
+  last_attempt_at?: Date | string | null
+  next_attempt_at?: Date | string | null
+  response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+}
+
+export type EventDeliveryCreateOrConnectWithoutOutbox_eventInput = {
+  where: Prisma.EventDeliveryWhereUniqueInput
+  create: Prisma.XOR<Prisma.EventDeliveryCreateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput>
+}
+
+export type EventDeliveryCreateManyOutbox_eventInputEnvelope = {
+  data: Prisma.EventDeliveryCreateManyOutbox_eventInput | Prisma.EventDeliveryCreateManyOutbox_eventInput[]
+  skipDuplicates?: boolean
+}
+
+export type EventDeliveryUpsertWithWhereUniqueWithoutOutbox_eventInput = {
+  where: Prisma.EventDeliveryWhereUniqueInput
+  update: Prisma.XOR<Prisma.EventDeliveryUpdateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedUpdateWithoutOutbox_eventInput>
+  create: Prisma.XOR<Prisma.EventDeliveryCreateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedCreateWithoutOutbox_eventInput>
+}
+
+export type EventDeliveryUpdateWithWhereUniqueWithoutOutbox_eventInput = {
+  where: Prisma.EventDeliveryWhereUniqueInput
+  data: Prisma.XOR<Prisma.EventDeliveryUpdateWithoutOutbox_eventInput, Prisma.EventDeliveryUncheckedUpdateWithoutOutbox_eventInput>
+}
+
+export type EventDeliveryUpdateManyWithWhereWithoutOutbox_eventInput = {
+  where: Prisma.EventDeliveryScalarWhereInput
+  data: Prisma.XOR<Prisma.EventDeliveryUpdateManyMutationInput, Prisma.EventDeliveryUncheckedUpdateManyWithoutOutbox_eventInput>
+}
+
+export type EventDeliveryScalarWhereInput = {
+  AND?: Prisma.EventDeliveryScalarWhereInput | Prisma.EventDeliveryScalarWhereInput[]
+  OR?: Prisma.EventDeliveryScalarWhereInput[]
+  NOT?: Prisma.EventDeliveryScalarWhereInput | Prisma.EventDeliveryScalarWhereInput[]
+  id?: Prisma.UuidFilter<"EventDelivery"> | string
+  tenant_id?: Prisma.UuidNullableFilter<"EventDelivery"> | string | null
+  outbox_event_id?: Prisma.UuidFilter<"EventDelivery"> | string
+  destination_key?: Prisma.StringFilter<"EventDelivery"> | string
+  status?: Prisma.EnumDispatchStatusFilter<"EventDelivery"> | $Enums.DispatchStatus
+  attempt_count?: Prisma.IntFilter<"EventDelivery"> | number
+  last_attempt_at?: Prisma.DateTimeNullableFilter<"EventDelivery"> | Date | string | null
+  next_attempt_at?: Prisma.DateTimeNullableFilter<"EventDelivery"> | Date | string | null
+  response_json?: Prisma.JsonNullableFilter<"EventDelivery">
+  created_at?: Prisma.DateTimeFilter<"EventDelivery"> | Date | string
+}
+
+export type EventDeliveryCreateManyOutbox_eventInput = {
+  id: string
+  destination_key: string
+  status?: $Enums.DispatchStatus
+  attempt_count?: number
+  last_attempt_at?: Date | string | null
+  next_attempt_at?: Date | string | null
+  response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+}
+
+export type EventDeliveryUpdateWithoutOutbox_eventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
+  attempt_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  next_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EventDeliveryUncheckedUpdateWithoutOutbox_eventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
+  attempt_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  next_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EventDeliveryUncheckedUpdateManyWithoutOutbox_eventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumDispatchStatusFieldUpdateOperationsInput | $Enums.DispatchStatus
+  attempt_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  next_attempt_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  response_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -477,6 +636,7 @@ export type EventDeliverySelect<ExtArgs extends runtime.Types.Extensions.Interna
   next_attempt_at?: boolean
   response_json?: boolean
   created_at?: boolean
+  outbox_event?: boolean | Prisma.EventDelivery$outbox_eventArgs<ExtArgs>
 }, ExtArgs["result"]["eventDelivery"]>
 
 export type EventDeliverySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -490,6 +650,7 @@ export type EventDeliverySelectCreateManyAndReturn<ExtArgs extends runtime.Types
   next_attempt_at?: boolean
   response_json?: boolean
   created_at?: boolean
+  outbox_event?: boolean | Prisma.EventDelivery$outbox_eventArgs<ExtArgs>
 }, ExtArgs["result"]["eventDelivery"]>
 
 export type EventDeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -503,6 +664,7 @@ export type EventDeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   next_attempt_at?: boolean
   response_json?: boolean
   created_at?: boolean
+  outbox_event?: boolean | Prisma.EventDelivery$outbox_eventArgs<ExtArgs>
 }, ExtArgs["result"]["eventDelivery"]>
 
 export type EventDeliverySelectScalar = {
@@ -519,10 +681,21 @@ export type EventDeliverySelectScalar = {
 }
 
 export type EventDeliveryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "outbox_event_id" | "destination_key" | "status" | "attempt_count" | "last_attempt_at" | "next_attempt_at" | "response_json" | "created_at", ExtArgs["result"]["eventDelivery"]>
+export type EventDeliveryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  outbox_event?: boolean | Prisma.EventDelivery$outbox_eventArgs<ExtArgs>
+}
+export type EventDeliveryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  outbox_event?: boolean | Prisma.EventDelivery$outbox_eventArgs<ExtArgs>
+}
+export type EventDeliveryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  outbox_event?: boolean | Prisma.EventDelivery$outbox_eventArgs<ExtArgs>
+}
 
 export type $EventDeliveryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "EventDelivery"
-  objects: {}
+  objects: {
+    outbox_event: Prisma.$OutboxEventPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string | null
@@ -928,6 +1101,7 @@ readonly fields: EventDeliveryFieldRefs;
  */
 export interface Prisma__EventDeliveryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  outbox_event<T extends Prisma.EventDelivery$outbox_eventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EventDelivery$outbox_eventArgs<ExtArgs>>): Prisma.Prisma__OutboxEventClient<runtime.Types.Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -984,6 +1158,10 @@ export type EventDeliveryFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
+  /**
    * Filter, which EventDelivery to fetch.
    */
   where: Prisma.EventDeliveryWhereUniqueInput
@@ -1002,6 +1180,10 @@ export type EventDeliveryFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
+  /**
    * Filter, which EventDelivery to fetch.
    */
   where: Prisma.EventDeliveryWhereUniqueInput
@@ -1019,6 +1201,10 @@ export type EventDeliveryFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the EventDelivery
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
   /**
    * Filter, which EventDelivery to fetch.
    */
@@ -1068,6 +1254,10 @@ export type EventDeliveryFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
+  /**
    * Filter, which EventDelivery to fetch.
    */
   where?: Prisma.EventDeliveryWhereInput
@@ -1115,6 +1305,10 @@ export type EventDeliveryFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the EventDelivery
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
   /**
    * Filter, which EventDeliveries to fetch.
    */
@@ -1164,6 +1358,10 @@ export type EventDeliveryCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
+  /**
    * The data needed to create a EventDelivery.
    */
   data: Prisma.XOR<Prisma.EventDeliveryCreateInput, Prisma.EventDeliveryUncheckedCreateInput>
@@ -1197,6 +1395,10 @@ export type EventDeliveryCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.EventDeliveryCreateManyInput | Prisma.EventDeliveryCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1211,6 +1413,10 @@ export type EventDeliveryUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the EventDelivery
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
   /**
    * The data needed to update a EventDelivery.
    */
@@ -1263,6 +1469,10 @@ export type EventDeliveryUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many EventDeliveries to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1277,6 +1487,10 @@ export type EventDeliveryUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the EventDelivery
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
   /**
    * The filter to search for the EventDelivery to update in case it exists.
    */
@@ -1304,6 +1518,10 @@ export type EventDeliveryDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
+  /**
    * Filter which EventDelivery to delete.
    */
   where: Prisma.EventDeliveryWhereUniqueInput
@@ -1324,6 +1542,25 @@ export type EventDeliveryDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * EventDelivery.outbox_event
+ */
+export type EventDelivery$outbox_eventArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OutboxEvent
+   */
+  select?: Prisma.OutboxEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OutboxEvent
+   */
+  omit?: Prisma.OutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  where?: Prisma.OutboxEventWhereInput
+}
+
+/**
  * EventDelivery without action
  */
 export type EventDeliveryDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1335,4 +1572,8 @@ export type EventDeliveryDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the EventDelivery
    */
   omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
 }

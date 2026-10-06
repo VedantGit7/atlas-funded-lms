@@ -214,6 +214,9 @@ export type MarketingEventRegistrationWhereInput = {
   name?: Prisma.StringNullableFilter<"MarketingEventRegistration"> | string | null
   source?: Prisma.StringFilter<"MarketingEventRegistration"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingEventRegistration"> | Date | string
+  contact?: Prisma.XOR<Prisma.MarketingContactNullableScalarRelationFilter, Prisma.MarketingContactWhereInput> | null
+  event?: Prisma.XOR<Prisma.MarketingEventScalarRelationFilter, Prisma.MarketingEventWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }
 
 export type MarketingEventRegistrationOrderByWithRelationInput = {
@@ -226,6 +229,9 @@ export type MarketingEventRegistrationOrderByWithRelationInput = {
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  contact?: Prisma.MarketingContactOrderByWithRelationInput
+  event?: Prisma.MarketingEventOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type MarketingEventRegistrationWhereUniqueInput = Prisma.AtLeast<{
@@ -242,6 +248,9 @@ export type MarketingEventRegistrationWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringNullableFilter<"MarketingEventRegistration"> | string | null
   source?: Prisma.StringFilter<"MarketingEventRegistration"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingEventRegistration"> | Date | string
+  contact?: Prisma.XOR<Prisma.MarketingContactNullableScalarRelationFilter, Prisma.MarketingContactWhereInput> | null
+  event?: Prisma.XOR<Prisma.MarketingEventScalarRelationFilter, Prisma.MarketingEventWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }, "id" | "tenant_id_event_id_email">
 
 export type MarketingEventRegistrationOrderByWithAggregationInput = {
@@ -276,14 +285,13 @@ export type MarketingEventRegistrationScalarWhereWithAggregatesInput = {
 
 export type MarketingEventRegistrationCreateInput = {
   id: string
-  tenant_id: string
-  event_id: string
-  contact_id?: string | null
-  membership_id?: string | null
   email: string
   name?: string | null
   source?: string
   created_at?: Date | string
+  contact?: Prisma.MarketingContactCreateNestedOneWithoutMarketing_event_registrationsInput
+  event: Prisma.MarketingEventCreateNestedOneWithoutMarketing_event_registrationsInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_event_registrationsInput
 }
 
 export type MarketingEventRegistrationUncheckedCreateInput = {
@@ -300,14 +308,13 @@ export type MarketingEventRegistrationUncheckedCreateInput = {
 
 export type MarketingEventRegistrationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  event_id?: Prisma.StringFieldUpdateOperationsInput | string
-  contact_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contact?: Prisma.MarketingContactUpdateOneWithoutMarketing_event_registrationsNestedInput
+  event?: Prisma.MarketingEventUpdateOneRequiredWithoutMarketing_event_registrationsNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutMarketing_event_registrationsNestedInput
 }
 
 export type MarketingEventRegistrationUncheckedUpdateInput = {
@@ -336,10 +343,6 @@ export type MarketingEventRegistrationCreateManyInput = {
 
 export type MarketingEventRegistrationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  event_id?: Prisma.StringFieldUpdateOperationsInput | string
-  contact_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
@@ -356,6 +359,16 @@ export type MarketingEventRegistrationUncheckedUpdateManyInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventRegistrationListRelationFilter = {
+  every?: Prisma.MarketingEventRegistrationWhereInput
+  some?: Prisma.MarketingEventRegistrationWhereInput
+  none?: Prisma.MarketingEventRegistrationWhereInput
+}
+
+export type MarketingEventRegistrationOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type MarketingEventRegistrationTenant_idEvent_idEmailCompoundUniqueInput = {
@@ -400,6 +413,405 @@ export type MarketingEventRegistrationMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
 }
 
+export type MarketingEventRegistrationCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput> | Prisma.MarketingEventRegistrationCreateWithoutMembershipInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyMembershipInputEnvelope
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+}
+
+export type MarketingEventRegistrationUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput> | Prisma.MarketingEventRegistrationCreateWithoutMembershipInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyMembershipInputEnvelope
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+}
+
+export type MarketingEventRegistrationUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput> | Prisma.MarketingEventRegistrationCreateWithoutMembershipInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyMembershipInputEnvelope
+  set?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  disconnect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  delete?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  update?: Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutMembershipInput | Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+}
+
+export type MarketingEventRegistrationUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput> | Prisma.MarketingEventRegistrationCreateWithoutMembershipInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyMembershipInputEnvelope
+  set?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  disconnect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  delete?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  update?: Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutMembershipInput | Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+}
+
+export type MarketingEventRegistrationCreateNestedManyWithoutContactInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput> | Prisma.MarketingEventRegistrationCreateWithoutContactInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyContactInputEnvelope
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+}
+
+export type MarketingEventRegistrationUncheckedCreateNestedManyWithoutContactInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput> | Prisma.MarketingEventRegistrationCreateWithoutContactInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyContactInputEnvelope
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+}
+
+export type MarketingEventRegistrationUpdateManyWithoutContactNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput> | Prisma.MarketingEventRegistrationCreateWithoutContactInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput[]
+  upsert?: Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutContactInput | Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutContactInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyContactInputEnvelope
+  set?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  disconnect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  delete?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  update?: Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutContactInput | Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutContactInput[]
+  updateMany?: Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutContactInput | Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutContactInput[]
+  deleteMany?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+}
+
+export type MarketingEventRegistrationUncheckedUpdateManyWithoutContactNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput> | Prisma.MarketingEventRegistrationCreateWithoutContactInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutContactInput[]
+  upsert?: Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutContactInput | Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutContactInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyContactInputEnvelope
+  set?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  disconnect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  delete?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  update?: Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutContactInput | Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutContactInput[]
+  updateMany?: Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutContactInput | Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutContactInput[]
+  deleteMany?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+}
+
+export type MarketingEventRegistrationCreateNestedManyWithoutEventInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput> | Prisma.MarketingEventRegistrationCreateWithoutEventInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyEventInputEnvelope
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+}
+
+export type MarketingEventRegistrationUncheckedCreateNestedManyWithoutEventInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput> | Prisma.MarketingEventRegistrationCreateWithoutEventInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyEventInputEnvelope
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+}
+
+export type MarketingEventRegistrationUpdateManyWithoutEventNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput> | Prisma.MarketingEventRegistrationCreateWithoutEventInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput[]
+  upsert?: Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutEventInput | Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutEventInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyEventInputEnvelope
+  set?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  disconnect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  delete?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  update?: Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutEventInput | Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutEventInput[]
+  updateMany?: Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutEventInput | Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutEventInput[]
+  deleteMany?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+}
+
+export type MarketingEventRegistrationUncheckedUpdateManyWithoutEventNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput> | Prisma.MarketingEventRegistrationCreateWithoutEventInput[] | Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput[]
+  connectOrCreate?: Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput | Prisma.MarketingEventRegistrationCreateOrConnectWithoutEventInput[]
+  upsert?: Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutEventInput | Prisma.MarketingEventRegistrationUpsertWithWhereUniqueWithoutEventInput[]
+  createMany?: Prisma.MarketingEventRegistrationCreateManyEventInputEnvelope
+  set?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  disconnect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  delete?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  connect?: Prisma.MarketingEventRegistrationWhereUniqueInput | Prisma.MarketingEventRegistrationWhereUniqueInput[]
+  update?: Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutEventInput | Prisma.MarketingEventRegistrationUpdateWithWhereUniqueWithoutEventInput[]
+  updateMany?: Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutEventInput | Prisma.MarketingEventRegistrationUpdateManyWithWhereWithoutEventInput[]
+  deleteMany?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+}
+
+export type MarketingEventRegistrationCreateWithoutMembershipInput = {
+  id: string
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+  contact?: Prisma.MarketingContactCreateNestedOneWithoutMarketing_event_registrationsInput
+  event: Prisma.MarketingEventCreateNestedOneWithoutMarketing_event_registrationsInput
+}
+
+export type MarketingEventRegistrationUncheckedCreateWithoutMembershipInput = {
+  id: string
+  event_id: string
+  contact_id?: string | null
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingEventRegistrationCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput>
+}
+
+export type MarketingEventRegistrationCreateManyMembershipInputEnvelope = {
+  data: Prisma.MarketingEventRegistrationCreateManyMembershipInput | Prisma.MarketingEventRegistrationCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingEventRegistrationUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutMembershipInput>
+}
+
+export type MarketingEventRegistrationUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateWithoutMembershipInput, Prisma.MarketingEventRegistrationUncheckedUpdateWithoutMembershipInput>
+}
+
+export type MarketingEventRegistrationUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.MarketingEventRegistrationScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateManyMutationInput, Prisma.MarketingEventRegistrationUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type MarketingEventRegistrationScalarWhereInput = {
+  AND?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+  OR?: Prisma.MarketingEventRegistrationScalarWhereInput[]
+  NOT?: Prisma.MarketingEventRegistrationScalarWhereInput | Prisma.MarketingEventRegistrationScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MarketingEventRegistration"> | string
+  tenant_id?: Prisma.UuidFilter<"MarketingEventRegistration"> | string
+  event_id?: Prisma.UuidFilter<"MarketingEventRegistration"> | string
+  contact_id?: Prisma.UuidNullableFilter<"MarketingEventRegistration"> | string | null
+  membership_id?: Prisma.UuidNullableFilter<"MarketingEventRegistration"> | string | null
+  email?: Prisma.StringFilter<"MarketingEventRegistration"> | string
+  name?: Prisma.StringNullableFilter<"MarketingEventRegistration"> | string | null
+  source?: Prisma.StringFilter<"MarketingEventRegistration"> | string
+  created_at?: Prisma.DateTimeFilter<"MarketingEventRegistration"> | Date | string
+}
+
+export type MarketingEventRegistrationCreateWithoutContactInput = {
+  id: string
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+  event: Prisma.MarketingEventCreateNestedOneWithoutMarketing_event_registrationsInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_event_registrationsInput
+}
+
+export type MarketingEventRegistrationUncheckedCreateWithoutContactInput = {
+  id: string
+  event_id: string
+  membership_id?: string | null
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingEventRegistrationCreateOrConnectWithoutContactInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput>
+}
+
+export type MarketingEventRegistrationCreateManyContactInputEnvelope = {
+  data: Prisma.MarketingEventRegistrationCreateManyContactInput | Prisma.MarketingEventRegistrationCreateManyContactInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingEventRegistrationUpsertWithWhereUniqueWithoutContactInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedUpdateWithoutContactInput>
+  create: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutContactInput>
+}
+
+export type MarketingEventRegistrationUpdateWithWhereUniqueWithoutContactInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateWithoutContactInput, Prisma.MarketingEventRegistrationUncheckedUpdateWithoutContactInput>
+}
+
+export type MarketingEventRegistrationUpdateManyWithWhereWithoutContactInput = {
+  where: Prisma.MarketingEventRegistrationScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateManyMutationInput, Prisma.MarketingEventRegistrationUncheckedUpdateManyWithoutContactInput>
+}
+
+export type MarketingEventRegistrationCreateWithoutEventInput = {
+  id: string
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+  contact?: Prisma.MarketingContactCreateNestedOneWithoutMarketing_event_registrationsInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_event_registrationsInput
+}
+
+export type MarketingEventRegistrationUncheckedCreateWithoutEventInput = {
+  id: string
+  contact_id?: string | null
+  membership_id?: string | null
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingEventRegistrationCreateOrConnectWithoutEventInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput>
+}
+
+export type MarketingEventRegistrationCreateManyEventInputEnvelope = {
+  data: Prisma.MarketingEventRegistrationCreateManyEventInput | Prisma.MarketingEventRegistrationCreateManyEventInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingEventRegistrationUpsertWithWhereUniqueWithoutEventInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedUpdateWithoutEventInput>
+  create: Prisma.XOR<Prisma.MarketingEventRegistrationCreateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedCreateWithoutEventInput>
+}
+
+export type MarketingEventRegistrationUpdateWithWhereUniqueWithoutEventInput = {
+  where: Prisma.MarketingEventRegistrationWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateWithoutEventInput, Prisma.MarketingEventRegistrationUncheckedUpdateWithoutEventInput>
+}
+
+export type MarketingEventRegistrationUpdateManyWithWhereWithoutEventInput = {
+  where: Prisma.MarketingEventRegistrationScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingEventRegistrationUpdateManyMutationInput, Prisma.MarketingEventRegistrationUncheckedUpdateManyWithoutEventInput>
+}
+
+export type MarketingEventRegistrationCreateManyMembershipInput = {
+  id: string
+  event_id: string
+  contact_id?: string | null
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingEventRegistrationUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contact?: Prisma.MarketingContactUpdateOneWithoutMarketing_event_registrationsNestedInput
+  event?: Prisma.MarketingEventUpdateOneRequiredWithoutMarketing_event_registrationsNestedInput
+}
+
+export type MarketingEventRegistrationUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_id?: Prisma.StringFieldUpdateOperationsInput | string
+  contact_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventRegistrationUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_id?: Prisma.StringFieldUpdateOperationsInput | string
+  contact_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventRegistrationCreateManyContactInput = {
+  id: string
+  event_id: string
+  membership_id?: string | null
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingEventRegistrationUpdateWithoutContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event?: Prisma.MarketingEventUpdateOneRequiredWithoutMarketing_event_registrationsNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutMarketing_event_registrationsNestedInput
+}
+
+export type MarketingEventRegistrationUncheckedUpdateWithoutContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventRegistrationUncheckedUpdateManyWithoutContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventRegistrationCreateManyEventInput = {
+  id: string
+  contact_id?: string | null
+  membership_id?: string | null
+  email: string
+  name?: string | null
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingEventRegistrationUpdateWithoutEventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contact?: Prisma.MarketingContactUpdateOneWithoutMarketing_event_registrationsNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutMarketing_event_registrationsNestedInput
+}
+
+export type MarketingEventRegistrationUncheckedUpdateWithoutEventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contact_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventRegistrationUncheckedUpdateManyWithoutEventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contact_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type MarketingEventRegistrationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -412,6 +824,9 @@ export type MarketingEventRegistrationSelect<ExtArgs extends runtime.Types.Exten
   name?: boolean
   source?: boolean
   created_at?: boolean
+  contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
+  event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["marketingEventRegistration"]>
 
 export type MarketingEventRegistrationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -424,6 +839,9 @@ export type MarketingEventRegistrationSelectCreateManyAndReturn<ExtArgs extends 
   name?: boolean
   source?: boolean
   created_at?: boolean
+  contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
+  event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["marketingEventRegistration"]>
 
 export type MarketingEventRegistrationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -436,6 +854,9 @@ export type MarketingEventRegistrationSelectUpdateManyAndReturn<ExtArgs extends 
   name?: boolean
   source?: boolean
   created_at?: boolean
+  contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
+  event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["marketingEventRegistration"]>
 
 export type MarketingEventRegistrationSelectScalar = {
@@ -451,10 +872,29 @@ export type MarketingEventRegistrationSelectScalar = {
 }
 
 export type MarketingEventRegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "event_id" | "contact_id" | "membership_id" | "email" | "name" | "source" | "created_at", ExtArgs["result"]["marketingEventRegistration"]>
+export type MarketingEventRegistrationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
+  event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
+}
+export type MarketingEventRegistrationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
+  event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
+}
+export type MarketingEventRegistrationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
+  event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
+}
 
 export type $MarketingEventRegistrationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingEventRegistration"
-  objects: {}
+  objects: {
+    contact: Prisma.$MarketingContactPayload<ExtArgs> | null
+    event: Prisma.$MarketingEventPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -859,6 +1299,9 @@ readonly fields: MarketingEventRegistrationFieldRefs;
  */
 export interface Prisma__MarketingEventRegistrationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  contact<T extends Prisma.MarketingEventRegistration$contactArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingEventRegistration$contactArgs<ExtArgs>>): Prisma.Prisma__MarketingContactClient<runtime.Types.Result.GetResult<Prisma.$MarketingContactPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  event<T extends Prisma.MarketingEventDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingEventDefaultArgs<ExtArgs>>): Prisma.Prisma__MarketingEventClient<runtime.Types.Result.GetResult<Prisma.$MarketingEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MarketingEventRegistration$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -914,6 +1357,10 @@ export type MarketingEventRegistrationFindUniqueArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingEventRegistration to fetch.
    */
   where: Prisma.MarketingEventRegistrationWhereUniqueInput
@@ -932,6 +1379,10 @@ export type MarketingEventRegistrationFindUniqueOrThrowArgs<ExtArgs extends runt
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingEventRegistration to fetch.
    */
   where: Prisma.MarketingEventRegistrationWhereUniqueInput
@@ -949,6 +1400,10 @@ export type MarketingEventRegistrationFindFirstArgs<ExtArgs extends runtime.Type
    * Omit specific fields from the MarketingEventRegistration
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
   /**
    * Filter, which MarketingEventRegistration to fetch.
    */
@@ -998,6 +1453,10 @@ export type MarketingEventRegistrationFindFirstOrThrowArgs<ExtArgs extends runti
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingEventRegistration to fetch.
    */
   where?: Prisma.MarketingEventRegistrationWhereInput
@@ -1045,6 +1504,10 @@ export type MarketingEventRegistrationFindManyArgs<ExtArgs extends runtime.Types
    * Omit specific fields from the MarketingEventRegistration
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
   /**
    * Filter, which MarketingEventRegistrations to fetch.
    */
@@ -1094,6 +1557,10 @@ export type MarketingEventRegistrationCreateArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingEventRegistration.
    */
   data: Prisma.XOR<Prisma.MarketingEventRegistrationCreateInput, Prisma.MarketingEventRegistrationUncheckedCreateInput>
@@ -1127,6 +1594,10 @@ export type MarketingEventRegistrationCreateManyAndReturnArgs<ExtArgs extends ru
    */
   data: Prisma.MarketingEventRegistrationCreateManyInput | Prisma.MarketingEventRegistrationCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1141,6 +1612,10 @@ export type MarketingEventRegistrationUpdateArgs<ExtArgs extends runtime.Types.E
    * Omit specific fields from the MarketingEventRegistration
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingEventRegistration.
    */
@@ -1193,6 +1668,10 @@ export type MarketingEventRegistrationUpdateManyAndReturnArgs<ExtArgs extends ru
    * Limit how many MarketingEventRegistrations to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1207,6 +1686,10 @@ export type MarketingEventRegistrationUpsertArgs<ExtArgs extends runtime.Types.E
    * Omit specific fields from the MarketingEventRegistration
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
   /**
    * The filter to search for the MarketingEventRegistration to update in case it exists.
    */
@@ -1234,6 +1717,10 @@ export type MarketingEventRegistrationDeleteArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
+  /**
    * Filter which MarketingEventRegistration to delete.
    */
   where: Prisma.MarketingEventRegistrationWhereUniqueInput
@@ -1254,6 +1741,44 @@ export type MarketingEventRegistrationDeleteManyArgs<ExtArgs extends runtime.Typ
 }
 
 /**
+ * MarketingEventRegistration.contact
+ */
+export type MarketingEventRegistration$contactArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingContact
+   */
+  select?: Prisma.MarketingContactSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingContact
+   */
+  omit?: Prisma.MarketingContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingContactInclude<ExtArgs> | null
+  where?: Prisma.MarketingContactWhereInput
+}
+
+/**
+ * MarketingEventRegistration.membership
+ */
+export type MarketingEventRegistration$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
+}
+
+/**
  * MarketingEventRegistration without action
  */
 export type MarketingEventRegistrationDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1265,4 +1790,8 @@ export type MarketingEventRegistrationDefaultArgs<ExtArgs extends runtime.Types.
    * Omit specific fields from the MarketingEventRegistration
    */
   omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
 }

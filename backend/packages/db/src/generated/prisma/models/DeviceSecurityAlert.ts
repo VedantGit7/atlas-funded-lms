@@ -258,6 +258,7 @@ export type DeviceSecurityAlertWhereInput = {
   notes_json?: Prisma.JsonNullableFilter<"DeviceSecurityAlert">
   created_at?: Prisma.DateTimeFilter<"DeviceSecurityAlert"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"DeviceSecurityAlert"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type DeviceSecurityAlertOrderByWithRelationInput = {
@@ -277,6 +278,7 @@ export type DeviceSecurityAlertOrderByWithRelationInput = {
   notes_json?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type DeviceSecurityAlertWhereUniqueInput = Prisma.AtLeast<{
@@ -300,6 +302,7 @@ export type DeviceSecurityAlertWhereUniqueInput = Prisma.AtLeast<{
   notes_json?: Prisma.JsonNullableFilter<"DeviceSecurityAlert">
   created_at?: Prisma.DateTimeFilter<"DeviceSecurityAlert"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"DeviceSecurityAlert"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_alert_key">
 
 export type DeviceSecurityAlertOrderByWithAggregationInput = {
@@ -348,8 +351,6 @@ export type DeviceSecurityAlertScalarWhereWithAggregatesInput = {
 
 export type DeviceSecurityAlertCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   alert_key: string
   alert_type: string
   severity: string
@@ -363,6 +364,7 @@ export type DeviceSecurityAlertCreateInput = {
   notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutDevice_security_alertsInput
 }
 
 export type DeviceSecurityAlertUncheckedCreateInput = {
@@ -386,8 +388,6 @@ export type DeviceSecurityAlertUncheckedCreateInput = {
 
 export type DeviceSecurityAlertUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   alert_key?: Prisma.StringFieldUpdateOperationsInput | string
   alert_type?: Prisma.StringFieldUpdateOperationsInput | string
   severity?: Prisma.StringFieldUpdateOperationsInput | string
@@ -401,6 +401,7 @@ export type DeviceSecurityAlertUpdateInput = {
   notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutDevice_security_alertsNestedInput
 }
 
 export type DeviceSecurityAlertUncheckedUpdateInput = {
@@ -443,8 +444,6 @@ export type DeviceSecurityAlertCreateManyInput = {
 
 export type DeviceSecurityAlertUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   alert_key?: Prisma.StringFieldUpdateOperationsInput | string
   alert_type?: Prisma.StringFieldUpdateOperationsInput | string
   severity?: Prisma.StringFieldUpdateOperationsInput | string
@@ -477,6 +476,16 @@ export type DeviceSecurityAlertUncheckedUpdateManyInput = {
   notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeviceSecurityAlertListRelationFilter = {
+  every?: Prisma.DeviceSecurityAlertWhereInput
+  some?: Prisma.DeviceSecurityAlertWhereInput
+  none?: Prisma.DeviceSecurityAlertWhereInput
+}
+
+export type DeviceSecurityAlertOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type DeviceSecurityAlertTenant_idAlert_keyCompoundUniqueInput = {
@@ -535,6 +544,198 @@ export type DeviceSecurityAlertMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type DeviceSecurityAlertCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.DeviceSecurityAlertCreateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput> | Prisma.DeviceSecurityAlertCreateWithoutMembershipInput[] | Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput | Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.DeviceSecurityAlertCreateManyMembershipInputEnvelope
+  connect?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+}
+
+export type DeviceSecurityAlertUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.DeviceSecurityAlertCreateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput> | Prisma.DeviceSecurityAlertCreateWithoutMembershipInput[] | Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput | Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.DeviceSecurityAlertCreateManyMembershipInputEnvelope
+  connect?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+}
+
+export type DeviceSecurityAlertUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.DeviceSecurityAlertCreateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput> | Prisma.DeviceSecurityAlertCreateWithoutMembershipInput[] | Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput | Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.DeviceSecurityAlertUpsertWithWhereUniqueWithoutMembershipInput | Prisma.DeviceSecurityAlertUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.DeviceSecurityAlertCreateManyMembershipInputEnvelope
+  set?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  disconnect?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  delete?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  connect?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  update?: Prisma.DeviceSecurityAlertUpdateWithWhereUniqueWithoutMembershipInput | Prisma.DeviceSecurityAlertUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.DeviceSecurityAlertUpdateManyWithWhereWithoutMembershipInput | Prisma.DeviceSecurityAlertUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.DeviceSecurityAlertScalarWhereInput | Prisma.DeviceSecurityAlertScalarWhereInput[]
+}
+
+export type DeviceSecurityAlertUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.DeviceSecurityAlertCreateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput> | Prisma.DeviceSecurityAlertCreateWithoutMembershipInput[] | Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput | Prisma.DeviceSecurityAlertCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.DeviceSecurityAlertUpsertWithWhereUniqueWithoutMembershipInput | Prisma.DeviceSecurityAlertUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.DeviceSecurityAlertCreateManyMembershipInputEnvelope
+  set?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  disconnect?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  delete?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  connect?: Prisma.DeviceSecurityAlertWhereUniqueInput | Prisma.DeviceSecurityAlertWhereUniqueInput[]
+  update?: Prisma.DeviceSecurityAlertUpdateWithWhereUniqueWithoutMembershipInput | Prisma.DeviceSecurityAlertUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.DeviceSecurityAlertUpdateManyWithWhereWithoutMembershipInput | Prisma.DeviceSecurityAlertUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.DeviceSecurityAlertScalarWhereInput | Prisma.DeviceSecurityAlertScalarWhereInput[]
+}
+
+export type DeviceSecurityAlertCreateWithoutMembershipInput = {
+  id: string
+  alert_key: string
+  alert_type: string
+  severity: string
+  status?: string
+  title: string
+  evidence_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  session_ids: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  detected_at?: Date | string
+  resolved_at?: Date | string | null
+  resolved_by?: string | null
+  notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type DeviceSecurityAlertUncheckedCreateWithoutMembershipInput = {
+  id: string
+  alert_key: string
+  alert_type: string
+  severity: string
+  status?: string
+  title: string
+  evidence_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  session_ids: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  detected_at?: Date | string
+  resolved_at?: Date | string | null
+  resolved_by?: string | null
+  notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type DeviceSecurityAlertCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.DeviceSecurityAlertWhereUniqueInput
+  create: Prisma.XOR<Prisma.DeviceSecurityAlertCreateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput>
+}
+
+export type DeviceSecurityAlertCreateManyMembershipInputEnvelope = {
+  data: Prisma.DeviceSecurityAlertCreateManyMembershipInput | Prisma.DeviceSecurityAlertCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type DeviceSecurityAlertUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.DeviceSecurityAlertWhereUniqueInput
+  update: Prisma.XOR<Prisma.DeviceSecurityAlertUpdateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.DeviceSecurityAlertCreateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedCreateWithoutMembershipInput>
+}
+
+export type DeviceSecurityAlertUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.DeviceSecurityAlertWhereUniqueInput
+  data: Prisma.XOR<Prisma.DeviceSecurityAlertUpdateWithoutMembershipInput, Prisma.DeviceSecurityAlertUncheckedUpdateWithoutMembershipInput>
+}
+
+export type DeviceSecurityAlertUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.DeviceSecurityAlertScalarWhereInput
+  data: Prisma.XOR<Prisma.DeviceSecurityAlertUpdateManyMutationInput, Prisma.DeviceSecurityAlertUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type DeviceSecurityAlertScalarWhereInput = {
+  AND?: Prisma.DeviceSecurityAlertScalarWhereInput | Prisma.DeviceSecurityAlertScalarWhereInput[]
+  OR?: Prisma.DeviceSecurityAlertScalarWhereInput[]
+  NOT?: Prisma.DeviceSecurityAlertScalarWhereInput | Prisma.DeviceSecurityAlertScalarWhereInput[]
+  id?: Prisma.UuidFilter<"DeviceSecurityAlert"> | string
+  tenant_id?: Prisma.UuidFilter<"DeviceSecurityAlert"> | string
+  membership_id?: Prisma.UuidFilter<"DeviceSecurityAlert"> | string
+  alert_key?: Prisma.StringFilter<"DeviceSecurityAlert"> | string
+  alert_type?: Prisma.StringFilter<"DeviceSecurityAlert"> | string
+  severity?: Prisma.StringFilter<"DeviceSecurityAlert"> | string
+  status?: Prisma.StringFilter<"DeviceSecurityAlert"> | string
+  title?: Prisma.StringFilter<"DeviceSecurityAlert"> | string
+  evidence_json?: Prisma.JsonNullableFilter<"DeviceSecurityAlert">
+  session_ids?: Prisma.JsonFilter<"DeviceSecurityAlert">
+  detected_at?: Prisma.DateTimeFilter<"DeviceSecurityAlert"> | Date | string
+  resolved_at?: Prisma.DateTimeNullableFilter<"DeviceSecurityAlert"> | Date | string | null
+  resolved_by?: Prisma.UuidNullableFilter<"DeviceSecurityAlert"> | string | null
+  notes_json?: Prisma.JsonNullableFilter<"DeviceSecurityAlert">
+  created_at?: Prisma.DateTimeFilter<"DeviceSecurityAlert"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"DeviceSecurityAlert"> | Date | string
+}
+
+export type DeviceSecurityAlertCreateManyMembershipInput = {
+  id: string
+  alert_key: string
+  alert_type: string
+  severity: string
+  status?: string
+  title: string
+  evidence_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  session_ids: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  detected_at?: Date | string
+  resolved_at?: Date | string | null
+  resolved_by?: string | null
+  notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type DeviceSecurityAlertUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  alert_key?: Prisma.StringFieldUpdateOperationsInput | string
+  alert_type?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  evidence_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  session_ids?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  detected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resolved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolved_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeviceSecurityAlertUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  alert_key?: Prisma.StringFieldUpdateOperationsInput | string
+  alert_type?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  evidence_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  session_ids?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  detected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resolved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolved_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeviceSecurityAlertUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  alert_key?: Prisma.StringFieldUpdateOperationsInput | string
+  alert_type?: Prisma.StringFieldUpdateOperationsInput | string
+  severity?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  evidence_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  session_ids?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  detected_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  resolved_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resolved_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type DeviceSecurityAlertSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -554,6 +755,7 @@ export type DeviceSecurityAlertSelect<ExtArgs extends runtime.Types.Extensions.I
   notes_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deviceSecurityAlert"]>
 
 export type DeviceSecurityAlertSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -573,6 +775,7 @@ export type DeviceSecurityAlertSelectCreateManyAndReturn<ExtArgs extends runtime
   notes_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deviceSecurityAlert"]>
 
 export type DeviceSecurityAlertSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -592,6 +795,7 @@ export type DeviceSecurityAlertSelectUpdateManyAndReturn<ExtArgs extends runtime
   notes_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deviceSecurityAlert"]>
 
 export type DeviceSecurityAlertSelectScalar = {
@@ -614,10 +818,21 @@ export type DeviceSecurityAlertSelectScalar = {
 }
 
 export type DeviceSecurityAlertOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "alert_key" | "alert_type" | "severity" | "status" | "title" | "evidence_json" | "session_ids" | "detected_at" | "resolved_at" | "resolved_by" | "notes_json" | "created_at" | "updated_at", ExtArgs["result"]["deviceSecurityAlert"]>
+export type DeviceSecurityAlertInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type DeviceSecurityAlertIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type DeviceSecurityAlertIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $DeviceSecurityAlertPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DeviceSecurityAlert"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1029,6 +1244,7 @@ readonly fields: DeviceSecurityAlertFieldRefs;
  */
 export interface Prisma__DeviceSecurityAlertClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1091,6 +1307,10 @@ export type DeviceSecurityAlertFindUniqueArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
+  /**
    * Filter, which DeviceSecurityAlert to fetch.
    */
   where: Prisma.DeviceSecurityAlertWhereUniqueInput
@@ -1109,6 +1329,10 @@ export type DeviceSecurityAlertFindUniqueOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
+  /**
    * Filter, which DeviceSecurityAlert to fetch.
    */
   where: Prisma.DeviceSecurityAlertWhereUniqueInput
@@ -1126,6 +1350,10 @@ export type DeviceSecurityAlertFindFirstArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the DeviceSecurityAlert
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
   /**
    * Filter, which DeviceSecurityAlert to fetch.
    */
@@ -1175,6 +1403,10 @@ export type DeviceSecurityAlertFindFirstOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
+  /**
    * Filter, which DeviceSecurityAlert to fetch.
    */
   where?: Prisma.DeviceSecurityAlertWhereInput
@@ -1222,6 +1454,10 @@ export type DeviceSecurityAlertFindManyArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the DeviceSecurityAlert
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
   /**
    * Filter, which DeviceSecurityAlerts to fetch.
    */
@@ -1271,6 +1507,10 @@ export type DeviceSecurityAlertCreateArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
+  /**
    * The data needed to create a DeviceSecurityAlert.
    */
   data: Prisma.XOR<Prisma.DeviceSecurityAlertCreateInput, Prisma.DeviceSecurityAlertUncheckedCreateInput>
@@ -1304,6 +1544,10 @@ export type DeviceSecurityAlertCreateManyAndReturnArgs<ExtArgs extends runtime.T
    */
   data: Prisma.DeviceSecurityAlertCreateManyInput | Prisma.DeviceSecurityAlertCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1318,6 +1562,10 @@ export type DeviceSecurityAlertUpdateArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the DeviceSecurityAlert
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
   /**
    * The data needed to update a DeviceSecurityAlert.
    */
@@ -1370,6 +1618,10 @@ export type DeviceSecurityAlertUpdateManyAndReturnArgs<ExtArgs extends runtime.T
    * Limit how many DeviceSecurityAlerts to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1384,6 +1636,10 @@ export type DeviceSecurityAlertUpsertArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the DeviceSecurityAlert
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
   /**
    * The filter to search for the DeviceSecurityAlert to update in case it exists.
    */
@@ -1410,6 +1666,10 @@ export type DeviceSecurityAlertDeleteArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the DeviceSecurityAlert
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
   /**
    * Filter which DeviceSecurityAlert to delete.
    */
@@ -1442,4 +1702,8 @@ export type DeviceSecurityAlertDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the DeviceSecurityAlert
    */
   omit?: Prisma.DeviceSecurityAlertOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeviceSecurityAlertInclude<ExtArgs> | null
 }

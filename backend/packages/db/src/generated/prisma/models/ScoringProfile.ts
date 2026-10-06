@@ -206,6 +206,12 @@ export type ScoringProfileWhereInput = {
   active_config_version_id?: Prisma.UuidNullableFilter<"ScoringProfile"> | string | null
   created_at?: Prisma.DateTimeFilter<"ScoringProfile"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ScoringProfile"> | Date | string
+  competency_bands?: Prisma.CompetencyBandListRelationFilter
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotListRelationFilter
+  competency_scores?: Prisma.CompetencyScoreListRelationFilter
+  composite_readiness_state?: Prisma.CompositeReadinessStateListRelationFilter
+  readiness_policies?: Prisma.ReadinessPolicyListRelationFilter
+  scoring_config_versions?: Prisma.ScoringConfigVersionListRelationFilter
 }
 
 export type ScoringProfileOrderByWithRelationInput = {
@@ -217,10 +223,17 @@ export type ScoringProfileOrderByWithRelationInput = {
   active_config_version_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  competency_bands?: Prisma.CompetencyBandOrderByRelationAggregateInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotOrderByRelationAggregateInput
+  competency_scores?: Prisma.CompetencyScoreOrderByRelationAggregateInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateOrderByRelationAggregateInput
+  readiness_policies?: Prisma.ReadinessPolicyOrderByRelationAggregateInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionOrderByRelationAggregateInput
 }
 
 export type ScoringProfileWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.ScoringProfileTenant_idIdCompoundUniqueInput
   tenant_id_key?: Prisma.ScoringProfileTenant_idKeyCompoundUniqueInput
   AND?: Prisma.ScoringProfileWhereInput | Prisma.ScoringProfileWhereInput[]
   OR?: Prisma.ScoringProfileWhereInput[]
@@ -232,7 +245,13 @@ export type ScoringProfileWhereUniqueInput = Prisma.AtLeast<{
   active_config_version_id?: Prisma.UuidNullableFilter<"ScoringProfile"> | string | null
   created_at?: Prisma.DateTimeFilter<"ScoringProfile"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ScoringProfile"> | Date | string
-}, "id" | "tenant_id_key">
+  competency_bands?: Prisma.CompetencyBandListRelationFilter
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotListRelationFilter
+  competency_scores?: Prisma.CompetencyScoreListRelationFilter
+  composite_readiness_state?: Prisma.CompositeReadinessStateListRelationFilter
+  readiness_policies?: Prisma.ReadinessPolicyListRelationFilter
+  scoring_config_versions?: Prisma.ScoringConfigVersionListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_key">
 
 export type ScoringProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -271,6 +290,12 @@ export type ScoringProfileCreateInput = {
   active_config_version_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionCreateNestedManyWithoutScoring_profileInput
 }
 
 export type ScoringProfileUncheckedCreateInput = {
@@ -282,6 +307,12 @@ export type ScoringProfileUncheckedCreateInput = {
   active_config_version_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedCreateNestedManyWithoutScoring_profileInput
 }
 
 export type ScoringProfileUpdateInput = {
@@ -293,6 +324,12 @@ export type ScoringProfileUpdateInput = {
   active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUpdateManyWithoutScoring_profileNestedInput
 }
 
 export type ScoringProfileUncheckedUpdateInput = {
@@ -304,6 +341,12 @@ export type ScoringProfileUncheckedUpdateInput = {
   active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedUpdateManyWithoutScoring_profileNestedInput
 }
 
 export type ScoringProfileCreateManyInput = {
@@ -337,6 +380,11 @@ export type ScoringProfileUncheckedUpdateManyInput = {
   active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ScoringProfileTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type ScoringProfileTenant_idKeyCompoundUniqueInput = {
@@ -377,6 +425,649 @@ export type ScoringProfileMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type ScoringProfileScalarRelationFilter = {
+  is?: Prisma.ScoringProfileWhereInput
+  isNot?: Prisma.ScoringProfileWhereInput
+}
+
+export type ScoringProfileCreateNestedOneWithoutScoring_config_versionsInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutScoring_config_versionsInput, Prisma.ScoringProfileUncheckedCreateWithoutScoring_config_versionsInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutScoring_config_versionsInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+}
+
+export type ScoringProfileUpdateOneRequiredWithoutScoring_config_versionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutScoring_config_versionsInput, Prisma.ScoringProfileUncheckedCreateWithoutScoring_config_versionsInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutScoring_config_versionsInput
+  upsert?: Prisma.ScoringProfileUpsertWithoutScoring_config_versionsInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ScoringProfileUpdateToOneWithWhereWithoutScoring_config_versionsInput, Prisma.ScoringProfileUpdateWithoutScoring_config_versionsInput>, Prisma.ScoringProfileUncheckedUpdateWithoutScoring_config_versionsInput>
+}
+
+export type ScoringProfileCreateNestedOneWithoutCompetency_bandsInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_bandsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_bandsInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutCompetency_bandsInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+}
+
+export type ScoringProfileUpdateOneRequiredWithoutCompetency_bandsNestedInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_bandsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_bandsInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutCompetency_bandsInput
+  upsert?: Prisma.ScoringProfileUpsertWithoutCompetency_bandsInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ScoringProfileUpdateToOneWithWhereWithoutCompetency_bandsInput, Prisma.ScoringProfileUpdateWithoutCompetency_bandsInput>, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_bandsInput>
+}
+
+export type ScoringProfileCreateNestedOneWithoutCompetency_scoresInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_scoresInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_scoresInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutCompetency_scoresInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+}
+
+export type ScoringProfileUpdateOneRequiredWithoutCompetency_scoresNestedInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_scoresInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_scoresInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutCompetency_scoresInput
+  upsert?: Prisma.ScoringProfileUpsertWithoutCompetency_scoresInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ScoringProfileUpdateToOneWithWhereWithoutCompetency_scoresInput, Prisma.ScoringProfileUpdateWithoutCompetency_scoresInput>, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_scoresInput>
+}
+
+export type ScoringProfileCreateNestedOneWithoutComposite_readiness_stateInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutComposite_readiness_stateInput, Prisma.ScoringProfileUncheckedCreateWithoutComposite_readiness_stateInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutComposite_readiness_stateInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+}
+
+export type ScoringProfileUpdateOneRequiredWithoutComposite_readiness_stateNestedInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutComposite_readiness_stateInput, Prisma.ScoringProfileUncheckedCreateWithoutComposite_readiness_stateInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutComposite_readiness_stateInput
+  upsert?: Prisma.ScoringProfileUpsertWithoutComposite_readiness_stateInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ScoringProfileUpdateToOneWithWhereWithoutComposite_readiness_stateInput, Prisma.ScoringProfileUpdateWithoutComposite_readiness_stateInput>, Prisma.ScoringProfileUncheckedUpdateWithoutComposite_readiness_stateInput>
+}
+
+export type ScoringProfileCreateNestedOneWithoutCompetency_score_snapshotsInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_score_snapshotsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_score_snapshotsInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutCompetency_score_snapshotsInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+}
+
+export type ScoringProfileUpdateOneRequiredWithoutCompetency_score_snapshotsNestedInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_score_snapshotsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_score_snapshotsInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutCompetency_score_snapshotsInput
+  upsert?: Prisma.ScoringProfileUpsertWithoutCompetency_score_snapshotsInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ScoringProfileUpdateToOneWithWhereWithoutCompetency_score_snapshotsInput, Prisma.ScoringProfileUpdateWithoutCompetency_score_snapshotsInput>, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_score_snapshotsInput>
+}
+
+export type ScoringProfileCreateNestedOneWithoutReadiness_policiesInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutReadiness_policiesInput, Prisma.ScoringProfileUncheckedCreateWithoutReadiness_policiesInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutReadiness_policiesInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+}
+
+export type ScoringProfileUpdateOneRequiredWithoutReadiness_policiesNestedInput = {
+  create?: Prisma.XOR<Prisma.ScoringProfileCreateWithoutReadiness_policiesInput, Prisma.ScoringProfileUncheckedCreateWithoutReadiness_policiesInput>
+  connectOrCreate?: Prisma.ScoringProfileCreateOrConnectWithoutReadiness_policiesInput
+  upsert?: Prisma.ScoringProfileUpsertWithoutReadiness_policiesInput
+  connect?: Prisma.ScoringProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ScoringProfileUpdateToOneWithWhereWithoutReadiness_policiesInput, Prisma.ScoringProfileUpdateWithoutReadiness_policiesInput>, Prisma.ScoringProfileUncheckedUpdateWithoutReadiness_policiesInput>
+}
+
+export type ScoringProfileCreateWithoutScoring_config_versionsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileUncheckedCreateWithoutScoring_config_versionsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileCreateOrConnectWithoutScoring_config_versionsInput = {
+  where: Prisma.ScoringProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutScoring_config_versionsInput, Prisma.ScoringProfileUncheckedCreateWithoutScoring_config_versionsInput>
+}
+
+export type ScoringProfileUpsertWithoutScoring_config_versionsInput = {
+  update: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutScoring_config_versionsInput, Prisma.ScoringProfileUncheckedUpdateWithoutScoring_config_versionsInput>
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutScoring_config_versionsInput, Prisma.ScoringProfileUncheckedCreateWithoutScoring_config_versionsInput>
+  where?: Prisma.ScoringProfileWhereInput
+}
+
+export type ScoringProfileUpdateToOneWithWhereWithoutScoring_config_versionsInput = {
+  where?: Prisma.ScoringProfileWhereInput
+  data: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutScoring_config_versionsInput, Prisma.ScoringProfileUncheckedUpdateWithoutScoring_config_versionsInput>
+}
+
+export type ScoringProfileUpdateWithoutScoring_config_versionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileUncheckedUpdateWithoutScoring_config_versionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileCreateWithoutCompetency_bandsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileUncheckedCreateWithoutCompetency_bandsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileCreateOrConnectWithoutCompetency_bandsInput = {
+  where: Prisma.ScoringProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_bandsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_bandsInput>
+}
+
+export type ScoringProfileUpsertWithoutCompetency_bandsInput = {
+  update: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutCompetency_bandsInput, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_bandsInput>
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_bandsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_bandsInput>
+  where?: Prisma.ScoringProfileWhereInput
+}
+
+export type ScoringProfileUpdateToOneWithWhereWithoutCompetency_bandsInput = {
+  where?: Prisma.ScoringProfileWhereInput
+  data: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutCompetency_bandsInput, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_bandsInput>
+}
+
+export type ScoringProfileUpdateWithoutCompetency_bandsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileUncheckedUpdateWithoutCompetency_bandsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileCreateWithoutCompetency_scoresInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileUncheckedCreateWithoutCompetency_scoresInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileCreateOrConnectWithoutCompetency_scoresInput = {
+  where: Prisma.ScoringProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_scoresInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_scoresInput>
+}
+
+export type ScoringProfileUpsertWithoutCompetency_scoresInput = {
+  update: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutCompetency_scoresInput, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_scoresInput>
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_scoresInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_scoresInput>
+  where?: Prisma.ScoringProfileWhereInput
+}
+
+export type ScoringProfileUpdateToOneWithWhereWithoutCompetency_scoresInput = {
+  where?: Prisma.ScoringProfileWhereInput
+  data: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutCompetency_scoresInput, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_scoresInput>
+}
+
+export type ScoringProfileUpdateWithoutCompetency_scoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileUncheckedUpdateWithoutCompetency_scoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileCreateWithoutComposite_readiness_stateInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileUncheckedCreateWithoutComposite_readiness_stateInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileCreateOrConnectWithoutComposite_readiness_stateInput = {
+  where: Prisma.ScoringProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutComposite_readiness_stateInput, Prisma.ScoringProfileUncheckedCreateWithoutComposite_readiness_stateInput>
+}
+
+export type ScoringProfileUpsertWithoutComposite_readiness_stateInput = {
+  update: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutComposite_readiness_stateInput, Prisma.ScoringProfileUncheckedUpdateWithoutComposite_readiness_stateInput>
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutComposite_readiness_stateInput, Prisma.ScoringProfileUncheckedCreateWithoutComposite_readiness_stateInput>
+  where?: Prisma.ScoringProfileWhereInput
+}
+
+export type ScoringProfileUpdateToOneWithWhereWithoutComposite_readiness_stateInput = {
+  where?: Prisma.ScoringProfileWhereInput
+  data: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutComposite_readiness_stateInput, Prisma.ScoringProfileUncheckedUpdateWithoutComposite_readiness_stateInput>
+}
+
+export type ScoringProfileUpdateWithoutComposite_readiness_stateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileUncheckedUpdateWithoutComposite_readiness_stateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileCreateWithoutCompetency_score_snapshotsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileUncheckedCreateWithoutCompetency_score_snapshotsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedCreateNestedManyWithoutScoring_profileInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileCreateOrConnectWithoutCompetency_score_snapshotsInput = {
+  where: Prisma.ScoringProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_score_snapshotsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_score_snapshotsInput>
+}
+
+export type ScoringProfileUpsertWithoutCompetency_score_snapshotsInput = {
+  update: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutCompetency_score_snapshotsInput, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_score_snapshotsInput>
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutCompetency_score_snapshotsInput, Prisma.ScoringProfileUncheckedCreateWithoutCompetency_score_snapshotsInput>
+  where?: Prisma.ScoringProfileWhereInput
+}
+
+export type ScoringProfileUpdateToOneWithWhereWithoutCompetency_score_snapshotsInput = {
+  where?: Prisma.ScoringProfileWhereInput
+  data: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutCompetency_score_snapshotsInput, Prisma.ScoringProfileUncheckedUpdateWithoutCompetency_score_snapshotsInput>
+}
+
+export type ScoringProfileUpdateWithoutCompetency_score_snapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileUncheckedUpdateWithoutCompetency_score_snapshotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileNestedInput
+  readiness_policies?: Prisma.ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileCreateWithoutReadiness_policiesInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileUncheckedCreateWithoutReadiness_policiesInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  status?: $Enums.EntityStatus
+  active_config_version_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutScoring_profileInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutScoring_profileInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedCreateNestedManyWithoutScoring_profileInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedCreateNestedManyWithoutScoring_profileInput
+}
+
+export type ScoringProfileCreateOrConnectWithoutReadiness_policiesInput = {
+  where: Prisma.ScoringProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutReadiness_policiesInput, Prisma.ScoringProfileUncheckedCreateWithoutReadiness_policiesInput>
+}
+
+export type ScoringProfileUpsertWithoutReadiness_policiesInput = {
+  update: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutReadiness_policiesInput, Prisma.ScoringProfileUncheckedUpdateWithoutReadiness_policiesInput>
+  create: Prisma.XOR<Prisma.ScoringProfileCreateWithoutReadiness_policiesInput, Prisma.ScoringProfileUncheckedCreateWithoutReadiness_policiesInput>
+  where?: Prisma.ScoringProfileWhereInput
+}
+
+export type ScoringProfileUpdateToOneWithWhereWithoutReadiness_policiesInput = {
+  where?: Prisma.ScoringProfileWhereInput
+  data: Prisma.XOR<Prisma.ScoringProfileUpdateWithoutReadiness_policiesInput, Prisma.ScoringProfileUncheckedUpdateWithoutReadiness_policiesInput>
+}
+
+export type ScoringProfileUpdateWithoutReadiness_policiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUpdateManyWithoutScoring_profileNestedInput
+}
+
+export type ScoringProfileUncheckedUpdateWithoutReadiness_policiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  active_config_version_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_bands?: Prisma.CompetencyBandUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileNestedInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutScoring_profileNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileNestedInput
+  scoring_config_versions?: Prisma.ScoringConfigVersionUncheckedUpdateManyWithoutScoring_profileNestedInput
+}
+
+
+/**
+ * Count Type ScoringProfileCountOutputType
+ */
+
+export type ScoringProfileCountOutputType = {
+  competency_bands: number
+  competency_score_snapshots: number
+  competency_scores: number
+  composite_readiness_state: number
+  readiness_policies: number
+  scoring_config_versions: number
+}
+
+export type ScoringProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  competency_bands?: boolean | ScoringProfileCountOutputTypeCountCompetency_bandsArgs
+  competency_score_snapshots?: boolean | ScoringProfileCountOutputTypeCountCompetency_score_snapshotsArgs
+  competency_scores?: boolean | ScoringProfileCountOutputTypeCountCompetency_scoresArgs
+  composite_readiness_state?: boolean | ScoringProfileCountOutputTypeCountComposite_readiness_stateArgs
+  readiness_policies?: boolean | ScoringProfileCountOutputTypeCountReadiness_policiesArgs
+  scoring_config_versions?: boolean | ScoringProfileCountOutputTypeCountScoring_config_versionsArgs
+}
+
+/**
+ * ScoringProfileCountOutputType without action
+ */
+export type ScoringProfileCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScoringProfileCountOutputType
+   */
+  select?: Prisma.ScoringProfileCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ScoringProfileCountOutputType without action
+ */
+export type ScoringProfileCountOutputTypeCountCompetency_bandsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompetencyBandWhereInput
+}
+
+/**
+ * ScoringProfileCountOutputType without action
+ */
+export type ScoringProfileCountOutputTypeCountCompetency_score_snapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompetencyScoreSnapshotWhereInput
+}
+
+/**
+ * ScoringProfileCountOutputType without action
+ */
+export type ScoringProfileCountOutputTypeCountCompetency_scoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompetencyScoreWhereInput
+}
+
+/**
+ * ScoringProfileCountOutputType without action
+ */
+export type ScoringProfileCountOutputTypeCountComposite_readiness_stateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompositeReadinessStateWhereInput
+}
+
+/**
+ * ScoringProfileCountOutputType without action
+ */
+export type ScoringProfileCountOutputTypeCountReadiness_policiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReadinessPolicyWhereInput
+}
+
+/**
+ * ScoringProfileCountOutputType without action
+ */
+export type ScoringProfileCountOutputTypeCountScoring_config_versionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ScoringConfigVersionWhereInput
+}
 
 
 export type ScoringProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -388,6 +1079,13 @@ export type ScoringProfileSelect<ExtArgs extends runtime.Types.Extensions.Intern
   active_config_version_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  competency_bands?: boolean | Prisma.ScoringProfile$competency_bandsArgs<ExtArgs>
+  competency_score_snapshots?: boolean | Prisma.ScoringProfile$competency_score_snapshotsArgs<ExtArgs>
+  competency_scores?: boolean | Prisma.ScoringProfile$competency_scoresArgs<ExtArgs>
+  composite_readiness_state?: boolean | Prisma.ScoringProfile$composite_readiness_stateArgs<ExtArgs>
+  readiness_policies?: boolean | Prisma.ScoringProfile$readiness_policiesArgs<ExtArgs>
+  scoring_config_versions?: boolean | Prisma.ScoringProfile$scoring_config_versionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ScoringProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scoringProfile"]>
 
 export type ScoringProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -424,10 +1122,28 @@ export type ScoringProfileSelectScalar = {
 }
 
 export type ScoringProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "status" | "active_config_version_id" | "created_at" | "updated_at", ExtArgs["result"]["scoringProfile"]>
+export type ScoringProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  competency_bands?: boolean | Prisma.ScoringProfile$competency_bandsArgs<ExtArgs>
+  competency_score_snapshots?: boolean | Prisma.ScoringProfile$competency_score_snapshotsArgs<ExtArgs>
+  competency_scores?: boolean | Prisma.ScoringProfile$competency_scoresArgs<ExtArgs>
+  composite_readiness_state?: boolean | Prisma.ScoringProfile$composite_readiness_stateArgs<ExtArgs>
+  readiness_policies?: boolean | Prisma.ScoringProfile$readiness_policiesArgs<ExtArgs>
+  scoring_config_versions?: boolean | Prisma.ScoringProfile$scoring_config_versionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ScoringProfileCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ScoringProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ScoringProfileIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ScoringProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ScoringProfile"
-  objects: {}
+  objects: {
+    competency_bands: Prisma.$CompetencyBandPayload<ExtArgs>[]
+    competency_score_snapshots: Prisma.$CompetencyScoreSnapshotPayload<ExtArgs>[]
+    competency_scores: Prisma.$CompetencyScorePayload<ExtArgs>[]
+    composite_readiness_state: Prisma.$CompositeReadinessStatePayload<ExtArgs>[]
+    readiness_policies: Prisma.$ReadinessPolicyPayload<ExtArgs>[]
+    scoring_config_versions: Prisma.$ScoringConfigVersionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -831,6 +1547,12 @@ readonly fields: ScoringProfileFieldRefs;
  */
 export interface Prisma__ScoringProfileClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  competency_bands<T extends Prisma.ScoringProfile$competency_bandsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfile$competency_bandsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompetencyBandPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  competency_score_snapshots<T extends Prisma.ScoringProfile$competency_score_snapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfile$competency_score_snapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompetencyScoreSnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  competency_scores<T extends Prisma.ScoringProfile$competency_scoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfile$competency_scoresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompetencyScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  composite_readiness_state<T extends Prisma.ScoringProfile$composite_readiness_stateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfile$composite_readiness_stateArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompositeReadinessStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  readiness_policies<T extends Prisma.ScoringProfile$readiness_policiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfile$readiness_policiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReadinessPolicyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  scoring_config_versions<T extends Prisma.ScoringProfile$scoring_config_versionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfile$scoring_config_versionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScoringConfigVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -885,6 +1607,10 @@ export type ScoringProfileFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
+  /**
    * Filter, which ScoringProfile to fetch.
    */
   where: Prisma.ScoringProfileWhereUniqueInput
@@ -903,6 +1629,10 @@ export type ScoringProfileFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
+  /**
    * Filter, which ScoringProfile to fetch.
    */
   where: Prisma.ScoringProfileWhereUniqueInput
@@ -920,6 +1650,10 @@ export type ScoringProfileFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the ScoringProfile
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
   /**
    * Filter, which ScoringProfile to fetch.
    */
@@ -969,6 +1703,10 @@ export type ScoringProfileFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
+  /**
    * Filter, which ScoringProfile to fetch.
    */
   where?: Prisma.ScoringProfileWhereInput
@@ -1016,6 +1754,10 @@ export type ScoringProfileFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ScoringProfile
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
   /**
    * Filter, which ScoringProfiles to fetch.
    */
@@ -1065,6 +1807,10 @@ export type ScoringProfileCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
+  /**
    * The data needed to create a ScoringProfile.
    */
   data: Prisma.XOR<Prisma.ScoringProfileCreateInput, Prisma.ScoringProfileUncheckedCreateInput>
@@ -1112,6 +1858,10 @@ export type ScoringProfileUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the ScoringProfile
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
   /**
    * The data needed to update a ScoringProfile.
    */
@@ -1179,6 +1929,10 @@ export type ScoringProfileUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
+  /**
    * The filter to search for the ScoringProfile to update in case it exists.
    */
   where: Prisma.ScoringProfileWhereUniqueInput
@@ -1205,6 +1959,10 @@ export type ScoringProfileDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
+  /**
    * Filter which ScoringProfile to delete.
    */
   where: Prisma.ScoringProfileWhereUniqueInput
@@ -1225,6 +1983,150 @@ export type ScoringProfileDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * ScoringProfile.competency_bands
+ */
+export type ScoringProfile$competency_bandsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompetencyBand
+   */
+  select?: Prisma.CompetencyBandSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompetencyBand
+   */
+  omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
+  where?: Prisma.CompetencyBandWhereInput
+  orderBy?: Prisma.CompetencyBandOrderByWithRelationInput | Prisma.CompetencyBandOrderByWithRelationInput[]
+  cursor?: Prisma.CompetencyBandWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompetencyBandScalarFieldEnum | Prisma.CompetencyBandScalarFieldEnum[]
+}
+
+/**
+ * ScoringProfile.competency_score_snapshots
+ */
+export type ScoringProfile$competency_score_snapshotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompetencyScoreSnapshot
+   */
+  select?: Prisma.CompetencyScoreSnapshotSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompetencyScoreSnapshot
+   */
+  omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
+  where?: Prisma.CompetencyScoreSnapshotWhereInput
+  orderBy?: Prisma.CompetencyScoreSnapshotOrderByWithRelationInput | Prisma.CompetencyScoreSnapshotOrderByWithRelationInput[]
+  cursor?: Prisma.CompetencyScoreSnapshotWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompetencyScoreSnapshotScalarFieldEnum | Prisma.CompetencyScoreSnapshotScalarFieldEnum[]
+}
+
+/**
+ * ScoringProfile.competency_scores
+ */
+export type ScoringProfile$competency_scoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompetencyScore
+   */
+  select?: Prisma.CompetencyScoreSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompetencyScore
+   */
+  omit?: Prisma.CompetencyScoreOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreInclude<ExtArgs> | null
+  where?: Prisma.CompetencyScoreWhereInput
+  orderBy?: Prisma.CompetencyScoreOrderByWithRelationInput | Prisma.CompetencyScoreOrderByWithRelationInput[]
+  cursor?: Prisma.CompetencyScoreWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompetencyScoreScalarFieldEnum | Prisma.CompetencyScoreScalarFieldEnum[]
+}
+
+/**
+ * ScoringProfile.composite_readiness_state
+ */
+export type ScoringProfile$composite_readiness_stateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompositeReadinessState
+   */
+  select?: Prisma.CompositeReadinessStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompositeReadinessState
+   */
+  omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
+  where?: Prisma.CompositeReadinessStateWhereInput
+  orderBy?: Prisma.CompositeReadinessStateOrderByWithRelationInput | Prisma.CompositeReadinessStateOrderByWithRelationInput[]
+  cursor?: Prisma.CompositeReadinessStateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompositeReadinessStateScalarFieldEnum | Prisma.CompositeReadinessStateScalarFieldEnum[]
+}
+
+/**
+ * ScoringProfile.readiness_policies
+ */
+export type ScoringProfile$readiness_policiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReadinessPolicy
+   */
+  select?: Prisma.ReadinessPolicySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReadinessPolicy
+   */
+  omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
+  where?: Prisma.ReadinessPolicyWhereInput
+  orderBy?: Prisma.ReadinessPolicyOrderByWithRelationInput | Prisma.ReadinessPolicyOrderByWithRelationInput[]
+  cursor?: Prisma.ReadinessPolicyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReadinessPolicyScalarFieldEnum | Prisma.ReadinessPolicyScalarFieldEnum[]
+}
+
+/**
+ * ScoringProfile.scoring_config_versions
+ */
+export type ScoringProfile$scoring_config_versionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ScoringConfigVersion
+   */
+  select?: Prisma.ScoringConfigVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ScoringConfigVersion
+   */
+  omit?: Prisma.ScoringConfigVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringConfigVersionInclude<ExtArgs> | null
+  where?: Prisma.ScoringConfigVersionWhereInput
+  orderBy?: Prisma.ScoringConfigVersionOrderByWithRelationInput | Prisma.ScoringConfigVersionOrderByWithRelationInput[]
+  cursor?: Prisma.ScoringConfigVersionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ScoringConfigVersionScalarFieldEnum | Prisma.ScoringConfigVersionScalarFieldEnum[]
+}
+
+/**
  * ScoringProfile without action
  */
 export type ScoringProfileDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1236,4 +2138,8 @@ export type ScoringProfileDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ScoringProfile
    */
   omit?: Prisma.ScoringProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScoringProfileInclude<ExtArgs> | null
 }

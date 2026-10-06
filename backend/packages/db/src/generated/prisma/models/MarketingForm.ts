@@ -290,6 +290,8 @@ export type MarketingFormWhereInput = {
   published_at?: Prisma.DateTimeNullableFilter<"MarketingForm"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingForm"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingForm"> | Date | string
+  marketing_ctas?: Prisma.MarketingCtaListRelationFilter
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionListRelationFilter
 }
 
 export type MarketingFormOrderByWithRelationInput = {
@@ -312,10 +314,13 @@ export type MarketingFormOrderByWithRelationInput = {
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  marketing_ctas?: Prisma.MarketingCtaOrderByRelationAggregateInput
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionOrderByRelationAggregateInput
 }
 
 export type MarketingFormWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MarketingFormTenant_idIdCompoundUniqueInput
   tenant_id_share_token?: Prisma.MarketingFormTenant_idShare_tokenCompoundUniqueInput
   AND?: Prisma.MarketingFormWhereInput | Prisma.MarketingFormWhereInput[]
   OR?: Prisma.MarketingFormWhereInput[]
@@ -338,7 +343,9 @@ export type MarketingFormWhereUniqueInput = Prisma.AtLeast<{
   published_at?: Prisma.DateTimeNullableFilter<"MarketingForm"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingForm"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingForm"> | Date | string
-}, "id" | "tenant_id_share_token">
+  marketing_ctas?: Prisma.MarketingCtaListRelationFilter
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_share_token">
 
 export type MarketingFormOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -410,6 +417,8 @@ export type MarketingFormCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_ctas?: Prisma.MarketingCtaCreateNestedManyWithoutFormInput
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionCreateNestedManyWithoutFormInput
 }
 
 export type MarketingFormUncheckedCreateInput = {
@@ -432,6 +441,8 @@ export type MarketingFormUncheckedCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_ctas?: Prisma.MarketingCtaUncheckedCreateNestedManyWithoutFormInput
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionUncheckedCreateNestedManyWithoutFormInput
 }
 
 export type MarketingFormUpdateInput = {
@@ -454,6 +465,8 @@ export type MarketingFormUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_ctas?: Prisma.MarketingCtaUpdateManyWithoutFormNestedInput
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionUpdateManyWithoutFormNestedInput
 }
 
 export type MarketingFormUncheckedUpdateInput = {
@@ -476,6 +489,8 @@ export type MarketingFormUncheckedUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_ctas?: Prisma.MarketingCtaUncheckedUpdateManyWithoutFormNestedInput
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionUncheckedUpdateManyWithoutFormNestedInput
 }
 
 export type MarketingFormCreateManyInput = {
@@ -542,6 +557,11 @@ export type MarketingFormUncheckedUpdateManyInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingFormTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type MarketingFormTenant_idShare_tokenCompoundUniqueInput = {
@@ -613,6 +633,300 @@ export type MarketingFormMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type MarketingFormScalarRelationFilter = {
+  is?: Prisma.MarketingFormWhereInput
+  isNot?: Prisma.MarketingFormWhereInput
+}
+
+export type MarketingFormNullableScalarRelationFilter = {
+  is?: Prisma.MarketingFormWhereInput | null
+  isNot?: Prisma.MarketingFormWhereInput | null
+}
+
+export type MarketingFormCreateNestedOneWithoutMarketing_form_submissionsInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_form_submissionsInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_form_submissionsInput>
+  connectOrCreate?: Prisma.MarketingFormCreateOrConnectWithoutMarketing_form_submissionsInput
+  connect?: Prisma.MarketingFormWhereUniqueInput
+}
+
+export type MarketingFormUpdateOneRequiredWithoutMarketing_form_submissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_form_submissionsInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_form_submissionsInput>
+  connectOrCreate?: Prisma.MarketingFormCreateOrConnectWithoutMarketing_form_submissionsInput
+  upsert?: Prisma.MarketingFormUpsertWithoutMarketing_form_submissionsInput
+  connect?: Prisma.MarketingFormWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MarketingFormUpdateToOneWithWhereWithoutMarketing_form_submissionsInput, Prisma.MarketingFormUpdateWithoutMarketing_form_submissionsInput>, Prisma.MarketingFormUncheckedUpdateWithoutMarketing_form_submissionsInput>
+}
+
+export type MarketingFormCreateNestedOneWithoutMarketing_ctasInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_ctasInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_ctasInput>
+  connectOrCreate?: Prisma.MarketingFormCreateOrConnectWithoutMarketing_ctasInput
+  connect?: Prisma.MarketingFormWhereUniqueInput
+}
+
+export type MarketingFormUpdateOneWithoutMarketing_ctasNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_ctasInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_ctasInput>
+  connectOrCreate?: Prisma.MarketingFormCreateOrConnectWithoutMarketing_ctasInput
+  upsert?: Prisma.MarketingFormUpsertWithoutMarketing_ctasInput
+  disconnect?: Prisma.MarketingFormWhereInput | boolean
+  delete?: Prisma.MarketingFormWhereInput | boolean
+  connect?: Prisma.MarketingFormWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MarketingFormUpdateToOneWithWhereWithoutMarketing_ctasInput, Prisma.MarketingFormUpdateWithoutMarketing_ctasInput>, Prisma.MarketingFormUncheckedUpdateWithoutMarketing_ctasInput>
+}
+
+export type MarketingFormCreateWithoutMarketing_form_submissionsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  kind?: string
+  share_token: string
+  google_signup_enabled?: boolean
+  button_text?: string
+  button_color?: string
+  button_text_color?: string
+  thank_you_html?: string | null
+  redirect_enabled?: boolean
+  redirect_url?: string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  marketing_ctas?: Prisma.MarketingCtaCreateNestedManyWithoutFormInput
+}
+
+export type MarketingFormUncheckedCreateWithoutMarketing_form_submissionsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  kind?: string
+  share_token: string
+  google_signup_enabled?: boolean
+  button_text?: string
+  button_color?: string
+  button_text_color?: string
+  thank_you_html?: string | null
+  redirect_enabled?: boolean
+  redirect_url?: string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  marketing_ctas?: Prisma.MarketingCtaUncheckedCreateNestedManyWithoutFormInput
+}
+
+export type MarketingFormCreateOrConnectWithoutMarketing_form_submissionsInput = {
+  where: Prisma.MarketingFormWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_form_submissionsInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_form_submissionsInput>
+}
+
+export type MarketingFormUpsertWithoutMarketing_form_submissionsInput = {
+  update: Prisma.XOR<Prisma.MarketingFormUpdateWithoutMarketing_form_submissionsInput, Prisma.MarketingFormUncheckedUpdateWithoutMarketing_form_submissionsInput>
+  create: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_form_submissionsInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_form_submissionsInput>
+  where?: Prisma.MarketingFormWhereInput
+}
+
+export type MarketingFormUpdateToOneWithWhereWithoutMarketing_form_submissionsInput = {
+  where?: Prisma.MarketingFormWhereInput
+  data: Prisma.XOR<Prisma.MarketingFormUpdateWithoutMarketing_form_submissionsInput, Prisma.MarketingFormUncheckedUpdateWithoutMarketing_form_submissionsInput>
+}
+
+export type MarketingFormUpdateWithoutMarketing_form_submissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  share_token?: Prisma.StringFieldUpdateOperationsInput | string
+  google_signup_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  button_text?: Prisma.StringFieldUpdateOperationsInput | string
+  button_color?: Prisma.StringFieldUpdateOperationsInput | string
+  button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
+  thank_you_html?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  redirect_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_ctas?: Prisma.MarketingCtaUpdateManyWithoutFormNestedInput
+}
+
+export type MarketingFormUncheckedUpdateWithoutMarketing_form_submissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  share_token?: Prisma.StringFieldUpdateOperationsInput | string
+  google_signup_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  button_text?: Prisma.StringFieldUpdateOperationsInput | string
+  button_color?: Prisma.StringFieldUpdateOperationsInput | string
+  button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
+  thank_you_html?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  redirect_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_ctas?: Prisma.MarketingCtaUncheckedUpdateManyWithoutFormNestedInput
+}
+
+export type MarketingFormCreateWithoutMarketing_ctasInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  kind?: string
+  share_token: string
+  google_signup_enabled?: boolean
+  button_text?: string
+  button_color?: string
+  button_text_color?: string
+  thank_you_html?: string | null
+  redirect_enabled?: boolean
+  redirect_url?: string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionCreateNestedManyWithoutFormInput
+}
+
+export type MarketingFormUncheckedCreateWithoutMarketing_ctasInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  kind?: string
+  share_token: string
+  google_signup_enabled?: boolean
+  button_text?: string
+  button_color?: string
+  button_text_color?: string
+  thank_you_html?: string | null
+  redirect_enabled?: boolean
+  redirect_url?: string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionUncheckedCreateNestedManyWithoutFormInput
+}
+
+export type MarketingFormCreateOrConnectWithoutMarketing_ctasInput = {
+  where: Prisma.MarketingFormWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_ctasInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_ctasInput>
+}
+
+export type MarketingFormUpsertWithoutMarketing_ctasInput = {
+  update: Prisma.XOR<Prisma.MarketingFormUpdateWithoutMarketing_ctasInput, Prisma.MarketingFormUncheckedUpdateWithoutMarketing_ctasInput>
+  create: Prisma.XOR<Prisma.MarketingFormCreateWithoutMarketing_ctasInput, Prisma.MarketingFormUncheckedCreateWithoutMarketing_ctasInput>
+  where?: Prisma.MarketingFormWhereInput
+}
+
+export type MarketingFormUpdateToOneWithWhereWithoutMarketing_ctasInput = {
+  where?: Prisma.MarketingFormWhereInput
+  data: Prisma.XOR<Prisma.MarketingFormUpdateWithoutMarketing_ctasInput, Prisma.MarketingFormUncheckedUpdateWithoutMarketing_ctasInput>
+}
+
+export type MarketingFormUpdateWithoutMarketing_ctasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  share_token?: Prisma.StringFieldUpdateOperationsInput | string
+  google_signup_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  button_text?: Prisma.StringFieldUpdateOperationsInput | string
+  button_color?: Prisma.StringFieldUpdateOperationsInput | string
+  button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
+  thank_you_html?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  redirect_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionUpdateManyWithoutFormNestedInput
+}
+
+export type MarketingFormUncheckedUpdateWithoutMarketing_ctasInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  share_token?: Prisma.StringFieldUpdateOperationsInput | string
+  google_signup_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  button_text?: Prisma.StringFieldUpdateOperationsInput | string
+  button_color?: Prisma.StringFieldUpdateOperationsInput | string
+  button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
+  thank_you_html?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  redirect_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  redirect_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fields_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_form_submissions?: Prisma.MarketingFormSubmissionUncheckedUpdateManyWithoutFormNestedInput
+}
+
+
+/**
+ * Count Type MarketingFormCountOutputType
+ */
+
+export type MarketingFormCountOutputType = {
+  marketing_ctas: number
+  marketing_form_submissions: number
+}
+
+export type MarketingFormCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_ctas?: boolean | MarketingFormCountOutputTypeCountMarketing_ctasArgs
+  marketing_form_submissions?: boolean | MarketingFormCountOutputTypeCountMarketing_form_submissionsArgs
+}
+
+/**
+ * MarketingFormCountOutputType without action
+ */
+export type MarketingFormCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingFormCountOutputType
+   */
+  select?: Prisma.MarketingFormCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MarketingFormCountOutputType without action
+ */
+export type MarketingFormCountOutputTypeCountMarketing_ctasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MarketingCtaWhereInput
+}
+
+/**
+ * MarketingFormCountOutputType without action
+ */
+export type MarketingFormCountOutputTypeCountMarketing_form_submissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MarketingFormSubmissionWhereInput
+}
 
 
 export type MarketingFormSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -635,6 +949,9 @@ export type MarketingFormSelect<ExtArgs extends runtime.Types.Extensions.Interna
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  marketing_ctas?: boolean | Prisma.MarketingForm$marketing_ctasArgs<ExtArgs>
+  marketing_form_submissions?: boolean | Prisma.MarketingForm$marketing_form_submissionsArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingFormCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingForm"]>
 
 export type MarketingFormSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -704,10 +1021,20 @@ export type MarketingFormSelectScalar = {
 }
 
 export type MarketingFormOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "title" | "description" | "status" | "kind" | "share_token" | "google_signup_enabled" | "button_text" | "button_color" | "button_text_color" | "thank_you_html" | "redirect_enabled" | "redirect_url" | "fields_json" | "created_by_membership_id" | "published_at" | "created_at" | "updated_at", ExtArgs["result"]["marketingForm"]>
+export type MarketingFormInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_ctas?: boolean | Prisma.MarketingForm$marketing_ctasArgs<ExtArgs>
+  marketing_form_submissions?: boolean | Prisma.MarketingForm$marketing_form_submissionsArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingFormCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type MarketingFormIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MarketingFormIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $MarketingFormPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingForm"
-  objects: {}
+  objects: {
+    marketing_ctas: Prisma.$MarketingCtaPayload<ExtArgs>[]
+    marketing_form_submissions: Prisma.$MarketingFormSubmissionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1122,6 +1449,8 @@ readonly fields: MarketingFormFieldRefs;
  */
 export interface Prisma__MarketingFormClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  marketing_ctas<T extends Prisma.MarketingForm$marketing_ctasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingForm$marketing_ctasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MarketingCtaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  marketing_form_submissions<T extends Prisma.MarketingForm$marketing_form_submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingForm$marketing_form_submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MarketingFormSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1187,6 +1516,10 @@ export type MarketingFormFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingForm to fetch.
    */
   where: Prisma.MarketingFormWhereUniqueInput
@@ -1205,6 +1538,10 @@ export type MarketingFormFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingForm to fetch.
    */
   where: Prisma.MarketingFormWhereUniqueInput
@@ -1222,6 +1559,10 @@ export type MarketingFormFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the MarketingForm
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
   /**
    * Filter, which MarketingForm to fetch.
    */
@@ -1271,6 +1612,10 @@ export type MarketingFormFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingForm to fetch.
    */
   where?: Prisma.MarketingFormWhereInput
@@ -1318,6 +1663,10 @@ export type MarketingFormFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the MarketingForm
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
   /**
    * Filter, which MarketingForms to fetch.
    */
@@ -1367,6 +1716,10 @@ export type MarketingFormCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingForm.
    */
   data: Prisma.XOR<Prisma.MarketingFormCreateInput, Prisma.MarketingFormUncheckedCreateInput>
@@ -1414,6 +1767,10 @@ export type MarketingFormUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the MarketingForm
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingForm.
    */
@@ -1481,6 +1838,10 @@ export type MarketingFormUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
+  /**
    * The filter to search for the MarketingForm to update in case it exists.
    */
   where: Prisma.MarketingFormWhereUniqueInput
@@ -1507,6 +1868,10 @@ export type MarketingFormDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
+  /**
    * Filter which MarketingForm to delete.
    */
   where: Prisma.MarketingFormWhereUniqueInput
@@ -1527,6 +1892,54 @@ export type MarketingFormDeleteManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * MarketingForm.marketing_ctas
+ */
+export type MarketingForm$marketing_ctasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingCta
+   */
+  select?: Prisma.MarketingCtaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingCta
+   */
+  omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
+  where?: Prisma.MarketingCtaWhereInput
+  orderBy?: Prisma.MarketingCtaOrderByWithRelationInput | Prisma.MarketingCtaOrderByWithRelationInput[]
+  cursor?: Prisma.MarketingCtaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MarketingCtaScalarFieldEnum | Prisma.MarketingCtaScalarFieldEnum[]
+}
+
+/**
+ * MarketingForm.marketing_form_submissions
+ */
+export type MarketingForm$marketing_form_submissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingFormSubmission
+   */
+  select?: Prisma.MarketingFormSubmissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingFormSubmission
+   */
+  omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
+  where?: Prisma.MarketingFormSubmissionWhereInput
+  orderBy?: Prisma.MarketingFormSubmissionOrderByWithRelationInput | Prisma.MarketingFormSubmissionOrderByWithRelationInput[]
+  cursor?: Prisma.MarketingFormSubmissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MarketingFormSubmissionScalarFieldEnum | Prisma.MarketingFormSubmissionScalarFieldEnum[]
+}
+
+/**
  * MarketingForm without action
  */
 export type MarketingFormDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1538,4 +1951,8 @@ export type MarketingFormDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the MarketingForm
    */
   omit?: Prisma.MarketingFormOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
 }

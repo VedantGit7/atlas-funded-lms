@@ -360,6 +360,7 @@ export type MarketingCtaWhereInput = {
   published_at?: Prisma.DateTimeNullableFilter<"MarketingCta"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingCta"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingCta"> | Date | string
+  form?: Prisma.XOR<Prisma.MarketingFormNullableScalarRelationFilter, Prisma.MarketingFormWhereInput> | null
 }
 
 export type MarketingCtaOrderByWithRelationInput = {
@@ -386,6 +387,7 @@ export type MarketingCtaOrderByWithRelationInput = {
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  form?: Prisma.MarketingFormOrderByWithRelationInput
 }
 
 export type MarketingCtaWhereUniqueInput = Prisma.AtLeast<{
@@ -415,6 +417,7 @@ export type MarketingCtaWhereUniqueInput = Prisma.AtLeast<{
   published_at?: Prisma.DateTimeNullableFilter<"MarketingCta"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingCta"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingCta"> | Date | string
+  form?: Prisma.XOR<Prisma.MarketingFormNullableScalarRelationFilter, Prisma.MarketingFormWhereInput> | null
 }, "id">
 
 export type MarketingCtaOrderByWithAggregationInput = {
@@ -479,7 +482,6 @@ export type MarketingCtaScalarWhereWithAggregatesInput = {
 
 export type MarketingCtaCreateInput = {
   id: string
-  tenant_id: string
   title: string
   description?: string | null
   cta_type: string
@@ -492,7 +494,6 @@ export type MarketingCtaCreateInput = {
   button_text_color?: string
   background_color?: string
   link_url?: string | null
-  form_id?: string | null
   linked_popup_cta_id?: string | null
   targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   view_count?: number
@@ -501,6 +502,7 @@ export type MarketingCtaCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  form?: Prisma.MarketingFormCreateNestedOneWithoutMarketing_ctasInput
 }
 
 export type MarketingCtaUncheckedCreateInput = {
@@ -531,7 +533,6 @@ export type MarketingCtaUncheckedCreateInput = {
 
 export type MarketingCtaUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cta_type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -544,7 +545,6 @@ export type MarketingCtaUpdateInput = {
   button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
   background_color?: Prisma.StringFieldUpdateOperationsInput | string
   link_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  form_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linked_popup_cta_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   view_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -553,6 +553,7 @@ export type MarketingCtaUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  form?: Prisma.MarketingFormUpdateOneWithoutMarketing_ctasNestedInput
 }
 
 export type MarketingCtaUncheckedUpdateInput = {
@@ -609,7 +610,6 @@ export type MarketingCtaCreateManyInput = {
 
 export type MarketingCtaUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   cta_type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -622,7 +622,6 @@ export type MarketingCtaUpdateManyMutationInput = {
   button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
   background_color?: Prisma.StringFieldUpdateOperationsInput | string
   link_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  form_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linked_popup_cta_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   view_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -657,6 +656,16 @@ export type MarketingCtaUncheckedUpdateManyInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingCtaListRelationFilter = {
+  every?: Prisma.MarketingCtaWhereInput
+  some?: Prisma.MarketingCtaWhereInput
+  none?: Prisma.MarketingCtaWhereInput
+}
+
+export type MarketingCtaOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type MarketingCtaCountOrderByAggregateInput = {
@@ -745,6 +754,247 @@ export type MarketingCtaSumOrderByAggregateInput = {
   click_count?: Prisma.SortOrder
 }
 
+export type MarketingCtaCreateNestedManyWithoutFormInput = {
+  create?: Prisma.XOR<Prisma.MarketingCtaCreateWithoutFormInput, Prisma.MarketingCtaUncheckedCreateWithoutFormInput> | Prisma.MarketingCtaCreateWithoutFormInput[] | Prisma.MarketingCtaUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingCtaCreateOrConnectWithoutFormInput | Prisma.MarketingCtaCreateOrConnectWithoutFormInput[]
+  createMany?: Prisma.MarketingCtaCreateManyFormInputEnvelope
+  connect?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+}
+
+export type MarketingCtaUncheckedCreateNestedManyWithoutFormInput = {
+  create?: Prisma.XOR<Prisma.MarketingCtaCreateWithoutFormInput, Prisma.MarketingCtaUncheckedCreateWithoutFormInput> | Prisma.MarketingCtaCreateWithoutFormInput[] | Prisma.MarketingCtaUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingCtaCreateOrConnectWithoutFormInput | Prisma.MarketingCtaCreateOrConnectWithoutFormInput[]
+  createMany?: Prisma.MarketingCtaCreateManyFormInputEnvelope
+  connect?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+}
+
+export type MarketingCtaUpdateManyWithoutFormNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingCtaCreateWithoutFormInput, Prisma.MarketingCtaUncheckedCreateWithoutFormInput> | Prisma.MarketingCtaCreateWithoutFormInput[] | Prisma.MarketingCtaUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingCtaCreateOrConnectWithoutFormInput | Prisma.MarketingCtaCreateOrConnectWithoutFormInput[]
+  upsert?: Prisma.MarketingCtaUpsertWithWhereUniqueWithoutFormInput | Prisma.MarketingCtaUpsertWithWhereUniqueWithoutFormInput[]
+  createMany?: Prisma.MarketingCtaCreateManyFormInputEnvelope
+  set?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  disconnect?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  delete?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  connect?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  update?: Prisma.MarketingCtaUpdateWithWhereUniqueWithoutFormInput | Prisma.MarketingCtaUpdateWithWhereUniqueWithoutFormInput[]
+  updateMany?: Prisma.MarketingCtaUpdateManyWithWhereWithoutFormInput | Prisma.MarketingCtaUpdateManyWithWhereWithoutFormInput[]
+  deleteMany?: Prisma.MarketingCtaScalarWhereInput | Prisma.MarketingCtaScalarWhereInput[]
+}
+
+export type MarketingCtaUncheckedUpdateManyWithoutFormNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingCtaCreateWithoutFormInput, Prisma.MarketingCtaUncheckedCreateWithoutFormInput> | Prisma.MarketingCtaCreateWithoutFormInput[] | Prisma.MarketingCtaUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingCtaCreateOrConnectWithoutFormInput | Prisma.MarketingCtaCreateOrConnectWithoutFormInput[]
+  upsert?: Prisma.MarketingCtaUpsertWithWhereUniqueWithoutFormInput | Prisma.MarketingCtaUpsertWithWhereUniqueWithoutFormInput[]
+  createMany?: Prisma.MarketingCtaCreateManyFormInputEnvelope
+  set?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  disconnect?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  delete?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  connect?: Prisma.MarketingCtaWhereUniqueInput | Prisma.MarketingCtaWhereUniqueInput[]
+  update?: Prisma.MarketingCtaUpdateWithWhereUniqueWithoutFormInput | Prisma.MarketingCtaUpdateWithWhereUniqueWithoutFormInput[]
+  updateMany?: Prisma.MarketingCtaUpdateManyWithWhereWithoutFormInput | Prisma.MarketingCtaUpdateManyWithWhereWithoutFormInput[]
+  deleteMany?: Prisma.MarketingCtaScalarWhereInput | Prisma.MarketingCtaScalarWhereInput[]
+}
+
+export type MarketingCtaCreateWithoutFormInput = {
+  id: string
+  title: string
+  description?: string | null
+  cta_type: string
+  status?: string
+  headline?: string
+  body_html?: string | null
+  image_url?: string | null
+  button_text?: string
+  button_color?: string
+  button_text_color?: string
+  background_color?: string
+  link_url?: string | null
+  linked_popup_cta_id?: string | null
+  targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  view_count?: number
+  click_count?: number
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingCtaUncheckedCreateWithoutFormInput = {
+  id: string
+  title: string
+  description?: string | null
+  cta_type: string
+  status?: string
+  headline?: string
+  body_html?: string | null
+  image_url?: string | null
+  button_text?: string
+  button_color?: string
+  button_text_color?: string
+  background_color?: string
+  link_url?: string | null
+  linked_popup_cta_id?: string | null
+  targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  view_count?: number
+  click_count?: number
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingCtaCreateOrConnectWithoutFormInput = {
+  where: Prisma.MarketingCtaWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingCtaCreateWithoutFormInput, Prisma.MarketingCtaUncheckedCreateWithoutFormInput>
+}
+
+export type MarketingCtaCreateManyFormInputEnvelope = {
+  data: Prisma.MarketingCtaCreateManyFormInput | Prisma.MarketingCtaCreateManyFormInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingCtaUpsertWithWhereUniqueWithoutFormInput = {
+  where: Prisma.MarketingCtaWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingCtaUpdateWithoutFormInput, Prisma.MarketingCtaUncheckedUpdateWithoutFormInput>
+  create: Prisma.XOR<Prisma.MarketingCtaCreateWithoutFormInput, Prisma.MarketingCtaUncheckedCreateWithoutFormInput>
+}
+
+export type MarketingCtaUpdateWithWhereUniqueWithoutFormInput = {
+  where: Prisma.MarketingCtaWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingCtaUpdateWithoutFormInput, Prisma.MarketingCtaUncheckedUpdateWithoutFormInput>
+}
+
+export type MarketingCtaUpdateManyWithWhereWithoutFormInput = {
+  where: Prisma.MarketingCtaScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingCtaUpdateManyMutationInput, Prisma.MarketingCtaUncheckedUpdateManyWithoutFormInput>
+}
+
+export type MarketingCtaScalarWhereInput = {
+  AND?: Prisma.MarketingCtaScalarWhereInput | Prisma.MarketingCtaScalarWhereInput[]
+  OR?: Prisma.MarketingCtaScalarWhereInput[]
+  NOT?: Prisma.MarketingCtaScalarWhereInput | Prisma.MarketingCtaScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MarketingCta"> | string
+  tenant_id?: Prisma.UuidFilter<"MarketingCta"> | string
+  title?: Prisma.StringFilter<"MarketingCta"> | string
+  description?: Prisma.StringNullableFilter<"MarketingCta"> | string | null
+  cta_type?: Prisma.StringFilter<"MarketingCta"> | string
+  status?: Prisma.StringFilter<"MarketingCta"> | string
+  headline?: Prisma.StringFilter<"MarketingCta"> | string
+  body_html?: Prisma.StringNullableFilter<"MarketingCta"> | string | null
+  image_url?: Prisma.StringNullableFilter<"MarketingCta"> | string | null
+  button_text?: Prisma.StringFilter<"MarketingCta"> | string
+  button_color?: Prisma.StringFilter<"MarketingCta"> | string
+  button_text_color?: Prisma.StringFilter<"MarketingCta"> | string
+  background_color?: Prisma.StringFilter<"MarketingCta"> | string
+  link_url?: Prisma.StringNullableFilter<"MarketingCta"> | string | null
+  form_id?: Prisma.UuidNullableFilter<"MarketingCta"> | string | null
+  linked_popup_cta_id?: Prisma.UuidNullableFilter<"MarketingCta"> | string | null
+  targeting_json?: Prisma.JsonFilter<"MarketingCta">
+  view_count?: Prisma.IntFilter<"MarketingCta"> | number
+  click_count?: Prisma.IntFilter<"MarketingCta"> | number
+  created_by_membership_id?: Prisma.UuidFilter<"MarketingCta"> | string
+  published_at?: Prisma.DateTimeNullableFilter<"MarketingCta"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"MarketingCta"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"MarketingCta"> | Date | string
+}
+
+export type MarketingCtaCreateManyFormInput = {
+  id: string
+  title: string
+  description?: string | null
+  cta_type: string
+  status?: string
+  headline?: string
+  body_html?: string | null
+  image_url?: string | null
+  button_text?: string
+  button_color?: string
+  button_text_color?: string
+  background_color?: string
+  link_url?: string | null
+  linked_popup_cta_id?: string | null
+  targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  view_count?: number
+  click_count?: number
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingCtaUpdateWithoutFormInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  headline?: Prisma.StringFieldUpdateOperationsInput | string
+  body_html?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  button_text?: Prisma.StringFieldUpdateOperationsInput | string
+  button_color?: Prisma.StringFieldUpdateOperationsInput | string
+  button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
+  background_color?: Prisma.StringFieldUpdateOperationsInput | string
+  link_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  linked_popup_cta_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  view_count?: Prisma.IntFieldUpdateOperationsInput | number
+  click_count?: Prisma.IntFieldUpdateOperationsInput | number
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingCtaUncheckedUpdateWithoutFormInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  headline?: Prisma.StringFieldUpdateOperationsInput | string
+  body_html?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  button_text?: Prisma.StringFieldUpdateOperationsInput | string
+  button_color?: Prisma.StringFieldUpdateOperationsInput | string
+  button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
+  background_color?: Prisma.StringFieldUpdateOperationsInput | string
+  link_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  linked_popup_cta_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  view_count?: Prisma.IntFieldUpdateOperationsInput | number
+  click_count?: Prisma.IntFieldUpdateOperationsInput | number
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingCtaUncheckedUpdateManyWithoutFormInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cta_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  headline?: Prisma.StringFieldUpdateOperationsInput | string
+  body_html?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  button_text?: Prisma.StringFieldUpdateOperationsInput | string
+  button_color?: Prisma.StringFieldUpdateOperationsInput | string
+  button_text_color?: Prisma.StringFieldUpdateOperationsInput | string
+  background_color?: Prisma.StringFieldUpdateOperationsInput | string
+  link_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  linked_popup_cta_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targeting_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  view_count?: Prisma.IntFieldUpdateOperationsInput | number
+  click_count?: Prisma.IntFieldUpdateOperationsInput | number
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type MarketingCtaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -771,6 +1021,7 @@ export type MarketingCtaSelect<ExtArgs extends runtime.Types.Extensions.Internal
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  form?: boolean | Prisma.MarketingCta$formArgs<ExtArgs>
 }, ExtArgs["result"]["marketingCta"]>
 
 export type MarketingCtaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -797,6 +1048,7 @@ export type MarketingCtaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  form?: boolean | Prisma.MarketingCta$formArgs<ExtArgs>
 }, ExtArgs["result"]["marketingCta"]>
 
 export type MarketingCtaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -823,6 +1075,7 @@ export type MarketingCtaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  form?: boolean | Prisma.MarketingCta$formArgs<ExtArgs>
 }, ExtArgs["result"]["marketingCta"]>
 
 export type MarketingCtaSelectScalar = {
@@ -852,10 +1105,21 @@ export type MarketingCtaSelectScalar = {
 }
 
 export type MarketingCtaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "title" | "description" | "cta_type" | "status" | "headline" | "body_html" | "image_url" | "button_text" | "button_color" | "button_text_color" | "background_color" | "link_url" | "form_id" | "linked_popup_cta_id" | "targeting_json" | "view_count" | "click_count" | "created_by_membership_id" | "published_at" | "created_at" | "updated_at", ExtArgs["result"]["marketingCta"]>
+export type MarketingCtaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  form?: boolean | Prisma.MarketingCta$formArgs<ExtArgs>
+}
+export type MarketingCtaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  form?: boolean | Prisma.MarketingCta$formArgs<ExtArgs>
+}
+export type MarketingCtaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  form?: boolean | Prisma.MarketingCta$formArgs<ExtArgs>
+}
 
 export type $MarketingCtaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingCta"
-  objects: {}
+  objects: {
+    form: Prisma.$MarketingFormPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1274,6 +1538,7 @@ readonly fields: MarketingCtaFieldRefs;
  */
 export interface Prisma__MarketingCtaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  form<T extends Prisma.MarketingCta$formArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingCta$formArgs<ExtArgs>>): Prisma.Prisma__MarketingFormClient<runtime.Types.Result.GetResult<Prisma.$MarketingFormPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1343,6 +1608,10 @@ export type MarketingCtaFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingCta to fetch.
    */
   where: Prisma.MarketingCtaWhereUniqueInput
@@ -1361,6 +1630,10 @@ export type MarketingCtaFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingCta to fetch.
    */
   where: Prisma.MarketingCtaWhereUniqueInput
@@ -1378,6 +1651,10 @@ export type MarketingCtaFindFirstArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the MarketingCta
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
   /**
    * Filter, which MarketingCta to fetch.
    */
@@ -1427,6 +1704,10 @@ export type MarketingCtaFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingCta to fetch.
    */
   where?: Prisma.MarketingCtaWhereInput
@@ -1474,6 +1755,10 @@ export type MarketingCtaFindManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the MarketingCta
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
   /**
    * Filter, which MarketingCtas to fetch.
    */
@@ -1523,6 +1808,10 @@ export type MarketingCtaCreateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingCta.
    */
   data: Prisma.XOR<Prisma.MarketingCtaCreateInput, Prisma.MarketingCtaUncheckedCreateInput>
@@ -1556,6 +1845,10 @@ export type MarketingCtaCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    */
   data: Prisma.MarketingCtaCreateManyInput | Prisma.MarketingCtaCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1570,6 +1863,10 @@ export type MarketingCtaUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the MarketingCta
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingCta.
    */
@@ -1622,6 +1919,10 @@ export type MarketingCtaUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many MarketingCtas to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1636,6 +1937,10 @@ export type MarketingCtaUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the MarketingCta
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
   /**
    * The filter to search for the MarketingCta to update in case it exists.
    */
@@ -1663,6 +1968,10 @@ export type MarketingCtaDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
+  /**
    * Filter which MarketingCta to delete.
    */
   where: Prisma.MarketingCtaWhereUniqueInput
@@ -1683,6 +1992,25 @@ export type MarketingCtaDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * MarketingCta.form
+ */
+export type MarketingCta$formArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingForm
+   */
+  select?: Prisma.MarketingFormSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingForm
+   */
+  omit?: Prisma.MarketingFormOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormInclude<ExtArgs> | null
+  where?: Prisma.MarketingFormWhereInput
+}
+
+/**
  * MarketingCta without action
  */
 export type MarketingCtaDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1694,4 +2022,8 @@ export type MarketingCtaDefaultArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the MarketingCta
    */
   omit?: Prisma.MarketingCtaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingCtaInclude<ExtArgs> | null
 }

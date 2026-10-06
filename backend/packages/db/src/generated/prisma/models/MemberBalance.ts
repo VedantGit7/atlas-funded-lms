@@ -224,6 +224,7 @@ export type MemberBalanceWhereInput = {
   currency_key?: Prisma.StringFilter<"MemberBalance"> | string
   balance?: Prisma.IntFilter<"MemberBalance"> | number
   updated_at?: Prisma.DateTimeFilter<"MemberBalance"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type MemberBalanceOrderByWithRelationInput = {
@@ -233,6 +234,7 @@ export type MemberBalanceOrderByWithRelationInput = {
   currency_key?: Prisma.SortOrder
   balance?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type MemberBalanceWhereUniqueInput = Prisma.AtLeast<{
@@ -246,6 +248,7 @@ export type MemberBalanceWhereUniqueInput = Prisma.AtLeast<{
   currency_key?: Prisma.StringFilter<"MemberBalance"> | string
   balance?: Prisma.IntFilter<"MemberBalance"> | number
   updated_at?: Prisma.DateTimeFilter<"MemberBalance"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_membership_id_currency_key">
 
 export type MemberBalanceOrderByWithAggregationInput = {
@@ -276,11 +279,10 @@ export type MemberBalanceScalarWhereWithAggregatesInput = {
 
 export type MemberBalanceCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   currency_key: string
   balance?: number
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutMember_balancesInput
 }
 
 export type MemberBalanceUncheckedCreateInput = {
@@ -294,11 +296,10 @@ export type MemberBalanceUncheckedCreateInput = {
 
 export type MemberBalanceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   currency_key?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.IntFieldUpdateOperationsInput | number
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutMember_balancesNestedInput
 }
 
 export type MemberBalanceUncheckedUpdateInput = {
@@ -321,8 +322,6 @@ export type MemberBalanceCreateManyInput = {
 
 export type MemberBalanceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   currency_key?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.IntFieldUpdateOperationsInput | number
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -335,6 +334,16 @@ export type MemberBalanceUncheckedUpdateManyInput = {
   currency_key?: Prisma.StringFieldUpdateOperationsInput | string
   balance?: Prisma.IntFieldUpdateOperationsInput | number
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MemberBalanceListRelationFilter = {
+  every?: Prisma.MemberBalanceWhereInput
+  some?: Prisma.MemberBalanceWhereInput
+  none?: Prisma.MemberBalanceWhereInput
+}
+
+export type MemberBalanceOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type MemberBalanceTenant_idMembership_idCurrency_keyCompoundUniqueInput = {
@@ -378,6 +387,128 @@ export type MemberBalanceSumOrderByAggregateInput = {
   balance?: Prisma.SortOrder
 }
 
+export type MemberBalanceCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MemberBalanceCreateWithoutMembershipInput, Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput> | Prisma.MemberBalanceCreateWithoutMembershipInput[] | Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput | Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MemberBalanceCreateManyMembershipInputEnvelope
+  connect?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+}
+
+export type MemberBalanceUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MemberBalanceCreateWithoutMembershipInput, Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput> | Prisma.MemberBalanceCreateWithoutMembershipInput[] | Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput | Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MemberBalanceCreateManyMembershipInputEnvelope
+  connect?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+}
+
+export type MemberBalanceUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberBalanceCreateWithoutMembershipInput, Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput> | Prisma.MemberBalanceCreateWithoutMembershipInput[] | Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput | Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MemberBalanceUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MemberBalanceUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MemberBalanceCreateManyMembershipInputEnvelope
+  set?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  disconnect?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  delete?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  connect?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  update?: Prisma.MemberBalanceUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MemberBalanceUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MemberBalanceUpdateManyWithWhereWithoutMembershipInput | Prisma.MemberBalanceUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MemberBalanceScalarWhereInput | Prisma.MemberBalanceScalarWhereInput[]
+}
+
+export type MemberBalanceUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MemberBalanceCreateWithoutMembershipInput, Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput> | Prisma.MemberBalanceCreateWithoutMembershipInput[] | Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput | Prisma.MemberBalanceCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MemberBalanceUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MemberBalanceUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MemberBalanceCreateManyMembershipInputEnvelope
+  set?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  disconnect?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  delete?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  connect?: Prisma.MemberBalanceWhereUniqueInput | Prisma.MemberBalanceWhereUniqueInput[]
+  update?: Prisma.MemberBalanceUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MemberBalanceUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MemberBalanceUpdateManyWithWhereWithoutMembershipInput | Prisma.MemberBalanceUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MemberBalanceScalarWhereInput | Prisma.MemberBalanceScalarWhereInput[]
+}
+
+export type MemberBalanceCreateWithoutMembershipInput = {
+  id: string
+  currency_key: string
+  balance?: number
+  updated_at?: Date | string
+}
+
+export type MemberBalanceUncheckedCreateWithoutMembershipInput = {
+  id: string
+  currency_key: string
+  balance?: number
+  updated_at?: Date | string
+}
+
+export type MemberBalanceCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.MemberBalanceWhereUniqueInput
+  create: Prisma.XOR<Prisma.MemberBalanceCreateWithoutMembershipInput, Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput>
+}
+
+export type MemberBalanceCreateManyMembershipInputEnvelope = {
+  data: Prisma.MemberBalanceCreateManyMembershipInput | Prisma.MemberBalanceCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type MemberBalanceUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MemberBalanceWhereUniqueInput
+  update: Prisma.XOR<Prisma.MemberBalanceUpdateWithoutMembershipInput, Prisma.MemberBalanceUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.MemberBalanceCreateWithoutMembershipInput, Prisma.MemberBalanceUncheckedCreateWithoutMembershipInput>
+}
+
+export type MemberBalanceUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MemberBalanceWhereUniqueInput
+  data: Prisma.XOR<Prisma.MemberBalanceUpdateWithoutMembershipInput, Prisma.MemberBalanceUncheckedUpdateWithoutMembershipInput>
+}
+
+export type MemberBalanceUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.MemberBalanceScalarWhereInput
+  data: Prisma.XOR<Prisma.MemberBalanceUpdateManyMutationInput, Prisma.MemberBalanceUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type MemberBalanceScalarWhereInput = {
+  AND?: Prisma.MemberBalanceScalarWhereInput | Prisma.MemberBalanceScalarWhereInput[]
+  OR?: Prisma.MemberBalanceScalarWhereInput[]
+  NOT?: Prisma.MemberBalanceScalarWhereInput | Prisma.MemberBalanceScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MemberBalance"> | string
+  tenant_id?: Prisma.UuidFilter<"MemberBalance"> | string
+  membership_id?: Prisma.UuidFilter<"MemberBalance"> | string
+  currency_key?: Prisma.StringFilter<"MemberBalance"> | string
+  balance?: Prisma.IntFilter<"MemberBalance"> | number
+  updated_at?: Prisma.DateTimeFilter<"MemberBalance"> | Date | string
+}
+
+export type MemberBalanceCreateManyMembershipInput = {
+  id: string
+  currency_key: string
+  balance?: number
+  updated_at?: Date | string
+}
+
+export type MemberBalanceUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  currency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  balance?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MemberBalanceUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  currency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  balance?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MemberBalanceUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  currency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  balance?: Prisma.IntFieldUpdateOperationsInput | number
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type MemberBalanceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -387,6 +518,7 @@ export type MemberBalanceSelect<ExtArgs extends runtime.Types.Extensions.Interna
   currency_key?: boolean
   balance?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["memberBalance"]>
 
 export type MemberBalanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -396,6 +528,7 @@ export type MemberBalanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   currency_key?: boolean
   balance?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["memberBalance"]>
 
 export type MemberBalanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -405,6 +538,7 @@ export type MemberBalanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   currency_key?: boolean
   balance?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["memberBalance"]>
 
 export type MemberBalanceSelectScalar = {
@@ -417,10 +551,21 @@ export type MemberBalanceSelectScalar = {
 }
 
 export type MemberBalanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "currency_key" | "balance" | "updated_at", ExtArgs["result"]["memberBalance"]>
+export type MemberBalanceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type MemberBalanceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type MemberBalanceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $MemberBalancePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MemberBalance"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -822,6 +967,7 @@ readonly fields: MemberBalanceFieldRefs;
  */
 export interface Prisma__MemberBalanceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -874,6 +1020,10 @@ export type MemberBalanceFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
+  /**
    * Filter, which MemberBalance to fetch.
    */
   where: Prisma.MemberBalanceWhereUniqueInput
@@ -892,6 +1042,10 @@ export type MemberBalanceFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
+  /**
    * Filter, which MemberBalance to fetch.
    */
   where: Prisma.MemberBalanceWhereUniqueInput
@@ -909,6 +1063,10 @@ export type MemberBalanceFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the MemberBalance
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
   /**
    * Filter, which MemberBalance to fetch.
    */
@@ -958,6 +1116,10 @@ export type MemberBalanceFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
+  /**
    * Filter, which MemberBalance to fetch.
    */
   where?: Prisma.MemberBalanceWhereInput
@@ -1005,6 +1167,10 @@ export type MemberBalanceFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the MemberBalance
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
   /**
    * Filter, which MemberBalances to fetch.
    */
@@ -1054,6 +1220,10 @@ export type MemberBalanceCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
+  /**
    * The data needed to create a MemberBalance.
    */
   data: Prisma.XOR<Prisma.MemberBalanceCreateInput, Prisma.MemberBalanceUncheckedCreateInput>
@@ -1087,6 +1257,10 @@ export type MemberBalanceCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.MemberBalanceCreateManyInput | Prisma.MemberBalanceCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1101,6 +1275,10 @@ export type MemberBalanceUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the MemberBalance
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
   /**
    * The data needed to update a MemberBalance.
    */
@@ -1153,6 +1331,10 @@ export type MemberBalanceUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many MemberBalances to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1167,6 +1349,10 @@ export type MemberBalanceUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the MemberBalance
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
   /**
    * The filter to search for the MemberBalance to update in case it exists.
    */
@@ -1193,6 +1379,10 @@ export type MemberBalanceDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the MemberBalance
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
   /**
    * Filter which MemberBalance to delete.
    */
@@ -1225,4 +1415,8 @@ export type MemberBalanceDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the MemberBalance
    */
   omit?: Prisma.MemberBalanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberBalanceInclude<ExtArgs> | null
 }

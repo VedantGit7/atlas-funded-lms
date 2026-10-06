@@ -198,6 +198,8 @@ export type PathEnrollmentWhereInput = {
   status?: Prisma.StringFilter<"PathEnrollment"> | string
   enrolled_at?: Prisma.DateTimeFilter<"PathEnrollment"> | Date | string
   completed_at?: Prisma.DateTimeNullableFilter<"PathEnrollment"> | Date | string | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  path?: Prisma.XOR<Prisma.LearningPathScalarRelationFilter, Prisma.LearningPathWhereInput>
 }
 
 export type PathEnrollmentOrderByWithRelationInput = {
@@ -208,6 +210,8 @@ export type PathEnrollmentOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   enrolled_at?: Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  path?: Prisma.LearningPathOrderByWithRelationInput
 }
 
 export type PathEnrollmentWhereUniqueInput = Prisma.AtLeast<{
@@ -222,6 +226,8 @@ export type PathEnrollmentWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"PathEnrollment"> | string
   enrolled_at?: Prisma.DateTimeFilter<"PathEnrollment"> | Date | string
   completed_at?: Prisma.DateTimeNullableFilter<"PathEnrollment"> | Date | string | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  path?: Prisma.XOR<Prisma.LearningPathScalarRelationFilter, Prisma.LearningPathWhereInput>
 }, "id" | "tenant_id_path_id_membership_id">
 
 export type PathEnrollmentOrderByWithAggregationInput = {
@@ -252,12 +258,11 @@ export type PathEnrollmentScalarWhereWithAggregatesInput = {
 
 export type PathEnrollmentCreateInput = {
   id: string
-  tenant_id: string
-  path_id: string
-  membership_id: string
   status?: string
   enrolled_at?: Date | string
   completed_at?: Date | string | null
+  membership: Prisma.MembershipCreateNestedOneWithoutPath_enrollmentsInput
+  path: Prisma.LearningPathCreateNestedOneWithoutPath_enrollmentsInput
 }
 
 export type PathEnrollmentUncheckedCreateInput = {
@@ -272,12 +277,11 @@ export type PathEnrollmentUncheckedCreateInput = {
 
 export type PathEnrollmentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  path_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPath_enrollmentsNestedInput
+  path?: Prisma.LearningPathUpdateOneRequiredWithoutPath_enrollmentsNestedInput
 }
 
 export type PathEnrollmentUncheckedUpdateInput = {
@@ -302,9 +306,6 @@ export type PathEnrollmentCreateManyInput = {
 
 export type PathEnrollmentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  path_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -318,6 +319,16 @@ export type PathEnrollmentUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type PathEnrollmentListRelationFilter = {
+  every?: Prisma.PathEnrollmentWhereInput
+  some?: Prisma.PathEnrollmentWhereInput
+  none?: Prisma.PathEnrollmentWhereInput
+}
+
+export type PathEnrollmentOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type PathEnrollmentTenant_idPath_idMembership_idCompoundUniqueInput = {
@@ -356,6 +367,251 @@ export type PathEnrollmentMinOrderByAggregateInput = {
   completed_at?: Prisma.SortOrder
 }
 
+export type PathEnrollmentCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.PathEnrollmentCreateWithoutMembershipInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+}
+
+export type PathEnrollmentUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.PathEnrollmentCreateWithoutMembershipInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+}
+
+export type PathEnrollmentUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.PathEnrollmentCreateWithoutMembershipInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  delete?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  update?: Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PathEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.PathEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PathEnrollmentScalarWhereInput | Prisma.PathEnrollmentScalarWhereInput[]
+}
+
+export type PathEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.PathEnrollmentCreateWithoutMembershipInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.PathEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  delete?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  update?: Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PathEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.PathEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PathEnrollmentScalarWhereInput | Prisma.PathEnrollmentScalarWhereInput[]
+}
+
+export type PathEnrollmentCreateNestedManyWithoutPathInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutPathInput, Prisma.PathEnrollmentUncheckedCreateWithoutPathInput> | Prisma.PathEnrollmentCreateWithoutPathInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutPathInput | Prisma.PathEnrollmentCreateOrConnectWithoutPathInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyPathInputEnvelope
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+}
+
+export type PathEnrollmentUncheckedCreateNestedManyWithoutPathInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutPathInput, Prisma.PathEnrollmentUncheckedCreateWithoutPathInput> | Prisma.PathEnrollmentCreateWithoutPathInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutPathInput | Prisma.PathEnrollmentCreateOrConnectWithoutPathInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyPathInputEnvelope
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+}
+
+export type PathEnrollmentUpdateManyWithoutPathNestedInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutPathInput, Prisma.PathEnrollmentUncheckedCreateWithoutPathInput> | Prisma.PathEnrollmentCreateWithoutPathInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutPathInput | Prisma.PathEnrollmentCreateOrConnectWithoutPathInput[]
+  upsert?: Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutPathInput | Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutPathInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyPathInputEnvelope
+  set?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  delete?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  update?: Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutPathInput | Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutPathInput[]
+  updateMany?: Prisma.PathEnrollmentUpdateManyWithWhereWithoutPathInput | Prisma.PathEnrollmentUpdateManyWithWhereWithoutPathInput[]
+  deleteMany?: Prisma.PathEnrollmentScalarWhereInput | Prisma.PathEnrollmentScalarWhereInput[]
+}
+
+export type PathEnrollmentUncheckedUpdateManyWithoutPathNestedInput = {
+  create?: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutPathInput, Prisma.PathEnrollmentUncheckedCreateWithoutPathInput> | Prisma.PathEnrollmentCreateWithoutPathInput[] | Prisma.PathEnrollmentUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathEnrollmentCreateOrConnectWithoutPathInput | Prisma.PathEnrollmentCreateOrConnectWithoutPathInput[]
+  upsert?: Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutPathInput | Prisma.PathEnrollmentUpsertWithWhereUniqueWithoutPathInput[]
+  createMany?: Prisma.PathEnrollmentCreateManyPathInputEnvelope
+  set?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  delete?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  connect?: Prisma.PathEnrollmentWhereUniqueInput | Prisma.PathEnrollmentWhereUniqueInput[]
+  update?: Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutPathInput | Prisma.PathEnrollmentUpdateWithWhereUniqueWithoutPathInput[]
+  updateMany?: Prisma.PathEnrollmentUpdateManyWithWhereWithoutPathInput | Prisma.PathEnrollmentUpdateManyWithWhereWithoutPathInput[]
+  deleteMany?: Prisma.PathEnrollmentScalarWhereInput | Prisma.PathEnrollmentScalarWhereInput[]
+}
+
+export type PathEnrollmentCreateWithoutMembershipInput = {
+  id: string
+  status?: string
+  enrolled_at?: Date | string
+  completed_at?: Date | string | null
+  path: Prisma.LearningPathCreateNestedOneWithoutPath_enrollmentsInput
+}
+
+export type PathEnrollmentUncheckedCreateWithoutMembershipInput = {
+  id: string
+  path_id: string
+  status?: string
+  enrolled_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type PathEnrollmentCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PathEnrollmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type PathEnrollmentCreateManyMembershipInputEnvelope = {
+  data: Prisma.PathEnrollmentCreateManyMembershipInput | Prisma.PathEnrollmentCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PathEnrollmentUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PathEnrollmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.PathEnrollmentUpdateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type PathEnrollmentUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PathEnrollmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.PathEnrollmentUpdateWithoutMembershipInput, Prisma.PathEnrollmentUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PathEnrollmentUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PathEnrollmentScalarWhereInput
+  data: Prisma.XOR<Prisma.PathEnrollmentUpdateManyMutationInput, Prisma.PathEnrollmentUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PathEnrollmentScalarWhereInput = {
+  AND?: Prisma.PathEnrollmentScalarWhereInput | Prisma.PathEnrollmentScalarWhereInput[]
+  OR?: Prisma.PathEnrollmentScalarWhereInput[]
+  NOT?: Prisma.PathEnrollmentScalarWhereInput | Prisma.PathEnrollmentScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PathEnrollment"> | string
+  tenant_id?: Prisma.UuidFilter<"PathEnrollment"> | string
+  path_id?: Prisma.UuidFilter<"PathEnrollment"> | string
+  membership_id?: Prisma.UuidFilter<"PathEnrollment"> | string
+  status?: Prisma.StringFilter<"PathEnrollment"> | string
+  enrolled_at?: Prisma.DateTimeFilter<"PathEnrollment"> | Date | string
+  completed_at?: Prisma.DateTimeNullableFilter<"PathEnrollment"> | Date | string | null
+}
+
+export type PathEnrollmentCreateWithoutPathInput = {
+  id: string
+  status?: string
+  enrolled_at?: Date | string
+  completed_at?: Date | string | null
+  membership: Prisma.MembershipCreateNestedOneWithoutPath_enrollmentsInput
+}
+
+export type PathEnrollmentUncheckedCreateWithoutPathInput = {
+  id: string
+  membership_id: string
+  status?: string
+  enrolled_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type PathEnrollmentCreateOrConnectWithoutPathInput = {
+  where: Prisma.PathEnrollmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutPathInput, Prisma.PathEnrollmentUncheckedCreateWithoutPathInput>
+}
+
+export type PathEnrollmentCreateManyPathInputEnvelope = {
+  data: Prisma.PathEnrollmentCreateManyPathInput | Prisma.PathEnrollmentCreateManyPathInput[]
+  skipDuplicates?: boolean
+}
+
+export type PathEnrollmentUpsertWithWhereUniqueWithoutPathInput = {
+  where: Prisma.PathEnrollmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.PathEnrollmentUpdateWithoutPathInput, Prisma.PathEnrollmentUncheckedUpdateWithoutPathInput>
+  create: Prisma.XOR<Prisma.PathEnrollmentCreateWithoutPathInput, Prisma.PathEnrollmentUncheckedCreateWithoutPathInput>
+}
+
+export type PathEnrollmentUpdateWithWhereUniqueWithoutPathInput = {
+  where: Prisma.PathEnrollmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.PathEnrollmentUpdateWithoutPathInput, Prisma.PathEnrollmentUncheckedUpdateWithoutPathInput>
+}
+
+export type PathEnrollmentUpdateManyWithWhereWithoutPathInput = {
+  where: Prisma.PathEnrollmentScalarWhereInput
+  data: Prisma.XOR<Prisma.PathEnrollmentUpdateManyMutationInput, Prisma.PathEnrollmentUncheckedUpdateManyWithoutPathInput>
+}
+
+export type PathEnrollmentCreateManyMembershipInput = {
+  id: string
+  path_id: string
+  status?: string
+  enrolled_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type PathEnrollmentUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  path?: Prisma.LearningPathUpdateOneRequiredWithoutPath_enrollmentsNestedInput
+}
+
+export type PathEnrollmentUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  path_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type PathEnrollmentUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  path_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type PathEnrollmentCreateManyPathInput = {
+  id: string
+  membership_id: string
+  status?: string
+  enrolled_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type PathEnrollmentUpdateWithoutPathInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPath_enrollmentsNestedInput
+}
+
+export type PathEnrollmentUncheckedUpdateWithoutPathInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type PathEnrollmentUncheckedUpdateManyWithoutPathInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 
 
 export type PathEnrollmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -366,6 +622,8 @@ export type PathEnrollmentSelect<ExtArgs extends runtime.Types.Extensions.Intern
   status?: boolean
   enrolled_at?: boolean
   completed_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathEnrollment"]>
 
 export type PathEnrollmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -376,6 +634,8 @@ export type PathEnrollmentSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   status?: boolean
   enrolled_at?: boolean
   completed_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathEnrollment"]>
 
 export type PathEnrollmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -386,6 +646,8 @@ export type PathEnrollmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   status?: boolean
   enrolled_at?: boolean
   completed_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathEnrollment"]>
 
 export type PathEnrollmentSelectScalar = {
@@ -399,10 +661,25 @@ export type PathEnrollmentSelectScalar = {
 }
 
 export type PathEnrollmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "path_id" | "membership_id" | "status" | "enrolled_at" | "completed_at", ExtArgs["result"]["pathEnrollment"]>
+export type PathEnrollmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
+}
+export type PathEnrollmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
+}
+export type PathEnrollmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
+}
 
 export type $PathEnrollmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PathEnrollment"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    path: Prisma.$LearningPathPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -805,6 +1082,8 @@ readonly fields: PathEnrollmentFieldRefs;
  */
 export interface Prisma__PathEnrollmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  path<T extends Prisma.LearningPathDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LearningPathDefaultArgs<ExtArgs>>): Prisma.Prisma__LearningPathClient<runtime.Types.Result.GetResult<Prisma.$LearningPathPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -858,6 +1137,10 @@ export type PathEnrollmentFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
+  /**
    * Filter, which PathEnrollment to fetch.
    */
   where: Prisma.PathEnrollmentWhereUniqueInput
@@ -876,6 +1159,10 @@ export type PathEnrollmentFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
+  /**
    * Filter, which PathEnrollment to fetch.
    */
   where: Prisma.PathEnrollmentWhereUniqueInput
@@ -893,6 +1180,10 @@ export type PathEnrollmentFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the PathEnrollment
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
   /**
    * Filter, which PathEnrollment to fetch.
    */
@@ -942,6 +1233,10 @@ export type PathEnrollmentFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
+  /**
    * Filter, which PathEnrollment to fetch.
    */
   where?: Prisma.PathEnrollmentWhereInput
@@ -989,6 +1284,10 @@ export type PathEnrollmentFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the PathEnrollment
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
   /**
    * Filter, which PathEnrollments to fetch.
    */
@@ -1038,6 +1337,10 @@ export type PathEnrollmentCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
+  /**
    * The data needed to create a PathEnrollment.
    */
   data: Prisma.XOR<Prisma.PathEnrollmentCreateInput, Prisma.PathEnrollmentUncheckedCreateInput>
@@ -1071,6 +1374,10 @@ export type PathEnrollmentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    */
   data: Prisma.PathEnrollmentCreateManyInput | Prisma.PathEnrollmentCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1085,6 +1392,10 @@ export type PathEnrollmentUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PathEnrollment
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
   /**
    * The data needed to update a PathEnrollment.
    */
@@ -1137,6 +1448,10 @@ export type PathEnrollmentUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * Limit how many PathEnrollments to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1151,6 +1466,10 @@ export type PathEnrollmentUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PathEnrollment
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
   /**
    * The filter to search for the PathEnrollment to update in case it exists.
    */
@@ -1177,6 +1496,10 @@ export type PathEnrollmentDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PathEnrollment
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
   /**
    * Filter which PathEnrollment to delete.
    */
@@ -1209,4 +1532,8 @@ export type PathEnrollmentDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the PathEnrollment
    */
   omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
 }

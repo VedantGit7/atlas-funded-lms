@@ -214,6 +214,8 @@ export type OutboxEventWhereInput = {
   metadata_json?: Prisma.JsonNullableFilter<"OutboxEvent">
   occurred_at?: Prisma.DateTimeFilter<"OutboxEvent"> | Date | string
   available_at?: Prisma.DateTimeFilter<"OutboxEvent"> | Date | string
+  dead_letter_events?: Prisma.DeadLetterEventListRelationFilter
+  event_deliveries?: Prisma.EventDeliveryListRelationFilter
 }
 
 export type OutboxEventOrderByWithRelationInput = {
@@ -227,10 +229,13 @@ export type OutboxEventOrderByWithRelationInput = {
   metadata_json?: Prisma.SortOrderInput | Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   available_at?: Prisma.SortOrder
+  dead_letter_events?: Prisma.DeadLetterEventOrderByRelationAggregateInput
+  event_deliveries?: Prisma.EventDeliveryOrderByRelationAggregateInput
 }
 
 export type OutboxEventWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.OutboxEventTenant_idIdCompoundUniqueInput
   AND?: Prisma.OutboxEventWhereInput | Prisma.OutboxEventWhereInput[]
   OR?: Prisma.OutboxEventWhereInput[]
   NOT?: Prisma.OutboxEventWhereInput | Prisma.OutboxEventWhereInput[]
@@ -243,7 +248,9 @@ export type OutboxEventWhereUniqueInput = Prisma.AtLeast<{
   metadata_json?: Prisma.JsonNullableFilter<"OutboxEvent">
   occurred_at?: Prisma.DateTimeFilter<"OutboxEvent"> | Date | string
   available_at?: Prisma.DateTimeFilter<"OutboxEvent"> | Date | string
-}, "id">
+  dead_letter_events?: Prisma.DeadLetterEventListRelationFilter
+  event_deliveries?: Prisma.EventDeliveryListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type OutboxEventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -288,6 +295,8 @@ export type OutboxEventCreateInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Date | string
   available_at?: Date | string
+  dead_letter_events?: Prisma.DeadLetterEventCreateNestedManyWithoutOutbox_eventInput
+  event_deliveries?: Prisma.EventDeliveryCreateNestedManyWithoutOutbox_eventInput
 }
 
 export type OutboxEventUncheckedCreateInput = {
@@ -301,6 +310,8 @@ export type OutboxEventUncheckedCreateInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Date | string
   available_at?: Date | string
+  dead_letter_events?: Prisma.DeadLetterEventUncheckedCreateNestedManyWithoutOutbox_eventInput
+  event_deliveries?: Prisma.EventDeliveryUncheckedCreateNestedManyWithoutOutbox_eventInput
 }
 
 export type OutboxEventUpdateInput = {
@@ -314,6 +325,8 @@ export type OutboxEventUpdateInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   available_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dead_letter_events?: Prisma.DeadLetterEventUpdateManyWithoutOutbox_eventNestedInput
+  event_deliveries?: Prisma.EventDeliveryUpdateManyWithoutOutbox_eventNestedInput
 }
 
 export type OutboxEventUncheckedUpdateInput = {
@@ -327,6 +340,8 @@ export type OutboxEventUncheckedUpdateInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   available_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dead_letter_events?: Prisma.DeadLetterEventUncheckedUpdateManyWithoutOutbox_eventNestedInput
+  event_deliveries?: Prisma.EventDeliveryUncheckedUpdateManyWithoutOutbox_eventNestedInput
 }
 
 export type OutboxEventCreateManyInput = {
@@ -368,6 +383,11 @@ export type OutboxEventUncheckedUpdateManyInput = {
   available_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type OutboxEventTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type OutboxEventCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -403,6 +423,225 @@ export type OutboxEventMinOrderByAggregateInput = {
   available_at?: Prisma.SortOrder
 }
 
+export type OutboxEventNullableScalarRelationFilter = {
+  is?: Prisma.OutboxEventWhereInput | null
+  isNot?: Prisma.OutboxEventWhereInput | null
+}
+
+export type OutboxEventCreateNestedOneWithoutEvent_deliveriesInput = {
+  create?: Prisma.XOR<Prisma.OutboxEventCreateWithoutEvent_deliveriesInput, Prisma.OutboxEventUncheckedCreateWithoutEvent_deliveriesInput>
+  connectOrCreate?: Prisma.OutboxEventCreateOrConnectWithoutEvent_deliveriesInput
+  connect?: Prisma.OutboxEventWhereUniqueInput
+}
+
+export type OutboxEventUpdateOneWithoutEvent_deliveriesNestedInput = {
+  create?: Prisma.XOR<Prisma.OutboxEventCreateWithoutEvent_deliveriesInput, Prisma.OutboxEventUncheckedCreateWithoutEvent_deliveriesInput>
+  connectOrCreate?: Prisma.OutboxEventCreateOrConnectWithoutEvent_deliveriesInput
+  upsert?: Prisma.OutboxEventUpsertWithoutEvent_deliveriesInput
+  disconnect?: Prisma.OutboxEventWhereInput | boolean
+  delete?: Prisma.OutboxEventWhereInput | boolean
+  connect?: Prisma.OutboxEventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OutboxEventUpdateToOneWithWhereWithoutEvent_deliveriesInput, Prisma.OutboxEventUpdateWithoutEvent_deliveriesInput>, Prisma.OutboxEventUncheckedUpdateWithoutEvent_deliveriesInput>
+}
+
+export type OutboxEventCreateNestedOneWithoutDead_letter_eventsInput = {
+  create?: Prisma.XOR<Prisma.OutboxEventCreateWithoutDead_letter_eventsInput, Prisma.OutboxEventUncheckedCreateWithoutDead_letter_eventsInput>
+  connectOrCreate?: Prisma.OutboxEventCreateOrConnectWithoutDead_letter_eventsInput
+  connect?: Prisma.OutboxEventWhereUniqueInput
+}
+
+export type OutboxEventUpdateOneWithoutDead_letter_eventsNestedInput = {
+  create?: Prisma.XOR<Prisma.OutboxEventCreateWithoutDead_letter_eventsInput, Prisma.OutboxEventUncheckedCreateWithoutDead_letter_eventsInput>
+  connectOrCreate?: Prisma.OutboxEventCreateOrConnectWithoutDead_letter_eventsInput
+  upsert?: Prisma.OutboxEventUpsertWithoutDead_letter_eventsInput
+  disconnect?: Prisma.OutboxEventWhereInput | boolean
+  delete?: Prisma.OutboxEventWhereInput | boolean
+  connect?: Prisma.OutboxEventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OutboxEventUpdateToOneWithWhereWithoutDead_letter_eventsInput, Prisma.OutboxEventUpdateWithoutDead_letter_eventsInput>, Prisma.OutboxEventUncheckedUpdateWithoutDead_letter_eventsInput>
+}
+
+export type OutboxEventCreateWithoutEvent_deliveriesInput = {
+  id: string
+  tenant_id?: string | null
+  event_type: string
+  aggregate_type: string
+  aggregate_id: string
+  idempotency_key?: string | null
+  payload_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  available_at?: Date | string
+  dead_letter_events?: Prisma.DeadLetterEventCreateNestedManyWithoutOutbox_eventInput
+}
+
+export type OutboxEventUncheckedCreateWithoutEvent_deliveriesInput = {
+  id: string
+  tenant_id?: string | null
+  event_type: string
+  aggregate_type: string
+  aggregate_id: string
+  idempotency_key?: string | null
+  payload_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  available_at?: Date | string
+  dead_letter_events?: Prisma.DeadLetterEventUncheckedCreateNestedManyWithoutOutbox_eventInput
+}
+
+export type OutboxEventCreateOrConnectWithoutEvent_deliveriesInput = {
+  where: Prisma.OutboxEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.OutboxEventCreateWithoutEvent_deliveriesInput, Prisma.OutboxEventUncheckedCreateWithoutEvent_deliveriesInput>
+}
+
+export type OutboxEventUpsertWithoutEvent_deliveriesInput = {
+  update: Prisma.XOR<Prisma.OutboxEventUpdateWithoutEvent_deliveriesInput, Prisma.OutboxEventUncheckedUpdateWithoutEvent_deliveriesInput>
+  create: Prisma.XOR<Prisma.OutboxEventCreateWithoutEvent_deliveriesInput, Prisma.OutboxEventUncheckedCreateWithoutEvent_deliveriesInput>
+  where?: Prisma.OutboxEventWhereInput
+}
+
+export type OutboxEventUpdateToOneWithWhereWithoutEvent_deliveriesInput = {
+  where?: Prisma.OutboxEventWhereInput
+  data: Prisma.XOR<Prisma.OutboxEventUpdateWithoutEvent_deliveriesInput, Prisma.OutboxEventUncheckedUpdateWithoutEvent_deliveriesInput>
+}
+
+export type OutboxEventUpdateWithoutEvent_deliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  available_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dead_letter_events?: Prisma.DeadLetterEventUpdateManyWithoutOutbox_eventNestedInput
+}
+
+export type OutboxEventUncheckedUpdateWithoutEvent_deliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  available_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dead_letter_events?: Prisma.DeadLetterEventUncheckedUpdateManyWithoutOutbox_eventNestedInput
+}
+
+export type OutboxEventCreateWithoutDead_letter_eventsInput = {
+  id: string
+  tenant_id?: string | null
+  event_type: string
+  aggregate_type: string
+  aggregate_id: string
+  idempotency_key?: string | null
+  payload_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  available_at?: Date | string
+  event_deliveries?: Prisma.EventDeliveryCreateNestedManyWithoutOutbox_eventInput
+}
+
+export type OutboxEventUncheckedCreateWithoutDead_letter_eventsInput = {
+  id: string
+  tenant_id?: string | null
+  event_type: string
+  aggregate_type: string
+  aggregate_id: string
+  idempotency_key?: string | null
+  payload_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  available_at?: Date | string
+  event_deliveries?: Prisma.EventDeliveryUncheckedCreateNestedManyWithoutOutbox_eventInput
+}
+
+export type OutboxEventCreateOrConnectWithoutDead_letter_eventsInput = {
+  where: Prisma.OutboxEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.OutboxEventCreateWithoutDead_letter_eventsInput, Prisma.OutboxEventUncheckedCreateWithoutDead_letter_eventsInput>
+}
+
+export type OutboxEventUpsertWithoutDead_letter_eventsInput = {
+  update: Prisma.XOR<Prisma.OutboxEventUpdateWithoutDead_letter_eventsInput, Prisma.OutboxEventUncheckedUpdateWithoutDead_letter_eventsInput>
+  create: Prisma.XOR<Prisma.OutboxEventCreateWithoutDead_letter_eventsInput, Prisma.OutboxEventUncheckedCreateWithoutDead_letter_eventsInput>
+  where?: Prisma.OutboxEventWhereInput
+}
+
+export type OutboxEventUpdateToOneWithWhereWithoutDead_letter_eventsInput = {
+  where?: Prisma.OutboxEventWhereInput
+  data: Prisma.XOR<Prisma.OutboxEventUpdateWithoutDead_letter_eventsInput, Prisma.OutboxEventUncheckedUpdateWithoutDead_letter_eventsInput>
+}
+
+export type OutboxEventUpdateWithoutDead_letter_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  available_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event_deliveries?: Prisma.EventDeliveryUpdateManyWithoutOutbox_eventNestedInput
+}
+
+export type OutboxEventUncheckedUpdateWithoutDead_letter_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_type?: Prisma.StringFieldUpdateOperationsInput | string
+  aggregate_id?: Prisma.StringFieldUpdateOperationsInput | string
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  available_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  event_deliveries?: Prisma.EventDeliveryUncheckedUpdateManyWithoutOutbox_eventNestedInput
+}
+
+
+/**
+ * Count Type OutboxEventCountOutputType
+ */
+
+export type OutboxEventCountOutputType = {
+  dead_letter_events: number
+  event_deliveries: number
+}
+
+export type OutboxEventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dead_letter_events?: boolean | OutboxEventCountOutputTypeCountDead_letter_eventsArgs
+  event_deliveries?: boolean | OutboxEventCountOutputTypeCountEvent_deliveriesArgs
+}
+
+/**
+ * OutboxEventCountOutputType without action
+ */
+export type OutboxEventCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OutboxEventCountOutputType
+   */
+  select?: Prisma.OutboxEventCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * OutboxEventCountOutputType without action
+ */
+export type OutboxEventCountOutputTypeCountDead_letter_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DeadLetterEventWhereInput
+}
+
+/**
+ * OutboxEventCountOutputType without action
+ */
+export type OutboxEventCountOutputTypeCountEvent_deliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EventDeliveryWhereInput
+}
 
 
 export type OutboxEventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -416,6 +655,9 @@ export type OutboxEventSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   metadata_json?: boolean
   occurred_at?: boolean
   available_at?: boolean
+  dead_letter_events?: boolean | Prisma.OutboxEvent$dead_letter_eventsArgs<ExtArgs>
+  event_deliveries?: boolean | Prisma.OutboxEvent$event_deliveriesArgs<ExtArgs>
+  _count?: boolean | Prisma.OutboxEventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["outboxEvent"]>
 
 export type OutboxEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -458,10 +700,20 @@ export type OutboxEventSelectScalar = {
 }
 
 export type OutboxEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "event_type" | "aggregate_type" | "aggregate_id" | "idempotency_key" | "payload_json" | "metadata_json" | "occurred_at" | "available_at", ExtArgs["result"]["outboxEvent"]>
+export type OutboxEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dead_letter_events?: boolean | Prisma.OutboxEvent$dead_letter_eventsArgs<ExtArgs>
+  event_deliveries?: boolean | Prisma.OutboxEvent$event_deliveriesArgs<ExtArgs>
+  _count?: boolean | Prisma.OutboxEventCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type OutboxEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type OutboxEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $OutboxEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "OutboxEvent"
-  objects: {}
+  objects: {
+    dead_letter_events: Prisma.$DeadLetterEventPayload<ExtArgs>[]
+    event_deliveries: Prisma.$EventDeliveryPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string | null
@@ -867,6 +1119,8 @@ readonly fields: OutboxEventFieldRefs;
  */
 export interface Prisma__OutboxEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  dead_letter_events<T extends Prisma.OutboxEvent$dead_letter_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OutboxEvent$dead_letter_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DeadLetterEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  event_deliveries<T extends Prisma.OutboxEvent$event_deliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OutboxEvent$event_deliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EventDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -923,6 +1177,10 @@ export type OutboxEventFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  /**
    * Filter, which OutboxEvent to fetch.
    */
   where: Prisma.OutboxEventWhereUniqueInput
@@ -941,6 +1199,10 @@ export type OutboxEventFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  /**
    * Filter, which OutboxEvent to fetch.
    */
   where: Prisma.OutboxEventWhereUniqueInput
@@ -958,6 +1220,10 @@ export type OutboxEventFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the OutboxEvent
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
   /**
    * Filter, which OutboxEvent to fetch.
    */
@@ -1007,6 +1273,10 @@ export type OutboxEventFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  /**
    * Filter, which OutboxEvent to fetch.
    */
   where?: Prisma.OutboxEventWhereInput
@@ -1054,6 +1324,10 @@ export type OutboxEventFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the OutboxEvent
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
   /**
    * Filter, which OutboxEvents to fetch.
    */
@@ -1103,6 +1377,10 @@ export type OutboxEventCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  /**
    * The data needed to create a OutboxEvent.
    */
   data: Prisma.XOR<Prisma.OutboxEventCreateInput, Prisma.OutboxEventUncheckedCreateInput>
@@ -1150,6 +1428,10 @@ export type OutboxEventUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the OutboxEvent
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
   /**
    * The data needed to update a OutboxEvent.
    */
@@ -1217,6 +1499,10 @@ export type OutboxEventUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  /**
    * The filter to search for the OutboxEvent to update in case it exists.
    */
   where: Prisma.OutboxEventWhereUniqueInput
@@ -1243,6 +1529,10 @@ export type OutboxEventDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  /**
    * Filter which OutboxEvent to delete.
    */
   where: Prisma.OutboxEventWhereUniqueInput
@@ -1263,6 +1553,54 @@ export type OutboxEventDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * OutboxEvent.dead_letter_events
+ */
+export type OutboxEvent$dead_letter_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DeadLetterEvent
+   */
+  select?: Prisma.DeadLetterEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DeadLetterEvent
+   */
+  omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
+  where?: Prisma.DeadLetterEventWhereInput
+  orderBy?: Prisma.DeadLetterEventOrderByWithRelationInput | Prisma.DeadLetterEventOrderByWithRelationInput[]
+  cursor?: Prisma.DeadLetterEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DeadLetterEventScalarFieldEnum | Prisma.DeadLetterEventScalarFieldEnum[]
+}
+
+/**
+ * OutboxEvent.event_deliveries
+ */
+export type OutboxEvent$event_deliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EventDelivery
+   */
+  select?: Prisma.EventDeliverySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EventDelivery
+   */
+  omit?: Prisma.EventDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EventDeliveryInclude<ExtArgs> | null
+  where?: Prisma.EventDeliveryWhereInput
+  orderBy?: Prisma.EventDeliveryOrderByWithRelationInput | Prisma.EventDeliveryOrderByWithRelationInput[]
+  cursor?: Prisma.EventDeliveryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EventDeliveryScalarFieldEnum | Prisma.EventDeliveryScalarFieldEnum[]
+}
+
+/**
  * OutboxEvent without action
  */
 export type OutboxEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1274,4 +1612,8 @@ export type OutboxEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the OutboxEvent
    */
   omit?: Prisma.OutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
 }

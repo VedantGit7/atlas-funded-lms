@@ -244,6 +244,7 @@ export type ZoomWebhookEventWhereInput = {
   received_at?: Prisma.DateTimeFilter<"ZoomWebhookEvent"> | Date | string
   payload_json?: Prisma.JsonNullableFilter<"ZoomWebhookEvent">
   created_at?: Prisma.DateTimeFilter<"ZoomWebhookEvent"> | Date | string
+  zoom_connection?: Prisma.XOR<Prisma.ZoomConnectionNullableScalarRelationFilter, Prisma.ZoomConnectionWhereInput> | null
 }
 
 export type ZoomWebhookEventOrderByWithRelationInput = {
@@ -256,6 +257,7 @@ export type ZoomWebhookEventOrderByWithRelationInput = {
   received_at?: Prisma.SortOrder
   payload_json?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  zoom_connection?: Prisma.ZoomConnectionOrderByWithRelationInput
 }
 
 export type ZoomWebhookEventWhereUniqueInput = Prisma.AtLeast<{
@@ -271,6 +273,7 @@ export type ZoomWebhookEventWhereUniqueInput = Prisma.AtLeast<{
   received_at?: Prisma.DateTimeFilter<"ZoomWebhookEvent"> | Date | string
   payload_json?: Prisma.JsonNullableFilter<"ZoomWebhookEvent">
   created_at?: Prisma.DateTimeFilter<"ZoomWebhookEvent"> | Date | string
+  zoom_connection?: Prisma.XOR<Prisma.ZoomConnectionNullableScalarRelationFilter, Prisma.ZoomConnectionWhereInput> | null
 }, "id">
 
 export type ZoomWebhookEventOrderByWithAggregationInput = {
@@ -307,14 +310,13 @@ export type ZoomWebhookEventScalarWhereWithAggregatesInput = {
 
 export type ZoomWebhookEventCreateInput = {
   id: string
-  tenant_id: string
-  zoom_connection_id?: string | null
   event_type: string
   topic?: string | null
   status_code?: number
   received_at?: Date | string
   payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
+  zoom_connection?: Prisma.ZoomConnectionCreateNestedOneWithoutZoom_webhook_eventsInput
 }
 
 export type ZoomWebhookEventUncheckedCreateInput = {
@@ -331,14 +333,13 @@ export type ZoomWebhookEventUncheckedCreateInput = {
 
 export type ZoomWebhookEventUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  zoom_connection_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_type?: Prisma.StringFieldUpdateOperationsInput | string
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status_code?: Prisma.IntFieldUpdateOperationsInput | number
   received_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  zoom_connection?: Prisma.ZoomConnectionUpdateOneWithoutZoom_webhook_eventsNestedInput
 }
 
 export type ZoomWebhookEventUncheckedUpdateInput = {
@@ -367,8 +368,6 @@ export type ZoomWebhookEventCreateManyInput = {
 
 export type ZoomWebhookEventUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  zoom_connection_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_type?: Prisma.StringFieldUpdateOperationsInput | string
   topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status_code?: Prisma.IntFieldUpdateOperationsInput | number
@@ -387,6 +386,16 @@ export type ZoomWebhookEventUncheckedUpdateManyInput = {
   received_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ZoomWebhookEventListRelationFilter = {
+  every?: Prisma.ZoomWebhookEventWhereInput
+  some?: Prisma.ZoomWebhookEventWhereInput
+  none?: Prisma.ZoomWebhookEventWhereInput
+}
+
+export type ZoomWebhookEventOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ZoomWebhookEventCountOrderByAggregateInput = {
@@ -431,6 +440,149 @@ export type ZoomWebhookEventSumOrderByAggregateInput = {
   status_code?: Prisma.SortOrder
 }
 
+export type ZoomWebhookEventCreateNestedManyWithoutZoom_connectionInput = {
+  create?: Prisma.XOR<Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput> | Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput[] | Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput[]
+  connectOrCreate?: Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput | Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput[]
+  createMany?: Prisma.ZoomWebhookEventCreateManyZoom_connectionInputEnvelope
+  connect?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+}
+
+export type ZoomWebhookEventUncheckedCreateNestedManyWithoutZoom_connectionInput = {
+  create?: Prisma.XOR<Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput> | Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput[] | Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput[]
+  connectOrCreate?: Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput | Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput[]
+  createMany?: Prisma.ZoomWebhookEventCreateManyZoom_connectionInputEnvelope
+  connect?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+}
+
+export type ZoomWebhookEventUpdateManyWithoutZoom_connectionNestedInput = {
+  create?: Prisma.XOR<Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput> | Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput[] | Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput[]
+  connectOrCreate?: Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput | Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput[]
+  upsert?: Prisma.ZoomWebhookEventUpsertWithWhereUniqueWithoutZoom_connectionInput | Prisma.ZoomWebhookEventUpsertWithWhereUniqueWithoutZoom_connectionInput[]
+  createMany?: Prisma.ZoomWebhookEventCreateManyZoom_connectionInputEnvelope
+  set?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  disconnect?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  delete?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  connect?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  update?: Prisma.ZoomWebhookEventUpdateWithWhereUniqueWithoutZoom_connectionInput | Prisma.ZoomWebhookEventUpdateWithWhereUniqueWithoutZoom_connectionInput[]
+  updateMany?: Prisma.ZoomWebhookEventUpdateManyWithWhereWithoutZoom_connectionInput | Prisma.ZoomWebhookEventUpdateManyWithWhereWithoutZoom_connectionInput[]
+  deleteMany?: Prisma.ZoomWebhookEventScalarWhereInput | Prisma.ZoomWebhookEventScalarWhereInput[]
+}
+
+export type ZoomWebhookEventUncheckedUpdateManyWithoutZoom_connectionNestedInput = {
+  create?: Prisma.XOR<Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput> | Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput[] | Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput[]
+  connectOrCreate?: Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput | Prisma.ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput[]
+  upsert?: Prisma.ZoomWebhookEventUpsertWithWhereUniqueWithoutZoom_connectionInput | Prisma.ZoomWebhookEventUpsertWithWhereUniqueWithoutZoom_connectionInput[]
+  createMany?: Prisma.ZoomWebhookEventCreateManyZoom_connectionInputEnvelope
+  set?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  disconnect?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  delete?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  connect?: Prisma.ZoomWebhookEventWhereUniqueInput | Prisma.ZoomWebhookEventWhereUniqueInput[]
+  update?: Prisma.ZoomWebhookEventUpdateWithWhereUniqueWithoutZoom_connectionInput | Prisma.ZoomWebhookEventUpdateWithWhereUniqueWithoutZoom_connectionInput[]
+  updateMany?: Prisma.ZoomWebhookEventUpdateManyWithWhereWithoutZoom_connectionInput | Prisma.ZoomWebhookEventUpdateManyWithWhereWithoutZoom_connectionInput[]
+  deleteMany?: Prisma.ZoomWebhookEventScalarWhereInput | Prisma.ZoomWebhookEventScalarWhereInput[]
+}
+
+export type ZoomWebhookEventCreateWithoutZoom_connectionInput = {
+  id: string
+  event_type: string
+  topic?: string | null
+  status_code?: number
+  received_at?: Date | string
+  payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+}
+
+export type ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput = {
+  id: string
+  event_type: string
+  topic?: string | null
+  status_code?: number
+  received_at?: Date | string
+  payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+}
+
+export type ZoomWebhookEventCreateOrConnectWithoutZoom_connectionInput = {
+  where: Prisma.ZoomWebhookEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput>
+}
+
+export type ZoomWebhookEventCreateManyZoom_connectionInputEnvelope = {
+  data: Prisma.ZoomWebhookEventCreateManyZoom_connectionInput | Prisma.ZoomWebhookEventCreateManyZoom_connectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type ZoomWebhookEventUpsertWithWhereUniqueWithoutZoom_connectionInput = {
+  where: Prisma.ZoomWebhookEventWhereUniqueInput
+  update: Prisma.XOR<Prisma.ZoomWebhookEventUpdateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedUpdateWithoutZoom_connectionInput>
+  create: Prisma.XOR<Prisma.ZoomWebhookEventCreateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedCreateWithoutZoom_connectionInput>
+}
+
+export type ZoomWebhookEventUpdateWithWhereUniqueWithoutZoom_connectionInput = {
+  where: Prisma.ZoomWebhookEventWhereUniqueInput
+  data: Prisma.XOR<Prisma.ZoomWebhookEventUpdateWithoutZoom_connectionInput, Prisma.ZoomWebhookEventUncheckedUpdateWithoutZoom_connectionInput>
+}
+
+export type ZoomWebhookEventUpdateManyWithWhereWithoutZoom_connectionInput = {
+  where: Prisma.ZoomWebhookEventScalarWhereInput
+  data: Prisma.XOR<Prisma.ZoomWebhookEventUpdateManyMutationInput, Prisma.ZoomWebhookEventUncheckedUpdateManyWithoutZoom_connectionInput>
+}
+
+export type ZoomWebhookEventScalarWhereInput = {
+  AND?: Prisma.ZoomWebhookEventScalarWhereInput | Prisma.ZoomWebhookEventScalarWhereInput[]
+  OR?: Prisma.ZoomWebhookEventScalarWhereInput[]
+  NOT?: Prisma.ZoomWebhookEventScalarWhereInput | Prisma.ZoomWebhookEventScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ZoomWebhookEvent"> | string
+  tenant_id?: Prisma.UuidFilter<"ZoomWebhookEvent"> | string
+  zoom_connection_id?: Prisma.UuidNullableFilter<"ZoomWebhookEvent"> | string | null
+  event_type?: Prisma.StringFilter<"ZoomWebhookEvent"> | string
+  topic?: Prisma.StringNullableFilter<"ZoomWebhookEvent"> | string | null
+  status_code?: Prisma.IntFilter<"ZoomWebhookEvent"> | number
+  received_at?: Prisma.DateTimeFilter<"ZoomWebhookEvent"> | Date | string
+  payload_json?: Prisma.JsonNullableFilter<"ZoomWebhookEvent">
+  created_at?: Prisma.DateTimeFilter<"ZoomWebhookEvent"> | Date | string
+}
+
+export type ZoomWebhookEventCreateManyZoom_connectionInput = {
+  id: string
+  event_type: string
+  topic?: string | null
+  status_code?: number
+  received_at?: Date | string
+  payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+}
+
+export type ZoomWebhookEventUpdateWithoutZoom_connectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_code?: Prisma.IntFieldUpdateOperationsInput | number
+  received_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ZoomWebhookEventUncheckedUpdateWithoutZoom_connectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_code?: Prisma.IntFieldUpdateOperationsInput | number
+  received_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ZoomWebhookEventUncheckedUpdateManyWithoutZoom_connectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  topic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_code?: Prisma.IntFieldUpdateOperationsInput | number
+  received_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payload_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type ZoomWebhookEventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -443,6 +595,7 @@ export type ZoomWebhookEventSelect<ExtArgs extends runtime.Types.Extensions.Inte
   received_at?: boolean
   payload_json?: boolean
   created_at?: boolean
+  zoom_connection?: boolean | Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs>
 }, ExtArgs["result"]["zoomWebhookEvent"]>
 
 export type ZoomWebhookEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -455,6 +608,7 @@ export type ZoomWebhookEventSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   received_at?: boolean
   payload_json?: boolean
   created_at?: boolean
+  zoom_connection?: boolean | Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs>
 }, ExtArgs["result"]["zoomWebhookEvent"]>
 
 export type ZoomWebhookEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -467,6 +621,7 @@ export type ZoomWebhookEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   received_at?: boolean
   payload_json?: boolean
   created_at?: boolean
+  zoom_connection?: boolean | Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs>
 }, ExtArgs["result"]["zoomWebhookEvent"]>
 
 export type ZoomWebhookEventSelectScalar = {
@@ -482,10 +637,21 @@ export type ZoomWebhookEventSelectScalar = {
 }
 
 export type ZoomWebhookEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "zoom_connection_id" | "event_type" | "topic" | "status_code" | "received_at" | "payload_json" | "created_at", ExtArgs["result"]["zoomWebhookEvent"]>
+export type ZoomWebhookEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  zoom_connection?: boolean | Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs>
+}
+export type ZoomWebhookEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  zoom_connection?: boolean | Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs>
+}
+export type ZoomWebhookEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  zoom_connection?: boolean | Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs>
+}
 
 export type $ZoomWebhookEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ZoomWebhookEvent"
-  objects: {}
+  objects: {
+    zoom_connection: Prisma.$ZoomConnectionPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -890,6 +1056,7 @@ readonly fields: ZoomWebhookEventFieldRefs;
  */
 export interface Prisma__ZoomWebhookEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  zoom_connection<T extends Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ZoomWebhookEvent$zoom_connectionArgs<ExtArgs>>): Prisma.Prisma__ZoomConnectionClient<runtime.Types.Result.GetResult<Prisma.$ZoomConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -945,6 +1112,10 @@ export type ZoomWebhookEventFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
+  /**
    * Filter, which ZoomWebhookEvent to fetch.
    */
   where: Prisma.ZoomWebhookEventWhereUniqueInput
@@ -963,6 +1134,10 @@ export type ZoomWebhookEventFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
+  /**
    * Filter, which ZoomWebhookEvent to fetch.
    */
   where: Prisma.ZoomWebhookEventWhereUniqueInput
@@ -980,6 +1155,10 @@ export type ZoomWebhookEventFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the ZoomWebhookEvent
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
   /**
    * Filter, which ZoomWebhookEvent to fetch.
    */
@@ -1029,6 +1208,10 @@ export type ZoomWebhookEventFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
+  /**
    * Filter, which ZoomWebhookEvent to fetch.
    */
   where?: Prisma.ZoomWebhookEventWhereInput
@@ -1076,6 +1259,10 @@ export type ZoomWebhookEventFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the ZoomWebhookEvent
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
   /**
    * Filter, which ZoomWebhookEvents to fetch.
    */
@@ -1125,6 +1312,10 @@ export type ZoomWebhookEventCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
+  /**
    * The data needed to create a ZoomWebhookEvent.
    */
   data: Prisma.XOR<Prisma.ZoomWebhookEventCreateInput, Prisma.ZoomWebhookEventUncheckedCreateInput>
@@ -1158,6 +1349,10 @@ export type ZoomWebhookEventCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.ZoomWebhookEventCreateManyInput | Prisma.ZoomWebhookEventCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1172,6 +1367,10 @@ export type ZoomWebhookEventUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ZoomWebhookEvent
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
   /**
    * The data needed to update a ZoomWebhookEvent.
    */
@@ -1224,6 +1423,10 @@ export type ZoomWebhookEventUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many ZoomWebhookEvents to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1238,6 +1441,10 @@ export type ZoomWebhookEventUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ZoomWebhookEvent
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
   /**
    * The filter to search for the ZoomWebhookEvent to update in case it exists.
    */
@@ -1265,6 +1472,10 @@ export type ZoomWebhookEventDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
+  /**
    * Filter which ZoomWebhookEvent to delete.
    */
   where: Prisma.ZoomWebhookEventWhereUniqueInput
@@ -1285,6 +1496,25 @@ export type ZoomWebhookEventDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
+ * ZoomWebhookEvent.zoom_connection
+ */
+export type ZoomWebhookEvent$zoom_connectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ZoomConnection
+   */
+  select?: Prisma.ZoomConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ZoomConnection
+   */
+  omit?: Prisma.ZoomConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomConnectionInclude<ExtArgs> | null
+  where?: Prisma.ZoomConnectionWhereInput
+}
+
+/**
  * ZoomWebhookEvent without action
  */
 export type ZoomWebhookEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1296,4 +1526,8 @@ export type ZoomWebhookEventDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the ZoomWebhookEvent
    */
   omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
 }

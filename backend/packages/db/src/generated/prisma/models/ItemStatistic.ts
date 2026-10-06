@@ -252,6 +252,7 @@ export type ItemStatisticWhereInput = {
   avg_latency_ms?: Prisma.IntNullableFilter<"ItemStatistic"> | number | null
   metrics_json?: Prisma.JsonNullableFilter<"ItemStatistic">
   calculated_at?: Prisma.DateTimeFilter<"ItemStatistic"> | Date | string
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
 }
 
 export type ItemStatisticOrderByWithRelationInput = {
@@ -264,6 +265,7 @@ export type ItemStatisticOrderByWithRelationInput = {
   avg_latency_ms?: Prisma.SortOrderInput | Prisma.SortOrder
   metrics_json?: Prisma.SortOrderInput | Prisma.SortOrder
   calculated_at?: Prisma.SortOrder
+  item?: Prisma.ItemOrderByWithRelationInput
 }
 
 export type ItemStatisticWhereUniqueInput = Prisma.AtLeast<{
@@ -280,6 +282,7 @@ export type ItemStatisticWhereUniqueInput = Prisma.AtLeast<{
   avg_latency_ms?: Prisma.IntNullableFilter<"ItemStatistic"> | number | null
   metrics_json?: Prisma.JsonNullableFilter<"ItemStatistic">
   calculated_at?: Prisma.DateTimeFilter<"ItemStatistic"> | Date | string
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
 }, "id" | "tenant_id_item_id_window_key">
 
 export type ItemStatisticOrderByWithAggregationInput = {
@@ -316,14 +319,13 @@ export type ItemStatisticScalarWhereWithAggregatesInput = {
 
 export type ItemStatisticCreateInput = {
   id: string
-  tenant_id: string
-  item_id: string
   window_key: string
   attempts_count?: number
   correct_count?: number
   avg_latency_ms?: number | null
   metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calculated_at?: Date | string
+  item: Prisma.ItemCreateNestedOneWithoutItem_statisticsInput
 }
 
 export type ItemStatisticUncheckedCreateInput = {
@@ -340,14 +342,13 @@ export type ItemStatisticUncheckedCreateInput = {
 
 export type ItemStatisticUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
   window_key?: Prisma.StringFieldUpdateOperationsInput | string
   attempts_count?: Prisma.IntFieldUpdateOperationsInput | number
   correct_count?: Prisma.IntFieldUpdateOperationsInput | number
   avg_latency_ms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  item?: Prisma.ItemUpdateOneRequiredWithoutItem_statisticsNestedInput
 }
 
 export type ItemStatisticUncheckedUpdateInput = {
@@ -376,8 +377,6 @@ export type ItemStatisticCreateManyInput = {
 
 export type ItemStatisticUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
   window_key?: Prisma.StringFieldUpdateOperationsInput | string
   attempts_count?: Prisma.IntFieldUpdateOperationsInput | number
   correct_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -396,6 +395,16 @@ export type ItemStatisticUncheckedUpdateManyInput = {
   avg_latency_ms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemStatisticListRelationFilter = {
+  every?: Prisma.ItemStatisticWhereInput
+  some?: Prisma.ItemStatisticWhereInput
+  none?: Prisma.ItemStatisticWhereInput
+}
+
+export type ItemStatisticOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ItemStatisticTenant_idItem_idWindow_keyCompoundUniqueInput = {
@@ -450,6 +459,149 @@ export type ItemStatisticSumOrderByAggregateInput = {
   avg_latency_ms?: Prisma.SortOrder
 }
 
+export type ItemStatisticCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.ItemStatisticCreateWithoutItemInput, Prisma.ItemStatisticUncheckedCreateWithoutItemInput> | Prisma.ItemStatisticCreateWithoutItemInput[] | Prisma.ItemStatisticUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemStatisticCreateOrConnectWithoutItemInput | Prisma.ItemStatisticCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.ItemStatisticCreateManyItemInputEnvelope
+  connect?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+}
+
+export type ItemStatisticUncheckedCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.ItemStatisticCreateWithoutItemInput, Prisma.ItemStatisticUncheckedCreateWithoutItemInput> | Prisma.ItemStatisticCreateWithoutItemInput[] | Prisma.ItemStatisticUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemStatisticCreateOrConnectWithoutItemInput | Prisma.ItemStatisticCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.ItemStatisticCreateManyItemInputEnvelope
+  connect?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+}
+
+export type ItemStatisticUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemStatisticCreateWithoutItemInput, Prisma.ItemStatisticUncheckedCreateWithoutItemInput> | Prisma.ItemStatisticCreateWithoutItemInput[] | Prisma.ItemStatisticUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemStatisticCreateOrConnectWithoutItemInput | Prisma.ItemStatisticCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.ItemStatisticUpsertWithWhereUniqueWithoutItemInput | Prisma.ItemStatisticUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.ItemStatisticCreateManyItemInputEnvelope
+  set?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  disconnect?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  delete?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  connect?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  update?: Prisma.ItemStatisticUpdateWithWhereUniqueWithoutItemInput | Prisma.ItemStatisticUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.ItemStatisticUpdateManyWithWhereWithoutItemInput | Prisma.ItemStatisticUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.ItemStatisticScalarWhereInput | Prisma.ItemStatisticScalarWhereInput[]
+}
+
+export type ItemStatisticUncheckedUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemStatisticCreateWithoutItemInput, Prisma.ItemStatisticUncheckedCreateWithoutItemInput> | Prisma.ItemStatisticCreateWithoutItemInput[] | Prisma.ItemStatisticUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemStatisticCreateOrConnectWithoutItemInput | Prisma.ItemStatisticCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.ItemStatisticUpsertWithWhereUniqueWithoutItemInput | Prisma.ItemStatisticUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.ItemStatisticCreateManyItemInputEnvelope
+  set?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  disconnect?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  delete?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  connect?: Prisma.ItemStatisticWhereUniqueInput | Prisma.ItemStatisticWhereUniqueInput[]
+  update?: Prisma.ItemStatisticUpdateWithWhereUniqueWithoutItemInput | Prisma.ItemStatisticUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.ItemStatisticUpdateManyWithWhereWithoutItemInput | Prisma.ItemStatisticUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.ItemStatisticScalarWhereInput | Prisma.ItemStatisticScalarWhereInput[]
+}
+
+export type ItemStatisticCreateWithoutItemInput = {
+  id: string
+  window_key: string
+  attempts_count?: number
+  correct_count?: number
+  avg_latency_ms?: number | null
+  metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+}
+
+export type ItemStatisticUncheckedCreateWithoutItemInput = {
+  id: string
+  window_key: string
+  attempts_count?: number
+  correct_count?: number
+  avg_latency_ms?: number | null
+  metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+}
+
+export type ItemStatisticCreateOrConnectWithoutItemInput = {
+  where: Prisma.ItemStatisticWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemStatisticCreateWithoutItemInput, Prisma.ItemStatisticUncheckedCreateWithoutItemInput>
+}
+
+export type ItemStatisticCreateManyItemInputEnvelope = {
+  data: Prisma.ItemStatisticCreateManyItemInput | Prisma.ItemStatisticCreateManyItemInput[]
+  skipDuplicates?: boolean
+}
+
+export type ItemStatisticUpsertWithWhereUniqueWithoutItemInput = {
+  where: Prisma.ItemStatisticWhereUniqueInput
+  update: Prisma.XOR<Prisma.ItemStatisticUpdateWithoutItemInput, Prisma.ItemStatisticUncheckedUpdateWithoutItemInput>
+  create: Prisma.XOR<Prisma.ItemStatisticCreateWithoutItemInput, Prisma.ItemStatisticUncheckedCreateWithoutItemInput>
+}
+
+export type ItemStatisticUpdateWithWhereUniqueWithoutItemInput = {
+  where: Prisma.ItemStatisticWhereUniqueInput
+  data: Prisma.XOR<Prisma.ItemStatisticUpdateWithoutItemInput, Prisma.ItemStatisticUncheckedUpdateWithoutItemInput>
+}
+
+export type ItemStatisticUpdateManyWithWhereWithoutItemInput = {
+  where: Prisma.ItemStatisticScalarWhereInput
+  data: Prisma.XOR<Prisma.ItemStatisticUpdateManyMutationInput, Prisma.ItemStatisticUncheckedUpdateManyWithoutItemInput>
+}
+
+export type ItemStatisticScalarWhereInput = {
+  AND?: Prisma.ItemStatisticScalarWhereInput | Prisma.ItemStatisticScalarWhereInput[]
+  OR?: Prisma.ItemStatisticScalarWhereInput[]
+  NOT?: Prisma.ItemStatisticScalarWhereInput | Prisma.ItemStatisticScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ItemStatistic"> | string
+  tenant_id?: Prisma.UuidFilter<"ItemStatistic"> | string
+  item_id?: Prisma.UuidFilter<"ItemStatistic"> | string
+  window_key?: Prisma.StringFilter<"ItemStatistic"> | string
+  attempts_count?: Prisma.IntFilter<"ItemStatistic"> | number
+  correct_count?: Prisma.IntFilter<"ItemStatistic"> | number
+  avg_latency_ms?: Prisma.IntNullableFilter<"ItemStatistic"> | number | null
+  metrics_json?: Prisma.JsonNullableFilter<"ItemStatistic">
+  calculated_at?: Prisma.DateTimeFilter<"ItemStatistic"> | Date | string
+}
+
+export type ItemStatisticCreateManyItemInput = {
+  id: string
+  window_key: string
+  attempts_count?: number
+  correct_count?: number
+  avg_latency_ms?: number | null
+  metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+}
+
+export type ItemStatisticUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  window_key?: Prisma.StringFieldUpdateOperationsInput | string
+  attempts_count?: Prisma.IntFieldUpdateOperationsInput | number
+  correct_count?: Prisma.IntFieldUpdateOperationsInput | number
+  avg_latency_ms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemStatisticUncheckedUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  window_key?: Prisma.StringFieldUpdateOperationsInput | string
+  attempts_count?: Prisma.IntFieldUpdateOperationsInput | number
+  correct_count?: Prisma.IntFieldUpdateOperationsInput | number
+  avg_latency_ms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemStatisticUncheckedUpdateManyWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  window_key?: Prisma.StringFieldUpdateOperationsInput | string
+  attempts_count?: Prisma.IntFieldUpdateOperationsInput | number
+  correct_count?: Prisma.IntFieldUpdateOperationsInput | number
+  avg_latency_ms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  metrics_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type ItemStatisticSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -462,6 +614,7 @@ export type ItemStatisticSelect<ExtArgs extends runtime.Types.Extensions.Interna
   avg_latency_ms?: boolean
   metrics_json?: boolean
   calculated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemStatistic"]>
 
 export type ItemStatisticSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -474,6 +627,7 @@ export type ItemStatisticSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   avg_latency_ms?: boolean
   metrics_json?: boolean
   calculated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemStatistic"]>
 
 export type ItemStatisticSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -486,6 +640,7 @@ export type ItemStatisticSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   avg_latency_ms?: boolean
   metrics_json?: boolean
   calculated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemStatistic"]>
 
 export type ItemStatisticSelectScalar = {
@@ -501,10 +656,21 @@ export type ItemStatisticSelectScalar = {
 }
 
 export type ItemStatisticOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "item_id" | "window_key" | "attempts_count" | "correct_count" | "avg_latency_ms" | "metrics_json" | "calculated_at", ExtArgs["result"]["itemStatistic"]>
+export type ItemStatisticInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
+export type ItemStatisticIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
+export type ItemStatisticIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
 
 export type $ItemStatisticPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ItemStatistic"
-  objects: {}
+  objects: {
+    item: Prisma.$ItemPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -909,6 +1075,7 @@ readonly fields: ItemStatisticFieldRefs;
  */
 export interface Prisma__ItemStatisticClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  item<T extends Prisma.ItemDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ItemDefaultArgs<ExtArgs>>): Prisma.Prisma__ItemClient<runtime.Types.Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -964,6 +1131,10 @@ export type ItemStatisticFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
+  /**
    * Filter, which ItemStatistic to fetch.
    */
   where: Prisma.ItemStatisticWhereUniqueInput
@@ -982,6 +1153,10 @@ export type ItemStatisticFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
+  /**
    * Filter, which ItemStatistic to fetch.
    */
   where: Prisma.ItemStatisticWhereUniqueInput
@@ -999,6 +1174,10 @@ export type ItemStatisticFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ItemStatistic
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
   /**
    * Filter, which ItemStatistic to fetch.
    */
@@ -1048,6 +1227,10 @@ export type ItemStatisticFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
+  /**
    * Filter, which ItemStatistic to fetch.
    */
   where?: Prisma.ItemStatisticWhereInput
@@ -1095,6 +1278,10 @@ export type ItemStatisticFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ItemStatistic
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
   /**
    * Filter, which ItemStatistics to fetch.
    */
@@ -1144,6 +1331,10 @@ export type ItemStatisticCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
+  /**
    * The data needed to create a ItemStatistic.
    */
   data: Prisma.XOR<Prisma.ItemStatisticCreateInput, Prisma.ItemStatisticUncheckedCreateInput>
@@ -1177,6 +1368,10 @@ export type ItemStatisticCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.ItemStatisticCreateManyInput | Prisma.ItemStatisticCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1191,6 +1386,10 @@ export type ItemStatisticUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the ItemStatistic
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
   /**
    * The data needed to update a ItemStatistic.
    */
@@ -1243,6 +1442,10 @@ export type ItemStatisticUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many ItemStatistics to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1257,6 +1460,10 @@ export type ItemStatisticUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the ItemStatistic
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
   /**
    * The filter to search for the ItemStatistic to update in case it exists.
    */
@@ -1283,6 +1490,10 @@ export type ItemStatisticDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the ItemStatistic
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
   /**
    * Filter which ItemStatistic to delete.
    */
@@ -1315,4 +1526,8 @@ export type ItemStatisticDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the ItemStatistic
    */
   omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
 }

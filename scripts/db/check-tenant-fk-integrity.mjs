@@ -8,8 +8,9 @@ import { TENANT_FOREIGN_KEYS } from "./tenant-fk-spec.mjs";
  *
  *   TENANT_FK_INTEGRITY_DATABASE_URL=... pnpm db:tenant-fk:check
  *
- * Run it against the target database before deploying migrations 120/121:
- * migration 121 validates existing rows, and fails on any row this reports.
+ * Run it against the target database before deploying the migrations that
+ * add them (120/121, 122/123): the validating migrations (121, 123) fail on
+ * any row this reports.
  * It also runs after the deploy, to confirm every constraint is validated.
  *
  * For each reference it counts child rows whose parent is missing and rows
@@ -50,14 +51,37 @@ export async function checkTenantForeignKeys(databaseUrl, { samples = 5 } = {}) 
       ).rows.map((row) => [row.conname, row.convalidated]),
     );
 
+    // Samples name each offending child row by its primary key; a few child
+    // tables have a composite or non-"id" key.
+    const primaryKeys = new Map(
+      (
+        await client.query(
+          `SELECT c.relname AS name,
+                  array_agg(a.attname::text ORDER BY array_position(i.indkey::int2[], a.attnum)) AS columns
+             FROM pg_index i
+             JOIN pg_class c ON c.oid = i.indrelid
+             JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = 'public'
+             JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = ANY (i.indkey)
+            WHERE i.indisprimary AND c.relname = ANY ($1::text[])
+            GROUP BY c.relname`,
+          [[...new Set(TENANT_FOREIGN_KEYS.map((fk) => fk.child))]],
+        )
+      ).rows.map((row) => [row.name, row.columns]),
+    );
+
     const results = [];
     for (const fk of TENANT_FOREIGN_KEYS) {
-      // Identifiers come from the static spec above, never from input.
+      const key = (primaryKeys.get(fk.child) ?? ["ctid"])
+        .map((column) => `c.${client.escapeIdentifier(column)}::text`)
+        .join(", ");
+      // Table and column identifiers come from the static spec above, never
+      // from input; key columns come from the catalog and are quoted.
       const { rows } = await client.query(
         `SELECT
            count(*) FILTER (WHERE p.id IS NULL AND other.id IS NULL)::int AS missing,
            count(*) FILTER (WHERE p.id IS NULL AND other.id IS NOT NULL)::int AS cross_tenant,
-           (array_agg(c.id::text ORDER BY c.id) FILTER (WHERE p.id IS NULL))[1:$1] AS sample_ids
+           (array_agg(concat_ws('/', ${key}) ORDER BY concat_ws('/', ${key}))
+              FILTER (WHERE p.id IS NULL))[1:$1] AS sample_ids
          FROM public.${fk.child} c
          LEFT JOIN public.${fk.parent} p ON p.tenant_id = c.tenant_id AND p.id = c.${fk.column}
          LEFT JOIN public.${fk.parent} other ON other.id = c.${fk.column}

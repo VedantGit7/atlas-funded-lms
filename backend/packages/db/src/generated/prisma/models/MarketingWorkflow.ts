@@ -234,6 +234,7 @@ export type MarketingWorkflowWhereInput = {
   published_at?: Prisma.DateTimeNullableFilter<"MarketingWorkflow"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingWorkflow"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingWorkflow"> | Date | string
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunListRelationFilter
 }
 
 export type MarketingWorkflowOrderByWithRelationInput = {
@@ -249,10 +250,12 @@ export type MarketingWorkflowOrderByWithRelationInput = {
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunOrderByRelationAggregateInput
 }
 
 export type MarketingWorkflowWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MarketingWorkflowTenant_idIdCompoundUniqueInput
   AND?: Prisma.MarketingWorkflowWhereInput | Prisma.MarketingWorkflowWhereInput[]
   OR?: Prisma.MarketingWorkflowWhereInput[]
   NOT?: Prisma.MarketingWorkflowWhereInput | Prisma.MarketingWorkflowWhereInput[]
@@ -267,7 +270,8 @@ export type MarketingWorkflowWhereUniqueInput = Prisma.AtLeast<{
   published_at?: Prisma.DateTimeNullableFilter<"MarketingWorkflow"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingWorkflow"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingWorkflow"> | Date | string
-}, "id">
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type MarketingWorkflowOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -318,6 +322,7 @@ export type MarketingWorkflowCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunCreateNestedManyWithoutWorkflowInput
 }
 
 export type MarketingWorkflowUncheckedCreateInput = {
@@ -333,6 +338,7 @@ export type MarketingWorkflowUncheckedCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunUncheckedCreateNestedManyWithoutWorkflowInput
 }
 
 export type MarketingWorkflowUpdateInput = {
@@ -348,6 +354,7 @@ export type MarketingWorkflowUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunUpdateManyWithoutWorkflowNestedInput
 }
 
 export type MarketingWorkflowUncheckedUpdateInput = {
@@ -363,6 +370,7 @@ export type MarketingWorkflowUncheckedUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunUncheckedUpdateManyWithoutWorkflowNestedInput
 }
 
 export type MarketingWorkflowCreateManyInput = {
@@ -410,6 +418,11 @@ export type MarketingWorkflowUncheckedUpdateManyInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type MarketingWorkflowTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type MarketingWorkflowCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -453,6 +466,130 @@ export type MarketingWorkflowMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type MarketingWorkflowScalarRelationFilter = {
+  is?: Prisma.MarketingWorkflowWhereInput
+  isNot?: Prisma.MarketingWorkflowWhereInput
+}
+
+export type MarketingWorkflowCreateNestedOneWithoutMarketing_workflow_runsInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowCreateWithoutMarketing_workflow_runsInput, Prisma.MarketingWorkflowUncheckedCreateWithoutMarketing_workflow_runsInput>
+  connectOrCreate?: Prisma.MarketingWorkflowCreateOrConnectWithoutMarketing_workflow_runsInput
+  connect?: Prisma.MarketingWorkflowWhereUniqueInput
+}
+
+export type MarketingWorkflowUpdateOneRequiredWithoutMarketing_workflow_runsNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowCreateWithoutMarketing_workflow_runsInput, Prisma.MarketingWorkflowUncheckedCreateWithoutMarketing_workflow_runsInput>
+  connectOrCreate?: Prisma.MarketingWorkflowCreateOrConnectWithoutMarketing_workflow_runsInput
+  upsert?: Prisma.MarketingWorkflowUpsertWithoutMarketing_workflow_runsInput
+  connect?: Prisma.MarketingWorkflowWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MarketingWorkflowUpdateToOneWithWhereWithoutMarketing_workflow_runsInput, Prisma.MarketingWorkflowUpdateWithoutMarketing_workflow_runsInput>, Prisma.MarketingWorkflowUncheckedUpdateWithoutMarketing_workflow_runsInput>
+}
+
+export type MarketingWorkflowCreateWithoutMarketing_workflow_runsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  allow_resubscribe?: boolean
+  use_case_key?: string | null
+  graph_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingWorkflowUncheckedCreateWithoutMarketing_workflow_runsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  allow_resubscribe?: boolean
+  use_case_key?: string | null
+  graph_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingWorkflowCreateOrConnectWithoutMarketing_workflow_runsInput = {
+  where: Prisma.MarketingWorkflowWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingWorkflowCreateWithoutMarketing_workflow_runsInput, Prisma.MarketingWorkflowUncheckedCreateWithoutMarketing_workflow_runsInput>
+}
+
+export type MarketingWorkflowUpsertWithoutMarketing_workflow_runsInput = {
+  update: Prisma.XOR<Prisma.MarketingWorkflowUpdateWithoutMarketing_workflow_runsInput, Prisma.MarketingWorkflowUncheckedUpdateWithoutMarketing_workflow_runsInput>
+  create: Prisma.XOR<Prisma.MarketingWorkflowCreateWithoutMarketing_workflow_runsInput, Prisma.MarketingWorkflowUncheckedCreateWithoutMarketing_workflow_runsInput>
+  where?: Prisma.MarketingWorkflowWhereInput
+}
+
+export type MarketingWorkflowUpdateToOneWithWhereWithoutMarketing_workflow_runsInput = {
+  where?: Prisma.MarketingWorkflowWhereInput
+  data: Prisma.XOR<Prisma.MarketingWorkflowUpdateWithoutMarketing_workflow_runsInput, Prisma.MarketingWorkflowUncheckedUpdateWithoutMarketing_workflow_runsInput>
+}
+
+export type MarketingWorkflowUpdateWithoutMarketing_workflow_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  allow_resubscribe?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  use_case_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  graph_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingWorkflowUncheckedUpdateWithoutMarketing_workflow_runsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  allow_resubscribe?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  use_case_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  graph_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type MarketingWorkflowCountOutputType
+ */
+
+export type MarketingWorkflowCountOutputType = {
+  marketing_workflow_runs: number
+}
+
+export type MarketingWorkflowCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_workflow_runs?: boolean | MarketingWorkflowCountOutputTypeCountMarketing_workflow_runsArgs
+}
+
+/**
+ * MarketingWorkflowCountOutputType without action
+ */
+export type MarketingWorkflowCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingWorkflowCountOutputType
+   */
+  select?: Prisma.MarketingWorkflowCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MarketingWorkflowCountOutputType without action
+ */
+export type MarketingWorkflowCountOutputTypeCountMarketing_workflow_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MarketingWorkflowRunWhereInput
+}
 
 
 export type MarketingWorkflowSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +605,8 @@ export type MarketingWorkflowSelect<ExtArgs extends runtime.Types.Extensions.Int
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  marketing_workflow_runs?: boolean | Prisma.MarketingWorkflow$marketing_workflow_runsArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingWorkflowCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingWorkflow"]>
 
 export type MarketingWorkflowSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -516,10 +655,18 @@ export type MarketingWorkflowSelectScalar = {
 }
 
 export type MarketingWorkflowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "title" | "description" | "status" | "allow_resubscribe" | "use_case_key" | "graph_json" | "created_by_membership_id" | "published_at" | "created_at" | "updated_at", ExtArgs["result"]["marketingWorkflow"]>
+export type MarketingWorkflowInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_workflow_runs?: boolean | Prisma.MarketingWorkflow$marketing_workflow_runsArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingWorkflowCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type MarketingWorkflowIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MarketingWorkflowIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $MarketingWorkflowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingWorkflow"
-  objects: {}
+  objects: {
+    marketing_workflow_runs: Prisma.$MarketingWorkflowRunPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -927,6 +1074,7 @@ readonly fields: MarketingWorkflowFieldRefs;
  */
 export interface Prisma__MarketingWorkflowClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  marketing_workflow_runs<T extends Prisma.MarketingWorkflow$marketing_workflow_runsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingWorkflow$marketing_workflow_runsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MarketingWorkflowRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -985,6 +1133,10 @@ export type MarketingWorkflowFindUniqueArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingWorkflow to fetch.
    */
   where: Prisma.MarketingWorkflowWhereUniqueInput
@@ -1003,6 +1155,10 @@ export type MarketingWorkflowFindUniqueOrThrowArgs<ExtArgs extends runtime.Types
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingWorkflow to fetch.
    */
   where: Prisma.MarketingWorkflowWhereUniqueInput
@@ -1020,6 +1176,10 @@ export type MarketingWorkflowFindFirstArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the MarketingWorkflow
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
   /**
    * Filter, which MarketingWorkflow to fetch.
    */
@@ -1069,6 +1229,10 @@ export type MarketingWorkflowFindFirstOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingWorkflow to fetch.
    */
   where?: Prisma.MarketingWorkflowWhereInput
@@ -1116,6 +1280,10 @@ export type MarketingWorkflowFindManyArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the MarketingWorkflow
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
   /**
    * Filter, which MarketingWorkflows to fetch.
    */
@@ -1165,6 +1333,10 @@ export type MarketingWorkflowCreateArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingWorkflow.
    */
   data: Prisma.XOR<Prisma.MarketingWorkflowCreateInput, Prisma.MarketingWorkflowUncheckedCreateInput>
@@ -1212,6 +1384,10 @@ export type MarketingWorkflowUpdateArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the MarketingWorkflow
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingWorkflow.
    */
@@ -1279,6 +1455,10 @@ export type MarketingWorkflowUpsertArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
+  /**
    * The filter to search for the MarketingWorkflow to update in case it exists.
    */
   where: Prisma.MarketingWorkflowWhereUniqueInput
@@ -1305,6 +1485,10 @@ export type MarketingWorkflowDeleteArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
+  /**
    * Filter which MarketingWorkflow to delete.
    */
   where: Prisma.MarketingWorkflowWhereUniqueInput
@@ -1325,6 +1509,30 @@ export type MarketingWorkflowDeleteManyArgs<ExtArgs extends runtime.Types.Extens
 }
 
 /**
+ * MarketingWorkflow.marketing_workflow_runs
+ */
+export type MarketingWorkflow$marketing_workflow_runsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingWorkflowRun
+   */
+  select?: Prisma.MarketingWorkflowRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingWorkflowRun
+   */
+  omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
+  where?: Prisma.MarketingWorkflowRunWhereInput
+  orderBy?: Prisma.MarketingWorkflowRunOrderByWithRelationInput | Prisma.MarketingWorkflowRunOrderByWithRelationInput[]
+  cursor?: Prisma.MarketingWorkflowRunWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MarketingWorkflowRunScalarFieldEnum | Prisma.MarketingWorkflowRunScalarFieldEnum[]
+}
+
+/**
  * MarketingWorkflow without action
  */
 export type MarketingWorkflowDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1336,4 +1544,8 @@ export type MarketingWorkflowDefaultArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the MarketingWorkflow
    */
   omit?: Prisma.MarketingWorkflowOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowInclude<ExtArgs> | null
 }

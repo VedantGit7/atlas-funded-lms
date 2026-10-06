@@ -246,6 +246,7 @@ export type QuestDefinitionWhereInput = {
   course_id?: Prisma.UuidNullableFilter<"QuestDefinition"> | string | null
   created_at?: Prisma.DateTimeFilter<"QuestDefinition"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"QuestDefinition"> | Date | string
+  course?: Prisma.XOR<Prisma.CourseNullableScalarRelationFilter, Prisma.CourseWhereInput> | null
 }
 
 export type QuestDefinitionOrderByWithRelationInput = {
@@ -263,6 +264,7 @@ export type QuestDefinitionOrderByWithRelationInput = {
   course_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  course?: Prisma.CourseOrderByWithRelationInput
 }
 
 export type QuestDefinitionWhereUniqueInput = Prisma.AtLeast<{
@@ -284,6 +286,7 @@ export type QuestDefinitionWhereUniqueInput = Prisma.AtLeast<{
   course_id?: Prisma.UuidNullableFilter<"QuestDefinition"> | string | null
   created_at?: Prisma.DateTimeFilter<"QuestDefinition"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"QuestDefinition"> | Date | string
+  course?: Prisma.XOR<Prisma.CourseNullableScalarRelationFilter, Prisma.CourseWhereInput> | null
 }, "id" | "tenant_id_key">
 
 export type QuestDefinitionOrderByWithAggregationInput = {
@@ -328,7 +331,6 @@ export type QuestDefinitionScalarWhereWithAggregatesInput = {
 
 export type QuestDefinitionCreateInput = {
   id: string
-  tenant_id: string
   key: string
   name: string
   description?: string | null
@@ -338,9 +340,9 @@ export type QuestDefinitionCreateInput = {
   rewards_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   starts_at?: Date | string | null
   ends_at?: Date | string | null
-  course_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  course?: Prisma.CourseCreateNestedOneWithoutQuest_definitionsInput
 }
 
 export type QuestDefinitionUncheckedCreateInput = {
@@ -362,7 +364,6 @@ export type QuestDefinitionUncheckedCreateInput = {
 
 export type QuestDefinitionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -372,9 +373,9 @@ export type QuestDefinitionUpdateInput = {
   rewards_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  course?: Prisma.CourseUpdateOneWithoutQuest_definitionsNestedInput
 }
 
 export type QuestDefinitionUncheckedUpdateInput = {
@@ -413,7 +414,6 @@ export type QuestDefinitionCreateManyInput = {
 
 export type QuestDefinitionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -423,7 +423,6 @@ export type QuestDefinitionUpdateManyMutationInput = {
   rewards_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -443,6 +442,16 @@ export type QuestDefinitionUncheckedUpdateManyInput = {
   course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuestDefinitionListRelationFilter = {
+  every?: Prisma.QuestDefinitionWhereInput
+  some?: Prisma.QuestDefinitionWhereInput
+  none?: Prisma.QuestDefinitionWhereInput
+}
+
+export type QuestDefinitionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type QuestDefinitionTenant_idKeyCompoundUniqueInput = {
@@ -497,6 +506,184 @@ export type QuestDefinitionMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type QuestDefinitionCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.QuestDefinitionCreateWithoutCourseInput, Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput> | Prisma.QuestDefinitionCreateWithoutCourseInput[] | Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput | Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.QuestDefinitionCreateManyCourseInputEnvelope
+  connect?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+}
+
+export type QuestDefinitionUncheckedCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.QuestDefinitionCreateWithoutCourseInput, Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput> | Prisma.QuestDefinitionCreateWithoutCourseInput[] | Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput | Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.QuestDefinitionCreateManyCourseInputEnvelope
+  connect?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+}
+
+export type QuestDefinitionUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.QuestDefinitionCreateWithoutCourseInput, Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput> | Prisma.QuestDefinitionCreateWithoutCourseInput[] | Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput | Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.QuestDefinitionUpsertWithWhereUniqueWithoutCourseInput | Prisma.QuestDefinitionUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.QuestDefinitionCreateManyCourseInputEnvelope
+  set?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  disconnect?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  delete?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  connect?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  update?: Prisma.QuestDefinitionUpdateWithWhereUniqueWithoutCourseInput | Prisma.QuestDefinitionUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.QuestDefinitionUpdateManyWithWhereWithoutCourseInput | Prisma.QuestDefinitionUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.QuestDefinitionScalarWhereInput | Prisma.QuestDefinitionScalarWhereInput[]
+}
+
+export type QuestDefinitionUncheckedUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.QuestDefinitionCreateWithoutCourseInput, Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput> | Prisma.QuestDefinitionCreateWithoutCourseInput[] | Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput | Prisma.QuestDefinitionCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.QuestDefinitionUpsertWithWhereUniqueWithoutCourseInput | Prisma.QuestDefinitionUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.QuestDefinitionCreateManyCourseInputEnvelope
+  set?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  disconnect?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  delete?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  connect?: Prisma.QuestDefinitionWhereUniqueInput | Prisma.QuestDefinitionWhereUniqueInput[]
+  update?: Prisma.QuestDefinitionUpdateWithWhereUniqueWithoutCourseInput | Prisma.QuestDefinitionUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.QuestDefinitionUpdateManyWithWhereWithoutCourseInput | Prisma.QuestDefinitionUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.QuestDefinitionScalarWhereInput | Prisma.QuestDefinitionScalarWhereInput[]
+}
+
+export type QuestDefinitionCreateWithoutCourseInput = {
+  id: string
+  key: string
+  name: string
+  description?: string | null
+  status?: $Enums.EntityStatus
+  quest_type?: string
+  criteria_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  rewards_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  starts_at?: Date | string | null
+  ends_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type QuestDefinitionUncheckedCreateWithoutCourseInput = {
+  id: string
+  key: string
+  name: string
+  description?: string | null
+  status?: $Enums.EntityStatus
+  quest_type?: string
+  criteria_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  rewards_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  starts_at?: Date | string | null
+  ends_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type QuestDefinitionCreateOrConnectWithoutCourseInput = {
+  where: Prisma.QuestDefinitionWhereUniqueInput
+  create: Prisma.XOR<Prisma.QuestDefinitionCreateWithoutCourseInput, Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput>
+}
+
+export type QuestDefinitionCreateManyCourseInputEnvelope = {
+  data: Prisma.QuestDefinitionCreateManyCourseInput | Prisma.QuestDefinitionCreateManyCourseInput[]
+  skipDuplicates?: boolean
+}
+
+export type QuestDefinitionUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.QuestDefinitionWhereUniqueInput
+  update: Prisma.XOR<Prisma.QuestDefinitionUpdateWithoutCourseInput, Prisma.QuestDefinitionUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.QuestDefinitionCreateWithoutCourseInput, Prisma.QuestDefinitionUncheckedCreateWithoutCourseInput>
+}
+
+export type QuestDefinitionUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.QuestDefinitionWhereUniqueInput
+  data: Prisma.XOR<Prisma.QuestDefinitionUpdateWithoutCourseInput, Prisma.QuestDefinitionUncheckedUpdateWithoutCourseInput>
+}
+
+export type QuestDefinitionUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.QuestDefinitionScalarWhereInput
+  data: Prisma.XOR<Prisma.QuestDefinitionUpdateManyMutationInput, Prisma.QuestDefinitionUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type QuestDefinitionScalarWhereInput = {
+  AND?: Prisma.QuestDefinitionScalarWhereInput | Prisma.QuestDefinitionScalarWhereInput[]
+  OR?: Prisma.QuestDefinitionScalarWhereInput[]
+  NOT?: Prisma.QuestDefinitionScalarWhereInput | Prisma.QuestDefinitionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"QuestDefinition"> | string
+  tenant_id?: Prisma.UuidFilter<"QuestDefinition"> | string
+  key?: Prisma.StringFilter<"QuestDefinition"> | string
+  name?: Prisma.StringFilter<"QuestDefinition"> | string
+  description?: Prisma.StringNullableFilter<"QuestDefinition"> | string | null
+  status?: Prisma.EnumEntityStatusFilter<"QuestDefinition"> | $Enums.EntityStatus
+  quest_type?: Prisma.StringFilter<"QuestDefinition"> | string
+  criteria_json?: Prisma.JsonFilter<"QuestDefinition">
+  rewards_json?: Prisma.JsonFilter<"QuestDefinition">
+  starts_at?: Prisma.DateTimeNullableFilter<"QuestDefinition"> | Date | string | null
+  ends_at?: Prisma.DateTimeNullableFilter<"QuestDefinition"> | Date | string | null
+  course_id?: Prisma.UuidNullableFilter<"QuestDefinition"> | string | null
+  created_at?: Prisma.DateTimeFilter<"QuestDefinition"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"QuestDefinition"> | Date | string
+}
+
+export type QuestDefinitionCreateManyCourseInput = {
+  id: string
+  key: string
+  name: string
+  description?: string | null
+  status?: $Enums.EntityStatus
+  quest_type?: string
+  criteria_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  rewards_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  starts_at?: Date | string | null
+  ends_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type QuestDefinitionUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  quest_type?: Prisma.StringFieldUpdateOperationsInput | string
+  criteria_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  rewards_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuestDefinitionUncheckedUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  quest_type?: Prisma.StringFieldUpdateOperationsInput | string
+  criteria_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  rewards_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuestDefinitionUncheckedUpdateManyWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  quest_type?: Prisma.StringFieldUpdateOperationsInput | string
+  criteria_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  rewards_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  starts_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type QuestDefinitionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -514,6 +701,7 @@ export type QuestDefinitionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   course_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.QuestDefinition$courseArgs<ExtArgs>
 }, ExtArgs["result"]["questDefinition"]>
 
 export type QuestDefinitionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -531,6 +719,7 @@ export type QuestDefinitionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   course_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.QuestDefinition$courseArgs<ExtArgs>
 }, ExtArgs["result"]["questDefinition"]>
 
 export type QuestDefinitionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -548,6 +737,7 @@ export type QuestDefinitionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   course_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.QuestDefinition$courseArgs<ExtArgs>
 }, ExtArgs["result"]["questDefinition"]>
 
 export type QuestDefinitionSelectScalar = {
@@ -568,10 +758,21 @@ export type QuestDefinitionSelectScalar = {
 }
 
 export type QuestDefinitionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "description" | "status" | "quest_type" | "criteria_json" | "rewards_json" | "starts_at" | "ends_at" | "course_id" | "created_at" | "updated_at", ExtArgs["result"]["questDefinition"]>
+export type QuestDefinitionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.QuestDefinition$courseArgs<ExtArgs>
+}
+export type QuestDefinitionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.QuestDefinition$courseArgs<ExtArgs>
+}
+export type QuestDefinitionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.QuestDefinition$courseArgs<ExtArgs>
+}
 
 export type $QuestDefinitionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "QuestDefinition"
-  objects: {}
+  objects: {
+    course: Prisma.$CoursePayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -981,6 +1182,7 @@ readonly fields: QuestDefinitionFieldRefs;
  */
 export interface Prisma__QuestDefinitionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  course<T extends Prisma.QuestDefinition$courseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.QuestDefinition$courseArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1041,6 +1243,10 @@ export type QuestDefinitionFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
+  /**
    * Filter, which QuestDefinition to fetch.
    */
   where: Prisma.QuestDefinitionWhereUniqueInput
@@ -1059,6 +1265,10 @@ export type QuestDefinitionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
+  /**
    * Filter, which QuestDefinition to fetch.
    */
   where: Prisma.QuestDefinitionWhereUniqueInput
@@ -1076,6 +1286,10 @@ export type QuestDefinitionFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the QuestDefinition
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
   /**
    * Filter, which QuestDefinition to fetch.
    */
@@ -1125,6 +1339,10 @@ export type QuestDefinitionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
+  /**
    * Filter, which QuestDefinition to fetch.
    */
   where?: Prisma.QuestDefinitionWhereInput
@@ -1172,6 +1390,10 @@ export type QuestDefinitionFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the QuestDefinition
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
   /**
    * Filter, which QuestDefinitions to fetch.
    */
@@ -1221,6 +1443,10 @@ export type QuestDefinitionCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
+  /**
    * The data needed to create a QuestDefinition.
    */
   data: Prisma.XOR<Prisma.QuestDefinitionCreateInput, Prisma.QuestDefinitionUncheckedCreateInput>
@@ -1254,6 +1480,10 @@ export type QuestDefinitionCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.QuestDefinitionCreateManyInput | Prisma.QuestDefinitionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1268,6 +1498,10 @@ export type QuestDefinitionUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the QuestDefinition
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
   /**
    * The data needed to update a QuestDefinition.
    */
@@ -1320,6 +1554,10 @@ export type QuestDefinitionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many QuestDefinitions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1334,6 +1572,10 @@ export type QuestDefinitionUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the QuestDefinition
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
   /**
    * The filter to search for the QuestDefinition to update in case it exists.
    */
@@ -1361,6 +1603,10 @@ export type QuestDefinitionDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
+  /**
    * Filter which QuestDefinition to delete.
    */
   where: Prisma.QuestDefinitionWhereUniqueInput
@@ -1381,6 +1627,25 @@ export type QuestDefinitionDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * QuestDefinition.course
+ */
+export type QuestDefinition$courseArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Course
+   */
+  select?: Prisma.CourseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Course
+   */
+  omit?: Prisma.CourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  where?: Prisma.CourseWhereInput
+}
+
+/**
  * QuestDefinition without action
  */
 export type QuestDefinitionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1392,4 +1657,8 @@ export type QuestDefinitionDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the QuestDefinition
    */
   omit?: Prisma.QuestDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestDefinitionInclude<ExtArgs> | null
 }

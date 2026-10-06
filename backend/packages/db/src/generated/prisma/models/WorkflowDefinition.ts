@@ -202,6 +202,7 @@ export type WorkflowDefinitionWhereInput = {
   status?: Prisma.EnumEntityStatusFilter<"WorkflowDefinition"> | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFilter<"WorkflowDefinition"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"WorkflowDefinition"> | Date | string
+  workflow_transitions?: Prisma.WorkflowTransitionListRelationFilter
 }
 
 export type WorkflowDefinitionOrderByWithRelationInput = {
@@ -213,10 +214,12 @@ export type WorkflowDefinitionOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  workflow_transitions?: Prisma.WorkflowTransitionOrderByRelationAggregateInput
 }
 
 export type WorkflowDefinitionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.WorkflowDefinitionTenant_idIdCompoundUniqueInput
   tenant_id_key?: Prisma.WorkflowDefinitionTenant_idKeyCompoundUniqueInput
   AND?: Prisma.WorkflowDefinitionWhereInput | Prisma.WorkflowDefinitionWhereInput[]
   OR?: Prisma.WorkflowDefinitionWhereInput[]
@@ -228,7 +231,8 @@ export type WorkflowDefinitionWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumEntityStatusFilter<"WorkflowDefinition"> | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFilter<"WorkflowDefinition"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"WorkflowDefinition"> | Date | string
-}, "id" | "tenant_id_key">
+  workflow_transitions?: Prisma.WorkflowTransitionListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_key">
 
 export type WorkflowDefinitionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -267,6 +271,7 @@ export type WorkflowDefinitionCreateInput = {
   status?: $Enums.EntityStatus
   created_at?: Date | string
   updated_at?: Date | string
+  workflow_transitions?: Prisma.WorkflowTransitionCreateNestedManyWithoutWorkflow_definitionInput
 }
 
 export type WorkflowDefinitionUncheckedCreateInput = {
@@ -278,6 +283,7 @@ export type WorkflowDefinitionUncheckedCreateInput = {
   status?: $Enums.EntityStatus
   created_at?: Date | string
   updated_at?: Date | string
+  workflow_transitions?: Prisma.WorkflowTransitionUncheckedCreateNestedManyWithoutWorkflow_definitionInput
 }
 
 export type WorkflowDefinitionUpdateInput = {
@@ -289,6 +295,7 @@ export type WorkflowDefinitionUpdateInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflow_transitions?: Prisma.WorkflowTransitionUpdateManyWithoutWorkflow_definitionNestedInput
 }
 
 export type WorkflowDefinitionUncheckedUpdateInput = {
@@ -300,6 +307,7 @@ export type WorkflowDefinitionUncheckedUpdateInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflow_transitions?: Prisma.WorkflowTransitionUncheckedUpdateManyWithoutWorkflow_definitionNestedInput
 }
 
 export type WorkflowDefinitionCreateManyInput = {
@@ -333,6 +341,11 @@ export type WorkflowDefinitionUncheckedUpdateManyInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WorkflowDefinitionTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type WorkflowDefinitionTenant_idKeyCompoundUniqueInput = {
@@ -371,10 +384,118 @@ export type WorkflowDefinitionMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type WorkflowDefinitionScalarRelationFilter = {
+  is?: Prisma.WorkflowDefinitionWhereInput
+  isNot?: Prisma.WorkflowDefinitionWhereInput
+}
+
 export type EnumEntityStatusFieldUpdateOperationsInput = {
   set?: $Enums.EntityStatus
 }
 
+export type WorkflowDefinitionCreateNestedOneWithoutWorkflow_transitionsInput = {
+  create?: Prisma.XOR<Prisma.WorkflowDefinitionCreateWithoutWorkflow_transitionsInput, Prisma.WorkflowDefinitionUncheckedCreateWithoutWorkflow_transitionsInput>
+  connectOrCreate?: Prisma.WorkflowDefinitionCreateOrConnectWithoutWorkflow_transitionsInput
+  connect?: Prisma.WorkflowDefinitionWhereUniqueInput
+}
+
+export type WorkflowDefinitionUpdateOneRequiredWithoutWorkflow_transitionsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkflowDefinitionCreateWithoutWorkflow_transitionsInput, Prisma.WorkflowDefinitionUncheckedCreateWithoutWorkflow_transitionsInput>
+  connectOrCreate?: Prisma.WorkflowDefinitionCreateOrConnectWithoutWorkflow_transitionsInput
+  upsert?: Prisma.WorkflowDefinitionUpsertWithoutWorkflow_transitionsInput
+  connect?: Prisma.WorkflowDefinitionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkflowDefinitionUpdateToOneWithWhereWithoutWorkflow_transitionsInput, Prisma.WorkflowDefinitionUpdateWithoutWorkflow_transitionsInput>, Prisma.WorkflowDefinitionUncheckedUpdateWithoutWorkflow_transitionsInput>
+}
+
+export type WorkflowDefinitionCreateWithoutWorkflow_transitionsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  definition_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.EntityStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type WorkflowDefinitionUncheckedCreateWithoutWorkflow_transitionsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  definition_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.EntityStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type WorkflowDefinitionCreateOrConnectWithoutWorkflow_transitionsInput = {
+  where: Prisma.WorkflowDefinitionWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkflowDefinitionCreateWithoutWorkflow_transitionsInput, Prisma.WorkflowDefinitionUncheckedCreateWithoutWorkflow_transitionsInput>
+}
+
+export type WorkflowDefinitionUpsertWithoutWorkflow_transitionsInput = {
+  update: Prisma.XOR<Prisma.WorkflowDefinitionUpdateWithoutWorkflow_transitionsInput, Prisma.WorkflowDefinitionUncheckedUpdateWithoutWorkflow_transitionsInput>
+  create: Prisma.XOR<Prisma.WorkflowDefinitionCreateWithoutWorkflow_transitionsInput, Prisma.WorkflowDefinitionUncheckedCreateWithoutWorkflow_transitionsInput>
+  where?: Prisma.WorkflowDefinitionWhereInput
+}
+
+export type WorkflowDefinitionUpdateToOneWithWhereWithoutWorkflow_transitionsInput = {
+  where?: Prisma.WorkflowDefinitionWhereInput
+  data: Prisma.XOR<Prisma.WorkflowDefinitionUpdateWithoutWorkflow_transitionsInput, Prisma.WorkflowDefinitionUncheckedUpdateWithoutWorkflow_transitionsInput>
+}
+
+export type WorkflowDefinitionUpdateWithoutWorkflow_transitionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  definition_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WorkflowDefinitionUncheckedUpdateWithoutWorkflow_transitionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  definition_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type WorkflowDefinitionCountOutputType
+ */
+
+export type WorkflowDefinitionCountOutputType = {
+  workflow_transitions: number
+}
+
+export type WorkflowDefinitionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflow_transitions?: boolean | WorkflowDefinitionCountOutputTypeCountWorkflow_transitionsArgs
+}
+
+/**
+ * WorkflowDefinitionCountOutputType without action
+ */
+export type WorkflowDefinitionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkflowDefinitionCountOutputType
+   */
+  select?: Prisma.WorkflowDefinitionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * WorkflowDefinitionCountOutputType without action
+ */
+export type WorkflowDefinitionCountOutputTypeCountWorkflow_transitionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WorkflowTransitionWhereInput
+}
 
 
 export type WorkflowDefinitionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -386,6 +507,8 @@ export type WorkflowDefinitionSelect<ExtArgs extends runtime.Types.Extensions.In
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  workflow_transitions?: boolean | Prisma.WorkflowDefinition$workflow_transitionsArgs<ExtArgs>
+  _count?: boolean | Prisma.WorkflowDefinitionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workflowDefinition"]>
 
 export type WorkflowDefinitionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -422,10 +545,18 @@ export type WorkflowDefinitionSelectScalar = {
 }
 
 export type WorkflowDefinitionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "definition_json" | "status" | "created_at" | "updated_at", ExtArgs["result"]["workflowDefinition"]>
+export type WorkflowDefinitionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflow_transitions?: boolean | Prisma.WorkflowDefinition$workflow_transitionsArgs<ExtArgs>
+  _count?: boolean | Prisma.WorkflowDefinitionCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type WorkflowDefinitionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type WorkflowDefinitionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $WorkflowDefinitionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WorkflowDefinition"
-  objects: {}
+  objects: {
+    workflow_transitions: Prisma.$WorkflowTransitionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -829,6 +960,7 @@ readonly fields: WorkflowDefinitionFieldRefs;
  */
 export interface Prisma__WorkflowDefinitionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  workflow_transitions<T extends Prisma.WorkflowDefinition$workflow_transitionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkflowDefinition$workflow_transitionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkflowTransitionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -883,6 +1015,10 @@ export type WorkflowDefinitionFindUniqueArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
+  /**
    * Filter, which WorkflowDefinition to fetch.
    */
   where: Prisma.WorkflowDefinitionWhereUniqueInput
@@ -901,6 +1037,10 @@ export type WorkflowDefinitionFindUniqueOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
+  /**
    * Filter, which WorkflowDefinition to fetch.
    */
   where: Prisma.WorkflowDefinitionWhereUniqueInput
@@ -918,6 +1058,10 @@ export type WorkflowDefinitionFindFirstArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the WorkflowDefinition
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
   /**
    * Filter, which WorkflowDefinition to fetch.
    */
@@ -967,6 +1111,10 @@ export type WorkflowDefinitionFindFirstOrThrowArgs<ExtArgs extends runtime.Types
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
+  /**
    * Filter, which WorkflowDefinition to fetch.
    */
   where?: Prisma.WorkflowDefinitionWhereInput
@@ -1014,6 +1162,10 @@ export type WorkflowDefinitionFindManyArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the WorkflowDefinition
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
   /**
    * Filter, which WorkflowDefinitions to fetch.
    */
@@ -1063,6 +1215,10 @@ export type WorkflowDefinitionCreateArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
+  /**
    * The data needed to create a WorkflowDefinition.
    */
   data: Prisma.XOR<Prisma.WorkflowDefinitionCreateInput, Prisma.WorkflowDefinitionUncheckedCreateInput>
@@ -1110,6 +1266,10 @@ export type WorkflowDefinitionUpdateArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the WorkflowDefinition
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
   /**
    * The data needed to update a WorkflowDefinition.
    */
@@ -1177,6 +1337,10 @@ export type WorkflowDefinitionUpsertArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
+  /**
    * The filter to search for the WorkflowDefinition to update in case it exists.
    */
   where: Prisma.WorkflowDefinitionWhereUniqueInput
@@ -1203,6 +1367,10 @@ export type WorkflowDefinitionDeleteArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
+  /**
    * Filter which WorkflowDefinition to delete.
    */
   where: Prisma.WorkflowDefinitionWhereUniqueInput
@@ -1223,6 +1391,30 @@ export type WorkflowDefinitionDeleteManyArgs<ExtArgs extends runtime.Types.Exten
 }
 
 /**
+ * WorkflowDefinition.workflow_transitions
+ */
+export type WorkflowDefinition$workflow_transitionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkflowTransition
+   */
+  select?: Prisma.WorkflowTransitionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WorkflowTransition
+   */
+  omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
+  where?: Prisma.WorkflowTransitionWhereInput
+  orderBy?: Prisma.WorkflowTransitionOrderByWithRelationInput | Prisma.WorkflowTransitionOrderByWithRelationInput[]
+  cursor?: Prisma.WorkflowTransitionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WorkflowTransitionScalarFieldEnum | Prisma.WorkflowTransitionScalarFieldEnum[]
+}
+
+/**
  * WorkflowDefinition without action
  */
 export type WorkflowDefinitionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1234,4 +1426,8 @@ export type WorkflowDefinitionDefaultArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the WorkflowDefinition
    */
   omit?: Prisma.WorkflowDefinitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowDefinitionInclude<ExtArgs> | null
 }

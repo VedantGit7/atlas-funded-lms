@@ -203,6 +203,7 @@ export type CustomFieldValueWhereInput = {
   created_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
   definition?: Prisma.XOR<Prisma.CustomFieldDefinitionScalarRelationFilter, Prisma.CustomFieldDefinitionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type CustomFieldValueOrderByWithRelationInput = {
@@ -215,6 +216,7 @@ export type CustomFieldValueOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   definition?: Prisma.CustomFieldDefinitionOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type CustomFieldValueWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type CustomFieldValueWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
   definition?: Prisma.XOR<Prisma.CustomFieldDefinitionScalarRelationFilter, Prisma.CustomFieldDefinitionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_custom_field_definition_id_membership_id">
 
 export type CustomFieldValueOrderByWithAggregationInput = {
@@ -263,13 +266,12 @@ export type CustomFieldValueScalarWhereWithAggregatesInput = {
 
 export type CustomFieldValueCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   value_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   updated_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   definition: Prisma.CustomFieldDefinitionCreateNestedOneWithoutValuesInput
+  membership: Prisma.MembershipCreateNestedOneWithoutCustom_field_valuesInput
 }
 
 export type CustomFieldValueUncheckedCreateInput = {
@@ -285,13 +287,12 @@ export type CustomFieldValueUncheckedCreateInput = {
 
 export type CustomFieldValueUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   value_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   updated_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   definition?: Prisma.CustomFieldDefinitionUpdateOneRequiredWithoutValuesNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCustom_field_valuesNestedInput
 }
 
 export type CustomFieldValueUncheckedUpdateInput = {
@@ -318,8 +319,6 @@ export type CustomFieldValueCreateManyInput = {
 
 export type CustomFieldValueUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   value_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   updated_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -384,6 +383,48 @@ export type CustomFieldValueMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type CustomFieldValueCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CustomFieldValueCreateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput> | Prisma.CustomFieldValueCreateWithoutMembershipInput[] | Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput | Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CustomFieldValueCreateManyMembershipInputEnvelope
+  connect?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+}
+
+export type CustomFieldValueUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CustomFieldValueCreateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput> | Prisma.CustomFieldValueCreateWithoutMembershipInput[] | Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput | Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CustomFieldValueCreateManyMembershipInputEnvelope
+  connect?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+}
+
+export type CustomFieldValueUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomFieldValueCreateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput> | Prisma.CustomFieldValueCreateWithoutMembershipInput[] | Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput | Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CustomFieldValueUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CustomFieldValueUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CustomFieldValueCreateManyMembershipInputEnvelope
+  set?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  disconnect?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  delete?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  connect?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  update?: Prisma.CustomFieldValueUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CustomFieldValueUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CustomFieldValueUpdateManyWithWhereWithoutMembershipInput | Prisma.CustomFieldValueUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CustomFieldValueScalarWhereInput | Prisma.CustomFieldValueScalarWhereInput[]
+}
+
+export type CustomFieldValueUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CustomFieldValueCreateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput> | Prisma.CustomFieldValueCreateWithoutMembershipInput[] | Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput | Prisma.CustomFieldValueCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CustomFieldValueUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CustomFieldValueUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CustomFieldValueCreateManyMembershipInputEnvelope
+  set?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  disconnect?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  delete?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  connect?: Prisma.CustomFieldValueWhereUniqueInput | Prisma.CustomFieldValueWhereUniqueInput[]
+  update?: Prisma.CustomFieldValueUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CustomFieldValueUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CustomFieldValueUpdateManyWithWhereWithoutMembershipInput | Prisma.CustomFieldValueUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CustomFieldValueScalarWhereInput | Prisma.CustomFieldValueScalarWhereInput[]
+}
+
 export type CustomFieldValueCreateNestedManyWithoutDefinitionInput = {
   create?: Prisma.XOR<Prisma.CustomFieldValueCreateWithoutDefinitionInput, Prisma.CustomFieldValueUncheckedCreateWithoutDefinitionInput> | Prisma.CustomFieldValueCreateWithoutDefinitionInput[] | Prisma.CustomFieldValueUncheckedCreateWithoutDefinitionInput[]
   connectOrCreate?: Prisma.CustomFieldValueCreateOrConnectWithoutDefinitionInput | Prisma.CustomFieldValueCreateOrConnectWithoutDefinitionInput[]
@@ -426,14 +467,71 @@ export type CustomFieldValueUncheckedUpdateManyWithoutDefinitionNestedInput = {
   deleteMany?: Prisma.CustomFieldValueScalarWhereInput | Prisma.CustomFieldValueScalarWhereInput[]
 }
 
-export type CustomFieldValueCreateWithoutDefinitionInput = {
+export type CustomFieldValueCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   value_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   updated_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  definition: Prisma.CustomFieldDefinitionCreateNestedOneWithoutValuesInput
+}
+
+export type CustomFieldValueUncheckedCreateWithoutMembershipInput = {
+  id: string
+  custom_field_definition_id: string
+  value_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  updated_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CustomFieldValueCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.CustomFieldValueWhereUniqueInput
+  create: Prisma.XOR<Prisma.CustomFieldValueCreateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput>
+}
+
+export type CustomFieldValueCreateManyMembershipInputEnvelope = {
+  data: Prisma.CustomFieldValueCreateManyMembershipInput | Prisma.CustomFieldValueCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type CustomFieldValueUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CustomFieldValueWhereUniqueInput
+  update: Prisma.XOR<Prisma.CustomFieldValueUpdateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.CustomFieldValueCreateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedCreateWithoutMembershipInput>
+}
+
+export type CustomFieldValueUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CustomFieldValueWhereUniqueInput
+  data: Prisma.XOR<Prisma.CustomFieldValueUpdateWithoutMembershipInput, Prisma.CustomFieldValueUncheckedUpdateWithoutMembershipInput>
+}
+
+export type CustomFieldValueUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.CustomFieldValueScalarWhereInput
+  data: Prisma.XOR<Prisma.CustomFieldValueUpdateManyMutationInput, Prisma.CustomFieldValueUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type CustomFieldValueScalarWhereInput = {
+  AND?: Prisma.CustomFieldValueScalarWhereInput | Prisma.CustomFieldValueScalarWhereInput[]
+  OR?: Prisma.CustomFieldValueScalarWhereInput[]
+  NOT?: Prisma.CustomFieldValueScalarWhereInput | Prisma.CustomFieldValueScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CustomFieldValue"> | string
+  tenant_id?: Prisma.UuidFilter<"CustomFieldValue"> | string
+  custom_field_definition_id?: Prisma.UuidFilter<"CustomFieldValue"> | string
+  membership_id?: Prisma.UuidFilter<"CustomFieldValue"> | string
+  value_json?: Prisma.JsonFilter<"CustomFieldValue">
+  updated_by_membership_id?: Prisma.UuidNullableFilter<"CustomFieldValue"> | string | null
+  created_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
+}
+
+export type CustomFieldValueCreateWithoutDefinitionInput = {
+  id: string
+  value_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  updated_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutCustom_field_valuesInput
 }
 
 export type CustomFieldValueUncheckedCreateWithoutDefinitionInput = {
@@ -472,18 +570,40 @@ export type CustomFieldValueUpdateManyWithWhereWithoutDefinitionInput = {
   data: Prisma.XOR<Prisma.CustomFieldValueUpdateManyMutationInput, Prisma.CustomFieldValueUncheckedUpdateManyWithoutDefinitionInput>
 }
 
-export type CustomFieldValueScalarWhereInput = {
-  AND?: Prisma.CustomFieldValueScalarWhereInput | Prisma.CustomFieldValueScalarWhereInput[]
-  OR?: Prisma.CustomFieldValueScalarWhereInput[]
-  NOT?: Prisma.CustomFieldValueScalarWhereInput | Prisma.CustomFieldValueScalarWhereInput[]
-  id?: Prisma.UuidFilter<"CustomFieldValue"> | string
-  tenant_id?: Prisma.UuidFilter<"CustomFieldValue"> | string
-  custom_field_definition_id?: Prisma.UuidFilter<"CustomFieldValue"> | string
-  membership_id?: Prisma.UuidFilter<"CustomFieldValue"> | string
-  value_json?: Prisma.JsonFilter<"CustomFieldValue">
-  updated_by_membership_id?: Prisma.UuidNullableFilter<"CustomFieldValue"> | string | null
-  created_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"CustomFieldValue"> | Date | string
+export type CustomFieldValueCreateManyMembershipInput = {
+  id: string
+  custom_field_definition_id: string
+  value_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  updated_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CustomFieldValueUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  value_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  updated_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  definition?: Prisma.CustomFieldDefinitionUpdateOneRequiredWithoutValuesNestedInput
+}
+
+export type CustomFieldValueUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  custom_field_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
+  value_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  updated_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CustomFieldValueUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  custom_field_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
+  value_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  updated_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type CustomFieldValueCreateManyDefinitionInput = {
@@ -498,12 +618,11 @@ export type CustomFieldValueCreateManyDefinitionInput = {
 
 export type CustomFieldValueUpdateWithoutDefinitionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   value_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   updated_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCustom_field_valuesNestedInput
 }
 
 export type CustomFieldValueUncheckedUpdateWithoutDefinitionInput = {
@@ -538,6 +657,7 @@ export type CustomFieldValueSelect<ExtArgs extends runtime.Types.Extensions.Inte
   created_at?: boolean
   updated_at?: boolean
   definition?: boolean | Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customFieldValue"]>
 
 export type CustomFieldValueSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -550,6 +670,7 @@ export type CustomFieldValueSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   created_at?: boolean
   updated_at?: boolean
   definition?: boolean | Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customFieldValue"]>
 
 export type CustomFieldValueSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -562,6 +683,7 @@ export type CustomFieldValueSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   created_at?: boolean
   updated_at?: boolean
   definition?: boolean | Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["customFieldValue"]>
 
 export type CustomFieldValueSelectScalar = {
@@ -578,18 +700,22 @@ export type CustomFieldValueSelectScalar = {
 export type CustomFieldValueOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "custom_field_definition_id" | "membership_id" | "value_json" | "updated_by_membership_id" | "created_at" | "updated_at", ExtArgs["result"]["customFieldValue"]>
 export type CustomFieldValueInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   definition?: boolean | Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type CustomFieldValueIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   definition?: boolean | Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type CustomFieldValueIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   definition?: boolean | Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $CustomFieldValuePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CustomFieldValue"
   objects: {
     definition: Prisma.$CustomFieldDefinitionPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -995,6 +1121,7 @@ readonly fields: CustomFieldValueFieldRefs;
 export interface Prisma__CustomFieldValueClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   definition<T extends Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CustomFieldDefinitionDefaultArgs<ExtArgs>>): Prisma.Prisma__CustomFieldDefinitionClient<runtime.Types.Result.GetResult<Prisma.$CustomFieldDefinitionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

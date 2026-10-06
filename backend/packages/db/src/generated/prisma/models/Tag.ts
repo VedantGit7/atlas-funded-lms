@@ -214,6 +214,8 @@ export type TagWhereInput = {
   created_at?: Prisma.DateTimeFilter<"Tag"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Tag"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Tag"> | Date | string | null
+  course_tags?: Prisma.CourseTagListRelationFilter
+  lesson_tags?: Prisma.LessonTagListRelationFilter
 }
 
 export type TagOrderByWithRelationInput = {
@@ -226,10 +228,13 @@ export type TagOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  course_tags?: Prisma.CourseTagOrderByRelationAggregateInput
+  lesson_tags?: Prisma.LessonTagOrderByRelationAggregateInput
 }
 
 export type TagWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.TagTenant_idIdCompoundUniqueInput
   tenant_id_slug?: Prisma.TagTenant_idSlugCompoundUniqueInput
   AND?: Prisma.TagWhereInput | Prisma.TagWhereInput[]
   OR?: Prisma.TagWhereInput[]
@@ -242,7 +247,9 @@ export type TagWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"Tag"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Tag"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Tag"> | Date | string | null
-}, "id" | "tenant_id_slug">
+  course_tags?: Prisma.CourseTagListRelationFilter
+  lesson_tags?: Prisma.LessonTagListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_slug">
 
 export type TagOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -284,6 +291,8 @@ export type TagCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  course_tags?: Prisma.CourseTagCreateNestedManyWithoutTagInput
+  lesson_tags?: Prisma.LessonTagCreateNestedManyWithoutTagInput
 }
 
 export type TagUncheckedCreateInput = {
@@ -296,6 +305,8 @@ export type TagUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  course_tags?: Prisma.CourseTagUncheckedCreateNestedManyWithoutTagInput
+  lesson_tags?: Prisma.LessonTagUncheckedCreateNestedManyWithoutTagInput
 }
 
 export type TagUpdateInput = {
@@ -308,6 +319,8 @@ export type TagUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_tags?: Prisma.CourseTagUpdateManyWithoutTagNestedInput
+  lesson_tags?: Prisma.LessonTagUpdateManyWithoutTagNestedInput
 }
 
 export type TagUncheckedUpdateInput = {
@@ -320,6 +333,8 @@ export type TagUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_tags?: Prisma.CourseTagUncheckedUpdateManyWithoutTagNestedInput
+  lesson_tags?: Prisma.LessonTagUncheckedUpdateManyWithoutTagNestedInput
 }
 
 export type TagCreateManyInput = {
@@ -356,6 +371,11 @@ export type TagUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type TagTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type TagTenant_idSlugCompoundUniqueInput = {
@@ -399,10 +419,217 @@ export type TagMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type TagScalarRelationFilter = {
+  is?: Prisma.TagWhereInput
+  isNot?: Prisma.TagWhereInput
+}
+
 export type EnumLessonTagVisibilityFieldUpdateOperationsInput = {
   set?: $Enums.LessonTagVisibility
 }
 
+export type TagCreateNestedOneWithoutLesson_tagsInput = {
+  create?: Prisma.XOR<Prisma.TagCreateWithoutLesson_tagsInput, Prisma.TagUncheckedCreateWithoutLesson_tagsInput>
+  connectOrCreate?: Prisma.TagCreateOrConnectWithoutLesson_tagsInput
+  connect?: Prisma.TagWhereUniqueInput
+}
+
+export type TagUpdateOneRequiredWithoutLesson_tagsNestedInput = {
+  create?: Prisma.XOR<Prisma.TagCreateWithoutLesson_tagsInput, Prisma.TagUncheckedCreateWithoutLesson_tagsInput>
+  connectOrCreate?: Prisma.TagCreateOrConnectWithoutLesson_tagsInput
+  upsert?: Prisma.TagUpsertWithoutLesson_tagsInput
+  connect?: Prisma.TagWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TagUpdateToOneWithWhereWithoutLesson_tagsInput, Prisma.TagUpdateWithoutLesson_tagsInput>, Prisma.TagUncheckedUpdateWithoutLesson_tagsInput>
+}
+
+export type TagCreateNestedOneWithoutCourse_tagsInput = {
+  create?: Prisma.XOR<Prisma.TagCreateWithoutCourse_tagsInput, Prisma.TagUncheckedCreateWithoutCourse_tagsInput>
+  connectOrCreate?: Prisma.TagCreateOrConnectWithoutCourse_tagsInput
+  connect?: Prisma.TagWhereUniqueInput
+}
+
+export type TagUpdateOneRequiredWithoutCourse_tagsNestedInput = {
+  create?: Prisma.XOR<Prisma.TagCreateWithoutCourse_tagsInput, Prisma.TagUncheckedCreateWithoutCourse_tagsInput>
+  connectOrCreate?: Prisma.TagCreateOrConnectWithoutCourse_tagsInput
+  upsert?: Prisma.TagUpsertWithoutCourse_tagsInput
+  connect?: Prisma.TagWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TagUpdateToOneWithWhereWithoutCourse_tagsInput, Prisma.TagUpdateWithoutCourse_tagsInput>, Prisma.TagUncheckedUpdateWithoutCourse_tagsInput>
+}
+
+export type TagCreateWithoutLesson_tagsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  slug: string
+  description?: string | null
+  visibility?: $Enums.LessonTagVisibility
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_tags?: Prisma.CourseTagCreateNestedManyWithoutTagInput
+}
+
+export type TagUncheckedCreateWithoutLesson_tagsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  slug: string
+  description?: string | null
+  visibility?: $Enums.LessonTagVisibility
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_tags?: Prisma.CourseTagUncheckedCreateNestedManyWithoutTagInput
+}
+
+export type TagCreateOrConnectWithoutLesson_tagsInput = {
+  where: Prisma.TagWhereUniqueInput
+  create: Prisma.XOR<Prisma.TagCreateWithoutLesson_tagsInput, Prisma.TagUncheckedCreateWithoutLesson_tagsInput>
+}
+
+export type TagUpsertWithoutLesson_tagsInput = {
+  update: Prisma.XOR<Prisma.TagUpdateWithoutLesson_tagsInput, Prisma.TagUncheckedUpdateWithoutLesson_tagsInput>
+  create: Prisma.XOR<Prisma.TagCreateWithoutLesson_tagsInput, Prisma.TagUncheckedCreateWithoutLesson_tagsInput>
+  where?: Prisma.TagWhereInput
+}
+
+export type TagUpdateToOneWithWhereWithoutLesson_tagsInput = {
+  where?: Prisma.TagWhereInput
+  data: Prisma.XOR<Prisma.TagUpdateWithoutLesson_tagsInput, Prisma.TagUncheckedUpdateWithoutLesson_tagsInput>
+}
+
+export type TagUpdateWithoutLesson_tagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibility?: Prisma.EnumLessonTagVisibilityFieldUpdateOperationsInput | $Enums.LessonTagVisibility
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_tags?: Prisma.CourseTagUpdateManyWithoutTagNestedInput
+}
+
+export type TagUncheckedUpdateWithoutLesson_tagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibility?: Prisma.EnumLessonTagVisibilityFieldUpdateOperationsInput | $Enums.LessonTagVisibility
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_tags?: Prisma.CourseTagUncheckedUpdateManyWithoutTagNestedInput
+}
+
+export type TagCreateWithoutCourse_tagsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  slug: string
+  description?: string | null
+  visibility?: $Enums.LessonTagVisibility
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  lesson_tags?: Prisma.LessonTagCreateNestedManyWithoutTagInput
+}
+
+export type TagUncheckedCreateWithoutCourse_tagsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  slug: string
+  description?: string | null
+  visibility?: $Enums.LessonTagVisibility
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  lesson_tags?: Prisma.LessonTagUncheckedCreateNestedManyWithoutTagInput
+}
+
+export type TagCreateOrConnectWithoutCourse_tagsInput = {
+  where: Prisma.TagWhereUniqueInput
+  create: Prisma.XOR<Prisma.TagCreateWithoutCourse_tagsInput, Prisma.TagUncheckedCreateWithoutCourse_tagsInput>
+}
+
+export type TagUpsertWithoutCourse_tagsInput = {
+  update: Prisma.XOR<Prisma.TagUpdateWithoutCourse_tagsInput, Prisma.TagUncheckedUpdateWithoutCourse_tagsInput>
+  create: Prisma.XOR<Prisma.TagCreateWithoutCourse_tagsInput, Prisma.TagUncheckedCreateWithoutCourse_tagsInput>
+  where?: Prisma.TagWhereInput
+}
+
+export type TagUpdateToOneWithWhereWithoutCourse_tagsInput = {
+  where?: Prisma.TagWhereInput
+  data: Prisma.XOR<Prisma.TagUpdateWithoutCourse_tagsInput, Prisma.TagUncheckedUpdateWithoutCourse_tagsInput>
+}
+
+export type TagUpdateWithoutCourse_tagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibility?: Prisma.EnumLessonTagVisibilityFieldUpdateOperationsInput | $Enums.LessonTagVisibility
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lesson_tags?: Prisma.LessonTagUpdateManyWithoutTagNestedInput
+}
+
+export type TagUncheckedUpdateWithoutCourse_tagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visibility?: Prisma.EnumLessonTagVisibilityFieldUpdateOperationsInput | $Enums.LessonTagVisibility
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lesson_tags?: Prisma.LessonTagUncheckedUpdateManyWithoutTagNestedInput
+}
+
+
+/**
+ * Count Type TagCountOutputType
+ */
+
+export type TagCountOutputType = {
+  course_tags: number
+  lesson_tags: number
+}
+
+export type TagCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course_tags?: boolean | TagCountOutputTypeCountCourse_tagsArgs
+  lesson_tags?: boolean | TagCountOutputTypeCountLesson_tagsArgs
+}
+
+/**
+ * TagCountOutputType without action
+ */
+export type TagCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TagCountOutputType
+   */
+  select?: Prisma.TagCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TagCountOutputType without action
+ */
+export type TagCountOutputTypeCountCourse_tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CourseTagWhereInput
+}
+
+/**
+ * TagCountOutputType without action
+ */
+export type TagCountOutputTypeCountLesson_tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LessonTagWhereInput
+}
 
 
 export type TagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -415,6 +642,9 @@ export type TagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  course_tags?: boolean | Prisma.Tag$course_tagsArgs<ExtArgs>
+  lesson_tags?: boolean | Prisma.Tag$lesson_tagsArgs<ExtArgs>
+  _count?: boolean | Prisma.TagCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tag"]>
 
 export type TagSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -454,10 +684,20 @@ export type TagSelectScalar = {
 }
 
 export type TagOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "title" | "slug" | "description" | "visibility" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["tag"]>
+export type TagInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course_tags?: boolean | Prisma.Tag$course_tagsArgs<ExtArgs>
+  lesson_tags?: boolean | Prisma.Tag$lesson_tagsArgs<ExtArgs>
+  _count?: boolean | Prisma.TagCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type TagIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type TagIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $TagPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Tag"
-  objects: {}
+  objects: {
+    course_tags: Prisma.$CourseTagPayload<ExtArgs>[]
+    lesson_tags: Prisma.$LessonTagPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -862,6 +1102,8 @@ readonly fields: TagFieldRefs;
  */
 export interface Prisma__TagClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  course_tags<T extends Prisma.Tag$course_tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tag$course_tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CourseTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  lesson_tags<T extends Prisma.Tag$lesson_tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tag$lesson_tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -917,6 +1159,10 @@ export type TagFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
+  /**
    * Filter, which Tag to fetch.
    */
   where: Prisma.TagWhereUniqueInput
@@ -935,6 +1181,10 @@ export type TagFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
+  /**
    * Filter, which Tag to fetch.
    */
   where: Prisma.TagWhereUniqueInput
@@ -952,6 +1202,10 @@ export type TagFindFirstArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the Tag
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
   /**
    * Filter, which Tag to fetch.
    */
@@ -1001,6 +1255,10 @@ export type TagFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
+  /**
    * Filter, which Tag to fetch.
    */
   where?: Prisma.TagWhereInput
@@ -1048,6 +1306,10 @@ export type TagFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Tag
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
   /**
    * Filter, which Tags to fetch.
    */
@@ -1097,6 +1359,10 @@ export type TagCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
+  /**
    * The data needed to create a Tag.
    */
   data: Prisma.XOR<Prisma.TagCreateInput, Prisma.TagUncheckedCreateInput>
@@ -1144,6 +1410,10 @@ export type TagUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
    * Omit specific fields from the Tag
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
   /**
    * The data needed to update a Tag.
    */
@@ -1211,6 +1481,10 @@ export type TagUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
+  /**
    * The filter to search for the Tag to update in case it exists.
    */
   where: Prisma.TagWhereUniqueInput
@@ -1237,6 +1511,10 @@ export type TagDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
+  /**
    * Filter which Tag to delete.
    */
   where: Prisma.TagWhereUniqueInput
@@ -1257,6 +1535,54 @@ export type TagDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 
 /**
+ * Tag.course_tags
+ */
+export type Tag$course_tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CourseTag
+   */
+  select?: Prisma.CourseTagSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CourseTag
+   */
+  omit?: Prisma.CourseTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseTagInclude<ExtArgs> | null
+  where?: Prisma.CourseTagWhereInput
+  orderBy?: Prisma.CourseTagOrderByWithRelationInput | Prisma.CourseTagOrderByWithRelationInput[]
+  cursor?: Prisma.CourseTagWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CourseTagScalarFieldEnum | Prisma.CourseTagScalarFieldEnum[]
+}
+
+/**
+ * Tag.lesson_tags
+ */
+export type Tag$lesson_tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LessonTag
+   */
+  select?: Prisma.LessonTagSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LessonTag
+   */
+  omit?: Prisma.LessonTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
+  where?: Prisma.LessonTagWhereInput
+  orderBy?: Prisma.LessonTagOrderByWithRelationInput | Prisma.LessonTagOrderByWithRelationInput[]
+  cursor?: Prisma.LessonTagWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LessonTagScalarFieldEnum | Prisma.LessonTagScalarFieldEnum[]
+}
+
+/**
  * Tag without action
  */
 export type TagDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1268,4 +1594,8 @@ export type TagDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * Omit specific fields from the Tag
    */
   omit?: Prisma.TagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TagInclude<ExtArgs> | null
 }

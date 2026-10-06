@@ -206,6 +206,7 @@ export type ReadinessPolicyWhereInput = {
   status?: Prisma.EnumEntityStatusFilter<"ReadinessPolicy"> | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFilter<"ReadinessPolicy"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ReadinessPolicy"> | Date | string
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }
 
 export type ReadinessPolicyOrderByWithRelationInput = {
@@ -218,6 +219,7 @@ export type ReadinessPolicyOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  scoring_profile?: Prisma.ScoringProfileOrderByWithRelationInput
 }
 
 export type ReadinessPolicyWhereUniqueInput = Prisma.AtLeast<{
@@ -234,6 +236,7 @@ export type ReadinessPolicyWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumEntityStatusFilter<"ReadinessPolicy"> | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFilter<"ReadinessPolicy"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ReadinessPolicy"> | Date | string
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }, "id" | "tenant_id_key">
 
 export type ReadinessPolicyOrderByWithAggregationInput = {
@@ -268,14 +271,13 @@ export type ReadinessPolicyScalarWhereWithAggregatesInput = {
 
 export type ReadinessPolicyCreateInput = {
   id: string
-  tenant_id: string
   key: string
-  scoring_profile_id: string
   cta_policy_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.EntityStatus
   created_at?: Date | string
   updated_at?: Date | string
+  scoring_profile: Prisma.ScoringProfileCreateNestedOneWithoutReadiness_policiesInput
 }
 
 export type ReadinessPolicyUncheckedCreateInput = {
@@ -292,14 +294,13 @@ export type ReadinessPolicyUncheckedCreateInput = {
 
 export type ReadinessPolicyUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   cta_policy_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  scoring_profile?: Prisma.ScoringProfileUpdateOneRequiredWithoutReadiness_policiesNestedInput
 }
 
 export type ReadinessPolicyUncheckedUpdateInput = {
@@ -328,9 +329,7 @@ export type ReadinessPolicyCreateManyInput = {
 
 export type ReadinessPolicyUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   cta_policy_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
@@ -348,6 +347,16 @@ export type ReadinessPolicyUncheckedUpdateManyInput = {
   status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReadinessPolicyListRelationFilter = {
+  every?: Prisma.ReadinessPolicyWhereInput
+  some?: Prisma.ReadinessPolicyWhereInput
+  none?: Prisma.ReadinessPolicyWhereInput
+}
+
+export type ReadinessPolicyOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ReadinessPolicyTenant_idKeyCompoundUniqueInput = {
@@ -387,6 +396,149 @@ export type ReadinessPolicyMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type ReadinessPolicyCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.ReadinessPolicyCreateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput> | Prisma.ReadinessPolicyCreateWithoutScoring_profileInput[] | Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput | Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.ReadinessPolicyCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+}
+
+export type ReadinessPolicyUncheckedCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.ReadinessPolicyCreateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput> | Prisma.ReadinessPolicyCreateWithoutScoring_profileInput[] | Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput | Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.ReadinessPolicyCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+}
+
+export type ReadinessPolicyUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.ReadinessPolicyCreateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput> | Prisma.ReadinessPolicyCreateWithoutScoring_profileInput[] | Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput | Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.ReadinessPolicyUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.ReadinessPolicyUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.ReadinessPolicyCreateManyScoring_profileInputEnvelope
+  set?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  disconnect?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  delete?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  connect?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  update?: Prisma.ReadinessPolicyUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.ReadinessPolicyUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.ReadinessPolicyUpdateManyWithWhereWithoutScoring_profileInput | Prisma.ReadinessPolicyUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.ReadinessPolicyScalarWhereInput | Prisma.ReadinessPolicyScalarWhereInput[]
+}
+
+export type ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.ReadinessPolicyCreateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput> | Prisma.ReadinessPolicyCreateWithoutScoring_profileInput[] | Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput | Prisma.ReadinessPolicyCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.ReadinessPolicyUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.ReadinessPolicyUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.ReadinessPolicyCreateManyScoring_profileInputEnvelope
+  set?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  disconnect?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  delete?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  connect?: Prisma.ReadinessPolicyWhereUniqueInput | Prisma.ReadinessPolicyWhereUniqueInput[]
+  update?: Prisma.ReadinessPolicyUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.ReadinessPolicyUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.ReadinessPolicyUpdateManyWithWhereWithoutScoring_profileInput | Prisma.ReadinessPolicyUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.ReadinessPolicyScalarWhereInput | Prisma.ReadinessPolicyScalarWhereInput[]
+}
+
+export type ReadinessPolicyCreateWithoutScoring_profileInput = {
+  id: string
+  key: string
+  cta_policy_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.EntityStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ReadinessPolicyUncheckedCreateWithoutScoring_profileInput = {
+  id: string
+  key: string
+  cta_policy_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.EntityStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ReadinessPolicyCreateOrConnectWithoutScoring_profileInput = {
+  where: Prisma.ReadinessPolicyWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReadinessPolicyCreateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type ReadinessPolicyCreateManyScoring_profileInputEnvelope = {
+  data: Prisma.ReadinessPolicyCreateManyScoring_profileInput | Prisma.ReadinessPolicyCreateManyScoring_profileInput[]
+  skipDuplicates?: boolean
+}
+
+export type ReadinessPolicyUpsertWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.ReadinessPolicyWhereUniqueInput
+  update: Prisma.XOR<Prisma.ReadinessPolicyUpdateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedUpdateWithoutScoring_profileInput>
+  create: Prisma.XOR<Prisma.ReadinessPolicyCreateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type ReadinessPolicyUpdateWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.ReadinessPolicyWhereUniqueInput
+  data: Prisma.XOR<Prisma.ReadinessPolicyUpdateWithoutScoring_profileInput, Prisma.ReadinessPolicyUncheckedUpdateWithoutScoring_profileInput>
+}
+
+export type ReadinessPolicyUpdateManyWithWhereWithoutScoring_profileInput = {
+  where: Prisma.ReadinessPolicyScalarWhereInput
+  data: Prisma.XOR<Prisma.ReadinessPolicyUpdateManyMutationInput, Prisma.ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileInput>
+}
+
+export type ReadinessPolicyScalarWhereInput = {
+  AND?: Prisma.ReadinessPolicyScalarWhereInput | Prisma.ReadinessPolicyScalarWhereInput[]
+  OR?: Prisma.ReadinessPolicyScalarWhereInput[]
+  NOT?: Prisma.ReadinessPolicyScalarWhereInput | Prisma.ReadinessPolicyScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ReadinessPolicy"> | string
+  tenant_id?: Prisma.UuidFilter<"ReadinessPolicy"> | string
+  key?: Prisma.StringFilter<"ReadinessPolicy"> | string
+  scoring_profile_id?: Prisma.UuidFilter<"ReadinessPolicy"> | string
+  cta_policy_json?: Prisma.JsonFilter<"ReadinessPolicy">
+  legal_copy_json?: Prisma.JsonNullableFilter<"ReadinessPolicy">
+  status?: Prisma.EnumEntityStatusFilter<"ReadinessPolicy"> | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFilter<"ReadinessPolicy"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"ReadinessPolicy"> | Date | string
+}
+
+export type ReadinessPolicyCreateManyScoring_profileInput = {
+  id: string
+  key: string
+  cta_policy_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.EntityStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ReadinessPolicyUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  cta_policy_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReadinessPolicyUncheckedUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  cta_policy_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReadinessPolicyUncheckedUpdateManyWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  cta_policy_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  legal_copy_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type ReadinessPolicySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -399,6 +551,7 @@ export type ReadinessPolicySelect<ExtArgs extends runtime.Types.Extensions.Inter
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["readinessPolicy"]>
 
 export type ReadinessPolicySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -411,6 +564,7 @@ export type ReadinessPolicySelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["readinessPolicy"]>
 
 export type ReadinessPolicySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -423,6 +577,7 @@ export type ReadinessPolicySelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["readinessPolicy"]>
 
 export type ReadinessPolicySelectScalar = {
@@ -438,10 +593,21 @@ export type ReadinessPolicySelectScalar = {
 }
 
 export type ReadinessPolicyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "scoring_profile_id" | "cta_policy_json" | "legal_copy_json" | "status" | "created_at" | "updated_at", ExtArgs["result"]["readinessPolicy"]>
+export type ReadinessPolicyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type ReadinessPolicyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type ReadinessPolicyIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
 
 export type $ReadinessPolicyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ReadinessPolicy"
-  objects: {}
+  objects: {
+    scoring_profile: Prisma.$ScoringProfilePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -846,6 +1012,7 @@ readonly fields: ReadinessPolicyFieldRefs;
  */
 export interface Prisma__ReadinessPolicyClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  scoring_profile<T extends Prisma.ScoringProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__ScoringProfileClient<runtime.Types.Result.GetResult<Prisma.$ScoringProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -901,6 +1068,10 @@ export type ReadinessPolicyFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
+  /**
    * Filter, which ReadinessPolicy to fetch.
    */
   where: Prisma.ReadinessPolicyWhereUniqueInput
@@ -919,6 +1090,10 @@ export type ReadinessPolicyFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
+  /**
    * Filter, which ReadinessPolicy to fetch.
    */
   where: Prisma.ReadinessPolicyWhereUniqueInput
@@ -936,6 +1111,10 @@ export type ReadinessPolicyFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the ReadinessPolicy
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
   /**
    * Filter, which ReadinessPolicy to fetch.
    */
@@ -985,6 +1164,10 @@ export type ReadinessPolicyFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
+  /**
    * Filter, which ReadinessPolicy to fetch.
    */
   where?: Prisma.ReadinessPolicyWhereInput
@@ -1032,6 +1215,10 @@ export type ReadinessPolicyFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the ReadinessPolicy
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
   /**
    * Filter, which ReadinessPolicies to fetch.
    */
@@ -1081,6 +1268,10 @@ export type ReadinessPolicyCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
+  /**
    * The data needed to create a ReadinessPolicy.
    */
   data: Prisma.XOR<Prisma.ReadinessPolicyCreateInput, Prisma.ReadinessPolicyUncheckedCreateInput>
@@ -1114,6 +1305,10 @@ export type ReadinessPolicyCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.ReadinessPolicyCreateManyInput | Prisma.ReadinessPolicyCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1128,6 +1323,10 @@ export type ReadinessPolicyUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ReadinessPolicy
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
   /**
    * The data needed to update a ReadinessPolicy.
    */
@@ -1180,6 +1379,10 @@ export type ReadinessPolicyUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many ReadinessPolicies to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1194,6 +1397,10 @@ export type ReadinessPolicyUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ReadinessPolicy
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
   /**
    * The filter to search for the ReadinessPolicy to update in case it exists.
    */
@@ -1220,6 +1427,10 @@ export type ReadinessPolicyDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ReadinessPolicy
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
   /**
    * Filter which ReadinessPolicy to delete.
    */
@@ -1252,4 +1463,8 @@ export type ReadinessPolicyDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ReadinessPolicy
    */
   omit?: Prisma.ReadinessPolicyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReadinessPolicyInclude<ExtArgs> | null
 }

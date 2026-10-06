@@ -190,6 +190,8 @@ export type BadgeAwardWhereInput = {
   membership_id?: Prisma.UuidFilter<"BadgeAward"> | string
   awarded_at?: Prisma.DateTimeFilter<"BadgeAward"> | Date | string
   source_event_id?: Prisma.UuidNullableFilter<"BadgeAward"> | string | null
+  badge?: Prisma.XOR<Prisma.BadgeScalarRelationFilter, Prisma.BadgeWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type BadgeAwardOrderByWithRelationInput = {
@@ -199,6 +201,8 @@ export type BadgeAwardOrderByWithRelationInput = {
   membership_id?: Prisma.SortOrder
   awarded_at?: Prisma.SortOrder
   source_event_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  badge?: Prisma.BadgeOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type BadgeAwardWhereUniqueInput = Prisma.AtLeast<{
@@ -212,6 +216,8 @@ export type BadgeAwardWhereUniqueInput = Prisma.AtLeast<{
   membership_id?: Prisma.UuidFilter<"BadgeAward"> | string
   awarded_at?: Prisma.DateTimeFilter<"BadgeAward"> | Date | string
   source_event_id?: Prisma.UuidNullableFilter<"BadgeAward"> | string | null
+  badge?: Prisma.XOR<Prisma.BadgeScalarRelationFilter, Prisma.BadgeWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_badge_id_membership_id">
 
 export type BadgeAwardOrderByWithAggregationInput = {
@@ -240,11 +246,10 @@ export type BadgeAwardScalarWhereWithAggregatesInput = {
 
 export type BadgeAwardCreateInput = {
   id: string
-  tenant_id: string
-  badge_id: string
-  membership_id: string
   awarded_at?: Date | string
   source_event_id?: string | null
+  badge: Prisma.BadgeCreateNestedOneWithoutBadge_awardsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutBadge_awardsInput
 }
 
 export type BadgeAwardUncheckedCreateInput = {
@@ -258,11 +263,10 @@ export type BadgeAwardUncheckedCreateInput = {
 
 export type BadgeAwardUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  badge_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  badge?: Prisma.BadgeUpdateOneRequiredWithoutBadge_awardsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutBadge_awardsNestedInput
 }
 
 export type BadgeAwardUncheckedUpdateInput = {
@@ -285,9 +289,6 @@ export type BadgeAwardCreateManyInput = {
 
 export type BadgeAwardUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  badge_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -299,6 +300,16 @@ export type BadgeAwardUncheckedUpdateManyInput = {
   membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type BadgeAwardListRelationFilter = {
+  every?: Prisma.BadgeAwardWhereInput
+  some?: Prisma.BadgeAwardWhereInput
+  none?: Prisma.BadgeAwardWhereInput
+}
+
+export type BadgeAwardOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type BadgeAwardTenant_idBadge_idMembership_idCompoundUniqueInput = {
@@ -334,6 +345,238 @@ export type BadgeAwardMinOrderByAggregateInput = {
   source_event_id?: Prisma.SortOrder
 }
 
+export type BadgeAwardCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutMembershipInput, Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput> | Prisma.BadgeAwardCreateWithoutMembershipInput[] | Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput | Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.BadgeAwardCreateManyMembershipInputEnvelope
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+}
+
+export type BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutMembershipInput, Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput> | Prisma.BadgeAwardCreateWithoutMembershipInput[] | Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput | Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.BadgeAwardCreateManyMembershipInputEnvelope
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+}
+
+export type BadgeAwardUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutMembershipInput, Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput> | Prisma.BadgeAwardCreateWithoutMembershipInput[] | Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput | Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.BadgeAwardUpsertWithWhereUniqueWithoutMembershipInput | Prisma.BadgeAwardUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.BadgeAwardCreateManyMembershipInputEnvelope
+  set?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  disconnect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  delete?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  update?: Prisma.BadgeAwardUpdateWithWhereUniqueWithoutMembershipInput | Prisma.BadgeAwardUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.BadgeAwardUpdateManyWithWhereWithoutMembershipInput | Prisma.BadgeAwardUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.BadgeAwardScalarWhereInput | Prisma.BadgeAwardScalarWhereInput[]
+}
+
+export type BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutMembershipInput, Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput> | Prisma.BadgeAwardCreateWithoutMembershipInput[] | Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput | Prisma.BadgeAwardCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.BadgeAwardUpsertWithWhereUniqueWithoutMembershipInput | Prisma.BadgeAwardUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.BadgeAwardCreateManyMembershipInputEnvelope
+  set?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  disconnect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  delete?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  update?: Prisma.BadgeAwardUpdateWithWhereUniqueWithoutMembershipInput | Prisma.BadgeAwardUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.BadgeAwardUpdateManyWithWhereWithoutMembershipInput | Prisma.BadgeAwardUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.BadgeAwardScalarWhereInput | Prisma.BadgeAwardScalarWhereInput[]
+}
+
+export type BadgeAwardCreateNestedManyWithoutBadgeInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutBadgeInput, Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput> | Prisma.BadgeAwardCreateWithoutBadgeInput[] | Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput | Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput[]
+  createMany?: Prisma.BadgeAwardCreateManyBadgeInputEnvelope
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+}
+
+export type BadgeAwardUncheckedCreateNestedManyWithoutBadgeInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutBadgeInput, Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput> | Prisma.BadgeAwardCreateWithoutBadgeInput[] | Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput | Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput[]
+  createMany?: Prisma.BadgeAwardCreateManyBadgeInputEnvelope
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+}
+
+export type BadgeAwardUpdateManyWithoutBadgeNestedInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutBadgeInput, Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput> | Prisma.BadgeAwardCreateWithoutBadgeInput[] | Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput | Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput[]
+  upsert?: Prisma.BadgeAwardUpsertWithWhereUniqueWithoutBadgeInput | Prisma.BadgeAwardUpsertWithWhereUniqueWithoutBadgeInput[]
+  createMany?: Prisma.BadgeAwardCreateManyBadgeInputEnvelope
+  set?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  disconnect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  delete?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  update?: Prisma.BadgeAwardUpdateWithWhereUniqueWithoutBadgeInput | Prisma.BadgeAwardUpdateWithWhereUniqueWithoutBadgeInput[]
+  updateMany?: Prisma.BadgeAwardUpdateManyWithWhereWithoutBadgeInput | Prisma.BadgeAwardUpdateManyWithWhereWithoutBadgeInput[]
+  deleteMany?: Prisma.BadgeAwardScalarWhereInput | Prisma.BadgeAwardScalarWhereInput[]
+}
+
+export type BadgeAwardUncheckedUpdateManyWithoutBadgeNestedInput = {
+  create?: Prisma.XOR<Prisma.BadgeAwardCreateWithoutBadgeInput, Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput> | Prisma.BadgeAwardCreateWithoutBadgeInput[] | Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput[]
+  connectOrCreate?: Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput | Prisma.BadgeAwardCreateOrConnectWithoutBadgeInput[]
+  upsert?: Prisma.BadgeAwardUpsertWithWhereUniqueWithoutBadgeInput | Prisma.BadgeAwardUpsertWithWhereUniqueWithoutBadgeInput[]
+  createMany?: Prisma.BadgeAwardCreateManyBadgeInputEnvelope
+  set?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  disconnect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  delete?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  connect?: Prisma.BadgeAwardWhereUniqueInput | Prisma.BadgeAwardWhereUniqueInput[]
+  update?: Prisma.BadgeAwardUpdateWithWhereUniqueWithoutBadgeInput | Prisma.BadgeAwardUpdateWithWhereUniqueWithoutBadgeInput[]
+  updateMany?: Prisma.BadgeAwardUpdateManyWithWhereWithoutBadgeInput | Prisma.BadgeAwardUpdateManyWithWhereWithoutBadgeInput[]
+  deleteMany?: Prisma.BadgeAwardScalarWhereInput | Prisma.BadgeAwardScalarWhereInput[]
+}
+
+export type BadgeAwardCreateWithoutMembershipInput = {
+  id: string
+  awarded_at?: Date | string
+  source_event_id?: string | null
+  badge: Prisma.BadgeCreateNestedOneWithoutBadge_awardsInput
+}
+
+export type BadgeAwardUncheckedCreateWithoutMembershipInput = {
+  id: string
+  badge_id: string
+  awarded_at?: Date | string
+  source_event_id?: string | null
+}
+
+export type BadgeAwardCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.BadgeAwardWhereUniqueInput
+  create: Prisma.XOR<Prisma.BadgeAwardCreateWithoutMembershipInput, Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput>
+}
+
+export type BadgeAwardCreateManyMembershipInputEnvelope = {
+  data: Prisma.BadgeAwardCreateManyMembershipInput | Prisma.BadgeAwardCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type BadgeAwardUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.BadgeAwardWhereUniqueInput
+  update: Prisma.XOR<Prisma.BadgeAwardUpdateWithoutMembershipInput, Prisma.BadgeAwardUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.BadgeAwardCreateWithoutMembershipInput, Prisma.BadgeAwardUncheckedCreateWithoutMembershipInput>
+}
+
+export type BadgeAwardUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.BadgeAwardWhereUniqueInput
+  data: Prisma.XOR<Prisma.BadgeAwardUpdateWithoutMembershipInput, Prisma.BadgeAwardUncheckedUpdateWithoutMembershipInput>
+}
+
+export type BadgeAwardUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.BadgeAwardScalarWhereInput
+  data: Prisma.XOR<Prisma.BadgeAwardUpdateManyMutationInput, Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type BadgeAwardScalarWhereInput = {
+  AND?: Prisma.BadgeAwardScalarWhereInput | Prisma.BadgeAwardScalarWhereInput[]
+  OR?: Prisma.BadgeAwardScalarWhereInput[]
+  NOT?: Prisma.BadgeAwardScalarWhereInput | Prisma.BadgeAwardScalarWhereInput[]
+  id?: Prisma.UuidFilter<"BadgeAward"> | string
+  tenant_id?: Prisma.UuidFilter<"BadgeAward"> | string
+  badge_id?: Prisma.UuidFilter<"BadgeAward"> | string
+  membership_id?: Prisma.UuidFilter<"BadgeAward"> | string
+  awarded_at?: Prisma.DateTimeFilter<"BadgeAward"> | Date | string
+  source_event_id?: Prisma.UuidNullableFilter<"BadgeAward"> | string | null
+}
+
+export type BadgeAwardCreateWithoutBadgeInput = {
+  id: string
+  awarded_at?: Date | string
+  source_event_id?: string | null
+  membership: Prisma.MembershipCreateNestedOneWithoutBadge_awardsInput
+}
+
+export type BadgeAwardUncheckedCreateWithoutBadgeInput = {
+  id: string
+  membership_id: string
+  awarded_at?: Date | string
+  source_event_id?: string | null
+}
+
+export type BadgeAwardCreateOrConnectWithoutBadgeInput = {
+  where: Prisma.BadgeAwardWhereUniqueInput
+  create: Prisma.XOR<Prisma.BadgeAwardCreateWithoutBadgeInput, Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput>
+}
+
+export type BadgeAwardCreateManyBadgeInputEnvelope = {
+  data: Prisma.BadgeAwardCreateManyBadgeInput | Prisma.BadgeAwardCreateManyBadgeInput[]
+  skipDuplicates?: boolean
+}
+
+export type BadgeAwardUpsertWithWhereUniqueWithoutBadgeInput = {
+  where: Prisma.BadgeAwardWhereUniqueInput
+  update: Prisma.XOR<Prisma.BadgeAwardUpdateWithoutBadgeInput, Prisma.BadgeAwardUncheckedUpdateWithoutBadgeInput>
+  create: Prisma.XOR<Prisma.BadgeAwardCreateWithoutBadgeInput, Prisma.BadgeAwardUncheckedCreateWithoutBadgeInput>
+}
+
+export type BadgeAwardUpdateWithWhereUniqueWithoutBadgeInput = {
+  where: Prisma.BadgeAwardWhereUniqueInput
+  data: Prisma.XOR<Prisma.BadgeAwardUpdateWithoutBadgeInput, Prisma.BadgeAwardUncheckedUpdateWithoutBadgeInput>
+}
+
+export type BadgeAwardUpdateManyWithWhereWithoutBadgeInput = {
+  where: Prisma.BadgeAwardScalarWhereInput
+  data: Prisma.XOR<Prisma.BadgeAwardUpdateManyMutationInput, Prisma.BadgeAwardUncheckedUpdateManyWithoutBadgeInput>
+}
+
+export type BadgeAwardCreateManyMembershipInput = {
+  id: string
+  badge_id: string
+  awarded_at?: Date | string
+  source_event_id?: string | null
+}
+
+export type BadgeAwardUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  badge?: Prisma.BadgeUpdateOneRequiredWithoutBadge_awardsNestedInput
+}
+
+export type BadgeAwardUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  badge_id?: Prisma.StringFieldUpdateOperationsInput | string
+  awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type BadgeAwardUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  badge_id?: Prisma.StringFieldUpdateOperationsInput | string
+  awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type BadgeAwardCreateManyBadgeInput = {
+  id: string
+  membership_id: string
+  awarded_at?: Date | string
+  source_event_id?: string | null
+}
+
+export type BadgeAwardUpdateWithoutBadgeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutBadge_awardsNestedInput
+}
+
+export type BadgeAwardUncheckedUpdateWithoutBadgeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type BadgeAwardUncheckedUpdateManyWithoutBadgeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  awarded_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
 
 
 export type BadgeAwardSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -343,6 +586,8 @@ export type BadgeAwardSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   membership_id?: boolean
   awarded_at?: boolean
   source_event_id?: boolean
+  badge?: boolean | Prisma.BadgeDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["badgeAward"]>
 
 export type BadgeAwardSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -352,6 +597,8 @@ export type BadgeAwardSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   membership_id?: boolean
   awarded_at?: boolean
   source_event_id?: boolean
+  badge?: boolean | Prisma.BadgeDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["badgeAward"]>
 
 export type BadgeAwardSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -361,6 +608,8 @@ export type BadgeAwardSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   membership_id?: boolean
   awarded_at?: boolean
   source_event_id?: boolean
+  badge?: boolean | Prisma.BadgeDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["badgeAward"]>
 
 export type BadgeAwardSelectScalar = {
@@ -373,10 +622,25 @@ export type BadgeAwardSelectScalar = {
 }
 
 export type BadgeAwardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "badge_id" | "membership_id" | "awarded_at" | "source_event_id", ExtArgs["result"]["badgeAward"]>
+export type BadgeAwardInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  badge?: boolean | Prisma.BadgeDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type BadgeAwardIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  badge?: boolean | Prisma.BadgeDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type BadgeAwardIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  badge?: boolean | Prisma.BadgeDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $BadgeAwardPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BadgeAward"
-  objects: {}
+  objects: {
+    badge: Prisma.$BadgePayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -778,6 +1042,8 @@ readonly fields: BadgeAwardFieldRefs;
  */
 export interface Prisma__BadgeAwardClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  badge<T extends Prisma.BadgeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BadgeDefaultArgs<ExtArgs>>): Prisma.Prisma__BadgeClient<runtime.Types.Result.GetResult<Prisma.$BadgePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -830,6 +1096,10 @@ export type BadgeAwardFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
+  /**
    * Filter, which BadgeAward to fetch.
    */
   where: Prisma.BadgeAwardWhereUniqueInput
@@ -848,6 +1118,10 @@ export type BadgeAwardFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
+  /**
    * Filter, which BadgeAward to fetch.
    */
   where: Prisma.BadgeAwardWhereUniqueInput
@@ -865,6 +1139,10 @@ export type BadgeAwardFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the BadgeAward
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
   /**
    * Filter, which BadgeAward to fetch.
    */
@@ -914,6 +1192,10 @@ export type BadgeAwardFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
+  /**
    * Filter, which BadgeAward to fetch.
    */
   where?: Prisma.BadgeAwardWhereInput
@@ -961,6 +1243,10 @@ export type BadgeAwardFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the BadgeAward
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
   /**
    * Filter, which BadgeAwards to fetch.
    */
@@ -1010,6 +1296,10 @@ export type BadgeAwardCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
+  /**
    * The data needed to create a BadgeAward.
    */
   data: Prisma.XOR<Prisma.BadgeAwardCreateInput, Prisma.BadgeAwardUncheckedCreateInput>
@@ -1043,6 +1333,10 @@ export type BadgeAwardCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    */
   data: Prisma.BadgeAwardCreateManyInput | Prisma.BadgeAwardCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1057,6 +1351,10 @@ export type BadgeAwardUpdateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the BadgeAward
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
   /**
    * The data needed to update a BadgeAward.
    */
@@ -1109,6 +1407,10 @@ export type BadgeAwardUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many BadgeAwards to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1123,6 +1425,10 @@ export type BadgeAwardUpsertArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the BadgeAward
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
   /**
    * The filter to search for the BadgeAward to update in case it exists.
    */
@@ -1149,6 +1455,10 @@ export type BadgeAwardDeleteArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the BadgeAward
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
   /**
    * Filter which BadgeAward to delete.
    */
@@ -1181,4 +1491,8 @@ export type BadgeAwardDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the BadgeAward
    */
   omit?: Prisma.BadgeAwardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BadgeAwardInclude<ExtArgs> | null
 }

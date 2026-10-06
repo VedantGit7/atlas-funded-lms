@@ -219,6 +219,12 @@ export async function deleteDimensionRecord(args: {
   tx: Tx;
   dimensionId: string;
 }): Promise<boolean> {
+  // Only reached for a dimension with no signals or scores (see
+  // countDimensionReferences), so its item weights have never counted.
+  await args.tx.$executeRaw`
+    delete from item_dimension_weights
+    where dimension_id = ${args.dimensionId}::uuid
+  `;
   const count = await args.tx.$executeRaw`
     delete from competency_dimensions
     where id = ${args.dimensionId}::uuid

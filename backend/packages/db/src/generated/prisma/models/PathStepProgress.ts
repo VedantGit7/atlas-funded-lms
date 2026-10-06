@@ -198,6 +198,7 @@ export type PathStepProgressWhereInput = {
   status?: Prisma.StringFilter<"PathStepProgress"> | string
   completed_at?: Prisma.DateTimeNullableFilter<"PathStepProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"PathStepProgress"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type PathStepProgressOrderByWithRelationInput = {
@@ -208,6 +209,7 @@ export type PathStepProgressOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type PathStepProgressWhereUniqueInput = Prisma.AtLeast<{
@@ -222,6 +224,7 @@ export type PathStepProgressWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"PathStepProgress"> | string
   completed_at?: Prisma.DateTimeNullableFilter<"PathStepProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"PathStepProgress"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_path_step_id_membership_id">
 
 export type PathStepProgressOrderByWithAggregationInput = {
@@ -252,12 +255,11 @@ export type PathStepProgressScalarWhereWithAggregatesInput = {
 
 export type PathStepProgressCreateInput = {
   id: string
-  tenant_id: string
   path_step_id: string
-  membership_id: string
   status?: string
   completed_at?: Date | string | null
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutPath_step_progressInput
 }
 
 export type PathStepProgressUncheckedCreateInput = {
@@ -272,12 +274,11 @@ export type PathStepProgressUncheckedCreateInput = {
 
 export type PathStepProgressUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   path_step_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPath_step_progressNestedInput
 }
 
 export type PathStepProgressUncheckedUpdateInput = {
@@ -302,9 +303,7 @@ export type PathStepProgressCreateManyInput = {
 
 export type PathStepProgressUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   path_step_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -318,6 +317,16 @@ export type PathStepProgressUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PathStepProgressListRelationFilter = {
+  every?: Prisma.PathStepProgressWhereInput
+  some?: Prisma.PathStepProgressWhereInput
+  none?: Prisma.PathStepProgressWhereInput
+}
+
+export type PathStepProgressOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type PathStepProgressTenant_idPath_step_idMembership_idCompoundUniqueInput = {
@@ -356,6 +365,135 @@ export type PathStepProgressMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type PathStepProgressCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PathStepProgressCreateWithoutMembershipInput, Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput> | Prisma.PathStepProgressCreateWithoutMembershipInput[] | Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput | Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PathStepProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+}
+
+export type PathStepProgressUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PathStepProgressCreateWithoutMembershipInput, Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput> | Prisma.PathStepProgressCreateWithoutMembershipInput[] | Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput | Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PathStepProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+}
+
+export type PathStepProgressUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PathStepProgressCreateWithoutMembershipInput, Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput> | Prisma.PathStepProgressCreateWithoutMembershipInput[] | Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput | Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PathStepProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PathStepProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PathStepProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  disconnect?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  delete?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  connect?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  update?: Prisma.PathStepProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PathStepProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PathStepProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.PathStepProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PathStepProgressScalarWhereInput | Prisma.PathStepProgressScalarWhereInput[]
+}
+
+export type PathStepProgressUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PathStepProgressCreateWithoutMembershipInput, Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput> | Prisma.PathStepProgressCreateWithoutMembershipInput[] | Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput | Prisma.PathStepProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PathStepProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PathStepProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PathStepProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  disconnect?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  delete?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  connect?: Prisma.PathStepProgressWhereUniqueInput | Prisma.PathStepProgressWhereUniqueInput[]
+  update?: Prisma.PathStepProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PathStepProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PathStepProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.PathStepProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PathStepProgressScalarWhereInput | Prisma.PathStepProgressScalarWhereInput[]
+}
+
+export type PathStepProgressCreateWithoutMembershipInput = {
+  id: string
+  path_step_id: string
+  status?: string
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type PathStepProgressUncheckedCreateWithoutMembershipInput = {
+  id: string
+  path_step_id: string
+  status?: string
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type PathStepProgressCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PathStepProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.PathStepProgressCreateWithoutMembershipInput, Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type PathStepProgressCreateManyMembershipInputEnvelope = {
+  data: Prisma.PathStepProgressCreateManyMembershipInput | Prisma.PathStepProgressCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PathStepProgressUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PathStepProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.PathStepProgressUpdateWithoutMembershipInput, Prisma.PathStepProgressUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PathStepProgressCreateWithoutMembershipInput, Prisma.PathStepProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type PathStepProgressUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PathStepProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.PathStepProgressUpdateWithoutMembershipInput, Prisma.PathStepProgressUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PathStepProgressUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PathStepProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.PathStepProgressUpdateManyMutationInput, Prisma.PathStepProgressUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PathStepProgressScalarWhereInput = {
+  AND?: Prisma.PathStepProgressScalarWhereInput | Prisma.PathStepProgressScalarWhereInput[]
+  OR?: Prisma.PathStepProgressScalarWhereInput[]
+  NOT?: Prisma.PathStepProgressScalarWhereInput | Prisma.PathStepProgressScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PathStepProgress"> | string
+  tenant_id?: Prisma.UuidFilter<"PathStepProgress"> | string
+  path_step_id?: Prisma.UuidFilter<"PathStepProgress"> | string
+  membership_id?: Prisma.UuidFilter<"PathStepProgress"> | string
+  status?: Prisma.StringFilter<"PathStepProgress"> | string
+  completed_at?: Prisma.DateTimeNullableFilter<"PathStepProgress"> | Date | string | null
+  updated_at?: Prisma.DateTimeFilter<"PathStepProgress"> | Date | string
+}
+
+export type PathStepProgressCreateManyMembershipInput = {
+  id: string
+  path_step_id: string
+  status?: string
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type PathStepProgressUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  path_step_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PathStepProgressUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  path_step_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PathStepProgressUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  path_step_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type PathStepProgressSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -366,6 +504,7 @@ export type PathStepProgressSelect<ExtArgs extends runtime.Types.Extensions.Inte
   status?: boolean
   completed_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathStepProgress"]>
 
 export type PathStepProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -376,6 +515,7 @@ export type PathStepProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   status?: boolean
   completed_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathStepProgress"]>
 
 export type PathStepProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -386,6 +526,7 @@ export type PathStepProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   status?: boolean
   completed_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathStepProgress"]>
 
 export type PathStepProgressSelectScalar = {
@@ -399,10 +540,21 @@ export type PathStepProgressSelectScalar = {
 }
 
 export type PathStepProgressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "path_step_id" | "membership_id" | "status" | "completed_at" | "updated_at", ExtArgs["result"]["pathStepProgress"]>
+export type PathStepProgressInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PathStepProgressIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PathStepProgressIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $PathStepProgressPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PathStepProgress"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -805,6 +957,7 @@ readonly fields: PathStepProgressFieldRefs;
  */
 export interface Prisma__PathStepProgressClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -858,6 +1011,10 @@ export type PathStepProgressFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
+  /**
    * Filter, which PathStepProgress to fetch.
    */
   where: Prisma.PathStepProgressWhereUniqueInput
@@ -876,6 +1033,10 @@ export type PathStepProgressFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
+  /**
    * Filter, which PathStepProgress to fetch.
    */
   where: Prisma.PathStepProgressWhereUniqueInput
@@ -893,6 +1054,10 @@ export type PathStepProgressFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the PathStepProgress
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
   /**
    * Filter, which PathStepProgress to fetch.
    */
@@ -942,6 +1107,10 @@ export type PathStepProgressFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
+  /**
    * Filter, which PathStepProgress to fetch.
    */
   where?: Prisma.PathStepProgressWhereInput
@@ -989,6 +1158,10 @@ export type PathStepProgressFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the PathStepProgress
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
   /**
    * Filter, which PathStepProgresses to fetch.
    */
@@ -1038,6 +1211,10 @@ export type PathStepProgressCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
+  /**
    * The data needed to create a PathStepProgress.
    */
   data: Prisma.XOR<Prisma.PathStepProgressCreateInput, Prisma.PathStepProgressUncheckedCreateInput>
@@ -1071,6 +1248,10 @@ export type PathStepProgressCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.PathStepProgressCreateManyInput | Prisma.PathStepProgressCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1085,6 +1266,10 @@ export type PathStepProgressUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the PathStepProgress
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
   /**
    * The data needed to update a PathStepProgress.
    */
@@ -1137,6 +1322,10 @@ export type PathStepProgressUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many PathStepProgresses to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1151,6 +1340,10 @@ export type PathStepProgressUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the PathStepProgress
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
   /**
    * The filter to search for the PathStepProgress to update in case it exists.
    */
@@ -1177,6 +1370,10 @@ export type PathStepProgressDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the PathStepProgress
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
   /**
    * Filter which PathStepProgress to delete.
    */
@@ -1209,4 +1406,8 @@ export type PathStepProgressDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the PathStepProgress
    */
   omit?: Prisma.PathStepProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepProgressInclude<ExtArgs> | null
 }

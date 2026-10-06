@@ -264,6 +264,7 @@ export type CompetencyBandWhereInput = {
   sort_order?: Prisma.IntFilter<"CompetencyBand"> | number
   created_at?: Prisma.DateTimeFilter<"CompetencyBand"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CompetencyBand"> | Date | string
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }
 
 export type CompetencyBandOrderByWithRelationInput = {
@@ -277,6 +278,7 @@ export type CompetencyBandOrderByWithRelationInput = {
   sort_order?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  scoring_profile?: Prisma.ScoringProfileOrderByWithRelationInput
 }
 
 export type CompetencyBandWhereUniqueInput = Prisma.AtLeast<{
@@ -294,6 +296,7 @@ export type CompetencyBandWhereUniqueInput = Prisma.AtLeast<{
   sort_order?: Prisma.IntFilter<"CompetencyBand"> | number
   created_at?: Prisma.DateTimeFilter<"CompetencyBand"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CompetencyBand"> | Date | string
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }, "id" | "tenant_id_scoring_profile_id_key">
 
 export type CompetencyBandOrderByWithAggregationInput = {
@@ -332,8 +335,6 @@ export type CompetencyBandScalarWhereWithAggregatesInput = {
 
 export type CompetencyBandCreateInput = {
   id: string
-  tenant_id: string
-  scoring_profile_id: string
   key: string
   label: string
   min_score: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -341,6 +342,7 @@ export type CompetencyBandCreateInput = {
   sort_order: number
   created_at?: Date | string
   updated_at?: Date | string
+  scoring_profile: Prisma.ScoringProfileCreateNestedOneWithoutCompetency_bandsInput
 }
 
 export type CompetencyBandUncheckedCreateInput = {
@@ -358,8 +360,6 @@ export type CompetencyBandUncheckedCreateInput = {
 
 export type CompetencyBandUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   min_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -367,6 +367,7 @@ export type CompetencyBandUpdateInput = {
   sort_order?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  scoring_profile?: Prisma.ScoringProfileUpdateOneRequiredWithoutCompetency_bandsNestedInput
 }
 
 export type CompetencyBandUncheckedUpdateInput = {
@@ -397,8 +398,6 @@ export type CompetencyBandCreateManyInput = {
 
 export type CompetencyBandUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   label?: Prisma.StringFieldUpdateOperationsInput | string
   min_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -419,6 +418,16 @@ export type CompetencyBandUncheckedUpdateManyInput = {
   sort_order?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyBandListRelationFilter = {
+  every?: Prisma.CompetencyBandWhereInput
+  some?: Prisma.CompetencyBandWhereInput
+  none?: Prisma.CompetencyBandWhereInput
+}
+
+export type CompetencyBandOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CompetencyBandTenant_idScoring_profile_idKeyCompoundUniqueInput = {
@@ -478,6 +487,156 @@ export type CompetencyBandSumOrderByAggregateInput = {
   sort_order?: Prisma.SortOrder
 }
 
+export type CompetencyBandCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.CompetencyBandCreateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyBandCreateWithoutScoring_profileInput[] | Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyBandCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+}
+
+export type CompetencyBandUncheckedCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.CompetencyBandCreateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyBandCreateWithoutScoring_profileInput[] | Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyBandCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+}
+
+export type CompetencyBandUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyBandCreateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyBandCreateWithoutScoring_profileInput[] | Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.CompetencyBandUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyBandUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyBandCreateManyScoring_profileInputEnvelope
+  set?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  disconnect?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  delete?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  connect?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  update?: Prisma.CompetencyBandUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyBandUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.CompetencyBandUpdateManyWithWhereWithoutScoring_profileInput | Prisma.CompetencyBandUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.CompetencyBandScalarWhereInput | Prisma.CompetencyBandScalarWhereInput[]
+}
+
+export type CompetencyBandUncheckedUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyBandCreateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyBandCreateWithoutScoring_profileInput[] | Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyBandCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.CompetencyBandUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyBandUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyBandCreateManyScoring_profileInputEnvelope
+  set?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  disconnect?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  delete?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  connect?: Prisma.CompetencyBandWhereUniqueInput | Prisma.CompetencyBandWhereUniqueInput[]
+  update?: Prisma.CompetencyBandUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyBandUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.CompetencyBandUpdateManyWithWhereWithoutScoring_profileInput | Prisma.CompetencyBandUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.CompetencyBandScalarWhereInput | Prisma.CompetencyBandScalarWhereInput[]
+}
+
+export type CompetencyBandCreateWithoutScoring_profileInput = {
+  id: string
+  key: string
+  label: string
+  min_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  max_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  sort_order: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CompetencyBandUncheckedCreateWithoutScoring_profileInput = {
+  id: string
+  key: string
+  label: string
+  min_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  max_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  sort_order: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CompetencyBandCreateOrConnectWithoutScoring_profileInput = {
+  where: Prisma.CompetencyBandWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencyBandCreateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type CompetencyBandCreateManyScoring_profileInputEnvelope = {
+  data: Prisma.CompetencyBandCreateManyScoring_profileInput | Prisma.CompetencyBandCreateManyScoring_profileInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompetencyBandUpsertWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.CompetencyBandWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompetencyBandUpdateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedUpdateWithoutScoring_profileInput>
+  create: Prisma.XOR<Prisma.CompetencyBandCreateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type CompetencyBandUpdateWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.CompetencyBandWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompetencyBandUpdateWithoutScoring_profileInput, Prisma.CompetencyBandUncheckedUpdateWithoutScoring_profileInput>
+}
+
+export type CompetencyBandUpdateManyWithWhereWithoutScoring_profileInput = {
+  where: Prisma.CompetencyBandScalarWhereInput
+  data: Prisma.XOR<Prisma.CompetencyBandUpdateManyMutationInput, Prisma.CompetencyBandUncheckedUpdateManyWithoutScoring_profileInput>
+}
+
+export type CompetencyBandScalarWhereInput = {
+  AND?: Prisma.CompetencyBandScalarWhereInput | Prisma.CompetencyBandScalarWhereInput[]
+  OR?: Prisma.CompetencyBandScalarWhereInput[]
+  NOT?: Prisma.CompetencyBandScalarWhereInput | Prisma.CompetencyBandScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CompetencyBand"> | string
+  tenant_id?: Prisma.UuidFilter<"CompetencyBand"> | string
+  scoring_profile_id?: Prisma.UuidFilter<"CompetencyBand"> | string
+  key?: Prisma.StringFilter<"CompetencyBand"> | string
+  label?: Prisma.StringFilter<"CompetencyBand"> | string
+  min_score?: Prisma.DecimalFilter<"CompetencyBand"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  max_score?: Prisma.DecimalFilter<"CompetencyBand"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  sort_order?: Prisma.IntFilter<"CompetencyBand"> | number
+  created_at?: Prisma.DateTimeFilter<"CompetencyBand"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"CompetencyBand"> | Date | string
+}
+
+export type CompetencyBandCreateManyScoring_profileInput = {
+  id: string
+  key: string
+  label: string
+  min_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  max_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  sort_order: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CompetencyBandUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  min_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  max_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyBandUncheckedUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  min_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  max_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyBandUncheckedUpdateManyWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  label?: Prisma.StringFieldUpdateOperationsInput | string
+  min_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  max_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  sort_order?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type CompetencyBandSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -491,6 +650,7 @@ export type CompetencyBandSelect<ExtArgs extends runtime.Types.Extensions.Intern
   sort_order?: boolean
   created_at?: boolean
   updated_at?: boolean
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencyBand"]>
 
 export type CompetencyBandSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -504,6 +664,7 @@ export type CompetencyBandSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   sort_order?: boolean
   created_at?: boolean
   updated_at?: boolean
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencyBand"]>
 
 export type CompetencyBandSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -517,6 +678,7 @@ export type CompetencyBandSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   sort_order?: boolean
   created_at?: boolean
   updated_at?: boolean
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencyBand"]>
 
 export type CompetencyBandSelectScalar = {
@@ -533,10 +695,21 @@ export type CompetencyBandSelectScalar = {
 }
 
 export type CompetencyBandOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "scoring_profile_id" | "key" | "label" | "min_score" | "max_score" | "sort_order" | "created_at" | "updated_at", ExtArgs["result"]["competencyBand"]>
+export type CompetencyBandInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type CompetencyBandIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type CompetencyBandIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
 
 export type $CompetencyBandPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompetencyBand"
-  objects: {}
+  objects: {
+    scoring_profile: Prisma.$ScoringProfilePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -942,6 +1115,7 @@ readonly fields: CompetencyBandFieldRefs;
  */
 export interface Prisma__CompetencyBandClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  scoring_profile<T extends Prisma.ScoringProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__ScoringProfileClient<runtime.Types.Result.GetResult<Prisma.$ScoringProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -998,6 +1172,10 @@ export type CompetencyBandFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyBand to fetch.
    */
   where: Prisma.CompetencyBandWhereUniqueInput
@@ -1016,6 +1194,10 @@ export type CompetencyBandFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyBand to fetch.
    */
   where: Prisma.CompetencyBandWhereUniqueInput
@@ -1033,6 +1215,10 @@ export type CompetencyBandFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the CompetencyBand
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
   /**
    * Filter, which CompetencyBand to fetch.
    */
@@ -1082,6 +1268,10 @@ export type CompetencyBandFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyBand to fetch.
    */
   where?: Prisma.CompetencyBandWhereInput
@@ -1129,6 +1319,10 @@ export type CompetencyBandFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the CompetencyBand
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
   /**
    * Filter, which CompetencyBands to fetch.
    */
@@ -1178,6 +1372,10 @@ export type CompetencyBandCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
+  /**
    * The data needed to create a CompetencyBand.
    */
   data: Prisma.XOR<Prisma.CompetencyBandCreateInput, Prisma.CompetencyBandUncheckedCreateInput>
@@ -1211,6 +1409,10 @@ export type CompetencyBandCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    */
   data: Prisma.CompetencyBandCreateManyInput | Prisma.CompetencyBandCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1225,6 +1427,10 @@ export type CompetencyBandUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the CompetencyBand
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
   /**
    * The data needed to update a CompetencyBand.
    */
@@ -1277,6 +1483,10 @@ export type CompetencyBandUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * Limit how many CompetencyBands to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1291,6 +1501,10 @@ export type CompetencyBandUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the CompetencyBand
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
   /**
    * The filter to search for the CompetencyBand to update in case it exists.
    */
@@ -1317,6 +1531,10 @@ export type CompetencyBandDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the CompetencyBand
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
   /**
    * Filter which CompetencyBand to delete.
    */
@@ -1349,4 +1567,8 @@ export type CompetencyBandDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the CompetencyBand
    */
   omit?: Prisma.CompetencyBandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyBandInclude<ExtArgs> | null
 }

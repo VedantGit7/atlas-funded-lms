@@ -54,10 +54,17 @@ async function insertCourse(tenant: IsolationTenantFixture, title: string): Prom
 async function insertMockTest(tenant: IsolationTenantFixture, title: string): Promise<string> {
   const id = randomUUID();
   await withTenantTx(tenantCtx(tenant), async (tx) => {
+    // A mock test must name an assessment of its own tenant (audit M3).
+    const assessmentId = randomUUID();
+    await tx.$executeRaw`
+      insert into assessments (id, tenant_id, slug, title, assessment_type, status, config_json, updated_at)
+      values (${assessmentId}::uuid, ${tenant.tenantId}::uuid, ${`assessment-${assessmentId.slice(0, 8)}`},
+              'Mock assessment', 'quiz', 'PUBLISHED'::"PublishStatus", '{}'::jsonb, now())
+    `;
     await tx.$executeRaw`
       insert into mock_tests (id, tenant_id, slug, title, assessment_id, status, created_at, updated_at)
       values (${id}::uuid, ${tenant.tenantId}::uuid, ${`mock-${id.slice(0, 8)}`}, ${title},
-              ${randomUUID()}::uuid, 'PUBLISHED'::"PublishStatus", now(), now())
+              ${assessmentId}::uuid, 'PUBLISHED'::"PublishStatus", now(), now())
     `;
   });
   return id;

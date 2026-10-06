@@ -234,6 +234,8 @@ export type LearningPathWhereInput = {
   created_at?: Prisma.DateTimeFilter<"LearningPath"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LearningPath"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"LearningPath"> | Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentListRelationFilter
+  path_steps?: Prisma.PathStepListRelationFilter
 }
 
 export type LearningPathOrderByWithRelationInput = {
@@ -249,10 +251,13 @@ export type LearningPathOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  path_enrollments?: Prisma.PathEnrollmentOrderByRelationAggregateInput
+  path_steps?: Prisma.PathStepOrderByRelationAggregateInput
 }
 
 export type LearningPathWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.LearningPathTenant_idIdCompoundUniqueInput
   AND?: Prisma.LearningPathWhereInput | Prisma.LearningPathWhereInput[]
   OR?: Prisma.LearningPathWhereInput[]
   NOT?: Prisma.LearningPathWhereInput | Prisma.LearningPathWhereInput[]
@@ -267,7 +272,9 @@ export type LearningPathWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"LearningPath"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LearningPath"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"LearningPath"> | Date | string | null
-}, "id">
+  path_enrollments?: Prisma.PathEnrollmentListRelationFilter
+  path_steps?: Prisma.PathStepListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type LearningPathOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -318,6 +325,8 @@ export type LearningPathCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentCreateNestedManyWithoutPathInput
+  path_steps?: Prisma.PathStepCreateNestedManyWithoutPathInput
 }
 
 export type LearningPathUncheckedCreateInput = {
@@ -333,6 +342,8 @@ export type LearningPathUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentUncheckedCreateNestedManyWithoutPathInput
+  path_steps?: Prisma.PathStepUncheckedCreateNestedManyWithoutPathInput
 }
 
 export type LearningPathUpdateInput = {
@@ -348,6 +359,8 @@ export type LearningPathUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentUpdateManyWithoutPathNestedInput
+  path_steps?: Prisma.PathStepUpdateManyWithoutPathNestedInput
 }
 
 export type LearningPathUncheckedUpdateInput = {
@@ -363,6 +376,8 @@ export type LearningPathUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentUncheckedUpdateManyWithoutPathNestedInput
+  path_steps?: Prisma.PathStepUncheckedUpdateManyWithoutPathNestedInput
 }
 
 export type LearningPathCreateManyInput = {
@@ -410,6 +425,11 @@ export type LearningPathUncheckedUpdateManyInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type LearningPathTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type LearningPathCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -453,6 +473,237 @@ export type LearningPathMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type LearningPathScalarRelationFilter = {
+  is?: Prisma.LearningPathWhereInput
+  isNot?: Prisma.LearningPathWhereInput
+}
+
+export type LearningPathCreateNestedOneWithoutPath_stepsInput = {
+  create?: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_stepsInput, Prisma.LearningPathUncheckedCreateWithoutPath_stepsInput>
+  connectOrCreate?: Prisma.LearningPathCreateOrConnectWithoutPath_stepsInput
+  connect?: Prisma.LearningPathWhereUniqueInput
+}
+
+export type LearningPathUpdateOneRequiredWithoutPath_stepsNestedInput = {
+  create?: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_stepsInput, Prisma.LearningPathUncheckedCreateWithoutPath_stepsInput>
+  connectOrCreate?: Prisma.LearningPathCreateOrConnectWithoutPath_stepsInput
+  upsert?: Prisma.LearningPathUpsertWithoutPath_stepsInput
+  connect?: Prisma.LearningPathWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LearningPathUpdateToOneWithWhereWithoutPath_stepsInput, Prisma.LearningPathUpdateWithoutPath_stepsInput>, Prisma.LearningPathUncheckedUpdateWithoutPath_stepsInput>
+}
+
+export type LearningPathCreateNestedOneWithoutPath_enrollmentsInput = {
+  create?: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_enrollmentsInput, Prisma.LearningPathUncheckedCreateWithoutPath_enrollmentsInput>
+  connectOrCreate?: Prisma.LearningPathCreateOrConnectWithoutPath_enrollmentsInput
+  connect?: Prisma.LearningPathWhereUniqueInput
+}
+
+export type LearningPathUpdateOneRequiredWithoutPath_enrollmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_enrollmentsInput, Prisma.LearningPathUncheckedCreateWithoutPath_enrollmentsInput>
+  connectOrCreate?: Prisma.LearningPathCreateOrConnectWithoutPath_enrollmentsInput
+  upsert?: Prisma.LearningPathUpsertWithoutPath_enrollmentsInput
+  connect?: Prisma.LearningPathWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LearningPathUpdateToOneWithWhereWithoutPath_enrollmentsInput, Prisma.LearningPathUpdateWithoutPath_enrollmentsInput>, Prisma.LearningPathUncheckedUpdateWithoutPath_enrollmentsInput>
+}
+
+export type LearningPathCreateWithoutPath_stepsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  path_type?: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PublishStatus
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentCreateNestedManyWithoutPathInput
+}
+
+export type LearningPathUncheckedCreateWithoutPath_stepsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  path_type?: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PublishStatus
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentUncheckedCreateNestedManyWithoutPathInput
+}
+
+export type LearningPathCreateOrConnectWithoutPath_stepsInput = {
+  where: Prisma.LearningPathWhereUniqueInput
+  create: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_stepsInput, Prisma.LearningPathUncheckedCreateWithoutPath_stepsInput>
+}
+
+export type LearningPathUpsertWithoutPath_stepsInput = {
+  update: Prisma.XOR<Prisma.LearningPathUpdateWithoutPath_stepsInput, Prisma.LearningPathUncheckedUpdateWithoutPath_stepsInput>
+  create: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_stepsInput, Prisma.LearningPathUncheckedCreateWithoutPath_stepsInput>
+  where?: Prisma.LearningPathWhereInput
+}
+
+export type LearningPathUpdateToOneWithWhereWithoutPath_stepsInput = {
+  where?: Prisma.LearningPathWhereInput
+  data: Prisma.XOR<Prisma.LearningPathUpdateWithoutPath_stepsInput, Prisma.LearningPathUncheckedUpdateWithoutPath_stepsInput>
+}
+
+export type LearningPathUpdateWithoutPath_stepsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path_type?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentUpdateManyWithoutPathNestedInput
+}
+
+export type LearningPathUncheckedUpdateWithoutPath_stepsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path_type?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  path_enrollments?: Prisma.PathEnrollmentUncheckedUpdateManyWithoutPathNestedInput
+}
+
+export type LearningPathCreateWithoutPath_enrollmentsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  path_type?: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PublishStatus
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  path_steps?: Prisma.PathStepCreateNestedManyWithoutPathInput
+}
+
+export type LearningPathUncheckedCreateWithoutPath_enrollmentsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  path_type?: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PublishStatus
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  path_steps?: Prisma.PathStepUncheckedCreateNestedManyWithoutPathInput
+}
+
+export type LearningPathCreateOrConnectWithoutPath_enrollmentsInput = {
+  where: Prisma.LearningPathWhereUniqueInput
+  create: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_enrollmentsInput, Prisma.LearningPathUncheckedCreateWithoutPath_enrollmentsInput>
+}
+
+export type LearningPathUpsertWithoutPath_enrollmentsInput = {
+  update: Prisma.XOR<Prisma.LearningPathUpdateWithoutPath_enrollmentsInput, Prisma.LearningPathUncheckedUpdateWithoutPath_enrollmentsInput>
+  create: Prisma.XOR<Prisma.LearningPathCreateWithoutPath_enrollmentsInput, Prisma.LearningPathUncheckedCreateWithoutPath_enrollmentsInput>
+  where?: Prisma.LearningPathWhereInput
+}
+
+export type LearningPathUpdateToOneWithWhereWithoutPath_enrollmentsInput = {
+  where?: Prisma.LearningPathWhereInput
+  data: Prisma.XOR<Prisma.LearningPathUpdateWithoutPath_enrollmentsInput, Prisma.LearningPathUncheckedUpdateWithoutPath_enrollmentsInput>
+}
+
+export type LearningPathUpdateWithoutPath_enrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path_type?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  path_steps?: Prisma.PathStepUpdateManyWithoutPathNestedInput
+}
+
+export type LearningPathUncheckedUpdateWithoutPath_enrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path_type?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  path_steps?: Prisma.PathStepUncheckedUpdateManyWithoutPathNestedInput
+}
+
+
+/**
+ * Count Type LearningPathCountOutputType
+ */
+
+export type LearningPathCountOutputType = {
+  path_enrollments: number
+  path_steps: number
+}
+
+export type LearningPathCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  path_enrollments?: boolean | LearningPathCountOutputTypeCountPath_enrollmentsArgs
+  path_steps?: boolean | LearningPathCountOutputTypeCountPath_stepsArgs
+}
+
+/**
+ * LearningPathCountOutputType without action
+ */
+export type LearningPathCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LearningPathCountOutputType
+   */
+  select?: Prisma.LearningPathCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * LearningPathCountOutputType without action
+ */
+export type LearningPathCountOutputTypeCountPath_enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PathEnrollmentWhereInput
+}
+
+/**
+ * LearningPathCountOutputType without action
+ */
+export type LearningPathCountOutputTypeCountPath_stepsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PathStepWhereInput
+}
 
 
 export type LearningPathSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +719,9 @@ export type LearningPathSelect<ExtArgs extends runtime.Types.Extensions.Internal
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  path_enrollments?: boolean | Prisma.LearningPath$path_enrollmentsArgs<ExtArgs>
+  path_steps?: boolean | Prisma.LearningPath$path_stepsArgs<ExtArgs>
+  _count?: boolean | Prisma.LearningPathCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learningPath"]>
 
 export type LearningPathSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -516,10 +770,20 @@ export type LearningPathSelectScalar = {
 }
 
 export type LearningPathOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "slug" | "title" | "description" | "path_type" | "metadata_json" | "status" | "created_by_membership_id" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["learningPath"]>
+export type LearningPathInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  path_enrollments?: boolean | Prisma.LearningPath$path_enrollmentsArgs<ExtArgs>
+  path_steps?: boolean | Prisma.LearningPath$path_stepsArgs<ExtArgs>
+  _count?: boolean | Prisma.LearningPathCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type LearningPathIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type LearningPathIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $LearningPathPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LearningPath"
-  objects: {}
+  objects: {
+    path_enrollments: Prisma.$PathEnrollmentPayload<ExtArgs>[]
+    path_steps: Prisma.$PathStepPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -927,6 +1191,8 @@ readonly fields: LearningPathFieldRefs;
  */
 export interface Prisma__LearningPathClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  path_enrollments<T extends Prisma.LearningPath$path_enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LearningPath$path_enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PathEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  path_steps<T extends Prisma.LearningPath$path_stepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LearningPath$path_stepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PathStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -985,6 +1251,10 @@ export type LearningPathFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
+  /**
    * Filter, which LearningPath to fetch.
    */
   where: Prisma.LearningPathWhereUniqueInput
@@ -1003,6 +1273,10 @@ export type LearningPathFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
+  /**
    * Filter, which LearningPath to fetch.
    */
   where: Prisma.LearningPathWhereUniqueInput
@@ -1020,6 +1294,10 @@ export type LearningPathFindFirstArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the LearningPath
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
   /**
    * Filter, which LearningPath to fetch.
    */
@@ -1069,6 +1347,10 @@ export type LearningPathFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
+  /**
    * Filter, which LearningPath to fetch.
    */
   where?: Prisma.LearningPathWhereInput
@@ -1116,6 +1398,10 @@ export type LearningPathFindManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the LearningPath
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
   /**
    * Filter, which LearningPaths to fetch.
    */
@@ -1165,6 +1451,10 @@ export type LearningPathCreateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
+  /**
    * The data needed to create a LearningPath.
    */
   data: Prisma.XOR<Prisma.LearningPathCreateInput, Prisma.LearningPathUncheckedCreateInput>
@@ -1212,6 +1502,10 @@ export type LearningPathUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the LearningPath
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
   /**
    * The data needed to update a LearningPath.
    */
@@ -1279,6 +1573,10 @@ export type LearningPathUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
+  /**
    * The filter to search for the LearningPath to update in case it exists.
    */
   where: Prisma.LearningPathWhereUniqueInput
@@ -1305,6 +1603,10 @@ export type LearningPathDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
+  /**
    * Filter which LearningPath to delete.
    */
   where: Prisma.LearningPathWhereUniqueInput
@@ -1325,6 +1627,54 @@ export type LearningPathDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * LearningPath.path_enrollments
+ */
+export type LearningPath$path_enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PathEnrollment
+   */
+  select?: Prisma.PathEnrollmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PathEnrollment
+   */
+  omit?: Prisma.PathEnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathEnrollmentInclude<ExtArgs> | null
+  where?: Prisma.PathEnrollmentWhereInput
+  orderBy?: Prisma.PathEnrollmentOrderByWithRelationInput | Prisma.PathEnrollmentOrderByWithRelationInput[]
+  cursor?: Prisma.PathEnrollmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PathEnrollmentScalarFieldEnum | Prisma.PathEnrollmentScalarFieldEnum[]
+}
+
+/**
+ * LearningPath.path_steps
+ */
+export type LearningPath$path_stepsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PathStep
+   */
+  select?: Prisma.PathStepSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PathStep
+   */
+  omit?: Prisma.PathStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
+  where?: Prisma.PathStepWhereInput
+  orderBy?: Prisma.PathStepOrderByWithRelationInput | Prisma.PathStepOrderByWithRelationInput[]
+  cursor?: Prisma.PathStepWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PathStepScalarFieldEnum | Prisma.PathStepScalarFieldEnum[]
+}
+
+/**
  * LearningPath without action
  */
 export type LearningPathDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1336,4 +1686,8 @@ export type LearningPathDefaultArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the LearningPath
    */
   omit?: Prisma.LearningPathOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearningPathInclude<ExtArgs> | null
 }

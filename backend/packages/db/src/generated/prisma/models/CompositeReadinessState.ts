@@ -252,6 +252,9 @@ export type CompositeReadinessStateWhereInput = {
   hard_gates_json?: Prisma.JsonNullableFilter<"CompositeReadinessState">
   calculated_at?: Prisma.DateTimeFilter<"CompositeReadinessState"> | Date | string
   config_version_id?: Prisma.UuidFilter<"CompositeReadinessState"> | string
+  config_version?: Prisma.XOR<Prisma.ScoringConfigVersionScalarRelationFilter, Prisma.ScoringConfigVersionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }
 
 export type CompositeReadinessStateOrderByWithRelationInput = {
@@ -265,6 +268,9 @@ export type CompositeReadinessStateOrderByWithRelationInput = {
   hard_gates_json?: Prisma.SortOrderInput | Prisma.SortOrder
   calculated_at?: Prisma.SortOrder
   config_version_id?: Prisma.SortOrder
+  config_version?: Prisma.ScoringConfigVersionOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  scoring_profile?: Prisma.ScoringProfileOrderByWithRelationInput
 }
 
 export type CompositeReadinessStateWhereUniqueInput = Prisma.AtLeast<{
@@ -282,6 +288,9 @@ export type CompositeReadinessStateWhereUniqueInput = Prisma.AtLeast<{
   hard_gates_json?: Prisma.JsonNullableFilter<"CompositeReadinessState">
   calculated_at?: Prisma.DateTimeFilter<"CompositeReadinessState"> | Date | string
   config_version_id?: Prisma.UuidFilter<"CompositeReadinessState"> | string
+  config_version?: Prisma.XOR<Prisma.ScoringConfigVersionScalarRelationFilter, Prisma.ScoringConfigVersionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }, "id" | "tenant_id_membership_id_scoring_profile_id_composite_key">
 
 export type CompositeReadinessStateOrderByWithAggregationInput = {
@@ -320,15 +329,14 @@ export type CompositeReadinessStateScalarWhereWithAggregatesInput = {
 
 export type CompositeReadinessStateCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
-  scoring_profile_id: string
   composite_key: string
   score: runtime.Decimal | runtime.DecimalJsLike | number | string
   band_key: string
   hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calculated_at?: Date | string
-  config_version_id: string
+  config_version: Prisma.ScoringConfigVersionCreateNestedOneWithoutComposite_readiness_stateInput
+  membership: Prisma.MembershipCreateNestedOneWithoutComposite_readiness_stateInput
+  scoring_profile: Prisma.ScoringProfileCreateNestedOneWithoutComposite_readiness_stateInput
 }
 
 export type CompositeReadinessStateUncheckedCreateInput = {
@@ -346,15 +354,14 @@ export type CompositeReadinessStateUncheckedCreateInput = {
 
 export type CompositeReadinessStateUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   composite_key?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   band_key?: Prisma.StringFieldUpdateOperationsInput | string
   hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  config_version_id?: Prisma.StringFieldUpdateOperationsInput | string
+  config_version?: Prisma.ScoringConfigVersionUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+  scoring_profile?: Prisma.ScoringProfileUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
 }
 
 export type CompositeReadinessStateUncheckedUpdateInput = {
@@ -385,15 +392,11 @@ export type CompositeReadinessStateCreateManyInput = {
 
 export type CompositeReadinessStateUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   composite_key?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   band_key?: Prisma.StringFieldUpdateOperationsInput | string
   hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  config_version_id?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type CompositeReadinessStateUncheckedUpdateManyInput = {
@@ -407,6 +410,16 @@ export type CompositeReadinessStateUncheckedUpdateManyInput = {
   hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   config_version_id?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompositeReadinessStateListRelationFilter = {
+  every?: Prisma.CompositeReadinessStateWhereInput
+  some?: Prisma.CompositeReadinessStateWhereInput
+  none?: Prisma.CompositeReadinessStateWhereInput
+}
+
+export type CompositeReadinessStateOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CompositeReadinessStateTenant_idMembership_idScoring_profile_idComposite_keyCompoundUniqueInput = {
@@ -461,6 +474,424 @@ export type CompositeReadinessStateSumOrderByAggregateInput = {
   score?: Prisma.SortOrder
 }
 
+export type CompositeReadinessStateCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput> | Prisma.CompositeReadinessStateCreateWithoutMembershipInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyMembershipInputEnvelope
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+}
+
+export type CompositeReadinessStateUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput> | Prisma.CompositeReadinessStateCreateWithoutMembershipInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyMembershipInputEnvelope
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+}
+
+export type CompositeReadinessStateUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput> | Prisma.CompositeReadinessStateCreateWithoutMembershipInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyMembershipInputEnvelope
+  set?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  disconnect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  delete?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  update?: Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutMembershipInput | Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+}
+
+export type CompositeReadinessStateUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput> | Prisma.CompositeReadinessStateCreateWithoutMembershipInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyMembershipInputEnvelope
+  set?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  disconnect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  delete?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  update?: Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutMembershipInput | Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+}
+
+export type CompositeReadinessStateCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput> | Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+}
+
+export type CompositeReadinessStateUncheckedCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput> | Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+}
+
+export type CompositeReadinessStateUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput> | Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyScoring_profileInputEnvelope
+  set?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  disconnect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  delete?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  update?: Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutScoring_profileInput | Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+}
+
+export type CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput> | Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyScoring_profileInputEnvelope
+  set?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  disconnect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  delete?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  update?: Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutScoring_profileInput | Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+}
+
+export type CompositeReadinessStateCreateNestedManyWithoutConfig_versionInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput> | Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyConfig_versionInputEnvelope
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+}
+
+export type CompositeReadinessStateUncheckedCreateNestedManyWithoutConfig_versionInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput> | Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyConfig_versionInputEnvelope
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+}
+
+export type CompositeReadinessStateUpdateManyWithoutConfig_versionNestedInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput> | Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput[]
+  upsert?: Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutConfig_versionInput | Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutConfig_versionInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyConfig_versionInputEnvelope
+  set?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  disconnect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  delete?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  update?: Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutConfig_versionInput | Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutConfig_versionInput[]
+  updateMany?: Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutConfig_versionInput | Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutConfig_versionInput[]
+  deleteMany?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+}
+
+export type CompositeReadinessStateUncheckedUpdateManyWithoutConfig_versionNestedInput = {
+  create?: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput> | Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput[] | Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput[]
+  connectOrCreate?: Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput | Prisma.CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput[]
+  upsert?: Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutConfig_versionInput | Prisma.CompositeReadinessStateUpsertWithWhereUniqueWithoutConfig_versionInput[]
+  createMany?: Prisma.CompositeReadinessStateCreateManyConfig_versionInputEnvelope
+  set?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  disconnect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  delete?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  connect?: Prisma.CompositeReadinessStateWhereUniqueInput | Prisma.CompositeReadinessStateWhereUniqueInput[]
+  update?: Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutConfig_versionInput | Prisma.CompositeReadinessStateUpdateWithWhereUniqueWithoutConfig_versionInput[]
+  updateMany?: Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutConfig_versionInput | Prisma.CompositeReadinessStateUpdateManyWithWhereWithoutConfig_versionInput[]
+  deleteMany?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+}
+
+export type CompositeReadinessStateCreateWithoutMembershipInput = {
+  id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+  config_version: Prisma.ScoringConfigVersionCreateNestedOneWithoutComposite_readiness_stateInput
+  scoring_profile: Prisma.ScoringProfileCreateNestedOneWithoutComposite_readiness_stateInput
+}
+
+export type CompositeReadinessStateUncheckedCreateWithoutMembershipInput = {
+  id: string
+  scoring_profile_id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+  config_version_id: string
+}
+
+export type CompositeReadinessStateCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput>
+}
+
+export type CompositeReadinessStateCreateManyMembershipInputEnvelope = {
+  data: Prisma.CompositeReadinessStateCreateManyMembershipInput | Prisma.CompositeReadinessStateCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompositeReadinessStateUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompositeReadinessStateUpdateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutMembershipInput>
+}
+
+export type CompositeReadinessStateUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompositeReadinessStateUpdateWithoutMembershipInput, Prisma.CompositeReadinessStateUncheckedUpdateWithoutMembershipInput>
+}
+
+export type CompositeReadinessStateUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.CompositeReadinessStateScalarWhereInput
+  data: Prisma.XOR<Prisma.CompositeReadinessStateUpdateManyMutationInput, Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type CompositeReadinessStateScalarWhereInput = {
+  AND?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+  OR?: Prisma.CompositeReadinessStateScalarWhereInput[]
+  NOT?: Prisma.CompositeReadinessStateScalarWhereInput | Prisma.CompositeReadinessStateScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CompositeReadinessState"> | string
+  tenant_id?: Prisma.UuidFilter<"CompositeReadinessState"> | string
+  membership_id?: Prisma.UuidFilter<"CompositeReadinessState"> | string
+  scoring_profile_id?: Prisma.UuidFilter<"CompositeReadinessState"> | string
+  composite_key?: Prisma.StringFilter<"CompositeReadinessState"> | string
+  score?: Prisma.DecimalFilter<"CompositeReadinessState"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFilter<"CompositeReadinessState"> | string
+  hard_gates_json?: Prisma.JsonNullableFilter<"CompositeReadinessState">
+  calculated_at?: Prisma.DateTimeFilter<"CompositeReadinessState"> | Date | string
+  config_version_id?: Prisma.UuidFilter<"CompositeReadinessState"> | string
+}
+
+export type CompositeReadinessStateCreateWithoutScoring_profileInput = {
+  id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+  config_version: Prisma.ScoringConfigVersionCreateNestedOneWithoutComposite_readiness_stateInput
+  membership: Prisma.MembershipCreateNestedOneWithoutComposite_readiness_stateInput
+}
+
+export type CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput = {
+  id: string
+  membership_id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+  config_version_id: string
+}
+
+export type CompositeReadinessStateCreateOrConnectWithoutScoring_profileInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type CompositeReadinessStateCreateManyScoring_profileInputEnvelope = {
+  data: Prisma.CompositeReadinessStateCreateManyScoring_profileInput | Prisma.CompositeReadinessStateCreateManyScoring_profileInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompositeReadinessStateUpsertWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompositeReadinessStateUpdateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedUpdateWithoutScoring_profileInput>
+  create: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type CompositeReadinessStateUpdateWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompositeReadinessStateUpdateWithoutScoring_profileInput, Prisma.CompositeReadinessStateUncheckedUpdateWithoutScoring_profileInput>
+}
+
+export type CompositeReadinessStateUpdateManyWithWhereWithoutScoring_profileInput = {
+  where: Prisma.CompositeReadinessStateScalarWhereInput
+  data: Prisma.XOR<Prisma.CompositeReadinessStateUpdateManyMutationInput, Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileInput>
+}
+
+export type CompositeReadinessStateCreateWithoutConfig_versionInput = {
+  id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutComposite_readiness_stateInput
+  scoring_profile: Prisma.ScoringProfileCreateNestedOneWithoutComposite_readiness_stateInput
+}
+
+export type CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput = {
+  id: string
+  membership_id: string
+  scoring_profile_id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+}
+
+export type CompositeReadinessStateCreateOrConnectWithoutConfig_versionInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput>
+}
+
+export type CompositeReadinessStateCreateManyConfig_versionInputEnvelope = {
+  data: Prisma.CompositeReadinessStateCreateManyConfig_versionInput | Prisma.CompositeReadinessStateCreateManyConfig_versionInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompositeReadinessStateUpsertWithWhereUniqueWithoutConfig_versionInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompositeReadinessStateUpdateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedUpdateWithoutConfig_versionInput>
+  create: Prisma.XOR<Prisma.CompositeReadinessStateCreateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedCreateWithoutConfig_versionInput>
+}
+
+export type CompositeReadinessStateUpdateWithWhereUniqueWithoutConfig_versionInput = {
+  where: Prisma.CompositeReadinessStateWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompositeReadinessStateUpdateWithoutConfig_versionInput, Prisma.CompositeReadinessStateUncheckedUpdateWithoutConfig_versionInput>
+}
+
+export type CompositeReadinessStateUpdateManyWithWhereWithoutConfig_versionInput = {
+  where: Prisma.CompositeReadinessStateScalarWhereInput
+  data: Prisma.XOR<Prisma.CompositeReadinessStateUpdateManyMutationInput, Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutConfig_versionInput>
+}
+
+export type CompositeReadinessStateCreateManyMembershipInput = {
+  id: string
+  scoring_profile_id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+  config_version_id: string
+}
+
+export type CompositeReadinessStateUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  config_version?: Prisma.ScoringConfigVersionUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+  scoring_profile?: Prisma.ScoringProfileUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+}
+
+export type CompositeReadinessStateUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  config_version_id?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompositeReadinessStateUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  config_version_id?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompositeReadinessStateCreateManyScoring_profileInput = {
+  id: string
+  membership_id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+  config_version_id: string
+}
+
+export type CompositeReadinessStateUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  config_version?: Prisma.ScoringConfigVersionUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+}
+
+export type CompositeReadinessStateUncheckedUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  config_version_id?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompositeReadinessStateUncheckedUpdateManyWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  config_version_id?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompositeReadinessStateCreateManyConfig_versionInput = {
+  id: string
+  membership_id: string
+  scoring_profile_id: string
+  composite_key: string
+  score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key: string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Date | string
+}
+
+export type CompositeReadinessStateUpdateWithoutConfig_versionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+  scoring_profile?: Prisma.ScoringProfileUpdateOneRequiredWithoutComposite_readiness_stateNestedInput
+}
+
+export type CompositeReadinessStateUncheckedUpdateWithoutConfig_versionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompositeReadinessStateUncheckedUpdateManyWithoutConfig_versionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
+  composite_key?: Prisma.StringFieldUpdateOperationsInput | string
+  score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  band_key?: Prisma.StringFieldUpdateOperationsInput | string
+  hard_gates_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  calculated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type CompositeReadinessStateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -474,6 +905,9 @@ export type CompositeReadinessStateSelect<ExtArgs extends runtime.Types.Extensio
   hard_gates_json?: boolean
   calculated_at?: boolean
   config_version_id?: boolean
+  config_version?: boolean | Prisma.ScoringConfigVersionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["compositeReadinessState"]>
 
 export type CompositeReadinessStateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -487,6 +921,9 @@ export type CompositeReadinessStateSelectCreateManyAndReturn<ExtArgs extends run
   hard_gates_json?: boolean
   calculated_at?: boolean
   config_version_id?: boolean
+  config_version?: boolean | Prisma.ScoringConfigVersionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["compositeReadinessState"]>
 
 export type CompositeReadinessStateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -500,6 +937,9 @@ export type CompositeReadinessStateSelectUpdateManyAndReturn<ExtArgs extends run
   hard_gates_json?: boolean
   calculated_at?: boolean
   config_version_id?: boolean
+  config_version?: boolean | Prisma.ScoringConfigVersionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["compositeReadinessState"]>
 
 export type CompositeReadinessStateSelectScalar = {
@@ -516,10 +956,29 @@ export type CompositeReadinessStateSelectScalar = {
 }
 
 export type CompositeReadinessStateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "scoring_profile_id" | "composite_key" | "score" | "band_key" | "hard_gates_json" | "calculated_at" | "config_version_id", ExtArgs["result"]["compositeReadinessState"]>
+export type CompositeReadinessStateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  config_version?: boolean | Prisma.ScoringConfigVersionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type CompositeReadinessStateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  config_version?: boolean | Prisma.ScoringConfigVersionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type CompositeReadinessStateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  config_version?: boolean | Prisma.ScoringConfigVersionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
 
 export type $CompositeReadinessStatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompositeReadinessState"
-  objects: {}
+  objects: {
+    config_version: Prisma.$ScoringConfigVersionPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    scoring_profile: Prisma.$ScoringProfilePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -925,6 +1384,9 @@ readonly fields: CompositeReadinessStateFieldRefs;
  */
 export interface Prisma__CompositeReadinessStateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  config_version<T extends Prisma.ScoringConfigVersionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringConfigVersionDefaultArgs<ExtArgs>>): Prisma.Prisma__ScoringConfigVersionClient<runtime.Types.Result.GetResult<Prisma.$ScoringConfigVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  scoring_profile<T extends Prisma.ScoringProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__ScoringProfileClient<runtime.Types.Result.GetResult<Prisma.$ScoringProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -981,6 +1443,10 @@ export type CompositeReadinessStateFindUniqueArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
+  /**
    * Filter, which CompositeReadinessState to fetch.
    */
   where: Prisma.CompositeReadinessStateWhereUniqueInput
@@ -999,6 +1465,10 @@ export type CompositeReadinessStateFindUniqueOrThrowArgs<ExtArgs extends runtime
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
+  /**
    * Filter, which CompositeReadinessState to fetch.
    */
   where: Prisma.CompositeReadinessStateWhereUniqueInput
@@ -1016,6 +1486,10 @@ export type CompositeReadinessStateFindFirstArgs<ExtArgs extends runtime.Types.E
    * Omit specific fields from the CompositeReadinessState
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
   /**
    * Filter, which CompositeReadinessState to fetch.
    */
@@ -1065,6 +1539,10 @@ export type CompositeReadinessStateFindFirstOrThrowArgs<ExtArgs extends runtime.
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
+  /**
    * Filter, which CompositeReadinessState to fetch.
    */
   where?: Prisma.CompositeReadinessStateWhereInput
@@ -1112,6 +1590,10 @@ export type CompositeReadinessStateFindManyArgs<ExtArgs extends runtime.Types.Ex
    * Omit specific fields from the CompositeReadinessState
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
   /**
    * Filter, which CompositeReadinessStates to fetch.
    */
@@ -1161,6 +1643,10 @@ export type CompositeReadinessStateCreateArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
+  /**
    * The data needed to create a CompositeReadinessState.
    */
   data: Prisma.XOR<Prisma.CompositeReadinessStateCreateInput, Prisma.CompositeReadinessStateUncheckedCreateInput>
@@ -1194,6 +1680,10 @@ export type CompositeReadinessStateCreateManyAndReturnArgs<ExtArgs extends runti
    */
   data: Prisma.CompositeReadinessStateCreateManyInput | Prisma.CompositeReadinessStateCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1208,6 +1698,10 @@ export type CompositeReadinessStateUpdateArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CompositeReadinessState
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
   /**
    * The data needed to update a CompositeReadinessState.
    */
@@ -1260,6 +1754,10 @@ export type CompositeReadinessStateUpdateManyAndReturnArgs<ExtArgs extends runti
    * Limit how many CompositeReadinessStates to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1274,6 +1772,10 @@ export type CompositeReadinessStateUpsertArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CompositeReadinessState
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
   /**
    * The filter to search for the CompositeReadinessState to update in case it exists.
    */
@@ -1300,6 +1802,10 @@ export type CompositeReadinessStateDeleteArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CompositeReadinessState
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
   /**
    * Filter which CompositeReadinessState to delete.
    */
@@ -1332,4 +1838,8 @@ export type CompositeReadinessStateDefaultArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the CompositeReadinessState
    */
   omit?: Prisma.CompositeReadinessStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompositeReadinessStateInclude<ExtArgs> | null
 }

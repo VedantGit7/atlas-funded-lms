@@ -222,6 +222,7 @@ export type MarketingIntegrationWebhookWhereInput = {
   last_delivery_status?: Prisma.StringNullableFilter<"MarketingIntegrationWebhook"> | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingIntegrationWebhook"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingIntegrationWebhook"> | Date | string
+  marketing_integration_webhook_deliveries?: Prisma.MarketingIntegrationWebhookDeliveryListRelationFilter
 }
 
 export type MarketingIntegrationWebhookOrderByWithRelationInput = {
@@ -235,10 +236,12 @@ export type MarketingIntegrationWebhookOrderByWithRelationInput = {
   last_delivery_status?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  marketing_integration_webhook_deliveries?: Prisma.MarketingIntegrationWebhookDeliveryOrderByRelationAggregateInput
 }
 
 export type MarketingIntegrationWebhookWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MarketingIntegrationWebhookTenant_idIdCompoundUniqueInput
   tenant_id_event_key_url?: Prisma.MarketingIntegrationWebhookTenant_idEvent_keyUrlCompoundUniqueInput
   AND?: Prisma.MarketingIntegrationWebhookWhereInput | Prisma.MarketingIntegrationWebhookWhereInput[]
   OR?: Prisma.MarketingIntegrationWebhookWhereInput[]
@@ -252,7 +255,8 @@ export type MarketingIntegrationWebhookWhereUniqueInput = Prisma.AtLeast<{
   last_delivery_status?: Prisma.StringNullableFilter<"MarketingIntegrationWebhook"> | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingIntegrationWebhook"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingIntegrationWebhook"> | Date | string
-}, "id" | "tenant_id_event_key_url">
+  marketing_integration_webhook_deliveries?: Prisma.MarketingIntegrationWebhookDeliveryListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_event_key_url">
 
 export type MarketingIntegrationWebhookOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -297,6 +301,7 @@ export type MarketingIntegrationWebhookCreateInput = {
   last_delivery_status?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_integration_webhook_deliveries?: Prisma.MarketingIntegrationWebhookDeliveryCreateNestedManyWithoutWebhookInput
 }
 
 export type MarketingIntegrationWebhookUncheckedCreateInput = {
@@ -310,6 +315,7 @@ export type MarketingIntegrationWebhookUncheckedCreateInput = {
   last_delivery_status?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_integration_webhook_deliveries?: Prisma.MarketingIntegrationWebhookDeliveryUncheckedCreateNestedManyWithoutWebhookInput
 }
 
 export type MarketingIntegrationWebhookUpdateInput = {
@@ -323,6 +329,7 @@ export type MarketingIntegrationWebhookUpdateInput = {
   last_delivery_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_integration_webhook_deliveries?: Prisma.MarketingIntegrationWebhookDeliveryUpdateManyWithoutWebhookNestedInput
 }
 
 export type MarketingIntegrationWebhookUncheckedUpdateInput = {
@@ -336,6 +343,7 @@ export type MarketingIntegrationWebhookUncheckedUpdateInput = {
   last_delivery_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_integration_webhook_deliveries?: Prisma.MarketingIntegrationWebhookDeliveryUncheckedUpdateManyWithoutWebhookNestedInput
 }
 
 export type MarketingIntegrationWebhookCreateManyInput = {
@@ -375,6 +383,11 @@ export type MarketingIntegrationWebhookUncheckedUpdateManyInput = {
   last_delivery_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingIntegrationWebhookTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type MarketingIntegrationWebhookTenant_idEvent_keyUrlCompoundUniqueInput = {
@@ -422,6 +435,122 @@ export type MarketingIntegrationWebhookMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type MarketingIntegrationWebhookScalarRelationFilter = {
+  is?: Prisma.MarketingIntegrationWebhookWhereInput
+  isNot?: Prisma.MarketingIntegrationWebhookWhereInput
+}
+
+export type MarketingIntegrationWebhookCreateNestedOneWithoutMarketing_integration_webhook_deliveriesInput = {
+  create?: Prisma.XOR<Prisma.MarketingIntegrationWebhookCreateWithoutMarketing_integration_webhook_deliveriesInput, Prisma.MarketingIntegrationWebhookUncheckedCreateWithoutMarketing_integration_webhook_deliveriesInput>
+  connectOrCreate?: Prisma.MarketingIntegrationWebhookCreateOrConnectWithoutMarketing_integration_webhook_deliveriesInput
+  connect?: Prisma.MarketingIntegrationWebhookWhereUniqueInput
+}
+
+export type MarketingIntegrationWebhookUpdateOneRequiredWithoutMarketing_integration_webhook_deliveriesNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingIntegrationWebhookCreateWithoutMarketing_integration_webhook_deliveriesInput, Prisma.MarketingIntegrationWebhookUncheckedCreateWithoutMarketing_integration_webhook_deliveriesInput>
+  connectOrCreate?: Prisma.MarketingIntegrationWebhookCreateOrConnectWithoutMarketing_integration_webhook_deliveriesInput
+  upsert?: Prisma.MarketingIntegrationWebhookUpsertWithoutMarketing_integration_webhook_deliveriesInput
+  connect?: Prisma.MarketingIntegrationWebhookWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MarketingIntegrationWebhookUpdateToOneWithWhereWithoutMarketing_integration_webhook_deliveriesInput, Prisma.MarketingIntegrationWebhookUpdateWithoutMarketing_integration_webhook_deliveriesInput>, Prisma.MarketingIntegrationWebhookUncheckedUpdateWithoutMarketing_integration_webhook_deliveriesInput>
+}
+
+export type MarketingIntegrationWebhookCreateWithoutMarketing_integration_webhook_deliveriesInput = {
+  id: string
+  tenant_id: string
+  event_key: string
+  url: string
+  enabled?: boolean
+  last_tested_at?: Date | string | null
+  last_delivery_at?: Date | string | null
+  last_delivery_status?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingIntegrationWebhookUncheckedCreateWithoutMarketing_integration_webhook_deliveriesInput = {
+  id: string
+  tenant_id: string
+  event_key: string
+  url: string
+  enabled?: boolean
+  last_tested_at?: Date | string | null
+  last_delivery_at?: Date | string | null
+  last_delivery_status?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingIntegrationWebhookCreateOrConnectWithoutMarketing_integration_webhook_deliveriesInput = {
+  where: Prisma.MarketingIntegrationWebhookWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingIntegrationWebhookCreateWithoutMarketing_integration_webhook_deliveriesInput, Prisma.MarketingIntegrationWebhookUncheckedCreateWithoutMarketing_integration_webhook_deliveriesInput>
+}
+
+export type MarketingIntegrationWebhookUpsertWithoutMarketing_integration_webhook_deliveriesInput = {
+  update: Prisma.XOR<Prisma.MarketingIntegrationWebhookUpdateWithoutMarketing_integration_webhook_deliveriesInput, Prisma.MarketingIntegrationWebhookUncheckedUpdateWithoutMarketing_integration_webhook_deliveriesInput>
+  create: Prisma.XOR<Prisma.MarketingIntegrationWebhookCreateWithoutMarketing_integration_webhook_deliveriesInput, Prisma.MarketingIntegrationWebhookUncheckedCreateWithoutMarketing_integration_webhook_deliveriesInput>
+  where?: Prisma.MarketingIntegrationWebhookWhereInput
+}
+
+export type MarketingIntegrationWebhookUpdateToOneWithWhereWithoutMarketing_integration_webhook_deliveriesInput = {
+  where?: Prisma.MarketingIntegrationWebhookWhereInput
+  data: Prisma.XOR<Prisma.MarketingIntegrationWebhookUpdateWithoutMarketing_integration_webhook_deliveriesInput, Prisma.MarketingIntegrationWebhookUncheckedUpdateWithoutMarketing_integration_webhook_deliveriesInput>
+}
+
+export type MarketingIntegrationWebhookUpdateWithoutMarketing_integration_webhook_deliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_key?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_tested_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_delivery_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_delivery_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingIntegrationWebhookUncheckedUpdateWithoutMarketing_integration_webhook_deliveriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_key?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_tested_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_delivery_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_delivery_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type MarketingIntegrationWebhookCountOutputType
+ */
+
+export type MarketingIntegrationWebhookCountOutputType = {
+  marketing_integration_webhook_deliveries: number
+}
+
+export type MarketingIntegrationWebhookCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_integration_webhook_deliveries?: boolean | MarketingIntegrationWebhookCountOutputTypeCountMarketing_integration_webhook_deliveriesArgs
+}
+
+/**
+ * MarketingIntegrationWebhookCountOutputType without action
+ */
+export type MarketingIntegrationWebhookCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingIntegrationWebhookCountOutputType
+   */
+  select?: Prisma.MarketingIntegrationWebhookCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MarketingIntegrationWebhookCountOutputType without action
+ */
+export type MarketingIntegrationWebhookCountOutputTypeCountMarketing_integration_webhook_deliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MarketingIntegrationWebhookDeliveryWhereInput
+}
 
 
 export type MarketingIntegrationWebhookSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -435,6 +564,8 @@ export type MarketingIntegrationWebhookSelect<ExtArgs extends runtime.Types.Exte
   last_delivery_status?: boolean
   created_at?: boolean
   updated_at?: boolean
+  marketing_integration_webhook_deliveries?: boolean | Prisma.MarketingIntegrationWebhook$marketing_integration_webhook_deliveriesArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingIntegrationWebhookCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingIntegrationWebhook"]>
 
 export type MarketingIntegrationWebhookSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -477,10 +608,18 @@ export type MarketingIntegrationWebhookSelectScalar = {
 }
 
 export type MarketingIntegrationWebhookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "event_key" | "url" | "enabled" | "last_tested_at" | "last_delivery_at" | "last_delivery_status" | "created_at" | "updated_at", ExtArgs["result"]["marketingIntegrationWebhook"]>
+export type MarketingIntegrationWebhookInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_integration_webhook_deliveries?: boolean | Prisma.MarketingIntegrationWebhook$marketing_integration_webhook_deliveriesArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingIntegrationWebhookCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type MarketingIntegrationWebhookIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MarketingIntegrationWebhookIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $MarketingIntegrationWebhookPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingIntegrationWebhook"
-  objects: {}
+  objects: {
+    marketing_integration_webhook_deliveries: Prisma.$MarketingIntegrationWebhookDeliveryPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -886,6 +1025,7 @@ readonly fields: MarketingIntegrationWebhookFieldRefs;
  */
 export interface Prisma__MarketingIntegrationWebhookClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  marketing_integration_webhook_deliveries<T extends Prisma.MarketingIntegrationWebhook$marketing_integration_webhook_deliveriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingIntegrationWebhook$marketing_integration_webhook_deliveriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MarketingIntegrationWebhookDeliveryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -942,6 +1082,10 @@ export type MarketingIntegrationWebhookFindUniqueArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingIntegrationWebhook to fetch.
    */
   where: Prisma.MarketingIntegrationWebhookWhereUniqueInput
@@ -960,6 +1104,10 @@ export type MarketingIntegrationWebhookFindUniqueOrThrowArgs<ExtArgs extends run
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingIntegrationWebhook to fetch.
    */
   where: Prisma.MarketingIntegrationWebhookWhereUniqueInput
@@ -977,6 +1125,10 @@ export type MarketingIntegrationWebhookFindFirstArgs<ExtArgs extends runtime.Typ
    * Omit specific fields from the MarketingIntegrationWebhook
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
   /**
    * Filter, which MarketingIntegrationWebhook to fetch.
    */
@@ -1026,6 +1178,10 @@ export type MarketingIntegrationWebhookFindFirstOrThrowArgs<ExtArgs extends runt
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingIntegrationWebhook to fetch.
    */
   where?: Prisma.MarketingIntegrationWebhookWhereInput
@@ -1073,6 +1229,10 @@ export type MarketingIntegrationWebhookFindManyArgs<ExtArgs extends runtime.Type
    * Omit specific fields from the MarketingIntegrationWebhook
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
   /**
    * Filter, which MarketingIntegrationWebhooks to fetch.
    */
@@ -1122,6 +1282,10 @@ export type MarketingIntegrationWebhookCreateArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingIntegrationWebhook.
    */
   data: Prisma.XOR<Prisma.MarketingIntegrationWebhookCreateInput, Prisma.MarketingIntegrationWebhookUncheckedCreateInput>
@@ -1169,6 +1333,10 @@ export type MarketingIntegrationWebhookUpdateArgs<ExtArgs extends runtime.Types.
    * Omit specific fields from the MarketingIntegrationWebhook
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingIntegrationWebhook.
    */
@@ -1236,6 +1404,10 @@ export type MarketingIntegrationWebhookUpsertArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
+  /**
    * The filter to search for the MarketingIntegrationWebhook to update in case it exists.
    */
   where: Prisma.MarketingIntegrationWebhookWhereUniqueInput
@@ -1262,6 +1434,10 @@ export type MarketingIntegrationWebhookDeleteArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
+  /**
    * Filter which MarketingIntegrationWebhook to delete.
    */
   where: Prisma.MarketingIntegrationWebhookWhereUniqueInput
@@ -1282,6 +1458,30 @@ export type MarketingIntegrationWebhookDeleteManyArgs<ExtArgs extends runtime.Ty
 }
 
 /**
+ * MarketingIntegrationWebhook.marketing_integration_webhook_deliveries
+ */
+export type MarketingIntegrationWebhook$marketing_integration_webhook_deliveriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingIntegrationWebhookDelivery
+   */
+  select?: Prisma.MarketingIntegrationWebhookDeliverySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingIntegrationWebhookDelivery
+   */
+  omit?: Prisma.MarketingIntegrationWebhookDeliveryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookDeliveryInclude<ExtArgs> | null
+  where?: Prisma.MarketingIntegrationWebhookDeliveryWhereInput
+  orderBy?: Prisma.MarketingIntegrationWebhookDeliveryOrderByWithRelationInput | Prisma.MarketingIntegrationWebhookDeliveryOrderByWithRelationInput[]
+  cursor?: Prisma.MarketingIntegrationWebhookDeliveryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MarketingIntegrationWebhookDeliveryScalarFieldEnum | Prisma.MarketingIntegrationWebhookDeliveryScalarFieldEnum[]
+}
+
+/**
  * MarketingIntegrationWebhook without action
  */
 export type MarketingIntegrationWebhookDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1293,4 +1493,8 @@ export type MarketingIntegrationWebhookDefaultArgs<ExtArgs extends runtime.Types
    * Omit specific fields from the MarketingIntegrationWebhook
    */
   omit?: Prisma.MarketingIntegrationWebhookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingIntegrationWebhookInclude<ExtArgs> | null
 }

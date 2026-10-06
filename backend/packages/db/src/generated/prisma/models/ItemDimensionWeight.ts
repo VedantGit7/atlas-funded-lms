@@ -224,6 +224,8 @@ export type ItemDimensionWeightWhereInput = {
   dimension_id?: Prisma.UuidFilter<"ItemDimensionWeight"> | string
   weight?: Prisma.DecimalFilter<"ItemDimensionWeight"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   created_at?: Prisma.DateTimeFilter<"ItemDimensionWeight"> | Date | string
+  dimension?: Prisma.XOR<Prisma.CompetencyDimensionScalarRelationFilter, Prisma.CompetencyDimensionWhereInput>
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
 }
 
 export type ItemDimensionWeightOrderByWithRelationInput = {
@@ -233,6 +235,8 @@ export type ItemDimensionWeightOrderByWithRelationInput = {
   dimension_id?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  dimension?: Prisma.CompetencyDimensionOrderByWithRelationInput
+  item?: Prisma.ItemOrderByWithRelationInput
 }
 
 export type ItemDimensionWeightWhereUniqueInput = Prisma.AtLeast<{
@@ -246,6 +250,8 @@ export type ItemDimensionWeightWhereUniqueInput = Prisma.AtLeast<{
   dimension_id?: Prisma.UuidFilter<"ItemDimensionWeight"> | string
   weight?: Prisma.DecimalFilter<"ItemDimensionWeight"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   created_at?: Prisma.DateTimeFilter<"ItemDimensionWeight"> | Date | string
+  dimension?: Prisma.XOR<Prisma.CompetencyDimensionScalarRelationFilter, Prisma.CompetencyDimensionWhereInput>
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
 }, "id" | "tenant_id_item_id_dimension_id">
 
 export type ItemDimensionWeightOrderByWithAggregationInput = {
@@ -276,11 +282,10 @@ export type ItemDimensionWeightScalarWhereWithAggregatesInput = {
 
 export type ItemDimensionWeightCreateInput = {
   id: string
-  tenant_id: string
-  item_id: string
-  dimension_id: string
   weight: runtime.Decimal | runtime.DecimalJsLike | number | string
   created_at?: Date | string
+  dimension: Prisma.CompetencyDimensionCreateNestedOneWithoutItem_dimension_weightsInput
+  item: Prisma.ItemCreateNestedOneWithoutItem_dimension_weightsInput
 }
 
 export type ItemDimensionWeightUncheckedCreateInput = {
@@ -294,11 +299,10 @@ export type ItemDimensionWeightUncheckedCreateInput = {
 
 export type ItemDimensionWeightUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
-  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
   weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dimension?: Prisma.CompetencyDimensionUpdateOneRequiredWithoutItem_dimension_weightsNestedInput
+  item?: Prisma.ItemUpdateOneRequiredWithoutItem_dimension_weightsNestedInput
 }
 
 export type ItemDimensionWeightUncheckedUpdateInput = {
@@ -321,9 +325,6 @@ export type ItemDimensionWeightCreateManyInput = {
 
 export type ItemDimensionWeightUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
-  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
   weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -335,6 +336,16 @@ export type ItemDimensionWeightUncheckedUpdateManyInput = {
   dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
   weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemDimensionWeightListRelationFilter = {
+  every?: Prisma.ItemDimensionWeightWhereInput
+  some?: Prisma.ItemDimensionWeightWhereInput
+  none?: Prisma.ItemDimensionWeightWhereInput
+}
+
+export type ItemDimensionWeightOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ItemDimensionWeightTenant_idItem_idDimension_idCompoundUniqueInput = {
@@ -378,6 +389,238 @@ export type ItemDimensionWeightSumOrderByAggregateInput = {
   weight?: Prisma.SortOrder
 }
 
+export type ItemDimensionWeightCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput> | Prisma.ItemDimensionWeightCreateWithoutItemInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyItemInputEnvelope
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+}
+
+export type ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput> | Prisma.ItemDimensionWeightCreateWithoutItemInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyItemInputEnvelope
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+}
+
+export type ItemDimensionWeightUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput> | Prisma.ItemDimensionWeightCreateWithoutItemInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutItemInput | Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyItemInputEnvelope
+  set?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  disconnect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  delete?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  update?: Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutItemInput | Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutItemInput | Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.ItemDimensionWeightScalarWhereInput | Prisma.ItemDimensionWeightScalarWhereInput[]
+}
+
+export type ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput> | Prisma.ItemDimensionWeightCreateWithoutItemInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutItemInput | Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyItemInputEnvelope
+  set?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  disconnect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  delete?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  update?: Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutItemInput | Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutItemInput | Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.ItemDimensionWeightScalarWhereInput | Prisma.ItemDimensionWeightScalarWhereInput[]
+}
+
+export type ItemDimensionWeightCreateNestedManyWithoutDimensionInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput> | Prisma.ItemDimensionWeightCreateWithoutDimensionInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyDimensionInputEnvelope
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+}
+
+export type ItemDimensionWeightUncheckedCreateNestedManyWithoutDimensionInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput> | Prisma.ItemDimensionWeightCreateWithoutDimensionInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyDimensionInputEnvelope
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+}
+
+export type ItemDimensionWeightUpdateManyWithoutDimensionNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput> | Prisma.ItemDimensionWeightCreateWithoutDimensionInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput[]
+  upsert?: Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutDimensionInput | Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutDimensionInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyDimensionInputEnvelope
+  set?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  disconnect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  delete?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  update?: Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutDimensionInput | Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutDimensionInput[]
+  updateMany?: Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutDimensionInput | Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutDimensionInput[]
+  deleteMany?: Prisma.ItemDimensionWeightScalarWhereInput | Prisma.ItemDimensionWeightScalarWhereInput[]
+}
+
+export type ItemDimensionWeightUncheckedUpdateManyWithoutDimensionNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput> | Prisma.ItemDimensionWeightCreateWithoutDimensionInput[] | Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput | Prisma.ItemDimensionWeightCreateOrConnectWithoutDimensionInput[]
+  upsert?: Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutDimensionInput | Prisma.ItemDimensionWeightUpsertWithWhereUniqueWithoutDimensionInput[]
+  createMany?: Prisma.ItemDimensionWeightCreateManyDimensionInputEnvelope
+  set?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  disconnect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  delete?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  connect?: Prisma.ItemDimensionWeightWhereUniqueInput | Prisma.ItemDimensionWeightWhereUniqueInput[]
+  update?: Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutDimensionInput | Prisma.ItemDimensionWeightUpdateWithWhereUniqueWithoutDimensionInput[]
+  updateMany?: Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutDimensionInput | Prisma.ItemDimensionWeightUpdateManyWithWhereWithoutDimensionInput[]
+  deleteMany?: Prisma.ItemDimensionWeightScalarWhereInput | Prisma.ItemDimensionWeightScalarWhereInput[]
+}
+
+export type ItemDimensionWeightCreateWithoutItemInput = {
+  id: string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Date | string
+  dimension: Prisma.CompetencyDimensionCreateNestedOneWithoutItem_dimension_weightsInput
+}
+
+export type ItemDimensionWeightUncheckedCreateWithoutItemInput = {
+  id: string
+  dimension_id: string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Date | string
+}
+
+export type ItemDimensionWeightCreateOrConnectWithoutItemInput = {
+  where: Prisma.ItemDimensionWeightWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput>
+}
+
+export type ItemDimensionWeightCreateManyItemInputEnvelope = {
+  data: Prisma.ItemDimensionWeightCreateManyItemInput | Prisma.ItemDimensionWeightCreateManyItemInput[]
+  skipDuplicates?: boolean
+}
+
+export type ItemDimensionWeightUpsertWithWhereUniqueWithoutItemInput = {
+  where: Prisma.ItemDimensionWeightWhereUniqueInput
+  update: Prisma.XOR<Prisma.ItemDimensionWeightUpdateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedUpdateWithoutItemInput>
+  create: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutItemInput>
+}
+
+export type ItemDimensionWeightUpdateWithWhereUniqueWithoutItemInput = {
+  where: Prisma.ItemDimensionWeightWhereUniqueInput
+  data: Prisma.XOR<Prisma.ItemDimensionWeightUpdateWithoutItemInput, Prisma.ItemDimensionWeightUncheckedUpdateWithoutItemInput>
+}
+
+export type ItemDimensionWeightUpdateManyWithWhereWithoutItemInput = {
+  where: Prisma.ItemDimensionWeightScalarWhereInput
+  data: Prisma.XOR<Prisma.ItemDimensionWeightUpdateManyMutationInput, Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemInput>
+}
+
+export type ItemDimensionWeightScalarWhereInput = {
+  AND?: Prisma.ItemDimensionWeightScalarWhereInput | Prisma.ItemDimensionWeightScalarWhereInput[]
+  OR?: Prisma.ItemDimensionWeightScalarWhereInput[]
+  NOT?: Prisma.ItemDimensionWeightScalarWhereInput | Prisma.ItemDimensionWeightScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ItemDimensionWeight"> | string
+  tenant_id?: Prisma.UuidFilter<"ItemDimensionWeight"> | string
+  item_id?: Prisma.UuidFilter<"ItemDimensionWeight"> | string
+  dimension_id?: Prisma.UuidFilter<"ItemDimensionWeight"> | string
+  weight?: Prisma.DecimalFilter<"ItemDimensionWeight"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Prisma.DateTimeFilter<"ItemDimensionWeight"> | Date | string
+}
+
+export type ItemDimensionWeightCreateWithoutDimensionInput = {
+  id: string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Date | string
+  item: Prisma.ItemCreateNestedOneWithoutItem_dimension_weightsInput
+}
+
+export type ItemDimensionWeightUncheckedCreateWithoutDimensionInput = {
+  id: string
+  item_id: string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Date | string
+}
+
+export type ItemDimensionWeightCreateOrConnectWithoutDimensionInput = {
+  where: Prisma.ItemDimensionWeightWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput>
+}
+
+export type ItemDimensionWeightCreateManyDimensionInputEnvelope = {
+  data: Prisma.ItemDimensionWeightCreateManyDimensionInput | Prisma.ItemDimensionWeightCreateManyDimensionInput[]
+  skipDuplicates?: boolean
+}
+
+export type ItemDimensionWeightUpsertWithWhereUniqueWithoutDimensionInput = {
+  where: Prisma.ItemDimensionWeightWhereUniqueInput
+  update: Prisma.XOR<Prisma.ItemDimensionWeightUpdateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedUpdateWithoutDimensionInput>
+  create: Prisma.XOR<Prisma.ItemDimensionWeightCreateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedCreateWithoutDimensionInput>
+}
+
+export type ItemDimensionWeightUpdateWithWhereUniqueWithoutDimensionInput = {
+  where: Prisma.ItemDimensionWeightWhereUniqueInput
+  data: Prisma.XOR<Prisma.ItemDimensionWeightUpdateWithoutDimensionInput, Prisma.ItemDimensionWeightUncheckedUpdateWithoutDimensionInput>
+}
+
+export type ItemDimensionWeightUpdateManyWithWhereWithoutDimensionInput = {
+  where: Prisma.ItemDimensionWeightScalarWhereInput
+  data: Prisma.XOR<Prisma.ItemDimensionWeightUpdateManyMutationInput, Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutDimensionInput>
+}
+
+export type ItemDimensionWeightCreateManyItemInput = {
+  id: string
+  dimension_id: string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Date | string
+}
+
+export type ItemDimensionWeightUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dimension?: Prisma.CompetencyDimensionUpdateOneRequiredWithoutItem_dimension_weightsNestedInput
+}
+
+export type ItemDimensionWeightUncheckedUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemDimensionWeightUncheckedUpdateManyWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemDimensionWeightCreateManyDimensionInput = {
+  id: string
+  item_id: string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Date | string
+}
+
+export type ItemDimensionWeightUpdateWithoutDimensionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  item?: Prisma.ItemUpdateOneRequiredWithoutItem_dimension_weightsNestedInput
+}
+
+export type ItemDimensionWeightUncheckedUpdateWithoutDimensionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemDimensionWeightUncheckedUpdateManyWithoutDimensionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type ItemDimensionWeightSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -387,6 +630,8 @@ export type ItemDimensionWeightSelect<ExtArgs extends runtime.Types.Extensions.I
   dimension_id?: boolean
   weight?: boolean
   created_at?: boolean
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemDimensionWeight"]>
 
 export type ItemDimensionWeightSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -396,6 +641,8 @@ export type ItemDimensionWeightSelectCreateManyAndReturn<ExtArgs extends runtime
   dimension_id?: boolean
   weight?: boolean
   created_at?: boolean
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemDimensionWeight"]>
 
 export type ItemDimensionWeightSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -405,6 +652,8 @@ export type ItemDimensionWeightSelectUpdateManyAndReturn<ExtArgs extends runtime
   dimension_id?: boolean
   weight?: boolean
   created_at?: boolean
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemDimensionWeight"]>
 
 export type ItemDimensionWeightSelectScalar = {
@@ -417,10 +666,25 @@ export type ItemDimensionWeightSelectScalar = {
 }
 
 export type ItemDimensionWeightOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "item_id" | "dimension_id" | "weight" | "created_at", ExtArgs["result"]["itemDimensionWeight"]>
+export type ItemDimensionWeightInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
+export type ItemDimensionWeightIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
+export type ItemDimensionWeightIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
 
 export type $ItemDimensionWeightPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ItemDimensionWeight"
-  objects: {}
+  objects: {
+    dimension: Prisma.$CompetencyDimensionPayload<ExtArgs>
+    item: Prisma.$ItemPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -822,6 +1086,8 @@ readonly fields: ItemDimensionWeightFieldRefs;
  */
 export interface Prisma__ItemDimensionWeightClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  dimension<T extends Prisma.CompetencyDimensionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompetencyDimensionDefaultArgs<ExtArgs>>): Prisma.Prisma__CompetencyDimensionClient<runtime.Types.Result.GetResult<Prisma.$CompetencyDimensionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  item<T extends Prisma.ItemDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ItemDefaultArgs<ExtArgs>>): Prisma.Prisma__ItemClient<runtime.Types.Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -874,6 +1140,10 @@ export type ItemDimensionWeightFindUniqueArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
+  /**
    * Filter, which ItemDimensionWeight to fetch.
    */
   where: Prisma.ItemDimensionWeightWhereUniqueInput
@@ -892,6 +1162,10 @@ export type ItemDimensionWeightFindUniqueOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
+  /**
    * Filter, which ItemDimensionWeight to fetch.
    */
   where: Prisma.ItemDimensionWeightWhereUniqueInput
@@ -909,6 +1183,10 @@ export type ItemDimensionWeightFindFirstArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the ItemDimensionWeight
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
   /**
    * Filter, which ItemDimensionWeight to fetch.
    */
@@ -958,6 +1236,10 @@ export type ItemDimensionWeightFindFirstOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
+  /**
    * Filter, which ItemDimensionWeight to fetch.
    */
   where?: Prisma.ItemDimensionWeightWhereInput
@@ -1005,6 +1287,10 @@ export type ItemDimensionWeightFindManyArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the ItemDimensionWeight
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
   /**
    * Filter, which ItemDimensionWeights to fetch.
    */
@@ -1054,6 +1340,10 @@ export type ItemDimensionWeightCreateArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
+  /**
    * The data needed to create a ItemDimensionWeight.
    */
   data: Prisma.XOR<Prisma.ItemDimensionWeightCreateInput, Prisma.ItemDimensionWeightUncheckedCreateInput>
@@ -1087,6 +1377,10 @@ export type ItemDimensionWeightCreateManyAndReturnArgs<ExtArgs extends runtime.T
    */
   data: Prisma.ItemDimensionWeightCreateManyInput | Prisma.ItemDimensionWeightCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1101,6 +1395,10 @@ export type ItemDimensionWeightUpdateArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the ItemDimensionWeight
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
   /**
    * The data needed to update a ItemDimensionWeight.
    */
@@ -1153,6 +1451,10 @@ export type ItemDimensionWeightUpdateManyAndReturnArgs<ExtArgs extends runtime.T
    * Limit how many ItemDimensionWeights to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1167,6 +1469,10 @@ export type ItemDimensionWeightUpsertArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the ItemDimensionWeight
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
   /**
    * The filter to search for the ItemDimensionWeight to update in case it exists.
    */
@@ -1193,6 +1499,10 @@ export type ItemDimensionWeightDeleteArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the ItemDimensionWeight
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
   /**
    * Filter which ItemDimensionWeight to delete.
    */
@@ -1225,4 +1535,8 @@ export type ItemDimensionWeightDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the ItemDimensionWeight
    */
   omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
 }

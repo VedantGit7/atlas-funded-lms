@@ -254,6 +254,8 @@ export type TestSeriesItemWhereInput = {
   updated_at?: Prisma.DateTimeFilter<"TestSeriesItem"> | Date | string
   test_series?: Prisma.XOR<Prisma.TestSeriesScalarRelationFilter, Prisma.TestSeriesWhereInput>
   progress?: Prisma.TestSeriesItemProgressListRelationFilter
+  assessment?: Prisma.XOR<Prisma.AssessmentNullableScalarRelationFilter, Prisma.AssessmentWhereInput> | null
+  mock_test?: Prisma.XOR<Prisma.MockTestNullableScalarRelationFilter, Prisma.MockTestWhereInput> | null
 }
 
 export type TestSeriesItemOrderByWithRelationInput = {
@@ -269,6 +271,8 @@ export type TestSeriesItemOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrder
   test_series?: Prisma.TestSeriesOrderByWithRelationInput
   progress?: Prisma.TestSeriesItemProgressOrderByRelationAggregateInput
+  assessment?: Prisma.AssessmentOrderByWithRelationInput
+  mock_test?: Prisma.MockTestOrderByWithRelationInput
 }
 
 export type TestSeriesItemWhereUniqueInput = Prisma.AtLeast<{
@@ -288,6 +292,8 @@ export type TestSeriesItemWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeFilter<"TestSeriesItem"> | Date | string
   test_series?: Prisma.XOR<Prisma.TestSeriesScalarRelationFilter, Prisma.TestSeriesWhereInput>
   progress?: Prisma.TestSeriesItemProgressListRelationFilter
+  assessment?: Prisma.XOR<Prisma.AssessmentNullableScalarRelationFilter, Prisma.AssessmentWhereInput> | null
+  mock_test?: Prisma.XOR<Prisma.MockTestNullableScalarRelationFilter, Prisma.MockTestWhereInput> | null
 }, "id" | "tenant_id_test_series_id_position">
 
 export type TestSeriesItemOrderByWithAggregationInput = {
@@ -326,16 +332,15 @@ export type TestSeriesItemScalarWhereWithAggregatesInput = {
 
 export type TestSeriesItemCreateInput = {
   id: string
-  tenant_id: string
   position: number
   title?: string | null
-  mock_test_id?: string | null
-  assessment_id?: string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
   test_series: Prisma.TestSeriesCreateNestedOneWithoutItemsInput
   progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutItemInput
+  assessment?: Prisma.AssessmentCreateNestedOneWithoutTest_series_itemsInput
+  mock_test?: Prisma.MockTestCreateNestedOneWithoutTest_series_itemsInput
 }
 
 export type TestSeriesItemUncheckedCreateInput = {
@@ -354,16 +359,15 @@ export type TestSeriesItemUncheckedCreateInput = {
 
 export type TestSeriesItemUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   test_series?: Prisma.TestSeriesUpdateOneRequiredWithoutItemsNestedInput
   progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutItemNestedInput
+  assessment?: Prisma.AssessmentUpdateOneWithoutTest_series_itemsNestedInput
+  mock_test?: Prisma.MockTestUpdateOneWithoutTest_series_itemsNestedInput
 }
 
 export type TestSeriesItemUncheckedUpdateInput = {
@@ -395,11 +399,8 @@ export type TestSeriesItemCreateManyInput = {
 
 export type TestSeriesItemUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -484,6 +485,48 @@ export type TestSeriesItemScalarRelationFilter = {
   isNot?: Prisma.TestSeriesItemWhereInput
 }
 
+export type TestSeriesItemCreateNestedManyWithoutMock_testInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput> | Prisma.TestSeriesItemCreateWithoutMock_testInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput | Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyMock_testInputEnvelope
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+}
+
+export type TestSeriesItemUncheckedCreateNestedManyWithoutMock_testInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput> | Prisma.TestSeriesItemCreateWithoutMock_testInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput | Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyMock_testInputEnvelope
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+}
+
+export type TestSeriesItemUpdateManyWithoutMock_testNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput> | Prisma.TestSeriesItemCreateWithoutMock_testInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput | Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput[]
+  upsert?: Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutMock_testInput | Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutMock_testInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyMock_testInputEnvelope
+  set?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutMock_testInput | Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutMock_testInput[]
+  updateMany?: Prisma.TestSeriesItemUpdateManyWithWhereWithoutMock_testInput | Prisma.TestSeriesItemUpdateManyWithWhereWithoutMock_testInput[]
+  deleteMany?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
+}
+
+export type TestSeriesItemUncheckedUpdateManyWithoutMock_testNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput> | Prisma.TestSeriesItemCreateWithoutMock_testInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput | Prisma.TestSeriesItemCreateOrConnectWithoutMock_testInput[]
+  upsert?: Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutMock_testInput | Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutMock_testInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyMock_testInputEnvelope
+  set?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutMock_testInput | Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutMock_testInput[]
+  updateMany?: Prisma.TestSeriesItemUpdateManyWithWhereWithoutMock_testInput | Prisma.TestSeriesItemUpdateManyWithWhereWithoutMock_testInput[]
+  deleteMany?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
+}
+
 export type TestSeriesItemCreateNestedManyWithoutTest_seriesInput = {
   create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutTest_seriesInput, Prisma.TestSeriesItemUncheckedCreateWithoutTest_seriesInput> | Prisma.TestSeriesItemCreateWithoutTest_seriesInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutTest_seriesInput[]
   connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutTest_seriesInput | Prisma.TestSeriesItemCreateOrConnectWithoutTest_seriesInput[]
@@ -540,17 +583,124 @@ export type TestSeriesItemUpdateOneRequiredWithoutProgressNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TestSeriesItemUpdateToOneWithWhereWithoutProgressInput, Prisma.TestSeriesItemUpdateWithoutProgressInput>, Prisma.TestSeriesItemUncheckedUpdateWithoutProgressInput>
 }
 
-export type TestSeriesItemCreateWithoutTest_seriesInput = {
+export type TestSeriesItemCreateNestedManyWithoutAssessmentInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput> | Prisma.TestSeriesItemCreateWithoutAssessmentInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput | Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyAssessmentInputEnvelope
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+}
+
+export type TestSeriesItemUncheckedCreateNestedManyWithoutAssessmentInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput> | Prisma.TestSeriesItemCreateWithoutAssessmentInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput | Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyAssessmentInputEnvelope
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+}
+
+export type TestSeriesItemUpdateManyWithoutAssessmentNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput> | Prisma.TestSeriesItemCreateWithoutAssessmentInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput | Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput[]
+  upsert?: Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutAssessmentInput | Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutAssessmentInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyAssessmentInputEnvelope
+  set?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutAssessmentInput | Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutAssessmentInput[]
+  updateMany?: Prisma.TestSeriesItemUpdateManyWithWhereWithoutAssessmentInput | Prisma.TestSeriesItemUpdateManyWithWhereWithoutAssessmentInput[]
+  deleteMany?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
+}
+
+export type TestSeriesItemUncheckedUpdateManyWithoutAssessmentNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput> | Prisma.TestSeriesItemCreateWithoutAssessmentInput[] | Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput | Prisma.TestSeriesItemCreateOrConnectWithoutAssessmentInput[]
+  upsert?: Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutAssessmentInput | Prisma.TestSeriesItemUpsertWithWhereUniqueWithoutAssessmentInput[]
+  createMany?: Prisma.TestSeriesItemCreateManyAssessmentInputEnvelope
+  set?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemWhereUniqueInput | Prisma.TestSeriesItemWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutAssessmentInput | Prisma.TestSeriesItemUpdateWithWhereUniqueWithoutAssessmentInput[]
+  updateMany?: Prisma.TestSeriesItemUpdateManyWithWhereWithoutAssessmentInput | Prisma.TestSeriesItemUpdateManyWithWhereWithoutAssessmentInput[]
+  deleteMany?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
+}
+
+export type TestSeriesItemCreateWithoutMock_testInput = {
   id: string
-  tenant_id: string
   position: number
   title?: string | null
-  mock_test_id?: string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  test_series: Prisma.TestSeriesCreateNestedOneWithoutItemsInput
+  progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutItemInput
+  assessment?: Prisma.AssessmentCreateNestedOneWithoutTest_series_itemsInput
+}
+
+export type TestSeriesItemUncheckedCreateWithoutMock_testInput = {
+  id: string
+  test_series_id: string
+  position: number
+  title?: string | null
   assessment_id?: string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type TestSeriesItemCreateOrConnectWithoutMock_testInput = {
+  where: Prisma.TestSeriesItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput>
+}
+
+export type TestSeriesItemCreateManyMock_testInputEnvelope = {
+  data: Prisma.TestSeriesItemCreateManyMock_testInput | Prisma.TestSeriesItemCreateManyMock_testInput[]
+  skipDuplicates?: boolean
+}
+
+export type TestSeriesItemUpsertWithWhereUniqueWithoutMock_testInput = {
+  where: Prisma.TestSeriesItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.TestSeriesItemUpdateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedUpdateWithoutMock_testInput>
+  create: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedCreateWithoutMock_testInput>
+}
+
+export type TestSeriesItemUpdateWithWhereUniqueWithoutMock_testInput = {
+  where: Prisma.TestSeriesItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.TestSeriesItemUpdateWithoutMock_testInput, Prisma.TestSeriesItemUncheckedUpdateWithoutMock_testInput>
+}
+
+export type TestSeriesItemUpdateManyWithWhereWithoutMock_testInput = {
+  where: Prisma.TestSeriesItemScalarWhereInput
+  data: Prisma.XOR<Prisma.TestSeriesItemUpdateManyMutationInput, Prisma.TestSeriesItemUncheckedUpdateManyWithoutMock_testInput>
+}
+
+export type TestSeriesItemScalarWhereInput = {
+  AND?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
+  OR?: Prisma.TestSeriesItemScalarWhereInput[]
+  NOT?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
+  id?: Prisma.UuidFilter<"TestSeriesItem"> | string
+  tenant_id?: Prisma.UuidFilter<"TestSeriesItem"> | string
+  test_series_id?: Prisma.UuidFilter<"TestSeriesItem"> | string
+  position?: Prisma.IntFilter<"TestSeriesItem"> | number
+  title?: Prisma.StringNullableFilter<"TestSeriesItem"> | string | null
+  mock_test_id?: Prisma.UuidNullableFilter<"TestSeriesItem"> | string | null
+  assessment_id?: Prisma.UuidNullableFilter<"TestSeriesItem"> | string | null
+  config_json?: Prisma.JsonNullableFilter<"TestSeriesItem">
+  created_at?: Prisma.DateTimeFilter<"TestSeriesItem"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"TestSeriesItem"> | Date | string
+}
+
+export type TestSeriesItemCreateWithoutTest_seriesInput = {
+  id: string
+  position: number
+  title?: string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
   progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutItemInput
+  assessment?: Prisma.AssessmentCreateNestedOneWithoutTest_series_itemsInput
+  mock_test?: Prisma.MockTestCreateNestedOneWithoutTest_series_itemsInput
 }
 
 export type TestSeriesItemUncheckedCreateWithoutTest_seriesInput = {
@@ -592,33 +742,16 @@ export type TestSeriesItemUpdateManyWithWhereWithoutTest_seriesInput = {
   data: Prisma.XOR<Prisma.TestSeriesItemUpdateManyMutationInput, Prisma.TestSeriesItemUncheckedUpdateManyWithoutTest_seriesInput>
 }
 
-export type TestSeriesItemScalarWhereInput = {
-  AND?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
-  OR?: Prisma.TestSeriesItemScalarWhereInput[]
-  NOT?: Prisma.TestSeriesItemScalarWhereInput | Prisma.TestSeriesItemScalarWhereInput[]
-  id?: Prisma.UuidFilter<"TestSeriesItem"> | string
-  tenant_id?: Prisma.UuidFilter<"TestSeriesItem"> | string
-  test_series_id?: Prisma.UuidFilter<"TestSeriesItem"> | string
-  position?: Prisma.IntFilter<"TestSeriesItem"> | number
-  title?: Prisma.StringNullableFilter<"TestSeriesItem"> | string | null
-  mock_test_id?: Prisma.UuidNullableFilter<"TestSeriesItem"> | string | null
-  assessment_id?: Prisma.UuidNullableFilter<"TestSeriesItem"> | string | null
-  config_json?: Prisma.JsonNullableFilter<"TestSeriesItem">
-  created_at?: Prisma.DateTimeFilter<"TestSeriesItem"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"TestSeriesItem"> | Date | string
-}
-
 export type TestSeriesItemCreateWithoutProgressInput = {
   id: string
-  tenant_id: string
   position: number
   title?: string | null
-  mock_test_id?: string | null
-  assessment_id?: string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
   test_series: Prisma.TestSeriesCreateNestedOneWithoutItemsInput
+  assessment?: Prisma.AssessmentCreateNestedOneWithoutTest_series_itemsInput
+  mock_test?: Prisma.MockTestCreateNestedOneWithoutTest_series_itemsInput
 }
 
 export type TestSeriesItemUncheckedCreateWithoutProgressInput = {
@@ -652,15 +785,14 @@ export type TestSeriesItemUpdateToOneWithWhereWithoutProgressInput = {
 
 export type TestSeriesItemUpdateWithoutProgressInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   test_series?: Prisma.TestSeriesUpdateOneRequiredWithoutItemsNestedInput
+  assessment?: Prisma.AssessmentUpdateOneWithoutTest_series_itemsNestedInput
+  mock_test?: Prisma.MockTestUpdateOneWithoutTest_series_itemsNestedInput
 }
 
 export type TestSeriesItemUncheckedUpdateWithoutProgressInput = {
@@ -670,6 +802,102 @@ export type TestSeriesItemUncheckedUpdateWithoutProgressInput = {
   position?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TestSeriesItemCreateWithoutAssessmentInput = {
+  id: string
+  position: number
+  title?: string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  test_series: Prisma.TestSeriesCreateNestedOneWithoutItemsInput
+  progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutItemInput
+  mock_test?: Prisma.MockTestCreateNestedOneWithoutTest_series_itemsInput
+}
+
+export type TestSeriesItemUncheckedCreateWithoutAssessmentInput = {
+  id: string
+  test_series_id: string
+  position: number
+  title?: string | null
+  mock_test_id?: string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type TestSeriesItemCreateOrConnectWithoutAssessmentInput = {
+  where: Prisma.TestSeriesItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput>
+}
+
+export type TestSeriesItemCreateManyAssessmentInputEnvelope = {
+  data: Prisma.TestSeriesItemCreateManyAssessmentInput | Prisma.TestSeriesItemCreateManyAssessmentInput[]
+  skipDuplicates?: boolean
+}
+
+export type TestSeriesItemUpsertWithWhereUniqueWithoutAssessmentInput = {
+  where: Prisma.TestSeriesItemWhereUniqueInput
+  update: Prisma.XOR<Prisma.TestSeriesItemUpdateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedUpdateWithoutAssessmentInput>
+  create: Prisma.XOR<Prisma.TestSeriesItemCreateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedCreateWithoutAssessmentInput>
+}
+
+export type TestSeriesItemUpdateWithWhereUniqueWithoutAssessmentInput = {
+  where: Prisma.TestSeriesItemWhereUniqueInput
+  data: Prisma.XOR<Prisma.TestSeriesItemUpdateWithoutAssessmentInput, Prisma.TestSeriesItemUncheckedUpdateWithoutAssessmentInput>
+}
+
+export type TestSeriesItemUpdateManyWithWhereWithoutAssessmentInput = {
+  where: Prisma.TestSeriesItemScalarWhereInput
+  data: Prisma.XOR<Prisma.TestSeriesItemUpdateManyMutationInput, Prisma.TestSeriesItemUncheckedUpdateManyWithoutAssessmentInput>
+}
+
+export type TestSeriesItemCreateManyMock_testInput = {
+  id: string
+  test_series_id: string
+  position: number
+  title?: string | null
+  assessment_id?: string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type TestSeriesItemUpdateWithoutMock_testInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  test_series?: Prisma.TestSeriesUpdateOneRequiredWithoutItemsNestedInput
+  progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutItemNestedInput
+  assessment?: Prisma.AssessmentUpdateOneWithoutTest_series_itemsNestedInput
+}
+
+export type TestSeriesItemUncheckedUpdateWithoutMock_testInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_id?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type TestSeriesItemUncheckedUpdateManyWithoutMock_testInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_id?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -690,15 +918,14 @@ export type TestSeriesItemCreateManyTest_seriesInput = {
 
 export type TestSeriesItemUpdateWithoutTest_seriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutItemNestedInput
+  assessment?: Prisma.AssessmentUpdateOneWithoutTest_series_itemsNestedInput
+  mock_test?: Prisma.MockTestUpdateOneWithoutTest_series_itemsNestedInput
 }
 
 export type TestSeriesItemUncheckedUpdateWithoutTest_seriesInput = {
@@ -721,6 +948,52 @@ export type TestSeriesItemUncheckedUpdateManyWithoutTest_seriesInput = {
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TestSeriesItemCreateManyAssessmentInput = {
+  id: string
+  test_series_id: string
+  position: number
+  title?: string | null
+  mock_test_id?: string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type TestSeriesItemUpdateWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  test_series?: Prisma.TestSeriesUpdateOneRequiredWithoutItemsNestedInput
+  progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutItemNestedInput
+  mock_test?: Prisma.MockTestUpdateOneWithoutTest_series_itemsNestedInput
+}
+
+export type TestSeriesItemUncheckedUpdateWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_id?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type TestSeriesItemUncheckedUpdateManyWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_id?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mock_test_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -770,6 +1043,8 @@ export type TestSeriesItemSelect<ExtArgs extends runtime.Types.Extensions.Intern
   updated_at?: boolean
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
   progress?: boolean | Prisma.TestSeriesItem$progressArgs<ExtArgs>
+  assessment?: boolean | Prisma.TestSeriesItem$assessmentArgs<ExtArgs>
+  mock_test?: boolean | Prisma.TestSeriesItem$mock_testArgs<ExtArgs>
   _count?: boolean | Prisma.TestSeriesItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesItem"]>
 
@@ -785,6 +1060,8 @@ export type TestSeriesItemSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   created_at?: boolean
   updated_at?: boolean
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  assessment?: boolean | Prisma.TestSeriesItem$assessmentArgs<ExtArgs>
+  mock_test?: boolean | Prisma.TestSeriesItem$mock_testArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesItem"]>
 
 export type TestSeriesItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -799,6 +1076,8 @@ export type TestSeriesItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   created_at?: boolean
   updated_at?: boolean
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  assessment?: boolean | Prisma.TestSeriesItem$assessmentArgs<ExtArgs>
+  mock_test?: boolean | Prisma.TestSeriesItem$mock_testArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesItem"]>
 
 export type TestSeriesItemSelectScalar = {
@@ -818,13 +1097,19 @@ export type TestSeriesItemOmit<ExtArgs extends runtime.Types.Extensions.Internal
 export type TestSeriesItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
   progress?: boolean | Prisma.TestSeriesItem$progressArgs<ExtArgs>
+  assessment?: boolean | Prisma.TestSeriesItem$assessmentArgs<ExtArgs>
+  mock_test?: boolean | Prisma.TestSeriesItem$mock_testArgs<ExtArgs>
   _count?: boolean | Prisma.TestSeriesItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TestSeriesItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  assessment?: boolean | Prisma.TestSeriesItem$assessmentArgs<ExtArgs>
+  mock_test?: boolean | Prisma.TestSeriesItem$mock_testArgs<ExtArgs>
 }
 export type TestSeriesItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  assessment?: boolean | Prisma.TestSeriesItem$assessmentArgs<ExtArgs>
+  mock_test?: boolean | Prisma.TestSeriesItem$mock_testArgs<ExtArgs>
 }
 
 export type $TestSeriesItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -832,6 +1117,8 @@ export type $TestSeriesItemPayload<ExtArgs extends runtime.Types.Extensions.Inte
   objects: {
     test_series: Prisma.$TestSeriesPayload<ExtArgs>
     progress: Prisma.$TestSeriesItemProgressPayload<ExtArgs>[]
+    assessment: Prisma.$AssessmentPayload<ExtArgs> | null
+    mock_test: Prisma.$MockTestPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1240,6 +1527,8 @@ export interface Prisma__TestSeriesItemClient<T, Null = never, ExtArgs extends r
   readonly [Symbol.toStringTag]: "PrismaPromise"
   test_series<T extends Prisma.TestSeriesDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestSeriesDefaultArgs<ExtArgs>>): Prisma.Prisma__TestSeriesClient<runtime.Types.Result.GetResult<Prisma.$TestSeriesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   progress<T extends Prisma.TestSeriesItem$progressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestSeriesItem$progressArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestSeriesItemProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assessment<T extends Prisma.TestSeriesItem$assessmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestSeriesItem$assessmentArgs<ExtArgs>>): Prisma.Prisma__AssessmentClient<runtime.Types.Result.GetResult<Prisma.$AssessmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  mock_test<T extends Prisma.TestSeriesItem$mock_testArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestSeriesItem$mock_testArgs<ExtArgs>>): Prisma.Prisma__MockTestClient<runtime.Types.Result.GetResult<Prisma.$MockTestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1701,6 +1990,44 @@ export type TestSeriesItem$progressArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.TestSeriesItemProgressScalarFieldEnum | Prisma.TestSeriesItemProgressScalarFieldEnum[]
+}
+
+/**
+ * TestSeriesItem.assessment
+ */
+export type TestSeriesItem$assessmentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Assessment
+   */
+  select?: Prisma.AssessmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Assessment
+   */
+  omit?: Prisma.AssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  where?: Prisma.AssessmentWhereInput
+}
+
+/**
+ * TestSeriesItem.mock_test
+ */
+export type TestSeriesItem$mock_testArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MockTest
+   */
+  select?: Prisma.MockTestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MockTest
+   */
+  omit?: Prisma.MockTestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MockTestInclude<ExtArgs> | null
+  where?: Prisma.MockTestWhereInput
 }
 
 /**

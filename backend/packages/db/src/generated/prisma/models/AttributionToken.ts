@@ -234,6 +234,7 @@ export type AttributionTokenWhereInput = {
   created_at?: Prisma.DateTimeFilter<"AttributionToken"> | Date | string
   expires_at?: Prisma.DateTimeFilter<"AttributionToken"> | Date | string
   consumed_at?: Prisma.DateTimeNullableFilter<"AttributionToken"> | Date | string | null
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }
 
 export type AttributionTokenOrderByWithRelationInput = {
@@ -249,6 +250,7 @@ export type AttributionTokenOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   expires_at?: Prisma.SortOrder
   consumed_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type AttributionTokenWhereUniqueInput = Prisma.AtLeast<{
@@ -267,6 +269,7 @@ export type AttributionTokenWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"AttributionToken"> | Date | string
   expires_at?: Prisma.DateTimeFilter<"AttributionToken"> | Date | string
   consumed_at?: Prisma.DateTimeNullableFilter<"AttributionToken"> | Date | string | null
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }, "id" | "token_hash">
 
 export type AttributionTokenOrderByWithAggregationInput = {
@@ -307,8 +310,6 @@ export type AttributionTokenScalarWhereWithAggregatesInput = {
 
 export type AttributionTokenCreateInput = {
   id: string
-  tenant_id: string
-  membership_id?: string | null
   anonymous_id?: string | null
   token_hash: string
   destination_url: string
@@ -318,6 +319,7 @@ export type AttributionTokenCreateInput = {
   created_at?: Date | string
   expires_at: Date | string
   consumed_at?: Date | string | null
+  membership?: Prisma.MembershipCreateNestedOneWithoutAttribution_tokensInput
 }
 
 export type AttributionTokenUncheckedCreateInput = {
@@ -337,8 +339,6 @@ export type AttributionTokenUncheckedCreateInput = {
 
 export type AttributionTokenUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_hash?: Prisma.StringFieldUpdateOperationsInput | string
   destination_url?: Prisma.StringFieldUpdateOperationsInput | string
@@ -348,6 +348,7 @@ export type AttributionTokenUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   consumed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneWithoutAttribution_tokensNestedInput
 }
 
 export type AttributionTokenUncheckedUpdateInput = {
@@ -382,8 +383,6 @@ export type AttributionTokenCreateManyInput = {
 
 export type AttributionTokenUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   token_hash?: Prisma.StringFieldUpdateOperationsInput | string
   destination_url?: Prisma.StringFieldUpdateOperationsInput | string
@@ -408,6 +407,16 @@ export type AttributionTokenUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   consumed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type AttributionTokenListRelationFilter = {
+  every?: Prisma.AttributionTokenWhereInput
+  some?: Prisma.AttributionTokenWhereInput
+  none?: Prisma.AttributionTokenWhereInput
+}
+
+export type AttributionTokenOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type AttributionTokenCountOrderByAggregateInput = {
@@ -453,6 +462,170 @@ export type AttributionTokenMinOrderByAggregateInput = {
   consumed_at?: Prisma.SortOrder
 }
 
+export type AttributionTokenCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.AttributionTokenCreateWithoutMembershipInput, Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput> | Prisma.AttributionTokenCreateWithoutMembershipInput[] | Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput | Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.AttributionTokenCreateManyMembershipInputEnvelope
+  connect?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+}
+
+export type AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.AttributionTokenCreateWithoutMembershipInput, Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput> | Prisma.AttributionTokenCreateWithoutMembershipInput[] | Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput | Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.AttributionTokenCreateManyMembershipInputEnvelope
+  connect?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+}
+
+export type AttributionTokenUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.AttributionTokenCreateWithoutMembershipInput, Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput> | Prisma.AttributionTokenCreateWithoutMembershipInput[] | Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput | Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.AttributionTokenUpsertWithWhereUniqueWithoutMembershipInput | Prisma.AttributionTokenUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.AttributionTokenCreateManyMembershipInputEnvelope
+  set?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  disconnect?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  delete?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  connect?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  update?: Prisma.AttributionTokenUpdateWithWhereUniqueWithoutMembershipInput | Prisma.AttributionTokenUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.AttributionTokenUpdateManyWithWhereWithoutMembershipInput | Prisma.AttributionTokenUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.AttributionTokenScalarWhereInput | Prisma.AttributionTokenScalarWhereInput[]
+}
+
+export type AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.AttributionTokenCreateWithoutMembershipInput, Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput> | Prisma.AttributionTokenCreateWithoutMembershipInput[] | Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput | Prisma.AttributionTokenCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.AttributionTokenUpsertWithWhereUniqueWithoutMembershipInput | Prisma.AttributionTokenUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.AttributionTokenCreateManyMembershipInputEnvelope
+  set?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  disconnect?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  delete?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  connect?: Prisma.AttributionTokenWhereUniqueInput | Prisma.AttributionTokenWhereUniqueInput[]
+  update?: Prisma.AttributionTokenUpdateWithWhereUniqueWithoutMembershipInput | Prisma.AttributionTokenUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.AttributionTokenUpdateManyWithWhereWithoutMembershipInput | Prisma.AttributionTokenUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.AttributionTokenScalarWhereInput | Prisma.AttributionTokenScalarWhereInput[]
+}
+
+export type AttributionTokenCreateWithoutMembershipInput = {
+  id: string
+  anonymous_id?: string | null
+  token_hash: string
+  destination_url: string
+  source_surface: string
+  readiness_band_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  expires_at: Date | string
+  consumed_at?: Date | string | null
+}
+
+export type AttributionTokenUncheckedCreateWithoutMembershipInput = {
+  id: string
+  anonymous_id?: string | null
+  token_hash: string
+  destination_url: string
+  source_surface: string
+  readiness_band_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  expires_at: Date | string
+  consumed_at?: Date | string | null
+}
+
+export type AttributionTokenCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.AttributionTokenWhereUniqueInput
+  create: Prisma.XOR<Prisma.AttributionTokenCreateWithoutMembershipInput, Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput>
+}
+
+export type AttributionTokenCreateManyMembershipInputEnvelope = {
+  data: Prisma.AttributionTokenCreateManyMembershipInput | Prisma.AttributionTokenCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type AttributionTokenUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.AttributionTokenWhereUniqueInput
+  update: Prisma.XOR<Prisma.AttributionTokenUpdateWithoutMembershipInput, Prisma.AttributionTokenUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.AttributionTokenCreateWithoutMembershipInput, Prisma.AttributionTokenUncheckedCreateWithoutMembershipInput>
+}
+
+export type AttributionTokenUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.AttributionTokenWhereUniqueInput
+  data: Prisma.XOR<Prisma.AttributionTokenUpdateWithoutMembershipInput, Prisma.AttributionTokenUncheckedUpdateWithoutMembershipInput>
+}
+
+export type AttributionTokenUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.AttributionTokenScalarWhereInput
+  data: Prisma.XOR<Prisma.AttributionTokenUpdateManyMutationInput, Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type AttributionTokenScalarWhereInput = {
+  AND?: Prisma.AttributionTokenScalarWhereInput | Prisma.AttributionTokenScalarWhereInput[]
+  OR?: Prisma.AttributionTokenScalarWhereInput[]
+  NOT?: Prisma.AttributionTokenScalarWhereInput | Prisma.AttributionTokenScalarWhereInput[]
+  id?: Prisma.UuidFilter<"AttributionToken"> | string
+  tenant_id?: Prisma.UuidFilter<"AttributionToken"> | string
+  membership_id?: Prisma.UuidNullableFilter<"AttributionToken"> | string | null
+  anonymous_id?: Prisma.StringNullableFilter<"AttributionToken"> | string | null
+  token_hash?: Prisma.StringFilter<"AttributionToken"> | string
+  destination_url?: Prisma.StringFilter<"AttributionToken"> | string
+  source_surface?: Prisma.StringFilter<"AttributionToken"> | string
+  readiness_band_key?: Prisma.StringNullableFilter<"AttributionToken"> | string | null
+  metadata_json?: Prisma.JsonNullableFilter<"AttributionToken">
+  created_at?: Prisma.DateTimeFilter<"AttributionToken"> | Date | string
+  expires_at?: Prisma.DateTimeFilter<"AttributionToken"> | Date | string
+  consumed_at?: Prisma.DateTimeNullableFilter<"AttributionToken"> | Date | string | null
+}
+
+export type AttributionTokenCreateManyMembershipInput = {
+  id: string
+  anonymous_id?: string | null
+  token_hash: string
+  destination_url: string
+  source_surface: string
+  readiness_band_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  expires_at: Date | string
+  consumed_at?: Date | string | null
+}
+
+export type AttributionTokenUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  token_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_url?: Prisma.StringFieldUpdateOperationsInput | string
+  source_surface?: Prisma.StringFieldUpdateOperationsInput | string
+  readiness_band_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  consumed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type AttributionTokenUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  token_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_url?: Prisma.StringFieldUpdateOperationsInput | string
+  source_surface?: Prisma.StringFieldUpdateOperationsInput | string
+  readiness_band_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  consumed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type AttributionTokenUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  token_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_url?: Prisma.StringFieldUpdateOperationsInput | string
+  source_surface?: Prisma.StringFieldUpdateOperationsInput | string
+  readiness_band_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  consumed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 
 
 export type AttributionTokenSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +641,7 @@ export type AttributionTokenSelect<ExtArgs extends runtime.Types.Extensions.Inte
   created_at?: boolean
   expires_at?: boolean
   consumed_at?: boolean
+  membership?: boolean | Prisma.AttributionToken$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["attributionToken"]>
 
 export type AttributionTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -483,6 +657,7 @@ export type AttributionTokenSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   created_at?: boolean
   expires_at?: boolean
   consumed_at?: boolean
+  membership?: boolean | Prisma.AttributionToken$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["attributionToken"]>
 
 export type AttributionTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -498,6 +673,7 @@ export type AttributionTokenSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   created_at?: boolean
   expires_at?: boolean
   consumed_at?: boolean
+  membership?: boolean | Prisma.AttributionToken$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["attributionToken"]>
 
 export type AttributionTokenSelectScalar = {
@@ -516,10 +692,21 @@ export type AttributionTokenSelectScalar = {
 }
 
 export type AttributionTokenOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "anonymous_id" | "token_hash" | "destination_url" | "source_surface" | "readiness_band_key" | "metadata_json" | "created_at" | "expires_at" | "consumed_at", ExtArgs["result"]["attributionToken"]>
+export type AttributionTokenInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.AttributionToken$membershipArgs<ExtArgs>
+}
+export type AttributionTokenIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.AttributionToken$membershipArgs<ExtArgs>
+}
+export type AttributionTokenIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.AttributionToken$membershipArgs<ExtArgs>
+}
 
 export type $AttributionTokenPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AttributionToken"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -927,6 +1114,7 @@ readonly fields: AttributionTokenFieldRefs;
  */
 export interface Prisma__AttributionTokenClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.AttributionToken$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AttributionToken$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -985,6 +1173,10 @@ export type AttributionTokenFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
+  /**
    * Filter, which AttributionToken to fetch.
    */
   where: Prisma.AttributionTokenWhereUniqueInput
@@ -1003,6 +1195,10 @@ export type AttributionTokenFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
+  /**
    * Filter, which AttributionToken to fetch.
    */
   where: Prisma.AttributionTokenWhereUniqueInput
@@ -1020,6 +1216,10 @@ export type AttributionTokenFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the AttributionToken
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
   /**
    * Filter, which AttributionToken to fetch.
    */
@@ -1069,6 +1269,10 @@ export type AttributionTokenFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
+  /**
    * Filter, which AttributionToken to fetch.
    */
   where?: Prisma.AttributionTokenWhereInput
@@ -1116,6 +1320,10 @@ export type AttributionTokenFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the AttributionToken
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
   /**
    * Filter, which AttributionTokens to fetch.
    */
@@ -1165,6 +1373,10 @@ export type AttributionTokenCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
+  /**
    * The data needed to create a AttributionToken.
    */
   data: Prisma.XOR<Prisma.AttributionTokenCreateInput, Prisma.AttributionTokenUncheckedCreateInput>
@@ -1198,6 +1410,10 @@ export type AttributionTokenCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.AttributionTokenCreateManyInput | Prisma.AttributionTokenCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1212,6 +1428,10 @@ export type AttributionTokenUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the AttributionToken
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
   /**
    * The data needed to update a AttributionToken.
    */
@@ -1264,6 +1484,10 @@ export type AttributionTokenUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many AttributionTokens to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1278,6 +1502,10 @@ export type AttributionTokenUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the AttributionToken
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
   /**
    * The filter to search for the AttributionToken to update in case it exists.
    */
@@ -1305,6 +1533,10 @@ export type AttributionTokenDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
+  /**
    * Filter which AttributionToken to delete.
    */
   where: Prisma.AttributionTokenWhereUniqueInput
@@ -1325,6 +1557,25 @@ export type AttributionTokenDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
+ * AttributionToken.membership
+ */
+export type AttributionToken$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
+}
+
+/**
  * AttributionToken without action
  */
 export type AttributionTokenDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1336,4 +1587,8 @@ export type AttributionTokenDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the AttributionToken
    */
   omit?: Prisma.AttributionTokenOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttributionTokenInclude<ExtArgs> | null
 }

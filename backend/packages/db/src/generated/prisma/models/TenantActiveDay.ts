@@ -166,12 +166,14 @@ export type TenantActiveDayWhereInput = {
   tenant_id?: Prisma.UuidFilter<"TenantActiveDay"> | string
   membership_id?: Prisma.UuidFilter<"TenantActiveDay"> | string
   day?: Prisma.DateTimeFilter<"TenantActiveDay"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type TenantActiveDayOrderByWithRelationInput = {
   tenant_id?: Prisma.SortOrder
   membership_id?: Prisma.SortOrder
   day?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type TenantActiveDayWhereUniqueInput = Prisma.AtLeast<{
@@ -182,6 +184,7 @@ export type TenantActiveDayWhereUniqueInput = Prisma.AtLeast<{
   tenant_id?: Prisma.UuidFilter<"TenantActiveDay"> | string
   membership_id?: Prisma.UuidFilter<"TenantActiveDay"> | string
   day?: Prisma.DateTimeFilter<"TenantActiveDay"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "tenant_id_membership_id_day">
 
 export type TenantActiveDayOrderByWithAggregationInput = {
@@ -203,9 +206,8 @@ export type TenantActiveDayScalarWhereWithAggregatesInput = {
 }
 
 export type TenantActiveDayCreateInput = {
-  tenant_id: string
-  membership_id: string
   day: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutTenant_active_daysInput
 }
 
 export type TenantActiveDayUncheckedCreateInput = {
@@ -215,9 +217,8 @@ export type TenantActiveDayUncheckedCreateInput = {
 }
 
 export type TenantActiveDayUpdateInput = {
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutTenant_active_daysNestedInput
 }
 
 export type TenantActiveDayUncheckedUpdateInput = {
@@ -233,8 +234,6 @@ export type TenantActiveDayCreateManyInput = {
 }
 
 export type TenantActiveDayUpdateManyMutationInput = {
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -242,6 +241,16 @@ export type TenantActiveDayUncheckedUpdateManyInput = {
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TenantActiveDayListRelationFilter = {
+  every?: Prisma.TenantActiveDayWhereInput
+  some?: Prisma.TenantActiveDayWhereInput
+  none?: Prisma.TenantActiveDayWhereInput
+}
+
+export type TenantActiveDayOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type TenantActiveDayTenant_idMembership_idDayCompoundUniqueInput = {
@@ -268,24 +277,128 @@ export type TenantActiveDayMinOrderByAggregateInput = {
   day?: Prisma.SortOrder
 }
 
+export type TenantActiveDayCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.TenantActiveDayCreateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput> | Prisma.TenantActiveDayCreateWithoutMembershipInput[] | Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput | Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.TenantActiveDayCreateManyMembershipInputEnvelope
+  connect?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+}
+
+export type TenantActiveDayUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.TenantActiveDayCreateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput> | Prisma.TenantActiveDayCreateWithoutMembershipInput[] | Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput | Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.TenantActiveDayCreateManyMembershipInputEnvelope
+  connect?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+}
+
+export type TenantActiveDayUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantActiveDayCreateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput> | Prisma.TenantActiveDayCreateWithoutMembershipInput[] | Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput | Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.TenantActiveDayUpsertWithWhereUniqueWithoutMembershipInput | Prisma.TenantActiveDayUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.TenantActiveDayCreateManyMembershipInputEnvelope
+  set?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  disconnect?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  delete?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  connect?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  update?: Prisma.TenantActiveDayUpdateWithWhereUniqueWithoutMembershipInput | Prisma.TenantActiveDayUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.TenantActiveDayUpdateManyWithWhereWithoutMembershipInput | Prisma.TenantActiveDayUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.TenantActiveDayScalarWhereInput | Prisma.TenantActiveDayScalarWhereInput[]
+}
+
+export type TenantActiveDayUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantActiveDayCreateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput> | Prisma.TenantActiveDayCreateWithoutMembershipInput[] | Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput | Prisma.TenantActiveDayCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.TenantActiveDayUpsertWithWhereUniqueWithoutMembershipInput | Prisma.TenantActiveDayUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.TenantActiveDayCreateManyMembershipInputEnvelope
+  set?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  disconnect?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  delete?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  connect?: Prisma.TenantActiveDayWhereUniqueInput | Prisma.TenantActiveDayWhereUniqueInput[]
+  update?: Prisma.TenantActiveDayUpdateWithWhereUniqueWithoutMembershipInput | Prisma.TenantActiveDayUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.TenantActiveDayUpdateManyWithWhereWithoutMembershipInput | Prisma.TenantActiveDayUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.TenantActiveDayScalarWhereInput | Prisma.TenantActiveDayScalarWhereInput[]
+}
+
+export type TenantActiveDayCreateWithoutMembershipInput = {
+  day: Date | string
+}
+
+export type TenantActiveDayUncheckedCreateWithoutMembershipInput = {
+  day: Date | string
+}
+
+export type TenantActiveDayCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.TenantActiveDayWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantActiveDayCreateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput>
+}
+
+export type TenantActiveDayCreateManyMembershipInputEnvelope = {
+  data: Prisma.TenantActiveDayCreateManyMembershipInput | Prisma.TenantActiveDayCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type TenantActiveDayUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.TenantActiveDayWhereUniqueInput
+  update: Prisma.XOR<Prisma.TenantActiveDayUpdateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.TenantActiveDayCreateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedCreateWithoutMembershipInput>
+}
+
+export type TenantActiveDayUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.TenantActiveDayWhereUniqueInput
+  data: Prisma.XOR<Prisma.TenantActiveDayUpdateWithoutMembershipInput, Prisma.TenantActiveDayUncheckedUpdateWithoutMembershipInput>
+}
+
+export type TenantActiveDayUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.TenantActiveDayScalarWhereInput
+  data: Prisma.XOR<Prisma.TenantActiveDayUpdateManyMutationInput, Prisma.TenantActiveDayUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type TenantActiveDayScalarWhereInput = {
+  AND?: Prisma.TenantActiveDayScalarWhereInput | Prisma.TenantActiveDayScalarWhereInput[]
+  OR?: Prisma.TenantActiveDayScalarWhereInput[]
+  NOT?: Prisma.TenantActiveDayScalarWhereInput | Prisma.TenantActiveDayScalarWhereInput[]
+  tenant_id?: Prisma.UuidFilter<"TenantActiveDay"> | string
+  membership_id?: Prisma.UuidFilter<"TenantActiveDay"> | string
+  day?: Prisma.DateTimeFilter<"TenantActiveDay"> | Date | string
+}
+
+export type TenantActiveDayCreateManyMembershipInput = {
+  day: Date | string
+}
+
+export type TenantActiveDayUpdateWithoutMembershipInput = {
+  day?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TenantActiveDayUncheckedUpdateWithoutMembershipInput = {
+  day?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TenantActiveDayUncheckedUpdateManyWithoutMembershipInput = {
+  day?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type TenantActiveDaySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   tenant_id?: boolean
   membership_id?: boolean
   day?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenantActiveDay"]>
 
 export type TenantActiveDaySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   tenant_id?: boolean
   membership_id?: boolean
   day?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenantActiveDay"]>
 
 export type TenantActiveDaySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   tenant_id?: boolean
   membership_id?: boolean
   day?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenantActiveDay"]>
 
 export type TenantActiveDaySelectScalar = {
@@ -295,10 +408,21 @@ export type TenantActiveDaySelectScalar = {
 }
 
 export type TenantActiveDayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"tenant_id" | "membership_id" | "day", ExtArgs["result"]["tenantActiveDay"]>
+export type TenantActiveDayInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type TenantActiveDayIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type TenantActiveDayIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $TenantActiveDayPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TenantActiveDay"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     tenant_id: string
     membership_id: string
@@ -697,6 +821,7 @@ readonly fields: TenantActiveDayFieldRefs;
  */
 export interface Prisma__TenantActiveDayClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -746,6 +871,10 @@ export type TenantActiveDayFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
+  /**
    * Filter, which TenantActiveDay to fetch.
    */
   where: Prisma.TenantActiveDayWhereUniqueInput
@@ -764,6 +893,10 @@ export type TenantActiveDayFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
+  /**
    * Filter, which TenantActiveDay to fetch.
    */
   where: Prisma.TenantActiveDayWhereUniqueInput
@@ -781,6 +914,10 @@ export type TenantActiveDayFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the TenantActiveDay
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
   /**
    * Filter, which TenantActiveDay to fetch.
    */
@@ -830,6 +967,10 @@ export type TenantActiveDayFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
+  /**
    * Filter, which TenantActiveDay to fetch.
    */
   where?: Prisma.TenantActiveDayWhereInput
@@ -877,6 +1018,10 @@ export type TenantActiveDayFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the TenantActiveDay
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
   /**
    * Filter, which TenantActiveDays to fetch.
    */
@@ -926,6 +1071,10 @@ export type TenantActiveDayCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
+  /**
    * The data needed to create a TenantActiveDay.
    */
   data: Prisma.XOR<Prisma.TenantActiveDayCreateInput, Prisma.TenantActiveDayUncheckedCreateInput>
@@ -959,6 +1108,10 @@ export type TenantActiveDayCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.TenantActiveDayCreateManyInput | Prisma.TenantActiveDayCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -973,6 +1126,10 @@ export type TenantActiveDayUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the TenantActiveDay
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
   /**
    * The data needed to update a TenantActiveDay.
    */
@@ -1025,6 +1182,10 @@ export type TenantActiveDayUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many TenantActiveDays to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1039,6 +1200,10 @@ export type TenantActiveDayUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the TenantActiveDay
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
   /**
    * The filter to search for the TenantActiveDay to update in case it exists.
    */
@@ -1065,6 +1230,10 @@ export type TenantActiveDayDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the TenantActiveDay
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
   /**
    * Filter which TenantActiveDay to delete.
    */
@@ -1097,4 +1266,8 @@ export type TenantActiveDayDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the TenantActiveDay
    */
   omit?: Prisma.TenantActiveDayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantActiveDayInclude<ExtArgs> | null
 }

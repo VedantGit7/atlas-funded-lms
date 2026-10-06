@@ -232,6 +232,7 @@ export type GamificationProfileWhereInput = {
   level_key?: Prisma.StringNullableFilter<"GamificationProfile"> | string | null
   created_at?: Prisma.DateTimeFilter<"GamificationProfile"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"GamificationProfile"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type GamificationProfileOrderByWithRelationInput = {
@@ -242,6 +243,7 @@ export type GamificationProfileOrderByWithRelationInput = {
   level_key?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type GamificationProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -256,6 +258,7 @@ export type GamificationProfileWhereUniqueInput = Prisma.AtLeast<{
   level_key?: Prisma.StringNullableFilter<"GamificationProfile"> | string | null
   created_at?: Prisma.DateTimeFilter<"GamificationProfile"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"GamificationProfile"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_membership_id">
 
 export type GamificationProfileOrderByWithAggregationInput = {
@@ -288,12 +291,11 @@ export type GamificationProfileScalarWhereWithAggregatesInput = {
 
 export type GamificationProfileCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   xp_total?: number
   level_key?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutGamification_profilesInput
 }
 
 export type GamificationProfileUncheckedCreateInput = {
@@ -308,12 +310,11 @@ export type GamificationProfileUncheckedCreateInput = {
 
 export type GamificationProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   xp_total?: Prisma.IntFieldUpdateOperationsInput | number
   level_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutGamification_profilesNestedInput
 }
 
 export type GamificationProfileUncheckedUpdateInput = {
@@ -338,8 +339,6 @@ export type GamificationProfileCreateManyInput = {
 
 export type GamificationProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   xp_total?: Prisma.IntFieldUpdateOperationsInput | number
   level_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -354,6 +353,16 @@ export type GamificationProfileUncheckedUpdateManyInput = {
   level_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GamificationProfileListRelationFilter = {
+  every?: Prisma.GamificationProfileWhereInput
+  some?: Prisma.GamificationProfileWhereInput
+  none?: Prisma.GamificationProfileWhereInput
+}
+
+export type GamificationProfileOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type GamificationProfileTenant_idMembership_idCompoundUniqueInput = {
@@ -399,6 +408,135 @@ export type GamificationProfileSumOrderByAggregateInput = {
   xp_total?: Prisma.SortOrder
 }
 
+export type GamificationProfileCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.GamificationProfileCreateWithoutMembershipInput, Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput> | Prisma.GamificationProfileCreateWithoutMembershipInput[] | Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput | Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.GamificationProfileCreateManyMembershipInputEnvelope
+  connect?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+}
+
+export type GamificationProfileUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.GamificationProfileCreateWithoutMembershipInput, Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput> | Prisma.GamificationProfileCreateWithoutMembershipInput[] | Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput | Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.GamificationProfileCreateManyMembershipInputEnvelope
+  connect?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+}
+
+export type GamificationProfileUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.GamificationProfileCreateWithoutMembershipInput, Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput> | Prisma.GamificationProfileCreateWithoutMembershipInput[] | Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput | Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.GamificationProfileUpsertWithWhereUniqueWithoutMembershipInput | Prisma.GamificationProfileUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.GamificationProfileCreateManyMembershipInputEnvelope
+  set?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  disconnect?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  delete?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  connect?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  update?: Prisma.GamificationProfileUpdateWithWhereUniqueWithoutMembershipInput | Prisma.GamificationProfileUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.GamificationProfileUpdateManyWithWhereWithoutMembershipInput | Prisma.GamificationProfileUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.GamificationProfileScalarWhereInput | Prisma.GamificationProfileScalarWhereInput[]
+}
+
+export type GamificationProfileUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.GamificationProfileCreateWithoutMembershipInput, Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput> | Prisma.GamificationProfileCreateWithoutMembershipInput[] | Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput | Prisma.GamificationProfileCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.GamificationProfileUpsertWithWhereUniqueWithoutMembershipInput | Prisma.GamificationProfileUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.GamificationProfileCreateManyMembershipInputEnvelope
+  set?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  disconnect?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  delete?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  connect?: Prisma.GamificationProfileWhereUniqueInput | Prisma.GamificationProfileWhereUniqueInput[]
+  update?: Prisma.GamificationProfileUpdateWithWhereUniqueWithoutMembershipInput | Prisma.GamificationProfileUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.GamificationProfileUpdateManyWithWhereWithoutMembershipInput | Prisma.GamificationProfileUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.GamificationProfileScalarWhereInput | Prisma.GamificationProfileScalarWhereInput[]
+}
+
+export type GamificationProfileCreateWithoutMembershipInput = {
+  id: string
+  xp_total?: number
+  level_key?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type GamificationProfileUncheckedCreateWithoutMembershipInput = {
+  id: string
+  xp_total?: number
+  level_key?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type GamificationProfileCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.GamificationProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.GamificationProfileCreateWithoutMembershipInput, Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput>
+}
+
+export type GamificationProfileCreateManyMembershipInputEnvelope = {
+  data: Prisma.GamificationProfileCreateManyMembershipInput | Prisma.GamificationProfileCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type GamificationProfileUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.GamificationProfileWhereUniqueInput
+  update: Prisma.XOR<Prisma.GamificationProfileUpdateWithoutMembershipInput, Prisma.GamificationProfileUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.GamificationProfileCreateWithoutMembershipInput, Prisma.GamificationProfileUncheckedCreateWithoutMembershipInput>
+}
+
+export type GamificationProfileUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.GamificationProfileWhereUniqueInput
+  data: Prisma.XOR<Prisma.GamificationProfileUpdateWithoutMembershipInput, Prisma.GamificationProfileUncheckedUpdateWithoutMembershipInput>
+}
+
+export type GamificationProfileUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.GamificationProfileScalarWhereInput
+  data: Prisma.XOR<Prisma.GamificationProfileUpdateManyMutationInput, Prisma.GamificationProfileUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type GamificationProfileScalarWhereInput = {
+  AND?: Prisma.GamificationProfileScalarWhereInput | Prisma.GamificationProfileScalarWhereInput[]
+  OR?: Prisma.GamificationProfileScalarWhereInput[]
+  NOT?: Prisma.GamificationProfileScalarWhereInput | Prisma.GamificationProfileScalarWhereInput[]
+  id?: Prisma.UuidFilter<"GamificationProfile"> | string
+  tenant_id?: Prisma.UuidFilter<"GamificationProfile"> | string
+  membership_id?: Prisma.UuidFilter<"GamificationProfile"> | string
+  xp_total?: Prisma.IntFilter<"GamificationProfile"> | number
+  level_key?: Prisma.StringNullableFilter<"GamificationProfile"> | string | null
+  created_at?: Prisma.DateTimeFilter<"GamificationProfile"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"GamificationProfile"> | Date | string
+}
+
+export type GamificationProfileCreateManyMembershipInput = {
+  id: string
+  xp_total?: number
+  level_key?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type GamificationProfileUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  xp_total?: Prisma.IntFieldUpdateOperationsInput | number
+  level_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GamificationProfileUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  xp_total?: Prisma.IntFieldUpdateOperationsInput | number
+  level_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GamificationProfileUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  xp_total?: Prisma.IntFieldUpdateOperationsInput | number
+  level_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type GamificationProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -409,6 +547,7 @@ export type GamificationProfileSelect<ExtArgs extends runtime.Types.Extensions.I
   level_key?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gamificationProfile"]>
 
 export type GamificationProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -419,6 +558,7 @@ export type GamificationProfileSelectCreateManyAndReturn<ExtArgs extends runtime
   level_key?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gamificationProfile"]>
 
 export type GamificationProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -429,6 +569,7 @@ export type GamificationProfileSelectUpdateManyAndReturn<ExtArgs extends runtime
   level_key?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gamificationProfile"]>
 
 export type GamificationProfileSelectScalar = {
@@ -442,10 +583,21 @@ export type GamificationProfileSelectScalar = {
 }
 
 export type GamificationProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "xp_total" | "level_key" | "created_at" | "updated_at", ExtArgs["result"]["gamificationProfile"]>
+export type GamificationProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type GamificationProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type GamificationProfileIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $GamificationProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GamificationProfile"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -848,6 +1000,7 @@ readonly fields: GamificationProfileFieldRefs;
  */
 export interface Prisma__GamificationProfileClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -901,6 +1054,10 @@ export type GamificationProfileFindUniqueArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
+  /**
    * Filter, which GamificationProfile to fetch.
    */
   where: Prisma.GamificationProfileWhereUniqueInput
@@ -919,6 +1076,10 @@ export type GamificationProfileFindUniqueOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
+  /**
    * Filter, which GamificationProfile to fetch.
    */
   where: Prisma.GamificationProfileWhereUniqueInput
@@ -936,6 +1097,10 @@ export type GamificationProfileFindFirstArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the GamificationProfile
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
   /**
    * Filter, which GamificationProfile to fetch.
    */
@@ -985,6 +1150,10 @@ export type GamificationProfileFindFirstOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
+  /**
    * Filter, which GamificationProfile to fetch.
    */
   where?: Prisma.GamificationProfileWhereInput
@@ -1032,6 +1201,10 @@ export type GamificationProfileFindManyArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the GamificationProfile
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
   /**
    * Filter, which GamificationProfiles to fetch.
    */
@@ -1081,6 +1254,10 @@ export type GamificationProfileCreateArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
+  /**
    * The data needed to create a GamificationProfile.
    */
   data: Prisma.XOR<Prisma.GamificationProfileCreateInput, Prisma.GamificationProfileUncheckedCreateInput>
@@ -1114,6 +1291,10 @@ export type GamificationProfileCreateManyAndReturnArgs<ExtArgs extends runtime.T
    */
   data: Prisma.GamificationProfileCreateManyInput | Prisma.GamificationProfileCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1128,6 +1309,10 @@ export type GamificationProfileUpdateArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the GamificationProfile
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
   /**
    * The data needed to update a GamificationProfile.
    */
@@ -1180,6 +1365,10 @@ export type GamificationProfileUpdateManyAndReturnArgs<ExtArgs extends runtime.T
    * Limit how many GamificationProfiles to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1194,6 +1383,10 @@ export type GamificationProfileUpsertArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the GamificationProfile
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
   /**
    * The filter to search for the GamificationProfile to update in case it exists.
    */
@@ -1220,6 +1413,10 @@ export type GamificationProfileDeleteArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the GamificationProfile
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
   /**
    * Filter which GamificationProfile to delete.
    */
@@ -1252,4 +1449,8 @@ export type GamificationProfileDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the GamificationProfile
    */
   omit?: Prisma.GamificationProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GamificationProfileInclude<ExtArgs> | null
 }

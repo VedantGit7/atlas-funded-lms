@@ -5,4 +5,6 @@ export type TenantForeignKey = {
   name: string;
 };
 
+export declare const CORE_TENANT_FOREIGN_KEYS: readonly TenantForeignKey[];
+export declare const COVERAGE_TENANT_FOREIGN_KEYS: readonly TenantForeignKey[];
 export declare const TENANT_FOREIGN_KEYS: readonly TenantForeignKey[];

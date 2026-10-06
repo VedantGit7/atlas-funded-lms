@@ -211,6 +211,7 @@ export type MessengerMessageWhereInput = {
   created_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
   conversation?: Prisma.XOR<Prisma.MessengerConversationScalarRelationFilter, Prisma.MessengerConversationWhereInput>
+  sender_membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type MessengerMessageOrderByWithRelationInput = {
@@ -224,6 +225,7 @@ export type MessengerMessageOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   conversation?: Prisma.MessengerConversationOrderByWithRelationInput
+  sender_membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type MessengerMessageWhereUniqueInput = Prisma.AtLeast<{
@@ -240,6 +242,7 @@ export type MessengerMessageWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
   conversation?: Prisma.XOR<Prisma.MessengerConversationScalarRelationFilter, Prisma.MessengerConversationWhereInput>
+  sender_membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id">
 
 export type MessengerMessageOrderByWithAggregationInput = {
@@ -274,14 +277,13 @@ export type MessengerMessageScalarWhereWithAggregatesInput = {
 
 export type MessengerMessageCreateInput = {
   id: string
-  tenant_id: string
-  sender_membership_id: string
   body: string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sent_at?: Date | string
   created_at?: Date | string
   updated_at?: Date | string
   conversation: Prisma.MessengerConversationCreateNestedOneWithoutMessagesInput
+  sender_membership: Prisma.MembershipCreateNestedOneWithoutMessenger_messagesInput
 }
 
 export type MessengerMessageUncheckedCreateInput = {
@@ -298,14 +300,13 @@ export type MessengerMessageUncheckedCreateInput = {
 
 export type MessengerMessageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  sender_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sent_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   conversation?: Prisma.MessengerConversationUpdateOneRequiredWithoutMessagesNestedInput
+  sender_membership?: Prisma.MembershipUpdateOneRequiredWithoutMessenger_messagesNestedInput
 }
 
 export type MessengerMessageUncheckedUpdateInput = {
@@ -334,8 +335,6 @@ export type MessengerMessageCreateManyInput = {
 
 export type MessengerMessageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  sender_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sent_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -399,6 +398,48 @@ export type MessengerMessageMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type MessengerMessageCreateNestedManyWithoutSender_membershipInput = {
+  create?: Prisma.XOR<Prisma.MessengerMessageCreateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput> | Prisma.MessengerMessageCreateWithoutSender_membershipInput[] | Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput[]
+  connectOrCreate?: Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput | Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput[]
+  createMany?: Prisma.MessengerMessageCreateManySender_membershipInputEnvelope
+  connect?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+}
+
+export type MessengerMessageUncheckedCreateNestedManyWithoutSender_membershipInput = {
+  create?: Prisma.XOR<Prisma.MessengerMessageCreateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput> | Prisma.MessengerMessageCreateWithoutSender_membershipInput[] | Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput[]
+  connectOrCreate?: Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput | Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput[]
+  createMany?: Prisma.MessengerMessageCreateManySender_membershipInputEnvelope
+  connect?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+}
+
+export type MessengerMessageUpdateManyWithoutSender_membershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MessengerMessageCreateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput> | Prisma.MessengerMessageCreateWithoutSender_membershipInput[] | Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput[]
+  connectOrCreate?: Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput | Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput[]
+  upsert?: Prisma.MessengerMessageUpsertWithWhereUniqueWithoutSender_membershipInput | Prisma.MessengerMessageUpsertWithWhereUniqueWithoutSender_membershipInput[]
+  createMany?: Prisma.MessengerMessageCreateManySender_membershipInputEnvelope
+  set?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  disconnect?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  delete?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  connect?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  update?: Prisma.MessengerMessageUpdateWithWhereUniqueWithoutSender_membershipInput | Prisma.MessengerMessageUpdateWithWhereUniqueWithoutSender_membershipInput[]
+  updateMany?: Prisma.MessengerMessageUpdateManyWithWhereWithoutSender_membershipInput | Prisma.MessengerMessageUpdateManyWithWhereWithoutSender_membershipInput[]
+  deleteMany?: Prisma.MessengerMessageScalarWhereInput | Prisma.MessengerMessageScalarWhereInput[]
+}
+
+export type MessengerMessageUncheckedUpdateManyWithoutSender_membershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MessengerMessageCreateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput> | Prisma.MessengerMessageCreateWithoutSender_membershipInput[] | Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput[]
+  connectOrCreate?: Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput | Prisma.MessengerMessageCreateOrConnectWithoutSender_membershipInput[]
+  upsert?: Prisma.MessengerMessageUpsertWithWhereUniqueWithoutSender_membershipInput | Prisma.MessengerMessageUpsertWithWhereUniqueWithoutSender_membershipInput[]
+  createMany?: Prisma.MessengerMessageCreateManySender_membershipInputEnvelope
+  set?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  disconnect?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  delete?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  connect?: Prisma.MessengerMessageWhereUniqueInput | Prisma.MessengerMessageWhereUniqueInput[]
+  update?: Prisma.MessengerMessageUpdateWithWhereUniqueWithoutSender_membershipInput | Prisma.MessengerMessageUpdateWithWhereUniqueWithoutSender_membershipInput[]
+  updateMany?: Prisma.MessengerMessageUpdateManyWithWhereWithoutSender_membershipInput | Prisma.MessengerMessageUpdateManyWithWhereWithoutSender_membershipInput[]
+  deleteMany?: Prisma.MessengerMessageScalarWhereInput | Prisma.MessengerMessageScalarWhereInput[]
+}
+
 export type MessengerMessageCreateNestedManyWithoutConversationInput = {
   create?: Prisma.XOR<Prisma.MessengerMessageCreateWithoutConversationInput, Prisma.MessengerMessageUncheckedCreateWithoutConversationInput> | Prisma.MessengerMessageCreateWithoutConversationInput[] | Prisma.MessengerMessageUncheckedCreateWithoutConversationInput[]
   connectOrCreate?: Prisma.MessengerMessageCreateOrConnectWithoutConversationInput | Prisma.MessengerMessageCreateOrConnectWithoutConversationInput[]
@@ -441,15 +482,75 @@ export type MessengerMessageUncheckedUpdateManyWithoutConversationNestedInput = 
   deleteMany?: Prisma.MessengerMessageScalarWhereInput | Prisma.MessengerMessageScalarWhereInput[]
 }
 
-export type MessengerMessageCreateWithoutConversationInput = {
+export type MessengerMessageCreateWithoutSender_membershipInput = {
   id: string
-  tenant_id: string
-  sender_membership_id: string
   body: string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sent_at?: Date | string
   created_at?: Date | string
   updated_at?: Date | string
+  conversation: Prisma.MessengerConversationCreateNestedOneWithoutMessagesInput
+}
+
+export type MessengerMessageUncheckedCreateWithoutSender_membershipInput = {
+  id: string
+  conversation_id: string
+  body: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sent_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MessengerMessageCreateOrConnectWithoutSender_membershipInput = {
+  where: Prisma.MessengerMessageWhereUniqueInput
+  create: Prisma.XOR<Prisma.MessengerMessageCreateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput>
+}
+
+export type MessengerMessageCreateManySender_membershipInputEnvelope = {
+  data: Prisma.MessengerMessageCreateManySender_membershipInput | Prisma.MessengerMessageCreateManySender_membershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type MessengerMessageUpsertWithWhereUniqueWithoutSender_membershipInput = {
+  where: Prisma.MessengerMessageWhereUniqueInput
+  update: Prisma.XOR<Prisma.MessengerMessageUpdateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedUpdateWithoutSender_membershipInput>
+  create: Prisma.XOR<Prisma.MessengerMessageCreateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedCreateWithoutSender_membershipInput>
+}
+
+export type MessengerMessageUpdateWithWhereUniqueWithoutSender_membershipInput = {
+  where: Prisma.MessengerMessageWhereUniqueInput
+  data: Prisma.XOR<Prisma.MessengerMessageUpdateWithoutSender_membershipInput, Prisma.MessengerMessageUncheckedUpdateWithoutSender_membershipInput>
+}
+
+export type MessengerMessageUpdateManyWithWhereWithoutSender_membershipInput = {
+  where: Prisma.MessengerMessageScalarWhereInput
+  data: Prisma.XOR<Prisma.MessengerMessageUpdateManyMutationInput, Prisma.MessengerMessageUncheckedUpdateManyWithoutSender_membershipInput>
+}
+
+export type MessengerMessageScalarWhereInput = {
+  AND?: Prisma.MessengerMessageScalarWhereInput | Prisma.MessengerMessageScalarWhereInput[]
+  OR?: Prisma.MessengerMessageScalarWhereInput[]
+  NOT?: Prisma.MessengerMessageScalarWhereInput | Prisma.MessengerMessageScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MessengerMessage"> | string
+  tenant_id?: Prisma.UuidFilter<"MessengerMessage"> | string
+  conversation_id?: Prisma.UuidFilter<"MessengerMessage"> | string
+  sender_membership_id?: Prisma.UuidFilter<"MessengerMessage"> | string
+  body?: Prisma.StringFilter<"MessengerMessage"> | string
+  metadata_json?: Prisma.JsonNullableFilter<"MessengerMessage">
+  sent_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
+  created_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
+}
+
+export type MessengerMessageCreateWithoutConversationInput = {
+  id: string
+  body: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sent_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+  sender_membership: Prisma.MembershipCreateNestedOneWithoutMessenger_messagesInput
 }
 
 export type MessengerMessageUncheckedCreateWithoutConversationInput = {
@@ -489,19 +590,44 @@ export type MessengerMessageUpdateManyWithWhereWithoutConversationInput = {
   data: Prisma.XOR<Prisma.MessengerMessageUpdateManyMutationInput, Prisma.MessengerMessageUncheckedUpdateManyWithoutConversationInput>
 }
 
-export type MessengerMessageScalarWhereInput = {
-  AND?: Prisma.MessengerMessageScalarWhereInput | Prisma.MessengerMessageScalarWhereInput[]
-  OR?: Prisma.MessengerMessageScalarWhereInput[]
-  NOT?: Prisma.MessengerMessageScalarWhereInput | Prisma.MessengerMessageScalarWhereInput[]
-  id?: Prisma.UuidFilter<"MessengerMessage"> | string
-  tenant_id?: Prisma.UuidFilter<"MessengerMessage"> | string
-  conversation_id?: Prisma.UuidFilter<"MessengerMessage"> | string
-  sender_membership_id?: Prisma.UuidFilter<"MessengerMessage"> | string
-  body?: Prisma.StringFilter<"MessengerMessage"> | string
-  metadata_json?: Prisma.JsonNullableFilter<"MessengerMessage">
-  sent_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
-  created_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"MessengerMessage"> | Date | string
+export type MessengerMessageCreateManySender_membershipInput = {
+  id: string
+  conversation_id: string
+  body: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sent_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MessengerMessageUpdateWithoutSender_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sent_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversation?: Prisma.MessengerConversationUpdateOneRequiredWithoutMessagesNestedInput
+}
+
+export type MessengerMessageUncheckedUpdateWithoutSender_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  conversation_id?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sent_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MessengerMessageUncheckedUpdateManyWithoutSender_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  conversation_id?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sent_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type MessengerMessageCreateManyConversationInput = {
@@ -517,13 +643,12 @@ export type MessengerMessageCreateManyConversationInput = {
 
 export type MessengerMessageUpdateWithoutConversationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  sender_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sent_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sender_membership?: Prisma.MembershipUpdateOneRequiredWithoutMessenger_messagesNestedInput
 }
 
 export type MessengerMessageUncheckedUpdateWithoutConversationInput = {
@@ -561,6 +686,7 @@ export type MessengerMessageSelect<ExtArgs extends runtime.Types.Extensions.Inte
   created_at?: boolean
   updated_at?: boolean
   conversation?: boolean | Prisma.MessengerConversationDefaultArgs<ExtArgs>
+  sender_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["messengerMessage"]>
 
 export type MessengerMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -574,6 +700,7 @@ export type MessengerMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   created_at?: boolean
   updated_at?: boolean
   conversation?: boolean | Prisma.MessengerConversationDefaultArgs<ExtArgs>
+  sender_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["messengerMessage"]>
 
 export type MessengerMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -587,6 +714,7 @@ export type MessengerMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   created_at?: boolean
   updated_at?: boolean
   conversation?: boolean | Prisma.MessengerConversationDefaultArgs<ExtArgs>
+  sender_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["messengerMessage"]>
 
 export type MessengerMessageSelectScalar = {
@@ -604,18 +732,22 @@ export type MessengerMessageSelectScalar = {
 export type MessengerMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "conversation_id" | "sender_membership_id" | "body" | "metadata_json" | "sent_at" | "created_at" | "updated_at", ExtArgs["result"]["messengerMessage"]>
 export type MessengerMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.MessengerConversationDefaultArgs<ExtArgs>
+  sender_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type MessengerMessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.MessengerConversationDefaultArgs<ExtArgs>
+  sender_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type MessengerMessageIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.MessengerConversationDefaultArgs<ExtArgs>
+  sender_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $MessengerMessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MessengerMessage"
   objects: {
     conversation: Prisma.$MessengerConversationPayload<ExtArgs>
+    sender_membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1022,6 +1154,7 @@ readonly fields: MessengerMessageFieldRefs;
 export interface Prisma__MessengerMessageClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   conversation<T extends Prisma.MessengerConversationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessengerConversationDefaultArgs<ExtArgs>>): Prisma.Prisma__MessengerConversationClient<runtime.Types.Result.GetResult<Prisma.$MessengerConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sender_membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

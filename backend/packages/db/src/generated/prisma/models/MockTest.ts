@@ -235,6 +235,8 @@ export type MockTestWhereInput = {
   updated_at?: Prisma.DateTimeFilter<"MockTest"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"MockTest"> | Date | string | null
   enrollments?: Prisma.MockTestEnrollmentListRelationFilter
+  assessment?: Prisma.XOR<Prisma.AssessmentScalarRelationFilter, Prisma.AssessmentWhereInput>
+  test_series_items?: Prisma.TestSeriesItemListRelationFilter
 }
 
 export type MockTestOrderByWithRelationInput = {
@@ -251,10 +253,13 @@ export type MockTestOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   enrollments?: Prisma.MockTestEnrollmentOrderByRelationAggregateInput
+  assessment?: Prisma.AssessmentOrderByWithRelationInput
+  test_series_items?: Prisma.TestSeriesItemOrderByRelationAggregateInput
 }
 
 export type MockTestWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MockTestTenant_idIdCompoundUniqueInput
   tenant_id_slug?: Prisma.MockTestTenant_idSlugCompoundUniqueInput
   AND?: Prisma.MockTestWhereInput | Prisma.MockTestWhereInput[]
   OR?: Prisma.MockTestWhereInput[]
@@ -271,7 +276,9 @@ export type MockTestWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeFilter<"MockTest"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"MockTest"> | Date | string | null
   enrollments?: Prisma.MockTestEnrollmentListRelationFilter
-}, "id" | "tenant_id_slug">
+  assessment?: Prisma.XOR<Prisma.AssessmentScalarRelationFilter, Prisma.AssessmentWhereInput>
+  test_series_items?: Prisma.TestSeriesItemListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_slug">
 
 export type MockTestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -311,11 +318,9 @@ export type MockTestScalarWhereWithAggregatesInput = {
 
 export type MockTestCreateInput = {
   id: string
-  tenant_id: string
   slug: string
   title: string
   description?: string | null
-  assessment_id: string
   status?: $Enums.PublishStatus
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_by_membership_id?: string | null
@@ -323,6 +328,8 @@ export type MockTestCreateInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   enrollments?: Prisma.MockTestEnrollmentCreateNestedManyWithoutMock_testInput
+  assessment: Prisma.AssessmentCreateNestedOneWithoutMock_testsInput
+  test_series_items?: Prisma.TestSeriesItemCreateNestedManyWithoutMock_testInput
 }
 
 export type MockTestUncheckedCreateInput = {
@@ -339,15 +346,14 @@ export type MockTestUncheckedCreateInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   enrollments?: Prisma.MockTestEnrollmentUncheckedCreateNestedManyWithoutMock_testInput
+  test_series_items?: Prisma.TestSeriesItemUncheckedCreateNestedManyWithoutMock_testInput
 }
 
 export type MockTestUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -355,6 +361,8 @@ export type MockTestUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enrollments?: Prisma.MockTestEnrollmentUpdateManyWithoutMock_testNestedInput
+  assessment?: Prisma.AssessmentUpdateOneRequiredWithoutMock_testsNestedInput
+  test_series_items?: Prisma.TestSeriesItemUpdateManyWithoutMock_testNestedInput
 }
 
 export type MockTestUncheckedUpdateInput = {
@@ -371,6 +379,7 @@ export type MockTestUncheckedUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   enrollments?: Prisma.MockTestEnrollmentUncheckedUpdateManyWithoutMock_testNestedInput
+  test_series_items?: Prisma.TestSeriesItemUncheckedUpdateManyWithoutMock_testNestedInput
 }
 
 export type MockTestCreateManyInput = {
@@ -390,11 +399,9 @@ export type MockTestCreateManyInput = {
 
 export type MockTestUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -416,6 +423,11 @@ export type MockTestUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MockTestTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type MockTestTenant_idSlugCompoundUniqueInput = {
@@ -471,6 +483,21 @@ export type MockTestScalarRelationFilter = {
   isNot?: Prisma.MockTestWhereInput
 }
 
+export type MockTestNullableScalarRelationFilter = {
+  is?: Prisma.MockTestWhereInput | null
+  isNot?: Prisma.MockTestWhereInput | null
+}
+
+export type MockTestListRelationFilter = {
+  every?: Prisma.MockTestWhereInput
+  some?: Prisma.MockTestWhereInput
+  none?: Prisma.MockTestWhereInput
+}
+
+export type MockTestOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type MockTestCreateNestedOneWithoutEnrollmentsInput = {
   create?: Prisma.XOR<Prisma.MockTestCreateWithoutEnrollmentsInput, Prisma.MockTestUncheckedCreateWithoutEnrollmentsInput>
   connectOrCreate?: Prisma.MockTestCreateOrConnectWithoutEnrollmentsInput
@@ -485,19 +512,77 @@ export type MockTestUpdateOneRequiredWithoutEnrollmentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MockTestUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.MockTestUpdateWithoutEnrollmentsInput>, Prisma.MockTestUncheckedUpdateWithoutEnrollmentsInput>
 }
 
+export type MockTestCreateNestedOneWithoutTest_series_itemsInput = {
+  create?: Prisma.XOR<Prisma.MockTestCreateWithoutTest_series_itemsInput, Prisma.MockTestUncheckedCreateWithoutTest_series_itemsInput>
+  connectOrCreate?: Prisma.MockTestCreateOrConnectWithoutTest_series_itemsInput
+  connect?: Prisma.MockTestWhereUniqueInput
+}
+
+export type MockTestUpdateOneWithoutTest_series_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.MockTestCreateWithoutTest_series_itemsInput, Prisma.MockTestUncheckedCreateWithoutTest_series_itemsInput>
+  connectOrCreate?: Prisma.MockTestCreateOrConnectWithoutTest_series_itemsInput
+  upsert?: Prisma.MockTestUpsertWithoutTest_series_itemsInput
+  disconnect?: Prisma.MockTestWhereInput | boolean
+  delete?: Prisma.MockTestWhereInput | boolean
+  connect?: Prisma.MockTestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MockTestUpdateToOneWithWhereWithoutTest_series_itemsInput, Prisma.MockTestUpdateWithoutTest_series_itemsInput>, Prisma.MockTestUncheckedUpdateWithoutTest_series_itemsInput>
+}
+
+export type MockTestCreateNestedManyWithoutAssessmentInput = {
+  create?: Prisma.XOR<Prisma.MockTestCreateWithoutAssessmentInput, Prisma.MockTestUncheckedCreateWithoutAssessmentInput> | Prisma.MockTestCreateWithoutAssessmentInput[] | Prisma.MockTestUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.MockTestCreateOrConnectWithoutAssessmentInput | Prisma.MockTestCreateOrConnectWithoutAssessmentInput[]
+  createMany?: Prisma.MockTestCreateManyAssessmentInputEnvelope
+  connect?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+}
+
+export type MockTestUncheckedCreateNestedManyWithoutAssessmentInput = {
+  create?: Prisma.XOR<Prisma.MockTestCreateWithoutAssessmentInput, Prisma.MockTestUncheckedCreateWithoutAssessmentInput> | Prisma.MockTestCreateWithoutAssessmentInput[] | Prisma.MockTestUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.MockTestCreateOrConnectWithoutAssessmentInput | Prisma.MockTestCreateOrConnectWithoutAssessmentInput[]
+  createMany?: Prisma.MockTestCreateManyAssessmentInputEnvelope
+  connect?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+}
+
+export type MockTestUpdateManyWithoutAssessmentNestedInput = {
+  create?: Prisma.XOR<Prisma.MockTestCreateWithoutAssessmentInput, Prisma.MockTestUncheckedCreateWithoutAssessmentInput> | Prisma.MockTestCreateWithoutAssessmentInput[] | Prisma.MockTestUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.MockTestCreateOrConnectWithoutAssessmentInput | Prisma.MockTestCreateOrConnectWithoutAssessmentInput[]
+  upsert?: Prisma.MockTestUpsertWithWhereUniqueWithoutAssessmentInput | Prisma.MockTestUpsertWithWhereUniqueWithoutAssessmentInput[]
+  createMany?: Prisma.MockTestCreateManyAssessmentInputEnvelope
+  set?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  disconnect?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  delete?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  connect?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  update?: Prisma.MockTestUpdateWithWhereUniqueWithoutAssessmentInput | Prisma.MockTestUpdateWithWhereUniqueWithoutAssessmentInput[]
+  updateMany?: Prisma.MockTestUpdateManyWithWhereWithoutAssessmentInput | Prisma.MockTestUpdateManyWithWhereWithoutAssessmentInput[]
+  deleteMany?: Prisma.MockTestScalarWhereInput | Prisma.MockTestScalarWhereInput[]
+}
+
+export type MockTestUncheckedUpdateManyWithoutAssessmentNestedInput = {
+  create?: Prisma.XOR<Prisma.MockTestCreateWithoutAssessmentInput, Prisma.MockTestUncheckedCreateWithoutAssessmentInput> | Prisma.MockTestCreateWithoutAssessmentInput[] | Prisma.MockTestUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.MockTestCreateOrConnectWithoutAssessmentInput | Prisma.MockTestCreateOrConnectWithoutAssessmentInput[]
+  upsert?: Prisma.MockTestUpsertWithWhereUniqueWithoutAssessmentInput | Prisma.MockTestUpsertWithWhereUniqueWithoutAssessmentInput[]
+  createMany?: Prisma.MockTestCreateManyAssessmentInputEnvelope
+  set?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  disconnect?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  delete?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  connect?: Prisma.MockTestWhereUniqueInput | Prisma.MockTestWhereUniqueInput[]
+  update?: Prisma.MockTestUpdateWithWhereUniqueWithoutAssessmentInput | Prisma.MockTestUpdateWithWhereUniqueWithoutAssessmentInput[]
+  updateMany?: Prisma.MockTestUpdateManyWithWhereWithoutAssessmentInput | Prisma.MockTestUpdateManyWithWhereWithoutAssessmentInput[]
+  deleteMany?: Prisma.MockTestScalarWhereInput | Prisma.MockTestScalarWhereInput[]
+}
+
 export type MockTestCreateWithoutEnrollmentsInput = {
   id: string
-  tenant_id: string
   slug: string
   title: string
   description?: string | null
-  assessment_id: string
   status?: $Enums.PublishStatus
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  assessment: Prisma.AssessmentCreateNestedOneWithoutMock_testsInput
+  test_series_items?: Prisma.TestSeriesItemCreateNestedManyWithoutMock_testInput
 }
 
 export type MockTestUncheckedCreateWithoutEnrollmentsInput = {
@@ -513,6 +598,7 @@ export type MockTestUncheckedCreateWithoutEnrollmentsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  test_series_items?: Prisma.TestSeriesItemUncheckedCreateNestedManyWithoutMock_testInput
 }
 
 export type MockTestCreateOrConnectWithoutEnrollmentsInput = {
@@ -533,17 +619,17 @@ export type MockTestUpdateToOneWithWhereWithoutEnrollmentsInput = {
 
 export type MockTestUpdateWithoutEnrollmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment?: Prisma.AssessmentUpdateOneRequiredWithoutMock_testsNestedInput
+  test_series_items?: Prisma.TestSeriesItemUpdateManyWithoutMock_testNestedInput
 }
 
 export type MockTestUncheckedUpdateWithoutEnrollmentsInput = {
@@ -559,6 +645,215 @@ export type MockTestUncheckedUpdateWithoutEnrollmentsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  test_series_items?: Prisma.TestSeriesItemUncheckedUpdateManyWithoutMock_testNestedInput
+}
+
+export type MockTestCreateWithoutTest_series_itemsInput = {
+  id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentCreateNestedManyWithoutMock_testInput
+  assessment: Prisma.AssessmentCreateNestedOneWithoutMock_testsInput
+}
+
+export type MockTestUncheckedCreateWithoutTest_series_itemsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  assessment_id: string
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentUncheckedCreateNestedManyWithoutMock_testInput
+}
+
+export type MockTestCreateOrConnectWithoutTest_series_itemsInput = {
+  where: Prisma.MockTestWhereUniqueInput
+  create: Prisma.XOR<Prisma.MockTestCreateWithoutTest_series_itemsInput, Prisma.MockTestUncheckedCreateWithoutTest_series_itemsInput>
+}
+
+export type MockTestUpsertWithoutTest_series_itemsInput = {
+  update: Prisma.XOR<Prisma.MockTestUpdateWithoutTest_series_itemsInput, Prisma.MockTestUncheckedUpdateWithoutTest_series_itemsInput>
+  create: Prisma.XOR<Prisma.MockTestCreateWithoutTest_series_itemsInput, Prisma.MockTestUncheckedCreateWithoutTest_series_itemsInput>
+  where?: Prisma.MockTestWhereInput
+}
+
+export type MockTestUpdateToOneWithWhereWithoutTest_series_itemsInput = {
+  where?: Prisma.MockTestWhereInput
+  data: Prisma.XOR<Prisma.MockTestUpdateWithoutTest_series_itemsInput, Prisma.MockTestUncheckedUpdateWithoutTest_series_itemsInput>
+}
+
+export type MockTestUpdateWithoutTest_series_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentUpdateManyWithoutMock_testNestedInput
+  assessment?: Prisma.AssessmentUpdateOneRequiredWithoutMock_testsNestedInput
+}
+
+export type MockTestUncheckedUpdateWithoutTest_series_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentUncheckedUpdateManyWithoutMock_testNestedInput
+}
+
+export type MockTestCreateWithoutAssessmentInput = {
+  id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentCreateNestedManyWithoutMock_testInput
+  test_series_items?: Prisma.TestSeriesItemCreateNestedManyWithoutMock_testInput
+}
+
+export type MockTestUncheckedCreateWithoutAssessmentInput = {
+  id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentUncheckedCreateNestedManyWithoutMock_testInput
+  test_series_items?: Prisma.TestSeriesItemUncheckedCreateNestedManyWithoutMock_testInput
+}
+
+export type MockTestCreateOrConnectWithoutAssessmentInput = {
+  where: Prisma.MockTestWhereUniqueInput
+  create: Prisma.XOR<Prisma.MockTestCreateWithoutAssessmentInput, Prisma.MockTestUncheckedCreateWithoutAssessmentInput>
+}
+
+export type MockTestCreateManyAssessmentInputEnvelope = {
+  data: Prisma.MockTestCreateManyAssessmentInput | Prisma.MockTestCreateManyAssessmentInput[]
+  skipDuplicates?: boolean
+}
+
+export type MockTestUpsertWithWhereUniqueWithoutAssessmentInput = {
+  where: Prisma.MockTestWhereUniqueInput
+  update: Prisma.XOR<Prisma.MockTestUpdateWithoutAssessmentInput, Prisma.MockTestUncheckedUpdateWithoutAssessmentInput>
+  create: Prisma.XOR<Prisma.MockTestCreateWithoutAssessmentInput, Prisma.MockTestUncheckedCreateWithoutAssessmentInput>
+}
+
+export type MockTestUpdateWithWhereUniqueWithoutAssessmentInput = {
+  where: Prisma.MockTestWhereUniqueInput
+  data: Prisma.XOR<Prisma.MockTestUpdateWithoutAssessmentInput, Prisma.MockTestUncheckedUpdateWithoutAssessmentInput>
+}
+
+export type MockTestUpdateManyWithWhereWithoutAssessmentInput = {
+  where: Prisma.MockTestScalarWhereInput
+  data: Prisma.XOR<Prisma.MockTestUpdateManyMutationInput, Prisma.MockTestUncheckedUpdateManyWithoutAssessmentInput>
+}
+
+export type MockTestScalarWhereInput = {
+  AND?: Prisma.MockTestScalarWhereInput | Prisma.MockTestScalarWhereInput[]
+  OR?: Prisma.MockTestScalarWhereInput[]
+  NOT?: Prisma.MockTestScalarWhereInput | Prisma.MockTestScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MockTest"> | string
+  tenant_id?: Prisma.UuidFilter<"MockTest"> | string
+  slug?: Prisma.StringFilter<"MockTest"> | string
+  title?: Prisma.StringFilter<"MockTest"> | string
+  description?: Prisma.StringNullableFilter<"MockTest"> | string | null
+  assessment_id?: Prisma.UuidFilter<"MockTest"> | string
+  status?: Prisma.EnumPublishStatusFilter<"MockTest"> | $Enums.PublishStatus
+  metadata_json?: Prisma.JsonNullableFilter<"MockTest">
+  created_by_membership_id?: Prisma.UuidNullableFilter<"MockTest"> | string | null
+  created_at?: Prisma.DateTimeFilter<"MockTest"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"MockTest"> | Date | string
+  deleted_at?: Prisma.DateTimeNullableFilter<"MockTest"> | Date | string | null
+}
+
+export type MockTestCreateManyAssessmentInput = {
+  id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+}
+
+export type MockTestUpdateWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentUpdateManyWithoutMock_testNestedInput
+  test_series_items?: Prisma.TestSeriesItemUpdateManyWithoutMock_testNestedInput
+}
+
+export type MockTestUncheckedUpdateWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enrollments?: Prisma.MockTestEnrollmentUncheckedUpdateManyWithoutMock_testNestedInput
+  test_series_items?: Prisma.TestSeriesItemUncheckedUpdateManyWithoutMock_testNestedInput
+}
+
+export type MockTestUncheckedUpdateManyWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -568,10 +863,12 @@ export type MockTestUncheckedUpdateWithoutEnrollmentsInput = {
 
 export type MockTestCountOutputType = {
   enrollments: number
+  test_series_items: number
 }
 
 export type MockTestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enrollments?: boolean | MockTestCountOutputTypeCountEnrollmentsArgs
+  test_series_items?: boolean | MockTestCountOutputTypeCountTest_series_itemsArgs
 }
 
 /**
@@ -591,6 +888,13 @@ export type MockTestCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.
   where?: Prisma.MockTestEnrollmentWhereInput
 }
 
+/**
+ * MockTestCountOutputType without action
+ */
+export type MockTestCountOutputTypeCountTest_series_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TestSeriesItemWhereInput
+}
+
 
 export type MockTestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -606,6 +910,8 @@ export type MockTestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updated_at?: boolean
   deleted_at?: boolean
   enrollments?: boolean | Prisma.MockTest$enrollmentsArgs<ExtArgs>
+  assessment?: boolean | Prisma.AssessmentDefaultArgs<ExtArgs>
+  test_series_items?: boolean | Prisma.MockTest$test_series_itemsArgs<ExtArgs>
   _count?: boolean | Prisma.MockTestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mockTest"]>
 
@@ -622,6 +928,7 @@ export type MockTestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  assessment?: boolean | Prisma.AssessmentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mockTest"]>
 
 export type MockTestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -637,6 +944,7 @@ export type MockTestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  assessment?: boolean | Prisma.AssessmentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["mockTest"]>
 
 export type MockTestSelectScalar = {
@@ -657,15 +965,23 @@ export type MockTestSelectScalar = {
 export type MockTestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "slug" | "title" | "description" | "assessment_id" | "status" | "metadata_json" | "created_by_membership_id" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["mockTest"]>
 export type MockTestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   enrollments?: boolean | Prisma.MockTest$enrollmentsArgs<ExtArgs>
+  assessment?: boolean | Prisma.AssessmentDefaultArgs<ExtArgs>
+  test_series_items?: boolean | Prisma.MockTest$test_series_itemsArgs<ExtArgs>
   _count?: boolean | Prisma.MockTestCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type MockTestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type MockTestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MockTestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment?: boolean | Prisma.AssessmentDefaultArgs<ExtArgs>
+}
+export type MockTestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment?: boolean | Prisma.AssessmentDefaultArgs<ExtArgs>
+}
 
 export type $MockTestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MockTest"
   objects: {
     enrollments: Prisma.$MockTestEnrollmentPayload<ExtArgs>[]
+    assessment: Prisma.$AssessmentPayload<ExtArgs>
+    test_series_items: Prisma.$TestSeriesItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1075,6 +1391,8 @@ readonly fields: MockTestFieldRefs;
 export interface Prisma__MockTestClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   enrollments<T extends Prisma.MockTest$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MockTest$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MockTestEnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assessment<T extends Prisma.AssessmentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentDefaultArgs<ExtArgs>>): Prisma.Prisma__AssessmentClient<runtime.Types.Result.GetResult<Prisma.$AssessmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  test_series_items<T extends Prisma.MockTest$test_series_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MockTest$test_series_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestSeriesItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1370,6 +1688,10 @@ export type MockTestCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    */
   data: Prisma.MockTestCreateManyInput | Prisma.MockTestCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MockTestIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1440,6 +1762,10 @@ export type MockTestUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many MockTests to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MockTestIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1530,6 +1856,30 @@ export type MockTest$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.MockTestEnrollmentScalarFieldEnum | Prisma.MockTestEnrollmentScalarFieldEnum[]
+}
+
+/**
+ * MockTest.test_series_items
+ */
+export type MockTest$test_series_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TestSeriesItem
+   */
+  select?: Prisma.TestSeriesItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TestSeriesItem
+   */
+  omit?: Prisma.TestSeriesItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TestSeriesItemInclude<ExtArgs> | null
+  where?: Prisma.TestSeriesItemWhereInput
+  orderBy?: Prisma.TestSeriesItemOrderByWithRelationInput | Prisma.TestSeriesItemOrderByWithRelationInput[]
+  cursor?: Prisma.TestSeriesItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TestSeriesItemScalarFieldEnum | Prisma.TestSeriesItemScalarFieldEnum[]
 }
 
 /**

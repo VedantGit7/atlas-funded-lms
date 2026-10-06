@@ -214,6 +214,8 @@ export type ModerationCaseWhereInput = {
   opened_by_membership_id?: Prisma.UuidNullableFilter<"ModerationCase"> | string | null
   created_at?: Prisma.DateTimeFilter<"ModerationCase"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ModerationCase"> | Date | string
+  appeals?: Prisma.AppealListRelationFilter
+  moderation_decisions?: Prisma.ModerationDecisionListRelationFilter
 }
 
 export type ModerationCaseOrderByWithRelationInput = {
@@ -226,10 +228,13 @@ export type ModerationCaseOrderByWithRelationInput = {
   opened_by_membership_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  appeals?: Prisma.AppealOrderByRelationAggregateInput
+  moderation_decisions?: Prisma.ModerationDecisionOrderByRelationAggregateInput
 }
 
 export type ModerationCaseWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.ModerationCaseTenant_idIdCompoundUniqueInput
   AND?: Prisma.ModerationCaseWhereInput | Prisma.ModerationCaseWhereInput[]
   OR?: Prisma.ModerationCaseWhereInput[]
   NOT?: Prisma.ModerationCaseWhereInput | Prisma.ModerationCaseWhereInput[]
@@ -241,7 +246,9 @@ export type ModerationCaseWhereUniqueInput = Prisma.AtLeast<{
   opened_by_membership_id?: Prisma.UuidNullableFilter<"ModerationCase"> | string | null
   created_at?: Prisma.DateTimeFilter<"ModerationCase"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ModerationCase"> | Date | string
-}, "id">
+  appeals?: Prisma.AppealListRelationFilter
+  moderation_decisions?: Prisma.ModerationDecisionListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type ModerationCaseOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -283,6 +290,8 @@ export type ModerationCaseCreateInput = {
   opened_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  appeals?: Prisma.AppealCreateNestedManyWithoutModeration_caseInput
+  moderation_decisions?: Prisma.ModerationDecisionCreateNestedManyWithoutModeration_caseInput
 }
 
 export type ModerationCaseUncheckedCreateInput = {
@@ -295,6 +304,8 @@ export type ModerationCaseUncheckedCreateInput = {
   opened_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  appeals?: Prisma.AppealUncheckedCreateNestedManyWithoutModeration_caseInput
+  moderation_decisions?: Prisma.ModerationDecisionUncheckedCreateNestedManyWithoutModeration_caseInput
 }
 
 export type ModerationCaseUpdateInput = {
@@ -307,6 +318,8 @@ export type ModerationCaseUpdateInput = {
   opened_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  appeals?: Prisma.AppealUpdateManyWithoutModeration_caseNestedInput
+  moderation_decisions?: Prisma.ModerationDecisionUpdateManyWithoutModeration_caseNestedInput
 }
 
 export type ModerationCaseUncheckedUpdateInput = {
@@ -319,6 +332,8 @@ export type ModerationCaseUncheckedUpdateInput = {
   opened_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  appeals?: Prisma.AppealUncheckedUpdateManyWithoutModeration_caseNestedInput
+  moderation_decisions?: Prisma.ModerationDecisionUncheckedUpdateManyWithoutModeration_caseNestedInput
 }
 
 export type ModerationCaseCreateManyInput = {
@@ -357,6 +372,11 @@ export type ModerationCaseUncheckedUpdateManyInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type ModerationCaseTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type ModerationCaseCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -393,10 +413,217 @@ export type ModerationCaseMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type ModerationCaseScalarRelationFilter = {
+  is?: Prisma.ModerationCaseWhereInput
+  isNot?: Prisma.ModerationCaseWhereInput
+}
+
 export type EnumModerationStatusFieldUpdateOperationsInput = {
   set?: $Enums.ModerationStatus
 }
 
+export type ModerationCaseCreateNestedOneWithoutModeration_decisionsInput = {
+  create?: Prisma.XOR<Prisma.ModerationCaseCreateWithoutModeration_decisionsInput, Prisma.ModerationCaseUncheckedCreateWithoutModeration_decisionsInput>
+  connectOrCreate?: Prisma.ModerationCaseCreateOrConnectWithoutModeration_decisionsInput
+  connect?: Prisma.ModerationCaseWhereUniqueInput
+}
+
+export type ModerationCaseUpdateOneRequiredWithoutModeration_decisionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ModerationCaseCreateWithoutModeration_decisionsInput, Prisma.ModerationCaseUncheckedCreateWithoutModeration_decisionsInput>
+  connectOrCreate?: Prisma.ModerationCaseCreateOrConnectWithoutModeration_decisionsInput
+  upsert?: Prisma.ModerationCaseUpsertWithoutModeration_decisionsInput
+  connect?: Prisma.ModerationCaseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ModerationCaseUpdateToOneWithWhereWithoutModeration_decisionsInput, Prisma.ModerationCaseUpdateWithoutModeration_decisionsInput>, Prisma.ModerationCaseUncheckedUpdateWithoutModeration_decisionsInput>
+}
+
+export type ModerationCaseCreateNestedOneWithoutAppealsInput = {
+  create?: Prisma.XOR<Prisma.ModerationCaseCreateWithoutAppealsInput, Prisma.ModerationCaseUncheckedCreateWithoutAppealsInput>
+  connectOrCreate?: Prisma.ModerationCaseCreateOrConnectWithoutAppealsInput
+  connect?: Prisma.ModerationCaseWhereUniqueInput
+}
+
+export type ModerationCaseUpdateOneRequiredWithoutAppealsNestedInput = {
+  create?: Prisma.XOR<Prisma.ModerationCaseCreateWithoutAppealsInput, Prisma.ModerationCaseUncheckedCreateWithoutAppealsInput>
+  connectOrCreate?: Prisma.ModerationCaseCreateOrConnectWithoutAppealsInput
+  upsert?: Prisma.ModerationCaseUpsertWithoutAppealsInput
+  connect?: Prisma.ModerationCaseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ModerationCaseUpdateToOneWithWhereWithoutAppealsInput, Prisma.ModerationCaseUpdateWithoutAppealsInput>, Prisma.ModerationCaseUncheckedUpdateWithoutAppealsInput>
+}
+
+export type ModerationCaseCreateWithoutModeration_decisionsInput = {
+  id: string
+  tenant_id: string
+  target_type: string
+  target_id: string
+  status?: $Enums.ModerationStatus
+  reason_key?: string | null
+  opened_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  appeals?: Prisma.AppealCreateNestedManyWithoutModeration_caseInput
+}
+
+export type ModerationCaseUncheckedCreateWithoutModeration_decisionsInput = {
+  id: string
+  tenant_id: string
+  target_type: string
+  target_id: string
+  status?: $Enums.ModerationStatus
+  reason_key?: string | null
+  opened_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  appeals?: Prisma.AppealUncheckedCreateNestedManyWithoutModeration_caseInput
+}
+
+export type ModerationCaseCreateOrConnectWithoutModeration_decisionsInput = {
+  where: Prisma.ModerationCaseWhereUniqueInput
+  create: Prisma.XOR<Prisma.ModerationCaseCreateWithoutModeration_decisionsInput, Prisma.ModerationCaseUncheckedCreateWithoutModeration_decisionsInput>
+}
+
+export type ModerationCaseUpsertWithoutModeration_decisionsInput = {
+  update: Prisma.XOR<Prisma.ModerationCaseUpdateWithoutModeration_decisionsInput, Prisma.ModerationCaseUncheckedUpdateWithoutModeration_decisionsInput>
+  create: Prisma.XOR<Prisma.ModerationCaseCreateWithoutModeration_decisionsInput, Prisma.ModerationCaseUncheckedCreateWithoutModeration_decisionsInput>
+  where?: Prisma.ModerationCaseWhereInput
+}
+
+export type ModerationCaseUpdateToOneWithWhereWithoutModeration_decisionsInput = {
+  where?: Prisma.ModerationCaseWhereInput
+  data: Prisma.XOR<Prisma.ModerationCaseUpdateWithoutModeration_decisionsInput, Prisma.ModerationCaseUncheckedUpdateWithoutModeration_decisionsInput>
+}
+
+export type ModerationCaseUpdateWithoutModeration_decisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  reason_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opened_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  appeals?: Prisma.AppealUpdateManyWithoutModeration_caseNestedInput
+}
+
+export type ModerationCaseUncheckedUpdateWithoutModeration_decisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  reason_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opened_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  appeals?: Prisma.AppealUncheckedUpdateManyWithoutModeration_caseNestedInput
+}
+
+export type ModerationCaseCreateWithoutAppealsInput = {
+  id: string
+  tenant_id: string
+  target_type: string
+  target_id: string
+  status?: $Enums.ModerationStatus
+  reason_key?: string | null
+  opened_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  moderation_decisions?: Prisma.ModerationDecisionCreateNestedManyWithoutModeration_caseInput
+}
+
+export type ModerationCaseUncheckedCreateWithoutAppealsInput = {
+  id: string
+  tenant_id: string
+  target_type: string
+  target_id: string
+  status?: $Enums.ModerationStatus
+  reason_key?: string | null
+  opened_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  moderation_decisions?: Prisma.ModerationDecisionUncheckedCreateNestedManyWithoutModeration_caseInput
+}
+
+export type ModerationCaseCreateOrConnectWithoutAppealsInput = {
+  where: Prisma.ModerationCaseWhereUniqueInput
+  create: Prisma.XOR<Prisma.ModerationCaseCreateWithoutAppealsInput, Prisma.ModerationCaseUncheckedCreateWithoutAppealsInput>
+}
+
+export type ModerationCaseUpsertWithoutAppealsInput = {
+  update: Prisma.XOR<Prisma.ModerationCaseUpdateWithoutAppealsInput, Prisma.ModerationCaseUncheckedUpdateWithoutAppealsInput>
+  create: Prisma.XOR<Prisma.ModerationCaseCreateWithoutAppealsInput, Prisma.ModerationCaseUncheckedCreateWithoutAppealsInput>
+  where?: Prisma.ModerationCaseWhereInput
+}
+
+export type ModerationCaseUpdateToOneWithWhereWithoutAppealsInput = {
+  where?: Prisma.ModerationCaseWhereInput
+  data: Prisma.XOR<Prisma.ModerationCaseUpdateWithoutAppealsInput, Prisma.ModerationCaseUncheckedUpdateWithoutAppealsInput>
+}
+
+export type ModerationCaseUpdateWithoutAppealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  reason_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opened_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderation_decisions?: Prisma.ModerationDecisionUpdateManyWithoutModeration_caseNestedInput
+}
+
+export type ModerationCaseUncheckedUpdateWithoutAppealsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumModerationStatusFieldUpdateOperationsInput | $Enums.ModerationStatus
+  reason_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  opened_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderation_decisions?: Prisma.ModerationDecisionUncheckedUpdateManyWithoutModeration_caseNestedInput
+}
+
+
+/**
+ * Count Type ModerationCaseCountOutputType
+ */
+
+export type ModerationCaseCountOutputType = {
+  appeals: number
+  moderation_decisions: number
+}
+
+export type ModerationCaseCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  appeals?: boolean | ModerationCaseCountOutputTypeCountAppealsArgs
+  moderation_decisions?: boolean | ModerationCaseCountOutputTypeCountModeration_decisionsArgs
+}
+
+/**
+ * ModerationCaseCountOutputType without action
+ */
+export type ModerationCaseCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ModerationCaseCountOutputType
+   */
+  select?: Prisma.ModerationCaseCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ModerationCaseCountOutputType without action
+ */
+export type ModerationCaseCountOutputTypeCountAppealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AppealWhereInput
+}
+
+/**
+ * ModerationCaseCountOutputType without action
+ */
+export type ModerationCaseCountOutputTypeCountModeration_decisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ModerationDecisionWhereInput
+}
 
 
 export type ModerationCaseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -409,6 +636,9 @@ export type ModerationCaseSelect<ExtArgs extends runtime.Types.Extensions.Intern
   opened_by_membership_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  appeals?: boolean | Prisma.ModerationCase$appealsArgs<ExtArgs>
+  moderation_decisions?: boolean | Prisma.ModerationCase$moderation_decisionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ModerationCaseCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["moderationCase"]>
 
 export type ModerationCaseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -448,10 +678,20 @@ export type ModerationCaseSelectScalar = {
 }
 
 export type ModerationCaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "target_type" | "target_id" | "status" | "reason_key" | "opened_by_membership_id" | "created_at" | "updated_at", ExtArgs["result"]["moderationCase"]>
+export type ModerationCaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  appeals?: boolean | Prisma.ModerationCase$appealsArgs<ExtArgs>
+  moderation_decisions?: boolean | Prisma.ModerationCase$moderation_decisionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ModerationCaseCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ModerationCaseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ModerationCaseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ModerationCasePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ModerationCase"
-  objects: {}
+  objects: {
+    appeals: Prisma.$AppealPayload<ExtArgs>[]
+    moderation_decisions: Prisma.$ModerationDecisionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -856,6 +1096,8 @@ readonly fields: ModerationCaseFieldRefs;
  */
 export interface Prisma__ModerationCaseClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  appeals<T extends Prisma.ModerationCase$appealsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ModerationCase$appealsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AppealPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  moderation_decisions<T extends Prisma.ModerationCase$moderation_decisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ModerationCase$moderation_decisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ModerationDecisionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -911,6 +1153,10 @@ export type ModerationCaseFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
+  /**
    * Filter, which ModerationCase to fetch.
    */
   where: Prisma.ModerationCaseWhereUniqueInput
@@ -929,6 +1175,10 @@ export type ModerationCaseFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
+  /**
    * Filter, which ModerationCase to fetch.
    */
   where: Prisma.ModerationCaseWhereUniqueInput
@@ -946,6 +1196,10 @@ export type ModerationCaseFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the ModerationCase
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
   /**
    * Filter, which ModerationCase to fetch.
    */
@@ -995,6 +1249,10 @@ export type ModerationCaseFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
+  /**
    * Filter, which ModerationCase to fetch.
    */
   where?: Prisma.ModerationCaseWhereInput
@@ -1042,6 +1300,10 @@ export type ModerationCaseFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the ModerationCase
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
   /**
    * Filter, which ModerationCases to fetch.
    */
@@ -1091,6 +1353,10 @@ export type ModerationCaseCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
+  /**
    * The data needed to create a ModerationCase.
    */
   data: Prisma.XOR<Prisma.ModerationCaseCreateInput, Prisma.ModerationCaseUncheckedCreateInput>
@@ -1138,6 +1404,10 @@ export type ModerationCaseUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the ModerationCase
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
   /**
    * The data needed to update a ModerationCase.
    */
@@ -1205,6 +1475,10 @@ export type ModerationCaseUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
+  /**
    * The filter to search for the ModerationCase to update in case it exists.
    */
   where: Prisma.ModerationCaseWhereUniqueInput
@@ -1231,6 +1505,10 @@ export type ModerationCaseDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
+  /**
    * Filter which ModerationCase to delete.
    */
   where: Prisma.ModerationCaseWhereUniqueInput
@@ -1251,6 +1529,54 @@ export type ModerationCaseDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * ModerationCase.appeals
+ */
+export type ModerationCase$appealsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Appeal
+   */
+  select?: Prisma.AppealSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Appeal
+   */
+  omit?: Prisma.AppealOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AppealInclude<ExtArgs> | null
+  where?: Prisma.AppealWhereInput
+  orderBy?: Prisma.AppealOrderByWithRelationInput | Prisma.AppealOrderByWithRelationInput[]
+  cursor?: Prisma.AppealWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AppealScalarFieldEnum | Prisma.AppealScalarFieldEnum[]
+}
+
+/**
+ * ModerationCase.moderation_decisions
+ */
+export type ModerationCase$moderation_decisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ModerationDecision
+   */
+  select?: Prisma.ModerationDecisionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ModerationDecision
+   */
+  omit?: Prisma.ModerationDecisionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationDecisionInclude<ExtArgs> | null
+  where?: Prisma.ModerationDecisionWhereInput
+  orderBy?: Prisma.ModerationDecisionOrderByWithRelationInput | Prisma.ModerationDecisionOrderByWithRelationInput[]
+  cursor?: Prisma.ModerationDecisionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ModerationDecisionScalarFieldEnum | Prisma.ModerationDecisionScalarFieldEnum[]
+}
+
+/**
  * ModerationCase without action
  */
 export type ModerationCaseDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1262,4 +1588,8 @@ export type ModerationCaseDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ModerationCase
    */
   omit?: Prisma.ModerationCaseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationCaseInclude<ExtArgs> | null
 }

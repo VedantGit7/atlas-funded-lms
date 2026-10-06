@@ -247,6 +247,8 @@ export type SalesAffiliateWhereInput = {
   created_at?: Prisma.DateTimeFilter<"SalesAffiliate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAffiliate"> | Date | string
   sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionListRelationFilter
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutListRelationFilter
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type SalesAffiliateOrderByWithRelationInput = {
@@ -264,6 +266,8 @@ export type SalesAffiliateOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionOrderByRelationAggregateInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutOrderByRelationAggregateInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type SalesAffiliateWhereUniqueInput = Prisma.AtLeast<{
@@ -287,6 +291,8 @@ export type SalesAffiliateWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"SalesAffiliate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAffiliate"> | Date | string
   sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionListRelationFilter
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutListRelationFilter
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_id" | "tenant_id_membership_id" | "tenant_id_coupon_code">
 
 export type SalesAffiliateOrderByWithAggregationInput = {
@@ -329,8 +335,6 @@ export type SalesAffiliateScalarWhereWithAggregatesInput = {
 
 export type SalesAffiliateCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   tier?: string
   status?: string
   coupon_code: string
@@ -342,6 +346,8 @@ export type SalesAffiliateCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutAffiliateInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutCreateNestedManyWithoutAffiliateInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_affiliatesInput
 }
 
 export type SalesAffiliateUncheckedCreateInput = {
@@ -359,12 +365,11 @@ export type SalesAffiliateUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutAffiliateInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedCreateNestedManyWithoutAffiliateInput
 }
 
 export type SalesAffiliateUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   tier?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
@@ -376,6 +381,8 @@ export type SalesAffiliateUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutAffiliateNestedInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUpdateManyWithoutAffiliateNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_affiliatesNestedInput
 }
 
 export type SalesAffiliateUncheckedUpdateInput = {
@@ -393,6 +400,7 @@ export type SalesAffiliateUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutAffiliateNestedInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedUpdateManyWithoutAffiliateNestedInput
 }
 
 export type SalesAffiliateCreateManyInput = {
@@ -413,8 +421,6 @@ export type SalesAffiliateCreateManyInput = {
 
 export type SalesAffiliateUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   tier?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
@@ -441,6 +447,16 @@ export type SalesAffiliateUncheckedUpdateManyInput = {
   created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAffiliateListRelationFilter = {
+  every?: Prisma.SalesAffiliateWhereInput
+  some?: Prisma.SalesAffiliateWhereInput
+  none?: Prisma.SalesAffiliateWhereInput
+}
+
+export type SalesAffiliateOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SalesAffiliateTenant_idIdCompoundUniqueInput = {
@@ -511,6 +527,48 @@ export type SalesAffiliateScalarRelationFilter = {
   isNot?: Prisma.SalesAffiliateWhereInput
 }
 
+export type SalesAffiliateCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateCreateWithoutMembershipInput[] | Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+}
+
+export type SalesAffiliateUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateCreateWithoutMembershipInput[] | Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+}
+
+export type SalesAffiliateUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateCreateWithoutMembershipInput[] | Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesAffiliateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  disconnect?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  delete?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  connect?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  update?: Prisma.SalesAffiliateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesAffiliateUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesAffiliateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesAffiliateScalarWhereInput | Prisma.SalesAffiliateScalarWhereInput[]
+}
+
+export type SalesAffiliateUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateCreateWithoutMembershipInput[] | Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesAffiliateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  disconnect?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  delete?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  connect?: Prisma.SalesAffiliateWhereUniqueInput | Prisma.SalesAffiliateWhereUniqueInput[]
+  update?: Prisma.SalesAffiliateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesAffiliateUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesAffiliateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesAffiliateScalarWhereInput | Prisma.SalesAffiliateScalarWhereInput[]
+}
+
 export type SalesAffiliateCreateNestedOneWithoutSales_affiliate_commissionsInput = {
   create?: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutSales_affiliate_commissionsInput, Prisma.SalesAffiliateUncheckedCreateWithoutSales_affiliate_commissionsInput>
   connectOrCreate?: Prisma.SalesAffiliateCreateOrConnectWithoutSales_affiliate_commissionsInput
@@ -525,10 +583,22 @@ export type SalesAffiliateUpdateOneRequiredWithoutSales_affiliate_commissionsNes
   update?: Prisma.XOR<Prisma.XOR<Prisma.SalesAffiliateUpdateToOneWithWhereWithoutSales_affiliate_commissionsInput, Prisma.SalesAffiliateUpdateWithoutSales_affiliate_commissionsInput>, Prisma.SalesAffiliateUncheckedUpdateWithoutSales_affiliate_commissionsInput>
 }
 
-export type SalesAffiliateCreateWithoutSales_affiliate_commissionsInput = {
+export type SalesAffiliateCreateNestedOneWithoutSales_affiliate_payoutsInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutSales_affiliate_payoutsInput, Prisma.SalesAffiliateUncheckedCreateWithoutSales_affiliate_payoutsInput>
+  connectOrCreate?: Prisma.SalesAffiliateCreateOrConnectWithoutSales_affiliate_payoutsInput
+  connect?: Prisma.SalesAffiliateWhereUniqueInput
+}
+
+export type SalesAffiliateUpdateOneRequiredWithoutSales_affiliate_payoutsNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutSales_affiliate_payoutsInput, Prisma.SalesAffiliateUncheckedCreateWithoutSales_affiliate_payoutsInput>
+  connectOrCreate?: Prisma.SalesAffiliateCreateOrConnectWithoutSales_affiliate_payoutsInput
+  upsert?: Prisma.SalesAffiliateUpsertWithoutSales_affiliate_payoutsInput
+  connect?: Prisma.SalesAffiliateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SalesAffiliateUpdateToOneWithWhereWithoutSales_affiliate_payoutsInput, Prisma.SalesAffiliateUpdateWithoutSales_affiliate_payoutsInput>, Prisma.SalesAffiliateUncheckedUpdateWithoutSales_affiliate_payoutsInput>
+}
+
+export type SalesAffiliateCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   tier?: string
   status?: string
   coupon_code: string
@@ -539,6 +609,85 @@ export type SalesAffiliateCreateWithoutSales_affiliate_commissionsInput = {
   created_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutAffiliateInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutCreateNestedManyWithoutAffiliateInput
+}
+
+export type SalesAffiliateUncheckedCreateWithoutMembershipInput = {
+  id: string
+  tier?: string
+  status?: string
+  coupon_code: string
+  payout_upi?: string | null
+  payout_bank_account?: string | null
+  payout_ifsc?: string | null
+  payout_account_name?: string | null
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutAffiliateInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedCreateNestedManyWithoutAffiliateInput
+}
+
+export type SalesAffiliateCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesAffiliateCreateManyMembershipInputEnvelope = {
+  data: Prisma.SalesAffiliateCreateManyMembershipInput | Prisma.SalesAffiliateCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesAffiliateUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesAffiliateUpdateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesAffiliateUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesAffiliateUpdateWithoutMembershipInput, Prisma.SalesAffiliateUncheckedUpdateWithoutMembershipInput>
+}
+
+export type SalesAffiliateUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesAffiliateUpdateManyMutationInput, Prisma.SalesAffiliateUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type SalesAffiliateScalarWhereInput = {
+  AND?: Prisma.SalesAffiliateScalarWhereInput | Prisma.SalesAffiliateScalarWhereInput[]
+  OR?: Prisma.SalesAffiliateScalarWhereInput[]
+  NOT?: Prisma.SalesAffiliateScalarWhereInput | Prisma.SalesAffiliateScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesAffiliate"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesAffiliate"> | string
+  membership_id?: Prisma.UuidFilter<"SalesAffiliate"> | string
+  tier?: Prisma.StringFilter<"SalesAffiliate"> | string
+  status?: Prisma.StringFilter<"SalesAffiliate"> | string
+  coupon_code?: Prisma.StringFilter<"SalesAffiliate"> | string
+  payout_upi?: Prisma.StringNullableFilter<"SalesAffiliate"> | string | null
+  payout_bank_account?: Prisma.StringNullableFilter<"SalesAffiliate"> | string | null
+  payout_ifsc?: Prisma.StringNullableFilter<"SalesAffiliate"> | string | null
+  payout_account_name?: Prisma.StringNullableFilter<"SalesAffiliate"> | string | null
+  created_by_membership_id?: Prisma.UuidNullableFilter<"SalesAffiliate"> | string | null
+  created_at?: Prisma.DateTimeFilter<"SalesAffiliate"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"SalesAffiliate"> | Date | string
+}
+
+export type SalesAffiliateCreateWithoutSales_affiliate_commissionsInput = {
+  id: string
+  tier?: string
+  status?: string
+  coupon_code: string
+  payout_upi?: string | null
+  payout_bank_account?: string | null
+  payout_ifsc?: string | null
+  payout_account_name?: string | null
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutCreateNestedManyWithoutAffiliateInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_affiliatesInput
 }
 
 export type SalesAffiliateUncheckedCreateWithoutSales_affiliate_commissionsInput = {
@@ -555,6 +704,7 @@ export type SalesAffiliateUncheckedCreateWithoutSales_affiliate_commissionsInput
   created_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedCreateNestedManyWithoutAffiliateInput
 }
 
 export type SalesAffiliateCreateOrConnectWithoutSales_affiliate_commissionsInput = {
@@ -575,6 +725,22 @@ export type SalesAffiliateUpdateToOneWithWhereWithoutSales_affiliate_commissions
 
 export type SalesAffiliateUpdateWithoutSales_affiliate_commissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tier?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
+  payout_upi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_bank_account?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_ifsc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_account_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUpdateManyWithoutAffiliateNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_affiliatesNestedInput
+}
+
+export type SalesAffiliateUncheckedUpdateWithoutSales_affiliate_commissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   tier?: Prisma.StringFieldUpdateOperationsInput | string
@@ -587,12 +753,139 @@ export type SalesAffiliateUpdateWithoutSales_affiliate_commissionsInput = {
   created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedUpdateManyWithoutAffiliateNestedInput
 }
 
-export type SalesAffiliateUncheckedUpdateWithoutSales_affiliate_commissionsInput = {
+export type SalesAffiliateCreateWithoutSales_affiliate_payoutsInput = {
+  id: string
+  tier?: string
+  status?: string
+  coupon_code: string
+  payout_upi?: string | null
+  payout_bank_account?: string | null
+  payout_ifsc?: string | null
+  payout_account_name?: string | null
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutAffiliateInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_affiliatesInput
+}
+
+export type SalesAffiliateUncheckedCreateWithoutSales_affiliate_payoutsInput = {
+  id: string
+  tenant_id: string
+  membership_id: string
+  tier?: string
+  status?: string
+  coupon_code: string
+  payout_upi?: string | null
+  payout_bank_account?: string | null
+  payout_ifsc?: string | null
+  payout_account_name?: string | null
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutAffiliateInput
+}
+
+export type SalesAffiliateCreateOrConnectWithoutSales_affiliate_payoutsInput = {
+  where: Prisma.SalesAffiliateWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutSales_affiliate_payoutsInput, Prisma.SalesAffiliateUncheckedCreateWithoutSales_affiliate_payoutsInput>
+}
+
+export type SalesAffiliateUpsertWithoutSales_affiliate_payoutsInput = {
+  update: Prisma.XOR<Prisma.SalesAffiliateUpdateWithoutSales_affiliate_payoutsInput, Prisma.SalesAffiliateUncheckedUpdateWithoutSales_affiliate_payoutsInput>
+  create: Prisma.XOR<Prisma.SalesAffiliateCreateWithoutSales_affiliate_payoutsInput, Prisma.SalesAffiliateUncheckedCreateWithoutSales_affiliate_payoutsInput>
+  where?: Prisma.SalesAffiliateWhereInput
+}
+
+export type SalesAffiliateUpdateToOneWithWhereWithoutSales_affiliate_payoutsInput = {
+  where?: Prisma.SalesAffiliateWhereInput
+  data: Prisma.XOR<Prisma.SalesAffiliateUpdateWithoutSales_affiliate_payoutsInput, Prisma.SalesAffiliateUncheckedUpdateWithoutSales_affiliate_payoutsInput>
+}
+
+export type SalesAffiliateUpdateWithoutSales_affiliate_payoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tier?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
+  payout_upi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_bank_account?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_ifsc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_account_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutAffiliateNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_affiliatesNestedInput
+}
+
+export type SalesAffiliateUncheckedUpdateWithoutSales_affiliate_payoutsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  tier?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
+  payout_upi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_bank_account?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_ifsc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_account_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutAffiliateNestedInput
+}
+
+export type SalesAffiliateCreateManyMembershipInput = {
+  id: string
+  tier?: string
+  status?: string
+  coupon_code: string
+  payout_upi?: string | null
+  payout_bank_account?: string | null
+  payout_ifsc?: string | null
+  payout_account_name?: string | null
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAffiliateUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tier?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
+  payout_upi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_bank_account?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_ifsc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_account_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutAffiliateNestedInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUpdateManyWithoutAffiliateNestedInput
+}
+
+export type SalesAffiliateUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tier?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
+  payout_upi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_bank_account?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_ifsc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payout_account_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutAffiliateNestedInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedUpdateManyWithoutAffiliateNestedInput
+}
+
+export type SalesAffiliateUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   tier?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   coupon_code?: Prisma.StringFieldUpdateOperationsInput | string
@@ -612,10 +905,12 @@ export type SalesAffiliateUncheckedUpdateWithoutSales_affiliate_commissionsInput
 
 export type SalesAffiliateCountOutputType = {
   sales_affiliate_commissions: number
+  sales_affiliate_payouts: number
 }
 
 export type SalesAffiliateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sales_affiliate_commissions?: boolean | SalesAffiliateCountOutputTypeCountSales_affiliate_commissionsArgs
+  sales_affiliate_payouts?: boolean | SalesAffiliateCountOutputTypeCountSales_affiliate_payoutsArgs
 }
 
 /**
@@ -635,6 +930,13 @@ export type SalesAffiliateCountOutputTypeCountSales_affiliate_commissionsArgs<Ex
   where?: Prisma.SalesAffiliateCommissionWhereInput
 }
 
+/**
+ * SalesAffiliateCountOutputType without action
+ */
+export type SalesAffiliateCountOutputTypeCountSales_affiliate_payoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesAffiliatePayoutWhereInput
+}
+
 
 export type SalesAffiliateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -651,6 +953,8 @@ export type SalesAffiliateSelect<ExtArgs extends runtime.Types.Extensions.Intern
   created_at?: boolean
   updated_at?: boolean
   sales_affiliate_commissions?: boolean | Prisma.SalesAffiliate$sales_affiliate_commissionsArgs<ExtArgs>
+  sales_affiliate_payouts?: boolean | Prisma.SalesAffiliate$sales_affiliate_payoutsArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.SalesAffiliateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliate"]>
 
@@ -668,6 +972,7 @@ export type SalesAffiliateSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   created_by_membership_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliate"]>
 
 export type SalesAffiliateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -684,6 +989,7 @@ export type SalesAffiliateSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   created_by_membership_id?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliate"]>
 
 export type SalesAffiliateSelectScalar = {
@@ -705,15 +1011,23 @@ export type SalesAffiliateSelectScalar = {
 export type SalesAffiliateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "tier" | "status" | "coupon_code" | "payout_upi" | "payout_bank_account" | "payout_ifsc" | "payout_account_name" | "created_by_membership_id" | "created_at" | "updated_at", ExtArgs["result"]["salesAffiliate"]>
 export type SalesAffiliateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sales_affiliate_commissions?: boolean | Prisma.SalesAffiliate$sales_affiliate_commissionsArgs<ExtArgs>
+  sales_affiliate_payouts?: boolean | Prisma.SalesAffiliate$sales_affiliate_payoutsArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.SalesAffiliateCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type SalesAffiliateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type SalesAffiliateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type SalesAffiliateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type SalesAffiliateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $SalesAffiliatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesAffiliate"
   objects: {
     sales_affiliate_commissions: Prisma.$SalesAffiliateCommissionPayload<ExtArgs>[]
+    sales_affiliate_payouts: Prisma.$SalesAffiliatePayoutPayload<ExtArgs>[]
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1130,6 +1444,8 @@ readonly fields: SalesAffiliateFieldRefs;
 export interface Prisma__SalesAffiliateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sales_affiliate_commissions<T extends Prisma.SalesAffiliate$sales_affiliate_commissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesAffiliate$sales_affiliate_commissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesAffiliateCommissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_affiliate_payouts<T extends Prisma.SalesAffiliate$sales_affiliate_payoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesAffiliate$sales_affiliate_payoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesAffiliatePayoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1426,6 +1742,10 @@ export type SalesAffiliateCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    */
   data: Prisma.SalesAffiliateCreateManyInput | Prisma.SalesAffiliateCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1496,6 +1816,10 @@ export type SalesAffiliateUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * Limit how many SalesAffiliates to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1586,6 +1910,30 @@ export type SalesAffiliate$sales_affiliate_commissionsArgs<ExtArgs extends runti
   take?: number
   skip?: number
   distinct?: Prisma.SalesAffiliateCommissionScalarFieldEnum | Prisma.SalesAffiliateCommissionScalarFieldEnum[]
+}
+
+/**
+ * SalesAffiliate.sales_affiliate_payouts
+ */
+export type SalesAffiliate$sales_affiliate_payoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesAffiliatePayout
+   */
+  select?: Prisma.SalesAffiliatePayoutSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesAffiliatePayout
+   */
+  omit?: Prisma.SalesAffiliatePayoutOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliatePayoutInclude<ExtArgs> | null
+  where?: Prisma.SalesAffiliatePayoutWhereInput
+  orderBy?: Prisma.SalesAffiliatePayoutOrderByWithRelationInput | Prisma.SalesAffiliatePayoutOrderByWithRelationInput[]
+  cursor?: Prisma.SalesAffiliatePayoutWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesAffiliatePayoutScalarFieldEnum | Prisma.SalesAffiliatePayoutScalarFieldEnum[]
 }
 
 /**

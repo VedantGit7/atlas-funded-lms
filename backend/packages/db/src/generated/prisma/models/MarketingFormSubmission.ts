@@ -194,6 +194,8 @@ export type MarketingFormSubmissionWhereInput = {
   answers_json?: Prisma.JsonFilter<"MarketingFormSubmission">
   source?: Prisma.StringFilter<"MarketingFormSubmission"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingFormSubmission"> | Date | string
+  contact?: Prisma.XOR<Prisma.MarketingContactScalarRelationFilter, Prisma.MarketingContactWhereInput>
+  form?: Prisma.XOR<Prisma.MarketingFormScalarRelationFilter, Prisma.MarketingFormWhereInput>
 }
 
 export type MarketingFormSubmissionOrderByWithRelationInput = {
@@ -204,6 +206,8 @@ export type MarketingFormSubmissionOrderByWithRelationInput = {
   answers_json?: Prisma.SortOrder
   source?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  contact?: Prisma.MarketingContactOrderByWithRelationInput
+  form?: Prisma.MarketingFormOrderByWithRelationInput
 }
 
 export type MarketingFormSubmissionWhereUniqueInput = Prisma.AtLeast<{
@@ -217,6 +221,8 @@ export type MarketingFormSubmissionWhereUniqueInput = Prisma.AtLeast<{
   answers_json?: Prisma.JsonFilter<"MarketingFormSubmission">
   source?: Prisma.StringFilter<"MarketingFormSubmission"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingFormSubmission"> | Date | string
+  contact?: Prisma.XOR<Prisma.MarketingContactScalarRelationFilter, Prisma.MarketingContactWhereInput>
+  form?: Prisma.XOR<Prisma.MarketingFormScalarRelationFilter, Prisma.MarketingFormWhereInput>
 }, "id">
 
 export type MarketingFormSubmissionOrderByWithAggregationInput = {
@@ -247,12 +253,11 @@ export type MarketingFormSubmissionScalarWhereWithAggregatesInput = {
 
 export type MarketingFormSubmissionCreateInput = {
   id: string
-  tenant_id: string
-  form_id: string
-  contact_id: string
   answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   source?: string
   created_at?: Date | string
+  contact: Prisma.MarketingContactCreateNestedOneWithoutMarketing_form_submissionsInput
+  form: Prisma.MarketingFormCreateNestedOneWithoutMarketing_form_submissionsInput
 }
 
 export type MarketingFormSubmissionUncheckedCreateInput = {
@@ -267,12 +272,11 @@ export type MarketingFormSubmissionUncheckedCreateInput = {
 
 export type MarketingFormSubmissionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  form_id?: Prisma.StringFieldUpdateOperationsInput | string
-  contact_id?: Prisma.StringFieldUpdateOperationsInput | string
   answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contact?: Prisma.MarketingContactUpdateOneRequiredWithoutMarketing_form_submissionsNestedInput
+  form?: Prisma.MarketingFormUpdateOneRequiredWithoutMarketing_form_submissionsNestedInput
 }
 
 export type MarketingFormSubmissionUncheckedUpdateInput = {
@@ -297,9 +301,6 @@ export type MarketingFormSubmissionCreateManyInput = {
 
 export type MarketingFormSubmissionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  form_id?: Prisma.StringFieldUpdateOperationsInput | string
-  contact_id?: Prisma.StringFieldUpdateOperationsInput | string
   answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -313,6 +314,16 @@ export type MarketingFormSubmissionUncheckedUpdateManyInput = {
   answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingFormSubmissionListRelationFilter = {
+  every?: Prisma.MarketingFormSubmissionWhereInput
+  some?: Prisma.MarketingFormSubmissionWhereInput
+  none?: Prisma.MarketingFormSubmissionWhereInput
+}
+
+export type MarketingFormSubmissionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type MarketingFormSubmissionCountOrderByAggregateInput = {
@@ -343,6 +354,251 @@ export type MarketingFormSubmissionMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
 }
 
+export type MarketingFormSubmissionCreateNestedManyWithoutFormInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput> | Prisma.MarketingFormSubmissionCreateWithoutFormInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyFormInputEnvelope
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+}
+
+export type MarketingFormSubmissionUncheckedCreateNestedManyWithoutFormInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput> | Prisma.MarketingFormSubmissionCreateWithoutFormInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyFormInputEnvelope
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+}
+
+export type MarketingFormSubmissionUpdateManyWithoutFormNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput> | Prisma.MarketingFormSubmissionCreateWithoutFormInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput[]
+  upsert?: Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutFormInput | Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutFormInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyFormInputEnvelope
+  set?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  disconnect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  delete?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  update?: Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutFormInput | Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutFormInput[]
+  updateMany?: Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutFormInput | Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutFormInput[]
+  deleteMany?: Prisma.MarketingFormSubmissionScalarWhereInput | Prisma.MarketingFormSubmissionScalarWhereInput[]
+}
+
+export type MarketingFormSubmissionUncheckedUpdateManyWithoutFormNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput> | Prisma.MarketingFormSubmissionCreateWithoutFormInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutFormInput[]
+  upsert?: Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutFormInput | Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutFormInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyFormInputEnvelope
+  set?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  disconnect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  delete?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  update?: Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutFormInput | Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutFormInput[]
+  updateMany?: Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutFormInput | Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutFormInput[]
+  deleteMany?: Prisma.MarketingFormSubmissionScalarWhereInput | Prisma.MarketingFormSubmissionScalarWhereInput[]
+}
+
+export type MarketingFormSubmissionCreateNestedManyWithoutContactInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput> | Prisma.MarketingFormSubmissionCreateWithoutContactInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyContactInputEnvelope
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+}
+
+export type MarketingFormSubmissionUncheckedCreateNestedManyWithoutContactInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput> | Prisma.MarketingFormSubmissionCreateWithoutContactInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyContactInputEnvelope
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+}
+
+export type MarketingFormSubmissionUpdateManyWithoutContactNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput> | Prisma.MarketingFormSubmissionCreateWithoutContactInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput[]
+  upsert?: Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutContactInput | Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutContactInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyContactInputEnvelope
+  set?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  disconnect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  delete?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  update?: Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutContactInput | Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutContactInput[]
+  updateMany?: Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutContactInput | Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutContactInput[]
+  deleteMany?: Prisma.MarketingFormSubmissionScalarWhereInput | Prisma.MarketingFormSubmissionScalarWhereInput[]
+}
+
+export type MarketingFormSubmissionUncheckedUpdateManyWithoutContactNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput> | Prisma.MarketingFormSubmissionCreateWithoutContactInput[] | Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput[]
+  connectOrCreate?: Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput | Prisma.MarketingFormSubmissionCreateOrConnectWithoutContactInput[]
+  upsert?: Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutContactInput | Prisma.MarketingFormSubmissionUpsertWithWhereUniqueWithoutContactInput[]
+  createMany?: Prisma.MarketingFormSubmissionCreateManyContactInputEnvelope
+  set?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  disconnect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  delete?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  connect?: Prisma.MarketingFormSubmissionWhereUniqueInput | Prisma.MarketingFormSubmissionWhereUniqueInput[]
+  update?: Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutContactInput | Prisma.MarketingFormSubmissionUpdateWithWhereUniqueWithoutContactInput[]
+  updateMany?: Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutContactInput | Prisma.MarketingFormSubmissionUpdateManyWithWhereWithoutContactInput[]
+  deleteMany?: Prisma.MarketingFormSubmissionScalarWhereInput | Prisma.MarketingFormSubmissionScalarWhereInput[]
+}
+
+export type MarketingFormSubmissionCreateWithoutFormInput = {
+  id: string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string
+  created_at?: Date | string
+  contact: Prisma.MarketingContactCreateNestedOneWithoutMarketing_form_submissionsInput
+}
+
+export type MarketingFormSubmissionUncheckedCreateWithoutFormInput = {
+  id: string
+  contact_id: string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingFormSubmissionCreateOrConnectWithoutFormInput = {
+  where: Prisma.MarketingFormSubmissionWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput>
+}
+
+export type MarketingFormSubmissionCreateManyFormInputEnvelope = {
+  data: Prisma.MarketingFormSubmissionCreateManyFormInput | Prisma.MarketingFormSubmissionCreateManyFormInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingFormSubmissionUpsertWithWhereUniqueWithoutFormInput = {
+  where: Prisma.MarketingFormSubmissionWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingFormSubmissionUpdateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedUpdateWithoutFormInput>
+  create: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutFormInput>
+}
+
+export type MarketingFormSubmissionUpdateWithWhereUniqueWithoutFormInput = {
+  where: Prisma.MarketingFormSubmissionWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingFormSubmissionUpdateWithoutFormInput, Prisma.MarketingFormSubmissionUncheckedUpdateWithoutFormInput>
+}
+
+export type MarketingFormSubmissionUpdateManyWithWhereWithoutFormInput = {
+  where: Prisma.MarketingFormSubmissionScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingFormSubmissionUpdateManyMutationInput, Prisma.MarketingFormSubmissionUncheckedUpdateManyWithoutFormInput>
+}
+
+export type MarketingFormSubmissionScalarWhereInput = {
+  AND?: Prisma.MarketingFormSubmissionScalarWhereInput | Prisma.MarketingFormSubmissionScalarWhereInput[]
+  OR?: Prisma.MarketingFormSubmissionScalarWhereInput[]
+  NOT?: Prisma.MarketingFormSubmissionScalarWhereInput | Prisma.MarketingFormSubmissionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MarketingFormSubmission"> | string
+  tenant_id?: Prisma.UuidFilter<"MarketingFormSubmission"> | string
+  form_id?: Prisma.UuidFilter<"MarketingFormSubmission"> | string
+  contact_id?: Prisma.UuidFilter<"MarketingFormSubmission"> | string
+  answers_json?: Prisma.JsonFilter<"MarketingFormSubmission">
+  source?: Prisma.StringFilter<"MarketingFormSubmission"> | string
+  created_at?: Prisma.DateTimeFilter<"MarketingFormSubmission"> | Date | string
+}
+
+export type MarketingFormSubmissionCreateWithoutContactInput = {
+  id: string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string
+  created_at?: Date | string
+  form: Prisma.MarketingFormCreateNestedOneWithoutMarketing_form_submissionsInput
+}
+
+export type MarketingFormSubmissionUncheckedCreateWithoutContactInput = {
+  id: string
+  form_id: string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingFormSubmissionCreateOrConnectWithoutContactInput = {
+  where: Prisma.MarketingFormSubmissionWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput>
+}
+
+export type MarketingFormSubmissionCreateManyContactInputEnvelope = {
+  data: Prisma.MarketingFormSubmissionCreateManyContactInput | Prisma.MarketingFormSubmissionCreateManyContactInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingFormSubmissionUpsertWithWhereUniqueWithoutContactInput = {
+  where: Prisma.MarketingFormSubmissionWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingFormSubmissionUpdateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedUpdateWithoutContactInput>
+  create: Prisma.XOR<Prisma.MarketingFormSubmissionCreateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedCreateWithoutContactInput>
+}
+
+export type MarketingFormSubmissionUpdateWithWhereUniqueWithoutContactInput = {
+  where: Prisma.MarketingFormSubmissionWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingFormSubmissionUpdateWithoutContactInput, Prisma.MarketingFormSubmissionUncheckedUpdateWithoutContactInput>
+}
+
+export type MarketingFormSubmissionUpdateManyWithWhereWithoutContactInput = {
+  where: Prisma.MarketingFormSubmissionScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingFormSubmissionUpdateManyMutationInput, Prisma.MarketingFormSubmissionUncheckedUpdateManyWithoutContactInput>
+}
+
+export type MarketingFormSubmissionCreateManyFormInput = {
+  id: string
+  contact_id: string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingFormSubmissionUpdateWithoutFormInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contact?: Prisma.MarketingContactUpdateOneRequiredWithoutMarketing_form_submissionsNestedInput
+}
+
+export type MarketingFormSubmissionUncheckedUpdateWithoutFormInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contact_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingFormSubmissionUncheckedUpdateManyWithoutFormInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  contact_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingFormSubmissionCreateManyContactInput = {
+  id: string
+  form_id: string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string
+  created_at?: Date | string
+}
+
+export type MarketingFormSubmissionUpdateWithoutContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  form?: Prisma.MarketingFormUpdateOneRequiredWithoutMarketing_form_submissionsNestedInput
+}
+
+export type MarketingFormSubmissionUncheckedUpdateWithoutContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  form_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingFormSubmissionUncheckedUpdateManyWithoutContactInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  form_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answers_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type MarketingFormSubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -353,6 +609,8 @@ export type MarketingFormSubmissionSelect<ExtArgs extends runtime.Types.Extensio
   answers_json?: boolean
   source?: boolean
   created_at?: boolean
+  contact?: boolean | Prisma.MarketingContactDefaultArgs<ExtArgs>
+  form?: boolean | Prisma.MarketingFormDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingFormSubmission"]>
 
 export type MarketingFormSubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -363,6 +621,8 @@ export type MarketingFormSubmissionSelectCreateManyAndReturn<ExtArgs extends run
   answers_json?: boolean
   source?: boolean
   created_at?: boolean
+  contact?: boolean | Prisma.MarketingContactDefaultArgs<ExtArgs>
+  form?: boolean | Prisma.MarketingFormDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingFormSubmission"]>
 
 export type MarketingFormSubmissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -373,6 +633,8 @@ export type MarketingFormSubmissionSelectUpdateManyAndReturn<ExtArgs extends run
   answers_json?: boolean
   source?: boolean
   created_at?: boolean
+  contact?: boolean | Prisma.MarketingContactDefaultArgs<ExtArgs>
+  form?: boolean | Prisma.MarketingFormDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingFormSubmission"]>
 
 export type MarketingFormSubmissionSelectScalar = {
@@ -386,10 +648,25 @@ export type MarketingFormSubmissionSelectScalar = {
 }
 
 export type MarketingFormSubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "form_id" | "contact_id" | "answers_json" | "source" | "created_at", ExtArgs["result"]["marketingFormSubmission"]>
+export type MarketingFormSubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contact?: boolean | Prisma.MarketingContactDefaultArgs<ExtArgs>
+  form?: boolean | Prisma.MarketingFormDefaultArgs<ExtArgs>
+}
+export type MarketingFormSubmissionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contact?: boolean | Prisma.MarketingContactDefaultArgs<ExtArgs>
+  form?: boolean | Prisma.MarketingFormDefaultArgs<ExtArgs>
+}
+export type MarketingFormSubmissionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contact?: boolean | Prisma.MarketingContactDefaultArgs<ExtArgs>
+  form?: boolean | Prisma.MarketingFormDefaultArgs<ExtArgs>
+}
 
 export type $MarketingFormSubmissionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingFormSubmission"
-  objects: {}
+  objects: {
+    contact: Prisma.$MarketingContactPayload<ExtArgs>
+    form: Prisma.$MarketingFormPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -792,6 +1069,8 @@ readonly fields: MarketingFormSubmissionFieldRefs;
  */
 export interface Prisma__MarketingFormSubmissionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  contact<T extends Prisma.MarketingContactDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingContactDefaultArgs<ExtArgs>>): Prisma.Prisma__MarketingContactClient<runtime.Types.Result.GetResult<Prisma.$MarketingContactPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  form<T extends Prisma.MarketingFormDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingFormDefaultArgs<ExtArgs>>): Prisma.Prisma__MarketingFormClient<runtime.Types.Result.GetResult<Prisma.$MarketingFormPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -845,6 +1124,10 @@ export type MarketingFormSubmissionFindUniqueArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingFormSubmission to fetch.
    */
   where: Prisma.MarketingFormSubmissionWhereUniqueInput
@@ -863,6 +1146,10 @@ export type MarketingFormSubmissionFindUniqueOrThrowArgs<ExtArgs extends runtime
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingFormSubmission to fetch.
    */
   where: Prisma.MarketingFormSubmissionWhereUniqueInput
@@ -880,6 +1167,10 @@ export type MarketingFormSubmissionFindFirstArgs<ExtArgs extends runtime.Types.E
    * Omit specific fields from the MarketingFormSubmission
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
   /**
    * Filter, which MarketingFormSubmission to fetch.
    */
@@ -929,6 +1220,10 @@ export type MarketingFormSubmissionFindFirstOrThrowArgs<ExtArgs extends runtime.
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingFormSubmission to fetch.
    */
   where?: Prisma.MarketingFormSubmissionWhereInput
@@ -976,6 +1271,10 @@ export type MarketingFormSubmissionFindManyArgs<ExtArgs extends runtime.Types.Ex
    * Omit specific fields from the MarketingFormSubmission
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
   /**
    * Filter, which MarketingFormSubmissions to fetch.
    */
@@ -1025,6 +1324,10 @@ export type MarketingFormSubmissionCreateArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingFormSubmission.
    */
   data: Prisma.XOR<Prisma.MarketingFormSubmissionCreateInput, Prisma.MarketingFormSubmissionUncheckedCreateInput>
@@ -1058,6 +1361,10 @@ export type MarketingFormSubmissionCreateManyAndReturnArgs<ExtArgs extends runti
    */
   data: Prisma.MarketingFormSubmissionCreateManyInput | Prisma.MarketingFormSubmissionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1072,6 +1379,10 @@ export type MarketingFormSubmissionUpdateArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the MarketingFormSubmission
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingFormSubmission.
    */
@@ -1124,6 +1435,10 @@ export type MarketingFormSubmissionUpdateManyAndReturnArgs<ExtArgs extends runti
    * Limit how many MarketingFormSubmissions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1138,6 +1453,10 @@ export type MarketingFormSubmissionUpsertArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the MarketingFormSubmission
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
   /**
    * The filter to search for the MarketingFormSubmission to update in case it exists.
    */
@@ -1164,6 +1483,10 @@ export type MarketingFormSubmissionDeleteArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the MarketingFormSubmission
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
   /**
    * Filter which MarketingFormSubmission to delete.
    */
@@ -1196,4 +1519,8 @@ export type MarketingFormSubmissionDefaultArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the MarketingFormSubmission
    */
   omit?: Prisma.MarketingFormSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingFormSubmissionInclude<ExtArgs> | null
 }

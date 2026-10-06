@@ -264,6 +264,8 @@ export type CompetencySignalWhereInput = {
   metadata_json?: Prisma.JsonNullableFilter<"CompetencySignal">
   occurred_at?: Prisma.DateTimeFilter<"CompetencySignal"> | Date | string
   idempotency_key?: Prisma.StringFilter<"CompetencySignal"> | string
+  dimension?: Prisma.XOR<Prisma.CompetencyDimensionScalarRelationFilter, Prisma.CompetencyDimensionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type CompetencySignalOrderByWithRelationInput = {
@@ -278,6 +280,8 @@ export type CompetencySignalOrderByWithRelationInput = {
   metadata_json?: Prisma.SortOrderInput | Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   idempotency_key?: Prisma.SortOrder
+  dimension?: Prisma.CompetencyDimensionOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type CompetencySignalWhereUniqueInput = Prisma.AtLeast<{
@@ -296,6 +300,8 @@ export type CompetencySignalWhereUniqueInput = Prisma.AtLeast<{
   metadata_json?: Prisma.JsonNullableFilter<"CompetencySignal">
   occurred_at?: Prisma.DateTimeFilter<"CompetencySignal"> | Date | string
   idempotency_key?: Prisma.StringFilter<"CompetencySignal"> | string
+  dimension?: Prisma.XOR<Prisma.CompetencyDimensionScalarRelationFilter, Prisma.CompetencyDimensionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_idempotency_key">
 
 export type CompetencySignalOrderByWithAggregationInput = {
@@ -336,9 +342,6 @@ export type CompetencySignalScalarWhereWithAggregatesInput = {
 
 export type CompetencySignalCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
-  dimension_id: string
   signal_source_key: string
   source_event_id?: string | null
   raw_score: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -346,6 +349,8 @@ export type CompetencySignalCreateInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Date | string
   idempotency_key: string
+  dimension: Prisma.CompetencyDimensionCreateNestedOneWithoutCompetency_signalsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutCompetency_signalsInput
 }
 
 export type CompetencySignalUncheckedCreateInput = {
@@ -364,9 +369,6 @@ export type CompetencySignalUncheckedCreateInput = {
 
 export type CompetencySignalUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
   signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
   source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -374,6 +376,8 @@ export type CompetencySignalUpdateInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  dimension?: Prisma.CompetencyDimensionUpdateOneRequiredWithoutCompetency_signalsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCompetency_signalsNestedInput
 }
 
 export type CompetencySignalUncheckedUpdateInput = {
@@ -406,9 +410,6 @@ export type CompetencySignalCreateManyInput = {
 
 export type CompetencySignalUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
   signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
   source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -430,6 +431,16 @@ export type CompetencySignalUncheckedUpdateManyInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompetencySignalListRelationFilter = {
+  every?: Prisma.CompetencySignalWhereInput
+  some?: Prisma.CompetencySignalWhereInput
+  none?: Prisma.CompetencySignalWhereInput
+}
+
+export type CompetencySignalOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CompetencySignalTenant_idIdempotency_keyCompoundUniqueInput = {
@@ -487,6 +498,303 @@ export type CompetencySignalSumOrderByAggregateInput = {
   weight?: Prisma.SortOrder
 }
 
+export type CompetencySignalCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutMembershipInput, Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput> | Prisma.CompetencySignalCreateWithoutMembershipInput[] | Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput | Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CompetencySignalCreateManyMembershipInputEnvelope
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+}
+
+export type CompetencySignalUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutMembershipInput, Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput> | Prisma.CompetencySignalCreateWithoutMembershipInput[] | Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput | Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CompetencySignalCreateManyMembershipInputEnvelope
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+}
+
+export type CompetencySignalUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutMembershipInput, Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput> | Prisma.CompetencySignalCreateWithoutMembershipInput[] | Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput | Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CompetencySignalUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CompetencySignalUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CompetencySignalCreateManyMembershipInputEnvelope
+  set?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  disconnect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  delete?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  update?: Prisma.CompetencySignalUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CompetencySignalUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CompetencySignalUpdateManyWithWhereWithoutMembershipInput | Prisma.CompetencySignalUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CompetencySignalScalarWhereInput | Prisma.CompetencySignalScalarWhereInput[]
+}
+
+export type CompetencySignalUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutMembershipInput, Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput> | Prisma.CompetencySignalCreateWithoutMembershipInput[] | Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput | Prisma.CompetencySignalCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CompetencySignalUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CompetencySignalUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CompetencySignalCreateManyMembershipInputEnvelope
+  set?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  disconnect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  delete?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  update?: Prisma.CompetencySignalUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CompetencySignalUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CompetencySignalUpdateManyWithWhereWithoutMembershipInput | Prisma.CompetencySignalUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CompetencySignalScalarWhereInput | Prisma.CompetencySignalScalarWhereInput[]
+}
+
+export type CompetencySignalCreateNestedManyWithoutDimensionInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutDimensionInput, Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput> | Prisma.CompetencySignalCreateWithoutDimensionInput[] | Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput | Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput[]
+  createMany?: Prisma.CompetencySignalCreateManyDimensionInputEnvelope
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+}
+
+export type CompetencySignalUncheckedCreateNestedManyWithoutDimensionInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutDimensionInput, Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput> | Prisma.CompetencySignalCreateWithoutDimensionInput[] | Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput | Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput[]
+  createMany?: Prisma.CompetencySignalCreateManyDimensionInputEnvelope
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+}
+
+export type CompetencySignalUpdateManyWithoutDimensionNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutDimensionInput, Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput> | Prisma.CompetencySignalCreateWithoutDimensionInput[] | Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput | Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput[]
+  upsert?: Prisma.CompetencySignalUpsertWithWhereUniqueWithoutDimensionInput | Prisma.CompetencySignalUpsertWithWhereUniqueWithoutDimensionInput[]
+  createMany?: Prisma.CompetencySignalCreateManyDimensionInputEnvelope
+  set?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  disconnect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  delete?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  update?: Prisma.CompetencySignalUpdateWithWhereUniqueWithoutDimensionInput | Prisma.CompetencySignalUpdateWithWhereUniqueWithoutDimensionInput[]
+  updateMany?: Prisma.CompetencySignalUpdateManyWithWhereWithoutDimensionInput | Prisma.CompetencySignalUpdateManyWithWhereWithoutDimensionInput[]
+  deleteMany?: Prisma.CompetencySignalScalarWhereInput | Prisma.CompetencySignalScalarWhereInput[]
+}
+
+export type CompetencySignalUncheckedUpdateManyWithoutDimensionNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencySignalCreateWithoutDimensionInput, Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput> | Prisma.CompetencySignalCreateWithoutDimensionInput[] | Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput[]
+  connectOrCreate?: Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput | Prisma.CompetencySignalCreateOrConnectWithoutDimensionInput[]
+  upsert?: Prisma.CompetencySignalUpsertWithWhereUniqueWithoutDimensionInput | Prisma.CompetencySignalUpsertWithWhereUniqueWithoutDimensionInput[]
+  createMany?: Prisma.CompetencySignalCreateManyDimensionInputEnvelope
+  set?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  disconnect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  delete?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  connect?: Prisma.CompetencySignalWhereUniqueInput | Prisma.CompetencySignalWhereUniqueInput[]
+  update?: Prisma.CompetencySignalUpdateWithWhereUniqueWithoutDimensionInput | Prisma.CompetencySignalUpdateWithWhereUniqueWithoutDimensionInput[]
+  updateMany?: Prisma.CompetencySignalUpdateManyWithWhereWithoutDimensionInput | Prisma.CompetencySignalUpdateManyWithWhereWithoutDimensionInput[]
+  deleteMany?: Prisma.CompetencySignalScalarWhereInput | Prisma.CompetencySignalScalarWhereInput[]
+}
+
+export type CompetencySignalCreateWithoutMembershipInput = {
+  id: string
+  signal_source_key: string
+  source_event_id?: string | null
+  raw_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  idempotency_key: string
+  dimension: Prisma.CompetencyDimensionCreateNestedOneWithoutCompetency_signalsInput
+}
+
+export type CompetencySignalUncheckedCreateWithoutMembershipInput = {
+  id: string
+  dimension_id: string
+  signal_source_key: string
+  source_event_id?: string | null
+  raw_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type CompetencySignalCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.CompetencySignalWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencySignalCreateWithoutMembershipInput, Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput>
+}
+
+export type CompetencySignalCreateManyMembershipInputEnvelope = {
+  data: Prisma.CompetencySignalCreateManyMembershipInput | Prisma.CompetencySignalCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompetencySignalUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CompetencySignalWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompetencySignalUpdateWithoutMembershipInput, Prisma.CompetencySignalUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.CompetencySignalCreateWithoutMembershipInput, Prisma.CompetencySignalUncheckedCreateWithoutMembershipInput>
+}
+
+export type CompetencySignalUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CompetencySignalWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompetencySignalUpdateWithoutMembershipInput, Prisma.CompetencySignalUncheckedUpdateWithoutMembershipInput>
+}
+
+export type CompetencySignalUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.CompetencySignalScalarWhereInput
+  data: Prisma.XOR<Prisma.CompetencySignalUpdateManyMutationInput, Prisma.CompetencySignalUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type CompetencySignalScalarWhereInput = {
+  AND?: Prisma.CompetencySignalScalarWhereInput | Prisma.CompetencySignalScalarWhereInput[]
+  OR?: Prisma.CompetencySignalScalarWhereInput[]
+  NOT?: Prisma.CompetencySignalScalarWhereInput | Prisma.CompetencySignalScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CompetencySignal"> | string
+  tenant_id?: Prisma.UuidFilter<"CompetencySignal"> | string
+  membership_id?: Prisma.UuidFilter<"CompetencySignal"> | string
+  dimension_id?: Prisma.UuidFilter<"CompetencySignal"> | string
+  signal_source_key?: Prisma.StringFilter<"CompetencySignal"> | string
+  source_event_id?: Prisma.UuidNullableFilter<"CompetencySignal"> | string | null
+  raw_score?: Prisma.DecimalFilter<"CompetencySignal"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight?: Prisma.DecimalFilter<"CompetencySignal"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.JsonNullableFilter<"CompetencySignal">
+  occurred_at?: Prisma.DateTimeFilter<"CompetencySignal"> | Date | string
+  idempotency_key?: Prisma.StringFilter<"CompetencySignal"> | string
+}
+
+export type CompetencySignalCreateWithoutDimensionInput = {
+  id: string
+  signal_source_key: string
+  source_event_id?: string | null
+  raw_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  idempotency_key: string
+  membership: Prisma.MembershipCreateNestedOneWithoutCompetency_signalsInput
+}
+
+export type CompetencySignalUncheckedCreateWithoutDimensionInput = {
+  id: string
+  membership_id: string
+  signal_source_key: string
+  source_event_id?: string | null
+  raw_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type CompetencySignalCreateOrConnectWithoutDimensionInput = {
+  where: Prisma.CompetencySignalWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencySignalCreateWithoutDimensionInput, Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput>
+}
+
+export type CompetencySignalCreateManyDimensionInputEnvelope = {
+  data: Prisma.CompetencySignalCreateManyDimensionInput | Prisma.CompetencySignalCreateManyDimensionInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompetencySignalUpsertWithWhereUniqueWithoutDimensionInput = {
+  where: Prisma.CompetencySignalWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompetencySignalUpdateWithoutDimensionInput, Prisma.CompetencySignalUncheckedUpdateWithoutDimensionInput>
+  create: Prisma.XOR<Prisma.CompetencySignalCreateWithoutDimensionInput, Prisma.CompetencySignalUncheckedCreateWithoutDimensionInput>
+}
+
+export type CompetencySignalUpdateWithWhereUniqueWithoutDimensionInput = {
+  where: Prisma.CompetencySignalWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompetencySignalUpdateWithoutDimensionInput, Prisma.CompetencySignalUncheckedUpdateWithoutDimensionInput>
+}
+
+export type CompetencySignalUpdateManyWithWhereWithoutDimensionInput = {
+  where: Prisma.CompetencySignalScalarWhereInput
+  data: Prisma.XOR<Prisma.CompetencySignalUpdateManyMutationInput, Prisma.CompetencySignalUncheckedUpdateManyWithoutDimensionInput>
+}
+
+export type CompetencySignalCreateManyMembershipInput = {
+  id: string
+  dimension_id: string
+  signal_source_key: string
+  source_event_id?: string | null
+  raw_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type CompetencySignalUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  dimension?: Prisma.CompetencyDimensionUpdateOneRequiredWithoutCompetency_signalsNestedInput
+}
+
+export type CompetencySignalUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
+  signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompetencySignalUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  dimension_id?: Prisma.StringFieldUpdateOperationsInput | string
+  signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompetencySignalCreateManyDimensionInput = {
+  id: string
+  membership_id: string
+  signal_source_key: string
+  source_event_id?: string | null
+  raw_score: runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight: runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type CompetencySignalUpdateWithoutDimensionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCompetency_signalsNestedInput
+}
+
+export type CompetencySignalUncheckedUpdateWithoutDimensionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type CompetencySignalUncheckedUpdateManyWithoutDimensionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  signal_source_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  raw_score?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  weight?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
 
 
 export type CompetencySignalSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -501,6 +809,8 @@ export type CompetencySignalSelect<ExtArgs extends runtime.Types.Extensions.Inte
   metadata_json?: boolean
   occurred_at?: boolean
   idempotency_key?: boolean
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencySignal"]>
 
 export type CompetencySignalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -515,6 +825,8 @@ export type CompetencySignalSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   metadata_json?: boolean
   occurred_at?: boolean
   idempotency_key?: boolean
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencySignal"]>
 
 export type CompetencySignalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -529,6 +841,8 @@ export type CompetencySignalSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   metadata_json?: boolean
   occurred_at?: boolean
   idempotency_key?: boolean
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencySignal"]>
 
 export type CompetencySignalSelectScalar = {
@@ -546,10 +860,25 @@ export type CompetencySignalSelectScalar = {
 }
 
 export type CompetencySignalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "dimension_id" | "signal_source_key" | "source_event_id" | "raw_score" | "weight" | "metadata_json" | "occurred_at" | "idempotency_key", ExtArgs["result"]["competencySignal"]>
+export type CompetencySignalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type CompetencySignalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type CompetencySignalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  dimension?: boolean | Prisma.CompetencyDimensionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $CompetencySignalPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompetencySignal"
-  objects: {}
+  objects: {
+    dimension: Prisma.$CompetencyDimensionPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -956,6 +1285,8 @@ readonly fields: CompetencySignalFieldRefs;
  */
 export interface Prisma__CompetencySignalClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  dimension<T extends Prisma.CompetencyDimensionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompetencyDimensionDefaultArgs<ExtArgs>>): Prisma.Prisma__CompetencyDimensionClient<runtime.Types.Result.GetResult<Prisma.$CompetencyDimensionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1013,6 +1344,10 @@ export type CompetencySignalFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencySignal to fetch.
    */
   where: Prisma.CompetencySignalWhereUniqueInput
@@ -1031,6 +1366,10 @@ export type CompetencySignalFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencySignal to fetch.
    */
   where: Prisma.CompetencySignalWhereUniqueInput
@@ -1048,6 +1387,10 @@ export type CompetencySignalFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the CompetencySignal
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
   /**
    * Filter, which CompetencySignal to fetch.
    */
@@ -1097,6 +1440,10 @@ export type CompetencySignalFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencySignal to fetch.
    */
   where?: Prisma.CompetencySignalWhereInput
@@ -1144,6 +1491,10 @@ export type CompetencySignalFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the CompetencySignal
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
   /**
    * Filter, which CompetencySignals to fetch.
    */
@@ -1193,6 +1544,10 @@ export type CompetencySignalCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
+  /**
    * The data needed to create a CompetencySignal.
    */
   data: Prisma.XOR<Prisma.CompetencySignalCreateInput, Prisma.CompetencySignalUncheckedCreateInput>
@@ -1226,6 +1581,10 @@ export type CompetencySignalCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.CompetencySignalCreateManyInput | Prisma.CompetencySignalCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1240,6 +1599,10 @@ export type CompetencySignalUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the CompetencySignal
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
   /**
    * The data needed to update a CompetencySignal.
    */
@@ -1292,6 +1655,10 @@ export type CompetencySignalUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many CompetencySignals to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1306,6 +1673,10 @@ export type CompetencySignalUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the CompetencySignal
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
   /**
    * The filter to search for the CompetencySignal to update in case it exists.
    */
@@ -1332,6 +1703,10 @@ export type CompetencySignalDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the CompetencySignal
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
   /**
    * Filter which CompetencySignal to delete.
    */
@@ -1364,4 +1739,8 @@ export type CompetencySignalDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the CompetencySignal
    */
   omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
 }

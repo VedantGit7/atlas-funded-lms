@@ -186,6 +186,12 @@ export const marketingWorkflowRepository = {
   },
 
   async deleteById(tx: TenantTx, id: string) {
+    // A workflow's runs and their logs go with it (the foreign keys restrict).
+    await tx.$executeRaw`
+      delete from marketing_workflow_run_logs
+      where run_id in (select id from marketing_workflow_runs where workflow_id = ${id}::uuid)
+    `;
+    await tx.$executeRaw`delete from marketing_workflow_runs where workflow_id = ${id}::uuid`;
     const rows = await tx.$queryRaw<Array<{ id: string }>>`
       delete from marketing_workflows where id = ${id}::uuid returning id::text
     `;

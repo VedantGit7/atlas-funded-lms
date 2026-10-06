@@ -241,6 +241,9 @@ export type SalesReferralPurchaseCreditWhereInput = {
   credits_applied?: Prisma.IntFilter<"SalesReferralPurchaseCredit"> | number
   created_at?: Prisma.DateTimeFilter<"SalesReferralPurchaseCredit"> | Date | string
   payment_order?: Prisma.XOR<Prisma.PaymentOrderScalarRelationFilter, Prisma.PaymentOrderWhereInput>
+  attribution?: Prisma.XOR<Prisma.SalesReferralAttributionScalarRelationFilter, Prisma.SalesReferralAttributionWhereInput>
+  referee_membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  referrer_membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type SalesReferralPurchaseCreditOrderByWithRelationInput = {
@@ -253,6 +256,9 @@ export type SalesReferralPurchaseCreditOrderByWithRelationInput = {
   credits_applied?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   payment_order?: Prisma.PaymentOrderOrderByWithRelationInput
+  attribution?: Prisma.SalesReferralAttributionOrderByWithRelationInput
+  referee_membership?: Prisma.MembershipOrderByWithRelationInput
+  referrer_membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type SalesReferralPurchaseCreditWhereUniqueInput = Prisma.AtLeast<{
@@ -269,6 +275,9 @@ export type SalesReferralPurchaseCreditWhereUniqueInput = Prisma.AtLeast<{
   credits_applied?: Prisma.IntFilter<"SalesReferralPurchaseCredit"> | number
   created_at?: Prisma.DateTimeFilter<"SalesReferralPurchaseCredit"> | Date | string
   payment_order?: Prisma.XOR<Prisma.PaymentOrderScalarRelationFilter, Prisma.PaymentOrderWhereInput>
+  attribution?: Prisma.XOR<Prisma.SalesReferralAttributionScalarRelationFilter, Prisma.SalesReferralAttributionWhereInput>
+  referee_membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  referrer_membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_payment_order_id">
 
 export type SalesReferralPurchaseCreditOrderByWithAggregationInput = {
@@ -303,12 +312,12 @@ export type SalesReferralPurchaseCreditScalarWhereWithAggregatesInput = {
 
 export type SalesReferralPurchaseCreditCreateInput = {
   id: string
-  attribution_id: string
-  referrer_membership_id: string
-  referee_membership_id: string
   credits_applied: number
   created_at?: Date | string
   payment_order: Prisma.PaymentOrderCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  attribution: Prisma.SalesReferralAttributionCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  referee_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referee_membershipInput
+  referrer_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referrer_membershipInput
 }
 
 export type SalesReferralPurchaseCreditUncheckedCreateInput = {
@@ -324,12 +333,12 @@ export type SalesReferralPurchaseCreditUncheckedCreateInput = {
 
 export type SalesReferralPurchaseCreditUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  attribution_id?: Prisma.StringFieldUpdateOperationsInput | string
-  referrer_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  referee_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   payment_order?: Prisma.PaymentOrderUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  attribution?: Prisma.SalesReferralAttributionUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  referee_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referee_membershipNestedInput
+  referrer_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referrer_membershipNestedInput
 }
 
 export type SalesReferralPurchaseCreditUncheckedUpdateInput = {
@@ -356,9 +365,6 @@ export type SalesReferralPurchaseCreditCreateManyInput = {
 
 export type SalesReferralPurchaseCreditUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  attribution_id?: Prisma.StringFieldUpdateOperationsInput | string
-  referrer_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  referee_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -430,6 +436,90 @@ export type SalesReferralPurchaseCreditSumOrderByAggregateInput = {
   credits_applied?: Prisma.SortOrder
 }
 
+export type SalesReferralPurchaseCreditCreateNestedManyWithoutReferee_membershipInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferee_membershipInputEnvelope
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+}
+
+export type SalesReferralPurchaseCreditCreateNestedManyWithoutReferrer_membershipInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferrer_membershipInputEnvelope
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+}
+
+export type SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutReferee_membershipInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferee_membershipInputEnvelope
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+}
+
+export type SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutReferrer_membershipInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferrer_membershipInputEnvelope
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+}
+
+export type SalesReferralPurchaseCreditUpdateManyWithoutReferee_membershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput[]
+  upsert?: Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferee_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferee_membershipInputEnvelope
+  set?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  disconnect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  delete?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  update?: Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferee_membershipInput[]
+  updateMany?: Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferee_membershipInput[]
+  deleteMany?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+}
+
+export type SalesReferralPurchaseCreditUpdateManyWithoutReferrer_membershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput[]
+  upsert?: Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferrer_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferrer_membershipInputEnvelope
+  set?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  disconnect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  delete?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  update?: Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferrer_membershipInput[]
+  updateMany?: Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferrer_membershipInput[]
+  deleteMany?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferee_membershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput[]
+  upsert?: Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferee_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferee_membershipInputEnvelope
+  set?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  disconnect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  delete?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  update?: Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferee_membershipInput[]
+  updateMany?: Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferee_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferee_membershipInput[]
+  deleteMany?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferrer_membershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput[]
+  upsert?: Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferrer_membershipInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyReferrer_membershipInputEnvelope
+  set?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  disconnect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  delete?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  update?: Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferrer_membershipInput[]
+  updateMany?: Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferrer_membershipInput[]
+  deleteMany?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+}
+
 export type SalesReferralPurchaseCreditCreateNestedManyWithoutPayment_orderInput = {
   create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutPayment_orderInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutPayment_orderInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutPayment_orderInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutPayment_orderInput[]
   connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutPayment_orderInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutPayment_orderInput[]
@@ -472,13 +562,157 @@ export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderNe
   deleteMany?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
 }
 
-export type SalesReferralPurchaseCreditCreateWithoutPayment_orderInput = {
+export type SalesReferralPurchaseCreditCreateNestedManyWithoutAttributionInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyAttributionInputEnvelope
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+}
+
+export type SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutAttributionInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyAttributionInputEnvelope
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+}
+
+export type SalesReferralPurchaseCreditUpdateManyWithoutAttributionNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput[]
+  upsert?: Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutAttributionInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyAttributionInputEnvelope
+  set?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  disconnect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  delete?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  update?: Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutAttributionInput[]
+  updateMany?: Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutAttributionInput[]
+  deleteMany?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutAttributionNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput> | Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput[] | Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput[]
+  connectOrCreate?: Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput[]
+  upsert?: Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutAttributionInput[]
+  createMany?: Prisma.SalesReferralPurchaseCreditCreateManyAttributionInputEnvelope
+  set?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  disconnect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  delete?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  connect?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput | Prisma.SalesReferralPurchaseCreditWhereUniqueInput[]
+  update?: Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutAttributionInput[]
+  updateMany?: Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutAttributionInput | Prisma.SalesReferralPurchaseCreditUpdateManyWithWhereWithoutAttributionInput[]
+  deleteMany?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+}
+
+export type SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput = {
+  id: string
+  credits_applied: number
+  created_at?: Date | string
+  payment_order: Prisma.PaymentOrderCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  attribution: Prisma.SalesReferralAttributionCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  referrer_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referrer_membershipInput
+}
+
+export type SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput = {
   id: string
   attribution_id: string
+  payment_order_id: string
   referrer_membership_id: string
+  credits_applied: number
+  created_at?: Date | string
+}
+
+export type SalesReferralPurchaseCreditCreateOrConnectWithoutReferee_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditCreateManyReferee_membershipInputEnvelope = {
+  data: Prisma.SalesReferralPurchaseCreditCreateManyReferee_membershipInput | Prisma.SalesReferralPurchaseCreditCreateManyReferee_membershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput = {
+  id: string
+  credits_applied: number
+  created_at?: Date | string
+  payment_order: Prisma.PaymentOrderCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  attribution: Prisma.SalesReferralAttributionCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  referee_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referee_membershipInput
+}
+
+export type SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput = {
+  id: string
+  attribution_id: string
+  payment_order_id: string
   referee_membership_id: string
   credits_applied: number
   created_at?: Date | string
+}
+
+export type SalesReferralPurchaseCreditCreateOrConnectWithoutReferrer_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditCreateManyReferrer_membershipInputEnvelope = {
+  data: Prisma.SalesReferralPurchaseCreditCreateManyReferrer_membershipInput | Prisma.SalesReferralPurchaseCreditCreateManyReferrer_membershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferee_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateWithoutReferee_membershipInput>
+  create: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferee_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferee_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateWithoutReferee_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateWithoutReferee_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferee_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateManyMutationInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferee_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditScalarWhereInput = {
+  AND?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+  OR?: Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+  NOT?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
+  attribution_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
+  payment_order_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
+  referrer_membership_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
+  referee_membership_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
+  credits_applied?: Prisma.IntFilter<"SalesReferralPurchaseCredit"> | number
+  created_at?: Prisma.DateTimeFilter<"SalesReferralPurchaseCredit"> | Date | string
+}
+
+export type SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutReferrer_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateWithoutReferrer_membershipInput>
+  create: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutReferrer_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutReferrer_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateWithoutReferrer_membershipInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateWithoutReferrer_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditUpdateManyWithWhereWithoutReferrer_membershipInput = {
+  where: Prisma.SalesReferralPurchaseCreditScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateManyMutationInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferrer_membershipInput>
+}
+
+export type SalesReferralPurchaseCreditCreateWithoutPayment_orderInput = {
+  id: string
+  credits_applied: number
+  created_at?: Date | string
+  attribution: Prisma.SalesReferralAttributionCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  referee_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referee_membershipInput
+  referrer_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referrer_membershipInput
 }
 
 export type SalesReferralPurchaseCreditUncheckedCreateWithoutPayment_orderInput = {
@@ -516,18 +750,120 @@ export type SalesReferralPurchaseCreditUpdateManyWithWhereWithoutPayment_orderIn
   data: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateManyMutationInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderInput>
 }
 
-export type SalesReferralPurchaseCreditScalarWhereInput = {
-  AND?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
-  OR?: Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
-  NOT?: Prisma.SalesReferralPurchaseCreditScalarWhereInput | Prisma.SalesReferralPurchaseCreditScalarWhereInput[]
-  id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
-  tenant_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
-  attribution_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
-  payment_order_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
-  referrer_membership_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
-  referee_membership_id?: Prisma.UuidFilter<"SalesReferralPurchaseCredit"> | string
-  credits_applied?: Prisma.IntFilter<"SalesReferralPurchaseCredit"> | number
-  created_at?: Prisma.DateTimeFilter<"SalesReferralPurchaseCredit"> | Date | string
+export type SalesReferralPurchaseCreditCreateWithoutAttributionInput = {
+  id: string
+  credits_applied: number
+  created_at?: Date | string
+  payment_order: Prisma.PaymentOrderCreateNestedOneWithoutSales_referral_purchase_creditsInput
+  referee_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referee_membershipInput
+  referrer_membership: Prisma.MembershipCreateNestedOneWithoutSales_referral_purchase_credits_referrer_membershipInput
+}
+
+export type SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput = {
+  id: string
+  payment_order_id: string
+  referrer_membership_id: string
+  referee_membership_id: string
+  credits_applied: number
+  created_at?: Date | string
+}
+
+export type SalesReferralPurchaseCreditCreateOrConnectWithoutAttributionInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput>
+}
+
+export type SalesReferralPurchaseCreditCreateManyAttributionInputEnvelope = {
+  data: Prisma.SalesReferralPurchaseCreditCreateManyAttributionInput | Prisma.SalesReferralPurchaseCreditCreateManyAttributionInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesReferralPurchaseCreditUpsertWithWhereUniqueWithoutAttributionInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateWithoutAttributionInput>
+  create: Prisma.XOR<Prisma.SalesReferralPurchaseCreditCreateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedCreateWithoutAttributionInput>
+}
+
+export type SalesReferralPurchaseCreditUpdateWithWhereUniqueWithoutAttributionInput = {
+  where: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateWithoutAttributionInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateWithoutAttributionInput>
+}
+
+export type SalesReferralPurchaseCreditUpdateManyWithWhereWithoutAttributionInput = {
+  where: Prisma.SalesReferralPurchaseCreditScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesReferralPurchaseCreditUpdateManyMutationInput, Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutAttributionInput>
+}
+
+export type SalesReferralPurchaseCreditCreateManyReferee_membershipInput = {
+  id: string
+  attribution_id: string
+  payment_order_id: string
+  referrer_membership_id: string
+  credits_applied: number
+  created_at?: Date | string
+}
+
+export type SalesReferralPurchaseCreditCreateManyReferrer_membershipInput = {
+  id: string
+  attribution_id: string
+  payment_order_id: string
+  referee_membership_id: string
+  credits_applied: number
+  created_at?: Date | string
+}
+
+export type SalesReferralPurchaseCreditUpdateWithoutReferee_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_order?: Prisma.PaymentOrderUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  attribution?: Prisma.SalesReferralAttributionUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  referrer_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referrer_membershipNestedInput
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateWithoutReferee_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referrer_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferee_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referrer_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesReferralPurchaseCreditUpdateWithoutReferrer_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_order?: Prisma.PaymentOrderUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  attribution?: Prisma.SalesReferralAttributionUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  referee_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referee_membershipNestedInput
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateWithoutReferrer_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referee_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferrer_membershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attribution_id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referee_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SalesReferralPurchaseCreditCreateManyPayment_orderInput = {
@@ -541,11 +877,11 @@ export type SalesReferralPurchaseCreditCreateManyPayment_orderInput = {
 
 export type SalesReferralPurchaseCreditUpdateWithoutPayment_orderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  attribution_id?: Prisma.StringFieldUpdateOperationsInput | string
-  referrer_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  referee_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attribution?: Prisma.SalesReferralAttributionUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  referee_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referee_membershipNestedInput
+  referrer_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referrer_membershipNestedInput
 }
 
 export type SalesReferralPurchaseCreditUncheckedUpdateWithoutPayment_orderInput = {
@@ -566,6 +902,42 @@ export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderIn
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type SalesReferralPurchaseCreditCreateManyAttributionInput = {
+  id: string
+  payment_order_id: string
+  referrer_membership_id: string
+  referee_membership_id: string
+  credits_applied: number
+  created_at?: Date | string
+}
+
+export type SalesReferralPurchaseCreditUpdateWithoutAttributionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_order?: Prisma.PaymentOrderUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput
+  referee_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referee_membershipNestedInput
+  referrer_membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_referral_purchase_credits_referrer_membershipNestedInput
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateWithoutAttributionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referrer_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referee_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesReferralPurchaseCreditUncheckedUpdateManyWithoutAttributionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referrer_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  referee_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credits_applied?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type SalesReferralPurchaseCreditSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -578,6 +950,9 @@ export type SalesReferralPurchaseCreditSelect<ExtArgs extends runtime.Types.Exte
   credits_applied?: boolean
   created_at?: boolean
   payment_order?: boolean | Prisma.PaymentOrderDefaultArgs<ExtArgs>
+  attribution?: boolean | Prisma.SalesReferralAttributionDefaultArgs<ExtArgs>
+  referee_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  referrer_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesReferralPurchaseCredit"]>
 
 export type SalesReferralPurchaseCreditSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -590,6 +965,9 @@ export type SalesReferralPurchaseCreditSelectCreateManyAndReturn<ExtArgs extends
   credits_applied?: boolean
   created_at?: boolean
   payment_order?: boolean | Prisma.PaymentOrderDefaultArgs<ExtArgs>
+  attribution?: boolean | Prisma.SalesReferralAttributionDefaultArgs<ExtArgs>
+  referee_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  referrer_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesReferralPurchaseCredit"]>
 
 export type SalesReferralPurchaseCreditSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -602,6 +980,9 @@ export type SalesReferralPurchaseCreditSelectUpdateManyAndReturn<ExtArgs extends
   credits_applied?: boolean
   created_at?: boolean
   payment_order?: boolean | Prisma.PaymentOrderDefaultArgs<ExtArgs>
+  attribution?: boolean | Prisma.SalesReferralAttributionDefaultArgs<ExtArgs>
+  referee_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  referrer_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesReferralPurchaseCredit"]>
 
 export type SalesReferralPurchaseCreditSelectScalar = {
@@ -618,18 +999,30 @@ export type SalesReferralPurchaseCreditSelectScalar = {
 export type SalesReferralPurchaseCreditOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "attribution_id" | "payment_order_id" | "referrer_membership_id" | "referee_membership_id" | "credits_applied" | "created_at", ExtArgs["result"]["salesReferralPurchaseCredit"]>
 export type SalesReferralPurchaseCreditInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payment_order?: boolean | Prisma.PaymentOrderDefaultArgs<ExtArgs>
+  attribution?: boolean | Prisma.SalesReferralAttributionDefaultArgs<ExtArgs>
+  referee_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  referrer_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type SalesReferralPurchaseCreditIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payment_order?: boolean | Prisma.PaymentOrderDefaultArgs<ExtArgs>
+  attribution?: boolean | Prisma.SalesReferralAttributionDefaultArgs<ExtArgs>
+  referee_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  referrer_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type SalesReferralPurchaseCreditIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   payment_order?: boolean | Prisma.PaymentOrderDefaultArgs<ExtArgs>
+  attribution?: boolean | Prisma.SalesReferralAttributionDefaultArgs<ExtArgs>
+  referee_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  referrer_membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $SalesReferralPurchaseCreditPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesReferralPurchaseCredit"
   objects: {
     payment_order: Prisma.$PaymentOrderPayload<ExtArgs>
+    attribution: Prisma.$SalesReferralAttributionPayload<ExtArgs>
+    referee_membership: Prisma.$MembershipPayload<ExtArgs>
+    referrer_membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1035,6 +1428,9 @@ readonly fields: SalesReferralPurchaseCreditFieldRefs;
 export interface Prisma__SalesReferralPurchaseCreditClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   payment_order<T extends Prisma.PaymentOrderDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentOrderDefaultArgs<ExtArgs>>): Prisma.Prisma__PaymentOrderClient<runtime.Types.Result.GetResult<Prisma.$PaymentOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  attribution<T extends Prisma.SalesReferralAttributionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesReferralAttributionDefaultArgs<ExtArgs>>): Prisma.Prisma__SalesReferralAttributionClient<runtime.Types.Result.GetResult<Prisma.$SalesReferralAttributionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  referee_membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  referrer_membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

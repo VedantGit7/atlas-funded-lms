@@ -219,6 +219,7 @@ export type AtRiskAlertWhereInput = {
   created_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
   rule?: Prisma.XOR<Prisma.AtRiskRuleScalarRelationFilter, Prisma.AtRiskRuleWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type AtRiskAlertOrderByWithRelationInput = {
@@ -233,6 +234,7 @@ export type AtRiskAlertOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   rule?: Prisma.AtRiskRuleOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type AtRiskAlertWhereUniqueInput = Prisma.AtLeast<{
@@ -250,6 +252,7 @@ export type AtRiskAlertWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
   rule?: Prisma.XOR<Prisma.AtRiskRuleScalarRelationFilter, Prisma.AtRiskRuleWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id">
 
 export type AtRiskAlertOrderByWithAggregationInput = {
@@ -286,8 +289,6 @@ export type AtRiskAlertScalarWhereWithAggregatesInput = {
 
 export type AtRiskAlertCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   triggered_at?: Date | string
@@ -295,6 +296,7 @@ export type AtRiskAlertCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   rule: Prisma.AtRiskRuleCreateNestedOneWithoutAlertsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutAt_risk_alertsInput
 }
 
 export type AtRiskAlertUncheckedCreateInput = {
@@ -312,8 +314,6 @@ export type AtRiskAlertUncheckedCreateInput = {
 
 export type AtRiskAlertUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   triggered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -321,6 +321,7 @@ export type AtRiskAlertUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   rule?: Prisma.AtRiskRuleUpdateOneRequiredWithoutAlertsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutAt_risk_alertsNestedInput
 }
 
 export type AtRiskAlertUncheckedUpdateInput = {
@@ -351,8 +352,6 @@ export type AtRiskAlertCreateManyInput = {
 
 export type AtRiskAlertUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   triggered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -421,6 +420,48 @@ export type AtRiskAlertMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type AtRiskAlertCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.AtRiskAlertCreateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput> | Prisma.AtRiskAlertCreateWithoutMembershipInput[] | Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput | Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.AtRiskAlertCreateManyMembershipInputEnvelope
+  connect?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+}
+
+export type AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.AtRiskAlertCreateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput> | Prisma.AtRiskAlertCreateWithoutMembershipInput[] | Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput | Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.AtRiskAlertCreateManyMembershipInputEnvelope
+  connect?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+}
+
+export type AtRiskAlertUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.AtRiskAlertCreateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput> | Prisma.AtRiskAlertCreateWithoutMembershipInput[] | Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput | Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.AtRiskAlertUpsertWithWhereUniqueWithoutMembershipInput | Prisma.AtRiskAlertUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.AtRiskAlertCreateManyMembershipInputEnvelope
+  set?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  disconnect?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  delete?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  connect?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  update?: Prisma.AtRiskAlertUpdateWithWhereUniqueWithoutMembershipInput | Prisma.AtRiskAlertUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.AtRiskAlertUpdateManyWithWhereWithoutMembershipInput | Prisma.AtRiskAlertUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.AtRiskAlertScalarWhereInput | Prisma.AtRiskAlertScalarWhereInput[]
+}
+
+export type AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.AtRiskAlertCreateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput> | Prisma.AtRiskAlertCreateWithoutMembershipInput[] | Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput | Prisma.AtRiskAlertCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.AtRiskAlertUpsertWithWhereUniqueWithoutMembershipInput | Prisma.AtRiskAlertUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.AtRiskAlertCreateManyMembershipInputEnvelope
+  set?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  disconnect?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  delete?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  connect?: Prisma.AtRiskAlertWhereUniqueInput | Prisma.AtRiskAlertWhereUniqueInput[]
+  update?: Prisma.AtRiskAlertUpdateWithWhereUniqueWithoutMembershipInput | Prisma.AtRiskAlertUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.AtRiskAlertUpdateManyWithWhereWithoutMembershipInput | Prisma.AtRiskAlertUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.AtRiskAlertScalarWhereInput | Prisma.AtRiskAlertScalarWhereInput[]
+}
+
 export type AtRiskAlertCreateNestedManyWithoutRuleInput = {
   create?: Prisma.XOR<Prisma.AtRiskAlertCreateWithoutRuleInput, Prisma.AtRiskAlertUncheckedCreateWithoutRuleInput> | Prisma.AtRiskAlertCreateWithoutRuleInput[] | Prisma.AtRiskAlertUncheckedCreateWithoutRuleInput[]
   connectOrCreate?: Prisma.AtRiskAlertCreateOrConnectWithoutRuleInput | Prisma.AtRiskAlertCreateOrConnectWithoutRuleInput[]
@@ -463,16 +504,79 @@ export type AtRiskAlertUncheckedUpdateManyWithoutRuleNestedInput = {
   deleteMany?: Prisma.AtRiskAlertScalarWhereInput | Prisma.AtRiskAlertScalarWhereInput[]
 }
 
-export type AtRiskAlertCreateWithoutRuleInput = {
+export type AtRiskAlertCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   triggered_at?: Date | string
   acknowledged_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  rule: Prisma.AtRiskRuleCreateNestedOneWithoutAlertsInput
+}
+
+export type AtRiskAlertUncheckedCreateWithoutMembershipInput = {
+  id: string
+  at_risk_rule_id: string
+  status?: string
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  triggered_at?: Date | string
+  acknowledged_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type AtRiskAlertCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.AtRiskAlertWhereUniqueInput
+  create: Prisma.XOR<Prisma.AtRiskAlertCreateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput>
+}
+
+export type AtRiskAlertCreateManyMembershipInputEnvelope = {
+  data: Prisma.AtRiskAlertCreateManyMembershipInput | Prisma.AtRiskAlertCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type AtRiskAlertUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.AtRiskAlertWhereUniqueInput
+  update: Prisma.XOR<Prisma.AtRiskAlertUpdateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.AtRiskAlertCreateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedCreateWithoutMembershipInput>
+}
+
+export type AtRiskAlertUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.AtRiskAlertWhereUniqueInput
+  data: Prisma.XOR<Prisma.AtRiskAlertUpdateWithoutMembershipInput, Prisma.AtRiskAlertUncheckedUpdateWithoutMembershipInput>
+}
+
+export type AtRiskAlertUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.AtRiskAlertScalarWhereInput
+  data: Prisma.XOR<Prisma.AtRiskAlertUpdateManyMutationInput, Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type AtRiskAlertScalarWhereInput = {
+  AND?: Prisma.AtRiskAlertScalarWhereInput | Prisma.AtRiskAlertScalarWhereInput[]
+  OR?: Prisma.AtRiskAlertScalarWhereInput[]
+  NOT?: Prisma.AtRiskAlertScalarWhereInput | Prisma.AtRiskAlertScalarWhereInput[]
+  id?: Prisma.UuidFilter<"AtRiskAlert"> | string
+  tenant_id?: Prisma.UuidFilter<"AtRiskAlert"> | string
+  at_risk_rule_id?: Prisma.UuidFilter<"AtRiskAlert"> | string
+  membership_id?: Prisma.UuidFilter<"AtRiskAlert"> | string
+  status?: Prisma.StringFilter<"AtRiskAlert"> | string
+  context_json?: Prisma.JsonNullableFilter<"AtRiskAlert">
+  triggered_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
+  acknowledged_at?: Prisma.DateTimeNullableFilter<"AtRiskAlert"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
+}
+
+export type AtRiskAlertCreateWithoutRuleInput = {
+  id: string
+  status?: string
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  triggered_at?: Date | string
+  acknowledged_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutAt_risk_alertsInput
 }
 
 export type AtRiskAlertUncheckedCreateWithoutRuleInput = {
@@ -513,20 +617,48 @@ export type AtRiskAlertUpdateManyWithWhereWithoutRuleInput = {
   data: Prisma.XOR<Prisma.AtRiskAlertUpdateManyMutationInput, Prisma.AtRiskAlertUncheckedUpdateManyWithoutRuleInput>
 }
 
-export type AtRiskAlertScalarWhereInput = {
-  AND?: Prisma.AtRiskAlertScalarWhereInput | Prisma.AtRiskAlertScalarWhereInput[]
-  OR?: Prisma.AtRiskAlertScalarWhereInput[]
-  NOT?: Prisma.AtRiskAlertScalarWhereInput | Prisma.AtRiskAlertScalarWhereInput[]
-  id?: Prisma.UuidFilter<"AtRiskAlert"> | string
-  tenant_id?: Prisma.UuidFilter<"AtRiskAlert"> | string
-  at_risk_rule_id?: Prisma.UuidFilter<"AtRiskAlert"> | string
-  membership_id?: Prisma.UuidFilter<"AtRiskAlert"> | string
-  status?: Prisma.StringFilter<"AtRiskAlert"> | string
-  context_json?: Prisma.JsonNullableFilter<"AtRiskAlert">
-  triggered_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
-  acknowledged_at?: Prisma.DateTimeNullableFilter<"AtRiskAlert"> | Date | string | null
-  created_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"AtRiskAlert"> | Date | string
+export type AtRiskAlertCreateManyMembershipInput = {
+  id: string
+  at_risk_rule_id: string
+  status?: string
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  triggered_at?: Date | string
+  acknowledged_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type AtRiskAlertUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  triggered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acknowledged_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rule?: Prisma.AtRiskRuleUpdateOneRequiredWithoutAlertsNestedInput
+}
+
+export type AtRiskAlertUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  at_risk_rule_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  triggered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acknowledged_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AtRiskAlertUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  at_risk_rule_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  triggered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  acknowledged_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AtRiskAlertCreateManyRuleInput = {
@@ -543,14 +675,13 @@ export type AtRiskAlertCreateManyRuleInput = {
 
 export type AtRiskAlertUpdateWithoutRuleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   triggered_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   acknowledged_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutAt_risk_alertsNestedInput
 }
 
 export type AtRiskAlertUncheckedUpdateWithoutRuleInput = {
@@ -591,6 +722,7 @@ export type AtRiskAlertSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   created_at?: boolean
   updated_at?: boolean
   rule?: boolean | Prisma.AtRiskRuleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["atRiskAlert"]>
 
 export type AtRiskAlertSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -605,6 +737,7 @@ export type AtRiskAlertSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   rule?: boolean | Prisma.AtRiskRuleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["atRiskAlert"]>
 
 export type AtRiskAlertSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -619,6 +752,7 @@ export type AtRiskAlertSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   created_at?: boolean
   updated_at?: boolean
   rule?: boolean | Prisma.AtRiskRuleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["atRiskAlert"]>
 
 export type AtRiskAlertSelectScalar = {
@@ -637,18 +771,22 @@ export type AtRiskAlertSelectScalar = {
 export type AtRiskAlertOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "at_risk_rule_id" | "membership_id" | "status" | "context_json" | "triggered_at" | "acknowledged_at" | "created_at" | "updated_at", ExtArgs["result"]["atRiskAlert"]>
 export type AtRiskAlertInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rule?: boolean | Prisma.AtRiskRuleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type AtRiskAlertIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rule?: boolean | Prisma.AtRiskRuleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type AtRiskAlertIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   rule?: boolean | Prisma.AtRiskRuleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $AtRiskAlertPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AtRiskAlert"
   objects: {
     rule: Prisma.$AtRiskRulePayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1056,6 +1194,7 @@ readonly fields: AtRiskAlertFieldRefs;
 export interface Prisma__AtRiskAlertClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   rule<T extends Prisma.AtRiskRuleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AtRiskRuleDefaultArgs<ExtArgs>>): Prisma.Prisma__AtRiskRuleClient<runtime.Types.Result.GetResult<Prisma.$AtRiskRulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

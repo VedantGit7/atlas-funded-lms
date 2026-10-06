@@ -210,6 +210,9 @@ export type CommunitySpaceWhereInput = {
   created_at?: Prisma.DateTimeFilter<"CommunitySpace"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CommunitySpace"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"CommunitySpace"> | Date | string | null
+  group_memberships?: Prisma.GroupMembershipListRelationFilter
+  group_streak_states?: Prisma.GroupStreakStateListRelationFilter
+  posts?: Prisma.PostListRelationFilter
 }
 
 export type CommunitySpaceOrderByWithRelationInput = {
@@ -222,10 +225,14 @@ export type CommunitySpaceOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  group_memberships?: Prisma.GroupMembershipOrderByRelationAggregateInput
+  group_streak_states?: Prisma.GroupStreakStateOrderByRelationAggregateInput
+  posts?: Prisma.PostOrderByRelationAggregateInput
 }
 
 export type CommunitySpaceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.CommunitySpaceTenant_idIdCompoundUniqueInput
   AND?: Prisma.CommunitySpaceWhereInput | Prisma.CommunitySpaceWhereInput[]
   OR?: Prisma.CommunitySpaceWhereInput[]
   NOT?: Prisma.CommunitySpaceWhereInput | Prisma.CommunitySpaceWhereInput[]
@@ -237,7 +244,10 @@ export type CommunitySpaceWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"CommunitySpace"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CommunitySpace"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"CommunitySpace"> | Date | string | null
-}, "id">
+  group_memberships?: Prisma.GroupMembershipListRelationFilter
+  group_streak_states?: Prisma.GroupStreakStateListRelationFilter
+  posts?: Prisma.PostListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type CommunitySpaceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -279,6 +289,9 @@ export type CommunitySpaceCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  group_memberships?: Prisma.GroupMembershipCreateNestedManyWithoutSpaceInput
+  group_streak_states?: Prisma.GroupStreakStateCreateNestedManyWithoutSpaceInput
+  posts?: Prisma.PostCreateNestedManyWithoutSpaceInput
 }
 
 export type CommunitySpaceUncheckedCreateInput = {
@@ -291,6 +304,9 @@ export type CommunitySpaceUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  group_memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutSpaceInput
+  group_streak_states?: Prisma.GroupStreakStateUncheckedCreateNestedManyWithoutSpaceInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutSpaceInput
 }
 
 export type CommunitySpaceUpdateInput = {
@@ -303,6 +319,9 @@ export type CommunitySpaceUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_memberships?: Prisma.GroupMembershipUpdateManyWithoutSpaceNestedInput
+  group_streak_states?: Prisma.GroupStreakStateUpdateManyWithoutSpaceNestedInput
+  posts?: Prisma.PostUpdateManyWithoutSpaceNestedInput
 }
 
 export type CommunitySpaceUncheckedUpdateInput = {
@@ -315,6 +334,9 @@ export type CommunitySpaceUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutSpaceNestedInput
+  group_streak_states?: Prisma.GroupStreakStateUncheckedUpdateManyWithoutSpaceNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutSpaceNestedInput
 }
 
 export type CommunitySpaceCreateManyInput = {
@@ -353,6 +375,16 @@ export type CommunitySpaceUncheckedUpdateManyInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type CommunitySpaceScalarRelationFilter = {
+  is?: Prisma.CommunitySpaceWhereInput
+  isNot?: Prisma.CommunitySpaceWhereInput
+}
+
+export type CommunitySpaceTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type CommunitySpaceCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -387,10 +419,315 @@ export type CommunitySpaceMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type CommunitySpaceCreateNestedOneWithoutGroup_streak_statesInput = {
+  create?: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_streak_statesInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_streak_statesInput>
+  connectOrCreate?: Prisma.CommunitySpaceCreateOrConnectWithoutGroup_streak_statesInput
+  connect?: Prisma.CommunitySpaceWhereUniqueInput
+}
+
+export type CommunitySpaceUpdateOneRequiredWithoutGroup_streak_statesNestedInput = {
+  create?: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_streak_statesInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_streak_statesInput>
+  connectOrCreate?: Prisma.CommunitySpaceCreateOrConnectWithoutGroup_streak_statesInput
+  upsert?: Prisma.CommunitySpaceUpsertWithoutGroup_streak_statesInput
+  connect?: Prisma.CommunitySpaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CommunitySpaceUpdateToOneWithWhereWithoutGroup_streak_statesInput, Prisma.CommunitySpaceUpdateWithoutGroup_streak_statesInput>, Prisma.CommunitySpaceUncheckedUpdateWithoutGroup_streak_statesInput>
+}
+
 export type EnumVisibilityFieldUpdateOperationsInput = {
   set?: $Enums.Visibility
 }
 
+export type CommunitySpaceCreateNestedOneWithoutGroup_membershipsInput = {
+  create?: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_membershipsInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_membershipsInput>
+  connectOrCreate?: Prisma.CommunitySpaceCreateOrConnectWithoutGroup_membershipsInput
+  connect?: Prisma.CommunitySpaceWhereUniqueInput
+}
+
+export type CommunitySpaceUpdateOneRequiredWithoutGroup_membershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_membershipsInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_membershipsInput>
+  connectOrCreate?: Prisma.CommunitySpaceCreateOrConnectWithoutGroup_membershipsInput
+  upsert?: Prisma.CommunitySpaceUpsertWithoutGroup_membershipsInput
+  connect?: Prisma.CommunitySpaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CommunitySpaceUpdateToOneWithWhereWithoutGroup_membershipsInput, Prisma.CommunitySpaceUpdateWithoutGroup_membershipsInput>, Prisma.CommunitySpaceUncheckedUpdateWithoutGroup_membershipsInput>
+}
+
+export type CommunitySpaceCreateNestedOneWithoutPostsInput = {
+  create?: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutPostsInput, Prisma.CommunitySpaceUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.CommunitySpaceCreateOrConnectWithoutPostsInput
+  connect?: Prisma.CommunitySpaceWhereUniqueInput
+}
+
+export type CommunitySpaceUpdateOneRequiredWithoutPostsNestedInput = {
+  create?: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutPostsInput, Prisma.CommunitySpaceUncheckedCreateWithoutPostsInput>
+  connectOrCreate?: Prisma.CommunitySpaceCreateOrConnectWithoutPostsInput
+  upsert?: Prisma.CommunitySpaceUpsertWithoutPostsInput
+  connect?: Prisma.CommunitySpaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CommunitySpaceUpdateToOneWithWhereWithoutPostsInput, Prisma.CommunitySpaceUpdateWithoutPostsInput>, Prisma.CommunitySpaceUncheckedUpdateWithoutPostsInput>
+}
+
+export type CommunitySpaceCreateWithoutGroup_streak_statesInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  name: string
+  visibility?: $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  group_memberships?: Prisma.GroupMembershipCreateNestedManyWithoutSpaceInput
+  posts?: Prisma.PostCreateNestedManyWithoutSpaceInput
+}
+
+export type CommunitySpaceUncheckedCreateWithoutGroup_streak_statesInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  name: string
+  visibility?: $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  group_memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutSpaceInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutSpaceInput
+}
+
+export type CommunitySpaceCreateOrConnectWithoutGroup_streak_statesInput = {
+  where: Prisma.CommunitySpaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_streak_statesInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_streak_statesInput>
+}
+
+export type CommunitySpaceUpsertWithoutGroup_streak_statesInput = {
+  update: Prisma.XOR<Prisma.CommunitySpaceUpdateWithoutGroup_streak_statesInput, Prisma.CommunitySpaceUncheckedUpdateWithoutGroup_streak_statesInput>
+  create: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_streak_statesInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_streak_statesInput>
+  where?: Prisma.CommunitySpaceWhereInput
+}
+
+export type CommunitySpaceUpdateToOneWithWhereWithoutGroup_streak_statesInput = {
+  where?: Prisma.CommunitySpaceWhereInput
+  data: Prisma.XOR<Prisma.CommunitySpaceUpdateWithoutGroup_streak_statesInput, Prisma.CommunitySpaceUncheckedUpdateWithoutGroup_streak_statesInput>
+}
+
+export type CommunitySpaceUpdateWithoutGroup_streak_statesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_memberships?: Prisma.GroupMembershipUpdateManyWithoutSpaceNestedInput
+  posts?: Prisma.PostUpdateManyWithoutSpaceNestedInput
+}
+
+export type CommunitySpaceUncheckedUpdateWithoutGroup_streak_statesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutSpaceNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutSpaceNestedInput
+}
+
+export type CommunitySpaceCreateWithoutGroup_membershipsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  name: string
+  visibility?: $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  group_streak_states?: Prisma.GroupStreakStateCreateNestedManyWithoutSpaceInput
+  posts?: Prisma.PostCreateNestedManyWithoutSpaceInput
+}
+
+export type CommunitySpaceUncheckedCreateWithoutGroup_membershipsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  name: string
+  visibility?: $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  group_streak_states?: Prisma.GroupStreakStateUncheckedCreateNestedManyWithoutSpaceInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutSpaceInput
+}
+
+export type CommunitySpaceCreateOrConnectWithoutGroup_membershipsInput = {
+  where: Prisma.CommunitySpaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_membershipsInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_membershipsInput>
+}
+
+export type CommunitySpaceUpsertWithoutGroup_membershipsInput = {
+  update: Prisma.XOR<Prisma.CommunitySpaceUpdateWithoutGroup_membershipsInput, Prisma.CommunitySpaceUncheckedUpdateWithoutGroup_membershipsInput>
+  create: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutGroup_membershipsInput, Prisma.CommunitySpaceUncheckedCreateWithoutGroup_membershipsInput>
+  where?: Prisma.CommunitySpaceWhereInput
+}
+
+export type CommunitySpaceUpdateToOneWithWhereWithoutGroup_membershipsInput = {
+  where?: Prisma.CommunitySpaceWhereInput
+  data: Prisma.XOR<Prisma.CommunitySpaceUpdateWithoutGroup_membershipsInput, Prisma.CommunitySpaceUncheckedUpdateWithoutGroup_membershipsInput>
+}
+
+export type CommunitySpaceUpdateWithoutGroup_membershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_streak_states?: Prisma.GroupStreakStateUpdateManyWithoutSpaceNestedInput
+  posts?: Prisma.PostUpdateManyWithoutSpaceNestedInput
+}
+
+export type CommunitySpaceUncheckedUpdateWithoutGroup_membershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_streak_states?: Prisma.GroupStreakStateUncheckedUpdateManyWithoutSpaceNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutSpaceNestedInput
+}
+
+export type CommunitySpaceCreateWithoutPostsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  name: string
+  visibility?: $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  group_memberships?: Prisma.GroupMembershipCreateNestedManyWithoutSpaceInput
+  group_streak_states?: Prisma.GroupStreakStateCreateNestedManyWithoutSpaceInput
+}
+
+export type CommunitySpaceUncheckedCreateWithoutPostsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  name: string
+  visibility?: $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  group_memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutSpaceInput
+  group_streak_states?: Prisma.GroupStreakStateUncheckedCreateNestedManyWithoutSpaceInput
+}
+
+export type CommunitySpaceCreateOrConnectWithoutPostsInput = {
+  where: Prisma.CommunitySpaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutPostsInput, Prisma.CommunitySpaceUncheckedCreateWithoutPostsInput>
+}
+
+export type CommunitySpaceUpsertWithoutPostsInput = {
+  update: Prisma.XOR<Prisma.CommunitySpaceUpdateWithoutPostsInput, Prisma.CommunitySpaceUncheckedUpdateWithoutPostsInput>
+  create: Prisma.XOR<Prisma.CommunitySpaceCreateWithoutPostsInput, Prisma.CommunitySpaceUncheckedCreateWithoutPostsInput>
+  where?: Prisma.CommunitySpaceWhereInput
+}
+
+export type CommunitySpaceUpdateToOneWithWhereWithoutPostsInput = {
+  where?: Prisma.CommunitySpaceWhereInput
+  data: Prisma.XOR<Prisma.CommunitySpaceUpdateWithoutPostsInput, Prisma.CommunitySpaceUncheckedUpdateWithoutPostsInput>
+}
+
+export type CommunitySpaceUpdateWithoutPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_memberships?: Prisma.GroupMembershipUpdateManyWithoutSpaceNestedInput
+  group_streak_states?: Prisma.GroupStreakStateUpdateManyWithoutSpaceNestedInput
+}
+
+export type CommunitySpaceUncheckedUpdateWithoutPostsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumVisibilityFieldUpdateOperationsInput | $Enums.Visibility
+  config_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  group_memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutSpaceNestedInput
+  group_streak_states?: Prisma.GroupStreakStateUncheckedUpdateManyWithoutSpaceNestedInput
+}
+
+
+/**
+ * Count Type CommunitySpaceCountOutputType
+ */
+
+export type CommunitySpaceCountOutputType = {
+  group_memberships: number
+  group_streak_states: number
+  posts: number
+}
+
+export type CommunitySpaceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  group_memberships?: boolean | CommunitySpaceCountOutputTypeCountGroup_membershipsArgs
+  group_streak_states?: boolean | CommunitySpaceCountOutputTypeCountGroup_streak_statesArgs
+  posts?: boolean | CommunitySpaceCountOutputTypeCountPostsArgs
+}
+
+/**
+ * CommunitySpaceCountOutputType without action
+ */
+export type CommunitySpaceCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommunitySpaceCountOutputType
+   */
+  select?: Prisma.CommunitySpaceCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CommunitySpaceCountOutputType without action
+ */
+export type CommunitySpaceCountOutputTypeCountGroup_membershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GroupMembershipWhereInput
+}
+
+/**
+ * CommunitySpaceCountOutputType without action
+ */
+export type CommunitySpaceCountOutputTypeCountGroup_streak_statesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GroupStreakStateWhereInput
+}
+
+/**
+ * CommunitySpaceCountOutputType without action
+ */
+export type CommunitySpaceCountOutputTypeCountPostsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PostWhereInput
+}
 
 
 export type CommunitySpaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -403,6 +740,10 @@ export type CommunitySpaceSelect<ExtArgs extends runtime.Types.Extensions.Intern
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  group_memberships?: boolean | Prisma.CommunitySpace$group_membershipsArgs<ExtArgs>
+  group_streak_states?: boolean | Prisma.CommunitySpace$group_streak_statesArgs<ExtArgs>
+  posts?: boolean | Prisma.CommunitySpace$postsArgs<ExtArgs>
+  _count?: boolean | Prisma.CommunitySpaceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["communitySpace"]>
 
 export type CommunitySpaceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -442,10 +783,22 @@ export type CommunitySpaceSelectScalar = {
 }
 
 export type CommunitySpaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "slug" | "name" | "visibility" | "config_json" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["communitySpace"]>
+export type CommunitySpaceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  group_memberships?: boolean | Prisma.CommunitySpace$group_membershipsArgs<ExtArgs>
+  group_streak_states?: boolean | Prisma.CommunitySpace$group_streak_statesArgs<ExtArgs>
+  posts?: boolean | Prisma.CommunitySpace$postsArgs<ExtArgs>
+  _count?: boolean | Prisma.CommunitySpaceCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CommunitySpaceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type CommunitySpaceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $CommunitySpacePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CommunitySpace"
-  objects: {}
+  objects: {
+    group_memberships: Prisma.$GroupMembershipPayload<ExtArgs>[]
+    group_streak_states: Prisma.$GroupStreakStatePayload<ExtArgs>[]
+    posts: Prisma.$PostPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -850,6 +1203,9 @@ readonly fields: CommunitySpaceFieldRefs;
  */
 export interface Prisma__CommunitySpaceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  group_memberships<T extends Prisma.CommunitySpace$group_membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunitySpace$group_membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  group_streak_states<T extends Prisma.CommunitySpace$group_streak_statesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunitySpace$group_streak_statesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GroupStreakStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  posts<T extends Prisma.CommunitySpace$postsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunitySpace$postsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -905,6 +1261,10 @@ export type CommunitySpaceFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
+  /**
    * Filter, which CommunitySpace to fetch.
    */
   where: Prisma.CommunitySpaceWhereUniqueInput
@@ -923,6 +1283,10 @@ export type CommunitySpaceFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
+  /**
    * Filter, which CommunitySpace to fetch.
    */
   where: Prisma.CommunitySpaceWhereUniqueInput
@@ -940,6 +1304,10 @@ export type CommunitySpaceFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the CommunitySpace
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
   /**
    * Filter, which CommunitySpace to fetch.
    */
@@ -989,6 +1357,10 @@ export type CommunitySpaceFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
+  /**
    * Filter, which CommunitySpace to fetch.
    */
   where?: Prisma.CommunitySpaceWhereInput
@@ -1036,6 +1408,10 @@ export type CommunitySpaceFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the CommunitySpace
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
   /**
    * Filter, which CommunitySpaces to fetch.
    */
@@ -1085,6 +1461,10 @@ export type CommunitySpaceCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
+  /**
    * The data needed to create a CommunitySpace.
    */
   data: Prisma.XOR<Prisma.CommunitySpaceCreateInput, Prisma.CommunitySpaceUncheckedCreateInput>
@@ -1132,6 +1512,10 @@ export type CommunitySpaceUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the CommunitySpace
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
   /**
    * The data needed to update a CommunitySpace.
    */
@@ -1199,6 +1583,10 @@ export type CommunitySpaceUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
+  /**
    * The filter to search for the CommunitySpace to update in case it exists.
    */
   where: Prisma.CommunitySpaceWhereUniqueInput
@@ -1225,6 +1613,10 @@ export type CommunitySpaceDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
+  /**
    * Filter which CommunitySpace to delete.
    */
   where: Prisma.CommunitySpaceWhereUniqueInput
@@ -1245,6 +1637,78 @@ export type CommunitySpaceDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * CommunitySpace.group_memberships
+ */
+export type CommunitySpace$group_membershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GroupMembership
+   */
+  select?: Prisma.GroupMembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GroupMembership
+   */
+  omit?: Prisma.GroupMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupMembershipInclude<ExtArgs> | null
+  where?: Prisma.GroupMembershipWhereInput
+  orderBy?: Prisma.GroupMembershipOrderByWithRelationInput | Prisma.GroupMembershipOrderByWithRelationInput[]
+  cursor?: Prisma.GroupMembershipWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GroupMembershipScalarFieldEnum | Prisma.GroupMembershipScalarFieldEnum[]
+}
+
+/**
+ * CommunitySpace.group_streak_states
+ */
+export type CommunitySpace$group_streak_statesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GroupStreakState
+   */
+  select?: Prisma.GroupStreakStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GroupStreakState
+   */
+  omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
+  where?: Prisma.GroupStreakStateWhereInput
+  orderBy?: Prisma.GroupStreakStateOrderByWithRelationInput | Prisma.GroupStreakStateOrderByWithRelationInput[]
+  cursor?: Prisma.GroupStreakStateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.GroupStreakStateScalarFieldEnum | Prisma.GroupStreakStateScalarFieldEnum[]
+}
+
+/**
+ * CommunitySpace.posts
+ */
+export type CommunitySpace$postsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Post
+   */
+  select?: Prisma.PostSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Post
+   */
+  omit?: Prisma.PostOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PostInclude<ExtArgs> | null
+  where?: Prisma.PostWhereInput
+  orderBy?: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[]
+  cursor?: Prisma.PostWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PostScalarFieldEnum | Prisma.PostScalarFieldEnum[]
+}
+
+/**
  * CommunitySpace without action
  */
 export type CommunitySpaceDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1256,4 +1720,8 @@ export type CommunitySpaceDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the CommunitySpace
    */
   omit?: Prisma.CommunitySpaceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunitySpaceInclude<ExtArgs> | null
 }

@@ -250,6 +250,9 @@ export type MarketingWorkflowRunWhereInput = {
   created_at?: Prisma.DateTimeFilter<"MarketingWorkflowRun"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingWorkflowRun"> | Date | string
   completed_at?: Prisma.DateTimeNullableFilter<"MarketingWorkflowRun"> | Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogListRelationFilter
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
+  workflow?: Prisma.XOR<Prisma.MarketingWorkflowScalarRelationFilter, Prisma.MarketingWorkflowWhereInput>
 }
 
 export type MarketingWorkflowRunOrderByWithRelationInput = {
@@ -267,10 +270,14 @@ export type MarketingWorkflowRunOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogOrderByRelationAggregateInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  workflow?: Prisma.MarketingWorkflowOrderByWithRelationInput
 }
 
 export type MarketingWorkflowRunWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MarketingWorkflowRunTenant_idIdCompoundUniqueInput
   tenant_id_idempotency_key?: Prisma.MarketingWorkflowRunTenant_idIdempotency_keyCompoundUniqueInput
   AND?: Prisma.MarketingWorkflowRunWhereInput | Prisma.MarketingWorkflowRunWhereInput[]
   OR?: Prisma.MarketingWorkflowRunWhereInput[]
@@ -288,7 +295,10 @@ export type MarketingWorkflowRunWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"MarketingWorkflowRun"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingWorkflowRun"> | Date | string
   completed_at?: Prisma.DateTimeNullableFilter<"MarketingWorkflowRun"> | Date | string | null
-}, "id" | "tenant_id_idempotency_key">
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogListRelationFilter
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
+  workflow?: Prisma.XOR<Prisma.MarketingWorkflowScalarRelationFilter, Prisma.MarketingWorkflowWhereInput>
+}, "id" | "tenant_id_id" | "tenant_id_idempotency_key">
 
 export type MarketingWorkflowRunOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -332,9 +342,6 @@ export type MarketingWorkflowRunScalarWhereWithAggregatesInput = {
 
 export type MarketingWorkflowRunCreateInput = {
   id: string
-  tenant_id: string
-  workflow_id: string
-  membership_id?: string | null
   status?: string
   trigger_event_type: string
   trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -345,6 +352,9 @@ export type MarketingWorkflowRunCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   completed_at?: Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogCreateNestedManyWithoutRunInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_workflow_runsInput
+  workflow: Prisma.MarketingWorkflowCreateNestedOneWithoutMarketing_workflow_runsInput
 }
 
 export type MarketingWorkflowRunUncheckedCreateInput = {
@@ -362,13 +372,11 @@ export type MarketingWorkflowRunUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   completed_at?: Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUncheckedCreateNestedManyWithoutRunInput
 }
 
 export type MarketingWorkflowRunUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  workflow_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
   trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -379,6 +387,9 @@ export type MarketingWorkflowRunUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUpdateManyWithoutRunNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutMarketing_workflow_runsNestedInput
+  workflow?: Prisma.MarketingWorkflowUpdateOneRequiredWithoutMarketing_workflow_runsNestedInput
 }
 
 export type MarketingWorkflowRunUncheckedUpdateInput = {
@@ -396,6 +407,7 @@ export type MarketingWorkflowRunUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUncheckedUpdateManyWithoutRunNestedInput
 }
 
 export type MarketingWorkflowRunCreateManyInput = {
@@ -417,9 +429,6 @@ export type MarketingWorkflowRunCreateManyInput = {
 
 export type MarketingWorkflowRunUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  workflow_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
   trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -447,6 +456,21 @@ export type MarketingWorkflowRunUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MarketingWorkflowRunListRelationFilter = {
+  every?: Prisma.MarketingWorkflowRunWhereInput
+  some?: Prisma.MarketingWorkflowRunWhereInput
+  none?: Prisma.MarketingWorkflowRunWhereInput
+}
+
+export type MarketingWorkflowRunOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type MarketingWorkflowRunTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type MarketingWorkflowRunTenant_idIdempotency_keyCompoundUniqueInput = {
@@ -503,6 +527,480 @@ export type MarketingWorkflowRunMinOrderByAggregateInput = {
   completed_at?: Prisma.SortOrder
 }
 
+export type MarketingWorkflowRunScalarRelationFilter = {
+  is?: Prisma.MarketingWorkflowRunWhereInput
+  isNot?: Prisma.MarketingWorkflowRunWhereInput
+}
+
+export type MarketingWorkflowRunCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput> | Prisma.MarketingWorkflowRunCreateWithoutMembershipInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyMembershipInputEnvelope
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+}
+
+export type MarketingWorkflowRunUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput> | Prisma.MarketingWorkflowRunCreateWithoutMembershipInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyMembershipInputEnvelope
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+}
+
+export type MarketingWorkflowRunUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput> | Prisma.MarketingWorkflowRunCreateWithoutMembershipInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyMembershipInputEnvelope
+  set?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  disconnect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  delete?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  update?: Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutMembershipInput | Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MarketingWorkflowRunScalarWhereInput | Prisma.MarketingWorkflowRunScalarWhereInput[]
+}
+
+export type MarketingWorkflowRunUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput> | Prisma.MarketingWorkflowRunCreateWithoutMembershipInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyMembershipInputEnvelope
+  set?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  disconnect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  delete?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  update?: Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutMembershipInput | Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MarketingWorkflowRunScalarWhereInput | Prisma.MarketingWorkflowRunScalarWhereInput[]
+}
+
+export type MarketingWorkflowRunCreateNestedManyWithoutWorkflowInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput> | Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyWorkflowInputEnvelope
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+}
+
+export type MarketingWorkflowRunUncheckedCreateNestedManyWithoutWorkflowInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput> | Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyWorkflowInputEnvelope
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+}
+
+export type MarketingWorkflowRunUpdateManyWithoutWorkflowNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput> | Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput[]
+  upsert?: Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutWorkflowInput | Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutWorkflowInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyWorkflowInputEnvelope
+  set?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  disconnect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  delete?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  update?: Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutWorkflowInput | Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutWorkflowInput[]
+  updateMany?: Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutWorkflowInput | Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutWorkflowInput[]
+  deleteMany?: Prisma.MarketingWorkflowRunScalarWhereInput | Prisma.MarketingWorkflowRunScalarWhereInput[]
+}
+
+export type MarketingWorkflowRunUncheckedUpdateManyWithoutWorkflowNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput> | Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput[] | Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput[]
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput | Prisma.MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput[]
+  upsert?: Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutWorkflowInput | Prisma.MarketingWorkflowRunUpsertWithWhereUniqueWithoutWorkflowInput[]
+  createMany?: Prisma.MarketingWorkflowRunCreateManyWorkflowInputEnvelope
+  set?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  disconnect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  delete?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput | Prisma.MarketingWorkflowRunWhereUniqueInput[]
+  update?: Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutWorkflowInput | Prisma.MarketingWorkflowRunUpdateWithWhereUniqueWithoutWorkflowInput[]
+  updateMany?: Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutWorkflowInput | Prisma.MarketingWorkflowRunUpdateManyWithWhereWithoutWorkflowInput[]
+  deleteMany?: Prisma.MarketingWorkflowRunScalarWhereInput | Prisma.MarketingWorkflowRunScalarWhereInput[]
+}
+
+export type MarketingWorkflowRunCreateNestedOneWithoutMarketing_workflow_run_logsInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMarketing_workflow_run_logsInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMarketing_workflow_run_logsInput>
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutMarketing_workflow_run_logsInput
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput
+}
+
+export type MarketingWorkflowRunUpdateOneRequiredWithoutMarketing_workflow_run_logsNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMarketing_workflow_run_logsInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMarketing_workflow_run_logsInput>
+  connectOrCreate?: Prisma.MarketingWorkflowRunCreateOrConnectWithoutMarketing_workflow_run_logsInput
+  upsert?: Prisma.MarketingWorkflowRunUpsertWithoutMarketing_workflow_run_logsInput
+  connect?: Prisma.MarketingWorkflowRunWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MarketingWorkflowRunUpdateToOneWithWhereWithoutMarketing_workflow_run_logsInput, Prisma.MarketingWorkflowRunUpdateWithoutMarketing_workflow_run_logsInput>, Prisma.MarketingWorkflowRunUncheckedUpdateWithoutMarketing_workflow_run_logsInput>
+}
+
+export type MarketingWorkflowRunCreateWithoutMembershipInput = {
+  id: string
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogCreateNestedManyWithoutRunInput
+  workflow: Prisma.MarketingWorkflowCreateNestedOneWithoutMarketing_workflow_runsInput
+}
+
+export type MarketingWorkflowRunUncheckedCreateWithoutMembershipInput = {
+  id: string
+  workflow_id: string
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUncheckedCreateNestedManyWithoutRunInput
+}
+
+export type MarketingWorkflowRunCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.MarketingWorkflowRunWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput>
+}
+
+export type MarketingWorkflowRunCreateManyMembershipInputEnvelope = {
+  data: Prisma.MarketingWorkflowRunCreateManyMembershipInput | Prisma.MarketingWorkflowRunCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingWorkflowRunUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MarketingWorkflowRunWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMembershipInput>
+}
+
+export type MarketingWorkflowRunUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MarketingWorkflowRunWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateWithoutMembershipInput, Prisma.MarketingWorkflowRunUncheckedUpdateWithoutMembershipInput>
+}
+
+export type MarketingWorkflowRunUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.MarketingWorkflowRunScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateManyMutationInput, Prisma.MarketingWorkflowRunUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type MarketingWorkflowRunScalarWhereInput = {
+  AND?: Prisma.MarketingWorkflowRunScalarWhereInput | Prisma.MarketingWorkflowRunScalarWhereInput[]
+  OR?: Prisma.MarketingWorkflowRunScalarWhereInput[]
+  NOT?: Prisma.MarketingWorkflowRunScalarWhereInput | Prisma.MarketingWorkflowRunScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MarketingWorkflowRun"> | string
+  tenant_id?: Prisma.UuidFilter<"MarketingWorkflowRun"> | string
+  workflow_id?: Prisma.UuidFilter<"MarketingWorkflowRun"> | string
+  membership_id?: Prisma.UuidNullableFilter<"MarketingWorkflowRun"> | string | null
+  status?: Prisma.StringFilter<"MarketingWorkflowRun"> | string
+  trigger_event_type?: Prisma.StringFilter<"MarketingWorkflowRun"> | string
+  trigger_payload_json?: Prisma.JsonFilter<"MarketingWorkflowRun">
+  current_node_id?: Prisma.StringNullableFilter<"MarketingWorkflowRun"> | string | null
+  wait_until?: Prisma.DateTimeNullableFilter<"MarketingWorkflowRun"> | Date | string | null
+  idempotency_key?: Prisma.StringFilter<"MarketingWorkflowRun"> | string
+  error_message?: Prisma.StringNullableFilter<"MarketingWorkflowRun"> | string | null
+  created_at?: Prisma.DateTimeFilter<"MarketingWorkflowRun"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"MarketingWorkflowRun"> | Date | string
+  completed_at?: Prisma.DateTimeNullableFilter<"MarketingWorkflowRun"> | Date | string | null
+}
+
+export type MarketingWorkflowRunCreateWithoutWorkflowInput = {
+  id: string
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogCreateNestedManyWithoutRunInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_workflow_runsInput
+}
+
+export type MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput = {
+  id: string
+  membership_id?: string | null
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUncheckedCreateNestedManyWithoutRunInput
+}
+
+export type MarketingWorkflowRunCreateOrConnectWithoutWorkflowInput = {
+  where: Prisma.MarketingWorkflowRunWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput>
+}
+
+export type MarketingWorkflowRunCreateManyWorkflowInputEnvelope = {
+  data: Prisma.MarketingWorkflowRunCreateManyWorkflowInput | Prisma.MarketingWorkflowRunCreateManyWorkflowInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingWorkflowRunUpsertWithWhereUniqueWithoutWorkflowInput = {
+  where: Prisma.MarketingWorkflowRunWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedUpdateWithoutWorkflowInput>
+  create: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutWorkflowInput>
+}
+
+export type MarketingWorkflowRunUpdateWithWhereUniqueWithoutWorkflowInput = {
+  where: Prisma.MarketingWorkflowRunWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateWithoutWorkflowInput, Prisma.MarketingWorkflowRunUncheckedUpdateWithoutWorkflowInput>
+}
+
+export type MarketingWorkflowRunUpdateManyWithWhereWithoutWorkflowInput = {
+  where: Prisma.MarketingWorkflowRunScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateManyMutationInput, Prisma.MarketingWorkflowRunUncheckedUpdateManyWithoutWorkflowInput>
+}
+
+export type MarketingWorkflowRunCreateWithoutMarketing_workflow_run_logsInput = {
+  id: string
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+  membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_workflow_runsInput
+  workflow: Prisma.MarketingWorkflowCreateNestedOneWithoutMarketing_workflow_runsInput
+}
+
+export type MarketingWorkflowRunUncheckedCreateWithoutMarketing_workflow_run_logsInput = {
+  id: string
+  tenant_id: string
+  workflow_id: string
+  membership_id?: string | null
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type MarketingWorkflowRunCreateOrConnectWithoutMarketing_workflow_run_logsInput = {
+  where: Prisma.MarketingWorkflowRunWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMarketing_workflow_run_logsInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMarketing_workflow_run_logsInput>
+}
+
+export type MarketingWorkflowRunUpsertWithoutMarketing_workflow_run_logsInput = {
+  update: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateWithoutMarketing_workflow_run_logsInput, Prisma.MarketingWorkflowRunUncheckedUpdateWithoutMarketing_workflow_run_logsInput>
+  create: Prisma.XOR<Prisma.MarketingWorkflowRunCreateWithoutMarketing_workflow_run_logsInput, Prisma.MarketingWorkflowRunUncheckedCreateWithoutMarketing_workflow_run_logsInput>
+  where?: Prisma.MarketingWorkflowRunWhereInput
+}
+
+export type MarketingWorkflowRunUpdateToOneWithWhereWithoutMarketing_workflow_run_logsInput = {
+  where?: Prisma.MarketingWorkflowRunWhereInput
+  data: Prisma.XOR<Prisma.MarketingWorkflowRunUpdateWithoutMarketing_workflow_run_logsInput, Prisma.MarketingWorkflowRunUncheckedUpdateWithoutMarketing_workflow_run_logsInput>
+}
+
+export type MarketingWorkflowRunUpdateWithoutMarketing_workflow_run_logsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneWithoutMarketing_workflow_runsNestedInput
+  workflow?: Prisma.MarketingWorkflowUpdateOneRequiredWithoutMarketing_workflow_runsNestedInput
+}
+
+export type MarketingWorkflowRunUncheckedUpdateWithoutMarketing_workflow_run_logsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  workflow_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MarketingWorkflowRunCreateManyMembershipInput = {
+  id: string
+  workflow_id: string
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type MarketingWorkflowRunUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUpdateManyWithoutRunNestedInput
+  workflow?: Prisma.MarketingWorkflowUpdateOneRequiredWithoutMarketing_workflow_runsNestedInput
+}
+
+export type MarketingWorkflowRunUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workflow_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUncheckedUpdateManyWithoutRunNestedInput
+}
+
+export type MarketingWorkflowRunUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workflow_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MarketingWorkflowRunCreateManyWorkflowInput = {
+  id: string
+  membership_id?: string | null
+  status?: string
+  trigger_event_type: string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: string | null
+  wait_until?: Date | string | null
+  idempotency_key: string
+  error_message?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type MarketingWorkflowRunUpdateWithoutWorkflowInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUpdateManyWithoutRunNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutMarketing_workflow_runsNestedInput
+}
+
+export type MarketingWorkflowRunUncheckedUpdateWithoutWorkflowInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marketing_workflow_run_logs?: Prisma.MarketingWorkflowRunLogUncheckedUpdateManyWithoutRunNestedInput
+}
+
+export type MarketingWorkflowRunUncheckedUpdateManyWithoutWorkflowInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  trigger_payload_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  current_node_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wait_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+
+/**
+ * Count Type MarketingWorkflowRunCountOutputType
+ */
+
+export type MarketingWorkflowRunCountOutputType = {
+  marketing_workflow_run_logs: number
+}
+
+export type MarketingWorkflowRunCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_workflow_run_logs?: boolean | MarketingWorkflowRunCountOutputTypeCountMarketing_workflow_run_logsArgs
+}
+
+/**
+ * MarketingWorkflowRunCountOutputType without action
+ */
+export type MarketingWorkflowRunCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingWorkflowRunCountOutputType
+   */
+  select?: Prisma.MarketingWorkflowRunCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MarketingWorkflowRunCountOutputType without action
+ */
+export type MarketingWorkflowRunCountOutputTypeCountMarketing_workflow_run_logsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MarketingWorkflowRunLogWhereInput
+}
 
 
 export type MarketingWorkflowRunSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -520,6 +1018,10 @@ export type MarketingWorkflowRunSelect<ExtArgs extends runtime.Types.Extensions.
   created_at?: boolean
   updated_at?: boolean
   completed_at?: boolean
+  marketing_workflow_run_logs?: boolean | Prisma.MarketingWorkflowRun$marketing_workflow_run_logsArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs>
+  workflow?: boolean | Prisma.MarketingWorkflowDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingWorkflowRunCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingWorkflowRun"]>
 
 export type MarketingWorkflowRunSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -537,6 +1039,8 @@ export type MarketingWorkflowRunSelectCreateManyAndReturn<ExtArgs extends runtim
   created_at?: boolean
   updated_at?: boolean
   completed_at?: boolean
+  membership?: boolean | Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs>
+  workflow?: boolean | Prisma.MarketingWorkflowDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingWorkflowRun"]>
 
 export type MarketingWorkflowRunSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -554,6 +1058,8 @@ export type MarketingWorkflowRunSelectUpdateManyAndReturn<ExtArgs extends runtim
   created_at?: boolean
   updated_at?: boolean
   completed_at?: boolean
+  membership?: boolean | Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs>
+  workflow?: boolean | Prisma.MarketingWorkflowDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingWorkflowRun"]>
 
 export type MarketingWorkflowRunSelectScalar = {
@@ -574,10 +1080,28 @@ export type MarketingWorkflowRunSelectScalar = {
 }
 
 export type MarketingWorkflowRunOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "workflow_id" | "membership_id" | "status" | "trigger_event_type" | "trigger_payload_json" | "current_node_id" | "wait_until" | "idempotency_key" | "error_message" | "created_at" | "updated_at" | "completed_at", ExtArgs["result"]["marketingWorkflowRun"]>
+export type MarketingWorkflowRunInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_workflow_run_logs?: boolean | Prisma.MarketingWorkflowRun$marketing_workflow_run_logsArgs<ExtArgs>
+  membership?: boolean | Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs>
+  workflow?: boolean | Prisma.MarketingWorkflowDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingWorkflowRunCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type MarketingWorkflowRunIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs>
+  workflow?: boolean | Prisma.MarketingWorkflowDefaultArgs<ExtArgs>
+}
+export type MarketingWorkflowRunIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs>
+  workflow?: boolean | Prisma.MarketingWorkflowDefaultArgs<ExtArgs>
+}
 
 export type $MarketingWorkflowRunPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingWorkflowRun"
-  objects: {}
+  objects: {
+    marketing_workflow_run_logs: Prisma.$MarketingWorkflowRunLogPayload<ExtArgs>[]
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
+    workflow: Prisma.$MarketingWorkflowPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -987,6 +1511,9 @@ readonly fields: MarketingWorkflowRunFieldRefs;
  */
 export interface Prisma__MarketingWorkflowRunClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  marketing_workflow_run_logs<T extends Prisma.MarketingWorkflowRun$marketing_workflow_run_logsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingWorkflowRun$marketing_workflow_run_logsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MarketingWorkflowRunLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  membership<T extends Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingWorkflowRun$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  workflow<T extends Prisma.MarketingWorkflowDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingWorkflowDefaultArgs<ExtArgs>>): Prisma.Prisma__MarketingWorkflowClient<runtime.Types.Result.GetResult<Prisma.$MarketingWorkflowPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1047,6 +1574,10 @@ export type MarketingWorkflowRunFindUniqueArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingWorkflowRun to fetch.
    */
   where: Prisma.MarketingWorkflowRunWhereUniqueInput
@@ -1065,6 +1596,10 @@ export type MarketingWorkflowRunFindUniqueOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingWorkflowRun to fetch.
    */
   where: Prisma.MarketingWorkflowRunWhereUniqueInput
@@ -1082,6 +1617,10 @@ export type MarketingWorkflowRunFindFirstArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the MarketingWorkflowRun
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
   /**
    * Filter, which MarketingWorkflowRun to fetch.
    */
@@ -1131,6 +1670,10 @@ export type MarketingWorkflowRunFindFirstOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingWorkflowRun to fetch.
    */
   where?: Prisma.MarketingWorkflowRunWhereInput
@@ -1178,6 +1721,10 @@ export type MarketingWorkflowRunFindManyArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the MarketingWorkflowRun
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
   /**
    * Filter, which MarketingWorkflowRuns to fetch.
    */
@@ -1227,6 +1774,10 @@ export type MarketingWorkflowRunCreateArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingWorkflowRun.
    */
   data: Prisma.XOR<Prisma.MarketingWorkflowRunCreateInput, Prisma.MarketingWorkflowRunUncheckedCreateInput>
@@ -1260,6 +1811,10 @@ export type MarketingWorkflowRunCreateManyAndReturnArgs<ExtArgs extends runtime.
    */
   data: Prisma.MarketingWorkflowRunCreateManyInput | Prisma.MarketingWorkflowRunCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1274,6 +1829,10 @@ export type MarketingWorkflowRunUpdateArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the MarketingWorkflowRun
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingWorkflowRun.
    */
@@ -1326,6 +1885,10 @@ export type MarketingWorkflowRunUpdateManyAndReturnArgs<ExtArgs extends runtime.
    * Limit how many MarketingWorkflowRuns to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1340,6 +1903,10 @@ export type MarketingWorkflowRunUpsertArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the MarketingWorkflowRun
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
   /**
    * The filter to search for the MarketingWorkflowRun to update in case it exists.
    */
@@ -1367,6 +1934,10 @@ export type MarketingWorkflowRunDeleteArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
+  /**
    * Filter which MarketingWorkflowRun to delete.
    */
   where: Prisma.MarketingWorkflowRunWhereUniqueInput
@@ -1387,6 +1958,49 @@ export type MarketingWorkflowRunDeleteManyArgs<ExtArgs extends runtime.Types.Ext
 }
 
 /**
+ * MarketingWorkflowRun.marketing_workflow_run_logs
+ */
+export type MarketingWorkflowRun$marketing_workflow_run_logsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingWorkflowRunLog
+   */
+  select?: Prisma.MarketingWorkflowRunLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingWorkflowRunLog
+   */
+  omit?: Prisma.MarketingWorkflowRunLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunLogInclude<ExtArgs> | null
+  where?: Prisma.MarketingWorkflowRunLogWhereInput
+  orderBy?: Prisma.MarketingWorkflowRunLogOrderByWithRelationInput | Prisma.MarketingWorkflowRunLogOrderByWithRelationInput[]
+  cursor?: Prisma.MarketingWorkflowRunLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MarketingWorkflowRunLogScalarFieldEnum | Prisma.MarketingWorkflowRunLogScalarFieldEnum[]
+}
+
+/**
+ * MarketingWorkflowRun.membership
+ */
+export type MarketingWorkflowRun$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
+}
+
+/**
  * MarketingWorkflowRun without action
  */
 export type MarketingWorkflowRunDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1398,4 +2012,8 @@ export type MarketingWorkflowRunDefaultArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the MarketingWorkflowRun
    */
   omit?: Prisma.MarketingWorkflowRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingWorkflowRunInclude<ExtArgs> | null
 }

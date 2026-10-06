@@ -34,13 +34,38 @@ function neutraliseCss(css: string): string {
     );
 }
 
+type PurifierModule = { default: Purifier };
+let importPurifier = (): Promise<PurifierModule> => import("isomorphic-dompurify");
 let purifier: Promise<Purifier> | null = null;
+
+/** Replace how DOMPurify is loaded (tests only); clears any loaded instance. */
+export function setSvgSanitizerImportForTests(load: (() => Promise<PurifierModule>) | null): void {
+  importPurifier = load ?? (() => import("isomorphic-dompurify"));
+  purifier = null;
+}
+
 function loadPurifier(): Promise<Purifier> {
-  purifier ??= import("isomorphic-dompurify").then(({ default: DOMPurify }) => {
-    installHooks(DOMPurify);
-    return DOMPurify;
-  });
+  purifier ??= importPurifier()
+    .then(({ default: DOMPurify }) => {
+      installHooks(DOMPurify);
+      return DOMPurify;
+    })
+    .catch((error: unknown) => {
+      // A failed load must not be cached: the next sanitize tries again.
+      purifier = null;
+      throw error;
+    });
   return purifier;
+}
+
+/**
+ * Load the sanitizer ahead of the first SVG upload. The API process calls this
+ * at startup (instrumentation.ts), so a confirm never pays for loading jsdom
+ * inside its database transaction; an upload that arrives while it is still
+ * loading waits for the same load.
+ */
+export async function preloadSvgSanitizer(): Promise<void> {
+  await loadPurifier();
 }
 
 function installHooks(DOMPurify: Purifier) {

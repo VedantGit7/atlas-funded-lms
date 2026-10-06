@@ -95,6 +95,10 @@ export const batchesRepository = {
   },
 
   async deleteBatch(tx: TenantTx, batchId: string): Promise<boolean> {
+    // Live sessions outlive their batch (the foreign key restricts).
+    await tx.$executeRaw`
+      update live_sessions set batch_id = null, updated_at = now() where batch_id = ${batchId}::uuid
+    `;
     const count = await tx.$executeRaw`
       delete from batches where id = ${batchId}::uuid
     `;

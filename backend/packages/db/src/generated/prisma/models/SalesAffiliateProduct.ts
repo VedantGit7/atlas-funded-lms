@@ -268,6 +268,7 @@ export type SalesAffiliateProductWhereInput = {
   premium_commission_pct?: Prisma.IntNullableFilter<"SalesAffiliateProduct"> | number | null
   created_at?: Prisma.DateTimeFilter<"SalesAffiliateProduct"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAffiliateProduct"> | Date | string
+  course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
 }
 
 export type SalesAffiliateProductOrderByWithRelationInput = {
@@ -281,6 +282,7 @@ export type SalesAffiliateProductOrderByWithRelationInput = {
   premium_commission_pct?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  course?: Prisma.CourseOrderByWithRelationInput
 }
 
 export type SalesAffiliateProductWhereUniqueInput = Prisma.AtLeast<{
@@ -298,6 +300,7 @@ export type SalesAffiliateProductWhereUniqueInput = Prisma.AtLeast<{
   premium_commission_pct?: Prisma.IntNullableFilter<"SalesAffiliateProduct"> | number | null
   created_at?: Prisma.DateTimeFilter<"SalesAffiliateProduct"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAffiliateProduct"> | Date | string
+  course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
 }, "id" | "tenant_id_course_id">
 
 export type SalesAffiliateProductOrderByWithAggregationInput = {
@@ -336,8 +339,6 @@ export type SalesAffiliateProductScalarWhereWithAggregatesInput = {
 
 export type SalesAffiliateProductCreateInput = {
   id: string
-  tenant_id: string
-  course_id: string
   enabled?: boolean
   standard_discount_pct?: number | null
   standard_commission_pct?: number | null
@@ -345,6 +346,7 @@ export type SalesAffiliateProductCreateInput = {
   premium_commission_pct?: number | null
   created_at?: Date | string
   updated_at?: Date | string
+  course: Prisma.CourseCreateNestedOneWithoutSales_affiliate_productsInput
 }
 
 export type SalesAffiliateProductUncheckedCreateInput = {
@@ -362,8 +364,6 @@ export type SalesAffiliateProductUncheckedCreateInput = {
 
 export type SalesAffiliateProductUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   standard_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   standard_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -371,6 +371,7 @@ export type SalesAffiliateProductUpdateInput = {
   premium_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  course?: Prisma.CourseUpdateOneRequiredWithoutSales_affiliate_productsNestedInput
 }
 
 export type SalesAffiliateProductUncheckedUpdateInput = {
@@ -401,8 +402,6 @@ export type SalesAffiliateProductCreateManyInput = {
 
 export type SalesAffiliateProductUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.StringFieldUpdateOperationsInput | string
   enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   standard_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   standard_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
@@ -423,6 +422,16 @@ export type SalesAffiliateProductUncheckedUpdateManyInput = {
   premium_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAffiliateProductListRelationFilter = {
+  every?: Prisma.SalesAffiliateProductWhereInput
+  some?: Prisma.SalesAffiliateProductWhereInput
+  none?: Prisma.SalesAffiliateProductWhereInput
+}
+
+export type SalesAffiliateProductOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SalesAffiliateProductTenant_idCourse_idCompoundUniqueInput = {
@@ -483,6 +492,156 @@ export type SalesAffiliateProductSumOrderByAggregateInput = {
   premium_commission_pct?: Prisma.SortOrder
 }
 
+export type SalesAffiliateProductCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateProductCreateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput> | Prisma.SalesAffiliateProductCreateWithoutCourseInput[] | Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput | Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.SalesAffiliateProductCreateManyCourseInputEnvelope
+  connect?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+}
+
+export type SalesAffiliateProductUncheckedCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateProductCreateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput> | Prisma.SalesAffiliateProductCreateWithoutCourseInput[] | Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput | Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.SalesAffiliateProductCreateManyCourseInputEnvelope
+  connect?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+}
+
+export type SalesAffiliateProductUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateProductCreateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput> | Prisma.SalesAffiliateProductCreateWithoutCourseInput[] | Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput | Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.SalesAffiliateProductUpsertWithWhereUniqueWithoutCourseInput | Prisma.SalesAffiliateProductUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.SalesAffiliateProductCreateManyCourseInputEnvelope
+  set?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  disconnect?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  delete?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  connect?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  update?: Prisma.SalesAffiliateProductUpdateWithWhereUniqueWithoutCourseInput | Prisma.SalesAffiliateProductUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.SalesAffiliateProductUpdateManyWithWhereWithoutCourseInput | Prisma.SalesAffiliateProductUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.SalesAffiliateProductScalarWhereInput | Prisma.SalesAffiliateProductScalarWhereInput[]
+}
+
+export type SalesAffiliateProductUncheckedUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateProductCreateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput> | Prisma.SalesAffiliateProductCreateWithoutCourseInput[] | Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput | Prisma.SalesAffiliateProductCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.SalesAffiliateProductUpsertWithWhereUniqueWithoutCourseInput | Prisma.SalesAffiliateProductUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.SalesAffiliateProductCreateManyCourseInputEnvelope
+  set?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  disconnect?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  delete?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  connect?: Prisma.SalesAffiliateProductWhereUniqueInput | Prisma.SalesAffiliateProductWhereUniqueInput[]
+  update?: Prisma.SalesAffiliateProductUpdateWithWhereUniqueWithoutCourseInput | Prisma.SalesAffiliateProductUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.SalesAffiliateProductUpdateManyWithWhereWithoutCourseInput | Prisma.SalesAffiliateProductUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.SalesAffiliateProductScalarWhereInput | Prisma.SalesAffiliateProductScalarWhereInput[]
+}
+
+export type SalesAffiliateProductCreateWithoutCourseInput = {
+  id: string
+  enabled?: boolean
+  standard_discount_pct?: number | null
+  standard_commission_pct?: number | null
+  premium_discount_pct?: number | null
+  premium_commission_pct?: number | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAffiliateProductUncheckedCreateWithoutCourseInput = {
+  id: string
+  enabled?: boolean
+  standard_discount_pct?: number | null
+  standard_commission_pct?: number | null
+  premium_discount_pct?: number | null
+  premium_commission_pct?: number | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAffiliateProductCreateOrConnectWithoutCourseInput = {
+  where: Prisma.SalesAffiliateProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesAffiliateProductCreateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput>
+}
+
+export type SalesAffiliateProductCreateManyCourseInputEnvelope = {
+  data: Prisma.SalesAffiliateProductCreateManyCourseInput | Prisma.SalesAffiliateProductCreateManyCourseInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesAffiliateProductUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.SalesAffiliateProductWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesAffiliateProductUpdateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.SalesAffiliateProductCreateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedCreateWithoutCourseInput>
+}
+
+export type SalesAffiliateProductUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.SalesAffiliateProductWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesAffiliateProductUpdateWithoutCourseInput, Prisma.SalesAffiliateProductUncheckedUpdateWithoutCourseInput>
+}
+
+export type SalesAffiliateProductUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.SalesAffiliateProductScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesAffiliateProductUpdateManyMutationInput, Prisma.SalesAffiliateProductUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type SalesAffiliateProductScalarWhereInput = {
+  AND?: Prisma.SalesAffiliateProductScalarWhereInput | Prisma.SalesAffiliateProductScalarWhereInput[]
+  OR?: Prisma.SalesAffiliateProductScalarWhereInput[]
+  NOT?: Prisma.SalesAffiliateProductScalarWhereInput | Prisma.SalesAffiliateProductScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesAffiliateProduct"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesAffiliateProduct"> | string
+  course_id?: Prisma.UuidFilter<"SalesAffiliateProduct"> | string
+  enabled?: Prisma.BoolFilter<"SalesAffiliateProduct"> | boolean
+  standard_discount_pct?: Prisma.IntNullableFilter<"SalesAffiliateProduct"> | number | null
+  standard_commission_pct?: Prisma.IntNullableFilter<"SalesAffiliateProduct"> | number | null
+  premium_discount_pct?: Prisma.IntNullableFilter<"SalesAffiliateProduct"> | number | null
+  premium_commission_pct?: Prisma.IntNullableFilter<"SalesAffiliateProduct"> | number | null
+  created_at?: Prisma.DateTimeFilter<"SalesAffiliateProduct"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"SalesAffiliateProduct"> | Date | string
+}
+
+export type SalesAffiliateProductCreateManyCourseInput = {
+  id: string
+  enabled?: boolean
+  standard_discount_pct?: number | null
+  standard_commission_pct?: number | null
+  premium_discount_pct?: number | null
+  premium_commission_pct?: number | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAffiliateProductUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  standard_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standard_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  premium_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  premium_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAffiliateProductUncheckedUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  standard_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standard_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  premium_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  premium_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAffiliateProductUncheckedUpdateManyWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  standard_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standard_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  premium_discount_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  premium_commission_pct?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type SalesAffiliateProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -496,6 +655,7 @@ export type SalesAffiliateProductSelect<ExtArgs extends runtime.Types.Extensions
   premium_commission_pct?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliateProduct"]>
 
 export type SalesAffiliateProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -509,6 +669,7 @@ export type SalesAffiliateProductSelectCreateManyAndReturn<ExtArgs extends runti
   premium_commission_pct?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliateProduct"]>
 
 export type SalesAffiliateProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -522,6 +683,7 @@ export type SalesAffiliateProductSelectUpdateManyAndReturn<ExtArgs extends runti
   premium_commission_pct?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliateProduct"]>
 
 export type SalesAffiliateProductSelectScalar = {
@@ -538,10 +700,21 @@ export type SalesAffiliateProductSelectScalar = {
 }
 
 export type SalesAffiliateProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "course_id" | "enabled" | "standard_discount_pct" | "standard_commission_pct" | "premium_discount_pct" | "premium_commission_pct" | "created_at" | "updated_at", ExtArgs["result"]["salesAffiliateProduct"]>
+export type SalesAffiliateProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
+export type SalesAffiliateProductIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
+export type SalesAffiliateProductIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
 
 export type $SalesAffiliateProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesAffiliateProduct"
-  objects: {}
+  objects: {
+    course: Prisma.$CoursePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -947,6 +1120,7 @@ readonly fields: SalesAffiliateProductFieldRefs;
  */
 export interface Prisma__SalesAffiliateProductClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  course<T extends Prisma.CourseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1003,6 +1177,10 @@ export type SalesAffiliateProductFindUniqueArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAffiliateProduct to fetch.
    */
   where: Prisma.SalesAffiliateProductWhereUniqueInput
@@ -1021,6 +1199,10 @@ export type SalesAffiliateProductFindUniqueOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAffiliateProduct to fetch.
    */
   where: Prisma.SalesAffiliateProductWhereUniqueInput
@@ -1038,6 +1220,10 @@ export type SalesAffiliateProductFindFirstArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the SalesAffiliateProduct
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
   /**
    * Filter, which SalesAffiliateProduct to fetch.
    */
@@ -1087,6 +1273,10 @@ export type SalesAffiliateProductFindFirstOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAffiliateProduct to fetch.
    */
   where?: Prisma.SalesAffiliateProductWhereInput
@@ -1134,6 +1324,10 @@ export type SalesAffiliateProductFindManyArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the SalesAffiliateProduct
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
   /**
    * Filter, which SalesAffiliateProducts to fetch.
    */
@@ -1183,6 +1377,10 @@ export type SalesAffiliateProductCreateArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
+  /**
    * The data needed to create a SalesAffiliateProduct.
    */
   data: Prisma.XOR<Prisma.SalesAffiliateProductCreateInput, Prisma.SalesAffiliateProductUncheckedCreateInput>
@@ -1216,6 +1414,10 @@ export type SalesAffiliateProductCreateManyAndReturnArgs<ExtArgs extends runtime
    */
   data: Prisma.SalesAffiliateProductCreateManyInput | Prisma.SalesAffiliateProductCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1230,6 +1432,10 @@ export type SalesAffiliateProductUpdateArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAffiliateProduct
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
   /**
    * The data needed to update a SalesAffiliateProduct.
    */
@@ -1282,6 +1488,10 @@ export type SalesAffiliateProductUpdateManyAndReturnArgs<ExtArgs extends runtime
    * Limit how many SalesAffiliateProducts to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1296,6 +1506,10 @@ export type SalesAffiliateProductUpsertArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAffiliateProduct
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
   /**
    * The filter to search for the SalesAffiliateProduct to update in case it exists.
    */
@@ -1322,6 +1536,10 @@ export type SalesAffiliateProductDeleteArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAffiliateProduct
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
   /**
    * Filter which SalesAffiliateProduct to delete.
    */
@@ -1354,4 +1572,8 @@ export type SalesAffiliateProductDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the SalesAffiliateProduct
    */
   omit?: Prisma.SalesAffiliateProductOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateProductInclude<ExtArgs> | null
 }

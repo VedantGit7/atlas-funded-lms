@@ -248,6 +248,8 @@ export type PathStepWhereInput = {
   position?: Prisma.IntFilter<"PathStep"> | number
   created_at?: Prisma.DateTimeFilter<"PathStep"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PathStep"> | Date | string
+  path_step_gates?: Prisma.PathStepGateListRelationFilter
+  path?: Prisma.XOR<Prisma.LearningPathScalarRelationFilter, Prisma.LearningPathWhereInput>
 }
 
 export type PathStepOrderByWithRelationInput = {
@@ -260,10 +262,13 @@ export type PathStepOrderByWithRelationInput = {
   position?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  path_step_gates?: Prisma.PathStepGateOrderByRelationAggregateInput
+  path?: Prisma.LearningPathOrderByWithRelationInput
 }
 
 export type PathStepWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.PathStepTenant_idIdCompoundUniqueInput
   tenant_id_path_id_position?: Prisma.PathStepTenant_idPath_idPositionCompoundUniqueInput
   AND?: Prisma.PathStepWhereInput | Prisma.PathStepWhereInput[]
   OR?: Prisma.PathStepWhereInput[]
@@ -276,7 +281,9 @@ export type PathStepWhereUniqueInput = Prisma.AtLeast<{
   position?: Prisma.IntFilter<"PathStep"> | number
   created_at?: Prisma.DateTimeFilter<"PathStep"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PathStep"> | Date | string
-}, "id" | "tenant_id_path_id_position">
+  path_step_gates?: Prisma.PathStepGateListRelationFilter
+  path?: Prisma.XOR<Prisma.LearningPathScalarRelationFilter, Prisma.LearningPathWhereInput>
+}, "id" | "tenant_id_id" | "tenant_id_path_id_position">
 
 export type PathStepOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -312,14 +319,14 @@ export type PathStepScalarWhereWithAggregatesInput = {
 
 export type PathStepCreateInput = {
   id: string
-  tenant_id: string
-  path_id: string
   step_type: string
   ref_id?: string | null
   title: string
   position: number
   created_at?: Date | string
   updated_at?: Date | string
+  path_step_gates?: Prisma.PathStepGateCreateNestedManyWithoutPath_stepInput
+  path: Prisma.LearningPathCreateNestedOneWithoutPath_stepsInput
 }
 
 export type PathStepUncheckedCreateInput = {
@@ -332,18 +339,19 @@ export type PathStepUncheckedCreateInput = {
   position: number
   created_at?: Date | string
   updated_at?: Date | string
+  path_step_gates?: Prisma.PathStepGateUncheckedCreateNestedManyWithoutPath_stepInput
 }
 
 export type PathStepUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  path_id?: Prisma.StringFieldUpdateOperationsInput | string
   step_type?: Prisma.StringFieldUpdateOperationsInput | string
   ref_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   position?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  path_step_gates?: Prisma.PathStepGateUpdateManyWithoutPath_stepNestedInput
+  path?: Prisma.LearningPathUpdateOneRequiredWithoutPath_stepsNestedInput
 }
 
 export type PathStepUncheckedUpdateInput = {
@@ -356,6 +364,7 @@ export type PathStepUncheckedUpdateInput = {
   position?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  path_step_gates?: Prisma.PathStepGateUncheckedUpdateManyWithoutPath_stepNestedInput
 }
 
 export type PathStepCreateManyInput = {
@@ -372,8 +381,6 @@ export type PathStepCreateManyInput = {
 
 export type PathStepUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  path_id?: Prisma.StringFieldUpdateOperationsInput | string
   step_type?: Prisma.StringFieldUpdateOperationsInput | string
   ref_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -392,6 +399,21 @@ export type PathStepUncheckedUpdateManyInput = {
   position?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PathStepListRelationFilter = {
+  every?: Prisma.PathStepWhereInput
+  some?: Prisma.PathStepWhereInput
+  none?: Prisma.PathStepWhereInput
+}
+
+export type PathStepOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type PathStepTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type PathStepTenant_idPath_idPositionCompoundUniqueInput = {
@@ -444,6 +466,263 @@ export type PathStepSumOrderByAggregateInput = {
   position?: Prisma.SortOrder
 }
 
+export type PathStepScalarRelationFilter = {
+  is?: Prisma.PathStepWhereInput
+  isNot?: Prisma.PathStepWhereInput
+}
+
+export type PathStepCreateNestedManyWithoutPathInput = {
+  create?: Prisma.XOR<Prisma.PathStepCreateWithoutPathInput, Prisma.PathStepUncheckedCreateWithoutPathInput> | Prisma.PathStepCreateWithoutPathInput[] | Prisma.PathStepUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathStepCreateOrConnectWithoutPathInput | Prisma.PathStepCreateOrConnectWithoutPathInput[]
+  createMany?: Prisma.PathStepCreateManyPathInputEnvelope
+  connect?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+}
+
+export type PathStepUncheckedCreateNestedManyWithoutPathInput = {
+  create?: Prisma.XOR<Prisma.PathStepCreateWithoutPathInput, Prisma.PathStepUncheckedCreateWithoutPathInput> | Prisma.PathStepCreateWithoutPathInput[] | Prisma.PathStepUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathStepCreateOrConnectWithoutPathInput | Prisma.PathStepCreateOrConnectWithoutPathInput[]
+  createMany?: Prisma.PathStepCreateManyPathInputEnvelope
+  connect?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+}
+
+export type PathStepUpdateManyWithoutPathNestedInput = {
+  create?: Prisma.XOR<Prisma.PathStepCreateWithoutPathInput, Prisma.PathStepUncheckedCreateWithoutPathInput> | Prisma.PathStepCreateWithoutPathInput[] | Prisma.PathStepUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathStepCreateOrConnectWithoutPathInput | Prisma.PathStepCreateOrConnectWithoutPathInput[]
+  upsert?: Prisma.PathStepUpsertWithWhereUniqueWithoutPathInput | Prisma.PathStepUpsertWithWhereUniqueWithoutPathInput[]
+  createMany?: Prisma.PathStepCreateManyPathInputEnvelope
+  set?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  disconnect?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  delete?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  connect?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  update?: Prisma.PathStepUpdateWithWhereUniqueWithoutPathInput | Prisma.PathStepUpdateWithWhereUniqueWithoutPathInput[]
+  updateMany?: Prisma.PathStepUpdateManyWithWhereWithoutPathInput | Prisma.PathStepUpdateManyWithWhereWithoutPathInput[]
+  deleteMany?: Prisma.PathStepScalarWhereInput | Prisma.PathStepScalarWhereInput[]
+}
+
+export type PathStepUncheckedUpdateManyWithoutPathNestedInput = {
+  create?: Prisma.XOR<Prisma.PathStepCreateWithoutPathInput, Prisma.PathStepUncheckedCreateWithoutPathInput> | Prisma.PathStepCreateWithoutPathInput[] | Prisma.PathStepUncheckedCreateWithoutPathInput[]
+  connectOrCreate?: Prisma.PathStepCreateOrConnectWithoutPathInput | Prisma.PathStepCreateOrConnectWithoutPathInput[]
+  upsert?: Prisma.PathStepUpsertWithWhereUniqueWithoutPathInput | Prisma.PathStepUpsertWithWhereUniqueWithoutPathInput[]
+  createMany?: Prisma.PathStepCreateManyPathInputEnvelope
+  set?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  disconnect?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  delete?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  connect?: Prisma.PathStepWhereUniqueInput | Prisma.PathStepWhereUniqueInput[]
+  update?: Prisma.PathStepUpdateWithWhereUniqueWithoutPathInput | Prisma.PathStepUpdateWithWhereUniqueWithoutPathInput[]
+  updateMany?: Prisma.PathStepUpdateManyWithWhereWithoutPathInput | Prisma.PathStepUpdateManyWithWhereWithoutPathInput[]
+  deleteMany?: Prisma.PathStepScalarWhereInput | Prisma.PathStepScalarWhereInput[]
+}
+
+export type PathStepCreateNestedOneWithoutPath_step_gatesInput = {
+  create?: Prisma.XOR<Prisma.PathStepCreateWithoutPath_step_gatesInput, Prisma.PathStepUncheckedCreateWithoutPath_step_gatesInput>
+  connectOrCreate?: Prisma.PathStepCreateOrConnectWithoutPath_step_gatesInput
+  connect?: Prisma.PathStepWhereUniqueInput
+}
+
+export type PathStepUpdateOneRequiredWithoutPath_step_gatesNestedInput = {
+  create?: Prisma.XOR<Prisma.PathStepCreateWithoutPath_step_gatesInput, Prisma.PathStepUncheckedCreateWithoutPath_step_gatesInput>
+  connectOrCreate?: Prisma.PathStepCreateOrConnectWithoutPath_step_gatesInput
+  upsert?: Prisma.PathStepUpsertWithoutPath_step_gatesInput
+  connect?: Prisma.PathStepWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PathStepUpdateToOneWithWhereWithoutPath_step_gatesInput, Prisma.PathStepUpdateWithoutPath_step_gatesInput>, Prisma.PathStepUncheckedUpdateWithoutPath_step_gatesInput>
+}
+
+export type PathStepCreateWithoutPathInput = {
+  id: string
+  step_type: string
+  ref_id?: string | null
+  title: string
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  path_step_gates?: Prisma.PathStepGateCreateNestedManyWithoutPath_stepInput
+}
+
+export type PathStepUncheckedCreateWithoutPathInput = {
+  id: string
+  step_type: string
+  ref_id?: string | null
+  title: string
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  path_step_gates?: Prisma.PathStepGateUncheckedCreateNestedManyWithoutPath_stepInput
+}
+
+export type PathStepCreateOrConnectWithoutPathInput = {
+  where: Prisma.PathStepWhereUniqueInput
+  create: Prisma.XOR<Prisma.PathStepCreateWithoutPathInput, Prisma.PathStepUncheckedCreateWithoutPathInput>
+}
+
+export type PathStepCreateManyPathInputEnvelope = {
+  data: Prisma.PathStepCreateManyPathInput | Prisma.PathStepCreateManyPathInput[]
+  skipDuplicates?: boolean
+}
+
+export type PathStepUpsertWithWhereUniqueWithoutPathInput = {
+  where: Prisma.PathStepWhereUniqueInput
+  update: Prisma.XOR<Prisma.PathStepUpdateWithoutPathInput, Prisma.PathStepUncheckedUpdateWithoutPathInput>
+  create: Prisma.XOR<Prisma.PathStepCreateWithoutPathInput, Prisma.PathStepUncheckedCreateWithoutPathInput>
+}
+
+export type PathStepUpdateWithWhereUniqueWithoutPathInput = {
+  where: Prisma.PathStepWhereUniqueInput
+  data: Prisma.XOR<Prisma.PathStepUpdateWithoutPathInput, Prisma.PathStepUncheckedUpdateWithoutPathInput>
+}
+
+export type PathStepUpdateManyWithWhereWithoutPathInput = {
+  where: Prisma.PathStepScalarWhereInput
+  data: Prisma.XOR<Prisma.PathStepUpdateManyMutationInput, Prisma.PathStepUncheckedUpdateManyWithoutPathInput>
+}
+
+export type PathStepScalarWhereInput = {
+  AND?: Prisma.PathStepScalarWhereInput | Prisma.PathStepScalarWhereInput[]
+  OR?: Prisma.PathStepScalarWhereInput[]
+  NOT?: Prisma.PathStepScalarWhereInput | Prisma.PathStepScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PathStep"> | string
+  tenant_id?: Prisma.UuidFilter<"PathStep"> | string
+  path_id?: Prisma.UuidFilter<"PathStep"> | string
+  step_type?: Prisma.StringFilter<"PathStep"> | string
+  ref_id?: Prisma.StringNullableFilter<"PathStep"> | string | null
+  title?: Prisma.StringFilter<"PathStep"> | string
+  position?: Prisma.IntFilter<"PathStep"> | number
+  created_at?: Prisma.DateTimeFilter<"PathStep"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"PathStep"> | Date | string
+}
+
+export type PathStepCreateWithoutPath_step_gatesInput = {
+  id: string
+  step_type: string
+  ref_id?: string | null
+  title: string
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  path: Prisma.LearningPathCreateNestedOneWithoutPath_stepsInput
+}
+
+export type PathStepUncheckedCreateWithoutPath_step_gatesInput = {
+  id: string
+  tenant_id: string
+  path_id: string
+  step_type: string
+  ref_id?: string | null
+  title: string
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PathStepCreateOrConnectWithoutPath_step_gatesInput = {
+  where: Prisma.PathStepWhereUniqueInput
+  create: Prisma.XOR<Prisma.PathStepCreateWithoutPath_step_gatesInput, Prisma.PathStepUncheckedCreateWithoutPath_step_gatesInput>
+}
+
+export type PathStepUpsertWithoutPath_step_gatesInput = {
+  update: Prisma.XOR<Prisma.PathStepUpdateWithoutPath_step_gatesInput, Prisma.PathStepUncheckedUpdateWithoutPath_step_gatesInput>
+  create: Prisma.XOR<Prisma.PathStepCreateWithoutPath_step_gatesInput, Prisma.PathStepUncheckedCreateWithoutPath_step_gatesInput>
+  where?: Prisma.PathStepWhereInput
+}
+
+export type PathStepUpdateToOneWithWhereWithoutPath_step_gatesInput = {
+  where?: Prisma.PathStepWhereInput
+  data: Prisma.XOR<Prisma.PathStepUpdateWithoutPath_step_gatesInput, Prisma.PathStepUncheckedUpdateWithoutPath_step_gatesInput>
+}
+
+export type PathStepUpdateWithoutPath_step_gatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  step_type?: Prisma.StringFieldUpdateOperationsInput | string
+  ref_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  path?: Prisma.LearningPathUpdateOneRequiredWithoutPath_stepsNestedInput
+}
+
+export type PathStepUncheckedUpdateWithoutPath_step_gatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  path_id?: Prisma.StringFieldUpdateOperationsInput | string
+  step_type?: Prisma.StringFieldUpdateOperationsInput | string
+  ref_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PathStepCreateManyPathInput = {
+  id: string
+  step_type: string
+  ref_id?: string | null
+  title: string
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PathStepUpdateWithoutPathInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  step_type?: Prisma.StringFieldUpdateOperationsInput | string
+  ref_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  path_step_gates?: Prisma.PathStepGateUpdateManyWithoutPath_stepNestedInput
+}
+
+export type PathStepUncheckedUpdateWithoutPathInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  step_type?: Prisma.StringFieldUpdateOperationsInput | string
+  ref_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  path_step_gates?: Prisma.PathStepGateUncheckedUpdateManyWithoutPath_stepNestedInput
+}
+
+export type PathStepUncheckedUpdateManyWithoutPathInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  step_type?: Prisma.StringFieldUpdateOperationsInput | string
+  ref_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type PathStepCountOutputType
+ */
+
+export type PathStepCountOutputType = {
+  path_step_gates: number
+}
+
+export type PathStepCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  path_step_gates?: boolean | PathStepCountOutputTypeCountPath_step_gatesArgs
+}
+
+/**
+ * PathStepCountOutputType without action
+ */
+export type PathStepCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PathStepCountOutputType
+   */
+  select?: Prisma.PathStepCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PathStepCountOutputType without action
+ */
+export type PathStepCountOutputTypeCountPath_step_gatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PathStepGateWhereInput
+}
 
 
 export type PathStepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -456,6 +735,9 @@ export type PathStepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   position?: boolean
   created_at?: boolean
   updated_at?: boolean
+  path_step_gates?: boolean | Prisma.PathStep$path_step_gatesArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.PathStepCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathStep"]>
 
 export type PathStepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +750,7 @@ export type PathStepSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   position?: boolean
   created_at?: boolean
   updated_at?: boolean
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathStep"]>
 
 export type PathStepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -480,6 +763,7 @@ export type PathStepSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   position?: boolean
   created_at?: boolean
   updated_at?: boolean
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pathStep"]>
 
 export type PathStepSelectScalar = {
@@ -495,10 +779,24 @@ export type PathStepSelectScalar = {
 }
 
 export type PathStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "path_id" | "step_type" | "ref_id" | "title" | "position" | "created_at" | "updated_at", ExtArgs["result"]["pathStep"]>
+export type PathStepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  path_step_gates?: boolean | Prisma.PathStep$path_step_gatesArgs<ExtArgs>
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.PathStepCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type PathStepIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
+}
+export type PathStepIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  path?: boolean | Prisma.LearningPathDefaultArgs<ExtArgs>
+}
 
 export type $PathStepPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PathStep"
-  objects: {}
+  objects: {
+    path_step_gates: Prisma.$PathStepGatePayload<ExtArgs>[]
+    path: Prisma.$LearningPathPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -903,6 +1201,8 @@ readonly fields: PathStepFieldRefs;
  */
 export interface Prisma__PathStepClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  path_step_gates<T extends Prisma.PathStep$path_step_gatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PathStep$path_step_gatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PathStepGatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  path<T extends Prisma.LearningPathDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LearningPathDefaultArgs<ExtArgs>>): Prisma.Prisma__LearningPathClient<runtime.Types.Result.GetResult<Prisma.$LearningPathPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -958,6 +1258,10 @@ export type PathStepFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
+  /**
    * Filter, which PathStep to fetch.
    */
   where: Prisma.PathStepWhereUniqueInput
@@ -976,6 +1280,10 @@ export type PathStepFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
+  /**
    * Filter, which PathStep to fetch.
    */
   where: Prisma.PathStepWhereUniqueInput
@@ -993,6 +1301,10 @@ export type PathStepFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the PathStep
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
   /**
    * Filter, which PathStep to fetch.
    */
@@ -1042,6 +1354,10 @@ export type PathStepFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
+  /**
    * Filter, which PathStep to fetch.
    */
   where?: Prisma.PathStepWhereInput
@@ -1089,6 +1405,10 @@ export type PathStepFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the PathStep
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
   /**
    * Filter, which PathSteps to fetch.
    */
@@ -1138,6 +1458,10 @@ export type PathStepCreateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
+  /**
    * The data needed to create a PathStep.
    */
   data: Prisma.XOR<Prisma.PathStepCreateInput, Prisma.PathStepUncheckedCreateInput>
@@ -1171,6 +1495,10 @@ export type PathStepCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    */
   data: Prisma.PathStepCreateManyInput | Prisma.PathStepCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1185,6 +1513,10 @@ export type PathStepUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the PathStep
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
   /**
    * The data needed to update a PathStep.
    */
@@ -1237,6 +1569,10 @@ export type PathStepUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many PathSteps to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1251,6 +1587,10 @@ export type PathStepUpsertArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the PathStep
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
   /**
    * The filter to search for the PathStep to update in case it exists.
    */
@@ -1278,6 +1618,10 @@ export type PathStepDeleteArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
+  /**
    * Filter which PathStep to delete.
    */
   where: Prisma.PathStepWhereUniqueInput
@@ -1298,6 +1642,30 @@ export type PathStepDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
+ * PathStep.path_step_gates
+ */
+export type PathStep$path_step_gatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PathStepGate
+   */
+  select?: Prisma.PathStepGateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PathStepGate
+   */
+  omit?: Prisma.PathStepGateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepGateInclude<ExtArgs> | null
+  where?: Prisma.PathStepGateWhereInput
+  orderBy?: Prisma.PathStepGateOrderByWithRelationInput | Prisma.PathStepGateOrderByWithRelationInput[]
+  cursor?: Prisma.PathStepGateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PathStepGateScalarFieldEnum | Prisma.PathStepGateScalarFieldEnum[]
+}
+
+/**
  * PathStep without action
  */
 export type PathStepDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1309,4 +1677,8 @@ export type PathStepDefaultArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the PathStep
    */
   omit?: Prisma.PathStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PathStepInclude<ExtArgs> | null
 }

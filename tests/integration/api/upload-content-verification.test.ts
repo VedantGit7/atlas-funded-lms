@@ -12,7 +12,7 @@ import {
   createPendingAssetReferenceWithUpload,
 } from "@atlas/storage/asset-reference.service";
 import { resolveBrandingAssetUrl } from "@atlas/storage/branding-public-url";
-import { sanitizeSvg } from "@atlas/storage/svg-sanitize";
+import { preloadSvgSanitizer } from "@atlas/storage/svg-sanitize";
 import {
   authoringTenantTx,
   createCourseAuthoringFixture,
@@ -71,9 +71,9 @@ suite("upload content verification (audit M8)", () => {
   beforeAll(async () => {
     fixture = await createCourseAuthoringFixture();
     setStorageProviderForTests(provider);
-    // Load the sanitizer (jsdom) before any transaction: a cold load under a
-    // busy parallel suite can outlast a transaction's timeout.
-    await sanitizeSvg(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'));
+    // As the API does at startup: load the sanitizer (jsdom) before any
+    // transaction, since a cold load under a busy suite can outlast one.
+    await preloadSvgSanitizer();
   }, 120_000);
   afterAll(() => setStorageProviderForTests(null));
 

@@ -284,6 +284,7 @@ export type ReportDeliveryDestinationWhereInput = {
   health_30d_json?: Prisma.JsonFilter<"ReportDeliveryDestination">
   created_at?: Prisma.DateTimeFilter<"ReportDeliveryDestination"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ReportDeliveryDestination"> | Date | string
+  report_delivery_effects?: Prisma.ReportDeliveryEffectListRelationFilter
 }
 
 export type ReportDeliveryDestinationOrderByWithRelationInput = {
@@ -302,10 +303,12 @@ export type ReportDeliveryDestinationOrderByWithRelationInput = {
   health_30d_json?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  report_delivery_effects?: Prisma.ReportDeliveryEffectOrderByRelationAggregateInput
 }
 
 export type ReportDeliveryDestinationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.ReportDeliveryDestinationTenant_idIdCompoundUniqueInput
   AND?: Prisma.ReportDeliveryDestinationWhereInput | Prisma.ReportDeliveryDestinationWhereInput[]
   OR?: Prisma.ReportDeliveryDestinationWhereInput[]
   NOT?: Prisma.ReportDeliveryDestinationWhereInput | Prisma.ReportDeliveryDestinationWhereInput[]
@@ -323,7 +326,8 @@ export type ReportDeliveryDestinationWhereUniqueInput = Prisma.AtLeast<{
   health_30d_json?: Prisma.JsonFilter<"ReportDeliveryDestination">
   created_at?: Prisma.DateTimeFilter<"ReportDeliveryDestination"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ReportDeliveryDestination"> | Date | string
-}, "id">
+  report_delivery_effects?: Prisma.ReportDeliveryEffectListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type ReportDeliveryDestinationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -385,6 +389,7 @@ export type ReportDeliveryDestinationCreateInput = {
   health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  report_delivery_effects?: Prisma.ReportDeliveryEffectCreateNestedManyWithoutDestinationInput
 }
 
 export type ReportDeliveryDestinationUncheckedCreateInput = {
@@ -403,6 +408,7 @@ export type ReportDeliveryDestinationUncheckedCreateInput = {
   health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  report_delivery_effects?: Prisma.ReportDeliveryEffectUncheckedCreateNestedManyWithoutDestinationInput
 }
 
 export type ReportDeliveryDestinationUpdateInput = {
@@ -421,6 +427,7 @@ export type ReportDeliveryDestinationUpdateInput = {
   health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  report_delivery_effects?: Prisma.ReportDeliveryEffectUpdateManyWithoutDestinationNestedInput
 }
 
 export type ReportDeliveryDestinationUncheckedUpdateInput = {
@@ -439,6 +446,7 @@ export type ReportDeliveryDestinationUncheckedUpdateInput = {
   health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  report_delivery_effects?: Prisma.ReportDeliveryEffectUncheckedUpdateManyWithoutDestinationNestedInput
 }
 
 export type ReportDeliveryDestinationCreateManyInput = {
@@ -493,6 +501,11 @@ export type ReportDeliveryDestinationUncheckedUpdateManyInput = {
   health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReportDeliveryDestinationTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type ReportDeliveryDestinationCountOrderByAggregateInput = {
@@ -551,6 +564,144 @@ export type ReportDeliveryDestinationSumOrderByAggregateInput = {
   consecutive_failures?: Prisma.SortOrder
 }
 
+export type ReportDeliveryDestinationNullableScalarRelationFilter = {
+  is?: Prisma.ReportDeliveryDestinationWhereInput | null
+  isNot?: Prisma.ReportDeliveryDestinationWhereInput | null
+}
+
+export type ReportDeliveryDestinationCreateNestedOneWithoutReport_delivery_effectsInput = {
+  create?: Prisma.XOR<Prisma.ReportDeliveryDestinationCreateWithoutReport_delivery_effectsInput, Prisma.ReportDeliveryDestinationUncheckedCreateWithoutReport_delivery_effectsInput>
+  connectOrCreate?: Prisma.ReportDeliveryDestinationCreateOrConnectWithoutReport_delivery_effectsInput
+  connect?: Prisma.ReportDeliveryDestinationWhereUniqueInput
+}
+
+export type ReportDeliveryDestinationUpdateOneWithoutReport_delivery_effectsNestedInput = {
+  create?: Prisma.XOR<Prisma.ReportDeliveryDestinationCreateWithoutReport_delivery_effectsInput, Prisma.ReportDeliveryDestinationUncheckedCreateWithoutReport_delivery_effectsInput>
+  connectOrCreate?: Prisma.ReportDeliveryDestinationCreateOrConnectWithoutReport_delivery_effectsInput
+  upsert?: Prisma.ReportDeliveryDestinationUpsertWithoutReport_delivery_effectsInput
+  disconnect?: Prisma.ReportDeliveryDestinationWhereInput | boolean
+  delete?: Prisma.ReportDeliveryDestinationWhereInput | boolean
+  connect?: Prisma.ReportDeliveryDestinationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ReportDeliveryDestinationUpdateToOneWithWhereWithoutReport_delivery_effectsInput, Prisma.ReportDeliveryDestinationUpdateWithoutReport_delivery_effectsInput>, Prisma.ReportDeliveryDestinationUncheckedUpdateWithoutReport_delivery_effectsInput>
+}
+
+export type ReportDeliveryDestinationCreateWithoutReport_delivery_effectsInput = {
+  id: string
+  tenant_id: string
+  created_by_membership_id: string
+  name: string
+  kind: string
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secrets_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: boolean
+  last_delivery_at?: Date | string | null
+  last_delivery_status?: string | null
+  last_error?: string | null
+  consecutive_failures?: number
+  health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ReportDeliveryDestinationUncheckedCreateWithoutReport_delivery_effectsInput = {
+  id: string
+  tenant_id: string
+  created_by_membership_id: string
+  name: string
+  kind: string
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secrets_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: boolean
+  last_delivery_at?: Date | string | null
+  last_delivery_status?: string | null
+  last_error?: string | null
+  consecutive_failures?: number
+  health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ReportDeliveryDestinationCreateOrConnectWithoutReport_delivery_effectsInput = {
+  where: Prisma.ReportDeliveryDestinationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReportDeliveryDestinationCreateWithoutReport_delivery_effectsInput, Prisma.ReportDeliveryDestinationUncheckedCreateWithoutReport_delivery_effectsInput>
+}
+
+export type ReportDeliveryDestinationUpsertWithoutReport_delivery_effectsInput = {
+  update: Prisma.XOR<Prisma.ReportDeliveryDestinationUpdateWithoutReport_delivery_effectsInput, Prisma.ReportDeliveryDestinationUncheckedUpdateWithoutReport_delivery_effectsInput>
+  create: Prisma.XOR<Prisma.ReportDeliveryDestinationCreateWithoutReport_delivery_effectsInput, Prisma.ReportDeliveryDestinationUncheckedCreateWithoutReport_delivery_effectsInput>
+  where?: Prisma.ReportDeliveryDestinationWhereInput
+}
+
+export type ReportDeliveryDestinationUpdateToOneWithWhereWithoutReport_delivery_effectsInput = {
+  where?: Prisma.ReportDeliveryDestinationWhereInput
+  data: Prisma.XOR<Prisma.ReportDeliveryDestinationUpdateWithoutReport_delivery_effectsInput, Prisma.ReportDeliveryDestinationUncheckedUpdateWithoutReport_delivery_effectsInput>
+}
+
+export type ReportDeliveryDestinationUpdateWithoutReport_delivery_effectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secrets_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_delivery_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_delivery_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  consecutive_failures?: Prisma.IntFieldUpdateOperationsInput | number
+  health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReportDeliveryDestinationUncheckedUpdateWithoutReport_delivery_effectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  secrets_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_delivery_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_delivery_status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  last_error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  consecutive_failures?: Prisma.IntFieldUpdateOperationsInput | number
+  health_30d_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type ReportDeliveryDestinationCountOutputType
+ */
+
+export type ReportDeliveryDestinationCountOutputType = {
+  report_delivery_effects: number
+}
+
+export type ReportDeliveryDestinationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  report_delivery_effects?: boolean | ReportDeliveryDestinationCountOutputTypeCountReport_delivery_effectsArgs
+}
+
+/**
+ * ReportDeliveryDestinationCountOutputType without action
+ */
+export type ReportDeliveryDestinationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReportDeliveryDestinationCountOutputType
+   */
+  select?: Prisma.ReportDeliveryDestinationCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ReportDeliveryDestinationCountOutputType without action
+ */
+export type ReportDeliveryDestinationCountOutputTypeCountReport_delivery_effectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReportDeliveryEffectWhereInput
+}
 
 
 export type ReportDeliveryDestinationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -569,6 +720,8 @@ export type ReportDeliveryDestinationSelect<ExtArgs extends runtime.Types.Extens
   health_30d_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  report_delivery_effects?: boolean | Prisma.ReportDeliveryDestination$report_delivery_effectsArgs<ExtArgs>
+  _count?: boolean | Prisma.ReportDeliveryDestinationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reportDeliveryDestination"]>
 
 export type ReportDeliveryDestinationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -626,10 +779,18 @@ export type ReportDeliveryDestinationSelectScalar = {
 }
 
 export type ReportDeliveryDestinationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "created_by_membership_id" | "name" | "kind" | "config_json" | "secrets_json" | "is_active" | "last_delivery_at" | "last_delivery_status" | "last_error" | "consecutive_failures" | "health_30d_json" | "created_at" | "updated_at", ExtArgs["result"]["reportDeliveryDestination"]>
+export type ReportDeliveryDestinationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  report_delivery_effects?: boolean | Prisma.ReportDeliveryDestination$report_delivery_effectsArgs<ExtArgs>
+  _count?: boolean | Prisma.ReportDeliveryDestinationCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ReportDeliveryDestinationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ReportDeliveryDestinationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ReportDeliveryDestinationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ReportDeliveryDestination"
-  objects: {}
+  objects: {
+    report_delivery_effects: Prisma.$ReportDeliveryEffectPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1040,6 +1201,7 @@ readonly fields: ReportDeliveryDestinationFieldRefs;
  */
 export interface Prisma__ReportDeliveryDestinationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  report_delivery_effects<T extends Prisma.ReportDeliveryDestination$report_delivery_effectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReportDeliveryDestination$report_delivery_effectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportDeliveryEffectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1101,6 +1263,10 @@ export type ReportDeliveryDestinationFindUniqueArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
+  /**
    * Filter, which ReportDeliveryDestination to fetch.
    */
   where: Prisma.ReportDeliveryDestinationWhereUniqueInput
@@ -1119,6 +1285,10 @@ export type ReportDeliveryDestinationFindUniqueOrThrowArgs<ExtArgs extends runti
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
+  /**
    * Filter, which ReportDeliveryDestination to fetch.
    */
   where: Prisma.ReportDeliveryDestinationWhereUniqueInput
@@ -1136,6 +1306,10 @@ export type ReportDeliveryDestinationFindFirstArgs<ExtArgs extends runtime.Types
    * Omit specific fields from the ReportDeliveryDestination
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
   /**
    * Filter, which ReportDeliveryDestination to fetch.
    */
@@ -1185,6 +1359,10 @@ export type ReportDeliveryDestinationFindFirstOrThrowArgs<ExtArgs extends runtim
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
+  /**
    * Filter, which ReportDeliveryDestination to fetch.
    */
   where?: Prisma.ReportDeliveryDestinationWhereInput
@@ -1232,6 +1410,10 @@ export type ReportDeliveryDestinationFindManyArgs<ExtArgs extends runtime.Types.
    * Omit specific fields from the ReportDeliveryDestination
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
   /**
    * Filter, which ReportDeliveryDestinations to fetch.
    */
@@ -1281,6 +1463,10 @@ export type ReportDeliveryDestinationCreateArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
+  /**
    * The data needed to create a ReportDeliveryDestination.
    */
   data: Prisma.XOR<Prisma.ReportDeliveryDestinationCreateInput, Prisma.ReportDeliveryDestinationUncheckedCreateInput>
@@ -1328,6 +1514,10 @@ export type ReportDeliveryDestinationUpdateArgs<ExtArgs extends runtime.Types.Ex
    * Omit specific fields from the ReportDeliveryDestination
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
   /**
    * The data needed to update a ReportDeliveryDestination.
    */
@@ -1395,6 +1585,10 @@ export type ReportDeliveryDestinationUpsertArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
+  /**
    * The filter to search for the ReportDeliveryDestination to update in case it exists.
    */
   where: Prisma.ReportDeliveryDestinationWhereUniqueInput
@@ -1421,6 +1615,10 @@ export type ReportDeliveryDestinationDeleteArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
+  /**
    * Filter which ReportDeliveryDestination to delete.
    */
   where: Prisma.ReportDeliveryDestinationWhereUniqueInput
@@ -1441,6 +1639,30 @@ export type ReportDeliveryDestinationDeleteManyArgs<ExtArgs extends runtime.Type
 }
 
 /**
+ * ReportDeliveryDestination.report_delivery_effects
+ */
+export type ReportDeliveryDestination$report_delivery_effectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReportDeliveryEffect
+   */
+  select?: Prisma.ReportDeliveryEffectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReportDeliveryEffect
+   */
+  omit?: Prisma.ReportDeliveryEffectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryEffectInclude<ExtArgs> | null
+  where?: Prisma.ReportDeliveryEffectWhereInput
+  orderBy?: Prisma.ReportDeliveryEffectOrderByWithRelationInput | Prisma.ReportDeliveryEffectOrderByWithRelationInput[]
+  cursor?: Prisma.ReportDeliveryEffectWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReportDeliveryEffectScalarFieldEnum | Prisma.ReportDeliveryEffectScalarFieldEnum[]
+}
+
+/**
  * ReportDeliveryDestination without action
  */
 export type ReportDeliveryDestinationDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1452,4 +1674,8 @@ export type ReportDeliveryDestinationDefaultArgs<ExtArgs extends runtime.Types.E
    * Omit specific fields from the ReportDeliveryDestination
    */
   omit?: Prisma.ReportDeliveryDestinationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReportDeliveryDestinationInclude<ExtArgs> | null
 }
