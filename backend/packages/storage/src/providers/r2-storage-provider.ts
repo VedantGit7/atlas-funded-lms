@@ -8,6 +8,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { addAbortSignal, Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import { SIGNED_UPLOAD_HEADERS } from "../r2-cors";
 import { boundedObjectStream } from "./bounded-object-stream";
 import type {
   CreateSignedDownloadUrlInput,
@@ -68,7 +69,8 @@ export class R2StorageProvider implements StorageProvider {
       // the uploader could store any Content-Type (text/html included) under a
       // public-safe key. Signed, the PUT must send exactly the declared type
       // and disposition or R2 rejects it.
-      signableHeaders: new Set(["content-type", "content-disposition"]),
+      // The bucket's CORS rule allows exactly these headers (r2-cors.ts).
+      signableHeaders: new Set<string>(SIGNED_UPLOAD_HEADERS),
     });
 
     return {
