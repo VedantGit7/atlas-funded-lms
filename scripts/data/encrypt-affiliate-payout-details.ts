@@ -15,10 +15,11 @@
  * found work, or an apply that could not finish), 2 when it refused to run.
  */
 import { backfillAffiliatePayoutDetails } from "./affiliate-payout-backfill";
+import { tenantArgs } from "./backfill-connection";
 
 const args = process.argv.slice(2);
 const apply = args.includes("--apply");
-const tenantIds = args.flatMap((arg, index) => (arg === "--tenant" ? [args[index + 1] ?? ""] : []));
+const tenantIds = tenantArgs(args);
 
 backfillAffiliatePayoutDetails({
   databaseUrl: process.env["DIRECT_DATABASE_URL"],
