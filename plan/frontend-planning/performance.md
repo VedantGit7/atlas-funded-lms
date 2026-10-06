@@ -161,7 +161,7 @@ Separating `frontend/apps/web` from `backend/apps/api`:
 
 ## 6. F8 exit criteria (performance)
 
-- [x] Lighthouse CI config (`lighthouserc.cjs`) for learner critical paths
+- [x] Lighthouse CI config (`lighthouserc.cjs`) for learner critical paths — replaced 2026-10-06 by the Playwright page-load check `pnpm perf:web-vitals` (docs/runbooks/web-vitals-check.md) when `@lhci/cli` was removed
 - [x] Bundle budget CI scaffold (`ci:learner-bundle-boundary`)
 - [x] Learner/platform import boundary check in bundle CI script
 - [x] L1 dashboard Suspense island for personalized section (waterfall depth 1)
