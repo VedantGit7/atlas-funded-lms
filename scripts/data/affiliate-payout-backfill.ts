@@ -1,4 +1,4 @@
-import { Client } from "pg";
+import type { Client } from "pg";
 import { decryptPaymentSecret } from "../../backend/packages/domain/config/src/payment-secret-crypto";
 import {
   isEncryptedPayoutValue,
@@ -6,6 +6,14 @@ import {
   sealPayoutValue,
   type PayoutField,
 } from "../../backend/apps/api/src/server/sales-affiliates/affiliate-payout-details";
+import {
+  BackfillRefused,
+  connectWithCompleteVisibility,
+  tenantScope,
+  type TenantScope,
+} from "./backfill-connection";
+
+export { BackfillRefused };
 
 /**
  * The audit M6 backfill: encrypt affiliate payout details written as plain
@@ -59,8 +67,6 @@ const PLAIN_TEXT = COLUMNS.map(
   ([column]) => `(${column} is not null and ${column} <> '' and ${column} not like 'enc:v1:%')`,
 ).join(" or ");
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 /** How many existing ciphertexts to decrypt as proof of the key. */
 const KEY_SAMPLE = 50;
 
@@ -91,8 +97,6 @@ export type BackfillReport = {
   remaining: number;
 };
 
-export class BackfillRefused extends Error {}
-
 export async function backfillAffiliatePayoutDetails(options: {
   databaseUrl: string | undefined;
   apply: boolean;
@@ -100,42 +104,18 @@ export async function backfillAffiliatePayoutDetails(options: {
   /** Limit the run (and the key check) to these tenants, e.g. one tenant first. */
   tenantIds?: readonly string[];
 }): Promise<BackfillReport> {
-  if (!options.databaseUrl) {
-    throw new BackfillRefused("DIRECT_DATABASE_URL (database owner) is required.");
-  }
   if (!process.env["LEARNER_BILLING_ENC_KEY"]) {
     throw new BackfillRefused(
       "LEARNER_BILLING_ENC_KEY is required: it must be the key the API decrypts with.",
     );
   }
 
-  const badTenant = options.tenantIds?.find((id) => !UUID.test(id));
-  if (badTenant !== undefined) {
-    throw new BackfillRefused(`--tenant expects a tenant id (uuid); got "${badTenant}".`);
-  }
-
-  const client = new Client({
-    connectionString: options.databaseUrl,
-    connectionTimeoutMillis: 5000,
-  });
-  await client.connect();
+  const scope = tenantScope(options.tenantIds);
+  const { client, database } = await connectWithCompleteVisibility(
+    options.databaseUrl,
+    "sales_affiliates",
+  );
   try {
-    const identity = (
-      await client.query<{ database: string; complete_visibility: boolean }>(
-        `select current_database() as database,
-                (select rolsuper or rolbypassrls from pg_roles where rolname = current_user) as complete_visibility`,
-      )
-    ).rows[0];
-    if (!identity?.complete_visibility) {
-      throw new BackfillRefused(
-        "This login cannot see every tenant's affiliates (sales_affiliates forces row-level security). " +
-          "Use the database owner with BYPASSRLS, or a superuser.",
-      );
-    }
-    // A read row security would filter now errors instead of returning less.
-    await client.query("set row_security = off");
-
-    const scope = tenantScope(options.tenantIds);
     const key = await checkKey(client, scope);
     if (key.failed > 0) {
       throw new BackfillRefused(
@@ -151,7 +131,7 @@ export async function backfillAffiliatePayoutDetails(options: {
       )
     ).rows;
     const report: BackfillReport = {
-      database: identity.database,
+      database,
       apply: options.apply,
       key,
       plainTextAffiliates: plain.length,
@@ -224,18 +204,8 @@ export async function backfillAffiliatePayoutDetails(options: {
   }
 }
 
-type Scope = { sql: (position: number) => string; params: unknown[] };
-
-function tenantScope(tenantIds: readonly string[] | undefined): Scope {
-  if (!tenantIds || tenantIds.length === 0) return { sql: () => "", params: [] };
-  return {
-    sql: (position) => `and tenant_id = any($${String(position)}::uuid[])`,
-    params: [tenantIds],
-  };
-}
-
 /** Decrypt a sample of the ciphertext already stored under this key. */
-async function checkKey(client: Client, scope: Scope): Promise<KeyCheck> {
+async function checkKey(client: Client, scope: TenantScope): Promise<KeyCheck> {
   const check: KeyCheck = { verified: 0, failed: 0 };
   const attempt = (open: () => unknown) => {
     try {

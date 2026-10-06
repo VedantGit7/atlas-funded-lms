@@ -117,15 +117,53 @@ lesson attachment; both must reach `READY`.
 
 ## One-off backfill
 
-SVGs confirmed before this change (lesson thumbnails) were stored unsanitized.
-After deploying, run with the database owner connection and the API's storage
-settings:
+SVGs confirmed before this change (lesson thumbnails) were stored unsanitized,
+and deleting a reference never removed its object. After deploying, run the
+backfill once per environment (staging first), after `pnpm storage:r2-cors`.
+
+You need:
+
+- the database **owner** URL, as a login with `BYPASSRLS` (or a superuser).
+  `storage_references` forces row-level security, and an owner without
+  `BYPASSRLS` sees no references at all; the script refuses such a login
+  rather than report nothing to do;
+- the API's storage settings (`STORAGE_PROVIDER=r2` and the `R2_*` values),
+  so it reads and writes the same bucket.
 
 ```bash
-DIRECT_DATABASE_URL=... pnpm data:sanitize-svg-assets
+# 1. Dry run: what would change, by reference id. Exits 1 while anything
+#    needs sanitizing or review.
+DIRECT_DATABASE_URL=... <storage env> pnpm data:sanitize-svg-assets
+
+# 2. Optional: one tenant first.
+... pnpm data:sanitize-svg-assets -- --apply --tenant <tenant-id>
+
+# 3. Everyone.
+... pnpm data:sanitize-svg-assets -- --apply
+
+# 4. Confirm: exits 0.
+... pnpm data:sanitize-svg-assets
 ```
 
-The dry run reports how many need sanitizing. Re-run with `-- --apply`, then
-run the dry run again and confirm it reports 0. Anything listed as "Not
-processed" is missing from storage or is not a readable SVG; review those
-references by id.
+What it covers and guarantees:
+
+- **Every stored SVG**: `READY` references, and `DELETED` ones whose object is
+  still in the bucket (a deleted reference whose object is gone is skipped).
+- **Object and record change together.** Each SVG is rewritten (sanitized,
+  served as a download) and its size and checksum recorded inside one
+  transaction that holds the reference's row lock. A reference changed by
+  someone else since it was read is left alone and listed; re-run to pick it
+  up. A failure rolls back and lists the reference.
+- **It repairs its own interruptions.** An object sanitized by a run that
+  stopped before recording it is found on the next run (a stale size/checksum
+  record) and its record corrected.
+- **Needs review**, listed by id and keeping the exit code at 1:
+  - a `READY` reference whose object is missing from storage;
+  - an object DOMPurify cannot parse as SVG. Browsers cannot render it as SVG
+    either, but decide per reference whether to delete it.
+- Exit codes: `0` nothing left to sanitize or review, `1` something is, `2`
+  refused to run (login cannot see every reference, bad arguments).
+
+SVG references still `PENDING` (uploads never confirmed, including branding
+uploads from before M8, which had no confirm step) are not touched: they were
+never usable, and an upload in progress must not be rewritten under the user.
