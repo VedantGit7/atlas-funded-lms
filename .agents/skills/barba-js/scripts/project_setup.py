@@ -43,7 +43,7 @@ def create_package_json(project_name: str) -> str:
   "devDependencies": {{
     "@barba/core": "^2.9.7",
     "gsap": "^3.12.5",
-    "vite": "^5.0.0"
+    "vite": "^8.3.3"
   }}
 }}
 '''
