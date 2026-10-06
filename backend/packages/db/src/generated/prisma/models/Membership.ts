@@ -266,6 +266,18 @@ export type MembershipWhereInput = {
   auth_principal?: Prisma.XOR<Prisma.AuthPrincipalNullableScalarRelationFilter, Prisma.AuthPrincipalWhereInput> | null
   profile?: Prisma.XOR<Prisma.MemberProfileNullableScalarRelationFilter, Prisma.MemberProfileWhereInput> | null
   notification_preferences?: Prisma.MemberNotificationPreferenceListRelationFilter
+  lesson_progress?: Prisma.LessonProgressListRelationFilter
+  enrollments?: Prisma.EnrollmentListRelationFilter
+  attempts?: Prisma.AttemptListRelationFilter
+  proctoring_sessions?: Prisma.ProctoringSessionListRelationFilter
+  certificates?: Prisma.CertificateListRelationFilter
+  payment_orders?: Prisma.PaymentOrderListRelationFilter
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanListRelationFilter
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionListRelationFilter
+  sales_wallets?: Prisma.SalesWalletListRelationFilter
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
+  user_roles?: Prisma.UserRoleListRelationFilter
+  permission_overrides?: Prisma.PermissionOverrideListRelationFilter
 }
 
 export type MembershipOrderByWithRelationInput = {
@@ -288,10 +300,23 @@ export type MembershipOrderByWithRelationInput = {
   auth_principal?: Prisma.AuthPrincipalOrderByWithRelationInput
   profile?: Prisma.MemberProfileOrderByWithRelationInput
   notification_preferences?: Prisma.MemberNotificationPreferenceOrderByRelationAggregateInput
+  lesson_progress?: Prisma.LessonProgressOrderByRelationAggregateInput
+  enrollments?: Prisma.EnrollmentOrderByRelationAggregateInput
+  attempts?: Prisma.AttemptOrderByRelationAggregateInput
+  proctoring_sessions?: Prisma.ProctoringSessionOrderByRelationAggregateInput
+  certificates?: Prisma.CertificateOrderByRelationAggregateInput
+  payment_orders?: Prisma.PaymentOrderOrderByRelationAggregateInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanOrderByRelationAggregateInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionOrderByRelationAggregateInput
+  sales_wallets?: Prisma.SalesWalletOrderByRelationAggregateInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionOrderByRelationAggregateInput
+  user_roles?: Prisma.UserRoleOrderByRelationAggregateInput
+  permission_overrides?: Prisma.PermissionOverrideOrderByRelationAggregateInput
 }
 
 export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MembershipTenant_idIdCompoundUniqueInput
   tenant_id_auth_principal_id?: Prisma.MembershipTenant_idAuth_principal_idCompoundUniqueInput
   AND?: Prisma.MembershipWhereInput | Prisma.MembershipWhereInput[]
   OR?: Prisma.MembershipWhereInput[]
@@ -314,7 +339,19 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   auth_principal?: Prisma.XOR<Prisma.AuthPrincipalNullableScalarRelationFilter, Prisma.AuthPrincipalWhereInput> | null
   profile?: Prisma.XOR<Prisma.MemberProfileNullableScalarRelationFilter, Prisma.MemberProfileWhereInput> | null
   notification_preferences?: Prisma.MemberNotificationPreferenceListRelationFilter
-}, "id" | "tenant_id_auth_principal_id">
+  lesson_progress?: Prisma.LessonProgressListRelationFilter
+  enrollments?: Prisma.EnrollmentListRelationFilter
+  attempts?: Prisma.AttemptListRelationFilter
+  proctoring_sessions?: Prisma.ProctoringSessionListRelationFilter
+  certificates?: Prisma.CertificateListRelationFilter
+  payment_orders?: Prisma.PaymentOrderListRelationFilter
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanListRelationFilter
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionListRelationFilter
+  sales_wallets?: Prisma.SalesWalletListRelationFilter
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
+  user_roles?: Prisma.UserRoleListRelationFilter
+  permission_overrides?: Prisma.PermissionOverrideListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_auth_principal_id">
 
 export type MembershipOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -376,6 +413,18 @@ export type MembershipCreateInput = {
   auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
   profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
   notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateInput = {
@@ -396,6 +445,18 @@ export type MembershipUncheckedCreateInput = {
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUpdateInput = {
@@ -416,6 +477,18 @@ export type MembershipUpdateInput = {
   auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
   profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateInput = {
@@ -436,6 +509,18 @@ export type MembershipUncheckedUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipCreateManyInput = {
@@ -500,6 +585,11 @@ export type MembershipOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type MembershipTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type MembershipTenant_idAuth_principal_idCompoundUniqueInput = {
   tenant_id: string
   auth_principal_id: string
@@ -562,6 +652,11 @@ export type MembershipMinOrderByAggregateInput = {
 export type MembershipScalarRelationFilter = {
   is?: Prisma.MembershipWhereInput
   isNot?: Prisma.MembershipWhereInput
+}
+
+export type MembershipNullableScalarRelationFilter = {
+  is?: Prisma.MembershipWhereInput | null
+  isNot?: Prisma.MembershipWhereInput | null
 }
 
 export type MembershipCreateNestedManyWithoutTenantInput = {
@@ -680,6 +775,176 @@ export type MembershipUpdateOneRequiredWithoutNotification_preferencesNestedInpu
   update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutNotification_preferencesInput, Prisma.MembershipUpdateWithoutNotification_preferencesInput>, Prisma.MembershipUncheckedUpdateWithoutNotification_preferencesInput>
 }
 
+export type MembershipCreateNestedOneWithoutUser_rolesInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutUser_rolesInput, Prisma.MembershipUncheckedCreateWithoutUser_rolesInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutUser_rolesInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutUser_rolesNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutUser_rolesInput, Prisma.MembershipUncheckedCreateWithoutUser_rolesInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutUser_rolesInput
+  upsert?: Prisma.MembershipUpsertWithoutUser_rolesInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutUser_rolesInput, Prisma.MembershipUpdateWithoutUser_rolesInput>, Prisma.MembershipUncheckedUpdateWithoutUser_rolesInput>
+}
+
+export type MembershipCreateNestedOneWithoutPermission_overridesInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutPermission_overridesInput, Prisma.MembershipUncheckedCreateWithoutPermission_overridesInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutPermission_overridesInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutPermission_overridesNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutPermission_overridesInput, Prisma.MembershipUncheckedCreateWithoutPermission_overridesInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutPermission_overridesInput
+  upsert?: Prisma.MembershipUpsertWithoutPermission_overridesInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutPermission_overridesInput, Prisma.MembershipUpdateWithoutPermission_overridesInput>, Prisma.MembershipUncheckedUpdateWithoutPermission_overridesInput>
+}
+
+export type MembershipCreateNestedOneWithoutEnrollmentsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutEnrollmentsInput, Prisma.MembershipUncheckedCreateWithoutEnrollmentsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutEnrollmentsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutEnrollmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutEnrollmentsInput, Prisma.MembershipUncheckedCreateWithoutEnrollmentsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutEnrollmentsInput
+  upsert?: Prisma.MembershipUpsertWithoutEnrollmentsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.MembershipUpdateWithoutEnrollmentsInput>, Prisma.MembershipUncheckedUpdateWithoutEnrollmentsInput>
+}
+
+export type MembershipCreateNestedOneWithoutLesson_progressInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutLesson_progressInput, Prisma.MembershipUncheckedCreateWithoutLesson_progressInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutLesson_progressInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutLesson_progressNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutLesson_progressInput, Prisma.MembershipUncheckedCreateWithoutLesson_progressInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutLesson_progressInput
+  upsert?: Prisma.MembershipUpsertWithoutLesson_progressInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutLesson_progressInput, Prisma.MembershipUpdateWithoutLesson_progressInput>, Prisma.MembershipUncheckedUpdateWithoutLesson_progressInput>
+}
+
+export type MembershipCreateNestedOneWithoutAttemptsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutAttemptsInput, Prisma.MembershipUncheckedCreateWithoutAttemptsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutAttemptsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutAttemptsInput, Prisma.MembershipUncheckedCreateWithoutAttemptsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutAttemptsInput
+  upsert?: Prisma.MembershipUpsertWithoutAttemptsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutAttemptsInput, Prisma.MembershipUpdateWithoutAttemptsInput>, Prisma.MembershipUncheckedUpdateWithoutAttemptsInput>
+}
+
+export type MembershipCreateNestedOneWithoutProctoring_sessionsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutProctoring_sessionsInput, Prisma.MembershipUncheckedCreateWithoutProctoring_sessionsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutProctoring_sessionsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutProctoring_sessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutProctoring_sessionsInput, Prisma.MembershipUncheckedCreateWithoutProctoring_sessionsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutProctoring_sessionsInput
+  upsert?: Prisma.MembershipUpsertWithoutProctoring_sessionsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutProctoring_sessionsInput, Prisma.MembershipUpdateWithoutProctoring_sessionsInput>, Prisma.MembershipUncheckedUpdateWithoutProctoring_sessionsInput>
+}
+
+export type MembershipCreateNestedOneWithoutCertificatesInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutCertificatesInput, Prisma.MembershipUncheckedCreateWithoutCertificatesInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutCertificatesInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutCertificatesNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutCertificatesInput, Prisma.MembershipUncheckedCreateWithoutCertificatesInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutCertificatesInput
+  upsert?: Prisma.MembershipUpsertWithoutCertificatesInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutCertificatesInput, Prisma.MembershipUpdateWithoutCertificatesInput>, Prisma.MembershipUncheckedUpdateWithoutCertificatesInput>
+}
+
+export type MembershipCreateNestedOneWithoutPayment_ordersInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_ordersInput, Prisma.MembershipUncheckedCreateWithoutPayment_ordersInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutPayment_ordersInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneWithoutPayment_ordersNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_ordersInput, Prisma.MembershipUncheckedCreateWithoutPayment_ordersInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutPayment_ordersInput
+  upsert?: Prisma.MembershipUpsertWithoutPayment_ordersInput
+  disconnect?: Prisma.MembershipWhereInput | boolean
+  delete?: Prisma.MembershipWhereInput | boolean
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutPayment_ordersInput, Prisma.MembershipUpdateWithoutPayment_ordersInput>, Prisma.MembershipUncheckedUpdateWithoutPayment_ordersInput>
+}
+
+export type MembershipCreateNestedOneWithoutPayment_instalment_plansInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_instalment_plansInput, Prisma.MembershipUncheckedCreateWithoutPayment_instalment_plansInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutPayment_instalment_plansInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutPayment_instalment_plansNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_instalment_plansInput, Prisma.MembershipUncheckedCreateWithoutPayment_instalment_plansInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutPayment_instalment_plansInput
+  upsert?: Prisma.MembershipUpsertWithoutPayment_instalment_plansInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutPayment_instalment_plansInput, Prisma.MembershipUpdateWithoutPayment_instalment_plansInput>, Prisma.MembershipUncheckedUpdateWithoutPayment_instalment_plansInput>
+}
+
+export type MembershipCreateNestedOneWithoutSales_coupon_redemptionsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutSales_coupon_redemptionsInput, Prisma.MembershipUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutSales_coupon_redemptionsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutSales_coupon_redemptionsInput, Prisma.MembershipUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutSales_coupon_redemptionsInput
+  upsert?: Prisma.MembershipUpsertWithoutSales_coupon_redemptionsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutSales_coupon_redemptionsInput, Prisma.MembershipUpdateWithoutSales_coupon_redemptionsInput>, Prisma.MembershipUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+}
+
+export type MembershipCreateNestedOneWithoutSales_walletsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutSales_walletsInput, Prisma.MembershipUncheckedCreateWithoutSales_walletsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutSales_walletsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutSales_walletsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutSales_walletsInput, Prisma.MembershipUncheckedCreateWithoutSales_walletsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutSales_walletsInput
+  upsert?: Prisma.MembershipUpsertWithoutSales_walletsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutSales_walletsInput, Prisma.MembershipUpdateWithoutSales_walletsInput>, Prisma.MembershipUncheckedUpdateWithoutSales_walletsInput>
+}
+
+export type MembershipCreateNestedOneWithoutSales_wallet_transactionsInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutSales_wallet_transactionsInput, Prisma.MembershipUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutSales_wallet_transactionsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutSales_wallet_transactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutSales_wallet_transactionsInput, Prisma.MembershipUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutSales_wallet_transactionsInput
+  upsert?: Prisma.MembershipUpsertWithoutSales_wallet_transactionsInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutSales_wallet_transactionsInput, Prisma.MembershipUpdateWithoutSales_wallet_transactionsInput>, Prisma.MembershipUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
 export type MembershipCreateWithoutTenantInput = {
   id: string
   status?: $Enums.MembershipStatus
@@ -697,6 +962,18 @@ export type MembershipCreateWithoutTenantInput = {
   auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
   profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
   notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutTenantInput = {
@@ -716,6 +993,18 @@ export type MembershipUncheckedCreateWithoutTenantInput = {
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutTenantInput = {
@@ -782,6 +1071,18 @@ export type MembershipCreateWithoutAuth_principalInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
   profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
   notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutAuth_principalInput = {
@@ -801,6 +1102,18 @@ export type MembershipUncheckedCreateWithoutAuth_principalInput = {
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutAuth_principalInput = {
@@ -846,6 +1159,18 @@ export type MembershipCreateWithoutProfileInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
   auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
   notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutProfileInput = {
@@ -865,6 +1190,18 @@ export type MembershipUncheckedCreateWithoutProfileInput = {
   created_at?: Date | string
   updated_at?: Date | string
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutProfileInput = {
@@ -900,6 +1237,18 @@ export type MembershipUpdateWithoutProfileInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
   auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutProfileInput = {
@@ -919,6 +1268,18 @@ export type MembershipUncheckedUpdateWithoutProfileInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipCreateWithoutNotification_preferencesInput = {
@@ -938,6 +1299,18 @@ export type MembershipCreateWithoutNotification_preferencesInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
   auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
   profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipUncheckedCreateWithoutNotification_preferencesInput = {
@@ -957,6 +1330,18 @@ export type MembershipUncheckedCreateWithoutNotification_preferencesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
 }
 
 export type MembershipCreateOrConnectWithoutNotification_preferencesInput = {
@@ -992,6 +1377,18 @@ export type MembershipUpdateWithoutNotification_preferencesInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
   auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
   profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutNotification_preferencesInput = {
@@ -1011,6 +1408,1698 @@ export type MembershipUncheckedUpdateWithoutNotification_preferencesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutUser_rolesInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutUser_rolesInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutUser_rolesInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutUser_rolesInput, Prisma.MembershipUncheckedCreateWithoutUser_rolesInput>
+}
+
+export type MembershipUpsertWithoutUser_rolesInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutUser_rolesInput, Prisma.MembershipUncheckedUpdateWithoutUser_rolesInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutUser_rolesInput, Prisma.MembershipUncheckedCreateWithoutUser_rolesInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutUser_rolesInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutUser_rolesInput, Prisma.MembershipUncheckedUpdateWithoutUser_rolesInput>
+}
+
+export type MembershipUpdateWithoutUser_rolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutUser_rolesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutPermission_overridesInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutPermission_overridesInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutPermission_overridesInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutPermission_overridesInput, Prisma.MembershipUncheckedCreateWithoutPermission_overridesInput>
+}
+
+export type MembershipUpsertWithoutPermission_overridesInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutPermission_overridesInput, Prisma.MembershipUncheckedUpdateWithoutPermission_overridesInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutPermission_overridesInput, Prisma.MembershipUncheckedCreateWithoutPermission_overridesInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutPermission_overridesInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutPermission_overridesInput, Prisma.MembershipUncheckedUpdateWithoutPermission_overridesInput>
+}
+
+export type MembershipUpdateWithoutPermission_overridesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutPermission_overridesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutEnrollmentsInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutEnrollmentsInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutEnrollmentsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutEnrollmentsInput, Prisma.MembershipUncheckedCreateWithoutEnrollmentsInput>
+}
+
+export type MembershipUpsertWithoutEnrollmentsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutEnrollmentsInput, Prisma.MembershipUncheckedUpdateWithoutEnrollmentsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutEnrollmentsInput, Prisma.MembershipUncheckedCreateWithoutEnrollmentsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutEnrollmentsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutEnrollmentsInput, Prisma.MembershipUncheckedUpdateWithoutEnrollmentsInput>
+}
+
+export type MembershipUpdateWithoutEnrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutEnrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutLesson_progressInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutLesson_progressInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutLesson_progressInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutLesson_progressInput, Prisma.MembershipUncheckedCreateWithoutLesson_progressInput>
+}
+
+export type MembershipUpsertWithoutLesson_progressInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutLesson_progressInput, Prisma.MembershipUncheckedUpdateWithoutLesson_progressInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutLesson_progressInput, Prisma.MembershipUncheckedCreateWithoutLesson_progressInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutLesson_progressInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutLesson_progressInput, Prisma.MembershipUncheckedUpdateWithoutLesson_progressInput>
+}
+
+export type MembershipUpdateWithoutLesson_progressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutLesson_progressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutAttemptsInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutAttemptsInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutAttemptsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutAttemptsInput, Prisma.MembershipUncheckedCreateWithoutAttemptsInput>
+}
+
+export type MembershipUpsertWithoutAttemptsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutAttemptsInput, Prisma.MembershipUncheckedUpdateWithoutAttemptsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutAttemptsInput, Prisma.MembershipUncheckedCreateWithoutAttemptsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutAttemptsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutAttemptsInput, Prisma.MembershipUncheckedUpdateWithoutAttemptsInput>
+}
+
+export type MembershipUpdateWithoutAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutProctoring_sessionsInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutProctoring_sessionsInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutProctoring_sessionsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutProctoring_sessionsInput, Prisma.MembershipUncheckedCreateWithoutProctoring_sessionsInput>
+}
+
+export type MembershipUpsertWithoutProctoring_sessionsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutProctoring_sessionsInput, Prisma.MembershipUncheckedUpdateWithoutProctoring_sessionsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutProctoring_sessionsInput, Prisma.MembershipUncheckedCreateWithoutProctoring_sessionsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutProctoring_sessionsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutProctoring_sessionsInput, Prisma.MembershipUncheckedUpdateWithoutProctoring_sessionsInput>
+}
+
+export type MembershipUpdateWithoutProctoring_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutProctoring_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutCertificatesInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutCertificatesInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutCertificatesInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutCertificatesInput, Prisma.MembershipUncheckedCreateWithoutCertificatesInput>
+}
+
+export type MembershipUpsertWithoutCertificatesInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutCertificatesInput, Prisma.MembershipUncheckedUpdateWithoutCertificatesInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutCertificatesInput, Prisma.MembershipUncheckedCreateWithoutCertificatesInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutCertificatesInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutCertificatesInput, Prisma.MembershipUncheckedUpdateWithoutCertificatesInput>
+}
+
+export type MembershipUpdateWithoutCertificatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutCertificatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutPayment_ordersInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutPayment_ordersInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutPayment_ordersInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_ordersInput, Prisma.MembershipUncheckedCreateWithoutPayment_ordersInput>
+}
+
+export type MembershipUpsertWithoutPayment_ordersInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutPayment_ordersInput, Prisma.MembershipUncheckedUpdateWithoutPayment_ordersInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_ordersInput, Prisma.MembershipUncheckedCreateWithoutPayment_ordersInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutPayment_ordersInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutPayment_ordersInput, Prisma.MembershipUncheckedUpdateWithoutPayment_ordersInput>
+}
+
+export type MembershipUpdateWithoutPayment_ordersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutPayment_ordersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutPayment_instalment_plansInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutPayment_instalment_plansInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutPayment_instalment_plansInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_instalment_plansInput, Prisma.MembershipUncheckedCreateWithoutPayment_instalment_plansInput>
+}
+
+export type MembershipUpsertWithoutPayment_instalment_plansInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutPayment_instalment_plansInput, Prisma.MembershipUncheckedUpdateWithoutPayment_instalment_plansInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutPayment_instalment_plansInput, Prisma.MembershipUncheckedCreateWithoutPayment_instalment_plansInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutPayment_instalment_plansInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutPayment_instalment_plansInput, Prisma.MembershipUncheckedUpdateWithoutPayment_instalment_plansInput>
+}
+
+export type MembershipUpdateWithoutPayment_instalment_plansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutPayment_instalment_plansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutSales_coupon_redemptionsInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutSales_coupon_redemptionsInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutSales_coupon_redemptionsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutSales_coupon_redemptionsInput, Prisma.MembershipUncheckedCreateWithoutSales_coupon_redemptionsInput>
+}
+
+export type MembershipUpsertWithoutSales_coupon_redemptionsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutSales_coupon_redemptionsInput, Prisma.MembershipUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutSales_coupon_redemptionsInput, Prisma.MembershipUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutSales_coupon_redemptionsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutSales_coupon_redemptionsInput, Prisma.MembershipUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+}
+
+export type MembershipUpdateWithoutSales_coupon_redemptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutSales_coupon_redemptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutSales_walletsInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutSales_walletsInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutSales_walletsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutSales_walletsInput, Prisma.MembershipUncheckedCreateWithoutSales_walletsInput>
+}
+
+export type MembershipUpsertWithoutSales_walletsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutSales_walletsInput, Prisma.MembershipUncheckedUpdateWithoutSales_walletsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutSales_walletsInput, Prisma.MembershipUncheckedCreateWithoutSales_walletsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutSales_walletsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutSales_walletsInput, Prisma.MembershipUncheckedUpdateWithoutSales_walletsInput>
+}
+
+export type MembershipUpdateWithoutSales_walletsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutSales_walletsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  tenant_id: string
+  auth_principal_id?: string | null
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutSales_wallet_transactionsInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutSales_wallet_transactionsInput, Prisma.MembershipUncheckedCreateWithoutSales_wallet_transactionsInput>
+}
+
+export type MembershipUpsertWithoutSales_wallet_transactionsInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutSales_wallet_transactionsInput, Prisma.MembershipUncheckedUpdateWithoutSales_wallet_transactionsInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutSales_wallet_transactionsInput, Prisma.MembershipUncheckedCreateWithoutSales_wallet_transactionsInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutSales_wallet_transactionsInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutSales_wallet_transactionsInput, Prisma.MembershipUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
+export type MembershipUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipCreateManyTenantInput = {
@@ -1047,6 +3136,18 @@ export type MembershipUpdateWithoutTenantInput = {
   auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
   profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutTenantInput = {
@@ -1066,6 +3167,18 @@ export type MembershipUncheckedUpdateWithoutTenantInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateManyWithoutTenantInput = {
@@ -1119,6 +3232,18 @@ export type MembershipUpdateWithoutAuth_principalInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
   profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateWithoutAuth_principalInput = {
@@ -1138,6 +3263,18 @@ export type MembershipUncheckedUpdateWithoutAuth_principalInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
 export type MembershipUncheckedUpdateManyWithoutAuth_principalInput = {
@@ -1164,10 +3301,34 @@ export type MembershipUncheckedUpdateManyWithoutAuth_principalInput = {
 
 export type MembershipCountOutputType = {
   notification_preferences: number
+  lesson_progress: number
+  enrollments: number
+  attempts: number
+  proctoring_sessions: number
+  certificates: number
+  payment_orders: number
+  payment_instalment_plans: number
+  sales_coupon_redemptions: number
+  sales_wallets: number
+  sales_wallet_transactions: number
+  user_roles: number
+  permission_overrides: number
 }
 
 export type MembershipCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   notification_preferences?: boolean | MembershipCountOutputTypeCountNotification_preferencesArgs
+  lesson_progress?: boolean | MembershipCountOutputTypeCountLesson_progressArgs
+  enrollments?: boolean | MembershipCountOutputTypeCountEnrollmentsArgs
+  attempts?: boolean | MembershipCountOutputTypeCountAttemptsArgs
+  proctoring_sessions?: boolean | MembershipCountOutputTypeCountProctoring_sessionsArgs
+  certificates?: boolean | MembershipCountOutputTypeCountCertificatesArgs
+  payment_orders?: boolean | MembershipCountOutputTypeCountPayment_ordersArgs
+  payment_instalment_plans?: boolean | MembershipCountOutputTypeCountPayment_instalment_plansArgs
+  sales_coupon_redemptions?: boolean | MembershipCountOutputTypeCountSales_coupon_redemptionsArgs
+  sales_wallets?: boolean | MembershipCountOutputTypeCountSales_walletsArgs
+  sales_wallet_transactions?: boolean | MembershipCountOutputTypeCountSales_wallet_transactionsArgs
+  user_roles?: boolean | MembershipCountOutputTypeCountUser_rolesArgs
+  permission_overrides?: boolean | MembershipCountOutputTypeCountPermission_overridesArgs
 }
 
 /**
@@ -1185,6 +3346,90 @@ export type MembershipCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.E
  */
 export type MembershipCountOutputTypeCountNotification_preferencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MemberNotificationPreferenceWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountLesson_progressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LessonProgressWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EnrollmentWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AttemptWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountProctoring_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ProctoringSessionWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountCertificatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CertificateWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountPayment_ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentOrderWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountPayment_instalment_plansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentInstalmentPlanWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountSales_coupon_redemptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesCouponRedemptionWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountSales_walletsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesWalletWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountSales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesWalletTransactionWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountUser_rolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserRoleWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountPermission_overridesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PermissionOverrideWhereInput
 }
 
 
@@ -1208,6 +3453,18 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   auth_principal?: boolean | Prisma.Membership$auth_principalArgs<ExtArgs>
   profile?: boolean | Prisma.Membership$profileArgs<ExtArgs>
   notification_preferences?: boolean | Prisma.Membership$notification_preferencesArgs<ExtArgs>
+  lesson_progress?: boolean | Prisma.Membership$lesson_progressArgs<ExtArgs>
+  enrollments?: boolean | Prisma.Membership$enrollmentsArgs<ExtArgs>
+  attempts?: boolean | Prisma.Membership$attemptsArgs<ExtArgs>
+  proctoring_sessions?: boolean | Prisma.Membership$proctoring_sessionsArgs<ExtArgs>
+  certificates?: boolean | Prisma.Membership$certificatesArgs<ExtArgs>
+  payment_orders?: boolean | Prisma.Membership$payment_ordersArgs<ExtArgs>
+  payment_instalment_plans?: boolean | Prisma.Membership$payment_instalment_plansArgs<ExtArgs>
+  sales_coupon_redemptions?: boolean | Prisma.Membership$sales_coupon_redemptionsArgs<ExtArgs>
+  sales_wallets?: boolean | Prisma.Membership$sales_walletsArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.Membership$sales_wallet_transactionsArgs<ExtArgs>
+  user_roles?: boolean | Prisma.Membership$user_rolesArgs<ExtArgs>
+  permission_overrides?: boolean | Prisma.Membership$permission_overridesArgs<ExtArgs>
   _count?: boolean | Prisma.MembershipCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["membership"]>
 
@@ -1275,6 +3532,18 @@ export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   auth_principal?: boolean | Prisma.Membership$auth_principalArgs<ExtArgs>
   profile?: boolean | Prisma.Membership$profileArgs<ExtArgs>
   notification_preferences?: boolean | Prisma.Membership$notification_preferencesArgs<ExtArgs>
+  lesson_progress?: boolean | Prisma.Membership$lesson_progressArgs<ExtArgs>
+  enrollments?: boolean | Prisma.Membership$enrollmentsArgs<ExtArgs>
+  attempts?: boolean | Prisma.Membership$attemptsArgs<ExtArgs>
+  proctoring_sessions?: boolean | Prisma.Membership$proctoring_sessionsArgs<ExtArgs>
+  certificates?: boolean | Prisma.Membership$certificatesArgs<ExtArgs>
+  payment_orders?: boolean | Prisma.Membership$payment_ordersArgs<ExtArgs>
+  payment_instalment_plans?: boolean | Prisma.Membership$payment_instalment_plansArgs<ExtArgs>
+  sales_coupon_redemptions?: boolean | Prisma.Membership$sales_coupon_redemptionsArgs<ExtArgs>
+  sales_wallets?: boolean | Prisma.Membership$sales_walletsArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.Membership$sales_wallet_transactionsArgs<ExtArgs>
+  user_roles?: boolean | Prisma.Membership$user_rolesArgs<ExtArgs>
+  permission_overrides?: boolean | Prisma.Membership$permission_overridesArgs<ExtArgs>
   _count?: boolean | Prisma.MembershipCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1293,6 +3562,18 @@ export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.Internal
     auth_principal: Prisma.$AuthPrincipalPayload<ExtArgs> | null
     profile: Prisma.$MemberProfilePayload<ExtArgs> | null
     notification_preferences: Prisma.$MemberNotificationPreferencePayload<ExtArgs>[]
+    lesson_progress: Prisma.$LessonProgressPayload<ExtArgs>[]
+    enrollments: Prisma.$EnrollmentPayload<ExtArgs>[]
+    attempts: Prisma.$AttemptPayload<ExtArgs>[]
+    proctoring_sessions: Prisma.$ProctoringSessionPayload<ExtArgs>[]
+    certificates: Prisma.$CertificatePayload<ExtArgs>[]
+    payment_orders: Prisma.$PaymentOrderPayload<ExtArgs>[]
+    payment_instalment_plans: Prisma.$PaymentInstalmentPlanPayload<ExtArgs>[]
+    sales_coupon_redemptions: Prisma.$SalesCouponRedemptionPayload<ExtArgs>[]
+    sales_wallets: Prisma.$SalesWalletPayload<ExtArgs>[]
+    sales_wallet_transactions: Prisma.$SalesWalletTransactionPayload<ExtArgs>[]
+    user_roles: Prisma.$UserRolePayload<ExtArgs>[]
+    permission_overrides: Prisma.$PermissionOverridePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1708,6 +3989,18 @@ export interface Prisma__MembershipClient<T, Null = never, ExtArgs extends runti
   auth_principal<T extends Prisma.Membership$auth_principalArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$auth_principalArgs<ExtArgs>>): Prisma.Prisma__AuthPrincipalClient<runtime.Types.Result.GetResult<Prisma.$AuthPrincipalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   profile<T extends Prisma.Membership$profileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$profileArgs<ExtArgs>>): Prisma.Prisma__MemberProfileClient<runtime.Types.Result.GetResult<Prisma.$MemberProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   notification_preferences<T extends Prisma.Membership$notification_preferencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$notification_preferencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberNotificationPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  lesson_progress<T extends Prisma.Membership$lesson_progressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$lesson_progressArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  enrollments<T extends Prisma.Membership$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  attempts<T extends Prisma.Membership$attemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  proctoring_sessions<T extends Prisma.Membership$proctoring_sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$proctoring_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProctoringSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  certificates<T extends Prisma.Membership$certificatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$certificatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  payment_orders<T extends Prisma.Membership$payment_ordersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$payment_ordersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentOrderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  payment_instalment_plans<T extends Prisma.Membership$payment_instalment_plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$payment_instalment_plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentInstalmentPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_coupon_redemptions<T extends Prisma.Membership$sales_coupon_redemptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$sales_coupon_redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesCouponRedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_wallets<T extends Prisma.Membership$sales_walletsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$sales_walletsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesWalletPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_wallet_transactions<T extends Prisma.Membership$sales_wallet_transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$sales_wallet_transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesWalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  user_roles<T extends Prisma.Membership$user_rolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$user_rolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  permission_overrides<T extends Prisma.Membership$permission_overridesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$permission_overridesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PermissionOverridePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2212,6 +4505,294 @@ export type Membership$notification_preferencesArgs<ExtArgs extends runtime.Type
   take?: number
   skip?: number
   distinct?: Prisma.MemberNotificationPreferenceScalarFieldEnum | Prisma.MemberNotificationPreferenceScalarFieldEnum[]
+}
+
+/**
+ * Membership.lesson_progress
+ */
+export type Membership$lesson_progressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LessonProgress
+   */
+  select?: Prisma.LessonProgressSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LessonProgress
+   */
+  omit?: Prisma.LessonProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
+  where?: Prisma.LessonProgressWhereInput
+  orderBy?: Prisma.LessonProgressOrderByWithRelationInput | Prisma.LessonProgressOrderByWithRelationInput[]
+  cursor?: Prisma.LessonProgressWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LessonProgressScalarFieldEnum | Prisma.LessonProgressScalarFieldEnum[]
+}
+
+/**
+ * Membership.enrollments
+ */
+export type Membership$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Enrollment
+   */
+  select?: Prisma.EnrollmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Enrollment
+   */
+  omit?: Prisma.EnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnrollmentInclude<ExtArgs> | null
+  where?: Prisma.EnrollmentWhereInput
+  orderBy?: Prisma.EnrollmentOrderByWithRelationInput | Prisma.EnrollmentOrderByWithRelationInput[]
+  cursor?: Prisma.EnrollmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EnrollmentScalarFieldEnum | Prisma.EnrollmentScalarFieldEnum[]
+}
+
+/**
+ * Membership.attempts
+ */
+export type Membership$attemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attempt
+   */
+  select?: Prisma.AttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attempt
+   */
+  omit?: Prisma.AttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptInclude<ExtArgs> | null
+  where?: Prisma.AttemptWhereInput
+  orderBy?: Prisma.AttemptOrderByWithRelationInput | Prisma.AttemptOrderByWithRelationInput[]
+  cursor?: Prisma.AttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AttemptScalarFieldEnum | Prisma.AttemptScalarFieldEnum[]
+}
+
+/**
+ * Membership.proctoring_sessions
+ */
+export type Membership$proctoring_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ProctoringSession
+   */
+  select?: Prisma.ProctoringSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ProctoringSession
+   */
+  omit?: Prisma.ProctoringSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProctoringSessionInclude<ExtArgs> | null
+  where?: Prisma.ProctoringSessionWhereInput
+  orderBy?: Prisma.ProctoringSessionOrderByWithRelationInput | Prisma.ProctoringSessionOrderByWithRelationInput[]
+  cursor?: Prisma.ProctoringSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ProctoringSessionScalarFieldEnum | Prisma.ProctoringSessionScalarFieldEnum[]
+}
+
+/**
+ * Membership.certificates
+ */
+export type Membership$certificatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Certificate
+   */
+  select?: Prisma.CertificateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Certificate
+   */
+  omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  where?: Prisma.CertificateWhereInput
+  orderBy?: Prisma.CertificateOrderByWithRelationInput | Prisma.CertificateOrderByWithRelationInput[]
+  cursor?: Prisma.CertificateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CertificateScalarFieldEnum | Prisma.CertificateScalarFieldEnum[]
+}
+
+/**
+ * Membership.payment_orders
+ */
+export type Membership$payment_ordersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentOrder
+   */
+  select?: Prisma.PaymentOrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentOrder
+   */
+  omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  where?: Prisma.PaymentOrderWhereInput
+  orderBy?: Prisma.PaymentOrderOrderByWithRelationInput | Prisma.PaymentOrderOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentOrderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentOrderScalarFieldEnum | Prisma.PaymentOrderScalarFieldEnum[]
+}
+
+/**
+ * Membership.payment_instalment_plans
+ */
+export type Membership$payment_instalment_plansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentInstalmentPlan
+   */
+  select?: Prisma.PaymentInstalmentPlanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentInstalmentPlan
+   */
+  omit?: Prisma.PaymentInstalmentPlanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInstalmentPlanInclude<ExtArgs> | null
+  where?: Prisma.PaymentInstalmentPlanWhereInput
+  orderBy?: Prisma.PaymentInstalmentPlanOrderByWithRelationInput | Prisma.PaymentInstalmentPlanOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentInstalmentPlanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentInstalmentPlanScalarFieldEnum | Prisma.PaymentInstalmentPlanScalarFieldEnum[]
+}
+
+/**
+ * Membership.sales_coupon_redemptions
+ */
+export type Membership$sales_coupon_redemptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesCouponRedemption
+   */
+  select?: Prisma.SalesCouponRedemptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesCouponRedemption
+   */
+  omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  where?: Prisma.SalesCouponRedemptionWhereInput
+  orderBy?: Prisma.SalesCouponRedemptionOrderByWithRelationInput | Prisma.SalesCouponRedemptionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesCouponRedemptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesCouponRedemptionScalarFieldEnum | Prisma.SalesCouponRedemptionScalarFieldEnum[]
+}
+
+/**
+ * Membership.sales_wallets
+ */
+export type Membership$sales_walletsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesWallet
+   */
+  select?: Prisma.SalesWalletSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesWallet
+   */
+  omit?: Prisma.SalesWalletOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
+  where?: Prisma.SalesWalletWhereInput
+  orderBy?: Prisma.SalesWalletOrderByWithRelationInput | Prisma.SalesWalletOrderByWithRelationInput[]
+  cursor?: Prisma.SalesWalletWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesWalletScalarFieldEnum | Prisma.SalesWalletScalarFieldEnum[]
+}
+
+/**
+ * Membership.sales_wallet_transactions
+ */
+export type Membership$sales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesWalletTransaction
+   */
+  select?: Prisma.SalesWalletTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesWalletTransaction
+   */
+  omit?: Prisma.SalesWalletTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletTransactionInclude<ExtArgs> | null
+  where?: Prisma.SalesWalletTransactionWhereInput
+  orderBy?: Prisma.SalesWalletTransactionOrderByWithRelationInput | Prisma.SalesWalletTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesWalletTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesWalletTransactionScalarFieldEnum | Prisma.SalesWalletTransactionScalarFieldEnum[]
+}
+
+/**
+ * Membership.user_roles
+ */
+export type Membership$user_rolesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserRole
+   */
+  select?: Prisma.UserRoleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserRole
+   */
+  omit?: Prisma.UserRoleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserRoleInclude<ExtArgs> | null
+  where?: Prisma.UserRoleWhereInput
+  orderBy?: Prisma.UserRoleOrderByWithRelationInput | Prisma.UserRoleOrderByWithRelationInput[]
+  cursor?: Prisma.UserRoleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserRoleScalarFieldEnum | Prisma.UserRoleScalarFieldEnum[]
+}
+
+/**
+ * Membership.permission_overrides
+ */
+export type Membership$permission_overridesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PermissionOverride
+   */
+  select?: Prisma.PermissionOverrideSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PermissionOverride
+   */
+  omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
+  where?: Prisma.PermissionOverrideWhereInput
+  orderBy?: Prisma.PermissionOverrideOrderByWithRelationInput | Prisma.PermissionOverrideOrderByWithRelationInput[]
+  cursor?: Prisma.PermissionOverrideWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PermissionOverrideScalarFieldEnum | Prisma.PermissionOverrideScalarFieldEnum[]
 }
 
 /**

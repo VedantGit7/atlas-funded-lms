@@ -190,6 +190,7 @@ export type CredentialVerificationWhereInput = {
   ip_hash?: Prisma.StringNullableFilter<"CredentialVerification"> | string | null
   user_agent_hash?: Prisma.StringNullableFilter<"CredentialVerification"> | string | null
   occurred_at?: Prisma.DateTimeFilter<"CredentialVerification"> | Date | string
+  certificate?: Prisma.XOR<Prisma.CertificateScalarRelationFilter, Prisma.CertificateWhereInput>
 }
 
 export type CredentialVerificationOrderByWithRelationInput = {
@@ -199,6 +200,7 @@ export type CredentialVerificationOrderByWithRelationInput = {
   ip_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   user_agent_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
+  certificate?: Prisma.CertificateOrderByWithRelationInput
 }
 
 export type CredentialVerificationWhereUniqueInput = Prisma.AtLeast<{
@@ -211,6 +213,7 @@ export type CredentialVerificationWhereUniqueInput = Prisma.AtLeast<{
   ip_hash?: Prisma.StringNullableFilter<"CredentialVerification"> | string | null
   user_agent_hash?: Prisma.StringNullableFilter<"CredentialVerification"> | string | null
   occurred_at?: Prisma.DateTimeFilter<"CredentialVerification"> | Date | string
+  certificate?: Prisma.XOR<Prisma.CertificateScalarRelationFilter, Prisma.CertificateWhereInput>
 }, "id">
 
 export type CredentialVerificationOrderByWithAggregationInput = {
@@ -239,11 +242,10 @@ export type CredentialVerificationScalarWhereWithAggregatesInput = {
 
 export type CredentialVerificationCreateInput = {
   id: string
-  tenant_id: string
-  certificate_id: string
   ip_hash?: string | null
   user_agent_hash?: string | null
   occurred_at?: Date | string
+  certificate: Prisma.CertificateCreateNestedOneWithoutCredential_verificationsInput
 }
 
 export type CredentialVerificationUncheckedCreateInput = {
@@ -257,11 +259,10 @@ export type CredentialVerificationUncheckedCreateInput = {
 
 export type CredentialVerificationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  certificate_id?: Prisma.StringFieldUpdateOperationsInput | string
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  certificate?: Prisma.CertificateUpdateOneRequiredWithoutCredential_verificationsNestedInput
 }
 
 export type CredentialVerificationUncheckedUpdateInput = {
@@ -284,8 +285,6 @@ export type CredentialVerificationCreateManyInput = {
 
 export type CredentialVerificationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  certificate_id?: Prisma.StringFieldUpdateOperationsInput | string
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -298,6 +297,16 @@ export type CredentialVerificationUncheckedUpdateManyInput = {
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CredentialVerificationListRelationFilter = {
+  every?: Prisma.CredentialVerificationWhereInput
+  some?: Prisma.CredentialVerificationWhereInput
+  none?: Prisma.CredentialVerificationWhereInput
+}
+
+export type CredentialVerificationOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CredentialVerificationCountOrderByAggregateInput = {
@@ -327,6 +336,128 @@ export type CredentialVerificationMinOrderByAggregateInput = {
   occurred_at?: Prisma.SortOrder
 }
 
+export type CredentialVerificationCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.CredentialVerificationCreateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput> | Prisma.CredentialVerificationCreateWithoutCertificateInput[] | Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput | Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.CredentialVerificationCreateManyCertificateInputEnvelope
+  connect?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+}
+
+export type CredentialVerificationUncheckedCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.CredentialVerificationCreateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput> | Prisma.CredentialVerificationCreateWithoutCertificateInput[] | Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput | Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.CredentialVerificationCreateManyCertificateInputEnvelope
+  connect?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+}
+
+export type CredentialVerificationUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.CredentialVerificationCreateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput> | Prisma.CredentialVerificationCreateWithoutCertificateInput[] | Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput | Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.CredentialVerificationUpsertWithWhereUniqueWithoutCertificateInput | Prisma.CredentialVerificationUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.CredentialVerificationCreateManyCertificateInputEnvelope
+  set?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  disconnect?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  delete?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  connect?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  update?: Prisma.CredentialVerificationUpdateWithWhereUniqueWithoutCertificateInput | Prisma.CredentialVerificationUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.CredentialVerificationUpdateManyWithWhereWithoutCertificateInput | Prisma.CredentialVerificationUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.CredentialVerificationScalarWhereInput | Prisma.CredentialVerificationScalarWhereInput[]
+}
+
+export type CredentialVerificationUncheckedUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.CredentialVerificationCreateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput> | Prisma.CredentialVerificationCreateWithoutCertificateInput[] | Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput | Prisma.CredentialVerificationCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.CredentialVerificationUpsertWithWhereUniqueWithoutCertificateInput | Prisma.CredentialVerificationUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.CredentialVerificationCreateManyCertificateInputEnvelope
+  set?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  disconnect?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  delete?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  connect?: Prisma.CredentialVerificationWhereUniqueInput | Prisma.CredentialVerificationWhereUniqueInput[]
+  update?: Prisma.CredentialVerificationUpdateWithWhereUniqueWithoutCertificateInput | Prisma.CredentialVerificationUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.CredentialVerificationUpdateManyWithWhereWithoutCertificateInput | Prisma.CredentialVerificationUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.CredentialVerificationScalarWhereInput | Prisma.CredentialVerificationScalarWhereInput[]
+}
+
+export type CredentialVerificationCreateWithoutCertificateInput = {
+  id: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  occurred_at?: Date | string
+}
+
+export type CredentialVerificationUncheckedCreateWithoutCertificateInput = {
+  id: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  occurred_at?: Date | string
+}
+
+export type CredentialVerificationCreateOrConnectWithoutCertificateInput = {
+  where: Prisma.CredentialVerificationWhereUniqueInput
+  create: Prisma.XOR<Prisma.CredentialVerificationCreateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput>
+}
+
+export type CredentialVerificationCreateManyCertificateInputEnvelope = {
+  data: Prisma.CredentialVerificationCreateManyCertificateInput | Prisma.CredentialVerificationCreateManyCertificateInput[]
+  skipDuplicates?: boolean
+}
+
+export type CredentialVerificationUpsertWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.CredentialVerificationWhereUniqueInput
+  update: Prisma.XOR<Prisma.CredentialVerificationUpdateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedUpdateWithoutCertificateInput>
+  create: Prisma.XOR<Prisma.CredentialVerificationCreateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedCreateWithoutCertificateInput>
+}
+
+export type CredentialVerificationUpdateWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.CredentialVerificationWhereUniqueInput
+  data: Prisma.XOR<Prisma.CredentialVerificationUpdateWithoutCertificateInput, Prisma.CredentialVerificationUncheckedUpdateWithoutCertificateInput>
+}
+
+export type CredentialVerificationUpdateManyWithWhereWithoutCertificateInput = {
+  where: Prisma.CredentialVerificationScalarWhereInput
+  data: Prisma.XOR<Prisma.CredentialVerificationUpdateManyMutationInput, Prisma.CredentialVerificationUncheckedUpdateManyWithoutCertificateInput>
+}
+
+export type CredentialVerificationScalarWhereInput = {
+  AND?: Prisma.CredentialVerificationScalarWhereInput | Prisma.CredentialVerificationScalarWhereInput[]
+  OR?: Prisma.CredentialVerificationScalarWhereInput[]
+  NOT?: Prisma.CredentialVerificationScalarWhereInput | Prisma.CredentialVerificationScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CredentialVerification"> | string
+  tenant_id?: Prisma.UuidFilter<"CredentialVerification"> | string
+  certificate_id?: Prisma.UuidFilter<"CredentialVerification"> | string
+  ip_hash?: Prisma.StringNullableFilter<"CredentialVerification"> | string | null
+  user_agent_hash?: Prisma.StringNullableFilter<"CredentialVerification"> | string | null
+  occurred_at?: Prisma.DateTimeFilter<"CredentialVerification"> | Date | string
+}
+
+export type CredentialVerificationCreateManyCertificateInput = {
+  id: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  occurred_at?: Date | string
+}
+
+export type CredentialVerificationUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CredentialVerificationUncheckedUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CredentialVerificationUncheckedUpdateManyWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type CredentialVerificationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -336,6 +467,7 @@ export type CredentialVerificationSelect<ExtArgs extends runtime.Types.Extension
   ip_hash?: boolean
   user_agent_hash?: boolean
   occurred_at?: boolean
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["credentialVerification"]>
 
 export type CredentialVerificationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -345,6 +477,7 @@ export type CredentialVerificationSelectCreateManyAndReturn<ExtArgs extends runt
   ip_hash?: boolean
   user_agent_hash?: boolean
   occurred_at?: boolean
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["credentialVerification"]>
 
 export type CredentialVerificationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -354,6 +487,7 @@ export type CredentialVerificationSelectUpdateManyAndReturn<ExtArgs extends runt
   ip_hash?: boolean
   user_agent_hash?: boolean
   occurred_at?: boolean
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["credentialVerification"]>
 
 export type CredentialVerificationSelectScalar = {
@@ -366,10 +500,21 @@ export type CredentialVerificationSelectScalar = {
 }
 
 export type CredentialVerificationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "certificate_id" | "ip_hash" | "user_agent_hash" | "occurred_at", ExtArgs["result"]["credentialVerification"]>
+export type CredentialVerificationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
+}
+export type CredentialVerificationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
+}
+export type CredentialVerificationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
+}
 
 export type $CredentialVerificationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CredentialVerification"
-  objects: {}
+  objects: {
+    certificate: Prisma.$CertificatePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -771,6 +916,7 @@ readonly fields: CredentialVerificationFieldRefs;
  */
 export interface Prisma__CredentialVerificationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  certificate<T extends Prisma.CertificateDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CertificateDefaultArgs<ExtArgs>>): Prisma.Prisma__CertificateClient<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -823,6 +969,10 @@ export type CredentialVerificationFindUniqueArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
+  /**
    * Filter, which CredentialVerification to fetch.
    */
   where: Prisma.CredentialVerificationWhereUniqueInput
@@ -841,6 +991,10 @@ export type CredentialVerificationFindUniqueOrThrowArgs<ExtArgs extends runtime.
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
+  /**
    * Filter, which CredentialVerification to fetch.
    */
   where: Prisma.CredentialVerificationWhereUniqueInput
@@ -858,6 +1012,10 @@ export type CredentialVerificationFindFirstArgs<ExtArgs extends runtime.Types.Ex
    * Omit specific fields from the CredentialVerification
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
   /**
    * Filter, which CredentialVerification to fetch.
    */
@@ -907,6 +1065,10 @@ export type CredentialVerificationFindFirstOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
+  /**
    * Filter, which CredentialVerification to fetch.
    */
   where?: Prisma.CredentialVerificationWhereInput
@@ -954,6 +1116,10 @@ export type CredentialVerificationFindManyArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the CredentialVerification
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
   /**
    * Filter, which CredentialVerifications to fetch.
    */
@@ -1003,6 +1169,10 @@ export type CredentialVerificationCreateArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
+  /**
    * The data needed to create a CredentialVerification.
    */
   data: Prisma.XOR<Prisma.CredentialVerificationCreateInput, Prisma.CredentialVerificationUncheckedCreateInput>
@@ -1036,6 +1206,10 @@ export type CredentialVerificationCreateManyAndReturnArgs<ExtArgs extends runtim
    */
   data: Prisma.CredentialVerificationCreateManyInput | Prisma.CredentialVerificationCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1050,6 +1224,10 @@ export type CredentialVerificationUpdateArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the CredentialVerification
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
   /**
    * The data needed to update a CredentialVerification.
    */
@@ -1102,6 +1280,10 @@ export type CredentialVerificationUpdateManyAndReturnArgs<ExtArgs extends runtim
    * Limit how many CredentialVerifications to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1116,6 +1298,10 @@ export type CredentialVerificationUpsertArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the CredentialVerification
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
   /**
    * The filter to search for the CredentialVerification to update in case it exists.
    */
@@ -1142,6 +1328,10 @@ export type CredentialVerificationDeleteArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the CredentialVerification
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
   /**
    * Filter which CredentialVerification to delete.
    */
@@ -1174,4 +1364,8 @@ export type CredentialVerificationDefaultArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CredentialVerification
    */
   omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
 }

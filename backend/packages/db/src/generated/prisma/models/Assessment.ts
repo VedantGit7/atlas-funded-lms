@@ -218,6 +218,8 @@ export type AssessmentWhereInput = {
   created_at?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
+  assessment_items?: Prisma.AssessmentItemListRelationFilter
+  attempts?: Prisma.AttemptListRelationFilter
 }
 
 export type AssessmentOrderByWithRelationInput = {
@@ -231,10 +233,13 @@ export type AssessmentOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  assessment_items?: Prisma.AssessmentItemOrderByRelationAggregateInput
+  attempts?: Prisma.AttemptOrderByRelationAggregateInput
 }
 
 export type AssessmentWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.AssessmentTenant_idIdCompoundUniqueInput
   tenant_id_slug?: Prisma.AssessmentTenant_idSlugCompoundUniqueInput
   AND?: Prisma.AssessmentWhereInput | Prisma.AssessmentWhereInput[]
   OR?: Prisma.AssessmentWhereInput[]
@@ -248,7 +253,9 @@ export type AssessmentWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
-}, "id" | "tenant_id_slug">
+  assessment_items?: Prisma.AssessmentItemListRelationFilter
+  attempts?: Prisma.AttemptListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_slug">
 
 export type AssessmentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -293,6 +300,8 @@ export type AssessmentCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutAssessmentInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutAssessmentInput
 }
 
 export type AssessmentUncheckedCreateInput = {
@@ -306,6 +315,8 @@ export type AssessmentUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutAssessmentInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutAssessmentInput
 }
 
 export type AssessmentUpdateInput = {
@@ -319,6 +330,8 @@ export type AssessmentUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutAssessmentNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutAssessmentNestedInput
 }
 
 export type AssessmentUncheckedUpdateInput = {
@@ -332,6 +345,8 @@ export type AssessmentUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutAssessmentNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutAssessmentNestedInput
 }
 
 export type AssessmentCreateManyInput = {
@@ -371,6 +386,11 @@ export type AssessmentUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type AssessmentTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type AssessmentTenant_idSlugCompoundUniqueInput = {
@@ -415,6 +435,221 @@ export type AssessmentMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type AssessmentScalarRelationFilter = {
+  is?: Prisma.AssessmentWhereInput
+  isNot?: Prisma.AssessmentWhereInput
+}
+
+export type AssessmentCreateNestedOneWithoutAssessment_itemsInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAssessment_itemsInput, Prisma.AssessmentUncheckedCreateWithoutAssessment_itemsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAssessment_itemsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+}
+
+export type AssessmentUpdateOneRequiredWithoutAssessment_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAssessment_itemsInput, Prisma.AssessmentUncheckedCreateWithoutAssessment_itemsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAssessment_itemsInput
+  upsert?: Prisma.AssessmentUpsertWithoutAssessment_itemsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentUpdateToOneWithWhereWithoutAssessment_itemsInput, Prisma.AssessmentUpdateWithoutAssessment_itemsInput>, Prisma.AssessmentUncheckedUpdateWithoutAssessment_itemsInput>
+}
+
+export type AssessmentCreateNestedOneWithoutAttemptsInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAttemptsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+}
+
+export type AssessmentUpdateOneRequiredWithoutAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAttemptsInput
+  upsert?: Prisma.AssessmentUpsertWithoutAttemptsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentUpdateToOneWithWhereWithoutAttemptsInput, Prisma.AssessmentUpdateWithoutAttemptsInput>, Prisma.AssessmentUncheckedUpdateWithoutAttemptsInput>
+}
+
+export type AssessmentCreateWithoutAssessment_itemsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  assessment_type: string
+  status?: $Enums.PublishStatus
+  config_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  attempts?: Prisma.AttemptCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentUncheckedCreateWithoutAssessment_itemsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  assessment_type: string
+  status?: $Enums.PublishStatus
+  config_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentCreateOrConnectWithoutAssessment_itemsInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutAssessment_itemsInput, Prisma.AssessmentUncheckedCreateWithoutAssessment_itemsInput>
+}
+
+export type AssessmentUpsertWithoutAssessment_itemsInput = {
+  update: Prisma.XOR<Prisma.AssessmentUpdateWithoutAssessment_itemsInput, Prisma.AssessmentUncheckedUpdateWithoutAssessment_itemsInput>
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutAssessment_itemsInput, Prisma.AssessmentUncheckedCreateWithoutAssessment_itemsInput>
+  where?: Prisma.AssessmentWhereInput
+}
+
+export type AssessmentUpdateToOneWithWhereWithoutAssessment_itemsInput = {
+  where?: Prisma.AssessmentWhereInput
+  data: Prisma.XOR<Prisma.AssessmentUpdateWithoutAssessment_itemsInput, Prisma.AssessmentUncheckedUpdateWithoutAssessment_itemsInput>
+}
+
+export type AssessmentUpdateWithoutAssessment_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.AttemptUpdateManyWithoutAssessmentNestedInput
+}
+
+export type AssessmentUncheckedUpdateWithoutAssessment_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutAssessmentNestedInput
+}
+
+export type AssessmentCreateWithoutAttemptsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  assessment_type: string
+  status?: $Enums.PublishStatus
+  config_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentUncheckedCreateWithoutAttemptsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  assessment_type: string
+  status?: $Enums.PublishStatus
+  config_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentCreateOrConnectWithoutAttemptsInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
+}
+
+export type AssessmentUpsertWithoutAttemptsInput = {
+  update: Prisma.XOR<Prisma.AssessmentUpdateWithoutAttemptsInput, Prisma.AssessmentUncheckedUpdateWithoutAttemptsInput>
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
+  where?: Prisma.AssessmentWhereInput
+}
+
+export type AssessmentUpdateToOneWithWhereWithoutAttemptsInput = {
+  where?: Prisma.AssessmentWhereInput
+  data: Prisma.XOR<Prisma.AssessmentUpdateWithoutAttemptsInput, Prisma.AssessmentUncheckedUpdateWithoutAttemptsInput>
+}
+
+export type AssessmentUpdateWithoutAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutAssessmentNestedInput
+}
+
+export type AssessmentUncheckedUpdateWithoutAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  config_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutAssessmentNestedInput
+}
+
+
+/**
+ * Count Type AssessmentCountOutputType
+ */
+
+export type AssessmentCountOutputType = {
+  assessment_items: number
+  attempts: number
+}
+
+export type AssessmentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment_items?: boolean | AssessmentCountOutputTypeCountAssessment_itemsArgs
+  attempts?: boolean | AssessmentCountOutputTypeCountAttemptsArgs
+}
+
+/**
+ * AssessmentCountOutputType without action
+ */
+export type AssessmentCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssessmentCountOutputType
+   */
+  select?: Prisma.AssessmentCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * AssessmentCountOutputType without action
+ */
+export type AssessmentCountOutputTypeCountAssessment_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssessmentItemWhereInput
+}
+
+/**
+ * AssessmentCountOutputType without action
+ */
+export type AssessmentCountOutputTypeCountAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AttemptWhereInput
+}
 
 
 export type AssessmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -428,6 +663,9 @@ export type AssessmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  assessment_items?: boolean | Prisma.Assessment$assessment_itemsArgs<ExtArgs>
+  attempts?: boolean | Prisma.Assessment$attemptsArgs<ExtArgs>
+  _count?: boolean | Prisma.AssessmentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["assessment"]>
 
 export type AssessmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -470,10 +708,20 @@ export type AssessmentSelectScalar = {
 }
 
 export type AssessmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "slug" | "title" | "assessment_type" | "status" | "config_json" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["assessment"]>
+export type AssessmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment_items?: boolean | Prisma.Assessment$assessment_itemsArgs<ExtArgs>
+  attempts?: boolean | Prisma.Assessment$attemptsArgs<ExtArgs>
+  _count?: boolean | Prisma.AssessmentCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type AssessmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type AssessmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $AssessmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Assessment"
-  objects: {}
+  objects: {
+    assessment_items: Prisma.$AssessmentItemPayload<ExtArgs>[]
+    attempts: Prisma.$AttemptPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -879,6 +1127,8 @@ readonly fields: AssessmentFieldRefs;
  */
 export interface Prisma__AssessmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  assessment_items<T extends Prisma.Assessment$assessment_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assessment$assessment_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssessmentItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  attempts<T extends Prisma.Assessment$attemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assessment$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -935,6 +1185,10 @@ export type AssessmentFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  /**
    * Filter, which Assessment to fetch.
    */
   where: Prisma.AssessmentWhereUniqueInput
@@ -953,6 +1207,10 @@ export type AssessmentFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  /**
    * Filter, which Assessment to fetch.
    */
   where: Prisma.AssessmentWhereUniqueInput
@@ -970,6 +1228,10 @@ export type AssessmentFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the Assessment
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
   /**
    * Filter, which Assessment to fetch.
    */
@@ -1019,6 +1281,10 @@ export type AssessmentFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  /**
    * Filter, which Assessment to fetch.
    */
   where?: Prisma.AssessmentWhereInput
@@ -1066,6 +1332,10 @@ export type AssessmentFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the Assessment
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
   /**
    * Filter, which Assessments to fetch.
    */
@@ -1115,6 +1385,10 @@ export type AssessmentCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  /**
    * The data needed to create a Assessment.
    */
   data: Prisma.XOR<Prisma.AssessmentCreateInput, Prisma.AssessmentUncheckedCreateInput>
@@ -1162,6 +1436,10 @@ export type AssessmentUpdateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the Assessment
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
   /**
    * The data needed to update a Assessment.
    */
@@ -1229,6 +1507,10 @@ export type AssessmentUpsertArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  /**
    * The filter to search for the Assessment to update in case it exists.
    */
   where: Prisma.AssessmentWhereUniqueInput
@@ -1255,6 +1537,10 @@ export type AssessmentDeleteArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  /**
    * Filter which Assessment to delete.
    */
   where: Prisma.AssessmentWhereUniqueInput
@@ -1275,6 +1561,54 @@ export type AssessmentDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * Assessment.assessment_items
+ */
+export type Assessment$assessment_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssessmentItem
+   */
+  select?: Prisma.AssessmentItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssessmentItem
+   */
+  omit?: Prisma.AssessmentItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentItemInclude<ExtArgs> | null
+  where?: Prisma.AssessmentItemWhereInput
+  orderBy?: Prisma.AssessmentItemOrderByWithRelationInput | Prisma.AssessmentItemOrderByWithRelationInput[]
+  cursor?: Prisma.AssessmentItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssessmentItemScalarFieldEnum | Prisma.AssessmentItemScalarFieldEnum[]
+}
+
+/**
+ * Assessment.attempts
+ */
+export type Assessment$attemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attempt
+   */
+  select?: Prisma.AttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attempt
+   */
+  omit?: Prisma.AttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptInclude<ExtArgs> | null
+  where?: Prisma.AttemptWhereInput
+  orderBy?: Prisma.AttemptOrderByWithRelationInput | Prisma.AttemptOrderByWithRelationInput[]
+  cursor?: Prisma.AttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AttemptScalarFieldEnum | Prisma.AttemptScalarFieldEnum[]
+}
+
+/**
  * Assessment without action
  */
 export type AssessmentDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1286,4 +1620,8 @@ export type AssessmentDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the Assessment
    */
   omit?: Prisma.AssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
 }

@@ -1,0 +1,273 @@
+/**
+ * The composite tenant foreign keys of audit M3 (migrations 120 and 121).
+ *
+ * Each child row's (tenant_id, column) must name a parent row of the same
+ * tenant. Shared by the integrity check and its test, which also asserts this
+ * list matches the migration exactly.
+ */
+export const TENANT_FOREIGN_KEYS = [
+  {
+    child: "course_modules",
+    column: "course_id",
+    parent: "courses",
+    name: "course_modules_course_id_tenant_fkey",
+  },
+  {
+    child: "lessons",
+    column: "module_id",
+    parent: "course_modules",
+    name: "lessons_module_id_tenant_fkey",
+  },
+  {
+    child: "lesson_assets",
+    column: "lesson_id",
+    parent: "lessons",
+    name: "lesson_assets_lesson_id_tenant_fkey",
+  },
+  {
+    child: "lesson_progress",
+    column: "lesson_id",
+    parent: "lessons",
+    name: "lesson_progress_lesson_id_tenant_fkey",
+  },
+  {
+    child: "lesson_progress",
+    column: "membership_id",
+    parent: "memberships",
+    name: "lesson_progress_membership_id_tenant_fkey",
+  },
+  {
+    child: "enrollments",
+    column: "course_id",
+    parent: "courses",
+    name: "enrollments_course_id_tenant_fkey",
+  },
+  {
+    child: "enrollments",
+    column: "membership_id",
+    parent: "memberships",
+    name: "enrollments_membership_id_tenant_fkey",
+  },
+  {
+    child: "assessment_items",
+    column: "assessment_id",
+    parent: "assessments",
+    name: "assessment_items_assessment_id_tenant_fkey",
+  },
+  {
+    child: "assessment_items",
+    column: "item_id",
+    parent: "items",
+    name: "assessment_items_item_id_tenant_fkey",
+  },
+  {
+    child: "item_options",
+    column: "item_id",
+    parent: "items",
+    name: "item_options_item_id_tenant_fkey",
+  },
+  {
+    child: "attempts",
+    column: "assessment_id",
+    parent: "assessments",
+    name: "attempts_assessment_id_tenant_fkey",
+  },
+  {
+    child: "attempts",
+    column: "membership_id",
+    parent: "memberships",
+    name: "attempts_membership_id_tenant_fkey",
+  },
+  {
+    child: "attempt_answers",
+    column: "attempt_id",
+    parent: "attempts",
+    name: "attempt_answers_attempt_id_tenant_fkey",
+  },
+  {
+    child: "attempt_answers",
+    column: "assessment_item_id",
+    parent: "assessment_items",
+    name: "attempt_answers_assessment_item_id_tenant_fkey",
+  },
+  {
+    child: "grading_tasks",
+    column: "attempt_id",
+    parent: "attempts",
+    name: "grading_tasks_attempt_id_tenant_fkey",
+  },
+  {
+    child: "proctoring_sessions",
+    column: "attempt_id",
+    parent: "attempts",
+    name: "proctoring_sessions_attempt_id_tenant_fkey",
+  },
+  {
+    child: "proctoring_sessions",
+    column: "membership_id",
+    parent: "memberships",
+    name: "proctoring_sessions_membership_id_tenant_fkey",
+  },
+  {
+    child: "proctoring_events",
+    column: "proctoring_session_id",
+    parent: "proctoring_sessions",
+    name: "proctoring_events_proctoring_session_id_tenant_fkey",
+  },
+  {
+    child: "certificates",
+    column: "membership_id",
+    parent: "memberships",
+    name: "certificates_membership_id_tenant_fkey",
+  },
+  {
+    child: "certificate_wallet_passes",
+    column: "certificate_id",
+    parent: "certificates",
+    name: "certificate_wallet_passes_certificate_id_tenant_fkey",
+  },
+  {
+    child: "credential_verifications",
+    column: "certificate_id",
+    parent: "certificates",
+    name: "credential_verifications_certificate_id_tenant_fkey",
+  },
+  {
+    child: "certificate_render_jobs",
+    column: "certificate_id",
+    parent: "certificates",
+    name: "certificate_render_jobs_certificate_id_tenant_fkey",
+  },
+  {
+    child: "payment_orders",
+    column: "membership_id",
+    parent: "memberships",
+    name: "payment_orders_membership_id_tenant_fkey",
+  },
+  {
+    child: "payment_instalments",
+    column: "payment_order_id",
+    parent: "payment_orders",
+    name: "payment_instalments_payment_order_id_tenant_fkey",
+  },
+  {
+    child: "payment_instalment_plans",
+    column: "membership_id",
+    parent: "memberships",
+    name: "payment_instalment_plans_membership_id_tenant_fkey",
+  },
+  {
+    child: "sales_coupon_redemptions",
+    column: "coupon_id",
+    parent: "sales_coupons",
+    name: "sales_coupon_redemptions_coupon_id_tenant_fkey",
+  },
+  {
+    child: "sales_coupon_redemptions",
+    column: "payment_order_id",
+    parent: "payment_orders",
+    name: "sales_coupon_redemptions_payment_order_id_tenant_fkey",
+  },
+  {
+    child: "sales_coupon_redemptions",
+    column: "membership_id",
+    parent: "memberships",
+    name: "sales_coupon_redemptions_membership_id_tenant_fkey",
+  },
+  {
+    child: "sales_coupon_redemptions",
+    column: "course_id",
+    parent: "courses",
+    name: "sales_coupon_redemptions_course_id_tenant_fkey",
+  },
+  {
+    child: "sales_coupon_courses",
+    column: "coupon_id",
+    parent: "sales_coupons",
+    name: "sales_coupon_courses_coupon_id_tenant_fkey",
+  },
+  {
+    child: "sales_coupon_courses",
+    column: "course_id",
+    parent: "courses",
+    name: "sales_coupon_courses_course_id_tenant_fkey",
+  },
+  {
+    child: "sales_wallets",
+    column: "membership_id",
+    parent: "memberships",
+    name: "sales_wallets_membership_id_tenant_fkey",
+  },
+  {
+    child: "sales_wallet_transactions",
+    column: "wallet_id",
+    parent: "sales_wallets",
+    name: "sales_wallet_transactions_wallet_id_tenant_fkey",
+  },
+  {
+    child: "sales_wallet_transactions",
+    column: "payment_order_id",
+    parent: "payment_orders",
+    name: "sales_wallet_transactions_payment_order_id_tenant_fkey",
+  },
+  {
+    child: "sales_wallet_transactions",
+    column: "membership_id",
+    parent: "memberships",
+    name: "sales_wallet_transactions_membership_id_tenant_fkey",
+  },
+  {
+    child: "sales_wallet_transactions",
+    column: "course_id",
+    parent: "courses",
+    name: "sales_wallet_transactions_course_id_tenant_fkey",
+  },
+  {
+    child: "sales_affiliate_commissions",
+    column: "affiliate_id",
+    parent: "sales_affiliates",
+    name: "sales_affiliate_commissions_affiliate_id_tenant_fkey",
+  },
+  {
+    child: "sales_affiliate_commissions",
+    column: "payment_order_id",
+    parent: "payment_orders",
+    name: "sales_affiliate_commissions_payment_order_id_tenant_fkey",
+  },
+  {
+    child: "sales_affiliate_commissions",
+    column: "course_id",
+    parent: "courses",
+    name: "sales_affiliate_commissions_course_id_tenant_fkey",
+  },
+  {
+    child: "sales_referral_purchase_credits",
+    column: "payment_order_id",
+    parent: "payment_orders",
+    name: "sales_referral_purchase_credits_payment_order_id_tenant_fkey",
+  },
+  {
+    child: "role_permissions",
+    column: "role_id",
+    parent: "roles",
+    name: "role_permissions_role_id_tenant_fkey",
+  },
+  {
+    child: "user_roles",
+    column: "role_id",
+    parent: "roles",
+    name: "user_roles_role_id_tenant_fkey",
+  },
+  {
+    child: "user_roles",
+    column: "membership_id",
+    parent: "memberships",
+    name: "user_roles_membership_id_tenant_fkey",
+  },
+  {
+    child: "permission_overrides",
+    column: "membership_id",
+    parent: "memberships",
+    name: "permission_overrides_membership_id_tenant_fkey",
+  },
+];

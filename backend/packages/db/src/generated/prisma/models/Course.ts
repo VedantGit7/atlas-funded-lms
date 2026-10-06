@@ -226,6 +226,12 @@ export type CourseWhereInput = {
   created_at?: Prisma.DateTimeFilter<"Course"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Course"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Course"> | Date | string | null
+  course_modules?: Prisma.CourseModuleListRelationFilter
+  enrollments?: Prisma.EnrollmentListRelationFilter
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionListRelationFilter
+  sales_coupon_courses?: Prisma.SalesCouponCourseListRelationFilter
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionListRelationFilter
 }
 
 export type CourseOrderByWithRelationInput = {
@@ -240,10 +246,17 @@ export type CourseOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  course_modules?: Prisma.CourseModuleOrderByRelationAggregateInput
+  enrollments?: Prisma.EnrollmentOrderByRelationAggregateInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionOrderByRelationAggregateInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseOrderByRelationAggregateInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionOrderByRelationAggregateInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionOrderByRelationAggregateInput
 }
 
 export type CourseWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.CourseTenant_idIdCompoundUniqueInput
   AND?: Prisma.CourseWhereInput | Prisma.CourseWhereInput[]
   OR?: Prisma.CourseWhereInput[]
   NOT?: Prisma.CourseWhereInput | Prisma.CourseWhereInput[]
@@ -257,7 +270,13 @@ export type CourseWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"Course"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Course"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Course"> | Date | string | null
-}, "id">
+  course_modules?: Prisma.CourseModuleListRelationFilter
+  enrollments?: Prisma.EnrollmentListRelationFilter
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionListRelationFilter
+  sales_coupon_courses?: Prisma.SalesCouponCourseListRelationFilter
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type CourseOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -305,6 +324,12 @@ export type CourseCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUncheckedCreateInput = {
@@ -319,6 +344,12 @@ export type CourseUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutCourseInput
 }
 
 export type CourseUpdateInput = {
@@ -333,6 +364,12 @@ export type CourseUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseUncheckedUpdateInput = {
@@ -347,6 +384,12 @@ export type CourseUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateManyInput = {
@@ -391,6 +434,11 @@ export type CourseUncheckedUpdateManyInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type CourseTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type CourseCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -431,10 +479,734 @@ export type CourseMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type CourseScalarRelationFilter = {
+  is?: Prisma.CourseWhereInput
+  isNot?: Prisma.CourseWhereInput
+}
+
+export type CourseNullableScalarRelationFilter = {
+  is?: Prisma.CourseWhereInput | null
+  isNot?: Prisma.CourseWhereInput | null
+}
+
 export type EnumPublishStatusFieldUpdateOperationsInput = {
   set?: $Enums.PublishStatus
 }
 
+export type CourseCreateNestedOneWithoutCourse_modulesInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutCourse_modulesInput, Prisma.CourseUncheckedCreateWithoutCourse_modulesInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutCourse_modulesInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneRequiredWithoutCourse_modulesNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutCourse_modulesInput, Prisma.CourseUncheckedCreateWithoutCourse_modulesInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutCourse_modulesInput
+  upsert?: Prisma.CourseUpsertWithoutCourse_modulesInput
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutCourse_modulesInput, Prisma.CourseUpdateWithoutCourse_modulesInput>, Prisma.CourseUncheckedUpdateWithoutCourse_modulesInput>
+}
+
+export type CourseCreateNestedOneWithoutEnrollmentsInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutEnrollmentsInput, Prisma.CourseUncheckedCreateWithoutEnrollmentsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutEnrollmentsInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneRequiredWithoutEnrollmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutEnrollmentsInput, Prisma.CourseUncheckedCreateWithoutEnrollmentsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutEnrollmentsInput
+  upsert?: Prisma.CourseUpsertWithoutEnrollmentsInput
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutEnrollmentsInput, Prisma.CourseUpdateWithoutEnrollmentsInput>, Prisma.CourseUncheckedUpdateWithoutEnrollmentsInput>
+}
+
+export type CourseCreateNestedOneWithoutSales_coupon_coursesInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_coursesInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_coursesInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_coupon_coursesInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneRequiredWithoutSales_coupon_coursesNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_coursesInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_coursesInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_coupon_coursesInput
+  upsert?: Prisma.CourseUpsertWithoutSales_coupon_coursesInput
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutSales_coupon_coursesInput, Prisma.CourseUpdateWithoutSales_coupon_coursesInput>, Prisma.CourseUncheckedUpdateWithoutSales_coupon_coursesInput>
+}
+
+export type CourseCreateNestedOneWithoutSales_coupon_redemptionsInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_redemptionsInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_coupon_redemptionsInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneWithoutSales_coupon_redemptionsNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_redemptionsInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_coupon_redemptionsInput
+  upsert?: Prisma.CourseUpsertWithoutSales_coupon_redemptionsInput
+  disconnect?: Prisma.CourseWhereInput | boolean
+  delete?: Prisma.CourseWhereInput | boolean
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutSales_coupon_redemptionsInput, Prisma.CourseUpdateWithoutSales_coupon_redemptionsInput>, Prisma.CourseUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+}
+
+export type CourseCreateNestedOneWithoutSales_wallet_transactionsInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_wallet_transactionsInput, Prisma.CourseUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_wallet_transactionsInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneWithoutSales_wallet_transactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_wallet_transactionsInput, Prisma.CourseUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_wallet_transactionsInput
+  upsert?: Prisma.CourseUpsertWithoutSales_wallet_transactionsInput
+  disconnect?: Prisma.CourseWhereInput | boolean
+  delete?: Prisma.CourseWhereInput | boolean
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutSales_wallet_transactionsInput, Prisma.CourseUpdateWithoutSales_wallet_transactionsInput>, Prisma.CourseUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
+export type CourseCreateNestedOneWithoutSales_affiliate_commissionsInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_affiliate_commissionsInput, Prisma.CourseUncheckedCreateWithoutSales_affiliate_commissionsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_affiliate_commissionsInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneRequiredWithoutSales_affiliate_commissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutSales_affiliate_commissionsInput, Prisma.CourseUncheckedCreateWithoutSales_affiliate_commissionsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSales_affiliate_commissionsInput
+  upsert?: Prisma.CourseUpsertWithoutSales_affiliate_commissionsInput
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutSales_affiliate_commissionsInput, Prisma.CourseUpdateWithoutSales_affiliate_commissionsInput>, Prisma.CourseUncheckedUpdateWithoutSales_affiliate_commissionsInput>
+}
+
+export type CourseCreateWithoutCourse_modulesInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutCourse_modulesInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutCourse_modulesInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutCourse_modulesInput, Prisma.CourseUncheckedCreateWithoutCourse_modulesInput>
+}
+
+export type CourseUpsertWithoutCourse_modulesInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutCourse_modulesInput, Prisma.CourseUncheckedUpdateWithoutCourse_modulesInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutCourse_modulesInput, Prisma.CourseUncheckedCreateWithoutCourse_modulesInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutCourse_modulesInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutCourse_modulesInput, Prisma.CourseUncheckedUpdateWithoutCourse_modulesInput>
+}
+
+export type CourseUpdateWithoutCourse_modulesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutCourse_modulesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseCreateWithoutEnrollmentsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutEnrollmentsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutEnrollmentsInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutEnrollmentsInput, Prisma.CourseUncheckedCreateWithoutEnrollmentsInput>
+}
+
+export type CourseUpsertWithoutEnrollmentsInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutEnrollmentsInput, Prisma.CourseUncheckedUpdateWithoutEnrollmentsInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutEnrollmentsInput, Prisma.CourseUncheckedCreateWithoutEnrollmentsInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutEnrollmentsInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutEnrollmentsInput, Prisma.CourseUncheckedUpdateWithoutEnrollmentsInput>
+}
+
+export type CourseUpdateWithoutEnrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutEnrollmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseCreateWithoutSales_coupon_coursesInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutSales_coupon_coursesInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutSales_coupon_coursesInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_coursesInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_coursesInput>
+}
+
+export type CourseUpsertWithoutSales_coupon_coursesInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutSales_coupon_coursesInput, Prisma.CourseUncheckedUpdateWithoutSales_coupon_coursesInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_coursesInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_coursesInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutSales_coupon_coursesInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutSales_coupon_coursesInput, Prisma.CourseUncheckedUpdateWithoutSales_coupon_coursesInput>
+}
+
+export type CourseUpdateWithoutSales_coupon_coursesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutSales_coupon_coursesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseCreateWithoutSales_coupon_redemptionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutSales_coupon_redemptionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutSales_coupon_redemptionsInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_redemptionsInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_redemptionsInput>
+}
+
+export type CourseUpsertWithoutSales_coupon_redemptionsInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutSales_coupon_redemptionsInput, Prisma.CourseUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_coupon_redemptionsInput, Prisma.CourseUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutSales_coupon_redemptionsInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutSales_coupon_redemptionsInput, Prisma.CourseUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+}
+
+export type CourseUpdateWithoutSales_coupon_redemptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutSales_coupon_redemptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedCreateNestedManyWithoutCourseInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutSales_wallet_transactionsInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_wallet_transactionsInput, Prisma.CourseUncheckedCreateWithoutSales_wallet_transactionsInput>
+}
+
+export type CourseUpsertWithoutSales_wallet_transactionsInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutSales_wallet_transactionsInput, Prisma.CourseUncheckedUpdateWithoutSales_wallet_transactionsInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_wallet_transactionsInput, Prisma.CourseUncheckedCreateWithoutSales_wallet_transactionsInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutSales_wallet_transactionsInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutSales_wallet_transactionsInput, Prisma.CourseUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
+export type CourseUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCourseNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseCreateWithoutSales_affiliate_commissionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutSales_affiliate_commissionsInput = {
+  id: string
+  tenant_id: string
+  slug: string
+  title: string
+  description?: string | null
+  status?: $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutCourseInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedCreateNestedManyWithoutCourseInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutSales_affiliate_commissionsInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_affiliate_commissionsInput, Prisma.CourseUncheckedCreateWithoutSales_affiliate_commissionsInput>
+}
+
+export type CourseUpsertWithoutSales_affiliate_commissionsInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutSales_affiliate_commissionsInput, Prisma.CourseUncheckedUpdateWithoutSales_affiliate_commissionsInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutSales_affiliate_commissionsInput, Prisma.CourseUncheckedCreateWithoutSales_affiliate_commissionsInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutSales_affiliate_commissionsInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutSales_affiliate_commissionsInput, Prisma.CourseUncheckedUpdateWithoutSales_affiliate_commissionsInput>
+}
+
+export type CourseUpdateWithoutSales_affiliate_commissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutSales_affiliate_commissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course_modules?: Prisma.CourseModuleUncheckedUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCourseNestedInput
+  sales_coupon_courses?: Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCourseNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutCourseNestedInput
+}
+
+
+/**
+ * Count Type CourseCountOutputType
+ */
+
+export type CourseCountOutputType = {
+  course_modules: number
+  enrollments: number
+  sales_coupon_redemptions: number
+  sales_coupon_courses: number
+  sales_wallet_transactions: number
+  sales_affiliate_commissions: number
+}
+
+export type CourseCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course_modules?: boolean | CourseCountOutputTypeCountCourse_modulesArgs
+  enrollments?: boolean | CourseCountOutputTypeCountEnrollmentsArgs
+  sales_coupon_redemptions?: boolean | CourseCountOutputTypeCountSales_coupon_redemptionsArgs
+  sales_coupon_courses?: boolean | CourseCountOutputTypeCountSales_coupon_coursesArgs
+  sales_wallet_transactions?: boolean | CourseCountOutputTypeCountSales_wallet_transactionsArgs
+  sales_affiliate_commissions?: boolean | CourseCountOutputTypeCountSales_affiliate_commissionsArgs
+}
+
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CourseCountOutputType
+   */
+  select?: Prisma.CourseCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeCountCourse_modulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CourseModuleWhereInput
+}
+
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeCountEnrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EnrollmentWhereInput
+}
+
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeCountSales_coupon_redemptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesCouponRedemptionWhereInput
+}
+
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeCountSales_coupon_coursesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesCouponCourseWhereInput
+}
+
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeCountSales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesWalletTransactionWhereInput
+}
+
+/**
+ * CourseCountOutputType without action
+ */
+export type CourseCountOutputTypeCountSales_affiliate_commissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesAffiliateCommissionWhereInput
+}
 
 
 export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -449,6 +1221,13 @@ export type CourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  course_modules?: boolean | Prisma.Course$course_modulesArgs<ExtArgs>
+  enrollments?: boolean | Prisma.Course$enrollmentsArgs<ExtArgs>
+  sales_coupon_redemptions?: boolean | Prisma.Course$sales_coupon_redemptionsArgs<ExtArgs>
+  sales_coupon_courses?: boolean | Prisma.Course$sales_coupon_coursesArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.Course$sales_wallet_transactionsArgs<ExtArgs>
+  sales_affiliate_commissions?: boolean | Prisma.Course$sales_affiliate_commissionsArgs<ExtArgs>
+  _count?: boolean | Prisma.CourseCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["course"]>
 
 export type CourseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -494,10 +1273,28 @@ export type CourseSelectScalar = {
 }
 
 export type CourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "slug" | "title" | "description" | "status" | "metadata_json" | "created_by_membership_id" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["course"]>
+export type CourseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course_modules?: boolean | Prisma.Course$course_modulesArgs<ExtArgs>
+  enrollments?: boolean | Prisma.Course$enrollmentsArgs<ExtArgs>
+  sales_coupon_redemptions?: boolean | Prisma.Course$sales_coupon_redemptionsArgs<ExtArgs>
+  sales_coupon_courses?: boolean | Prisma.Course$sales_coupon_coursesArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.Course$sales_wallet_transactionsArgs<ExtArgs>
+  sales_affiliate_commissions?: boolean | Prisma.Course$sales_affiliate_commissionsArgs<ExtArgs>
+  _count?: boolean | Prisma.CourseCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CourseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type CourseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $CoursePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Course"
-  objects: {}
+  objects: {
+    course_modules: Prisma.$CourseModulePayload<ExtArgs>[]
+    enrollments: Prisma.$EnrollmentPayload<ExtArgs>[]
+    sales_coupon_redemptions: Prisma.$SalesCouponRedemptionPayload<ExtArgs>[]
+    sales_coupon_courses: Prisma.$SalesCouponCoursePayload<ExtArgs>[]
+    sales_wallet_transactions: Prisma.$SalesWalletTransactionPayload<ExtArgs>[]
+    sales_affiliate_commissions: Prisma.$SalesAffiliateCommissionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -904,6 +1701,12 @@ readonly fields: CourseFieldRefs;
  */
 export interface Prisma__CourseClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  course_modules<T extends Prisma.Course$course_modulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$course_modulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CourseModulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  enrollments<T extends Prisma.Course$enrollmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$enrollmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EnrollmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_coupon_redemptions<T extends Prisma.Course$sales_coupon_redemptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$sales_coupon_redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesCouponRedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_coupon_courses<T extends Prisma.Course$sales_coupon_coursesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$sales_coupon_coursesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesCouponCoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_wallet_transactions<T extends Prisma.Course$sales_wallet_transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$sales_wallet_transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesWalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_affiliate_commissions<T extends Prisma.Course$sales_affiliate_commissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Course$sales_affiliate_commissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesAffiliateCommissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -961,6 +1764,10 @@ export type CourseFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  /**
    * Filter, which Course to fetch.
    */
   where: Prisma.CourseWhereUniqueInput
@@ -979,6 +1786,10 @@ export type CourseFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  /**
    * Filter, which Course to fetch.
    */
   where: Prisma.CourseWhereUniqueInput
@@ -996,6 +1807,10 @@ export type CourseFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the Course
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
   /**
    * Filter, which Course to fetch.
    */
@@ -1045,6 +1860,10 @@ export type CourseFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  /**
    * Filter, which Course to fetch.
    */
   where?: Prisma.CourseWhereInput
@@ -1092,6 +1911,10 @@ export type CourseFindManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the Course
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
   /**
    * Filter, which Courses to fetch.
    */
@@ -1141,6 +1964,10 @@ export type CourseCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  /**
    * The data needed to create a Course.
    */
   data: Prisma.XOR<Prisma.CourseCreateInput, Prisma.CourseUncheckedCreateInput>
@@ -1188,6 +2015,10 @@ export type CourseUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the Course
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
   /**
    * The data needed to update a Course.
    */
@@ -1255,6 +2086,10 @@ export type CourseUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  /**
    * The filter to search for the Course to update in case it exists.
    */
   where: Prisma.CourseWhereUniqueInput
@@ -1281,6 +2116,10 @@ export type CourseDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  /**
    * Filter which Course to delete.
    */
   where: Prisma.CourseWhereUniqueInput
@@ -1301,6 +2140,150 @@ export type CourseDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
+ * Course.course_modules
+ */
+export type Course$course_modulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CourseModule
+   */
+  select?: Prisma.CourseModuleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CourseModule
+   */
+  omit?: Prisma.CourseModuleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseModuleInclude<ExtArgs> | null
+  where?: Prisma.CourseModuleWhereInput
+  orderBy?: Prisma.CourseModuleOrderByWithRelationInput | Prisma.CourseModuleOrderByWithRelationInput[]
+  cursor?: Prisma.CourseModuleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CourseModuleScalarFieldEnum | Prisma.CourseModuleScalarFieldEnum[]
+}
+
+/**
+ * Course.enrollments
+ */
+export type Course$enrollmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Enrollment
+   */
+  select?: Prisma.EnrollmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Enrollment
+   */
+  omit?: Prisma.EnrollmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EnrollmentInclude<ExtArgs> | null
+  where?: Prisma.EnrollmentWhereInput
+  orderBy?: Prisma.EnrollmentOrderByWithRelationInput | Prisma.EnrollmentOrderByWithRelationInput[]
+  cursor?: Prisma.EnrollmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EnrollmentScalarFieldEnum | Prisma.EnrollmentScalarFieldEnum[]
+}
+
+/**
+ * Course.sales_coupon_redemptions
+ */
+export type Course$sales_coupon_redemptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesCouponRedemption
+   */
+  select?: Prisma.SalesCouponRedemptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesCouponRedemption
+   */
+  omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  where?: Prisma.SalesCouponRedemptionWhereInput
+  orderBy?: Prisma.SalesCouponRedemptionOrderByWithRelationInput | Prisma.SalesCouponRedemptionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesCouponRedemptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesCouponRedemptionScalarFieldEnum | Prisma.SalesCouponRedemptionScalarFieldEnum[]
+}
+
+/**
+ * Course.sales_coupon_courses
+ */
+export type Course$sales_coupon_coursesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesCouponCourse
+   */
+  select?: Prisma.SalesCouponCourseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesCouponCourse
+   */
+  omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
+  where?: Prisma.SalesCouponCourseWhereInput
+  orderBy?: Prisma.SalesCouponCourseOrderByWithRelationInput | Prisma.SalesCouponCourseOrderByWithRelationInput[]
+  cursor?: Prisma.SalesCouponCourseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesCouponCourseScalarFieldEnum | Prisma.SalesCouponCourseScalarFieldEnum[]
+}
+
+/**
+ * Course.sales_wallet_transactions
+ */
+export type Course$sales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesWalletTransaction
+   */
+  select?: Prisma.SalesWalletTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesWalletTransaction
+   */
+  omit?: Prisma.SalesWalletTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletTransactionInclude<ExtArgs> | null
+  where?: Prisma.SalesWalletTransactionWhereInput
+  orderBy?: Prisma.SalesWalletTransactionOrderByWithRelationInput | Prisma.SalesWalletTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesWalletTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesWalletTransactionScalarFieldEnum | Prisma.SalesWalletTransactionScalarFieldEnum[]
+}
+
+/**
+ * Course.sales_affiliate_commissions
+ */
+export type Course$sales_affiliate_commissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesAffiliateCommission
+   */
+  select?: Prisma.SalesAffiliateCommissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesAffiliateCommission
+   */
+  omit?: Prisma.SalesAffiliateCommissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateCommissionInclude<ExtArgs> | null
+  where?: Prisma.SalesAffiliateCommissionWhereInput
+  orderBy?: Prisma.SalesAffiliateCommissionOrderByWithRelationInput | Prisma.SalesAffiliateCommissionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesAffiliateCommissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesAffiliateCommissionScalarFieldEnum | Prisma.SalesAffiliateCommissionScalarFieldEnum[]
+}
+
+/**
  * Course without action
  */
 export type CourseDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1312,4 +2295,8 @@ export type CourseDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Course
    */
   omit?: Prisma.CourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
 }

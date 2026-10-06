@@ -324,6 +324,12 @@ export type PaymentOrderWhereInput = {
   paid_at?: Prisma.DateTimeNullableFilter<"PaymentOrder"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
+  payment_instalments?: Prisma.PaymentInstalmentListRelationFilter
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionListRelationFilter
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionListRelationFilter
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditListRelationFilter
 }
 
 export type PaymentOrderOrderByWithRelationInput = {
@@ -345,6 +351,12 @@ export type PaymentOrderOrderByWithRelationInput = {
   paid_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  payment_instalments?: Prisma.PaymentInstalmentOrderByRelationAggregateInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionOrderByRelationAggregateInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionOrderByRelationAggregateInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionOrderByRelationAggregateInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditOrderByRelationAggregateInput
 }
 
 export type PaymentOrderWhereUniqueInput = Prisma.AtLeast<{
@@ -370,6 +382,12 @@ export type PaymentOrderWhereUniqueInput = Prisma.AtLeast<{
   paid_at?: Prisma.DateTimeNullableFilter<"PaymentOrder"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
+  payment_instalments?: Prisma.PaymentInstalmentListRelationFilter
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionListRelationFilter
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionListRelationFilter
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditListRelationFilter
 }, "id" | "tenant_id_id">
 
 export type PaymentOrderOrderByWithAggregationInput = {
@@ -424,8 +442,6 @@ export type PaymentOrderScalarWhereWithAggregatesInput = {
 
 export type PaymentOrderCreateInput = {
   id: string
-  tenant_id: string
-  membership_id?: string | null
   external_id?: string | null
   amount_cents: number
   currency?: string
@@ -441,6 +457,12 @@ export type PaymentOrderCreateInput = {
   paid_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutPayment_ordersInput
+  payment_instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutPayment_orderInput
 }
 
 export type PaymentOrderUncheckedCreateInput = {
@@ -462,12 +484,15 @@ export type PaymentOrderUncheckedCreateInput = {
   paid_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutPayment_orderInput
 }
 
 export type PaymentOrderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -483,6 +508,12 @@ export type PaymentOrderUpdateInput = {
   paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutPayment_ordersNestedInput
+  payment_instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutPayment_orderNestedInput
 }
 
 export type PaymentOrderUncheckedUpdateInput = {
@@ -504,6 +535,11 @@ export type PaymentOrderUncheckedUpdateInput = {
   paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderNestedInput
 }
 
 export type PaymentOrderCreateManyInput = {
@@ -529,8 +565,6 @@ export type PaymentOrderCreateManyInput = {
 
 export type PaymentOrderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
@@ -567,6 +601,16 @@ export type PaymentOrderUncheckedUpdateManyInput = {
   paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentOrderListRelationFilter = {
+  every?: Prisma.PaymentOrderWhereInput
+  some?: Prisma.PaymentOrderWhereInput
+  none?: Prisma.PaymentOrderWhereInput
+}
+
+export type PaymentOrderOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type PaymentOrderTenant_idIdCompoundUniqueInput = {
@@ -647,6 +691,953 @@ export type PaymentOrderSumOrderByAggregateInput = {
   tax_amount_cents?: Prisma.SortOrder
 }
 
+export type PaymentOrderNullableScalarRelationFilter = {
+  is?: Prisma.PaymentOrderWhereInput | null
+  isNot?: Prisma.PaymentOrderWhereInput | null
+}
+
+export type PaymentOrderScalarRelationFilter = {
+  is?: Prisma.PaymentOrderWhereInput
+  isNot?: Prisma.PaymentOrderWhereInput
+}
+
+export type PaymentOrderCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutMembershipInput, Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput> | Prisma.PaymentOrderCreateWithoutMembershipInput[] | Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput | Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PaymentOrderCreateManyMembershipInputEnvelope
+  connect?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+}
+
+export type PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutMembershipInput, Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput> | Prisma.PaymentOrderCreateWithoutMembershipInput[] | Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput | Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PaymentOrderCreateManyMembershipInputEnvelope
+  connect?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+}
+
+export type PaymentOrderUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutMembershipInput, Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput> | Prisma.PaymentOrderCreateWithoutMembershipInput[] | Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput | Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PaymentOrderUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PaymentOrderUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PaymentOrderCreateManyMembershipInputEnvelope
+  set?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  disconnect?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  delete?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  connect?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  update?: Prisma.PaymentOrderUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PaymentOrderUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PaymentOrderUpdateManyWithWhereWithoutMembershipInput | Prisma.PaymentOrderUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PaymentOrderScalarWhereInput | Prisma.PaymentOrderScalarWhereInput[]
+}
+
+export type PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutMembershipInput, Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput> | Prisma.PaymentOrderCreateWithoutMembershipInput[] | Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput | Prisma.PaymentOrderCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PaymentOrderUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PaymentOrderUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PaymentOrderCreateManyMembershipInputEnvelope
+  set?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  disconnect?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  delete?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  connect?: Prisma.PaymentOrderWhereUniqueInput | Prisma.PaymentOrderWhereUniqueInput[]
+  update?: Prisma.PaymentOrderUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PaymentOrderUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PaymentOrderUpdateManyWithWhereWithoutMembershipInput | Prisma.PaymentOrderUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PaymentOrderScalarWhereInput | Prisma.PaymentOrderScalarWhereInput[]
+}
+
+export type PaymentOrderCreateNestedOneWithoutPayment_instalmentsInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutPayment_instalmentsInput, Prisma.PaymentOrderUncheckedCreateWithoutPayment_instalmentsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutPayment_instalmentsInput
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+}
+
+export type PaymentOrderUpdateOneWithoutPayment_instalmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutPayment_instalmentsInput, Prisma.PaymentOrderUncheckedCreateWithoutPayment_instalmentsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutPayment_instalmentsInput
+  upsert?: Prisma.PaymentOrderUpsertWithoutPayment_instalmentsInput
+  disconnect?: Prisma.PaymentOrderWhereInput | boolean
+  delete?: Prisma.PaymentOrderWhereInput | boolean
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentOrderUpdateToOneWithWhereWithoutPayment_instalmentsInput, Prisma.PaymentOrderUpdateWithoutPayment_instalmentsInput>, Prisma.PaymentOrderUncheckedUpdateWithoutPayment_instalmentsInput>
+}
+
+export type PaymentOrderCreateNestedOneWithoutSales_coupon_redemptionsInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_coupon_redemptionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_coupon_redemptionsInput
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+}
+
+export type PaymentOrderUpdateOneWithoutSales_coupon_redemptionsNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_coupon_redemptionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_coupon_redemptionsInput
+  upsert?: Prisma.PaymentOrderUpsertWithoutSales_coupon_redemptionsInput
+  disconnect?: Prisma.PaymentOrderWhereInput | boolean
+  delete?: Prisma.PaymentOrderWhereInput | boolean
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentOrderUpdateToOneWithWhereWithoutSales_coupon_redemptionsInput, Prisma.PaymentOrderUpdateWithoutSales_coupon_redemptionsInput>, Prisma.PaymentOrderUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+}
+
+export type PaymentOrderCreateNestedOneWithoutSales_wallet_transactionsInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_wallet_transactionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_wallet_transactionsInput
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+}
+
+export type PaymentOrderUpdateOneWithoutSales_wallet_transactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_wallet_transactionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_wallet_transactionsInput
+  upsert?: Prisma.PaymentOrderUpsertWithoutSales_wallet_transactionsInput
+  disconnect?: Prisma.PaymentOrderWhereInput | boolean
+  delete?: Prisma.PaymentOrderWhereInput | boolean
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentOrderUpdateToOneWithWhereWithoutSales_wallet_transactionsInput, Prisma.PaymentOrderUpdateWithoutSales_wallet_transactionsInput>, Prisma.PaymentOrderUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
+export type PaymentOrderCreateNestedOneWithoutSales_referral_purchase_creditsInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_referral_purchase_creditsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_referral_purchase_creditsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_referral_purchase_creditsInput
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+}
+
+export type PaymentOrderUpdateOneRequiredWithoutSales_referral_purchase_creditsNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_referral_purchase_creditsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_referral_purchase_creditsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_referral_purchase_creditsInput
+  upsert?: Prisma.PaymentOrderUpsertWithoutSales_referral_purchase_creditsInput
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentOrderUpdateToOneWithWhereWithoutSales_referral_purchase_creditsInput, Prisma.PaymentOrderUpdateWithoutSales_referral_purchase_creditsInput>, Prisma.PaymentOrderUncheckedUpdateWithoutSales_referral_purchase_creditsInput>
+}
+
+export type PaymentOrderCreateNestedOneWithoutSales_affiliate_commissionsInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_affiliate_commissionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_affiliate_commissionsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_affiliate_commissionsInput
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+}
+
+export type PaymentOrderUpdateOneRequiredWithoutSales_affiliate_commissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_affiliate_commissionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_affiliate_commissionsInput>
+  connectOrCreate?: Prisma.PaymentOrderCreateOrConnectWithoutSales_affiliate_commissionsInput
+  upsert?: Prisma.PaymentOrderUpsertWithoutSales_affiliate_commissionsInput
+  connect?: Prisma.PaymentOrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentOrderUpdateToOneWithWhereWithoutSales_affiliate_commissionsInput, Prisma.PaymentOrderUpdateWithoutSales_affiliate_commissionsInput>, Prisma.PaymentOrderUncheckedUpdateWithoutSales_affiliate_commissionsInput>
+}
+
+export type PaymentOrderCreateWithoutMembershipInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderUncheckedCreateWithoutMembershipInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutMembershipInput, Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput>
+}
+
+export type PaymentOrderCreateManyMembershipInputEnvelope = {
+  data: Prisma.PaymentOrderCreateManyMembershipInput | Prisma.PaymentOrderCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PaymentOrderUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  update: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutMembershipInput, Prisma.PaymentOrderUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutMembershipInput, Prisma.PaymentOrderUncheckedCreateWithoutMembershipInput>
+}
+
+export type PaymentOrderUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  data: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutMembershipInput, Prisma.PaymentOrderUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PaymentOrderUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PaymentOrderScalarWhereInput
+  data: Prisma.XOR<Prisma.PaymentOrderUpdateManyMutationInput, Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PaymentOrderScalarWhereInput = {
+  AND?: Prisma.PaymentOrderScalarWhereInput | Prisma.PaymentOrderScalarWhereInput[]
+  OR?: Prisma.PaymentOrderScalarWhereInput[]
+  NOT?: Prisma.PaymentOrderScalarWhereInput | Prisma.PaymentOrderScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PaymentOrder"> | string
+  tenant_id?: Prisma.UuidFilter<"PaymentOrder"> | string
+  membership_id?: Prisma.UuidNullableFilter<"PaymentOrder"> | string | null
+  external_id?: Prisma.StringNullableFilter<"PaymentOrder"> | string | null
+  amount_cents?: Prisma.IntFilter<"PaymentOrder"> | number
+  currency?: Prisma.StringFilter<"PaymentOrder"> | string
+  status?: Prisma.StringFilter<"PaymentOrder"> | string
+  metadata_json?: Prisma.JsonNullableFilter<"PaymentOrder">
+  gateway_key?: Prisma.StringNullableFilter<"PaymentOrder"> | string | null
+  product_title?: Prisma.StringNullableFilter<"PaymentOrder"> | string | null
+  product_type?: Prisma.StringNullableFilter<"PaymentOrder"> | string | null
+  coupon_amount_cents?: Prisma.IntNullableFilter<"PaymentOrder"> | number | null
+  tax_amount_cents?: Prisma.IntNullableFilter<"PaymentOrder"> | number | null
+  invoice_number?: Prisma.StringNullableFilter<"PaymentOrder"> | string | null
+  billing_name?: Prisma.StringNullableFilter<"PaymentOrder"> | string | null
+  paid_at?: Prisma.DateTimeNullableFilter<"PaymentOrder"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"PaymentOrder"> | Date | string
+}
+
+export type PaymentOrderCreateWithoutPayment_instalmentsInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutPayment_ordersInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderUncheckedCreateWithoutPayment_instalmentsInput = {
+  id: string
+  tenant_id: string
+  membership_id?: string | null
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderCreateOrConnectWithoutPayment_instalmentsInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutPayment_instalmentsInput, Prisma.PaymentOrderUncheckedCreateWithoutPayment_instalmentsInput>
+}
+
+export type PaymentOrderUpsertWithoutPayment_instalmentsInput = {
+  update: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutPayment_instalmentsInput, Prisma.PaymentOrderUncheckedUpdateWithoutPayment_instalmentsInput>
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutPayment_instalmentsInput, Prisma.PaymentOrderUncheckedCreateWithoutPayment_instalmentsInput>
+  where?: Prisma.PaymentOrderWhereInput
+}
+
+export type PaymentOrderUpdateToOneWithWhereWithoutPayment_instalmentsInput = {
+  where?: Prisma.PaymentOrderWhereInput
+  data: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutPayment_instalmentsInput, Prisma.PaymentOrderUncheckedUpdateWithoutPayment_instalmentsInput>
+}
+
+export type PaymentOrderUpdateWithoutPayment_instalmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutPayment_ordersNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderUncheckedUpdateWithoutPayment_instalmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderCreateWithoutSales_coupon_redemptionsInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutPayment_ordersInput
+  payment_instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderUncheckedCreateWithoutSales_coupon_redemptionsInput = {
+  id: string
+  tenant_id: string
+  membership_id?: string | null
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderCreateOrConnectWithoutSales_coupon_redemptionsInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_coupon_redemptionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_coupon_redemptionsInput>
+}
+
+export type PaymentOrderUpsertWithoutSales_coupon_redemptionsInput = {
+  update: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_coupon_redemptionsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_coupon_redemptionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_coupon_redemptionsInput>
+  where?: Prisma.PaymentOrderWhereInput
+}
+
+export type PaymentOrderUpdateToOneWithWhereWithoutSales_coupon_redemptionsInput = {
+  where?: Prisma.PaymentOrderWhereInput
+  data: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_coupon_redemptionsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_coupon_redemptionsInput>
+}
+
+export type PaymentOrderUpdateWithoutSales_coupon_redemptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutPayment_ordersNestedInput
+  payment_instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderUncheckedUpdateWithoutSales_coupon_redemptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutPayment_ordersInput
+  payment_instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderUncheckedCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  tenant_id: string
+  membership_id?: string | null
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderCreateOrConnectWithoutSales_wallet_transactionsInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_wallet_transactionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_wallet_transactionsInput>
+}
+
+export type PaymentOrderUpsertWithoutSales_wallet_transactionsInput = {
+  update: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_wallet_transactionsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_wallet_transactionsInput>
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_wallet_transactionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_wallet_transactionsInput>
+  where?: Prisma.PaymentOrderWhereInput
+}
+
+export type PaymentOrderUpdateToOneWithWhereWithoutSales_wallet_transactionsInput = {
+  where?: Prisma.PaymentOrderWhereInput
+  data: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_wallet_transactionsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
+export type PaymentOrderUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutPayment_ordersNestedInput
+  payment_instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderUncheckedUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderCreateWithoutSales_referral_purchase_creditsInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutPayment_ordersInput
+  payment_instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderUncheckedCreateWithoutSales_referral_purchase_creditsInput = {
+  id: string
+  tenant_id: string
+  membership_id?: string | null
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderCreateOrConnectWithoutSales_referral_purchase_creditsInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_referral_purchase_creditsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_referral_purchase_creditsInput>
+}
+
+export type PaymentOrderUpsertWithoutSales_referral_purchase_creditsInput = {
+  update: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_referral_purchase_creditsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_referral_purchase_creditsInput>
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_referral_purchase_creditsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_referral_purchase_creditsInput>
+  where?: Prisma.PaymentOrderWhereInput
+}
+
+export type PaymentOrderUpdateToOneWithWhereWithoutSales_referral_purchase_creditsInput = {
+  where?: Prisma.PaymentOrderWhereInput
+  data: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_referral_purchase_creditsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_referral_purchase_creditsInput>
+}
+
+export type PaymentOrderUpdateWithoutSales_referral_purchase_creditsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutPayment_ordersNestedInput
+  payment_instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderUncheckedUpdateWithoutSales_referral_purchase_creditsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderCreateWithoutSales_affiliate_commissionsInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutPayment_ordersInput
+  payment_instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderUncheckedCreateWithoutSales_affiliate_commissionsInput = {
+  id: string
+  tenant_id: string
+  membership_id?: string | null
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutPayment_orderInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutPayment_orderInput
+}
+
+export type PaymentOrderCreateOrConnectWithoutSales_affiliate_commissionsInput = {
+  where: Prisma.PaymentOrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_affiliate_commissionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_affiliate_commissionsInput>
+}
+
+export type PaymentOrderUpsertWithoutSales_affiliate_commissionsInput = {
+  update: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_affiliate_commissionsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_affiliate_commissionsInput>
+  create: Prisma.XOR<Prisma.PaymentOrderCreateWithoutSales_affiliate_commissionsInput, Prisma.PaymentOrderUncheckedCreateWithoutSales_affiliate_commissionsInput>
+  where?: Prisma.PaymentOrderWhereInput
+}
+
+export type PaymentOrderUpdateToOneWithWhereWithoutSales_affiliate_commissionsInput = {
+  where?: Prisma.PaymentOrderWhereInput
+  data: Prisma.XOR<Prisma.PaymentOrderUpdateWithoutSales_affiliate_commissionsInput, Prisma.PaymentOrderUncheckedUpdateWithoutSales_affiliate_commissionsInput>
+}
+
+export type PaymentOrderUpdateWithoutSales_affiliate_commissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutPayment_ordersNestedInput
+  payment_instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderUncheckedUpdateWithoutSales_affiliate_commissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderCreateManyMembershipInput = {
+  id: string
+  external_id?: string | null
+  amount_cents: number
+  currency?: string
+  status: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: string | null
+  product_title?: string | null
+  product_type?: string | null
+  coupon_amount_cents?: number | null
+  tax_amount_cents?: number | null
+  invoice_number?: string | null
+  billing_name?: string | null
+  paid_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PaymentOrderUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_instalments?: Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_affiliate_commissions?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutPayment_orderNestedInput
+  sales_referral_purchase_credits?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutPayment_orderNestedInput
+}
+
+export type PaymentOrderUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  gateway_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  product_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coupon_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tax_amount_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  invoice_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type PaymentOrderCountOutputType
+ */
+
+export type PaymentOrderCountOutputType = {
+  payment_instalments: number
+  sales_coupon_redemptions: number
+  sales_wallet_transactions: number
+  sales_affiliate_commissions: number
+  sales_referral_purchase_credits: number
+}
+
+export type PaymentOrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  payment_instalments?: boolean | PaymentOrderCountOutputTypeCountPayment_instalmentsArgs
+  sales_coupon_redemptions?: boolean | PaymentOrderCountOutputTypeCountSales_coupon_redemptionsArgs
+  sales_wallet_transactions?: boolean | PaymentOrderCountOutputTypeCountSales_wallet_transactionsArgs
+  sales_affiliate_commissions?: boolean | PaymentOrderCountOutputTypeCountSales_affiliate_commissionsArgs
+  sales_referral_purchase_credits?: boolean | PaymentOrderCountOutputTypeCountSales_referral_purchase_creditsArgs
+}
+
+/**
+ * PaymentOrderCountOutputType without action
+ */
+export type PaymentOrderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentOrderCountOutputType
+   */
+  select?: Prisma.PaymentOrderCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PaymentOrderCountOutputType without action
+ */
+export type PaymentOrderCountOutputTypeCountPayment_instalmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentInstalmentWhereInput
+}
+
+/**
+ * PaymentOrderCountOutputType without action
+ */
+export type PaymentOrderCountOutputTypeCountSales_coupon_redemptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesCouponRedemptionWhereInput
+}
+
+/**
+ * PaymentOrderCountOutputType without action
+ */
+export type PaymentOrderCountOutputTypeCountSales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesWalletTransactionWhereInput
+}
+
+/**
+ * PaymentOrderCountOutputType without action
+ */
+export type PaymentOrderCountOutputTypeCountSales_affiliate_commissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesAffiliateCommissionWhereInput
+}
+
+/**
+ * PaymentOrderCountOutputType without action
+ */
+export type PaymentOrderCountOutputTypeCountSales_referral_purchase_creditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesReferralPurchaseCreditWhereInput
+}
 
 
 export type PaymentOrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -668,6 +1659,13 @@ export type PaymentOrderSelect<ExtArgs extends runtime.Types.Extensions.Internal
   paid_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.PaymentOrder$membershipArgs<ExtArgs>
+  payment_instalments?: boolean | Prisma.PaymentOrder$payment_instalmentsArgs<ExtArgs>
+  sales_coupon_redemptions?: boolean | Prisma.PaymentOrder$sales_coupon_redemptionsArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.PaymentOrder$sales_wallet_transactionsArgs<ExtArgs>
+  sales_affiliate_commissions?: boolean | Prisma.PaymentOrder$sales_affiliate_commissionsArgs<ExtArgs>
+  sales_referral_purchase_credits?: boolean | Prisma.PaymentOrder$sales_referral_purchase_creditsArgs<ExtArgs>
+  _count?: boolean | Prisma.PaymentOrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paymentOrder"]>
 
 export type PaymentOrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -689,6 +1687,7 @@ export type PaymentOrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   paid_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.PaymentOrder$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["paymentOrder"]>
 
 export type PaymentOrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -710,6 +1709,7 @@ export type PaymentOrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   paid_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.PaymentOrder$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["paymentOrder"]>
 
 export type PaymentOrderSelectScalar = {
@@ -734,10 +1734,32 @@ export type PaymentOrderSelectScalar = {
 }
 
 export type PaymentOrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "external_id" | "amount_cents" | "currency" | "status" | "metadata_json" | "gateway_key" | "product_title" | "product_type" | "coupon_amount_cents" | "tax_amount_cents" | "invoice_number" | "billing_name" | "paid_at" | "created_at" | "updated_at", ExtArgs["result"]["paymentOrder"]>
+export type PaymentOrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.PaymentOrder$membershipArgs<ExtArgs>
+  payment_instalments?: boolean | Prisma.PaymentOrder$payment_instalmentsArgs<ExtArgs>
+  sales_coupon_redemptions?: boolean | Prisma.PaymentOrder$sales_coupon_redemptionsArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.PaymentOrder$sales_wallet_transactionsArgs<ExtArgs>
+  sales_affiliate_commissions?: boolean | Prisma.PaymentOrder$sales_affiliate_commissionsArgs<ExtArgs>
+  sales_referral_purchase_credits?: boolean | Prisma.PaymentOrder$sales_referral_purchase_creditsArgs<ExtArgs>
+  _count?: boolean | Prisma.PaymentOrderCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type PaymentOrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.PaymentOrder$membershipArgs<ExtArgs>
+}
+export type PaymentOrderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.PaymentOrder$membershipArgs<ExtArgs>
+}
 
 export type $PaymentOrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PaymentOrder"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
+    payment_instalments: Prisma.$PaymentInstalmentPayload<ExtArgs>[]
+    sales_coupon_redemptions: Prisma.$SalesCouponRedemptionPayload<ExtArgs>[]
+    sales_wallet_transactions: Prisma.$SalesWalletTransactionPayload<ExtArgs>[]
+    sales_affiliate_commissions: Prisma.$SalesAffiliateCommissionPayload<ExtArgs>[]
+    sales_referral_purchase_credits: Prisma.$SalesReferralPurchaseCreditPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1151,6 +2173,12 @@ readonly fields: PaymentOrderFieldRefs;
  */
 export interface Prisma__PaymentOrderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.PaymentOrder$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentOrder$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  payment_instalments<T extends Prisma.PaymentOrder$payment_instalmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentOrder$payment_instalmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentInstalmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_coupon_redemptions<T extends Prisma.PaymentOrder$sales_coupon_redemptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentOrder$sales_coupon_redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesCouponRedemptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_wallet_transactions<T extends Prisma.PaymentOrder$sales_wallet_transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentOrder$sales_wallet_transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesWalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_affiliate_commissions<T extends Prisma.PaymentOrder$sales_affiliate_commissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentOrder$sales_affiliate_commissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesAffiliateCommissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_referral_purchase_credits<T extends Prisma.PaymentOrder$sales_referral_purchase_creditsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentOrder$sales_referral_purchase_creditsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesReferralPurchaseCreditPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1215,6 +2243,10 @@ export type PaymentOrderFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  /**
    * Filter, which PaymentOrder to fetch.
    */
   where: Prisma.PaymentOrderWhereUniqueInput
@@ -1233,6 +2265,10 @@ export type PaymentOrderFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  /**
    * Filter, which PaymentOrder to fetch.
    */
   where: Prisma.PaymentOrderWhereUniqueInput
@@ -1250,6 +2286,10 @@ export type PaymentOrderFindFirstArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the PaymentOrder
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
   /**
    * Filter, which PaymentOrder to fetch.
    */
@@ -1299,6 +2339,10 @@ export type PaymentOrderFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  /**
    * Filter, which PaymentOrder to fetch.
    */
   where?: Prisma.PaymentOrderWhereInput
@@ -1346,6 +2390,10 @@ export type PaymentOrderFindManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PaymentOrder
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
   /**
    * Filter, which PaymentOrders to fetch.
    */
@@ -1395,6 +2443,10 @@ export type PaymentOrderCreateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  /**
    * The data needed to create a PaymentOrder.
    */
   data: Prisma.XOR<Prisma.PaymentOrderCreateInput, Prisma.PaymentOrderUncheckedCreateInput>
@@ -1428,6 +2480,10 @@ export type PaymentOrderCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    */
   data: Prisma.PaymentOrderCreateManyInput | Prisma.PaymentOrderCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1442,6 +2498,10 @@ export type PaymentOrderUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the PaymentOrder
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
   /**
    * The data needed to update a PaymentOrder.
    */
@@ -1494,6 +2554,10 @@ export type PaymentOrderUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many PaymentOrders to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1508,6 +2572,10 @@ export type PaymentOrderUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the PaymentOrder
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
   /**
    * The filter to search for the PaymentOrder to update in case it exists.
    */
@@ -1535,6 +2603,10 @@ export type PaymentOrderDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  /**
    * Filter which PaymentOrder to delete.
    */
   where: Prisma.PaymentOrderWhereUniqueInput
@@ -1555,6 +2627,145 @@ export type PaymentOrderDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
+ * PaymentOrder.membership
+ */
+export type PaymentOrder$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
+}
+
+/**
+ * PaymentOrder.payment_instalments
+ */
+export type PaymentOrder$payment_instalmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentInstalment
+   */
+  select?: Prisma.PaymentInstalmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentInstalment
+   */
+  omit?: Prisma.PaymentInstalmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInstalmentInclude<ExtArgs> | null
+  where?: Prisma.PaymentInstalmentWhereInput
+  orderBy?: Prisma.PaymentInstalmentOrderByWithRelationInput | Prisma.PaymentInstalmentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentInstalmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentInstalmentScalarFieldEnum | Prisma.PaymentInstalmentScalarFieldEnum[]
+}
+
+/**
+ * PaymentOrder.sales_coupon_redemptions
+ */
+export type PaymentOrder$sales_coupon_redemptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesCouponRedemption
+   */
+  select?: Prisma.SalesCouponRedemptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesCouponRedemption
+   */
+  omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  where?: Prisma.SalesCouponRedemptionWhereInput
+  orderBy?: Prisma.SalesCouponRedemptionOrderByWithRelationInput | Prisma.SalesCouponRedemptionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesCouponRedemptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesCouponRedemptionScalarFieldEnum | Prisma.SalesCouponRedemptionScalarFieldEnum[]
+}
+
+/**
+ * PaymentOrder.sales_wallet_transactions
+ */
+export type PaymentOrder$sales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesWalletTransaction
+   */
+  select?: Prisma.SalesWalletTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesWalletTransaction
+   */
+  omit?: Prisma.SalesWalletTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletTransactionInclude<ExtArgs> | null
+  where?: Prisma.SalesWalletTransactionWhereInput
+  orderBy?: Prisma.SalesWalletTransactionOrderByWithRelationInput | Prisma.SalesWalletTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesWalletTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesWalletTransactionScalarFieldEnum | Prisma.SalesWalletTransactionScalarFieldEnum[]
+}
+
+/**
+ * PaymentOrder.sales_affiliate_commissions
+ */
+export type PaymentOrder$sales_affiliate_commissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesAffiliateCommission
+   */
+  select?: Prisma.SalesAffiliateCommissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesAffiliateCommission
+   */
+  omit?: Prisma.SalesAffiliateCommissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateCommissionInclude<ExtArgs> | null
+  where?: Prisma.SalesAffiliateCommissionWhereInput
+  orderBy?: Prisma.SalesAffiliateCommissionOrderByWithRelationInput | Prisma.SalesAffiliateCommissionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesAffiliateCommissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesAffiliateCommissionScalarFieldEnum | Prisma.SalesAffiliateCommissionScalarFieldEnum[]
+}
+
+/**
+ * PaymentOrder.sales_referral_purchase_credits
+ */
+export type PaymentOrder$sales_referral_purchase_creditsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesReferralPurchaseCredit
+   */
+  select?: Prisma.SalesReferralPurchaseCreditSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesReferralPurchaseCredit
+   */
+  omit?: Prisma.SalesReferralPurchaseCreditOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesReferralPurchaseCreditInclude<ExtArgs> | null
+  where?: Prisma.SalesReferralPurchaseCreditWhereInput
+  orderBy?: Prisma.SalesReferralPurchaseCreditOrderByWithRelationInput | Prisma.SalesReferralPurchaseCreditOrderByWithRelationInput[]
+  cursor?: Prisma.SalesReferralPurchaseCreditWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesReferralPurchaseCreditScalarFieldEnum | Prisma.SalesReferralPurchaseCreditScalarFieldEnum[]
+}
+
+/**
  * PaymentOrder without action
  */
 export type PaymentOrderDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1566,4 +2777,8 @@ export type PaymentOrderDefaultArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the PaymentOrder
    */
   omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
 }

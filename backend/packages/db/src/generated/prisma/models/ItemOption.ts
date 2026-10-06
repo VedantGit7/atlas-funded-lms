@@ -236,6 +236,7 @@ export type ItemOptionWhereInput = {
   position?: Prisma.IntFilter<"ItemOption"> | number
   created_at?: Prisma.DateTimeFilter<"ItemOption"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ItemOption"> | Date | string
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
 }
 
 export type ItemOptionOrderByWithRelationInput = {
@@ -247,6 +248,7 @@ export type ItemOptionOrderByWithRelationInput = {
   position?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  item?: Prisma.ItemOrderByWithRelationInput
 }
 
 export type ItemOptionWhereUniqueInput = Prisma.AtLeast<{
@@ -262,6 +264,7 @@ export type ItemOptionWhereUniqueInput = Prisma.AtLeast<{
   position?: Prisma.IntFilter<"ItemOption"> | number
   created_at?: Prisma.DateTimeFilter<"ItemOption"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ItemOption"> | Date | string
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
 }, "id" | "tenant_id_item_id_position">
 
 export type ItemOptionOrderByWithAggregationInput = {
@@ -296,13 +299,12 @@ export type ItemOptionScalarWhereWithAggregatesInput = {
 
 export type ItemOptionCreateInput = {
   id: string
-  tenant_id: string
-  item_id: string
   option_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   is_correct?: boolean | null
   position: number
   created_at?: Date | string
   updated_at?: Date | string
+  item: Prisma.ItemCreateNestedOneWithoutItem_optionsInput
 }
 
 export type ItemOptionUncheckedCreateInput = {
@@ -318,13 +320,12 @@ export type ItemOptionUncheckedCreateInput = {
 
 export type ItemOptionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
   option_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   position?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  item?: Prisma.ItemUpdateOneRequiredWithoutItem_optionsNestedInput
 }
 
 export type ItemOptionUncheckedUpdateInput = {
@@ -351,8 +352,6 @@ export type ItemOptionCreateManyInput = {
 
 export type ItemOptionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
   option_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   position?: Prisma.IntFieldUpdateOperationsInput | number
@@ -369,6 +368,16 @@ export type ItemOptionUncheckedUpdateManyInput = {
   position?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemOptionListRelationFilter = {
+  every?: Prisma.ItemOptionWhereInput
+  some?: Prisma.ItemOptionWhereInput
+  none?: Prisma.ItemOptionWhereInput
+}
+
+export type ItemOptionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ItemOptionTenant_idItem_idPositionCompoundUniqueInput = {
@@ -416,8 +425,144 @@ export type ItemOptionSumOrderByAggregateInput = {
   position?: Prisma.SortOrder
 }
 
+export type ItemOptionCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.ItemOptionCreateWithoutItemInput, Prisma.ItemOptionUncheckedCreateWithoutItemInput> | Prisma.ItemOptionCreateWithoutItemInput[] | Prisma.ItemOptionUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemOptionCreateOrConnectWithoutItemInput | Prisma.ItemOptionCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.ItemOptionCreateManyItemInputEnvelope
+  connect?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+}
+
+export type ItemOptionUncheckedCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.ItemOptionCreateWithoutItemInput, Prisma.ItemOptionUncheckedCreateWithoutItemInput> | Prisma.ItemOptionCreateWithoutItemInput[] | Prisma.ItemOptionUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemOptionCreateOrConnectWithoutItemInput | Prisma.ItemOptionCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.ItemOptionCreateManyItemInputEnvelope
+  connect?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+}
+
+export type ItemOptionUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemOptionCreateWithoutItemInput, Prisma.ItemOptionUncheckedCreateWithoutItemInput> | Prisma.ItemOptionCreateWithoutItemInput[] | Prisma.ItemOptionUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemOptionCreateOrConnectWithoutItemInput | Prisma.ItemOptionCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.ItemOptionUpsertWithWhereUniqueWithoutItemInput | Prisma.ItemOptionUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.ItemOptionCreateManyItemInputEnvelope
+  set?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  disconnect?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  delete?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  connect?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  update?: Prisma.ItemOptionUpdateWithWhereUniqueWithoutItemInput | Prisma.ItemOptionUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.ItemOptionUpdateManyWithWhereWithoutItemInput | Prisma.ItemOptionUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.ItemOptionScalarWhereInput | Prisma.ItemOptionScalarWhereInput[]
+}
+
+export type ItemOptionUncheckedUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemOptionCreateWithoutItemInput, Prisma.ItemOptionUncheckedCreateWithoutItemInput> | Prisma.ItemOptionCreateWithoutItemInput[] | Prisma.ItemOptionUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.ItemOptionCreateOrConnectWithoutItemInput | Prisma.ItemOptionCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.ItemOptionUpsertWithWhereUniqueWithoutItemInput | Prisma.ItemOptionUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.ItemOptionCreateManyItemInputEnvelope
+  set?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  disconnect?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  delete?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  connect?: Prisma.ItemOptionWhereUniqueInput | Prisma.ItemOptionWhereUniqueInput[]
+  update?: Prisma.ItemOptionUpdateWithWhereUniqueWithoutItemInput | Prisma.ItemOptionUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.ItemOptionUpdateManyWithWhereWithoutItemInput | Prisma.ItemOptionUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.ItemOptionScalarWhereInput | Prisma.ItemOptionScalarWhereInput[]
+}
+
 export type NullableBoolFieldUpdateOperationsInput = {
   set?: boolean | null
+}
+
+export type ItemOptionCreateWithoutItemInput = {
+  id: string
+  option_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ItemOptionUncheckedCreateWithoutItemInput = {
+  id: string
+  option_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ItemOptionCreateOrConnectWithoutItemInput = {
+  where: Prisma.ItemOptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemOptionCreateWithoutItemInput, Prisma.ItemOptionUncheckedCreateWithoutItemInput>
+}
+
+export type ItemOptionCreateManyItemInputEnvelope = {
+  data: Prisma.ItemOptionCreateManyItemInput | Prisma.ItemOptionCreateManyItemInput[]
+  skipDuplicates?: boolean
+}
+
+export type ItemOptionUpsertWithWhereUniqueWithoutItemInput = {
+  where: Prisma.ItemOptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.ItemOptionUpdateWithoutItemInput, Prisma.ItemOptionUncheckedUpdateWithoutItemInput>
+  create: Prisma.XOR<Prisma.ItemOptionCreateWithoutItemInput, Prisma.ItemOptionUncheckedCreateWithoutItemInput>
+}
+
+export type ItemOptionUpdateWithWhereUniqueWithoutItemInput = {
+  where: Prisma.ItemOptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.ItemOptionUpdateWithoutItemInput, Prisma.ItemOptionUncheckedUpdateWithoutItemInput>
+}
+
+export type ItemOptionUpdateManyWithWhereWithoutItemInput = {
+  where: Prisma.ItemOptionScalarWhereInput
+  data: Prisma.XOR<Prisma.ItemOptionUpdateManyMutationInput, Prisma.ItemOptionUncheckedUpdateManyWithoutItemInput>
+}
+
+export type ItemOptionScalarWhereInput = {
+  AND?: Prisma.ItemOptionScalarWhereInput | Prisma.ItemOptionScalarWhereInput[]
+  OR?: Prisma.ItemOptionScalarWhereInput[]
+  NOT?: Prisma.ItemOptionScalarWhereInput | Prisma.ItemOptionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ItemOption"> | string
+  tenant_id?: Prisma.UuidFilter<"ItemOption"> | string
+  item_id?: Prisma.UuidFilter<"ItemOption"> | string
+  option_json?: Prisma.JsonFilter<"ItemOption">
+  is_correct?: Prisma.BoolNullableFilter<"ItemOption"> | boolean | null
+  position?: Prisma.IntFilter<"ItemOption"> | number
+  created_at?: Prisma.DateTimeFilter<"ItemOption"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"ItemOption"> | Date | string
+}
+
+export type ItemOptionCreateManyItemInput = {
+  id: string
+  option_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  position: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ItemOptionUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  option_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemOptionUncheckedUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  option_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ItemOptionUncheckedUpdateManyWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  option_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -431,6 +576,7 @@ export type ItemOptionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   position?: boolean
   created_at?: boolean
   updated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemOption"]>
 
 export type ItemOptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -442,6 +588,7 @@ export type ItemOptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   position?: boolean
   created_at?: boolean
   updated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemOption"]>
 
 export type ItemOptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -453,6 +600,7 @@ export type ItemOptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   position?: boolean
   created_at?: boolean
   updated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["itemOption"]>
 
 export type ItemOptionSelectScalar = {
@@ -467,10 +615,21 @@ export type ItemOptionSelectScalar = {
 }
 
 export type ItemOptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "item_id" | "option_json" | "is_correct" | "position" | "created_at" | "updated_at", ExtArgs["result"]["itemOption"]>
+export type ItemOptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
+export type ItemOptionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
+export type ItemOptionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+}
 
 export type $ItemOptionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ItemOption"
-  objects: {}
+  objects: {
+    item: Prisma.$ItemPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -874,6 +1033,7 @@ readonly fields: ItemOptionFieldRefs;
  */
 export interface Prisma__ItemOptionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  item<T extends Prisma.ItemDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ItemDefaultArgs<ExtArgs>>): Prisma.Prisma__ItemClient<runtime.Types.Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -928,6 +1088,10 @@ export type ItemOptionFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
+  /**
    * Filter, which ItemOption to fetch.
    */
   where: Prisma.ItemOptionWhereUniqueInput
@@ -946,6 +1110,10 @@ export type ItemOptionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
+  /**
    * Filter, which ItemOption to fetch.
    */
   where: Prisma.ItemOptionWhereUniqueInput
@@ -963,6 +1131,10 @@ export type ItemOptionFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the ItemOption
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
   /**
    * Filter, which ItemOption to fetch.
    */
@@ -1012,6 +1184,10 @@ export type ItemOptionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
+  /**
    * Filter, which ItemOption to fetch.
    */
   where?: Prisma.ItemOptionWhereInput
@@ -1059,6 +1235,10 @@ export type ItemOptionFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the ItemOption
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
   /**
    * Filter, which ItemOptions to fetch.
    */
@@ -1108,6 +1288,10 @@ export type ItemOptionCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
+  /**
    * The data needed to create a ItemOption.
    */
   data: Prisma.XOR<Prisma.ItemOptionCreateInput, Prisma.ItemOptionUncheckedCreateInput>
@@ -1141,6 +1325,10 @@ export type ItemOptionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    */
   data: Prisma.ItemOptionCreateManyInput | Prisma.ItemOptionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1155,6 +1343,10 @@ export type ItemOptionUpdateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the ItemOption
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
   /**
    * The data needed to update a ItemOption.
    */
@@ -1207,6 +1399,10 @@ export type ItemOptionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many ItemOptions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1221,6 +1417,10 @@ export type ItemOptionUpsertArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the ItemOption
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
   /**
    * The filter to search for the ItemOption to update in case it exists.
    */
@@ -1247,6 +1447,10 @@ export type ItemOptionDeleteArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the ItemOption
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
   /**
    * Filter which ItemOption to delete.
    */
@@ -1279,4 +1483,8 @@ export type ItemOptionDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the ItemOption
    */
   omit?: Prisma.ItemOptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
 }

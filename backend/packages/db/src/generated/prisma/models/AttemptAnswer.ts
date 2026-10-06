@@ -244,6 +244,8 @@ export type AttemptAnswerWhereInput = {
   points_awarded?: Prisma.DecimalNullableFilter<"AttemptAnswer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   occurred_at?: Prisma.DateTimeFilter<"AttemptAnswer"> | Date | string
   idempotency_key?: Prisma.StringFilter<"AttemptAnswer"> | string
+  attempt?: Prisma.XOR<Prisma.AttemptScalarRelationFilter, Prisma.AttemptWhereInput>
+  assessment_item?: Prisma.XOR<Prisma.AssessmentItemScalarRelationFilter, Prisma.AssessmentItemWhereInput>
 }
 
 export type AttemptAnswerOrderByWithRelationInput = {
@@ -256,6 +258,8 @@ export type AttemptAnswerOrderByWithRelationInput = {
   points_awarded?: Prisma.SortOrderInput | Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
   idempotency_key?: Prisma.SortOrder
+  attempt?: Prisma.AttemptOrderByWithRelationInput
+  assessment_item?: Prisma.AssessmentItemOrderByWithRelationInput
 }
 
 export type AttemptAnswerWhereUniqueInput = Prisma.AtLeast<{
@@ -273,6 +277,8 @@ export type AttemptAnswerWhereUniqueInput = Prisma.AtLeast<{
   points_awarded?: Prisma.DecimalNullableFilter<"AttemptAnswer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   occurred_at?: Prisma.DateTimeFilter<"AttemptAnswer"> | Date | string
   idempotency_key?: Prisma.StringFilter<"AttemptAnswer"> | string
+  attempt?: Prisma.XOR<Prisma.AttemptScalarRelationFilter, Prisma.AttemptWhereInput>
+  assessment_item?: Prisma.XOR<Prisma.AssessmentItemScalarRelationFilter, Prisma.AssessmentItemWhereInput>
 }, "id" | "tenant_id_idempotency_key" | "tenant_id_attempt_id_assessment_item_id">
 
 export type AttemptAnswerOrderByWithAggregationInput = {
@@ -309,14 +315,13 @@ export type AttemptAnswerScalarWhereWithAggregatesInput = {
 
 export type AttemptAnswerCreateInput = {
   id: string
-  tenant_id: string
-  attempt_id: string
-  assessment_item_id: string
   answer_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   is_correct?: boolean | null
   points_awarded?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   occurred_at?: Date | string
   idempotency_key: string
+  attempt: Prisma.AttemptCreateNestedOneWithoutAttempt_answersInput
+  assessment_item: Prisma.AssessmentItemCreateNestedOneWithoutAttempt_answersInput
 }
 
 export type AttemptAnswerUncheckedCreateInput = {
@@ -333,14 +338,13 @@ export type AttemptAnswerUncheckedCreateInput = {
 
 export type AttemptAnswerUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  attempt_id?: Prisma.StringFieldUpdateOperationsInput | string
-  assessment_item_id?: Prisma.StringFieldUpdateOperationsInput | string
   answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  attempt?: Prisma.AttemptUpdateOneRequiredWithoutAttempt_answersNestedInput
+  assessment_item?: Prisma.AssessmentItemUpdateOneRequiredWithoutAttempt_answersNestedInput
 }
 
 export type AttemptAnswerUncheckedUpdateInput = {
@@ -369,9 +373,6 @@ export type AttemptAnswerCreateManyInput = {
 
 export type AttemptAnswerUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  attempt_id?: Prisma.StringFieldUpdateOperationsInput | string
-  assessment_item_id?: Prisma.StringFieldUpdateOperationsInput | string
   answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -389,6 +390,16 @@ export type AttemptAnswerUncheckedUpdateManyInput = {
   points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type AttemptAnswerListRelationFilter = {
+  every?: Prisma.AttemptAnswerWhereInput
+  some?: Prisma.AttemptAnswerWhereInput
+  none?: Prisma.AttemptAnswerWhereInput
+}
+
+export type AttemptAnswerOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type AttemptAnswerTenant_idIdempotency_keyCompoundUniqueInput = {
@@ -444,6 +455,277 @@ export type AttemptAnswerSumOrderByAggregateInput = {
   points_awarded?: Prisma.SortOrder
 }
 
+export type AttemptAnswerCreateNestedManyWithoutAssessment_itemInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput> | Prisma.AttemptAnswerCreateWithoutAssessment_itemInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput | Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAssessment_itemInputEnvelope
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+}
+
+export type AttemptAnswerUncheckedCreateNestedManyWithoutAssessment_itemInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput> | Prisma.AttemptAnswerCreateWithoutAssessment_itemInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput | Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAssessment_itemInputEnvelope
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+}
+
+export type AttemptAnswerUpdateManyWithoutAssessment_itemNestedInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput> | Prisma.AttemptAnswerCreateWithoutAssessment_itemInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput | Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput[]
+  upsert?: Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAssessment_itemInput | Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAssessment_itemInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAssessment_itemInputEnvelope
+  set?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  disconnect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  delete?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  update?: Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAssessment_itemInput | Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAssessment_itemInput[]
+  updateMany?: Prisma.AttemptAnswerUpdateManyWithWhereWithoutAssessment_itemInput | Prisma.AttemptAnswerUpdateManyWithWhereWithoutAssessment_itemInput[]
+  deleteMany?: Prisma.AttemptAnswerScalarWhereInput | Prisma.AttemptAnswerScalarWhereInput[]
+}
+
+export type AttemptAnswerUncheckedUpdateManyWithoutAssessment_itemNestedInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput> | Prisma.AttemptAnswerCreateWithoutAssessment_itemInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput | Prisma.AttemptAnswerCreateOrConnectWithoutAssessment_itemInput[]
+  upsert?: Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAssessment_itemInput | Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAssessment_itemInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAssessment_itemInputEnvelope
+  set?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  disconnect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  delete?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  update?: Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAssessment_itemInput | Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAssessment_itemInput[]
+  updateMany?: Prisma.AttemptAnswerUpdateManyWithWhereWithoutAssessment_itemInput | Prisma.AttemptAnswerUpdateManyWithWhereWithoutAssessment_itemInput[]
+  deleteMany?: Prisma.AttemptAnswerScalarWhereInput | Prisma.AttemptAnswerScalarWhereInput[]
+}
+
+export type AttemptAnswerCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput> | Prisma.AttemptAnswerCreateWithoutAttemptInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput | Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAttemptInputEnvelope
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+}
+
+export type AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput> | Prisma.AttemptAnswerCreateWithoutAttemptInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput | Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAttemptInputEnvelope
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+}
+
+export type AttemptAnswerUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput> | Prisma.AttemptAnswerCreateWithoutAttemptInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput | Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput | Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAttemptInputEnvelope
+  set?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  disconnect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  delete?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  update?: Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput | Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.AttemptAnswerUpdateManyWithWhereWithoutAttemptInput | Prisma.AttemptAnswerUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.AttemptAnswerScalarWhereInput | Prisma.AttemptAnswerScalarWhereInput[]
+}
+
+export type AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput> | Prisma.AttemptAnswerCreateWithoutAttemptInput[] | Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput | Prisma.AttemptAnswerCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput | Prisma.AttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.AttemptAnswerCreateManyAttemptInputEnvelope
+  set?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  disconnect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  delete?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  connect?: Prisma.AttemptAnswerWhereUniqueInput | Prisma.AttemptAnswerWhereUniqueInput[]
+  update?: Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput | Prisma.AttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.AttemptAnswerUpdateManyWithWhereWithoutAttemptInput | Prisma.AttemptAnswerUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.AttemptAnswerScalarWhereInput | Prisma.AttemptAnswerScalarWhereInput[]
+}
+
+export type AttemptAnswerCreateWithoutAssessment_itemInput = {
+  id: string
+  answer_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  points_awarded?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Date | string
+  idempotency_key: string
+  attempt: Prisma.AttemptCreateNestedOneWithoutAttempt_answersInput
+}
+
+export type AttemptAnswerUncheckedCreateWithoutAssessment_itemInput = {
+  id: string
+  attempt_id: string
+  answer_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  points_awarded?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type AttemptAnswerCreateOrConnectWithoutAssessment_itemInput = {
+  where: Prisma.AttemptAnswerWhereUniqueInput
+  create: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput>
+}
+
+export type AttemptAnswerCreateManyAssessment_itemInputEnvelope = {
+  data: Prisma.AttemptAnswerCreateManyAssessment_itemInput | Prisma.AttemptAnswerCreateManyAssessment_itemInput[]
+  skipDuplicates?: boolean
+}
+
+export type AttemptAnswerUpsertWithWhereUniqueWithoutAssessment_itemInput = {
+  where: Prisma.AttemptAnswerWhereUniqueInput
+  update: Prisma.XOR<Prisma.AttemptAnswerUpdateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedUpdateWithoutAssessment_itemInput>
+  create: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedCreateWithoutAssessment_itemInput>
+}
+
+export type AttemptAnswerUpdateWithWhereUniqueWithoutAssessment_itemInput = {
+  where: Prisma.AttemptAnswerWhereUniqueInput
+  data: Prisma.XOR<Prisma.AttemptAnswerUpdateWithoutAssessment_itemInput, Prisma.AttemptAnswerUncheckedUpdateWithoutAssessment_itemInput>
+}
+
+export type AttemptAnswerUpdateManyWithWhereWithoutAssessment_itemInput = {
+  where: Prisma.AttemptAnswerScalarWhereInput
+  data: Prisma.XOR<Prisma.AttemptAnswerUpdateManyMutationInput, Prisma.AttemptAnswerUncheckedUpdateManyWithoutAssessment_itemInput>
+}
+
+export type AttemptAnswerScalarWhereInput = {
+  AND?: Prisma.AttemptAnswerScalarWhereInput | Prisma.AttemptAnswerScalarWhereInput[]
+  OR?: Prisma.AttemptAnswerScalarWhereInput[]
+  NOT?: Prisma.AttemptAnswerScalarWhereInput | Prisma.AttemptAnswerScalarWhereInput[]
+  id?: Prisma.UuidFilter<"AttemptAnswer"> | string
+  tenant_id?: Prisma.UuidFilter<"AttemptAnswer"> | string
+  attempt_id?: Prisma.UuidFilter<"AttemptAnswer"> | string
+  assessment_item_id?: Prisma.UuidFilter<"AttemptAnswer"> | string
+  answer_json?: Prisma.JsonFilter<"AttemptAnswer">
+  is_correct?: Prisma.BoolNullableFilter<"AttemptAnswer"> | boolean | null
+  points_awarded?: Prisma.DecimalNullableFilter<"AttemptAnswer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Prisma.DateTimeFilter<"AttemptAnswer"> | Date | string
+  idempotency_key?: Prisma.StringFilter<"AttemptAnswer"> | string
+}
+
+export type AttemptAnswerCreateWithoutAttemptInput = {
+  id: string
+  answer_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  points_awarded?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Date | string
+  idempotency_key: string
+  assessment_item: Prisma.AssessmentItemCreateNestedOneWithoutAttempt_answersInput
+}
+
+export type AttemptAnswerUncheckedCreateWithoutAttemptInput = {
+  id: string
+  assessment_item_id: string
+  answer_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  points_awarded?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type AttemptAnswerCreateOrConnectWithoutAttemptInput = {
+  where: Prisma.AttemptAnswerWhereUniqueInput
+  create: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput>
+}
+
+export type AttemptAnswerCreateManyAttemptInputEnvelope = {
+  data: Prisma.AttemptAnswerCreateManyAttemptInput | Prisma.AttemptAnswerCreateManyAttemptInput[]
+  skipDuplicates?: boolean
+}
+
+export type AttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.AttemptAnswerWhereUniqueInput
+  update: Prisma.XOR<Prisma.AttemptAnswerUpdateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedUpdateWithoutAttemptInput>
+  create: Prisma.XOR<Prisma.AttemptAnswerCreateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedCreateWithoutAttemptInput>
+}
+
+export type AttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.AttemptAnswerWhereUniqueInput
+  data: Prisma.XOR<Prisma.AttemptAnswerUpdateWithoutAttemptInput, Prisma.AttemptAnswerUncheckedUpdateWithoutAttemptInput>
+}
+
+export type AttemptAnswerUpdateManyWithWhereWithoutAttemptInput = {
+  where: Prisma.AttemptAnswerScalarWhereInput
+  data: Prisma.XOR<Prisma.AttemptAnswerUpdateManyMutationInput, Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptInput>
+}
+
+export type AttemptAnswerCreateManyAssessment_itemInput = {
+  id: string
+  attempt_id: string
+  answer_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  points_awarded?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type AttemptAnswerUpdateWithoutAssessment_itemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  attempt?: Prisma.AttemptUpdateOneRequiredWithoutAttempt_answersNestedInput
+}
+
+export type AttemptAnswerUncheckedUpdateWithoutAssessment_itemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attempt_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type AttemptAnswerUncheckedUpdateManyWithoutAssessment_itemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attempt_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type AttemptAnswerCreateManyAttemptInput = {
+  id: string
+  assessment_item_id: string
+  answer_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: boolean | null
+  points_awarded?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Date | string
+  idempotency_key: string
+}
+
+export type AttemptAnswerUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_item?: Prisma.AssessmentItemUpdateOneRequiredWithoutAttempt_answersNestedInput
+}
+
+export type AttemptAnswerUncheckedUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type AttemptAnswerUncheckedUpdateManyWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  answer_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  is_correct?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  points_awarded?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
 
 
 export type AttemptAnswerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -456,6 +738,8 @@ export type AttemptAnswerSelect<ExtArgs extends runtime.Types.Extensions.Interna
   points_awarded?: boolean
   occurred_at?: boolean
   idempotency_key?: boolean
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  assessment_item?: boolean | Prisma.AssessmentItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attemptAnswer"]>
 
 export type AttemptAnswerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +752,8 @@ export type AttemptAnswerSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   points_awarded?: boolean
   occurred_at?: boolean
   idempotency_key?: boolean
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  assessment_item?: boolean | Prisma.AssessmentItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attemptAnswer"]>
 
 export type AttemptAnswerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -480,6 +766,8 @@ export type AttemptAnswerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   points_awarded?: boolean
   occurred_at?: boolean
   idempotency_key?: boolean
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  assessment_item?: boolean | Prisma.AssessmentItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attemptAnswer"]>
 
 export type AttemptAnswerSelectScalar = {
@@ -495,10 +783,25 @@ export type AttemptAnswerSelectScalar = {
 }
 
 export type AttemptAnswerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "attempt_id" | "assessment_item_id" | "answer_json" | "is_correct" | "points_awarded" | "occurred_at" | "idempotency_key", ExtArgs["result"]["attemptAnswer"]>
+export type AttemptAnswerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  assessment_item?: boolean | Prisma.AssessmentItemDefaultArgs<ExtArgs>
+}
+export type AttemptAnswerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  assessment_item?: boolean | Prisma.AssessmentItemDefaultArgs<ExtArgs>
+}
+export type AttemptAnswerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  assessment_item?: boolean | Prisma.AssessmentItemDefaultArgs<ExtArgs>
+}
 
 export type $AttemptAnswerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AttemptAnswer"
-  objects: {}
+  objects: {
+    attempt: Prisma.$AttemptPayload<ExtArgs>
+    assessment_item: Prisma.$AssessmentItemPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -903,6 +1206,8 @@ readonly fields: AttemptAnswerFieldRefs;
  */
 export interface Prisma__AttemptAnswerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  attempt<T extends Prisma.AttemptDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AttemptDefaultArgs<ExtArgs>>): Prisma.Prisma__AttemptClient<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  assessment_item<T extends Prisma.AssessmentItemDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentItemDefaultArgs<ExtArgs>>): Prisma.Prisma__AssessmentItemClient<runtime.Types.Result.GetResult<Prisma.$AssessmentItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -958,6 +1263,10 @@ export type AttemptAnswerFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
+  /**
    * Filter, which AttemptAnswer to fetch.
    */
   where: Prisma.AttemptAnswerWhereUniqueInput
@@ -976,6 +1285,10 @@ export type AttemptAnswerFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
+  /**
    * Filter, which AttemptAnswer to fetch.
    */
   where: Prisma.AttemptAnswerWhereUniqueInput
@@ -993,6 +1306,10 @@ export type AttemptAnswerFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the AttemptAnswer
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
   /**
    * Filter, which AttemptAnswer to fetch.
    */
@@ -1042,6 +1359,10 @@ export type AttemptAnswerFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
+  /**
    * Filter, which AttemptAnswer to fetch.
    */
   where?: Prisma.AttemptAnswerWhereInput
@@ -1089,6 +1410,10 @@ export type AttemptAnswerFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the AttemptAnswer
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
   /**
    * Filter, which AttemptAnswers to fetch.
    */
@@ -1138,6 +1463,10 @@ export type AttemptAnswerCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
+  /**
    * The data needed to create a AttemptAnswer.
    */
   data: Prisma.XOR<Prisma.AttemptAnswerCreateInput, Prisma.AttemptAnswerUncheckedCreateInput>
@@ -1171,6 +1500,10 @@ export type AttemptAnswerCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.AttemptAnswerCreateManyInput | Prisma.AttemptAnswerCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1185,6 +1518,10 @@ export type AttemptAnswerUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the AttemptAnswer
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
   /**
    * The data needed to update a AttemptAnswer.
    */
@@ -1237,6 +1574,10 @@ export type AttemptAnswerUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many AttemptAnswers to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1251,6 +1592,10 @@ export type AttemptAnswerUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the AttemptAnswer
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
   /**
    * The filter to search for the AttemptAnswer to update in case it exists.
    */
@@ -1277,6 +1622,10 @@ export type AttemptAnswerDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the AttemptAnswer
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
   /**
    * Filter which AttemptAnswer to delete.
    */
@@ -1309,4 +1658,8 @@ export type AttemptAnswerDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the AttemptAnswer
    */
   omit?: Prisma.AttemptAnswerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptAnswerInclude<ExtArgs> | null
 }

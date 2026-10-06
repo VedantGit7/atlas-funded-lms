@@ -222,6 +222,7 @@ export type CertificateWalletPassWhereInput = {
   created_at?: Prisma.DateTimeFilter<"CertificateWalletPass"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CertificateWalletPass"> | Date | string
   revoked_at?: Prisma.DateTimeNullableFilter<"CertificateWalletPass"> | Date | string | null
+  certificate?: Prisma.XOR<Prisma.CertificateScalarRelationFilter, Prisma.CertificateWhereInput>
 }
 
 export type CertificateWalletPassOrderByWithRelationInput = {
@@ -235,6 +236,7 @@ export type CertificateWalletPassOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   revoked_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  certificate?: Prisma.CertificateOrderByWithRelationInput
 }
 
 export type CertificateWalletPassWhereUniqueInput = Prisma.AtLeast<{
@@ -252,6 +254,7 @@ export type CertificateWalletPassWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"CertificateWalletPass"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CertificateWalletPass"> | Date | string
   revoked_at?: Prisma.DateTimeNullableFilter<"CertificateWalletPass"> | Date | string | null
+  certificate?: Prisma.XOR<Prisma.CertificateScalarRelationFilter, Prisma.CertificateWhereInput>
 }, "id" | "tenant_id_certificate_id_platform">
 
 export type CertificateWalletPassOrderByWithAggregationInput = {
@@ -288,8 +291,6 @@ export type CertificateWalletPassScalarWhereWithAggregatesInput = {
 
 export type CertificateWalletPassCreateInput = {
   id: string
-  tenant_id: string
-  certificate_id: string
   platform: string
   pass_object_key?: string | null
   external_id?: string | null
@@ -297,6 +298,7 @@ export type CertificateWalletPassCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   revoked_at?: Date | string | null
+  certificate: Prisma.CertificateCreateNestedOneWithoutCertificate_wallet_passesInput
 }
 
 export type CertificateWalletPassUncheckedCreateInput = {
@@ -314,8 +316,6 @@ export type CertificateWalletPassUncheckedCreateInput = {
 
 export type CertificateWalletPassUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  certificate_id?: Prisma.StringFieldUpdateOperationsInput | string
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   pass_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -323,6 +323,7 @@ export type CertificateWalletPassUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  certificate?: Prisma.CertificateUpdateOneRequiredWithoutCertificate_wallet_passesNestedInput
 }
 
 export type CertificateWalletPassUncheckedUpdateInput = {
@@ -353,8 +354,6 @@ export type CertificateWalletPassCreateManyInput = {
 
 export type CertificateWalletPassUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  certificate_id?: Prisma.StringFieldUpdateOperationsInput | string
   platform?: Prisma.StringFieldUpdateOperationsInput | string
   pass_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -375,6 +374,16 @@ export type CertificateWalletPassUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type CertificateWalletPassListRelationFilter = {
+  every?: Prisma.CertificateWalletPassWhereInput
+  some?: Prisma.CertificateWalletPassWhereInput
+  none?: Prisma.CertificateWalletPassWhereInput
+}
+
+export type CertificateWalletPassOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CertificateWalletPassTenant_idCertificate_idPlatformCompoundUniqueInput = {
@@ -422,6 +431,156 @@ export type CertificateWalletPassMinOrderByAggregateInput = {
   revoked_at?: Prisma.SortOrder
 }
 
+export type CertificateWalletPassCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.CertificateWalletPassCreateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput> | Prisma.CertificateWalletPassCreateWithoutCertificateInput[] | Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput | Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.CertificateWalletPassCreateManyCertificateInputEnvelope
+  connect?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+}
+
+export type CertificateWalletPassUncheckedCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.CertificateWalletPassCreateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput> | Prisma.CertificateWalletPassCreateWithoutCertificateInput[] | Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput | Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.CertificateWalletPassCreateManyCertificateInputEnvelope
+  connect?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+}
+
+export type CertificateWalletPassUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateWalletPassCreateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput> | Prisma.CertificateWalletPassCreateWithoutCertificateInput[] | Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput | Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.CertificateWalletPassUpsertWithWhereUniqueWithoutCertificateInput | Prisma.CertificateWalletPassUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.CertificateWalletPassCreateManyCertificateInputEnvelope
+  set?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  disconnect?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  delete?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  connect?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  update?: Prisma.CertificateWalletPassUpdateWithWhereUniqueWithoutCertificateInput | Prisma.CertificateWalletPassUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.CertificateWalletPassUpdateManyWithWhereWithoutCertificateInput | Prisma.CertificateWalletPassUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.CertificateWalletPassScalarWhereInput | Prisma.CertificateWalletPassScalarWhereInput[]
+}
+
+export type CertificateWalletPassUncheckedUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateWalletPassCreateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput> | Prisma.CertificateWalletPassCreateWithoutCertificateInput[] | Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput | Prisma.CertificateWalletPassCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.CertificateWalletPassUpsertWithWhereUniqueWithoutCertificateInput | Prisma.CertificateWalletPassUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.CertificateWalletPassCreateManyCertificateInputEnvelope
+  set?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  disconnect?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  delete?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  connect?: Prisma.CertificateWalletPassWhereUniqueInput | Prisma.CertificateWalletPassWhereUniqueInput[]
+  update?: Prisma.CertificateWalletPassUpdateWithWhereUniqueWithoutCertificateInput | Prisma.CertificateWalletPassUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.CertificateWalletPassUpdateManyWithWhereWithoutCertificateInput | Prisma.CertificateWalletPassUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.CertificateWalletPassScalarWhereInput | Prisma.CertificateWalletPassScalarWhereInput[]
+}
+
+export type CertificateWalletPassCreateWithoutCertificateInput = {
+  id: string
+  platform: string
+  pass_object_key?: string | null
+  external_id?: string | null
+  status?: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  revoked_at?: Date | string | null
+}
+
+export type CertificateWalletPassUncheckedCreateWithoutCertificateInput = {
+  id: string
+  platform: string
+  pass_object_key?: string | null
+  external_id?: string | null
+  status?: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  revoked_at?: Date | string | null
+}
+
+export type CertificateWalletPassCreateOrConnectWithoutCertificateInput = {
+  where: Prisma.CertificateWalletPassWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateWalletPassCreateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput>
+}
+
+export type CertificateWalletPassCreateManyCertificateInputEnvelope = {
+  data: Prisma.CertificateWalletPassCreateManyCertificateInput | Prisma.CertificateWalletPassCreateManyCertificateInput[]
+  skipDuplicates?: boolean
+}
+
+export type CertificateWalletPassUpsertWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.CertificateWalletPassWhereUniqueInput
+  update: Prisma.XOR<Prisma.CertificateWalletPassUpdateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedUpdateWithoutCertificateInput>
+  create: Prisma.XOR<Prisma.CertificateWalletPassCreateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedCreateWithoutCertificateInput>
+}
+
+export type CertificateWalletPassUpdateWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.CertificateWalletPassWhereUniqueInput
+  data: Prisma.XOR<Prisma.CertificateWalletPassUpdateWithoutCertificateInput, Prisma.CertificateWalletPassUncheckedUpdateWithoutCertificateInput>
+}
+
+export type CertificateWalletPassUpdateManyWithWhereWithoutCertificateInput = {
+  where: Prisma.CertificateWalletPassScalarWhereInput
+  data: Prisma.XOR<Prisma.CertificateWalletPassUpdateManyMutationInput, Prisma.CertificateWalletPassUncheckedUpdateManyWithoutCertificateInput>
+}
+
+export type CertificateWalletPassScalarWhereInput = {
+  AND?: Prisma.CertificateWalletPassScalarWhereInput | Prisma.CertificateWalletPassScalarWhereInput[]
+  OR?: Prisma.CertificateWalletPassScalarWhereInput[]
+  NOT?: Prisma.CertificateWalletPassScalarWhereInput | Prisma.CertificateWalletPassScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CertificateWalletPass"> | string
+  tenant_id?: Prisma.UuidFilter<"CertificateWalletPass"> | string
+  certificate_id?: Prisma.UuidFilter<"CertificateWalletPass"> | string
+  platform?: Prisma.StringFilter<"CertificateWalletPass"> | string
+  pass_object_key?: Prisma.StringNullableFilter<"CertificateWalletPass"> | string | null
+  external_id?: Prisma.StringNullableFilter<"CertificateWalletPass"> | string | null
+  status?: Prisma.StringFilter<"CertificateWalletPass"> | string
+  created_at?: Prisma.DateTimeFilter<"CertificateWalletPass"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"CertificateWalletPass"> | Date | string
+  revoked_at?: Prisma.DateTimeNullableFilter<"CertificateWalletPass"> | Date | string | null
+}
+
+export type CertificateWalletPassCreateManyCertificateInput = {
+  id: string
+  platform: string
+  pass_object_key?: string | null
+  external_id?: string | null
+  status?: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  revoked_at?: Date | string | null
+}
+
+export type CertificateWalletPassUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  platform?: Prisma.StringFieldUpdateOperationsInput | string
+  pass_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type CertificateWalletPassUncheckedUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  platform?: Prisma.StringFieldUpdateOperationsInput | string
+  pass_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type CertificateWalletPassUncheckedUpdateManyWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  platform?: Prisma.StringFieldUpdateOperationsInput | string
+  pass_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  external_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 
 
 export type CertificateWalletPassSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -435,6 +594,7 @@ export type CertificateWalletPassSelect<ExtArgs extends runtime.Types.Extensions
   created_at?: boolean
   updated_at?: boolean
   revoked_at?: boolean
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificateWalletPass"]>
 
 export type CertificateWalletPassSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -448,6 +608,7 @@ export type CertificateWalletPassSelectCreateManyAndReturn<ExtArgs extends runti
   created_at?: boolean
   updated_at?: boolean
   revoked_at?: boolean
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificateWalletPass"]>
 
 export type CertificateWalletPassSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -461,6 +622,7 @@ export type CertificateWalletPassSelectUpdateManyAndReturn<ExtArgs extends runti
   created_at?: boolean
   updated_at?: boolean
   revoked_at?: boolean
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificateWalletPass"]>
 
 export type CertificateWalletPassSelectScalar = {
@@ -477,10 +639,21 @@ export type CertificateWalletPassSelectScalar = {
 }
 
 export type CertificateWalletPassOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "certificate_id" | "platform" | "pass_object_key" | "external_id" | "status" | "created_at" | "updated_at" | "revoked_at", ExtArgs["result"]["certificateWalletPass"]>
+export type CertificateWalletPassInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
+}
+export type CertificateWalletPassIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
+}
+export type CertificateWalletPassIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateDefaultArgs<ExtArgs>
+}
 
 export type $CertificateWalletPassPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CertificateWalletPass"
-  objects: {}
+  objects: {
+    certificate: Prisma.$CertificatePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -886,6 +1059,7 @@ readonly fields: CertificateWalletPassFieldRefs;
  */
 export interface Prisma__CertificateWalletPassClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  certificate<T extends Prisma.CertificateDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CertificateDefaultArgs<ExtArgs>>): Prisma.Prisma__CertificateClient<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -942,6 +1116,10 @@ export type CertificateWalletPassFindUniqueArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateWalletPass to fetch.
    */
   where: Prisma.CertificateWalletPassWhereUniqueInput
@@ -960,6 +1138,10 @@ export type CertificateWalletPassFindUniqueOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateWalletPass to fetch.
    */
   where: Prisma.CertificateWalletPassWhereUniqueInput
@@ -977,6 +1159,10 @@ export type CertificateWalletPassFindFirstArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the CertificateWalletPass
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
   /**
    * Filter, which CertificateWalletPass to fetch.
    */
@@ -1026,6 +1212,10 @@ export type CertificateWalletPassFindFirstOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateWalletPass to fetch.
    */
   where?: Prisma.CertificateWalletPassWhereInput
@@ -1073,6 +1263,10 @@ export type CertificateWalletPassFindManyArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CertificateWalletPass
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
   /**
    * Filter, which CertificateWalletPasses to fetch.
    */
@@ -1122,6 +1316,10 @@ export type CertificateWalletPassCreateArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
+  /**
    * The data needed to create a CertificateWalletPass.
    */
   data: Prisma.XOR<Prisma.CertificateWalletPassCreateInput, Prisma.CertificateWalletPassUncheckedCreateInput>
@@ -1155,6 +1353,10 @@ export type CertificateWalletPassCreateManyAndReturnArgs<ExtArgs extends runtime
    */
   data: Prisma.CertificateWalletPassCreateManyInput | Prisma.CertificateWalletPassCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1169,6 +1371,10 @@ export type CertificateWalletPassUpdateArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the CertificateWalletPass
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
   /**
    * The data needed to update a CertificateWalletPass.
    */
@@ -1221,6 +1427,10 @@ export type CertificateWalletPassUpdateManyAndReturnArgs<ExtArgs extends runtime
    * Limit how many CertificateWalletPasses to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1235,6 +1445,10 @@ export type CertificateWalletPassUpsertArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the CertificateWalletPass
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
   /**
    * The filter to search for the CertificateWalletPass to update in case it exists.
    */
@@ -1261,6 +1475,10 @@ export type CertificateWalletPassDeleteArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the CertificateWalletPass
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
   /**
    * Filter which CertificateWalletPass to delete.
    */
@@ -1293,4 +1511,8 @@ export type CertificateWalletPassDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the CertificateWalletPass
    */
   omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
 }

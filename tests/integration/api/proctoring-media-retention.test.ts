@@ -26,14 +26,21 @@ import {
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
 
-// F21 requires a real parent session; a random UUID alone is no longer accepted.
+// F21 requires a real parent session, and M3 a real attempt of the same tenant
+// behind it; random UUIDs are no longer accepted.
 async function seedSession(
   tenant: Awaited<ReturnType<typeof createTenantIsolationFixture>>["tenantA"],
 ): Promise<string> {
   const id = randomUUID();
+  const assessmentId = randomUUID();
+  const attemptId = randomUUID();
   await withTenantTx(tenantCtx(tenant), async (tx) => {
+    await tx.$executeRaw`INSERT INTO assessments(id,tenant_id,slug,title,assessment_type,status,config_json,updated_at)
+      VALUES(${assessmentId}::uuid,${tenant.tenantId}::uuid,${`m12-${assessmentId}`},'M12','quiz','PUBLISHED','{}'::jsonb,now())`;
+    await tx.$executeRaw`INSERT INTO attempts(id,tenant_id,assessment_id,membership_id)
+      VALUES(${attemptId}::uuid,${tenant.tenantId}::uuid,${assessmentId}::uuid,${tenant.membershipId}::uuid)`;
     await tx.$executeRaw`INSERT INTO proctoring_sessions(id,tenant_id,attempt_id,membership_id)
-      VALUES(${id}::uuid,${tenant.tenantId}::uuid,${randomUUID()}::uuid,${tenant.membershipId}::uuid)`;
+      VALUES(${id}::uuid,${tenant.tenantId}::uuid,${attemptId}::uuid,${tenant.membershipId}::uuid)`;
   });
   return id;
 }

@@ -269,6 +269,7 @@ export type PaymentInstalmentWhereInput = {
   created_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
   plan?: Prisma.XOR<Prisma.PaymentInstalmentPlanScalarRelationFilter, Prisma.PaymentInstalmentPlanWhereInput>
+  payment_order?: Prisma.XOR<Prisma.PaymentOrderNullableScalarRelationFilter, Prisma.PaymentOrderWhereInput> | null
 }
 
 export type PaymentInstalmentOrderByWithRelationInput = {
@@ -284,6 +285,7 @@ export type PaymentInstalmentOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   plan?: Prisma.PaymentInstalmentPlanOrderByWithRelationInput
+  payment_order?: Prisma.PaymentOrderOrderByWithRelationInput
 }
 
 export type PaymentInstalmentWhereUniqueInput = Prisma.AtLeast<{
@@ -303,6 +305,7 @@ export type PaymentInstalmentWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
   plan?: Prisma.XOR<Prisma.PaymentInstalmentPlanScalarRelationFilter, Prisma.PaymentInstalmentPlanWhereInput>
+  payment_order?: Prisma.XOR<Prisma.PaymentOrderNullableScalarRelationFilter, Prisma.PaymentOrderWhereInput> | null
 }, "id" | "tenant_id_plan_id_sequence_no">
 
 export type PaymentInstalmentOrderByWithAggregationInput = {
@@ -343,16 +346,15 @@ export type PaymentInstalmentScalarWhereWithAggregatesInput = {
 
 export type PaymentInstalmentCreateInput = {
   id: string
-  tenant_id: string
   sequence_no: number
   amount_cents: number
   due_at: Date | string
   paid_at?: Date | string | null
   status?: string
-  payment_order_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
   plan: Prisma.PaymentInstalmentPlanCreateNestedOneWithoutInstalmentsInput
+  payment_order?: Prisma.PaymentOrderCreateNestedOneWithoutPayment_instalmentsInput
 }
 
 export type PaymentInstalmentUncheckedCreateInput = {
@@ -371,16 +373,15 @@ export type PaymentInstalmentUncheckedCreateInput = {
 
 export type PaymentInstalmentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   sequence_no?: Prisma.IntFieldUpdateOperationsInput | number
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plan?: Prisma.PaymentInstalmentPlanUpdateOneRequiredWithoutInstalmentsNestedInput
+  payment_order?: Prisma.PaymentOrderUpdateOneWithoutPayment_instalmentsNestedInput
 }
 
 export type PaymentInstalmentUncheckedUpdateInput = {
@@ -413,13 +414,11 @@ export type PaymentInstalmentCreateManyInput = {
 
 export type PaymentInstalmentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   sequence_no?: Prisma.IntFieldUpdateOperationsInput | number
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -506,6 +505,48 @@ export type PaymentInstalmentSumOrderByAggregateInput = {
   amount_cents?: Prisma.SortOrder
 }
 
+export type PaymentInstalmentCreateNestedManyWithoutPayment_orderInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentCreateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput> | Prisma.PaymentInstalmentCreateWithoutPayment_orderInput[] | Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput | Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput[]
+  createMany?: Prisma.PaymentInstalmentCreateManyPayment_orderInputEnvelope
+  connect?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+}
+
+export type PaymentInstalmentUncheckedCreateNestedManyWithoutPayment_orderInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentCreateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput> | Prisma.PaymentInstalmentCreateWithoutPayment_orderInput[] | Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput | Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput[]
+  createMany?: Prisma.PaymentInstalmentCreateManyPayment_orderInputEnvelope
+  connect?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+}
+
+export type PaymentInstalmentUpdateManyWithoutPayment_orderNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentCreateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput> | Prisma.PaymentInstalmentCreateWithoutPayment_orderInput[] | Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput | Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput[]
+  upsert?: Prisma.PaymentInstalmentUpsertWithWhereUniqueWithoutPayment_orderInput | Prisma.PaymentInstalmentUpsertWithWhereUniqueWithoutPayment_orderInput[]
+  createMany?: Prisma.PaymentInstalmentCreateManyPayment_orderInputEnvelope
+  set?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  disconnect?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  delete?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  connect?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  update?: Prisma.PaymentInstalmentUpdateWithWhereUniqueWithoutPayment_orderInput | Prisma.PaymentInstalmentUpdateWithWhereUniqueWithoutPayment_orderInput[]
+  updateMany?: Prisma.PaymentInstalmentUpdateManyWithWhereWithoutPayment_orderInput | Prisma.PaymentInstalmentUpdateManyWithWhereWithoutPayment_orderInput[]
+  deleteMany?: Prisma.PaymentInstalmentScalarWhereInput | Prisma.PaymentInstalmentScalarWhereInput[]
+}
+
+export type PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentCreateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput> | Prisma.PaymentInstalmentCreateWithoutPayment_orderInput[] | Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput | Prisma.PaymentInstalmentCreateOrConnectWithoutPayment_orderInput[]
+  upsert?: Prisma.PaymentInstalmentUpsertWithWhereUniqueWithoutPayment_orderInput | Prisma.PaymentInstalmentUpsertWithWhereUniqueWithoutPayment_orderInput[]
+  createMany?: Prisma.PaymentInstalmentCreateManyPayment_orderInputEnvelope
+  set?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  disconnect?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  delete?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  connect?: Prisma.PaymentInstalmentWhereUniqueInput | Prisma.PaymentInstalmentWhereUniqueInput[]
+  update?: Prisma.PaymentInstalmentUpdateWithWhereUniqueWithoutPayment_orderInput | Prisma.PaymentInstalmentUpdateWithWhereUniqueWithoutPayment_orderInput[]
+  updateMany?: Prisma.PaymentInstalmentUpdateManyWithWhereWithoutPayment_orderInput | Prisma.PaymentInstalmentUpdateManyWithWhereWithoutPayment_orderInput[]
+  deleteMany?: Prisma.PaymentInstalmentScalarWhereInput | Prisma.PaymentInstalmentScalarWhereInput[]
+}
+
 export type PaymentInstalmentCreateNestedManyWithoutPlanInput = {
   create?: Prisma.XOR<Prisma.PaymentInstalmentCreateWithoutPlanInput, Prisma.PaymentInstalmentUncheckedCreateWithoutPlanInput> | Prisma.PaymentInstalmentCreateWithoutPlanInput[] | Prisma.PaymentInstalmentUncheckedCreateWithoutPlanInput[]
   connectOrCreate?: Prisma.PaymentInstalmentCreateOrConnectWithoutPlanInput | Prisma.PaymentInstalmentCreateOrConnectWithoutPlanInput[]
@@ -548,17 +589,83 @@ export type PaymentInstalmentUncheckedUpdateManyWithoutPlanNestedInput = {
   deleteMany?: Prisma.PaymentInstalmentScalarWhereInput | Prisma.PaymentInstalmentScalarWhereInput[]
 }
 
-export type PaymentInstalmentCreateWithoutPlanInput = {
+export type PaymentInstalmentCreateWithoutPayment_orderInput = {
   id: string
-  tenant_id: string
   sequence_no: number
   amount_cents: number
   due_at: Date | string
   paid_at?: Date | string | null
   status?: string
-  payment_order_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  plan: Prisma.PaymentInstalmentPlanCreateNestedOneWithoutInstalmentsInput
+}
+
+export type PaymentInstalmentUncheckedCreateWithoutPayment_orderInput = {
+  id: string
+  plan_id: string
+  sequence_no: number
+  amount_cents: number
+  due_at: Date | string
+  paid_at?: Date | string | null
+  status?: string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PaymentInstalmentCreateOrConnectWithoutPayment_orderInput = {
+  where: Prisma.PaymentInstalmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentInstalmentCreateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput>
+}
+
+export type PaymentInstalmentCreateManyPayment_orderInputEnvelope = {
+  data: Prisma.PaymentInstalmentCreateManyPayment_orderInput | Prisma.PaymentInstalmentCreateManyPayment_orderInput[]
+  skipDuplicates?: boolean
+}
+
+export type PaymentInstalmentUpsertWithWhereUniqueWithoutPayment_orderInput = {
+  where: Prisma.PaymentInstalmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.PaymentInstalmentUpdateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedUpdateWithoutPayment_orderInput>
+  create: Prisma.XOR<Prisma.PaymentInstalmentCreateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedCreateWithoutPayment_orderInput>
+}
+
+export type PaymentInstalmentUpdateWithWhereUniqueWithoutPayment_orderInput = {
+  where: Prisma.PaymentInstalmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.PaymentInstalmentUpdateWithoutPayment_orderInput, Prisma.PaymentInstalmentUncheckedUpdateWithoutPayment_orderInput>
+}
+
+export type PaymentInstalmentUpdateManyWithWhereWithoutPayment_orderInput = {
+  where: Prisma.PaymentInstalmentScalarWhereInput
+  data: Prisma.XOR<Prisma.PaymentInstalmentUpdateManyMutationInput, Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderInput>
+}
+
+export type PaymentInstalmentScalarWhereInput = {
+  AND?: Prisma.PaymentInstalmentScalarWhereInput | Prisma.PaymentInstalmentScalarWhereInput[]
+  OR?: Prisma.PaymentInstalmentScalarWhereInput[]
+  NOT?: Prisma.PaymentInstalmentScalarWhereInput | Prisma.PaymentInstalmentScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PaymentInstalment"> | string
+  tenant_id?: Prisma.UuidFilter<"PaymentInstalment"> | string
+  plan_id?: Prisma.UuidFilter<"PaymentInstalment"> | string
+  sequence_no?: Prisma.IntFilter<"PaymentInstalment"> | number
+  amount_cents?: Prisma.IntFilter<"PaymentInstalment"> | number
+  due_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
+  paid_at?: Prisma.DateTimeNullableFilter<"PaymentInstalment"> | Date | string | null
+  status?: Prisma.StringFilter<"PaymentInstalment"> | string
+  payment_order_id?: Prisma.UuidNullableFilter<"PaymentInstalment"> | string | null
+  created_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
+}
+
+export type PaymentInstalmentCreateWithoutPlanInput = {
+  id: string
+  sequence_no: number
+  amount_cents: number
+  due_at: Date | string
+  paid_at?: Date | string | null
+  status?: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_order?: Prisma.PaymentOrderCreateNestedOneWithoutPayment_instalmentsInput
 }
 
 export type PaymentInstalmentUncheckedCreateWithoutPlanInput = {
@@ -600,21 +707,52 @@ export type PaymentInstalmentUpdateManyWithWhereWithoutPlanInput = {
   data: Prisma.XOR<Prisma.PaymentInstalmentUpdateManyMutationInput, Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPlanInput>
 }
 
-export type PaymentInstalmentScalarWhereInput = {
-  AND?: Prisma.PaymentInstalmentScalarWhereInput | Prisma.PaymentInstalmentScalarWhereInput[]
-  OR?: Prisma.PaymentInstalmentScalarWhereInput[]
-  NOT?: Prisma.PaymentInstalmentScalarWhereInput | Prisma.PaymentInstalmentScalarWhereInput[]
-  id?: Prisma.UuidFilter<"PaymentInstalment"> | string
-  tenant_id?: Prisma.UuidFilter<"PaymentInstalment"> | string
-  plan_id?: Prisma.UuidFilter<"PaymentInstalment"> | string
-  sequence_no?: Prisma.IntFilter<"PaymentInstalment"> | number
-  amount_cents?: Prisma.IntFilter<"PaymentInstalment"> | number
-  due_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
-  paid_at?: Prisma.DateTimeNullableFilter<"PaymentInstalment"> | Date | string | null
-  status?: Prisma.StringFilter<"PaymentInstalment"> | string
-  payment_order_id?: Prisma.UuidNullableFilter<"PaymentInstalment"> | string | null
-  created_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"PaymentInstalment"> | Date | string
+export type PaymentInstalmentCreateManyPayment_orderInput = {
+  id: string
+  plan_id: string
+  sequence_no: number
+  amount_cents: number
+  due_at: Date | string
+  paid_at?: Date | string | null
+  status?: string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PaymentInstalmentUpdateWithoutPayment_orderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sequence_no?: Prisma.IntFieldUpdateOperationsInput | number
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.PaymentInstalmentPlanUpdateOneRequiredWithoutInstalmentsNestedInput
+}
+
+export type PaymentInstalmentUncheckedUpdateWithoutPayment_orderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  plan_id?: Prisma.StringFieldUpdateOperationsInput | string
+  sequence_no?: Prisma.IntFieldUpdateOperationsInput | number
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentInstalmentUncheckedUpdateManyWithoutPayment_orderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  plan_id?: Prisma.StringFieldUpdateOperationsInput | string
+  sequence_no?: Prisma.IntFieldUpdateOperationsInput | number
+  amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type PaymentInstalmentCreateManyPlanInput = {
@@ -632,15 +770,14 @@ export type PaymentInstalmentCreateManyPlanInput = {
 
 export type PaymentInstalmentUpdateWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   sequence_no?: Prisma.IntFieldUpdateOperationsInput | number
   amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   paid_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_order?: Prisma.PaymentOrderUpdateOneWithoutPayment_instalmentsNestedInput
 }
 
 export type PaymentInstalmentUncheckedUpdateWithoutPlanInput = {
@@ -684,6 +821,7 @@ export type PaymentInstalmentSelect<ExtArgs extends runtime.Types.Extensions.Int
   created_at?: boolean
   updated_at?: boolean
   plan?: boolean | Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.PaymentInstalment$payment_orderArgs<ExtArgs>
 }, ExtArgs["result"]["paymentInstalment"]>
 
 export type PaymentInstalmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -699,6 +837,7 @@ export type PaymentInstalmentSelectCreateManyAndReturn<ExtArgs extends runtime.T
   created_at?: boolean
   updated_at?: boolean
   plan?: boolean | Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.PaymentInstalment$payment_orderArgs<ExtArgs>
 }, ExtArgs["result"]["paymentInstalment"]>
 
 export type PaymentInstalmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -714,6 +853,7 @@ export type PaymentInstalmentSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   created_at?: boolean
   updated_at?: boolean
   plan?: boolean | Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.PaymentInstalment$payment_orderArgs<ExtArgs>
 }, ExtArgs["result"]["paymentInstalment"]>
 
 export type PaymentInstalmentSelectScalar = {
@@ -733,18 +873,22 @@ export type PaymentInstalmentSelectScalar = {
 export type PaymentInstalmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "plan_id" | "sequence_no" | "amount_cents" | "due_at" | "paid_at" | "status" | "payment_order_id" | "created_at" | "updated_at", ExtArgs["result"]["paymentInstalment"]>
 export type PaymentInstalmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.PaymentInstalment$payment_orderArgs<ExtArgs>
 }
 export type PaymentInstalmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.PaymentInstalment$payment_orderArgs<ExtArgs>
 }
 export type PaymentInstalmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.PaymentInstalment$payment_orderArgs<ExtArgs>
 }
 
 export type $PaymentInstalmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PaymentInstalment"
   objects: {
     plan: Prisma.$PaymentInstalmentPlanPayload<ExtArgs>
+    payment_order: Prisma.$PaymentOrderPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1153,6 +1297,7 @@ readonly fields: PaymentInstalmentFieldRefs;
 export interface Prisma__PaymentInstalmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   plan<T extends Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentInstalmentPlanDefaultArgs<ExtArgs>>): Prisma.Prisma__PaymentInstalmentPlanClient<runtime.Types.Result.GetResult<Prisma.$PaymentInstalmentPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  payment_order<T extends Prisma.PaymentInstalment$payment_orderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentInstalment$payment_orderArgs<ExtArgs>>): Prisma.Prisma__PaymentOrderClient<runtime.Types.Result.GetResult<Prisma.$PaymentOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1591,6 +1736,25 @@ export type PaymentInstalmentDeleteManyArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many PaymentInstalments to delete.
    */
   limit?: number
+}
+
+/**
+ * PaymentInstalment.payment_order
+ */
+export type PaymentInstalment$payment_orderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentOrder
+   */
+  select?: Prisma.PaymentOrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentOrder
+   */
+  omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  where?: Prisma.PaymentOrderWhereInput
 }
 
 /**

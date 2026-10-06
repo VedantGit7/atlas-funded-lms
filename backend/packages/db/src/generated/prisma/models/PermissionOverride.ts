@@ -206,6 +206,7 @@ export type PermissionOverrideWhereInput = {
   reason?: Prisma.StringNullableFilter<"PermissionOverride"> | string | null
   expires_at?: Prisma.DateTimeNullableFilter<"PermissionOverride"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"PermissionOverride"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type PermissionOverrideOrderByWithRelationInput = {
@@ -217,6 +218,7 @@ export type PermissionOverrideOrderByWithRelationInput = {
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type PermissionOverrideWhereUniqueInput = Prisma.AtLeast<{
@@ -232,6 +234,7 @@ export type PermissionOverrideWhereUniqueInput = Prisma.AtLeast<{
   reason?: Prisma.StringNullableFilter<"PermissionOverride"> | string | null
   expires_at?: Prisma.DateTimeNullableFilter<"PermissionOverride"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"PermissionOverride"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_membership_id_permission_key">
 
 export type PermissionOverrideOrderByWithAggregationInput = {
@@ -264,13 +267,12 @@ export type PermissionOverrideScalarWhereWithAggregatesInput = {
 
 export type PermissionOverrideCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   permission_key: string
   effect: string
   reason?: string | null
   expires_at?: Date | string | null
   created_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutPermission_overridesInput
 }
 
 export type PermissionOverrideUncheckedCreateInput = {
@@ -286,13 +288,12 @@ export type PermissionOverrideUncheckedCreateInput = {
 
 export type PermissionOverrideUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   permission_key?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPermission_overridesNestedInput
 }
 
 export type PermissionOverrideUncheckedUpdateInput = {
@@ -319,8 +320,6 @@ export type PermissionOverrideCreateManyInput = {
 
 export type PermissionOverrideUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   permission_key?: Prisma.StringFieldUpdateOperationsInput | string
   effect?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -337,6 +336,16 @@ export type PermissionOverrideUncheckedUpdateManyInput = {
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PermissionOverrideListRelationFilter = {
+  every?: Prisma.PermissionOverrideWhereInput
+  some?: Prisma.PermissionOverrideWhereInput
+  none?: Prisma.PermissionOverrideWhereInput
+}
+
+export type PermissionOverrideOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type PermissionOverrideTenant_idMembership_idPermission_keyCompoundUniqueInput = {
@@ -378,6 +387,142 @@ export type PermissionOverrideMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
 }
 
+export type PermissionOverrideCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PermissionOverrideCreateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput> | Prisma.PermissionOverrideCreateWithoutMembershipInput[] | Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput | Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PermissionOverrideCreateManyMembershipInputEnvelope
+  connect?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+}
+
+export type PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PermissionOverrideCreateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput> | Prisma.PermissionOverrideCreateWithoutMembershipInput[] | Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput | Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PermissionOverrideCreateManyMembershipInputEnvelope
+  connect?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+}
+
+export type PermissionOverrideUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PermissionOverrideCreateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput> | Prisma.PermissionOverrideCreateWithoutMembershipInput[] | Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput | Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PermissionOverrideUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PermissionOverrideUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PermissionOverrideCreateManyMembershipInputEnvelope
+  set?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  disconnect?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  delete?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  connect?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  update?: Prisma.PermissionOverrideUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PermissionOverrideUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PermissionOverrideUpdateManyWithWhereWithoutMembershipInput | Prisma.PermissionOverrideUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PermissionOverrideScalarWhereInput | Prisma.PermissionOverrideScalarWhereInput[]
+}
+
+export type PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PermissionOverrideCreateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput> | Prisma.PermissionOverrideCreateWithoutMembershipInput[] | Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput | Prisma.PermissionOverrideCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PermissionOverrideUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PermissionOverrideUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PermissionOverrideCreateManyMembershipInputEnvelope
+  set?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  disconnect?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  delete?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  connect?: Prisma.PermissionOverrideWhereUniqueInput | Prisma.PermissionOverrideWhereUniqueInput[]
+  update?: Prisma.PermissionOverrideUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PermissionOverrideUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PermissionOverrideUpdateManyWithWhereWithoutMembershipInput | Prisma.PermissionOverrideUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PermissionOverrideScalarWhereInput | Prisma.PermissionOverrideScalarWhereInput[]
+}
+
+export type PermissionOverrideCreateWithoutMembershipInput = {
+  id: string
+  permission_key: string
+  effect: string
+  reason?: string | null
+  expires_at?: Date | string | null
+  created_at?: Date | string
+}
+
+export type PermissionOverrideUncheckedCreateWithoutMembershipInput = {
+  id: string
+  permission_key: string
+  effect: string
+  reason?: string | null
+  expires_at?: Date | string | null
+  created_at?: Date | string
+}
+
+export type PermissionOverrideCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PermissionOverrideWhereUniqueInput
+  create: Prisma.XOR<Prisma.PermissionOverrideCreateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput>
+}
+
+export type PermissionOverrideCreateManyMembershipInputEnvelope = {
+  data: Prisma.PermissionOverrideCreateManyMembershipInput | Prisma.PermissionOverrideCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PermissionOverrideUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PermissionOverrideWhereUniqueInput
+  update: Prisma.XOR<Prisma.PermissionOverrideUpdateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PermissionOverrideCreateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedCreateWithoutMembershipInput>
+}
+
+export type PermissionOverrideUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PermissionOverrideWhereUniqueInput
+  data: Prisma.XOR<Prisma.PermissionOverrideUpdateWithoutMembershipInput, Prisma.PermissionOverrideUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PermissionOverrideUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PermissionOverrideScalarWhereInput
+  data: Prisma.XOR<Prisma.PermissionOverrideUpdateManyMutationInput, Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PermissionOverrideScalarWhereInput = {
+  AND?: Prisma.PermissionOverrideScalarWhereInput | Prisma.PermissionOverrideScalarWhereInput[]
+  OR?: Prisma.PermissionOverrideScalarWhereInput[]
+  NOT?: Prisma.PermissionOverrideScalarWhereInput | Prisma.PermissionOverrideScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PermissionOverride"> | string
+  tenant_id?: Prisma.UuidFilter<"PermissionOverride"> | string
+  membership_id?: Prisma.UuidFilter<"PermissionOverride"> | string
+  permission_key?: Prisma.StringFilter<"PermissionOverride"> | string
+  effect?: Prisma.StringFilter<"PermissionOverride"> | string
+  reason?: Prisma.StringNullableFilter<"PermissionOverride"> | string | null
+  expires_at?: Prisma.DateTimeNullableFilter<"PermissionOverride"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"PermissionOverride"> | Date | string
+}
+
+export type PermissionOverrideCreateManyMembershipInput = {
+  id: string
+  permission_key: string
+  effect: string
+  reason?: string | null
+  expires_at?: Date | string | null
+  created_at?: Date | string
+}
+
+export type PermissionOverrideUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  permission_key?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PermissionOverrideUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  permission_key?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PermissionOverrideUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  permission_key?: Prisma.StringFieldUpdateOperationsInput | string
+  effect?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type PermissionOverrideSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -389,6 +534,7 @@ export type PermissionOverrideSelect<ExtArgs extends runtime.Types.Extensions.In
   reason?: boolean
   expires_at?: boolean
   created_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["permissionOverride"]>
 
 export type PermissionOverrideSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -400,6 +546,7 @@ export type PermissionOverrideSelectCreateManyAndReturn<ExtArgs extends runtime.
   reason?: boolean
   expires_at?: boolean
   created_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["permissionOverride"]>
 
 export type PermissionOverrideSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -411,6 +558,7 @@ export type PermissionOverrideSelectUpdateManyAndReturn<ExtArgs extends runtime.
   reason?: boolean
   expires_at?: boolean
   created_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["permissionOverride"]>
 
 export type PermissionOverrideSelectScalar = {
@@ -425,10 +573,21 @@ export type PermissionOverrideSelectScalar = {
 }
 
 export type PermissionOverrideOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "permission_key" | "effect" | "reason" | "expires_at" | "created_at", ExtArgs["result"]["permissionOverride"]>
+export type PermissionOverrideInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PermissionOverrideIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PermissionOverrideIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $PermissionOverridePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PermissionOverride"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -832,6 +991,7 @@ readonly fields: PermissionOverrideFieldRefs;
  */
 export interface Prisma__PermissionOverrideClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -886,6 +1046,10 @@ export type PermissionOverrideFindUniqueArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
+  /**
    * Filter, which PermissionOverride to fetch.
    */
   where: Prisma.PermissionOverrideWhereUniqueInput
@@ -904,6 +1068,10 @@ export type PermissionOverrideFindUniqueOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
+  /**
    * Filter, which PermissionOverride to fetch.
    */
   where: Prisma.PermissionOverrideWhereUniqueInput
@@ -921,6 +1089,10 @@ export type PermissionOverrideFindFirstArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the PermissionOverride
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
   /**
    * Filter, which PermissionOverride to fetch.
    */
@@ -970,6 +1142,10 @@ export type PermissionOverrideFindFirstOrThrowArgs<ExtArgs extends runtime.Types
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
+  /**
    * Filter, which PermissionOverride to fetch.
    */
   where?: Prisma.PermissionOverrideWhereInput
@@ -1017,6 +1193,10 @@ export type PermissionOverrideFindManyArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the PermissionOverride
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
   /**
    * Filter, which PermissionOverrides to fetch.
    */
@@ -1066,6 +1246,10 @@ export type PermissionOverrideCreateArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
+  /**
    * The data needed to create a PermissionOverride.
    */
   data: Prisma.XOR<Prisma.PermissionOverrideCreateInput, Prisma.PermissionOverrideUncheckedCreateInput>
@@ -1099,6 +1283,10 @@ export type PermissionOverrideCreateManyAndReturnArgs<ExtArgs extends runtime.Ty
    */
   data: Prisma.PermissionOverrideCreateManyInput | Prisma.PermissionOverrideCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1113,6 +1301,10 @@ export type PermissionOverrideUpdateArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the PermissionOverride
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
   /**
    * The data needed to update a PermissionOverride.
    */
@@ -1165,6 +1357,10 @@ export type PermissionOverrideUpdateManyAndReturnArgs<ExtArgs extends runtime.Ty
    * Limit how many PermissionOverrides to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1179,6 +1375,10 @@ export type PermissionOverrideUpsertArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the PermissionOverride
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
   /**
    * The filter to search for the PermissionOverride to update in case it exists.
    */
@@ -1205,6 +1405,10 @@ export type PermissionOverrideDeleteArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the PermissionOverride
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
   /**
    * Filter which PermissionOverride to delete.
    */
@@ -1237,4 +1441,8 @@ export type PermissionOverrideDefaultArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the PermissionOverride
    */
   omit?: Prisma.PermissionOverrideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PermissionOverrideInclude<ExtArgs> | null
 }
