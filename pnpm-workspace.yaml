@@ -52,7 +52,10 @@ overrides:
   "mysql2@<3.22.0": "^3.22.0"
   "nanoid@<3.3.16": "^3.3.16"
   "postcss@<=8.5.17": "^8.5.18"
-  "shell-quote@<=1.8.4": "^1.8.5"
+  # Raised (2026-10-06): quote() command injection via a line terminator in a
+  # token after a comment token (critical), fixed in 1.11.0. Dev tooling only:
+  # concurrently pins an exact older copy in every release so far.
+  "shell-quote@<1.11.0": "^1.11.0"
   "tmp@<0.2.6": "^0.2.6"
   # exceljs pulls uuid only for v4; the advisory is a bounds check in v3/v5/v6
   # when an explicit `buf` is passed, so it was never reachable here. Bumped
@@ -63,6 +66,11 @@ overrides:
   # event loop. Build tooling (postcss via next, vite and tailwind); fixed in
   # 1.2.2.
   "source-map-js@<1.2.2": "^1.2.2"
+  # Raised (2026-10-06): librsvg vulnerability in the libvips sharp bundles
+  # (CVE-2026-96889), fixed in 0.35.5. Production: next's image optimizer in the
+  # web and API apps. next's own range (^0.35.4) already admits the fix; the
+  # override keeps a lockfile refresh from resolving below it.
+  "sharp@<0.35.5": "^0.35.5"
 
 auditConfig:
   # Suppressed by advisory id, so any NEW advisory still fails security:check.
