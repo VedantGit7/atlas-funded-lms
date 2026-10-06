@@ -29,6 +29,7 @@ Sprint 10 WS1–5 engineering work is in-repo; this section tracks prep only —
 - [ ] Production secrets reviewed (by reference only; not stored in repo)
 - [ ] `pnpm perf:web-vitals` passes against the staging build ([web-vitals-check.md](../runbooks/web-vitals-check.md))
 - [ ] `pnpm db:tenant-fk:check` reports no violations against production before deploying migrations 120/121 and 122/123, and every constraint `validated` after ([tenant-foreign-keys.md](../runbooks/tenant-foreign-keys.md))
+- [ ] `pnpm data:encrypt-affiliate-payouts` reports 0 affiliates with plain-text payout details on staging and production, with the key verified against existing ciphertext ([affiliate-payout-details.md](../runbooks/affiliate-payout-details.md))
 
 ## Ownership
 

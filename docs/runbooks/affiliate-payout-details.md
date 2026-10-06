@@ -23,21 +23,54 @@ are stored encrypted and shown masked.
   names only, never values. On both forms an empty bank account or UPI field
   keeps what is on file; removing one is an explicit choice.
 
-## After deploying
+## After deploying: the backfill
 
 Values saved before this change are still plain text. They keep working,
-because reads accept them, but they must be encrypted. With the production
-database owner URL and the production `LEARNER_BILLING_ENC_KEY`:
+because reads accept them, but they must be encrypted. Run the backfill once
+per environment (staging first, then production) after the M6 code is live.
+
+You need:
+
+- the database **owner** URL, as a login with `BYPASSRLS` (or a superuser).
+  `sales_affiliates` forces row-level security, and an owner without
+  `BYPASSRLS` sees no rows at all; the script refuses such a login rather than
+  report a clean table that is not;
+- the environment's own `LEARNER_BILLING_ENC_KEY`, the one the API runs with.
 
 ```bash
+# 1. Dry run: counts only, never values. Exits 1 while plain text remains.
 DIRECT_DATABASE_URL=... LEARNER_BILLING_ENC_KEY=... pnpm data:encrypt-affiliate-payouts
-DIRECT_DATABASE_URL=... LEARNER_BILLING_ENC_KEY=... pnpm data:encrypt-affiliate-payouts -- --apply
+
+# 2. Optional: one tenant first.
+... pnpm data:encrypt-affiliate-payouts -- --apply --tenant <tenant-id>
+
+# 3. Everyone.
+... pnpm data:encrypt-affiliate-payouts -- --apply
+
+# 4. Confirm: reports 0 and exits 0.
+... pnpm data:encrypt-affiliate-payouts
 ```
 
-The first command is a dry run and reports how many affiliates still hold plain
-text. The second encrypts them. Run the dry run again and confirm it reports
-`0`. The script is safe to re-run. It never overwrites a row that changed after
-it read it; it reports how many it skipped, and running it again picks them up.
+What the script guarantees:
+
+- **The key is proven before anything is written.** It must decrypt the
+  ciphertext already in the database (payment gateway secrets, and payout
+  values saved since M6). If it does not, the script stops with exit code 2 and
+  changes nothing: a wrong key would make every affiliate's details unreadable.
+  When there is nothing to check it against (no gateway configured and no
+  payout saved since M6), the dry run says `Key: no existing ciphertext`, and
+  `--apply` additionally needs `--allow-unverified-key`. Compare the key with
+  the deployment's secret before passing it.
+- **Every value is verified before it is stored.** Each affiliate is encrypted
+  in its own short transaction: the row is locked, each value sealed and opened
+  again, and the row is written only if all of them round-trip. An affiliate
+  that fails is left unchanged and listed by id; nothing else is affected.
+- **Concurrent edits are safe.** An edit made during the run waits for the row
+  lock and is never overwritten; a value already encrypted is left alone.
+- **Safe to re-run.** Exit codes: `0` no plain text remains, `1` some does, `2`
+  refused to run (wrong key, login cannot see every row, bad arguments).
+
+Record the final dry-run output (counts only) in the release evidence.
 
 ## Key rotation
 
