@@ -215,6 +215,7 @@ export type BundleEnrollmentWhereInput = {
   expires_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
   bundle?: Prisma.XOR<Prisma.BundleScalarRelationFilter, Prisma.BundleWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type BundleEnrollmentOrderByWithRelationInput = {
@@ -228,6 +229,7 @@ export type BundleEnrollmentOrderByWithRelationInput = {
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   bundle?: Prisma.BundleOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type BundleEnrollmentWhereUniqueInput = Prisma.AtLeast<{
@@ -245,6 +247,7 @@ export type BundleEnrollmentWhereUniqueInput = Prisma.AtLeast<{
   expires_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
   bundle?: Prisma.XOR<Prisma.BundleScalarRelationFilter, Prisma.BundleWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_bundle_id_membership_id">
 
 export type BundleEnrollmentOrderByWithAggregationInput = {
@@ -279,14 +282,13 @@ export type BundleEnrollmentScalarWhereWithAggregatesInput = {
 
 export type BundleEnrollmentCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   enrolled_type?: string
   enrolled_at?: Date | string
   expires_at?: Date | string | null
   completed_at?: Date | string | null
   bundle: Prisma.BundleCreateNestedOneWithoutEnrollmentsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutBundle_enrollmentsInput
 }
 
 export type BundleEnrollmentUncheckedCreateInput = {
@@ -303,14 +305,13 @@ export type BundleEnrollmentUncheckedCreateInput = {
 
 export type BundleEnrollmentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bundle?: Prisma.BundleUpdateOneRequiredWithoutEnrollmentsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutBundle_enrollmentsNestedInput
 }
 
 export type BundleEnrollmentUncheckedUpdateInput = {
@@ -339,8 +340,6 @@ export type BundleEnrollmentCreateManyInput = {
 
 export type BundleEnrollmentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,6 +411,48 @@ export type BundleEnrollmentMinOrderByAggregateInput = {
   completed_at?: Prisma.SortOrder
 }
 
+export type BundleEnrollmentCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.BundleEnrollmentCreateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.BundleEnrollmentCreateWithoutMembershipInput[] | Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.BundleEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+}
+
+export type BundleEnrollmentUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.BundleEnrollmentCreateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.BundleEnrollmentCreateWithoutMembershipInput[] | Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.BundleEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+}
+
+export type BundleEnrollmentUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.BundleEnrollmentCreateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.BundleEnrollmentCreateWithoutMembershipInput[] | Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.BundleEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.BundleEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.BundleEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  delete?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  connect?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  update?: Prisma.BundleEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.BundleEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.BundleEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.BundleEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.BundleEnrollmentScalarWhereInput | Prisma.BundleEnrollmentScalarWhereInput[]
+}
+
+export type BundleEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.BundleEnrollmentCreateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.BundleEnrollmentCreateWithoutMembershipInput[] | Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.BundleEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.BundleEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.BundleEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.BundleEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  delete?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  connect?: Prisma.BundleEnrollmentWhereUniqueInput | Prisma.BundleEnrollmentWhereUniqueInput[]
+  update?: Prisma.BundleEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.BundleEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.BundleEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.BundleEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.BundleEnrollmentScalarWhereInput | Prisma.BundleEnrollmentScalarWhereInput[]
+}
+
 export type BundleEnrollmentCreateNestedManyWithoutBundleInput = {
   create?: Prisma.XOR<Prisma.BundleEnrollmentCreateWithoutBundleInput, Prisma.BundleEnrollmentUncheckedCreateWithoutBundleInput> | Prisma.BundleEnrollmentCreateWithoutBundleInput[] | Prisma.BundleEnrollmentUncheckedCreateWithoutBundleInput[]
   connectOrCreate?: Prisma.BundleEnrollmentCreateOrConnectWithoutBundleInput | Prisma.BundleEnrollmentCreateOrConnectWithoutBundleInput[]
@@ -454,15 +495,75 @@ export type BundleEnrollmentUncheckedUpdateManyWithoutBundleNestedInput = {
   deleteMany?: Prisma.BundleEnrollmentScalarWhereInput | Prisma.BundleEnrollmentScalarWhereInput[]
 }
 
-export type BundleEnrollmentCreateWithoutBundleInput = {
+export type BundleEnrollmentCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   enrolled_type?: string
   enrolled_at?: Date | string
   expires_at?: Date | string | null
   completed_at?: Date | string | null
+  bundle: Prisma.BundleCreateNestedOneWithoutEnrollmentsInput
+}
+
+export type BundleEnrollmentUncheckedCreateWithoutMembershipInput = {
+  id: string
+  bundle_id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  expires_at?: Date | string | null
+  completed_at?: Date | string | null
+}
+
+export type BundleEnrollmentCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.BundleEnrollmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.BundleEnrollmentCreateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type BundleEnrollmentCreateManyMembershipInputEnvelope = {
+  data: Prisma.BundleEnrollmentCreateManyMembershipInput | Prisma.BundleEnrollmentCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type BundleEnrollmentUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.BundleEnrollmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.BundleEnrollmentUpdateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.BundleEnrollmentCreateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type BundleEnrollmentUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.BundleEnrollmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.BundleEnrollmentUpdateWithoutMembershipInput, Prisma.BundleEnrollmentUncheckedUpdateWithoutMembershipInput>
+}
+
+export type BundleEnrollmentUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.BundleEnrollmentScalarWhereInput
+  data: Prisma.XOR<Prisma.BundleEnrollmentUpdateManyMutationInput, Prisma.BundleEnrollmentUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type BundleEnrollmentScalarWhereInput = {
+  AND?: Prisma.BundleEnrollmentScalarWhereInput | Prisma.BundleEnrollmentScalarWhereInput[]
+  OR?: Prisma.BundleEnrollmentScalarWhereInput[]
+  NOT?: Prisma.BundleEnrollmentScalarWhereInput | Prisma.BundleEnrollmentScalarWhereInput[]
+  id?: Prisma.UuidFilter<"BundleEnrollment"> | string
+  tenant_id?: Prisma.UuidFilter<"BundleEnrollment"> | string
+  bundle_id?: Prisma.UuidFilter<"BundleEnrollment"> | string
+  membership_id?: Prisma.UuidFilter<"BundleEnrollment"> | string
+  status?: Prisma.StringFilter<"BundleEnrollment"> | string
+  enrolled_type?: Prisma.StringFilter<"BundleEnrollment"> | string
+  enrolled_at?: Prisma.DateTimeFilter<"BundleEnrollment"> | Date | string
+  expires_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
+  completed_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
+}
+
+export type BundleEnrollmentCreateWithoutBundleInput = {
+  id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  expires_at?: Date | string | null
+  completed_at?: Date | string | null
+  membership: Prisma.MembershipCreateNestedOneWithoutBundle_enrollmentsInput
 }
 
 export type BundleEnrollmentUncheckedCreateWithoutBundleInput = {
@@ -502,19 +603,44 @@ export type BundleEnrollmentUpdateManyWithWhereWithoutBundleInput = {
   data: Prisma.XOR<Prisma.BundleEnrollmentUpdateManyMutationInput, Prisma.BundleEnrollmentUncheckedUpdateManyWithoutBundleInput>
 }
 
-export type BundleEnrollmentScalarWhereInput = {
-  AND?: Prisma.BundleEnrollmentScalarWhereInput | Prisma.BundleEnrollmentScalarWhereInput[]
-  OR?: Prisma.BundleEnrollmentScalarWhereInput[]
-  NOT?: Prisma.BundleEnrollmentScalarWhereInput | Prisma.BundleEnrollmentScalarWhereInput[]
-  id?: Prisma.UuidFilter<"BundleEnrollment"> | string
-  tenant_id?: Prisma.UuidFilter<"BundleEnrollment"> | string
-  bundle_id?: Prisma.UuidFilter<"BundleEnrollment"> | string
-  membership_id?: Prisma.UuidFilter<"BundleEnrollment"> | string
-  status?: Prisma.StringFilter<"BundleEnrollment"> | string
-  enrolled_type?: Prisma.StringFilter<"BundleEnrollment"> | string
-  enrolled_at?: Prisma.DateTimeFilter<"BundleEnrollment"> | Date | string
-  expires_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
-  completed_at?: Prisma.DateTimeNullableFilter<"BundleEnrollment"> | Date | string | null
+export type BundleEnrollmentCreateManyMembershipInput = {
+  id: string
+  bundle_id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  expires_at?: Date | string | null
+  completed_at?: Date | string | null
+}
+
+export type BundleEnrollmentUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bundle?: Prisma.BundleUpdateOneRequiredWithoutEnrollmentsNestedInput
+}
+
+export type BundleEnrollmentUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bundle_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type BundleEnrollmentUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  bundle_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type BundleEnrollmentCreateManyBundleInput = {
@@ -530,13 +656,12 @@ export type BundleEnrollmentCreateManyBundleInput = {
 
 export type BundleEnrollmentUpdateWithoutBundleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutBundle_enrollmentsNestedInput
 }
 
 export type BundleEnrollmentUncheckedUpdateWithoutBundleInput = {
@@ -574,6 +699,7 @@ export type BundleEnrollmentSelect<ExtArgs extends runtime.Types.Extensions.Inte
   expires_at?: boolean
   completed_at?: boolean
   bundle?: boolean | Prisma.BundleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["bundleEnrollment"]>
 
 export type BundleEnrollmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -587,6 +713,7 @@ export type BundleEnrollmentSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   expires_at?: boolean
   completed_at?: boolean
   bundle?: boolean | Prisma.BundleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["bundleEnrollment"]>
 
 export type BundleEnrollmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -600,6 +727,7 @@ export type BundleEnrollmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   expires_at?: boolean
   completed_at?: boolean
   bundle?: boolean | Prisma.BundleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["bundleEnrollment"]>
 
 export type BundleEnrollmentSelectScalar = {
@@ -617,18 +745,22 @@ export type BundleEnrollmentSelectScalar = {
 export type BundleEnrollmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "bundle_id" | "membership_id" | "status" | "enrolled_type" | "enrolled_at" | "expires_at" | "completed_at", ExtArgs["result"]["bundleEnrollment"]>
 export type BundleEnrollmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bundle?: boolean | Prisma.BundleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type BundleEnrollmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bundle?: boolean | Prisma.BundleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type BundleEnrollmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bundle?: boolean | Prisma.BundleDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $BundleEnrollmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BundleEnrollment"
   objects: {
     bundle: Prisma.$BundlePayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1035,6 +1167,7 @@ readonly fields: BundleEnrollmentFieldRefs;
 export interface Prisma__BundleEnrollmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   bundle<T extends Prisma.BundleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BundleDefaultArgs<ExtArgs>>): Prisma.Prisma__BundleClient<runtime.Types.Result.GetResult<Prisma.$BundlePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

@@ -239,6 +239,7 @@ export type LearnerSubscriptionEnrollmentWhereInput = {
   cancelled_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
   plan?: Prisma.XOR<Prisma.LearnerSubscriptionPlanScalarRelationFilter, Prisma.LearnerSubscriptionPlanWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type LearnerSubscriptionEnrollmentOrderByWithRelationInput = {
@@ -255,6 +256,7 @@ export type LearnerSubscriptionEnrollmentOrderByWithRelationInput = {
   cancelled_at?: Prisma.SortOrderInput | Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   plan?: Prisma.LearnerSubscriptionPlanOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type LearnerSubscriptionEnrollmentWhereUniqueInput = Prisma.AtLeast<{
@@ -275,6 +277,7 @@ export type LearnerSubscriptionEnrollmentWhereUniqueInput = Prisma.AtLeast<{
   cancelled_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
   plan?: Prisma.XOR<Prisma.LearnerSubscriptionPlanScalarRelationFilter, Prisma.LearnerSubscriptionPlanWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_plan_id_membership_id">
 
 export type LearnerSubscriptionEnrollmentOrderByWithAggregationInput = {
@@ -315,8 +318,6 @@ export type LearnerSubscriptionEnrollmentScalarWhereWithAggregatesInput = {
 
 export type LearnerSubscriptionEnrollmentCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   enrolled_type?: string
   enrolled_at?: Date | string
@@ -326,6 +327,7 @@ export type LearnerSubscriptionEnrollmentCreateInput = {
   cancelled_at?: Date | string | null
   completed_at?: Date | string | null
   plan: Prisma.LearnerSubscriptionPlanCreateNestedOneWithoutEnrollmentsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutLearner_subscription_enrollmentsInput
 }
 
 export type LearnerSubscriptionEnrollmentUncheckedCreateInput = {
@@ -345,8 +347,6 @@ export type LearnerSubscriptionEnrollmentUncheckedCreateInput = {
 
 export type LearnerSubscriptionEnrollmentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -356,6 +356,7 @@ export type LearnerSubscriptionEnrollmentUpdateInput = {
   cancelled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plan?: Prisma.LearnerSubscriptionPlanUpdateOneRequiredWithoutEnrollmentsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutLearner_subscription_enrollmentsNestedInput
 }
 
 export type LearnerSubscriptionEnrollmentUncheckedUpdateInput = {
@@ -390,8 +391,6 @@ export type LearnerSubscriptionEnrollmentCreateManyInput = {
 
 export type LearnerSubscriptionEnrollmentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -478,6 +477,48 @@ export type LearnerSubscriptionEnrollmentMinOrderByAggregateInput = {
   completed_at?: Prisma.SortOrder
 }
 
+export type LearnerSubscriptionEnrollmentCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput[] | Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.LearnerSubscriptionEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+}
+
+export type LearnerSubscriptionEnrollmentUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput[] | Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.LearnerSubscriptionEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+}
+
+export type LearnerSubscriptionEnrollmentUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput[] | Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.LearnerSubscriptionEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.LearnerSubscriptionEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  delete?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  connect?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  update?: Prisma.LearnerSubscriptionEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.LearnerSubscriptionEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput | Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
+}
+
+export type LearnerSubscriptionEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput[] | Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.LearnerSubscriptionEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.LearnerSubscriptionEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  delete?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  connect?: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput | Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput[]
+  update?: Prisma.LearnerSubscriptionEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.LearnerSubscriptionEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.LearnerSubscriptionEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput | Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
+}
+
 export type LearnerSubscriptionEnrollmentCreateNestedManyWithoutPlanInput = {
   create?: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentCreateWithoutPlanInput, Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutPlanInput> | Prisma.LearnerSubscriptionEnrollmentCreateWithoutPlanInput[] | Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutPlanInput[]
   connectOrCreate?: Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutPlanInput | Prisma.LearnerSubscriptionEnrollmentCreateOrConnectWithoutPlanInput[]
@@ -520,10 +561,8 @@ export type LearnerSubscriptionEnrollmentUncheckedUpdateManyWithoutPlanNestedInp
   deleteMany?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput | Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
 }
 
-export type LearnerSubscriptionEnrollmentCreateWithoutPlanInput = {
+export type LearnerSubscriptionEnrollmentCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   enrolled_type?: string
   enrolled_at?: Date | string
@@ -532,6 +571,77 @@ export type LearnerSubscriptionEnrollmentCreateWithoutPlanInput = {
   expires_at?: Date | string | null
   cancelled_at?: Date | string | null
   completed_at?: Date | string | null
+  plan: Prisma.LearnerSubscriptionPlanCreateNestedOneWithoutEnrollmentsInput
+}
+
+export type LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput = {
+  id: string
+  plan_id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  current_period_start?: Date | string | null
+  current_period_end?: Date | string | null
+  expires_at?: Date | string | null
+  cancelled_at?: Date | string | null
+  completed_at?: Date | string | null
+}
+
+export type LearnerSubscriptionEnrollmentCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type LearnerSubscriptionEnrollmentCreateManyMembershipInputEnvelope = {
+  data: Prisma.LearnerSubscriptionEnrollmentCreateManyMembershipInput | Prisma.LearnerSubscriptionEnrollmentCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type LearnerSubscriptionEnrollmentUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentUpdateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentCreateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type LearnerSubscriptionEnrollmentUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.LearnerSubscriptionEnrollmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentUpdateWithoutMembershipInput, Prisma.LearnerSubscriptionEnrollmentUncheckedUpdateWithoutMembershipInput>
+}
+
+export type LearnerSubscriptionEnrollmentUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput
+  data: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentUpdateManyMutationInput, Prisma.LearnerSubscriptionEnrollmentUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type LearnerSubscriptionEnrollmentScalarWhereInput = {
+  AND?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput | Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
+  OR?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
+  NOT?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput | Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
+  id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
+  tenant_id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
+  plan_id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
+  membership_id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
+  status?: Prisma.StringFilter<"LearnerSubscriptionEnrollment"> | string
+  enrolled_type?: Prisma.StringFilter<"LearnerSubscriptionEnrollment"> | string
+  enrolled_at?: Prisma.DateTimeFilter<"LearnerSubscriptionEnrollment"> | Date | string
+  current_period_start?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
+  current_period_end?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
+  expires_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
+  cancelled_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
+  completed_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
+}
+
+export type LearnerSubscriptionEnrollmentCreateWithoutPlanInput = {
+  id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  current_period_start?: Date | string | null
+  current_period_end?: Date | string | null
+  expires_at?: Date | string | null
+  cancelled_at?: Date | string | null
+  completed_at?: Date | string | null
+  membership: Prisma.MembershipCreateNestedOneWithoutLearner_subscription_enrollmentsInput
 }
 
 export type LearnerSubscriptionEnrollmentUncheckedCreateWithoutPlanInput = {
@@ -574,22 +684,56 @@ export type LearnerSubscriptionEnrollmentUpdateManyWithWhereWithoutPlanInput = {
   data: Prisma.XOR<Prisma.LearnerSubscriptionEnrollmentUpdateManyMutationInput, Prisma.LearnerSubscriptionEnrollmentUncheckedUpdateManyWithoutPlanInput>
 }
 
-export type LearnerSubscriptionEnrollmentScalarWhereInput = {
-  AND?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput | Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
-  OR?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
-  NOT?: Prisma.LearnerSubscriptionEnrollmentScalarWhereInput | Prisma.LearnerSubscriptionEnrollmentScalarWhereInput[]
-  id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
-  tenant_id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
-  plan_id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
-  membership_id?: Prisma.UuidFilter<"LearnerSubscriptionEnrollment"> | string
-  status?: Prisma.StringFilter<"LearnerSubscriptionEnrollment"> | string
-  enrolled_type?: Prisma.StringFilter<"LearnerSubscriptionEnrollment"> | string
-  enrolled_at?: Prisma.DateTimeFilter<"LearnerSubscriptionEnrollment"> | Date | string
-  current_period_start?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
-  current_period_end?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
-  expires_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
-  cancelled_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
-  completed_at?: Prisma.DateTimeNullableFilter<"LearnerSubscriptionEnrollment"> | Date | string | null
+export type LearnerSubscriptionEnrollmentCreateManyMembershipInput = {
+  id: string
+  plan_id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  current_period_start?: Date | string | null
+  current_period_end?: Date | string | null
+  expires_at?: Date | string | null
+  cancelled_at?: Date | string | null
+  completed_at?: Date | string | null
+}
+
+export type LearnerSubscriptionEnrollmentUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  current_period_start?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  current_period_end?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plan?: Prisma.LearnerSubscriptionPlanUpdateOneRequiredWithoutEnrollmentsNestedInput
+}
+
+export type LearnerSubscriptionEnrollmentUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  plan_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  current_period_start?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  current_period_end?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type LearnerSubscriptionEnrollmentUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  plan_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  current_period_start?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  current_period_end?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type LearnerSubscriptionEnrollmentCreateManyPlanInput = {
@@ -608,8 +752,6 @@ export type LearnerSubscriptionEnrollmentCreateManyPlanInput = {
 
 export type LearnerSubscriptionEnrollmentUpdateWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -618,6 +760,7 @@ export type LearnerSubscriptionEnrollmentUpdateWithoutPlanInput = {
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cancelled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutLearner_subscription_enrollmentsNestedInput
 }
 
 export type LearnerSubscriptionEnrollmentUncheckedUpdateWithoutPlanInput = {
@@ -664,6 +807,7 @@ export type LearnerSubscriptionEnrollmentSelect<ExtArgs extends runtime.Types.Ex
   cancelled_at?: boolean
   completed_at?: boolean
   plan?: boolean | Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learnerSubscriptionEnrollment"]>
 
 export type LearnerSubscriptionEnrollmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -680,6 +824,7 @@ export type LearnerSubscriptionEnrollmentSelectCreateManyAndReturn<ExtArgs exten
   cancelled_at?: boolean
   completed_at?: boolean
   plan?: boolean | Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learnerSubscriptionEnrollment"]>
 
 export type LearnerSubscriptionEnrollmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -696,6 +841,7 @@ export type LearnerSubscriptionEnrollmentSelectUpdateManyAndReturn<ExtArgs exten
   cancelled_at?: boolean
   completed_at?: boolean
   plan?: boolean | Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["learnerSubscriptionEnrollment"]>
 
 export type LearnerSubscriptionEnrollmentSelectScalar = {
@@ -716,18 +862,22 @@ export type LearnerSubscriptionEnrollmentSelectScalar = {
 export type LearnerSubscriptionEnrollmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "plan_id" | "membership_id" | "status" | "enrolled_type" | "enrolled_at" | "current_period_start" | "current_period_end" | "expires_at" | "cancelled_at" | "completed_at", ExtArgs["result"]["learnerSubscriptionEnrollment"]>
 export type LearnerSubscriptionEnrollmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type LearnerSubscriptionEnrollmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type LearnerSubscriptionEnrollmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $LearnerSubscriptionEnrollmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LearnerSubscriptionEnrollment"
   objects: {
     plan: Prisma.$LearnerSubscriptionPlanPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1137,6 +1287,7 @@ readonly fields: LearnerSubscriptionEnrollmentFieldRefs;
 export interface Prisma__LearnerSubscriptionEnrollmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   plan<T extends Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LearnerSubscriptionPlanDefaultArgs<ExtArgs>>): Prisma.Prisma__LearnerSubscriptionPlanClient<runtime.Types.Result.GetResult<Prisma.$LearnerSubscriptionPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

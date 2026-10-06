@@ -281,6 +281,8 @@ export const marketingFormsRepository = {
 
   async deleteById(tx: TenantTx, id: string) {
     await tx.$executeRaw`delete from marketing_form_submissions where form_id = ${id}::uuid`;
+    // CTAs outlive the form they pointed at (the foreign key restricts).
+    await tx.$executeRaw`update marketing_ctas set form_id = null, updated_at = now() where form_id = ${id}::uuid`;
     const result = await tx.$executeRaw`delete from marketing_forms where id = ${id}::uuid`;
     return result > 0;
   },

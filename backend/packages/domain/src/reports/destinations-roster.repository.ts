@@ -413,6 +413,13 @@ export const destinationsRosterRepository = {
       where delivery_json->>'destinationId' = ${id}
     `;
 
+    // Delivery records are kept; they stop naming the destination, which is
+    // how a pending delivery already treats a deleted one.
+    await tx.$executeRaw`
+      update report_delivery_effects set destination_id = null, updated_at = now()
+      where destination_id = ${id}::uuid
+    `;
+
     await tx.$executeRaw`
       delete from report_delivery_destinations
       where id = ${id}::uuid

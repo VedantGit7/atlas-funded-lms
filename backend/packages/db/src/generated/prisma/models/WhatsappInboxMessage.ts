@@ -206,6 +206,7 @@ export type WhatsappInboxMessageWhereInput = {
   status?: Prisma.StringFilter<"WhatsappInboxMessage"> | string
   meta_message_id?: Prisma.StringNullableFilter<"WhatsappInboxMessage"> | string | null
   created_at?: Prisma.DateTimeFilter<"WhatsappInboxMessage"> | Date | string
+  conversation?: Prisma.XOR<Prisma.WhatsappConversationScalarRelationFilter, Prisma.WhatsappConversationWhereInput>
 }
 
 export type WhatsappInboxMessageOrderByWithRelationInput = {
@@ -217,6 +218,7 @@ export type WhatsappInboxMessageOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   meta_message_id?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  conversation?: Prisma.WhatsappConversationOrderByWithRelationInput
 }
 
 export type WhatsappInboxMessageWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type WhatsappInboxMessageWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"WhatsappInboxMessage"> | string
   meta_message_id?: Prisma.StringNullableFilter<"WhatsappInboxMessage"> | string | null
   created_at?: Prisma.DateTimeFilter<"WhatsappInboxMessage"> | Date | string
+  conversation?: Prisma.XOR<Prisma.WhatsappConversationScalarRelationFilter, Prisma.WhatsappConversationWhereInput>
 }, "id">
 
 export type WhatsappInboxMessageOrderByWithAggregationInput = {
@@ -263,13 +266,12 @@ export type WhatsappInboxMessageScalarWhereWithAggregatesInput = {
 
 export type WhatsappInboxMessageCreateInput = {
   id: string
-  tenant_id: string
-  conversation_id: string
   direction: string
   body: string
   status?: string
   meta_message_id?: string | null
   created_at?: Date | string
+  conversation: Prisma.WhatsappConversationCreateNestedOneWithoutWhatsapp_inbox_messagesInput
 }
 
 export type WhatsappInboxMessageUncheckedCreateInput = {
@@ -285,13 +287,12 @@ export type WhatsappInboxMessageUncheckedCreateInput = {
 
 export type WhatsappInboxMessageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  conversation_id?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   meta_message_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  conversation?: Prisma.WhatsappConversationUpdateOneRequiredWithoutWhatsapp_inbox_messagesNestedInput
 }
 
 export type WhatsappInboxMessageUncheckedUpdateInput = {
@@ -318,8 +319,6 @@ export type WhatsappInboxMessageCreateManyInput = {
 
 export type WhatsappInboxMessageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  conversation_id?: Prisma.StringFieldUpdateOperationsInput | string
   direction?: Prisma.StringFieldUpdateOperationsInput | string
   body?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -336,6 +335,16 @@ export type WhatsappInboxMessageUncheckedUpdateManyInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   meta_message_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WhatsappInboxMessageListRelationFilter = {
+  every?: Prisma.WhatsappInboxMessageWhereInput
+  some?: Prisma.WhatsappInboxMessageWhereInput
+  none?: Prisma.WhatsappInboxMessageWhereInput
+}
+
+export type WhatsappInboxMessageOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type WhatsappInboxMessageCountOrderByAggregateInput = {
@@ -371,6 +380,142 @@ export type WhatsappInboxMessageMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
 }
 
+export type WhatsappInboxMessageCreateNestedManyWithoutConversationInput = {
+  create?: Prisma.XOR<Prisma.WhatsappInboxMessageCreateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput> | Prisma.WhatsappInboxMessageCreateWithoutConversationInput[] | Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput[]
+  connectOrCreate?: Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput | Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput[]
+  createMany?: Prisma.WhatsappInboxMessageCreateManyConversationInputEnvelope
+  connect?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+}
+
+export type WhatsappInboxMessageUncheckedCreateNestedManyWithoutConversationInput = {
+  create?: Prisma.XOR<Prisma.WhatsappInboxMessageCreateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput> | Prisma.WhatsappInboxMessageCreateWithoutConversationInput[] | Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput[]
+  connectOrCreate?: Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput | Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput[]
+  createMany?: Prisma.WhatsappInboxMessageCreateManyConversationInputEnvelope
+  connect?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+}
+
+export type WhatsappInboxMessageUpdateManyWithoutConversationNestedInput = {
+  create?: Prisma.XOR<Prisma.WhatsappInboxMessageCreateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput> | Prisma.WhatsappInboxMessageCreateWithoutConversationInput[] | Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput[]
+  connectOrCreate?: Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput | Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput[]
+  upsert?: Prisma.WhatsappInboxMessageUpsertWithWhereUniqueWithoutConversationInput | Prisma.WhatsappInboxMessageUpsertWithWhereUniqueWithoutConversationInput[]
+  createMany?: Prisma.WhatsappInboxMessageCreateManyConversationInputEnvelope
+  set?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  disconnect?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  delete?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  connect?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  update?: Prisma.WhatsappInboxMessageUpdateWithWhereUniqueWithoutConversationInput | Prisma.WhatsappInboxMessageUpdateWithWhereUniqueWithoutConversationInput[]
+  updateMany?: Prisma.WhatsappInboxMessageUpdateManyWithWhereWithoutConversationInput | Prisma.WhatsappInboxMessageUpdateManyWithWhereWithoutConversationInput[]
+  deleteMany?: Prisma.WhatsappInboxMessageScalarWhereInput | Prisma.WhatsappInboxMessageScalarWhereInput[]
+}
+
+export type WhatsappInboxMessageUncheckedUpdateManyWithoutConversationNestedInput = {
+  create?: Prisma.XOR<Prisma.WhatsappInboxMessageCreateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput> | Prisma.WhatsappInboxMessageCreateWithoutConversationInput[] | Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput[]
+  connectOrCreate?: Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput | Prisma.WhatsappInboxMessageCreateOrConnectWithoutConversationInput[]
+  upsert?: Prisma.WhatsappInboxMessageUpsertWithWhereUniqueWithoutConversationInput | Prisma.WhatsappInboxMessageUpsertWithWhereUniqueWithoutConversationInput[]
+  createMany?: Prisma.WhatsappInboxMessageCreateManyConversationInputEnvelope
+  set?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  disconnect?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  delete?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  connect?: Prisma.WhatsappInboxMessageWhereUniqueInput | Prisma.WhatsappInboxMessageWhereUniqueInput[]
+  update?: Prisma.WhatsappInboxMessageUpdateWithWhereUniqueWithoutConversationInput | Prisma.WhatsappInboxMessageUpdateWithWhereUniqueWithoutConversationInput[]
+  updateMany?: Prisma.WhatsappInboxMessageUpdateManyWithWhereWithoutConversationInput | Prisma.WhatsappInboxMessageUpdateManyWithWhereWithoutConversationInput[]
+  deleteMany?: Prisma.WhatsappInboxMessageScalarWhereInput | Prisma.WhatsappInboxMessageScalarWhereInput[]
+}
+
+export type WhatsappInboxMessageCreateWithoutConversationInput = {
+  id: string
+  direction: string
+  body: string
+  status?: string
+  meta_message_id?: string | null
+  created_at?: Date | string
+}
+
+export type WhatsappInboxMessageUncheckedCreateWithoutConversationInput = {
+  id: string
+  direction: string
+  body: string
+  status?: string
+  meta_message_id?: string | null
+  created_at?: Date | string
+}
+
+export type WhatsappInboxMessageCreateOrConnectWithoutConversationInput = {
+  where: Prisma.WhatsappInboxMessageWhereUniqueInput
+  create: Prisma.XOR<Prisma.WhatsappInboxMessageCreateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput>
+}
+
+export type WhatsappInboxMessageCreateManyConversationInputEnvelope = {
+  data: Prisma.WhatsappInboxMessageCreateManyConversationInput | Prisma.WhatsappInboxMessageCreateManyConversationInput[]
+  skipDuplicates?: boolean
+}
+
+export type WhatsappInboxMessageUpsertWithWhereUniqueWithoutConversationInput = {
+  where: Prisma.WhatsappInboxMessageWhereUniqueInput
+  update: Prisma.XOR<Prisma.WhatsappInboxMessageUpdateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedUpdateWithoutConversationInput>
+  create: Prisma.XOR<Prisma.WhatsappInboxMessageCreateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedCreateWithoutConversationInput>
+}
+
+export type WhatsappInboxMessageUpdateWithWhereUniqueWithoutConversationInput = {
+  where: Prisma.WhatsappInboxMessageWhereUniqueInput
+  data: Prisma.XOR<Prisma.WhatsappInboxMessageUpdateWithoutConversationInput, Prisma.WhatsappInboxMessageUncheckedUpdateWithoutConversationInput>
+}
+
+export type WhatsappInboxMessageUpdateManyWithWhereWithoutConversationInput = {
+  where: Prisma.WhatsappInboxMessageScalarWhereInput
+  data: Prisma.XOR<Prisma.WhatsappInboxMessageUpdateManyMutationInput, Prisma.WhatsappInboxMessageUncheckedUpdateManyWithoutConversationInput>
+}
+
+export type WhatsappInboxMessageScalarWhereInput = {
+  AND?: Prisma.WhatsappInboxMessageScalarWhereInput | Prisma.WhatsappInboxMessageScalarWhereInput[]
+  OR?: Prisma.WhatsappInboxMessageScalarWhereInput[]
+  NOT?: Prisma.WhatsappInboxMessageScalarWhereInput | Prisma.WhatsappInboxMessageScalarWhereInput[]
+  id?: Prisma.UuidFilter<"WhatsappInboxMessage"> | string
+  tenant_id?: Prisma.UuidFilter<"WhatsappInboxMessage"> | string
+  conversation_id?: Prisma.UuidFilter<"WhatsappInboxMessage"> | string
+  direction?: Prisma.StringFilter<"WhatsappInboxMessage"> | string
+  body?: Prisma.StringFilter<"WhatsappInboxMessage"> | string
+  status?: Prisma.StringFilter<"WhatsappInboxMessage"> | string
+  meta_message_id?: Prisma.StringNullableFilter<"WhatsappInboxMessage"> | string | null
+  created_at?: Prisma.DateTimeFilter<"WhatsappInboxMessage"> | Date | string
+}
+
+export type WhatsappInboxMessageCreateManyConversationInput = {
+  id: string
+  direction: string
+  body: string
+  status?: string
+  meta_message_id?: string | null
+  created_at?: Date | string
+}
+
+export type WhatsappInboxMessageUpdateWithoutConversationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  meta_message_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WhatsappInboxMessageUncheckedUpdateWithoutConversationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  meta_message_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WhatsappInboxMessageUncheckedUpdateManyWithoutConversationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  direction?: Prisma.StringFieldUpdateOperationsInput | string
+  body?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  meta_message_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type WhatsappInboxMessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -382,6 +527,7 @@ export type WhatsappInboxMessageSelect<ExtArgs extends runtime.Types.Extensions.
   status?: boolean
   meta_message_id?: boolean
   created_at?: boolean
+  conversation?: boolean | Prisma.WhatsappConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["whatsappInboxMessage"]>
 
 export type WhatsappInboxMessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -393,6 +539,7 @@ export type WhatsappInboxMessageSelectCreateManyAndReturn<ExtArgs extends runtim
   status?: boolean
   meta_message_id?: boolean
   created_at?: boolean
+  conversation?: boolean | Prisma.WhatsappConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["whatsappInboxMessage"]>
 
 export type WhatsappInboxMessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -404,6 +551,7 @@ export type WhatsappInboxMessageSelectUpdateManyAndReturn<ExtArgs extends runtim
   status?: boolean
   meta_message_id?: boolean
   created_at?: boolean
+  conversation?: boolean | Prisma.WhatsappConversationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["whatsappInboxMessage"]>
 
 export type WhatsappInboxMessageSelectScalar = {
@@ -418,10 +566,21 @@ export type WhatsappInboxMessageSelectScalar = {
 }
 
 export type WhatsappInboxMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "conversation_id" | "direction" | "body" | "status" | "meta_message_id" | "created_at", ExtArgs["result"]["whatsappInboxMessage"]>
+export type WhatsappInboxMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  conversation?: boolean | Prisma.WhatsappConversationDefaultArgs<ExtArgs>
+}
+export type WhatsappInboxMessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  conversation?: boolean | Prisma.WhatsappConversationDefaultArgs<ExtArgs>
+}
+export type WhatsappInboxMessageIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  conversation?: boolean | Prisma.WhatsappConversationDefaultArgs<ExtArgs>
+}
 
 export type $WhatsappInboxMessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WhatsappInboxMessage"
-  objects: {}
+  objects: {
+    conversation: Prisma.$WhatsappConversationPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -825,6 +984,7 @@ readonly fields: WhatsappInboxMessageFieldRefs;
  */
 export interface Prisma__WhatsappInboxMessageClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  conversation<T extends Prisma.WhatsappConversationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WhatsappConversationDefaultArgs<ExtArgs>>): Prisma.Prisma__WhatsappConversationClient<runtime.Types.Result.GetResult<Prisma.$WhatsappConversationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -879,6 +1039,10 @@ export type WhatsappInboxMessageFindUniqueArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
+  /**
    * Filter, which WhatsappInboxMessage to fetch.
    */
   where: Prisma.WhatsappInboxMessageWhereUniqueInput
@@ -897,6 +1061,10 @@ export type WhatsappInboxMessageFindUniqueOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
+  /**
    * Filter, which WhatsappInboxMessage to fetch.
    */
   where: Prisma.WhatsappInboxMessageWhereUniqueInput
@@ -914,6 +1082,10 @@ export type WhatsappInboxMessageFindFirstArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the WhatsappInboxMessage
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
   /**
    * Filter, which WhatsappInboxMessage to fetch.
    */
@@ -963,6 +1135,10 @@ export type WhatsappInboxMessageFindFirstOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
+  /**
    * Filter, which WhatsappInboxMessage to fetch.
    */
   where?: Prisma.WhatsappInboxMessageWhereInput
@@ -1010,6 +1186,10 @@ export type WhatsappInboxMessageFindManyArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the WhatsappInboxMessage
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
   /**
    * Filter, which WhatsappInboxMessages to fetch.
    */
@@ -1059,6 +1239,10 @@ export type WhatsappInboxMessageCreateArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
+  /**
    * The data needed to create a WhatsappInboxMessage.
    */
   data: Prisma.XOR<Prisma.WhatsappInboxMessageCreateInput, Prisma.WhatsappInboxMessageUncheckedCreateInput>
@@ -1092,6 +1276,10 @@ export type WhatsappInboxMessageCreateManyAndReturnArgs<ExtArgs extends runtime.
    */
   data: Prisma.WhatsappInboxMessageCreateManyInput | Prisma.WhatsappInboxMessageCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1106,6 +1294,10 @@ export type WhatsappInboxMessageUpdateArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the WhatsappInboxMessage
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
   /**
    * The data needed to update a WhatsappInboxMessage.
    */
@@ -1158,6 +1350,10 @@ export type WhatsappInboxMessageUpdateManyAndReturnArgs<ExtArgs extends runtime.
    * Limit how many WhatsappInboxMessages to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1172,6 +1368,10 @@ export type WhatsappInboxMessageUpsertArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the WhatsappInboxMessage
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
   /**
    * The filter to search for the WhatsappInboxMessage to update in case it exists.
    */
@@ -1198,6 +1398,10 @@ export type WhatsappInboxMessageDeleteArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the WhatsappInboxMessage
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
   /**
    * Filter which WhatsappInboxMessage to delete.
    */
@@ -1230,4 +1434,8 @@ export type WhatsappInboxMessageDefaultArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the WhatsappInboxMessage
    */
   omit?: Prisma.WhatsappInboxMessageOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WhatsappInboxMessageInclude<ExtArgs> | null
 }

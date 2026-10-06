@@ -249,6 +249,8 @@ export type TestSeriesItemProgressWhereInput = {
   completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesItemProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"TestSeriesItemProgress"> | Date | string
   item?: Prisma.XOR<Prisma.TestSeriesItemScalarRelationFilter, Prisma.TestSeriesItemWhereInput>
+  attempt?: Prisma.XOR<Prisma.AttemptNullableScalarRelationFilter, Prisma.AttemptWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type TestSeriesItemProgressOrderByWithRelationInput = {
@@ -262,6 +264,8 @@ export type TestSeriesItemProgressOrderByWithRelationInput = {
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   item?: Prisma.TestSeriesItemOrderByWithRelationInput
+  attempt?: Prisma.AttemptOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type TestSeriesItemProgressWhereUniqueInput = Prisma.AtLeast<{
@@ -279,6 +283,8 @@ export type TestSeriesItemProgressWhereUniqueInput = Prisma.AtLeast<{
   completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesItemProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"TestSeriesItemProgress"> | Date | string
   item?: Prisma.XOR<Prisma.TestSeriesItemScalarRelationFilter, Prisma.TestSeriesItemWhereInput>
+  attempt?: Prisma.XOR<Prisma.AttemptNullableScalarRelationFilter, Prisma.AttemptWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_test_series_item_id_membership_id">
 
 export type TestSeriesItemProgressOrderByWithAggregationInput = {
@@ -315,14 +321,13 @@ export type TestSeriesItemProgressScalarWhereWithAggregatesInput = {
 
 export type TestSeriesItemProgressCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  attempt_id?: string | null
   completed_at?: Date | string | null
   updated_at?: Date | string
   item: Prisma.TestSeriesItemCreateNestedOneWithoutProgressInput
+  attempt?: Prisma.AttemptCreateNestedOneWithoutTest_series_item_progressInput
+  membership: Prisma.MembershipCreateNestedOneWithoutTest_series_item_progressInput
 }
 
 export type TestSeriesItemProgressUncheckedCreateInput = {
@@ -339,14 +344,13 @@ export type TestSeriesItemProgressUncheckedCreateInput = {
 
 export type TestSeriesItemProgressUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   item?: Prisma.TestSeriesItemUpdateOneRequiredWithoutProgressNestedInput
+  attempt?: Prisma.AttemptUpdateOneWithoutTest_series_item_progressNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutTest_series_item_progressNestedInput
 }
 
 export type TestSeriesItemProgressUncheckedUpdateInput = {
@@ -375,11 +379,8 @@ export type TestSeriesItemProgressCreateManyInput = {
 
 export type TestSeriesItemProgressUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -456,6 +457,48 @@ export type TestSeriesItemProgressSumOrderByAggregateInput = {
   score_pct?: Prisma.SortOrder
 }
 
+export type TestSeriesItemProgressCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesItemProgressCreateWithoutMembershipInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+}
+
+export type TestSeriesItemProgressUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesItemProgressCreateWithoutMembershipInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+}
+
+export type TestSeriesItemProgressUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesItemProgressCreateWithoutMembershipInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
+}
+
+export type TestSeriesItemProgressUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesItemProgressCreateWithoutMembershipInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
+}
+
 export type TestSeriesItemProgressCreateNestedManyWithoutItemInput = {
   create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutItemInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutItemInput> | Prisma.TestSeriesItemProgressCreateWithoutItemInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutItemInput[]
   connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutItemInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutItemInput[]
@@ -498,15 +541,117 @@ export type TestSeriesItemProgressUncheckedUpdateManyWithoutItemNestedInput = {
   deleteMany?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
 }
 
-export type TestSeriesItemProgressCreateWithoutItemInput = {
+export type TestSeriesItemProgressCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput> | Prisma.TestSeriesItemProgressCreateWithoutAttemptInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyAttemptInputEnvelope
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+}
+
+export type TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput> | Prisma.TestSeriesItemProgressCreateWithoutAttemptInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyAttemptInputEnvelope
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+}
+
+export type TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput> | Prisma.TestSeriesItemProgressCreateWithoutAttemptInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutAttemptInput | Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyAttemptInputEnvelope
+  set?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutAttemptInput | Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutAttemptInput | Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
+}
+
+export type TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput> | Prisma.TestSeriesItemProgressCreateWithoutAttemptInput[] | Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput | Prisma.TestSeriesItemProgressCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutAttemptInput | Prisma.TestSeriesItemProgressUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.TestSeriesItemProgressCreateManyAttemptInputEnvelope
+  set?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  delete?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  connect?: Prisma.TestSeriesItemProgressWhereUniqueInput | Prisma.TestSeriesItemProgressWhereUniqueInput[]
+  update?: Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutAttemptInput | Prisma.TestSeriesItemProgressUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutAttemptInput | Prisma.TestSeriesItemProgressUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
+}
+
+export type TestSeriesItemProgressCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
+  status?: string
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+  item: Prisma.TestSeriesItemCreateNestedOneWithoutProgressInput
+  attempt?: Prisma.AttemptCreateNestedOneWithoutTest_series_item_progressInput
+}
+
+export type TestSeriesItemProgressUncheckedCreateWithoutMembershipInput = {
+  id: string
+  test_series_item_id: string
   status?: string
   score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   attempt_id?: string | null
   completed_at?: Date | string | null
   updated_at?: Date | string
+}
+
+export type TestSeriesItemProgressCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.TestSeriesItemProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type TestSeriesItemProgressCreateManyMembershipInputEnvelope = {
+  data: Prisma.TestSeriesItemProgressCreateManyMembershipInput | Prisma.TestSeriesItemProgressCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type TestSeriesItemProgressUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.TestSeriesItemProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.TestSeriesItemProgressUpdateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type TestSeriesItemProgressUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.TestSeriesItemProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.TestSeriesItemProgressUpdateWithoutMembershipInput, Prisma.TestSeriesItemProgressUncheckedUpdateWithoutMembershipInput>
+}
+
+export type TestSeriesItemProgressUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.TestSeriesItemProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.TestSeriesItemProgressUpdateManyMutationInput, Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type TestSeriesItemProgressScalarWhereInput = {
+  AND?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
+  OR?: Prisma.TestSeriesItemProgressScalarWhereInput[]
+  NOT?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
+  id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
+  tenant_id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
+  test_series_item_id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
+  membership_id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
+  status?: Prisma.StringFilter<"TestSeriesItemProgress"> | string
+  score_pct?: Prisma.DecimalNullableFilter<"TestSeriesItemProgress"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  attempt_id?: Prisma.UuidNullableFilter<"TestSeriesItemProgress"> | string | null
+  completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesItemProgress"> | Date | string | null
+  updated_at?: Prisma.DateTimeFilter<"TestSeriesItemProgress"> | Date | string
+}
+
+export type TestSeriesItemProgressCreateWithoutItemInput = {
+  id: string
+  status?: string
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+  attempt?: Prisma.AttemptCreateNestedOneWithoutTest_series_item_progressInput
+  membership: Prisma.MembershipCreateNestedOneWithoutTest_series_item_progressInput
 }
 
 export type TestSeriesItemProgressUncheckedCreateWithoutItemInput = {
@@ -546,19 +691,90 @@ export type TestSeriesItemProgressUpdateManyWithWhereWithoutItemInput = {
   data: Prisma.XOR<Prisma.TestSeriesItemProgressUpdateManyMutationInput, Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutItemInput>
 }
 
-export type TestSeriesItemProgressScalarWhereInput = {
-  AND?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
-  OR?: Prisma.TestSeriesItemProgressScalarWhereInput[]
-  NOT?: Prisma.TestSeriesItemProgressScalarWhereInput | Prisma.TestSeriesItemProgressScalarWhereInput[]
-  id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
-  tenant_id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
-  test_series_item_id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
-  membership_id?: Prisma.UuidFilter<"TestSeriesItemProgress"> | string
-  status?: Prisma.StringFilter<"TestSeriesItemProgress"> | string
-  score_pct?: Prisma.DecimalNullableFilter<"TestSeriesItemProgress"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  attempt_id?: Prisma.UuidNullableFilter<"TestSeriesItemProgress"> | string | null
-  completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesItemProgress"> | Date | string | null
-  updated_at?: Prisma.DateTimeFilter<"TestSeriesItemProgress"> | Date | string
+export type TestSeriesItemProgressCreateWithoutAttemptInput = {
+  id: string
+  status?: string
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+  item: Prisma.TestSeriesItemCreateNestedOneWithoutProgressInput
+  membership: Prisma.MembershipCreateNestedOneWithoutTest_series_item_progressInput
+}
+
+export type TestSeriesItemProgressUncheckedCreateWithoutAttemptInput = {
+  id: string
+  test_series_item_id: string
+  membership_id: string
+  status?: string
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type TestSeriesItemProgressCreateOrConnectWithoutAttemptInput = {
+  where: Prisma.TestSeriesItemProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput>
+}
+
+export type TestSeriesItemProgressCreateManyAttemptInputEnvelope = {
+  data: Prisma.TestSeriesItemProgressCreateManyAttemptInput | Prisma.TestSeriesItemProgressCreateManyAttemptInput[]
+  skipDuplicates?: boolean
+}
+
+export type TestSeriesItemProgressUpsertWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.TestSeriesItemProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.TestSeriesItemProgressUpdateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedUpdateWithoutAttemptInput>
+  create: Prisma.XOR<Prisma.TestSeriesItemProgressCreateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedCreateWithoutAttemptInput>
+}
+
+export type TestSeriesItemProgressUpdateWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.TestSeriesItemProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.TestSeriesItemProgressUpdateWithoutAttemptInput, Prisma.TestSeriesItemProgressUncheckedUpdateWithoutAttemptInput>
+}
+
+export type TestSeriesItemProgressUpdateManyWithWhereWithoutAttemptInput = {
+  where: Prisma.TestSeriesItemProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.TestSeriesItemProgressUpdateManyMutationInput, Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptInput>
+}
+
+export type TestSeriesItemProgressCreateManyMembershipInput = {
+  id: string
+  test_series_item_id: string
+  status?: string
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  attempt_id?: string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type TestSeriesItemProgressUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  item?: Prisma.TestSeriesItemUpdateOneRequiredWithoutProgressNestedInput
+  attempt?: Prisma.AttemptUpdateOneWithoutTest_series_item_progressNestedInput
+}
+
+export type TestSeriesItemProgressUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TestSeriesItemProgressUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TestSeriesItemProgressCreateManyItemInput = {
@@ -574,13 +790,12 @@ export type TestSeriesItemProgressCreateManyItemInput = {
 
 export type TestSeriesItemProgressUpdateWithoutItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attempt?: Prisma.AttemptUpdateOneWithoutTest_series_item_progressNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutTest_series_item_progressNestedInput
 }
 
 export type TestSeriesItemProgressUncheckedUpdateWithoutItemInput = {
@@ -605,6 +820,46 @@ export type TestSeriesItemProgressUncheckedUpdateManyWithoutItemInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type TestSeriesItemProgressCreateManyAttemptInput = {
+  id: string
+  test_series_item_id: string
+  membership_id: string
+  status?: string
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type TestSeriesItemProgressUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  item?: Prisma.TestSeriesItemUpdateOneRequiredWithoutProgressNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutTest_series_item_progressNestedInput
+}
+
+export type TestSeriesItemProgressUncheckedUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type TestSeriesItemProgressSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -618,6 +873,8 @@ export type TestSeriesItemProgressSelect<ExtArgs extends runtime.Types.Extension
   completed_at?: boolean
   updated_at?: boolean
   item?: boolean | Prisma.TestSeriesItemDefaultArgs<ExtArgs>
+  attempt?: boolean | Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesItemProgress"]>
 
 export type TestSeriesItemProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -631,6 +888,8 @@ export type TestSeriesItemProgressSelectCreateManyAndReturn<ExtArgs extends runt
   completed_at?: boolean
   updated_at?: boolean
   item?: boolean | Prisma.TestSeriesItemDefaultArgs<ExtArgs>
+  attempt?: boolean | Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesItemProgress"]>
 
 export type TestSeriesItemProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -644,6 +903,8 @@ export type TestSeriesItemProgressSelectUpdateManyAndReturn<ExtArgs extends runt
   completed_at?: boolean
   updated_at?: boolean
   item?: boolean | Prisma.TestSeriesItemDefaultArgs<ExtArgs>
+  attempt?: boolean | Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesItemProgress"]>
 
 export type TestSeriesItemProgressSelectScalar = {
@@ -661,18 +922,26 @@ export type TestSeriesItemProgressSelectScalar = {
 export type TestSeriesItemProgressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "test_series_item_id" | "membership_id" | "status" | "score_pct" | "attempt_id" | "completed_at" | "updated_at", ExtArgs["result"]["testSeriesItemProgress"]>
 export type TestSeriesItemProgressInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   item?: boolean | Prisma.TestSeriesItemDefaultArgs<ExtArgs>
+  attempt?: boolean | Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type TestSeriesItemProgressIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   item?: boolean | Prisma.TestSeriesItemDefaultArgs<ExtArgs>
+  attempt?: boolean | Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type TestSeriesItemProgressIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   item?: boolean | Prisma.TestSeriesItemDefaultArgs<ExtArgs>
+  attempt?: boolean | Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $TestSeriesItemProgressPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TestSeriesItemProgress"
   objects: {
     item: Prisma.$TestSeriesItemPayload<ExtArgs>
+    attempt: Prisma.$AttemptPayload<ExtArgs> | null
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1079,6 +1348,8 @@ readonly fields: TestSeriesItemProgressFieldRefs;
 export interface Prisma__TestSeriesItemProgressClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   item<T extends Prisma.TestSeriesItemDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestSeriesItemDefaultArgs<ExtArgs>>): Prisma.Prisma__TestSeriesItemClient<runtime.Types.Result.GetResult<Prisma.$TestSeriesItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  attempt<T extends Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestSeriesItemProgress$attemptArgs<ExtArgs>>): Prisma.Prisma__AttemptClient<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1515,6 +1786,25 @@ export type TestSeriesItemProgressDeleteManyArgs<ExtArgs extends runtime.Types.E
    * Limit how many TestSeriesItemProgresses to delete.
    */
   limit?: number
+}
+
+/**
+ * TestSeriesItemProgress.attempt
+ */
+export type TestSeriesItemProgress$attemptArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attempt
+   */
+  select?: Prisma.AttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attempt
+   */
+  omit?: Prisma.AttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptInclude<ExtArgs> | null
+  where?: Prisma.AttemptWhereInput
 }
 
 /**

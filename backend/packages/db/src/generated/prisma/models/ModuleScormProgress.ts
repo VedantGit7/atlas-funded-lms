@@ -252,6 +252,8 @@ export type ModuleScormProgressWhereInput = {
   completed_at?: Prisma.DateTimeNullableFilter<"ModuleScormProgress"> | Date | string | null
   last_seen_at?: Prisma.DateTimeNullableFilter<"ModuleScormProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"ModuleScormProgress"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  module?: Prisma.XOR<Prisma.CourseModuleScalarRelationFilter, Prisma.CourseModuleWhereInput>
 }
 
 export type ModuleScormProgressOrderByWithRelationInput = {
@@ -265,6 +267,8 @@ export type ModuleScormProgressOrderByWithRelationInput = {
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   last_seen_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  module?: Prisma.CourseModuleOrderByWithRelationInput
 }
 
 export type ModuleScormProgressWhereUniqueInput = Prisma.AtLeast<{
@@ -282,6 +286,8 @@ export type ModuleScormProgressWhereUniqueInput = Prisma.AtLeast<{
   completed_at?: Prisma.DateTimeNullableFilter<"ModuleScormProgress"> | Date | string | null
   last_seen_at?: Prisma.DateTimeNullableFilter<"ModuleScormProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"ModuleScormProgress"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  module?: Prisma.XOR<Prisma.CourseModuleScalarRelationFilter, Prisma.CourseModuleWhereInput>
 }, "id" | "tenant_id_module_id_membership_id">
 
 export type ModuleScormProgressOrderByWithAggregationInput = {
@@ -320,15 +326,14 @@ export type ModuleScormProgressScalarWhereWithAggregatesInput = {
 
 export type ModuleScormProgressCreateInput = {
   id: string
-  tenant_id: string
-  module_id: string
-  membership_id: string
   status?: string
   progress_pct?: number
   cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   completed_at?: Date | string | null
   last_seen_at?: Date | string | null
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutModule_scorm_progressInput
+  module: Prisma.CourseModuleCreateNestedOneWithoutModule_scorm_progressInput
 }
 
 export type ModuleScormProgressUncheckedCreateInput = {
@@ -346,15 +351,14 @@ export type ModuleScormProgressUncheckedCreateInput = {
 
 export type ModuleScormProgressUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  module_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
   cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutModule_scorm_progressNestedInput
+  module?: Prisma.CourseModuleUpdateOneRequiredWithoutModule_scorm_progressNestedInput
 }
 
 export type ModuleScormProgressUncheckedUpdateInput = {
@@ -385,9 +389,6 @@ export type ModuleScormProgressCreateManyInput = {
 
 export type ModuleScormProgressUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  module_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
   cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -407,6 +408,16 @@ export type ModuleScormProgressUncheckedUpdateManyInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ModuleScormProgressListRelationFilter = {
+  every?: Prisma.ModuleScormProgressWhereInput
+  some?: Prisma.ModuleScormProgressWhereInput
+  none?: Prisma.ModuleScormProgressWhereInput
+}
+
+export type ModuleScormProgressOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ModuleScormProgressTenant_idModule_idMembership_idCompoundUniqueInput = {
@@ -460,6 +471,290 @@ export type ModuleScormProgressSumOrderByAggregateInput = {
   progress_pct?: Prisma.SortOrder
 }
 
+export type ModuleScormProgressCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput> | Prisma.ModuleScormProgressCreateWithoutMembershipInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput | Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+}
+
+export type ModuleScormProgressUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput> | Prisma.ModuleScormProgressCreateWithoutMembershipInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput | Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+}
+
+export type ModuleScormProgressUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput> | Prisma.ModuleScormProgressCreateWithoutMembershipInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput | Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  disconnect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  delete?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  update?: Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.ModuleScormProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.ModuleScormProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.ModuleScormProgressScalarWhereInput | Prisma.ModuleScormProgressScalarWhereInput[]
+}
+
+export type ModuleScormProgressUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput> | Prisma.ModuleScormProgressCreateWithoutMembershipInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput | Prisma.ModuleScormProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  disconnect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  delete?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  update?: Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.ModuleScormProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.ModuleScormProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.ModuleScormProgressScalarWhereInput | Prisma.ModuleScormProgressScalarWhereInput[]
+}
+
+export type ModuleScormProgressCreateNestedManyWithoutModuleInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput> | Prisma.ModuleScormProgressCreateWithoutModuleInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput | Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyModuleInputEnvelope
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+}
+
+export type ModuleScormProgressUncheckedCreateNestedManyWithoutModuleInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput> | Prisma.ModuleScormProgressCreateWithoutModuleInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput | Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyModuleInputEnvelope
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+}
+
+export type ModuleScormProgressUpdateManyWithoutModuleNestedInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput> | Prisma.ModuleScormProgressCreateWithoutModuleInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput | Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput[]
+  upsert?: Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutModuleInput | Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutModuleInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyModuleInputEnvelope
+  set?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  disconnect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  delete?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  update?: Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutModuleInput | Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutModuleInput[]
+  updateMany?: Prisma.ModuleScormProgressUpdateManyWithWhereWithoutModuleInput | Prisma.ModuleScormProgressUpdateManyWithWhereWithoutModuleInput[]
+  deleteMany?: Prisma.ModuleScormProgressScalarWhereInput | Prisma.ModuleScormProgressScalarWhereInput[]
+}
+
+export type ModuleScormProgressUncheckedUpdateManyWithoutModuleNestedInput = {
+  create?: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput> | Prisma.ModuleScormProgressCreateWithoutModuleInput[] | Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput[]
+  connectOrCreate?: Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput | Prisma.ModuleScormProgressCreateOrConnectWithoutModuleInput[]
+  upsert?: Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutModuleInput | Prisma.ModuleScormProgressUpsertWithWhereUniqueWithoutModuleInput[]
+  createMany?: Prisma.ModuleScormProgressCreateManyModuleInputEnvelope
+  set?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  disconnect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  delete?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  connect?: Prisma.ModuleScormProgressWhereUniqueInput | Prisma.ModuleScormProgressWhereUniqueInput[]
+  update?: Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutModuleInput | Prisma.ModuleScormProgressUpdateWithWhereUniqueWithoutModuleInput[]
+  updateMany?: Prisma.ModuleScormProgressUpdateManyWithWhereWithoutModuleInput | Prisma.ModuleScormProgressUpdateManyWithWhereWithoutModuleInput[]
+  deleteMany?: Prisma.ModuleScormProgressScalarWhereInput | Prisma.ModuleScormProgressScalarWhereInput[]
+}
+
+export type ModuleScormProgressCreateWithoutMembershipInput = {
+  id: string
+  status?: string
+  progress_pct?: number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  last_seen_at?: Date | string | null
+  updated_at?: Date | string
+  module: Prisma.CourseModuleCreateNestedOneWithoutModule_scorm_progressInput
+}
+
+export type ModuleScormProgressUncheckedCreateWithoutMembershipInput = {
+  id: string
+  module_id: string
+  status?: string
+  progress_pct?: number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  last_seen_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type ModuleScormProgressCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.ModuleScormProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type ModuleScormProgressCreateManyMembershipInputEnvelope = {
+  data: Prisma.ModuleScormProgressCreateManyMembershipInput | Prisma.ModuleScormProgressCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type ModuleScormProgressUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.ModuleScormProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.ModuleScormProgressUpdateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type ModuleScormProgressUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.ModuleScormProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.ModuleScormProgressUpdateWithoutMembershipInput, Prisma.ModuleScormProgressUncheckedUpdateWithoutMembershipInput>
+}
+
+export type ModuleScormProgressUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.ModuleScormProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.ModuleScormProgressUpdateManyMutationInput, Prisma.ModuleScormProgressUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type ModuleScormProgressScalarWhereInput = {
+  AND?: Prisma.ModuleScormProgressScalarWhereInput | Prisma.ModuleScormProgressScalarWhereInput[]
+  OR?: Prisma.ModuleScormProgressScalarWhereInput[]
+  NOT?: Prisma.ModuleScormProgressScalarWhereInput | Prisma.ModuleScormProgressScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ModuleScormProgress"> | string
+  tenant_id?: Prisma.UuidFilter<"ModuleScormProgress"> | string
+  module_id?: Prisma.UuidFilter<"ModuleScormProgress"> | string
+  membership_id?: Prisma.UuidFilter<"ModuleScormProgress"> | string
+  status?: Prisma.StringFilter<"ModuleScormProgress"> | string
+  progress_pct?: Prisma.IntFilter<"ModuleScormProgress"> | number
+  cmi_json?: Prisma.JsonNullableFilter<"ModuleScormProgress">
+  completed_at?: Prisma.DateTimeNullableFilter<"ModuleScormProgress"> | Date | string | null
+  last_seen_at?: Prisma.DateTimeNullableFilter<"ModuleScormProgress"> | Date | string | null
+  updated_at?: Prisma.DateTimeFilter<"ModuleScormProgress"> | Date | string
+}
+
+export type ModuleScormProgressCreateWithoutModuleInput = {
+  id: string
+  status?: string
+  progress_pct?: number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  last_seen_at?: Date | string | null
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutModule_scorm_progressInput
+}
+
+export type ModuleScormProgressUncheckedCreateWithoutModuleInput = {
+  id: string
+  membership_id: string
+  status?: string
+  progress_pct?: number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  last_seen_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type ModuleScormProgressCreateOrConnectWithoutModuleInput = {
+  where: Prisma.ModuleScormProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput>
+}
+
+export type ModuleScormProgressCreateManyModuleInputEnvelope = {
+  data: Prisma.ModuleScormProgressCreateManyModuleInput | Prisma.ModuleScormProgressCreateManyModuleInput[]
+  skipDuplicates?: boolean
+}
+
+export type ModuleScormProgressUpsertWithWhereUniqueWithoutModuleInput = {
+  where: Prisma.ModuleScormProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.ModuleScormProgressUpdateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedUpdateWithoutModuleInput>
+  create: Prisma.XOR<Prisma.ModuleScormProgressCreateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedCreateWithoutModuleInput>
+}
+
+export type ModuleScormProgressUpdateWithWhereUniqueWithoutModuleInput = {
+  where: Prisma.ModuleScormProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.ModuleScormProgressUpdateWithoutModuleInput, Prisma.ModuleScormProgressUncheckedUpdateWithoutModuleInput>
+}
+
+export type ModuleScormProgressUpdateManyWithWhereWithoutModuleInput = {
+  where: Prisma.ModuleScormProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.ModuleScormProgressUpdateManyMutationInput, Prisma.ModuleScormProgressUncheckedUpdateManyWithoutModuleInput>
+}
+
+export type ModuleScormProgressCreateManyMembershipInput = {
+  id: string
+  module_id: string
+  status?: string
+  progress_pct?: number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  last_seen_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type ModuleScormProgressUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  module?: Prisma.CourseModuleUpdateOneRequiredWithoutModule_scorm_progressNestedInput
+}
+
+export type ModuleScormProgressUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  module_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ModuleScormProgressUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  module_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ModuleScormProgressCreateManyModuleInput = {
+  id: string
+  membership_id: string
+  status?: string
+  progress_pct?: number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  last_seen_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type ModuleScormProgressUpdateWithoutModuleInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutModule_scorm_progressNestedInput
+}
+
+export type ModuleScormProgressUncheckedUpdateWithoutModuleInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ModuleScormProgressUncheckedUpdateManyWithoutModuleInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  cmi_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type ModuleScormProgressSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -473,6 +768,8 @@ export type ModuleScormProgressSelect<ExtArgs extends runtime.Types.Extensions.I
   completed_at?: boolean
   last_seen_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  module?: boolean | Prisma.CourseModuleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["moduleScormProgress"]>
 
 export type ModuleScormProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -486,6 +783,8 @@ export type ModuleScormProgressSelectCreateManyAndReturn<ExtArgs extends runtime
   completed_at?: boolean
   last_seen_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  module?: boolean | Prisma.CourseModuleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["moduleScormProgress"]>
 
 export type ModuleScormProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -499,6 +798,8 @@ export type ModuleScormProgressSelectUpdateManyAndReturn<ExtArgs extends runtime
   completed_at?: boolean
   last_seen_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  module?: boolean | Prisma.CourseModuleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["moduleScormProgress"]>
 
 export type ModuleScormProgressSelectScalar = {
@@ -515,10 +816,25 @@ export type ModuleScormProgressSelectScalar = {
 }
 
 export type ModuleScormProgressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "module_id" | "membership_id" | "status" | "progress_pct" | "cmi_json" | "completed_at" | "last_seen_at" | "updated_at", ExtArgs["result"]["moduleScormProgress"]>
+export type ModuleScormProgressInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  module?: boolean | Prisma.CourseModuleDefaultArgs<ExtArgs>
+}
+export type ModuleScormProgressIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  module?: boolean | Prisma.CourseModuleDefaultArgs<ExtArgs>
+}
+export type ModuleScormProgressIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  module?: boolean | Prisma.CourseModuleDefaultArgs<ExtArgs>
+}
 
 export type $ModuleScormProgressPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ModuleScormProgress"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    module: Prisma.$CourseModulePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -924,6 +1240,8 @@ readonly fields: ModuleScormProgressFieldRefs;
  */
 export interface Prisma__ModuleScormProgressClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  module<T extends Prisma.CourseModuleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseModuleDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseModuleClient<runtime.Types.Result.GetResult<Prisma.$CourseModulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -980,6 +1298,10 @@ export type ModuleScormProgressFindUniqueArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
+  /**
    * Filter, which ModuleScormProgress to fetch.
    */
   where: Prisma.ModuleScormProgressWhereUniqueInput
@@ -998,6 +1320,10 @@ export type ModuleScormProgressFindUniqueOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
+  /**
    * Filter, which ModuleScormProgress to fetch.
    */
   where: Prisma.ModuleScormProgressWhereUniqueInput
@@ -1015,6 +1341,10 @@ export type ModuleScormProgressFindFirstArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the ModuleScormProgress
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
   /**
    * Filter, which ModuleScormProgress to fetch.
    */
@@ -1064,6 +1394,10 @@ export type ModuleScormProgressFindFirstOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
+  /**
    * Filter, which ModuleScormProgress to fetch.
    */
   where?: Prisma.ModuleScormProgressWhereInput
@@ -1111,6 +1445,10 @@ export type ModuleScormProgressFindManyArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the ModuleScormProgress
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
   /**
    * Filter, which ModuleScormProgresses to fetch.
    */
@@ -1160,6 +1498,10 @@ export type ModuleScormProgressCreateArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
+  /**
    * The data needed to create a ModuleScormProgress.
    */
   data: Prisma.XOR<Prisma.ModuleScormProgressCreateInput, Prisma.ModuleScormProgressUncheckedCreateInput>
@@ -1193,6 +1535,10 @@ export type ModuleScormProgressCreateManyAndReturnArgs<ExtArgs extends runtime.T
    */
   data: Prisma.ModuleScormProgressCreateManyInput | Prisma.ModuleScormProgressCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1207,6 +1553,10 @@ export type ModuleScormProgressUpdateArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the ModuleScormProgress
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
   /**
    * The data needed to update a ModuleScormProgress.
    */
@@ -1259,6 +1609,10 @@ export type ModuleScormProgressUpdateManyAndReturnArgs<ExtArgs extends runtime.T
    * Limit how many ModuleScormProgresses to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1273,6 +1627,10 @@ export type ModuleScormProgressUpsertArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the ModuleScormProgress
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
   /**
    * The filter to search for the ModuleScormProgress to update in case it exists.
    */
@@ -1299,6 +1657,10 @@ export type ModuleScormProgressDeleteArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the ModuleScormProgress
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
   /**
    * Filter which ModuleScormProgress to delete.
    */
@@ -1331,4 +1693,8 @@ export type ModuleScormProgressDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the ModuleScormProgress
    */
   omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
 }

@@ -273,6 +273,7 @@ export type ZoomMeetingParticipantWhereInput = {
   created_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
   meeting?: Prisma.XOR<Prisma.ZoomMeetingScalarRelationFilter, Prisma.ZoomMeetingWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }
 
 export type ZoomMeetingParticipantOrderByWithRelationInput = {
@@ -289,6 +290,7 @@ export type ZoomMeetingParticipantOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   meeting?: Prisma.ZoomMeetingOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type ZoomMeetingParticipantWhereUniqueInput = Prisma.AtLeast<{
@@ -308,6 +310,7 @@ export type ZoomMeetingParticipantWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
   meeting?: Prisma.XOR<Prisma.ZoomMeetingScalarRelationFilter, Prisma.ZoomMeetingWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }, "id">
 
 export type ZoomMeetingParticipantOrderByWithAggregationInput = {
@@ -350,8 +353,6 @@ export type ZoomMeetingParticipantScalarWhereWithAggregatesInput = {
 
 export type ZoomMeetingParticipantCreateInput = {
   id: string
-  tenant_id: string
-  membership_id?: string | null
   external_user_id?: string | null
   display_name?: string | null
   email?: string | null
@@ -361,6 +362,7 @@ export type ZoomMeetingParticipantCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   meeting: Prisma.ZoomMeetingCreateNestedOneWithoutParticipantsInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutZoom_meeting_participantsInput
 }
 
 export type ZoomMeetingParticipantUncheckedCreateInput = {
@@ -380,8 +382,6 @@ export type ZoomMeetingParticipantUncheckedCreateInput = {
 
 export type ZoomMeetingParticipantUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   display_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -391,6 +391,7 @@ export type ZoomMeetingParticipantUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   meeting?: Prisma.ZoomMeetingUpdateOneRequiredWithoutParticipantsNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutZoom_meeting_participantsNestedInput
 }
 
 export type ZoomMeetingParticipantUncheckedUpdateInput = {
@@ -425,8 +426,6 @@ export type ZoomMeetingParticipantCreateManyInput = {
 
 export type ZoomMeetingParticipantUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   display_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -515,6 +514,48 @@ export type ZoomMeetingParticipantSumOrderByAggregateInput = {
   duration_seconds?: Prisma.SortOrder
 }
 
+export type ZoomMeetingParticipantCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput> | Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput[] | Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput | Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.ZoomMeetingParticipantCreateManyMembershipInputEnvelope
+  connect?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+}
+
+export type ZoomMeetingParticipantUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput> | Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput[] | Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput | Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.ZoomMeetingParticipantCreateManyMembershipInputEnvelope
+  connect?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+}
+
+export type ZoomMeetingParticipantUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput> | Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput[] | Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput | Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.ZoomMeetingParticipantUpsertWithWhereUniqueWithoutMembershipInput | Prisma.ZoomMeetingParticipantUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.ZoomMeetingParticipantCreateManyMembershipInputEnvelope
+  set?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  disconnect?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  delete?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  connect?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  update?: Prisma.ZoomMeetingParticipantUpdateWithWhereUniqueWithoutMembershipInput | Prisma.ZoomMeetingParticipantUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.ZoomMeetingParticipantUpdateManyWithWhereWithoutMembershipInput | Prisma.ZoomMeetingParticipantUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.ZoomMeetingParticipantScalarWhereInput | Prisma.ZoomMeetingParticipantScalarWhereInput[]
+}
+
+export type ZoomMeetingParticipantUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput> | Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput[] | Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput | Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.ZoomMeetingParticipantUpsertWithWhereUniqueWithoutMembershipInput | Prisma.ZoomMeetingParticipantUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.ZoomMeetingParticipantCreateManyMembershipInputEnvelope
+  set?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  disconnect?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  delete?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  connect?: Prisma.ZoomMeetingParticipantWhereUniqueInput | Prisma.ZoomMeetingParticipantWhereUniqueInput[]
+  update?: Prisma.ZoomMeetingParticipantUpdateWithWhereUniqueWithoutMembershipInput | Prisma.ZoomMeetingParticipantUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.ZoomMeetingParticipantUpdateManyWithWhereWithoutMembershipInput | Prisma.ZoomMeetingParticipantUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.ZoomMeetingParticipantScalarWhereInput | Prisma.ZoomMeetingParticipantScalarWhereInput[]
+}
+
 export type ZoomMeetingParticipantCreateNestedManyWithoutMeetingInput = {
   create?: Prisma.XOR<Prisma.ZoomMeetingParticipantCreateWithoutMeetingInput, Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMeetingInput> | Prisma.ZoomMeetingParticipantCreateWithoutMeetingInput[] | Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMeetingInput[]
   connectOrCreate?: Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMeetingInput | Prisma.ZoomMeetingParticipantCreateOrConnectWithoutMeetingInput[]
@@ -557,10 +598,8 @@ export type ZoomMeetingParticipantUncheckedUpdateManyWithoutMeetingNestedInput =
   deleteMany?: Prisma.ZoomMeetingParticipantScalarWhereInput | Prisma.ZoomMeetingParticipantScalarWhereInput[]
 }
 
-export type ZoomMeetingParticipantCreateWithoutMeetingInput = {
+export type ZoomMeetingParticipantCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id?: string | null
   external_user_id?: string | null
   display_name?: string | null
   email?: string | null
@@ -569,6 +608,77 @@ export type ZoomMeetingParticipantCreateWithoutMeetingInput = {
   duration_seconds?: number | null
   created_at?: Date | string
   updated_at?: Date | string
+  meeting: Prisma.ZoomMeetingCreateNestedOneWithoutParticipantsInput
+}
+
+export type ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput = {
+  id: string
+  zoom_meeting_id: string
+  external_user_id?: string | null
+  display_name?: string | null
+  email?: string | null
+  join_time?: Date | string | null
+  leave_time?: Date | string | null
+  duration_seconds?: number | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ZoomMeetingParticipantCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.ZoomMeetingParticipantWhereUniqueInput
+  create: Prisma.XOR<Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput>
+}
+
+export type ZoomMeetingParticipantCreateManyMembershipInputEnvelope = {
+  data: Prisma.ZoomMeetingParticipantCreateManyMembershipInput | Prisma.ZoomMeetingParticipantCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type ZoomMeetingParticipantUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.ZoomMeetingParticipantWhereUniqueInput
+  update: Prisma.XOR<Prisma.ZoomMeetingParticipantUpdateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.ZoomMeetingParticipantCreateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedCreateWithoutMembershipInput>
+}
+
+export type ZoomMeetingParticipantUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.ZoomMeetingParticipantWhereUniqueInput
+  data: Prisma.XOR<Prisma.ZoomMeetingParticipantUpdateWithoutMembershipInput, Prisma.ZoomMeetingParticipantUncheckedUpdateWithoutMembershipInput>
+}
+
+export type ZoomMeetingParticipantUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.ZoomMeetingParticipantScalarWhereInput
+  data: Prisma.XOR<Prisma.ZoomMeetingParticipantUpdateManyMutationInput, Prisma.ZoomMeetingParticipantUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type ZoomMeetingParticipantScalarWhereInput = {
+  AND?: Prisma.ZoomMeetingParticipantScalarWhereInput | Prisma.ZoomMeetingParticipantScalarWhereInput[]
+  OR?: Prisma.ZoomMeetingParticipantScalarWhereInput[]
+  NOT?: Prisma.ZoomMeetingParticipantScalarWhereInput | Prisma.ZoomMeetingParticipantScalarWhereInput[]
+  id?: Prisma.UuidFilter<"ZoomMeetingParticipant"> | string
+  tenant_id?: Prisma.UuidFilter<"ZoomMeetingParticipant"> | string
+  zoom_meeting_id?: Prisma.UuidFilter<"ZoomMeetingParticipant"> | string
+  membership_id?: Prisma.UuidNullableFilter<"ZoomMeetingParticipant"> | string | null
+  external_user_id?: Prisma.StringNullableFilter<"ZoomMeetingParticipant"> | string | null
+  display_name?: Prisma.StringNullableFilter<"ZoomMeetingParticipant"> | string | null
+  email?: Prisma.StringNullableFilter<"ZoomMeetingParticipant"> | string | null
+  join_time?: Prisma.DateTimeNullableFilter<"ZoomMeetingParticipant"> | Date | string | null
+  leave_time?: Prisma.DateTimeNullableFilter<"ZoomMeetingParticipant"> | Date | string | null
+  duration_seconds?: Prisma.IntNullableFilter<"ZoomMeetingParticipant"> | number | null
+  created_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
+}
+
+export type ZoomMeetingParticipantCreateWithoutMeetingInput = {
+  id: string
+  external_user_id?: string | null
+  display_name?: string | null
+  email?: string | null
+  join_time?: Date | string | null
+  leave_time?: Date | string | null
+  duration_seconds?: number | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutZoom_meeting_participantsInput
 }
 
 export type ZoomMeetingParticipantUncheckedCreateWithoutMeetingInput = {
@@ -611,22 +721,56 @@ export type ZoomMeetingParticipantUpdateManyWithWhereWithoutMeetingInput = {
   data: Prisma.XOR<Prisma.ZoomMeetingParticipantUpdateManyMutationInput, Prisma.ZoomMeetingParticipantUncheckedUpdateManyWithoutMeetingInput>
 }
 
-export type ZoomMeetingParticipantScalarWhereInput = {
-  AND?: Prisma.ZoomMeetingParticipantScalarWhereInput | Prisma.ZoomMeetingParticipantScalarWhereInput[]
-  OR?: Prisma.ZoomMeetingParticipantScalarWhereInput[]
-  NOT?: Prisma.ZoomMeetingParticipantScalarWhereInput | Prisma.ZoomMeetingParticipantScalarWhereInput[]
-  id?: Prisma.UuidFilter<"ZoomMeetingParticipant"> | string
-  tenant_id?: Prisma.UuidFilter<"ZoomMeetingParticipant"> | string
-  zoom_meeting_id?: Prisma.UuidFilter<"ZoomMeetingParticipant"> | string
-  membership_id?: Prisma.UuidNullableFilter<"ZoomMeetingParticipant"> | string | null
-  external_user_id?: Prisma.StringNullableFilter<"ZoomMeetingParticipant"> | string | null
-  display_name?: Prisma.StringNullableFilter<"ZoomMeetingParticipant"> | string | null
-  email?: Prisma.StringNullableFilter<"ZoomMeetingParticipant"> | string | null
-  join_time?: Prisma.DateTimeNullableFilter<"ZoomMeetingParticipant"> | Date | string | null
-  leave_time?: Prisma.DateTimeNullableFilter<"ZoomMeetingParticipant"> | Date | string | null
-  duration_seconds?: Prisma.IntNullableFilter<"ZoomMeetingParticipant"> | number | null
-  created_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"ZoomMeetingParticipant"> | Date | string
+export type ZoomMeetingParticipantCreateManyMembershipInput = {
+  id: string
+  zoom_meeting_id: string
+  external_user_id?: string | null
+  display_name?: string | null
+  email?: string | null
+  join_time?: Date | string | null
+  leave_time?: Date | string | null
+  duration_seconds?: number | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type ZoomMeetingParticipantUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  display_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  join_time?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leave_time?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  meeting?: Prisma.ZoomMeetingUpdateOneRequiredWithoutParticipantsNestedInput
+}
+
+export type ZoomMeetingParticipantUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  zoom_meeting_id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  display_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  join_time?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leave_time?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ZoomMeetingParticipantUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  zoom_meeting_id?: Prisma.StringFieldUpdateOperationsInput | string
+  external_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  display_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  join_time?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  leave_time?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ZoomMeetingParticipantCreateManyMeetingInput = {
@@ -645,8 +789,6 @@ export type ZoomMeetingParticipantCreateManyMeetingInput = {
 
 export type ZoomMeetingParticipantUpdateWithoutMeetingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   external_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   display_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -655,6 +797,7 @@ export type ZoomMeetingParticipantUpdateWithoutMeetingInput = {
   duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutZoom_meeting_participantsNestedInput
 }
 
 export type ZoomMeetingParticipantUncheckedUpdateWithoutMeetingInput = {
@@ -701,6 +844,7 @@ export type ZoomMeetingParticipantSelect<ExtArgs extends runtime.Types.Extension
   created_at?: boolean
   updated_at?: boolean
   meeting?: boolean | Prisma.ZoomMeetingDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["zoomMeetingParticipant"]>
 
 export type ZoomMeetingParticipantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -717,6 +861,7 @@ export type ZoomMeetingParticipantSelectCreateManyAndReturn<ExtArgs extends runt
   created_at?: boolean
   updated_at?: boolean
   meeting?: boolean | Prisma.ZoomMeetingDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["zoomMeetingParticipant"]>
 
 export type ZoomMeetingParticipantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -733,6 +878,7 @@ export type ZoomMeetingParticipantSelectUpdateManyAndReturn<ExtArgs extends runt
   created_at?: boolean
   updated_at?: boolean
   meeting?: boolean | Prisma.ZoomMeetingDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["zoomMeetingParticipant"]>
 
 export type ZoomMeetingParticipantSelectScalar = {
@@ -753,18 +899,22 @@ export type ZoomMeetingParticipantSelectScalar = {
 export type ZoomMeetingParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "zoom_meeting_id" | "membership_id" | "external_user_id" | "display_name" | "email" | "join_time" | "leave_time" | "duration_seconds" | "created_at" | "updated_at", ExtArgs["result"]["zoomMeetingParticipant"]>
 export type ZoomMeetingParticipantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   meeting?: boolean | Prisma.ZoomMeetingDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs>
 }
 export type ZoomMeetingParticipantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   meeting?: boolean | Prisma.ZoomMeetingDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs>
 }
 export type ZoomMeetingParticipantIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   meeting?: boolean | Prisma.ZoomMeetingDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs>
 }
 
 export type $ZoomMeetingParticipantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ZoomMeetingParticipant"
   objects: {
     meeting: Prisma.$ZoomMeetingPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1174,6 +1324,7 @@ readonly fields: ZoomMeetingParticipantFieldRefs;
 export interface Prisma__ZoomMeetingParticipantClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   meeting<T extends Prisma.ZoomMeetingDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ZoomMeetingDefaultArgs<ExtArgs>>): Prisma.Prisma__ZoomMeetingClient<runtime.Types.Result.GetResult<Prisma.$ZoomMeetingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ZoomMeetingParticipant$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1613,6 +1764,25 @@ export type ZoomMeetingParticipantDeleteManyArgs<ExtArgs extends runtime.Types.E
    * Limit how many ZoomMeetingParticipants to delete.
    */
   limit?: number
+}
+
+/**
+ * ZoomMeetingParticipant.membership
+ */
+export type ZoomMeetingParticipant$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
 }
 
 /**

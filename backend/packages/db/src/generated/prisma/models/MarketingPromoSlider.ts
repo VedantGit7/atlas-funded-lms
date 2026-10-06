@@ -214,6 +214,7 @@ export type MarketingPromoSliderWhereInput = {
   published_at?: Prisma.DateTimeNullableFilter<"MarketingPromoSlider"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingPromoSlider"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingPromoSlider"> | Date | string
+  marketing_promo_slides?: Prisma.MarketingPromoSlideListRelationFilter
 }
 
 export type MarketingPromoSliderOrderByWithRelationInput = {
@@ -226,10 +227,12 @@ export type MarketingPromoSliderOrderByWithRelationInput = {
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  marketing_promo_slides?: Prisma.MarketingPromoSlideOrderByRelationAggregateInput
 }
 
 export type MarketingPromoSliderWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MarketingPromoSliderTenant_idIdCompoundUniqueInput
   AND?: Prisma.MarketingPromoSliderWhereInput | Prisma.MarketingPromoSliderWhereInput[]
   OR?: Prisma.MarketingPromoSliderWhereInput[]
   NOT?: Prisma.MarketingPromoSliderWhereInput | Prisma.MarketingPromoSliderWhereInput[]
@@ -241,7 +244,8 @@ export type MarketingPromoSliderWhereUniqueInput = Prisma.AtLeast<{
   published_at?: Prisma.DateTimeNullableFilter<"MarketingPromoSlider"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingPromoSlider"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingPromoSlider"> | Date | string
-}, "id">
+  marketing_promo_slides?: Prisma.MarketingPromoSlideListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type MarketingPromoSliderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -283,6 +287,7 @@ export type MarketingPromoSliderCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_promo_slides?: Prisma.MarketingPromoSlideCreateNestedManyWithoutSliderInput
 }
 
 export type MarketingPromoSliderUncheckedCreateInput = {
@@ -295,6 +300,7 @@ export type MarketingPromoSliderUncheckedCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_promo_slides?: Prisma.MarketingPromoSlideUncheckedCreateNestedManyWithoutSliderInput
 }
 
 export type MarketingPromoSliderUpdateInput = {
@@ -307,6 +313,7 @@ export type MarketingPromoSliderUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_promo_slides?: Prisma.MarketingPromoSlideUpdateManyWithoutSliderNestedInput
 }
 
 export type MarketingPromoSliderUncheckedUpdateInput = {
@@ -319,6 +326,7 @@ export type MarketingPromoSliderUncheckedUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_promo_slides?: Prisma.MarketingPromoSlideUncheckedUpdateManyWithoutSliderNestedInput
 }
 
 export type MarketingPromoSliderCreateManyInput = {
@@ -357,6 +365,11 @@ export type MarketingPromoSliderUncheckedUpdateManyInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type MarketingPromoSliderTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type MarketingPromoSliderCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -393,6 +406,118 @@ export type MarketingPromoSliderMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type MarketingPromoSliderScalarRelationFilter = {
+  is?: Prisma.MarketingPromoSliderWhereInput
+  isNot?: Prisma.MarketingPromoSliderWhereInput
+}
+
+export type MarketingPromoSliderCreateNestedOneWithoutMarketing_promo_slidesInput = {
+  create?: Prisma.XOR<Prisma.MarketingPromoSliderCreateWithoutMarketing_promo_slidesInput, Prisma.MarketingPromoSliderUncheckedCreateWithoutMarketing_promo_slidesInput>
+  connectOrCreate?: Prisma.MarketingPromoSliderCreateOrConnectWithoutMarketing_promo_slidesInput
+  connect?: Prisma.MarketingPromoSliderWhereUniqueInput
+}
+
+export type MarketingPromoSliderUpdateOneRequiredWithoutMarketing_promo_slidesNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingPromoSliderCreateWithoutMarketing_promo_slidesInput, Prisma.MarketingPromoSliderUncheckedCreateWithoutMarketing_promo_slidesInput>
+  connectOrCreate?: Prisma.MarketingPromoSliderCreateOrConnectWithoutMarketing_promo_slidesInput
+  upsert?: Prisma.MarketingPromoSliderUpsertWithoutMarketing_promo_slidesInput
+  connect?: Prisma.MarketingPromoSliderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MarketingPromoSliderUpdateToOneWithWhereWithoutMarketing_promo_slidesInput, Prisma.MarketingPromoSliderUpdateWithoutMarketing_promo_slidesInput>, Prisma.MarketingPromoSliderUncheckedUpdateWithoutMarketing_promo_slidesInput>
+}
+
+export type MarketingPromoSliderCreateWithoutMarketing_promo_slidesInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingPromoSliderUncheckedCreateWithoutMarketing_promo_slidesInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingPromoSliderCreateOrConnectWithoutMarketing_promo_slidesInput = {
+  where: Prisma.MarketingPromoSliderWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingPromoSliderCreateWithoutMarketing_promo_slidesInput, Prisma.MarketingPromoSliderUncheckedCreateWithoutMarketing_promo_slidesInput>
+}
+
+export type MarketingPromoSliderUpsertWithoutMarketing_promo_slidesInput = {
+  update: Prisma.XOR<Prisma.MarketingPromoSliderUpdateWithoutMarketing_promo_slidesInput, Prisma.MarketingPromoSliderUncheckedUpdateWithoutMarketing_promo_slidesInput>
+  create: Prisma.XOR<Prisma.MarketingPromoSliderCreateWithoutMarketing_promo_slidesInput, Prisma.MarketingPromoSliderUncheckedCreateWithoutMarketing_promo_slidesInput>
+  where?: Prisma.MarketingPromoSliderWhereInput
+}
+
+export type MarketingPromoSliderUpdateToOneWithWhereWithoutMarketing_promo_slidesInput = {
+  where?: Prisma.MarketingPromoSliderWhereInput
+  data: Prisma.XOR<Prisma.MarketingPromoSliderUpdateWithoutMarketing_promo_slidesInput, Prisma.MarketingPromoSliderUncheckedUpdateWithoutMarketing_promo_slidesInput>
+}
+
+export type MarketingPromoSliderUpdateWithoutMarketing_promo_slidesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingPromoSliderUncheckedUpdateWithoutMarketing_promo_slidesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type MarketingPromoSliderCountOutputType
+ */
+
+export type MarketingPromoSliderCountOutputType = {
+  marketing_promo_slides: number
+}
+
+export type MarketingPromoSliderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_promo_slides?: boolean | MarketingPromoSliderCountOutputTypeCountMarketing_promo_slidesArgs
+}
+
+/**
+ * MarketingPromoSliderCountOutputType without action
+ */
+export type MarketingPromoSliderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingPromoSliderCountOutputType
+   */
+  select?: Prisma.MarketingPromoSliderCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MarketingPromoSliderCountOutputType without action
+ */
+export type MarketingPromoSliderCountOutputTypeCountMarketing_promo_slidesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MarketingPromoSlideWhereInput
+}
 
 
 export type MarketingPromoSliderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -405,6 +530,8 @@ export type MarketingPromoSliderSelect<ExtArgs extends runtime.Types.Extensions.
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  marketing_promo_slides?: boolean | Prisma.MarketingPromoSlider$marketing_promo_slidesArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingPromoSliderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingPromoSlider"]>
 
 export type MarketingPromoSliderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -444,10 +571,18 @@ export type MarketingPromoSliderSelectScalar = {
 }
 
 export type MarketingPromoSliderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "title" | "description" | "status" | "created_by_membership_id" | "published_at" | "created_at" | "updated_at", ExtArgs["result"]["marketingPromoSlider"]>
+export type MarketingPromoSliderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_promo_slides?: boolean | Prisma.MarketingPromoSlider$marketing_promo_slidesArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingPromoSliderCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type MarketingPromoSliderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MarketingPromoSliderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $MarketingPromoSliderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingPromoSlider"
-  objects: {}
+  objects: {
+    marketing_promo_slides: Prisma.$MarketingPromoSlidePayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -852,6 +987,7 @@ readonly fields: MarketingPromoSliderFieldRefs;
  */
 export interface Prisma__MarketingPromoSliderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  marketing_promo_slides<T extends Prisma.MarketingPromoSlider$marketing_promo_slidesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingPromoSlider$marketing_promo_slidesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MarketingPromoSlidePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -907,6 +1043,10 @@ export type MarketingPromoSliderFindUniqueArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingPromoSlider to fetch.
    */
   where: Prisma.MarketingPromoSliderWhereUniqueInput
@@ -925,6 +1065,10 @@ export type MarketingPromoSliderFindUniqueOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingPromoSlider to fetch.
    */
   where: Prisma.MarketingPromoSliderWhereUniqueInput
@@ -942,6 +1086,10 @@ export type MarketingPromoSliderFindFirstArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the MarketingPromoSlider
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
   /**
    * Filter, which MarketingPromoSlider to fetch.
    */
@@ -991,6 +1139,10 @@ export type MarketingPromoSliderFindFirstOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingPromoSlider to fetch.
    */
   where?: Prisma.MarketingPromoSliderWhereInput
@@ -1038,6 +1190,10 @@ export type MarketingPromoSliderFindManyArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the MarketingPromoSlider
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
   /**
    * Filter, which MarketingPromoSliders to fetch.
    */
@@ -1087,6 +1243,10 @@ export type MarketingPromoSliderCreateArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingPromoSlider.
    */
   data: Prisma.XOR<Prisma.MarketingPromoSliderCreateInput, Prisma.MarketingPromoSliderUncheckedCreateInput>
@@ -1134,6 +1294,10 @@ export type MarketingPromoSliderUpdateArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the MarketingPromoSlider
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingPromoSlider.
    */
@@ -1201,6 +1365,10 @@ export type MarketingPromoSliderUpsertArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
+  /**
    * The filter to search for the MarketingPromoSlider to update in case it exists.
    */
   where: Prisma.MarketingPromoSliderWhereUniqueInput
@@ -1227,6 +1395,10 @@ export type MarketingPromoSliderDeleteArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
+  /**
    * Filter which MarketingPromoSlider to delete.
    */
   where: Prisma.MarketingPromoSliderWhereUniqueInput
@@ -1247,6 +1419,30 @@ export type MarketingPromoSliderDeleteManyArgs<ExtArgs extends runtime.Types.Ext
 }
 
 /**
+ * MarketingPromoSlider.marketing_promo_slides
+ */
+export type MarketingPromoSlider$marketing_promo_slidesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingPromoSlide
+   */
+  select?: Prisma.MarketingPromoSlideSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingPromoSlide
+   */
+  omit?: Prisma.MarketingPromoSlideOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSlideInclude<ExtArgs> | null
+  where?: Prisma.MarketingPromoSlideWhereInput
+  orderBy?: Prisma.MarketingPromoSlideOrderByWithRelationInput | Prisma.MarketingPromoSlideOrderByWithRelationInput[]
+  cursor?: Prisma.MarketingPromoSlideWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MarketingPromoSlideScalarFieldEnum | Prisma.MarketingPromoSlideScalarFieldEnum[]
+}
+
+/**
  * MarketingPromoSlider without action
  */
 export type MarketingPromoSliderDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1258,4 +1454,8 @@ export type MarketingPromoSliderDefaultArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the MarketingPromoSlider
    */
   omit?: Prisma.MarketingPromoSliderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingPromoSliderInclude<ExtArgs> | null
 }

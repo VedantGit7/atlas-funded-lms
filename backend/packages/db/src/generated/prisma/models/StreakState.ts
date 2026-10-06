@@ -244,6 +244,7 @@ export type StreakStateWhereInput = {
   longest_count?: Prisma.IntFilter<"StreakState"> | number
   last_activity_date?: Prisma.DateTimeNullableFilter<"StreakState"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"StreakState"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type StreakStateOrderByWithRelationInput = {
@@ -255,6 +256,7 @@ export type StreakStateOrderByWithRelationInput = {
   longest_count?: Prisma.SortOrder
   last_activity_date?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type StreakStateWhereUniqueInput = Prisma.AtLeast<{
@@ -270,6 +272,7 @@ export type StreakStateWhereUniqueInput = Prisma.AtLeast<{
   longest_count?: Prisma.IntFilter<"StreakState"> | number
   last_activity_date?: Prisma.DateTimeNullableFilter<"StreakState"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"StreakState"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_membership_id_streak_key">
 
 export type StreakStateOrderByWithAggregationInput = {
@@ -304,13 +307,12 @@ export type StreakStateScalarWhereWithAggregatesInput = {
 
 export type StreakStateCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   streak_key: string
   current_count?: number
   longest_count?: number
   last_activity_date?: Date | string | null
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutStreak_statesInput
 }
 
 export type StreakStateUncheckedCreateInput = {
@@ -326,13 +328,12 @@ export type StreakStateUncheckedCreateInput = {
 
 export type StreakStateUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   streak_key?: Prisma.StringFieldUpdateOperationsInput | string
   current_count?: Prisma.IntFieldUpdateOperationsInput | number
   longest_count?: Prisma.IntFieldUpdateOperationsInput | number
   last_activity_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutStreak_statesNestedInput
 }
 
 export type StreakStateUncheckedUpdateInput = {
@@ -359,8 +360,6 @@ export type StreakStateCreateManyInput = {
 
 export type StreakStateUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   streak_key?: Prisma.StringFieldUpdateOperationsInput | string
   current_count?: Prisma.IntFieldUpdateOperationsInput | number
   longest_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -377,6 +376,16 @@ export type StreakStateUncheckedUpdateManyInput = {
   longest_count?: Prisma.IntFieldUpdateOperationsInput | number
   last_activity_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StreakStateListRelationFilter = {
+  every?: Prisma.StreakStateWhereInput
+  some?: Prisma.StreakStateWhereInput
+  none?: Prisma.StreakStateWhereInput
+}
+
+export type StreakStateOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type StreakStateTenant_idMembership_idStreak_keyCompoundUniqueInput = {
@@ -428,6 +437,142 @@ export type StreakStateSumOrderByAggregateInput = {
   longest_count?: Prisma.SortOrder
 }
 
+export type StreakStateCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.StreakStateCreateWithoutMembershipInput, Prisma.StreakStateUncheckedCreateWithoutMembershipInput> | Prisma.StreakStateCreateWithoutMembershipInput[] | Prisma.StreakStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakStateCreateOrConnectWithoutMembershipInput | Prisma.StreakStateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.StreakStateCreateManyMembershipInputEnvelope
+  connect?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+}
+
+export type StreakStateUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.StreakStateCreateWithoutMembershipInput, Prisma.StreakStateUncheckedCreateWithoutMembershipInput> | Prisma.StreakStateCreateWithoutMembershipInput[] | Prisma.StreakStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakStateCreateOrConnectWithoutMembershipInput | Prisma.StreakStateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.StreakStateCreateManyMembershipInputEnvelope
+  connect?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+}
+
+export type StreakStateUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.StreakStateCreateWithoutMembershipInput, Prisma.StreakStateUncheckedCreateWithoutMembershipInput> | Prisma.StreakStateCreateWithoutMembershipInput[] | Prisma.StreakStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakStateCreateOrConnectWithoutMembershipInput | Prisma.StreakStateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.StreakStateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.StreakStateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.StreakStateCreateManyMembershipInputEnvelope
+  set?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  disconnect?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  delete?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  connect?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  update?: Prisma.StreakStateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.StreakStateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.StreakStateUpdateManyWithWhereWithoutMembershipInput | Prisma.StreakStateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.StreakStateScalarWhereInput | Prisma.StreakStateScalarWhereInput[]
+}
+
+export type StreakStateUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.StreakStateCreateWithoutMembershipInput, Prisma.StreakStateUncheckedCreateWithoutMembershipInput> | Prisma.StreakStateCreateWithoutMembershipInput[] | Prisma.StreakStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakStateCreateOrConnectWithoutMembershipInput | Prisma.StreakStateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.StreakStateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.StreakStateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.StreakStateCreateManyMembershipInputEnvelope
+  set?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  disconnect?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  delete?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  connect?: Prisma.StreakStateWhereUniqueInput | Prisma.StreakStateWhereUniqueInput[]
+  update?: Prisma.StreakStateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.StreakStateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.StreakStateUpdateManyWithWhereWithoutMembershipInput | Prisma.StreakStateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.StreakStateScalarWhereInput | Prisma.StreakStateScalarWhereInput[]
+}
+
+export type StreakStateCreateWithoutMembershipInput = {
+  id: string
+  streak_key: string
+  current_count?: number
+  longest_count?: number
+  last_activity_date?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type StreakStateUncheckedCreateWithoutMembershipInput = {
+  id: string
+  streak_key: string
+  current_count?: number
+  longest_count?: number
+  last_activity_date?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type StreakStateCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.StreakStateWhereUniqueInput
+  create: Prisma.XOR<Prisma.StreakStateCreateWithoutMembershipInput, Prisma.StreakStateUncheckedCreateWithoutMembershipInput>
+}
+
+export type StreakStateCreateManyMembershipInputEnvelope = {
+  data: Prisma.StreakStateCreateManyMembershipInput | Prisma.StreakStateCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type StreakStateUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.StreakStateWhereUniqueInput
+  update: Prisma.XOR<Prisma.StreakStateUpdateWithoutMembershipInput, Prisma.StreakStateUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.StreakStateCreateWithoutMembershipInput, Prisma.StreakStateUncheckedCreateWithoutMembershipInput>
+}
+
+export type StreakStateUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.StreakStateWhereUniqueInput
+  data: Prisma.XOR<Prisma.StreakStateUpdateWithoutMembershipInput, Prisma.StreakStateUncheckedUpdateWithoutMembershipInput>
+}
+
+export type StreakStateUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.StreakStateScalarWhereInput
+  data: Prisma.XOR<Prisma.StreakStateUpdateManyMutationInput, Prisma.StreakStateUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type StreakStateScalarWhereInput = {
+  AND?: Prisma.StreakStateScalarWhereInput | Prisma.StreakStateScalarWhereInput[]
+  OR?: Prisma.StreakStateScalarWhereInput[]
+  NOT?: Prisma.StreakStateScalarWhereInput | Prisma.StreakStateScalarWhereInput[]
+  id?: Prisma.UuidFilter<"StreakState"> | string
+  tenant_id?: Prisma.UuidFilter<"StreakState"> | string
+  membership_id?: Prisma.UuidFilter<"StreakState"> | string
+  streak_key?: Prisma.StringFilter<"StreakState"> | string
+  current_count?: Prisma.IntFilter<"StreakState"> | number
+  longest_count?: Prisma.IntFilter<"StreakState"> | number
+  last_activity_date?: Prisma.DateTimeNullableFilter<"StreakState"> | Date | string | null
+  updated_at?: Prisma.DateTimeFilter<"StreakState"> | Date | string
+}
+
+export type StreakStateCreateManyMembershipInput = {
+  id: string
+  streak_key: string
+  current_count?: number
+  longest_count?: number
+  last_activity_date?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type StreakStateUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  current_count?: Prisma.IntFieldUpdateOperationsInput | number
+  longest_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_activity_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StreakStateUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  current_count?: Prisma.IntFieldUpdateOperationsInput | number
+  longest_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_activity_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StreakStateUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  current_count?: Prisma.IntFieldUpdateOperationsInput | number
+  longest_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_activity_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type StreakStateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -439,6 +584,7 @@ export type StreakStateSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   longest_count?: boolean
   last_activity_date?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["streakState"]>
 
 export type StreakStateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -450,6 +596,7 @@ export type StreakStateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   longest_count?: boolean
   last_activity_date?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["streakState"]>
 
 export type StreakStateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -461,6 +608,7 @@ export type StreakStateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   longest_count?: boolean
   last_activity_date?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["streakState"]>
 
 export type StreakStateSelectScalar = {
@@ -475,10 +623,21 @@ export type StreakStateSelectScalar = {
 }
 
 export type StreakStateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "streak_key" | "current_count" | "longest_count" | "last_activity_date" | "updated_at", ExtArgs["result"]["streakState"]>
+export type StreakStateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type StreakStateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type StreakStateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $StreakStatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StreakState"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -882,6 +1041,7 @@ readonly fields: StreakStateFieldRefs;
  */
 export interface Prisma__StreakStateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -936,6 +1096,10 @@ export type StreakStateFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
+  /**
    * Filter, which StreakState to fetch.
    */
   where: Prisma.StreakStateWhereUniqueInput
@@ -954,6 +1118,10 @@ export type StreakStateFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
+  /**
    * Filter, which StreakState to fetch.
    */
   where: Prisma.StreakStateWhereUniqueInput
@@ -971,6 +1139,10 @@ export type StreakStateFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the StreakState
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
   /**
    * Filter, which StreakState to fetch.
    */
@@ -1020,6 +1192,10 @@ export type StreakStateFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
+  /**
    * Filter, which StreakState to fetch.
    */
   where?: Prisma.StreakStateWhereInput
@@ -1067,6 +1243,10 @@ export type StreakStateFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the StreakState
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
   /**
    * Filter, which StreakStates to fetch.
    */
@@ -1116,6 +1296,10 @@ export type StreakStateCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
+  /**
    * The data needed to create a StreakState.
    */
   data: Prisma.XOR<Prisma.StreakStateCreateInput, Prisma.StreakStateUncheckedCreateInput>
@@ -1149,6 +1333,10 @@ export type StreakStateCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.StreakStateCreateManyInput | Prisma.StreakStateCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1163,6 +1351,10 @@ export type StreakStateUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the StreakState
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
   /**
    * The data needed to update a StreakState.
    */
@@ -1215,6 +1407,10 @@ export type StreakStateUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many StreakStates to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1229,6 +1425,10 @@ export type StreakStateUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the StreakState
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
   /**
    * The filter to search for the StreakState to update in case it exists.
    */
@@ -1255,6 +1455,10 @@ export type StreakStateDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the StreakState
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
   /**
    * Filter which StreakState to delete.
    */
@@ -1287,4 +1491,8 @@ export type StreakStateDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the StreakState
    */
   omit?: Prisma.StreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakStateInclude<ExtArgs> | null
 }

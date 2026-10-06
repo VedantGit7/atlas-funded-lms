@@ -232,6 +232,8 @@ export type RewardRedemptionWhereInput = {
   cost_amount?: Prisma.IntFilter<"RewardRedemption"> | number
   status?: Prisma.StringFilter<"RewardRedemption"> | string
   redeemed_at?: Prisma.DateTimeFilter<"RewardRedemption"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  reward_item?: Prisma.XOR<Prisma.RewardItemScalarRelationFilter, Prisma.RewardItemWhereInput>
 }
 
 export type RewardRedemptionOrderByWithRelationInput = {
@@ -242,6 +244,8 @@ export type RewardRedemptionOrderByWithRelationInput = {
   cost_amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   redeemed_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  reward_item?: Prisma.RewardItemOrderByWithRelationInput
 }
 
 export type RewardRedemptionWhereUniqueInput = Prisma.AtLeast<{
@@ -255,6 +259,8 @@ export type RewardRedemptionWhereUniqueInput = Prisma.AtLeast<{
   cost_amount?: Prisma.IntFilter<"RewardRedemption"> | number
   status?: Prisma.StringFilter<"RewardRedemption"> | string
   redeemed_at?: Prisma.DateTimeFilter<"RewardRedemption"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  reward_item?: Prisma.XOR<Prisma.RewardItemScalarRelationFilter, Prisma.RewardItemWhereInput>
 }, "id">
 
 export type RewardRedemptionOrderByWithAggregationInput = {
@@ -287,12 +293,11 @@ export type RewardRedemptionScalarWhereWithAggregatesInput = {
 
 export type RewardRedemptionCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
-  reward_item_id: string
   cost_amount: number
   status: string
   redeemed_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutReward_redemptionsInput
+  reward_item: Prisma.RewardItemCreateNestedOneWithoutReward_redemptionsInput
 }
 
 export type RewardRedemptionUncheckedCreateInput = {
@@ -307,12 +312,11 @@ export type RewardRedemptionUncheckedCreateInput = {
 
 export type RewardRedemptionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  reward_item_id?: Prisma.StringFieldUpdateOperationsInput | string
   cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
   redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutReward_redemptionsNestedInput
+  reward_item?: Prisma.RewardItemUpdateOneRequiredWithoutReward_redemptionsNestedInput
 }
 
 export type RewardRedemptionUncheckedUpdateInput = {
@@ -337,9 +341,6 @@ export type RewardRedemptionCreateManyInput = {
 
 export type RewardRedemptionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  reward_item_id?: Prisma.StringFieldUpdateOperationsInput | string
   cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
   redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -353,6 +354,16 @@ export type RewardRedemptionUncheckedUpdateManyInput = {
   cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
   redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RewardRedemptionListRelationFilter = {
+  every?: Prisma.RewardRedemptionWhereInput
+  some?: Prisma.RewardRedemptionWhereInput
+  none?: Prisma.RewardRedemptionWhereInput
+}
+
+export type RewardRedemptionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type RewardRedemptionCountOrderByAggregateInput = {
@@ -393,6 +404,251 @@ export type RewardRedemptionSumOrderByAggregateInput = {
   cost_amount?: Prisma.SortOrder
 }
 
+export type RewardRedemptionCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.RewardRedemptionCreateWithoutMembershipInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput | Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyMembershipInputEnvelope
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+}
+
+export type RewardRedemptionUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.RewardRedemptionCreateWithoutMembershipInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput | Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyMembershipInputEnvelope
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+}
+
+export type RewardRedemptionUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.RewardRedemptionCreateWithoutMembershipInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput | Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyMembershipInputEnvelope
+  set?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  delete?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  update?: Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.RewardRedemptionUpdateManyWithWhereWithoutMembershipInput | Prisma.RewardRedemptionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.RewardRedemptionScalarWhereInput | Prisma.RewardRedemptionScalarWhereInput[]
+}
+
+export type RewardRedemptionUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.RewardRedemptionCreateWithoutMembershipInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput | Prisma.RewardRedemptionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyMembershipInputEnvelope
+  set?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  delete?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  update?: Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.RewardRedemptionUpdateManyWithWhereWithoutMembershipInput | Prisma.RewardRedemptionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.RewardRedemptionScalarWhereInput | Prisma.RewardRedemptionScalarWhereInput[]
+}
+
+export type RewardRedemptionCreateNestedManyWithoutReward_itemInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput> | Prisma.RewardRedemptionCreateWithoutReward_itemInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput | Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyReward_itemInputEnvelope
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+}
+
+export type RewardRedemptionUncheckedCreateNestedManyWithoutReward_itemInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput> | Prisma.RewardRedemptionCreateWithoutReward_itemInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput | Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyReward_itemInputEnvelope
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+}
+
+export type RewardRedemptionUpdateManyWithoutReward_itemNestedInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput> | Prisma.RewardRedemptionCreateWithoutReward_itemInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput | Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput[]
+  upsert?: Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutReward_itemInput | Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutReward_itemInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyReward_itemInputEnvelope
+  set?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  delete?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  update?: Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutReward_itemInput | Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutReward_itemInput[]
+  updateMany?: Prisma.RewardRedemptionUpdateManyWithWhereWithoutReward_itemInput | Prisma.RewardRedemptionUpdateManyWithWhereWithoutReward_itemInput[]
+  deleteMany?: Prisma.RewardRedemptionScalarWhereInput | Prisma.RewardRedemptionScalarWhereInput[]
+}
+
+export type RewardRedemptionUncheckedUpdateManyWithoutReward_itemNestedInput = {
+  create?: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput> | Prisma.RewardRedemptionCreateWithoutReward_itemInput[] | Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput[]
+  connectOrCreate?: Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput | Prisma.RewardRedemptionCreateOrConnectWithoutReward_itemInput[]
+  upsert?: Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutReward_itemInput | Prisma.RewardRedemptionUpsertWithWhereUniqueWithoutReward_itemInput[]
+  createMany?: Prisma.RewardRedemptionCreateManyReward_itemInputEnvelope
+  set?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  delete?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  connect?: Prisma.RewardRedemptionWhereUniqueInput | Prisma.RewardRedemptionWhereUniqueInput[]
+  update?: Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutReward_itemInput | Prisma.RewardRedemptionUpdateWithWhereUniqueWithoutReward_itemInput[]
+  updateMany?: Prisma.RewardRedemptionUpdateManyWithWhereWithoutReward_itemInput | Prisma.RewardRedemptionUpdateManyWithWhereWithoutReward_itemInput[]
+  deleteMany?: Prisma.RewardRedemptionScalarWhereInput | Prisma.RewardRedemptionScalarWhereInput[]
+}
+
+export type RewardRedemptionCreateWithoutMembershipInput = {
+  id: string
+  cost_amount: number
+  status: string
+  redeemed_at?: Date | string
+  reward_item: Prisma.RewardItemCreateNestedOneWithoutReward_redemptionsInput
+}
+
+export type RewardRedemptionUncheckedCreateWithoutMembershipInput = {
+  id: string
+  reward_item_id: string
+  cost_amount: number
+  status: string
+  redeemed_at?: Date | string
+}
+
+export type RewardRedemptionCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.RewardRedemptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput>
+}
+
+export type RewardRedemptionCreateManyMembershipInputEnvelope = {
+  data: Prisma.RewardRedemptionCreateManyMembershipInput | Prisma.RewardRedemptionCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type RewardRedemptionUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.RewardRedemptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.RewardRedemptionUpdateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedCreateWithoutMembershipInput>
+}
+
+export type RewardRedemptionUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.RewardRedemptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.RewardRedemptionUpdateWithoutMembershipInput, Prisma.RewardRedemptionUncheckedUpdateWithoutMembershipInput>
+}
+
+export type RewardRedemptionUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.RewardRedemptionScalarWhereInput
+  data: Prisma.XOR<Prisma.RewardRedemptionUpdateManyMutationInput, Prisma.RewardRedemptionUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type RewardRedemptionScalarWhereInput = {
+  AND?: Prisma.RewardRedemptionScalarWhereInput | Prisma.RewardRedemptionScalarWhereInput[]
+  OR?: Prisma.RewardRedemptionScalarWhereInput[]
+  NOT?: Prisma.RewardRedemptionScalarWhereInput | Prisma.RewardRedemptionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"RewardRedemption"> | string
+  tenant_id?: Prisma.UuidFilter<"RewardRedemption"> | string
+  membership_id?: Prisma.UuidFilter<"RewardRedemption"> | string
+  reward_item_id?: Prisma.UuidFilter<"RewardRedemption"> | string
+  cost_amount?: Prisma.IntFilter<"RewardRedemption"> | number
+  status?: Prisma.StringFilter<"RewardRedemption"> | string
+  redeemed_at?: Prisma.DateTimeFilter<"RewardRedemption"> | Date | string
+}
+
+export type RewardRedemptionCreateWithoutReward_itemInput = {
+  id: string
+  cost_amount: number
+  status: string
+  redeemed_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutReward_redemptionsInput
+}
+
+export type RewardRedemptionUncheckedCreateWithoutReward_itemInput = {
+  id: string
+  membership_id: string
+  cost_amount: number
+  status: string
+  redeemed_at?: Date | string
+}
+
+export type RewardRedemptionCreateOrConnectWithoutReward_itemInput = {
+  where: Prisma.RewardRedemptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput>
+}
+
+export type RewardRedemptionCreateManyReward_itemInputEnvelope = {
+  data: Prisma.RewardRedemptionCreateManyReward_itemInput | Prisma.RewardRedemptionCreateManyReward_itemInput[]
+  skipDuplicates?: boolean
+}
+
+export type RewardRedemptionUpsertWithWhereUniqueWithoutReward_itemInput = {
+  where: Prisma.RewardRedemptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.RewardRedemptionUpdateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedUpdateWithoutReward_itemInput>
+  create: Prisma.XOR<Prisma.RewardRedemptionCreateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedCreateWithoutReward_itemInput>
+}
+
+export type RewardRedemptionUpdateWithWhereUniqueWithoutReward_itemInput = {
+  where: Prisma.RewardRedemptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.RewardRedemptionUpdateWithoutReward_itemInput, Prisma.RewardRedemptionUncheckedUpdateWithoutReward_itemInput>
+}
+
+export type RewardRedemptionUpdateManyWithWhereWithoutReward_itemInput = {
+  where: Prisma.RewardRedemptionScalarWhereInput
+  data: Prisma.XOR<Prisma.RewardRedemptionUpdateManyMutationInput, Prisma.RewardRedemptionUncheckedUpdateManyWithoutReward_itemInput>
+}
+
+export type RewardRedemptionCreateManyMembershipInput = {
+  id: string
+  reward_item_id: string
+  cost_amount: number
+  status: string
+  redeemed_at?: Date | string
+}
+
+export type RewardRedemptionUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reward_item?: Prisma.RewardItemUpdateOneRequiredWithoutReward_redemptionsNestedInput
+}
+
+export type RewardRedemptionUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  reward_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RewardRedemptionUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  reward_item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RewardRedemptionCreateManyReward_itemInput = {
+  id: string
+  membership_id: string
+  cost_amount: number
+  status: string
+  redeemed_at?: Date | string
+}
+
+export type RewardRedemptionUpdateWithoutReward_itemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutReward_redemptionsNestedInput
+}
+
+export type RewardRedemptionUncheckedUpdateWithoutReward_itemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RewardRedemptionUncheckedUpdateManyWithoutReward_itemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  cost_amount?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  redeemed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type RewardRedemptionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -403,6 +659,8 @@ export type RewardRedemptionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   cost_amount?: boolean
   status?: boolean
   redeemed_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  reward_item?: boolean | Prisma.RewardItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rewardRedemption"]>
 
 export type RewardRedemptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -413,6 +671,8 @@ export type RewardRedemptionSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   cost_amount?: boolean
   status?: boolean
   redeemed_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  reward_item?: boolean | Prisma.RewardItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rewardRedemption"]>
 
 export type RewardRedemptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -423,6 +683,8 @@ export type RewardRedemptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   cost_amount?: boolean
   status?: boolean
   redeemed_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  reward_item?: boolean | Prisma.RewardItemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["rewardRedemption"]>
 
 export type RewardRedemptionSelectScalar = {
@@ -436,10 +698,25 @@ export type RewardRedemptionSelectScalar = {
 }
 
 export type RewardRedemptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "reward_item_id" | "cost_amount" | "status" | "redeemed_at", ExtArgs["result"]["rewardRedemption"]>
+export type RewardRedemptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  reward_item?: boolean | Prisma.RewardItemDefaultArgs<ExtArgs>
+}
+export type RewardRedemptionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  reward_item?: boolean | Prisma.RewardItemDefaultArgs<ExtArgs>
+}
+export type RewardRedemptionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  reward_item?: boolean | Prisma.RewardItemDefaultArgs<ExtArgs>
+}
 
 export type $RewardRedemptionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RewardRedemption"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    reward_item: Prisma.$RewardItemPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -842,6 +1119,8 @@ readonly fields: RewardRedemptionFieldRefs;
  */
 export interface Prisma__RewardRedemptionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  reward_item<T extends Prisma.RewardItemDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RewardItemDefaultArgs<ExtArgs>>): Prisma.Prisma__RewardItemClient<runtime.Types.Result.GetResult<Prisma.$RewardItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -895,6 +1174,10 @@ export type RewardRedemptionFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
+  /**
    * Filter, which RewardRedemption to fetch.
    */
   where: Prisma.RewardRedemptionWhereUniqueInput
@@ -913,6 +1196,10 @@ export type RewardRedemptionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
+  /**
    * Filter, which RewardRedemption to fetch.
    */
   where: Prisma.RewardRedemptionWhereUniqueInput
@@ -930,6 +1217,10 @@ export type RewardRedemptionFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the RewardRedemption
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
   /**
    * Filter, which RewardRedemption to fetch.
    */
@@ -979,6 +1270,10 @@ export type RewardRedemptionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
+  /**
    * Filter, which RewardRedemption to fetch.
    */
   where?: Prisma.RewardRedemptionWhereInput
@@ -1026,6 +1321,10 @@ export type RewardRedemptionFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the RewardRedemption
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
   /**
    * Filter, which RewardRedemptions to fetch.
    */
@@ -1075,6 +1374,10 @@ export type RewardRedemptionCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
+  /**
    * The data needed to create a RewardRedemption.
    */
   data: Prisma.XOR<Prisma.RewardRedemptionCreateInput, Prisma.RewardRedemptionUncheckedCreateInput>
@@ -1108,6 +1411,10 @@ export type RewardRedemptionCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.RewardRedemptionCreateManyInput | Prisma.RewardRedemptionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1122,6 +1429,10 @@ export type RewardRedemptionUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the RewardRedemption
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
   /**
    * The data needed to update a RewardRedemption.
    */
@@ -1174,6 +1485,10 @@ export type RewardRedemptionUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many RewardRedemptions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1188,6 +1503,10 @@ export type RewardRedemptionUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the RewardRedemption
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
   /**
    * The filter to search for the RewardRedemption to update in case it exists.
    */
@@ -1214,6 +1533,10 @@ export type RewardRedemptionDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the RewardRedemption
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
   /**
    * Filter which RewardRedemption to delete.
    */
@@ -1246,4 +1569,8 @@ export type RewardRedemptionDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the RewardRedemption
    */
   omit?: Prisma.RewardRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RewardRedemptionInclude<ExtArgs> | null
 }

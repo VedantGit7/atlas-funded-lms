@@ -27,7 +27,8 @@ Sprint 10 WS1–5 engineering work is in-repo; this section tracks prep only —
 - [ ] Rollback target identified (`RELEASE_SHA` or `RELEASE_VERSION`)
 - [ ] Domain and SSL verified for production hosts
 - [ ] Production secrets reviewed (by reference only; not stored in repo)
-- [ ] `pnpm db:tenant-fk:check` reports no violations against production before deploying migrations 120/121, and every constraint `validated` after ([tenant-foreign-keys.md](../runbooks/tenant-foreign-keys.md))
+- [ ] `pnpm perf:web-vitals` passes against the staging build ([web-vitals-check.md](../runbooks/web-vitals-check.md))
+- [ ] `pnpm db:tenant-fk:check` reports no violations against production before deploying migrations 120/121 and 122/123, and every constraint `validated` after ([tenant-foreign-keys.md](../runbooks/tenant-foreign-keys.md))
 
 ## Ownership
 

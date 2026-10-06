@@ -281,6 +281,7 @@ export type LiveAttendanceWhereInput = {
   created_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
   session?: Prisma.XOR<Prisma.LiveSessionScalarRelationFilter, Prisma.LiveSessionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type LiveAttendanceOrderByWithRelationInput = {
@@ -298,6 +299,7 @@ export type LiveAttendanceOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   session?: Prisma.LiveSessionOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type LiveAttendanceWhereUniqueInput = Prisma.AtLeast<{
@@ -319,6 +321,7 @@ export type LiveAttendanceWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
   session?: Prisma.XOR<Prisma.LiveSessionScalarRelationFilter, Prisma.LiveSessionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_live_session_id_membership_id">
 
 export type LiveAttendanceOrderByWithAggregationInput = {
@@ -363,8 +366,6 @@ export type LiveAttendanceScalarWhereWithAggregatesInput = {
 
 export type LiveAttendanceCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   joined_at?: Date | string | null
   left_at?: Date | string | null
@@ -375,6 +376,7 @@ export type LiveAttendanceCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   session: Prisma.LiveSessionCreateNestedOneWithoutAttendanceInput
+  membership: Prisma.MembershipCreateNestedOneWithoutLive_attendanceInput
 }
 
 export type LiveAttendanceUncheckedCreateInput = {
@@ -395,8 +397,6 @@ export type LiveAttendanceUncheckedCreateInput = {
 
 export type LiveAttendanceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   left_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -407,6 +407,7 @@ export type LiveAttendanceUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.LiveSessionUpdateOneRequiredWithoutAttendanceNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutLive_attendanceNestedInput
 }
 
 export type LiveAttendanceUncheckedUpdateInput = {
@@ -443,8 +444,6 @@ export type LiveAttendanceCreateManyInput = {
 
 export type LiveAttendanceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   left_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -544,6 +543,48 @@ export type LiveAttendanceSumOrderByAggregateInput = {
   duration_seconds?: Prisma.SortOrder
 }
 
+export type LiveAttendanceCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.LiveAttendanceCreateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput> | Prisma.LiveAttendanceCreateWithoutMembershipInput[] | Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput | Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.LiveAttendanceCreateManyMembershipInputEnvelope
+  connect?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+}
+
+export type LiveAttendanceUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.LiveAttendanceCreateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput> | Prisma.LiveAttendanceCreateWithoutMembershipInput[] | Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput | Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.LiveAttendanceCreateManyMembershipInputEnvelope
+  connect?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+}
+
+export type LiveAttendanceUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.LiveAttendanceCreateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput> | Prisma.LiveAttendanceCreateWithoutMembershipInput[] | Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput | Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.LiveAttendanceUpsertWithWhereUniqueWithoutMembershipInput | Prisma.LiveAttendanceUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.LiveAttendanceCreateManyMembershipInputEnvelope
+  set?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  disconnect?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  delete?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  connect?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  update?: Prisma.LiveAttendanceUpdateWithWhereUniqueWithoutMembershipInput | Prisma.LiveAttendanceUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.LiveAttendanceUpdateManyWithWhereWithoutMembershipInput | Prisma.LiveAttendanceUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.LiveAttendanceScalarWhereInput | Prisma.LiveAttendanceScalarWhereInput[]
+}
+
+export type LiveAttendanceUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.LiveAttendanceCreateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput> | Prisma.LiveAttendanceCreateWithoutMembershipInput[] | Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput | Prisma.LiveAttendanceCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.LiveAttendanceUpsertWithWhereUniqueWithoutMembershipInput | Prisma.LiveAttendanceUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.LiveAttendanceCreateManyMembershipInputEnvelope
+  set?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  disconnect?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  delete?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  connect?: Prisma.LiveAttendanceWhereUniqueInput | Prisma.LiveAttendanceWhereUniqueInput[]
+  update?: Prisma.LiveAttendanceUpdateWithWhereUniqueWithoutMembershipInput | Prisma.LiveAttendanceUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.LiveAttendanceUpdateManyWithWhereWithoutMembershipInput | Prisma.LiveAttendanceUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.LiveAttendanceScalarWhereInput | Prisma.LiveAttendanceScalarWhereInput[]
+}
+
 export type LiveAttendanceCreateNestedManyWithoutSessionInput = {
   create?: Prisma.XOR<Prisma.LiveAttendanceCreateWithoutSessionInput, Prisma.LiveAttendanceUncheckedCreateWithoutSessionInput> | Prisma.LiveAttendanceCreateWithoutSessionInput[] | Prisma.LiveAttendanceUncheckedCreateWithoutSessionInput[]
   connectOrCreate?: Prisma.LiveAttendanceCreateOrConnectWithoutSessionInput | Prisma.LiveAttendanceCreateOrConnectWithoutSessionInput[]
@@ -586,10 +627,8 @@ export type LiveAttendanceUncheckedUpdateManyWithoutSessionNestedInput = {
   deleteMany?: Prisma.LiveAttendanceScalarWhereInput | Prisma.LiveAttendanceScalarWhereInput[]
 }
 
-export type LiveAttendanceCreateWithoutSessionInput = {
+export type LiveAttendanceCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   joined_at?: Date | string | null
   left_at?: Date | string | null
@@ -599,6 +638,80 @@ export type LiveAttendanceCreateWithoutSessionInput = {
   overridden_by_membership_id?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  session: Prisma.LiveSessionCreateNestedOneWithoutAttendanceInput
+}
+
+export type LiveAttendanceUncheckedCreateWithoutMembershipInput = {
+  id: string
+  live_session_id: string
+  status?: string
+  joined_at?: Date | string | null
+  left_at?: Date | string | null
+  duration_seconds?: number | null
+  override_reason?: string | null
+  overridden_at?: Date | string | null
+  overridden_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type LiveAttendanceCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.LiveAttendanceWhereUniqueInput
+  create: Prisma.XOR<Prisma.LiveAttendanceCreateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput>
+}
+
+export type LiveAttendanceCreateManyMembershipInputEnvelope = {
+  data: Prisma.LiveAttendanceCreateManyMembershipInput | Prisma.LiveAttendanceCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type LiveAttendanceUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.LiveAttendanceWhereUniqueInput
+  update: Prisma.XOR<Prisma.LiveAttendanceUpdateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.LiveAttendanceCreateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedCreateWithoutMembershipInput>
+}
+
+export type LiveAttendanceUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.LiveAttendanceWhereUniqueInput
+  data: Prisma.XOR<Prisma.LiveAttendanceUpdateWithoutMembershipInput, Prisma.LiveAttendanceUncheckedUpdateWithoutMembershipInput>
+}
+
+export type LiveAttendanceUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.LiveAttendanceScalarWhereInput
+  data: Prisma.XOR<Prisma.LiveAttendanceUpdateManyMutationInput, Prisma.LiveAttendanceUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type LiveAttendanceScalarWhereInput = {
+  AND?: Prisma.LiveAttendanceScalarWhereInput | Prisma.LiveAttendanceScalarWhereInput[]
+  OR?: Prisma.LiveAttendanceScalarWhereInput[]
+  NOT?: Prisma.LiveAttendanceScalarWhereInput | Prisma.LiveAttendanceScalarWhereInput[]
+  id?: Prisma.UuidFilter<"LiveAttendance"> | string
+  tenant_id?: Prisma.UuidFilter<"LiveAttendance"> | string
+  live_session_id?: Prisma.UuidFilter<"LiveAttendance"> | string
+  membership_id?: Prisma.UuidFilter<"LiveAttendance"> | string
+  status?: Prisma.StringFilter<"LiveAttendance"> | string
+  joined_at?: Prisma.DateTimeNullableFilter<"LiveAttendance"> | Date | string | null
+  left_at?: Prisma.DateTimeNullableFilter<"LiveAttendance"> | Date | string | null
+  duration_seconds?: Prisma.IntNullableFilter<"LiveAttendance"> | number | null
+  override_reason?: Prisma.StringNullableFilter<"LiveAttendance"> | string | null
+  overridden_at?: Prisma.DateTimeNullableFilter<"LiveAttendance"> | Date | string | null
+  overridden_by_membership_id?: Prisma.UuidNullableFilter<"LiveAttendance"> | string | null
+  created_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
+}
+
+export type LiveAttendanceCreateWithoutSessionInput = {
+  id: string
+  status?: string
+  joined_at?: Date | string | null
+  left_at?: Date | string | null
+  duration_seconds?: number | null
+  override_reason?: string | null
+  overridden_at?: Date | string | null
+  overridden_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutLive_attendanceInput
 }
 
 export type LiveAttendanceUncheckedCreateWithoutSessionInput = {
@@ -642,23 +755,60 @@ export type LiveAttendanceUpdateManyWithWhereWithoutSessionInput = {
   data: Prisma.XOR<Prisma.LiveAttendanceUpdateManyMutationInput, Prisma.LiveAttendanceUncheckedUpdateManyWithoutSessionInput>
 }
 
-export type LiveAttendanceScalarWhereInput = {
-  AND?: Prisma.LiveAttendanceScalarWhereInput | Prisma.LiveAttendanceScalarWhereInput[]
-  OR?: Prisma.LiveAttendanceScalarWhereInput[]
-  NOT?: Prisma.LiveAttendanceScalarWhereInput | Prisma.LiveAttendanceScalarWhereInput[]
-  id?: Prisma.UuidFilter<"LiveAttendance"> | string
-  tenant_id?: Prisma.UuidFilter<"LiveAttendance"> | string
-  live_session_id?: Prisma.UuidFilter<"LiveAttendance"> | string
-  membership_id?: Prisma.UuidFilter<"LiveAttendance"> | string
-  status?: Prisma.StringFilter<"LiveAttendance"> | string
-  joined_at?: Prisma.DateTimeNullableFilter<"LiveAttendance"> | Date | string | null
-  left_at?: Prisma.DateTimeNullableFilter<"LiveAttendance"> | Date | string | null
-  duration_seconds?: Prisma.IntNullableFilter<"LiveAttendance"> | number | null
-  override_reason?: Prisma.StringNullableFilter<"LiveAttendance"> | string | null
-  overridden_at?: Prisma.DateTimeNullableFilter<"LiveAttendance"> | Date | string | null
-  overridden_by_membership_id?: Prisma.UuidNullableFilter<"LiveAttendance"> | string | null
-  created_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"LiveAttendance"> | Date | string
+export type LiveAttendanceCreateManyMembershipInput = {
+  id: string
+  live_session_id: string
+  status?: string
+  joined_at?: Date | string | null
+  left_at?: Date | string | null
+  duration_seconds?: number | null
+  override_reason?: string | null
+  overridden_at?: Date | string | null
+  overridden_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type LiveAttendanceUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  left_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  override_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  overridden_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  overridden_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  session?: Prisma.LiveSessionUpdateOneRequiredWithoutAttendanceNestedInput
+}
+
+export type LiveAttendanceUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  live_session_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  left_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  override_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  overridden_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  overridden_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LiveAttendanceUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  live_session_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  left_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  override_reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  overridden_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  overridden_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LiveAttendanceCreateManySessionInput = {
@@ -678,8 +828,6 @@ export type LiveAttendanceCreateManySessionInput = {
 
 export type LiveAttendanceUpdateWithoutSessionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   left_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -689,6 +837,7 @@ export type LiveAttendanceUpdateWithoutSessionInput = {
   overridden_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutLive_attendanceNestedInput
 }
 
 export type LiveAttendanceUncheckedUpdateWithoutSessionInput = {
@@ -738,6 +887,7 @@ export type LiveAttendanceSelect<ExtArgs extends runtime.Types.Extensions.Intern
   created_at?: boolean
   updated_at?: boolean
   session?: boolean | Prisma.LiveSessionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["liveAttendance"]>
 
 export type LiveAttendanceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -755,6 +905,7 @@ export type LiveAttendanceSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   created_at?: boolean
   updated_at?: boolean
   session?: boolean | Prisma.LiveSessionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["liveAttendance"]>
 
 export type LiveAttendanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -772,6 +923,7 @@ export type LiveAttendanceSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   created_at?: boolean
   updated_at?: boolean
   session?: boolean | Prisma.LiveSessionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["liveAttendance"]>
 
 export type LiveAttendanceSelectScalar = {
@@ -793,18 +945,22 @@ export type LiveAttendanceSelectScalar = {
 export type LiveAttendanceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "live_session_id" | "membership_id" | "status" | "joined_at" | "left_at" | "duration_seconds" | "override_reason" | "overridden_at" | "overridden_by_membership_id" | "created_at" | "updated_at", ExtArgs["result"]["liveAttendance"]>
 export type LiveAttendanceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.LiveSessionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type LiveAttendanceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.LiveSessionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type LiveAttendanceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.LiveSessionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $LiveAttendancePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LiveAttendance"
   objects: {
     session: Prisma.$LiveSessionPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1215,6 +1371,7 @@ readonly fields: LiveAttendanceFieldRefs;
 export interface Prisma__LiveAttendanceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   session<T extends Prisma.LiveSessionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LiveSessionDefaultArgs<ExtArgs>>): Prisma.Prisma__LiveSessionClient<runtime.Types.Result.GetResult<Prisma.$LiveSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

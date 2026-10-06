@@ -226,6 +226,7 @@ export type WorkflowTransitionWhereInput = {
   reason?: Prisma.StringNullableFilter<"WorkflowTransition"> | string | null
   metadata_json?: Prisma.JsonNullableFilter<"WorkflowTransition">
   occurred_at?: Prisma.DateTimeFilter<"WorkflowTransition"> | Date | string
+  workflow_definition?: Prisma.XOR<Prisma.WorkflowDefinitionScalarRelationFilter, Prisma.WorkflowDefinitionWhereInput>
 }
 
 export type WorkflowTransitionOrderByWithRelationInput = {
@@ -240,6 +241,7 @@ export type WorkflowTransitionOrderByWithRelationInput = {
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata_json?: Prisma.SortOrderInput | Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
+  workflow_definition?: Prisma.WorkflowDefinitionOrderByWithRelationInput
 }
 
 export type WorkflowTransitionWhereUniqueInput = Prisma.AtLeast<{
@@ -257,6 +259,7 @@ export type WorkflowTransitionWhereUniqueInput = Prisma.AtLeast<{
   reason?: Prisma.StringNullableFilter<"WorkflowTransition"> | string | null
   metadata_json?: Prisma.JsonNullableFilter<"WorkflowTransition">
   occurred_at?: Prisma.DateTimeFilter<"WorkflowTransition"> | Date | string
+  workflow_definition?: Prisma.XOR<Prisma.WorkflowDefinitionScalarRelationFilter, Prisma.WorkflowDefinitionWhereInput>
 }, "id">
 
 export type WorkflowTransitionOrderByWithAggregationInput = {
@@ -295,8 +298,6 @@ export type WorkflowTransitionScalarWhereWithAggregatesInput = {
 
 export type WorkflowTransitionCreateInput = {
   id: string
-  tenant_id: string
-  workflow_definition_id: string
   target_type: string
   target_id: string
   from_state: string
@@ -305,6 +306,7 @@ export type WorkflowTransitionCreateInput = {
   reason?: string | null
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Date | string
+  workflow_definition: Prisma.WorkflowDefinitionCreateNestedOneWithoutWorkflow_transitionsInput
 }
 
 export type WorkflowTransitionUncheckedCreateInput = {
@@ -323,8 +325,6 @@ export type WorkflowTransitionUncheckedCreateInput = {
 
 export type WorkflowTransitionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  workflow_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
   target_type?: Prisma.StringFieldUpdateOperationsInput | string
   target_id?: Prisma.StringFieldUpdateOperationsInput | string
   from_state?: Prisma.StringFieldUpdateOperationsInput | string
@@ -333,6 +333,7 @@ export type WorkflowTransitionUpdateInput = {
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  workflow_definition?: Prisma.WorkflowDefinitionUpdateOneRequiredWithoutWorkflow_transitionsNestedInput
 }
 
 export type WorkflowTransitionUncheckedUpdateInput = {
@@ -365,8 +366,6 @@ export type WorkflowTransitionCreateManyInput = {
 
 export type WorkflowTransitionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  workflow_definition_id?: Prisma.StringFieldUpdateOperationsInput | string
   target_type?: Prisma.StringFieldUpdateOperationsInput | string
   target_id?: Prisma.StringFieldUpdateOperationsInput | string
   from_state?: Prisma.StringFieldUpdateOperationsInput | string
@@ -389,6 +388,16 @@ export type WorkflowTransitionUncheckedUpdateManyInput = {
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WorkflowTransitionListRelationFilter = {
+  every?: Prisma.WorkflowTransitionWhereInput
+  some?: Prisma.WorkflowTransitionWhereInput
+  none?: Prisma.WorkflowTransitionWhereInput
+}
+
+export type WorkflowTransitionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type WorkflowTransitionCountOrderByAggregateInput = {
@@ -431,6 +440,163 @@ export type WorkflowTransitionMinOrderByAggregateInput = {
   occurred_at?: Prisma.SortOrder
 }
 
+export type WorkflowTransitionCreateNestedManyWithoutWorkflow_definitionInput = {
+  create?: Prisma.XOR<Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput> | Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput[] | Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput[]
+  connectOrCreate?: Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput[]
+  createMany?: Prisma.WorkflowTransitionCreateManyWorkflow_definitionInputEnvelope
+  connect?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+}
+
+export type WorkflowTransitionUncheckedCreateNestedManyWithoutWorkflow_definitionInput = {
+  create?: Prisma.XOR<Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput> | Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput[] | Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput[]
+  connectOrCreate?: Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput[]
+  createMany?: Prisma.WorkflowTransitionCreateManyWorkflow_definitionInputEnvelope
+  connect?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+}
+
+export type WorkflowTransitionUpdateManyWithoutWorkflow_definitionNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput> | Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput[] | Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput[]
+  connectOrCreate?: Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput[]
+  upsert?: Prisma.WorkflowTransitionUpsertWithWhereUniqueWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionUpsertWithWhereUniqueWithoutWorkflow_definitionInput[]
+  createMany?: Prisma.WorkflowTransitionCreateManyWorkflow_definitionInputEnvelope
+  set?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  disconnect?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  delete?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  connect?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  update?: Prisma.WorkflowTransitionUpdateWithWhereUniqueWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionUpdateWithWhereUniqueWithoutWorkflow_definitionInput[]
+  updateMany?: Prisma.WorkflowTransitionUpdateManyWithWhereWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionUpdateManyWithWhereWithoutWorkflow_definitionInput[]
+  deleteMany?: Prisma.WorkflowTransitionScalarWhereInput | Prisma.WorkflowTransitionScalarWhereInput[]
+}
+
+export type WorkflowTransitionUncheckedUpdateManyWithoutWorkflow_definitionNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput> | Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput[] | Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput[]
+  connectOrCreate?: Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput[]
+  upsert?: Prisma.WorkflowTransitionUpsertWithWhereUniqueWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionUpsertWithWhereUniqueWithoutWorkflow_definitionInput[]
+  createMany?: Prisma.WorkflowTransitionCreateManyWorkflow_definitionInputEnvelope
+  set?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  disconnect?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  delete?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  connect?: Prisma.WorkflowTransitionWhereUniqueInput | Prisma.WorkflowTransitionWhereUniqueInput[]
+  update?: Prisma.WorkflowTransitionUpdateWithWhereUniqueWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionUpdateWithWhereUniqueWithoutWorkflow_definitionInput[]
+  updateMany?: Prisma.WorkflowTransitionUpdateManyWithWhereWithoutWorkflow_definitionInput | Prisma.WorkflowTransitionUpdateManyWithWhereWithoutWorkflow_definitionInput[]
+  deleteMany?: Prisma.WorkflowTransitionScalarWhereInput | Prisma.WorkflowTransitionScalarWhereInput[]
+}
+
+export type WorkflowTransitionCreateWithoutWorkflow_definitionInput = {
+  id: string
+  target_type: string
+  target_id: string
+  from_state: string
+  to_state: string
+  actor_membership_id: string
+  reason?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput = {
+  id: string
+  target_type: string
+  target_id: string
+  from_state: string
+  to_state: string
+  actor_membership_id: string
+  reason?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type WorkflowTransitionCreateOrConnectWithoutWorkflow_definitionInput = {
+  where: Prisma.WorkflowTransitionWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput>
+}
+
+export type WorkflowTransitionCreateManyWorkflow_definitionInputEnvelope = {
+  data: Prisma.WorkflowTransitionCreateManyWorkflow_definitionInput | Prisma.WorkflowTransitionCreateManyWorkflow_definitionInput[]
+  skipDuplicates?: boolean
+}
+
+export type WorkflowTransitionUpsertWithWhereUniqueWithoutWorkflow_definitionInput = {
+  where: Prisma.WorkflowTransitionWhereUniqueInput
+  update: Prisma.XOR<Prisma.WorkflowTransitionUpdateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedUpdateWithoutWorkflow_definitionInput>
+  create: Prisma.XOR<Prisma.WorkflowTransitionCreateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedCreateWithoutWorkflow_definitionInput>
+}
+
+export type WorkflowTransitionUpdateWithWhereUniqueWithoutWorkflow_definitionInput = {
+  where: Prisma.WorkflowTransitionWhereUniqueInput
+  data: Prisma.XOR<Prisma.WorkflowTransitionUpdateWithoutWorkflow_definitionInput, Prisma.WorkflowTransitionUncheckedUpdateWithoutWorkflow_definitionInput>
+}
+
+export type WorkflowTransitionUpdateManyWithWhereWithoutWorkflow_definitionInput = {
+  where: Prisma.WorkflowTransitionScalarWhereInput
+  data: Prisma.XOR<Prisma.WorkflowTransitionUpdateManyMutationInput, Prisma.WorkflowTransitionUncheckedUpdateManyWithoutWorkflow_definitionInput>
+}
+
+export type WorkflowTransitionScalarWhereInput = {
+  AND?: Prisma.WorkflowTransitionScalarWhereInput | Prisma.WorkflowTransitionScalarWhereInput[]
+  OR?: Prisma.WorkflowTransitionScalarWhereInput[]
+  NOT?: Prisma.WorkflowTransitionScalarWhereInput | Prisma.WorkflowTransitionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"WorkflowTransition"> | string
+  tenant_id?: Prisma.UuidFilter<"WorkflowTransition"> | string
+  workflow_definition_id?: Prisma.UuidFilter<"WorkflowTransition"> | string
+  target_type?: Prisma.StringFilter<"WorkflowTransition"> | string
+  target_id?: Prisma.UuidFilter<"WorkflowTransition"> | string
+  from_state?: Prisma.StringFilter<"WorkflowTransition"> | string
+  to_state?: Prisma.StringFilter<"WorkflowTransition"> | string
+  actor_membership_id?: Prisma.UuidFilter<"WorkflowTransition"> | string
+  reason?: Prisma.StringNullableFilter<"WorkflowTransition"> | string | null
+  metadata_json?: Prisma.JsonNullableFilter<"WorkflowTransition">
+  occurred_at?: Prisma.DateTimeFilter<"WorkflowTransition"> | Date | string
+}
+
+export type WorkflowTransitionCreateManyWorkflow_definitionInput = {
+  id: string
+  target_type: string
+  target_id: string
+  from_state: string
+  to_state: string
+  actor_membership_id: string
+  reason?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type WorkflowTransitionUpdateWithoutWorkflow_definitionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  from_state?: Prisma.StringFieldUpdateOperationsInput | string
+  to_state?: Prisma.StringFieldUpdateOperationsInput | string
+  actor_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WorkflowTransitionUncheckedUpdateWithoutWorkflow_definitionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  from_state?: Prisma.StringFieldUpdateOperationsInput | string
+  to_state?: Prisma.StringFieldUpdateOperationsInput | string
+  actor_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type WorkflowTransitionUncheckedUpdateManyWithoutWorkflow_definitionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  from_state?: Prisma.StringFieldUpdateOperationsInput | string
+  to_state?: Prisma.StringFieldUpdateOperationsInput | string
+  actor_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type WorkflowTransitionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -445,6 +611,7 @@ export type WorkflowTransitionSelect<ExtArgs extends runtime.Types.Extensions.In
   reason?: boolean
   metadata_json?: boolean
   occurred_at?: boolean
+  workflow_definition?: boolean | Prisma.WorkflowDefinitionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workflowTransition"]>
 
 export type WorkflowTransitionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -459,6 +626,7 @@ export type WorkflowTransitionSelectCreateManyAndReturn<ExtArgs extends runtime.
   reason?: boolean
   metadata_json?: boolean
   occurred_at?: boolean
+  workflow_definition?: boolean | Prisma.WorkflowDefinitionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workflowTransition"]>
 
 export type WorkflowTransitionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -473,6 +641,7 @@ export type WorkflowTransitionSelectUpdateManyAndReturn<ExtArgs extends runtime.
   reason?: boolean
   metadata_json?: boolean
   occurred_at?: boolean
+  workflow_definition?: boolean | Prisma.WorkflowDefinitionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workflowTransition"]>
 
 export type WorkflowTransitionSelectScalar = {
@@ -490,10 +659,21 @@ export type WorkflowTransitionSelectScalar = {
 }
 
 export type WorkflowTransitionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "workflow_definition_id" | "target_type" | "target_id" | "from_state" | "to_state" | "actor_membership_id" | "reason" | "metadata_json" | "occurred_at", ExtArgs["result"]["workflowTransition"]>
+export type WorkflowTransitionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflow_definition?: boolean | Prisma.WorkflowDefinitionDefaultArgs<ExtArgs>
+}
+export type WorkflowTransitionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflow_definition?: boolean | Prisma.WorkflowDefinitionDefaultArgs<ExtArgs>
+}
+export type WorkflowTransitionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workflow_definition?: boolean | Prisma.WorkflowDefinitionDefaultArgs<ExtArgs>
+}
 
 export type $WorkflowTransitionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "WorkflowTransition"
-  objects: {}
+  objects: {
+    workflow_definition: Prisma.$WorkflowDefinitionPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -900,6 +1080,7 @@ readonly fields: WorkflowTransitionFieldRefs;
  */
 export interface Prisma__WorkflowTransitionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  workflow_definition<T extends Prisma.WorkflowDefinitionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkflowDefinitionDefaultArgs<ExtArgs>>): Prisma.Prisma__WorkflowDefinitionClient<runtime.Types.Result.GetResult<Prisma.$WorkflowDefinitionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -957,6 +1138,10 @@ export type WorkflowTransitionFindUniqueArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
+  /**
    * Filter, which WorkflowTransition to fetch.
    */
   where: Prisma.WorkflowTransitionWhereUniqueInput
@@ -975,6 +1160,10 @@ export type WorkflowTransitionFindUniqueOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
+  /**
    * Filter, which WorkflowTransition to fetch.
    */
   where: Prisma.WorkflowTransitionWhereUniqueInput
@@ -992,6 +1181,10 @@ export type WorkflowTransitionFindFirstArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the WorkflowTransition
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
   /**
    * Filter, which WorkflowTransition to fetch.
    */
@@ -1041,6 +1234,10 @@ export type WorkflowTransitionFindFirstOrThrowArgs<ExtArgs extends runtime.Types
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
+  /**
    * Filter, which WorkflowTransition to fetch.
    */
   where?: Prisma.WorkflowTransitionWhereInput
@@ -1088,6 +1285,10 @@ export type WorkflowTransitionFindManyArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the WorkflowTransition
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
   /**
    * Filter, which WorkflowTransitions to fetch.
    */
@@ -1137,6 +1338,10 @@ export type WorkflowTransitionCreateArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
+  /**
    * The data needed to create a WorkflowTransition.
    */
   data: Prisma.XOR<Prisma.WorkflowTransitionCreateInput, Prisma.WorkflowTransitionUncheckedCreateInput>
@@ -1170,6 +1375,10 @@ export type WorkflowTransitionCreateManyAndReturnArgs<ExtArgs extends runtime.Ty
    */
   data: Prisma.WorkflowTransitionCreateManyInput | Prisma.WorkflowTransitionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1184,6 +1393,10 @@ export type WorkflowTransitionUpdateArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the WorkflowTransition
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
   /**
    * The data needed to update a WorkflowTransition.
    */
@@ -1236,6 +1449,10 @@ export type WorkflowTransitionUpdateManyAndReturnArgs<ExtArgs extends runtime.Ty
    * Limit how many WorkflowTransitions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1250,6 +1467,10 @@ export type WorkflowTransitionUpsertArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the WorkflowTransition
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
   /**
    * The filter to search for the WorkflowTransition to update in case it exists.
    */
@@ -1276,6 +1497,10 @@ export type WorkflowTransitionDeleteArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the WorkflowTransition
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
   /**
    * Filter which WorkflowTransition to delete.
    */
@@ -1308,4 +1533,8 @@ export type WorkflowTransitionDefaultArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the WorkflowTransition
    */
   omit?: Prisma.WorkflowTransitionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkflowTransitionInclude<ExtArgs> | null
 }

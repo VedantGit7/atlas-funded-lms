@@ -265,6 +265,8 @@ export type AttemptWhereInput = {
   attempt_answers?: Prisma.AttemptAnswerListRelationFilter
   grading_tasks?: Prisma.GradingTaskListRelationFilter
   proctoring_sessions?: Prisma.ProctoringSessionListRelationFilter
+  diagnostic_sessions?: Prisma.DiagnosticSessionListRelationFilter
+  test_series_item_progress?: Prisma.TestSeriesItemProgressListRelationFilter
 }
 
 export type AttemptOrderByWithRelationInput = {
@@ -284,6 +286,8 @@ export type AttemptOrderByWithRelationInput = {
   attempt_answers?: Prisma.AttemptAnswerOrderByRelationAggregateInput
   grading_tasks?: Prisma.GradingTaskOrderByRelationAggregateInput
   proctoring_sessions?: Prisma.ProctoringSessionOrderByRelationAggregateInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionOrderByRelationAggregateInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressOrderByRelationAggregateInput
 }
 
 export type AttemptWhereUniqueInput = Prisma.AtLeast<{
@@ -308,6 +312,8 @@ export type AttemptWhereUniqueInput = Prisma.AtLeast<{
   attempt_answers?: Prisma.AttemptAnswerListRelationFilter
   grading_tasks?: Prisma.GradingTaskListRelationFilter
   proctoring_sessions?: Prisma.ProctoringSessionListRelationFilter
+  diagnostic_sessions?: Prisma.DiagnosticSessionListRelationFilter
+  test_series_item_progress?: Prisma.TestSeriesItemProgressListRelationFilter
 }, "id" | "tenant_id_id" | "tenant_id_idempotency_key">
 
 export type AttemptOrderByWithAggregationInput = {
@@ -360,6 +366,8 @@ export type AttemptCreateInput = {
   attempt_answers?: Prisma.AttemptAnswerCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptUncheckedCreateInput = {
@@ -377,6 +385,8 @@ export type AttemptUncheckedCreateInput = {
   attempt_answers?: Prisma.AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptUpdateInput = {
@@ -393,6 +403,8 @@ export type AttemptUpdateInput = {
   attempt_answers?: Prisma.AttemptAnswerUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateInput = {
@@ -410,6 +422,8 @@ export type AttemptUncheckedUpdateInput = {
   attempt_answers?: Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptCreateManyInput = {
@@ -459,6 +473,11 @@ export type AttemptListRelationFilter = {
 
 export type AttemptOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type AttemptNullableScalarRelationFilter = {
+  is?: Prisma.AttemptWhereInput | null
+  isNot?: Prisma.AttemptWhereInput | null
 }
 
 export type AttemptTenant_idIdCompoundUniqueInput = {
@@ -566,6 +585,22 @@ export type AttemptUncheckedUpdateManyWithoutMembershipNestedInput = {
   deleteMany?: Prisma.AttemptScalarWhereInput | Prisma.AttemptScalarWhereInput[]
 }
 
+export type AttemptCreateNestedOneWithoutTest_series_item_progressInput = {
+  create?: Prisma.XOR<Prisma.AttemptCreateWithoutTest_series_item_progressInput, Prisma.AttemptUncheckedCreateWithoutTest_series_item_progressInput>
+  connectOrCreate?: Prisma.AttemptCreateOrConnectWithoutTest_series_item_progressInput
+  connect?: Prisma.AttemptWhereUniqueInput
+}
+
+export type AttemptUpdateOneWithoutTest_series_item_progressNestedInput = {
+  create?: Prisma.XOR<Prisma.AttemptCreateWithoutTest_series_item_progressInput, Prisma.AttemptUncheckedCreateWithoutTest_series_item_progressInput>
+  connectOrCreate?: Prisma.AttemptCreateOrConnectWithoutTest_series_item_progressInput
+  upsert?: Prisma.AttemptUpsertWithoutTest_series_item_progressInput
+  disconnect?: Prisma.AttemptWhereInput | boolean
+  delete?: Prisma.AttemptWhereInput | boolean
+  connect?: Prisma.AttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AttemptUpdateToOneWithWhereWithoutTest_series_item_progressInput, Prisma.AttemptUpdateWithoutTest_series_item_progressInput>, Prisma.AttemptUncheckedUpdateWithoutTest_series_item_progressInput>
+}
+
 export type AttemptCreateNestedManyWithoutAssessmentInput = {
   create?: Prisma.XOR<Prisma.AttemptCreateWithoutAssessmentInput, Prisma.AttemptUncheckedCreateWithoutAssessmentInput> | Prisma.AttemptCreateWithoutAssessmentInput[] | Prisma.AttemptUncheckedCreateWithoutAssessmentInput[]
   connectOrCreate?: Prisma.AttemptCreateOrConnectWithoutAssessmentInput | Prisma.AttemptCreateOrConnectWithoutAssessmentInput[]
@@ -654,6 +689,22 @@ export type AttemptUpdateOneRequiredWithoutProctoring_sessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AttemptUpdateToOneWithWhereWithoutProctoring_sessionsInput, Prisma.AttemptUpdateWithoutProctoring_sessionsInput>, Prisma.AttemptUncheckedUpdateWithoutProctoring_sessionsInput>
 }
 
+export type AttemptCreateNestedOneWithoutDiagnostic_sessionsInput = {
+  create?: Prisma.XOR<Prisma.AttemptCreateWithoutDiagnostic_sessionsInput, Prisma.AttemptUncheckedCreateWithoutDiagnostic_sessionsInput>
+  connectOrCreate?: Prisma.AttemptCreateOrConnectWithoutDiagnostic_sessionsInput
+  connect?: Prisma.AttemptWhereUniqueInput
+}
+
+export type AttemptUpdateOneWithoutDiagnostic_sessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.AttemptCreateWithoutDiagnostic_sessionsInput, Prisma.AttemptUncheckedCreateWithoutDiagnostic_sessionsInput>
+  connectOrCreate?: Prisma.AttemptCreateOrConnectWithoutDiagnostic_sessionsInput
+  upsert?: Prisma.AttemptUpsertWithoutDiagnostic_sessionsInput
+  disconnect?: Prisma.AttemptWhereInput | boolean
+  delete?: Prisma.AttemptWhereInput | boolean
+  connect?: Prisma.AttemptWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AttemptUpdateToOneWithWhereWithoutDiagnostic_sessionsInput, Prisma.AttemptUpdateWithoutDiagnostic_sessionsInput>, Prisma.AttemptUncheckedUpdateWithoutDiagnostic_sessionsInput>
+}
+
 export type AttemptCreateWithoutMembershipInput = {
   id: string
   status?: $Enums.AttemptStatus
@@ -667,6 +718,8 @@ export type AttemptCreateWithoutMembershipInput = {
   attempt_answers?: Prisma.AttemptAnswerCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptUncheckedCreateWithoutMembershipInput = {
@@ -682,6 +735,8 @@ export type AttemptUncheckedCreateWithoutMembershipInput = {
   attempt_answers?: Prisma.AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptCreateOrConnectWithoutMembershipInput = {
@@ -727,6 +782,92 @@ export type AttemptScalarWhereInput = {
   idempotency_key?: Prisma.StringNullableFilter<"Attempt"> | string | null
 }
 
+export type AttemptCreateWithoutTest_series_item_progressInput = {
+  id: string
+  status?: $Enums.AttemptStatus
+  started_at?: Date | string
+  submitted_at?: Date | string | null
+  graded_at?: Date | string | null
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  assessment: Prisma.AssessmentCreateNestedOneWithoutAttemptsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutAttemptsInput
+  attempt_answers?: Prisma.AttemptAnswerCreateNestedManyWithoutAttemptInput
+  grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAttemptInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutAttemptInput
+}
+
+export type AttemptUncheckedCreateWithoutTest_series_item_progressInput = {
+  id: string
+  tenant_id: string
+  assessment_id: string
+  membership_id: string
+  status?: $Enums.AttemptStatus
+  started_at?: Date | string
+  submitted_at?: Date | string | null
+  graded_at?: Date | string | null
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  attempt_answers?: Prisma.AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
+  grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAttemptInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput
+}
+
+export type AttemptCreateOrConnectWithoutTest_series_item_progressInput = {
+  where: Prisma.AttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.AttemptCreateWithoutTest_series_item_progressInput, Prisma.AttemptUncheckedCreateWithoutTest_series_item_progressInput>
+}
+
+export type AttemptUpsertWithoutTest_series_item_progressInput = {
+  update: Prisma.XOR<Prisma.AttemptUpdateWithoutTest_series_item_progressInput, Prisma.AttemptUncheckedUpdateWithoutTest_series_item_progressInput>
+  create: Prisma.XOR<Prisma.AttemptCreateWithoutTest_series_item_progressInput, Prisma.AttemptUncheckedCreateWithoutTest_series_item_progressInput>
+  where?: Prisma.AttemptWhereInput
+}
+
+export type AttemptUpdateToOneWithWhereWithoutTest_series_item_progressInput = {
+  where?: Prisma.AttemptWhereInput
+  data: Prisma.XOR<Prisma.AttemptUpdateWithoutTest_series_item_progressInput, Prisma.AttemptUncheckedUpdateWithoutTest_series_item_progressInput>
+}
+
+export type AttemptUpdateWithoutTest_series_item_progressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAttemptStatusFieldUpdateOperationsInput | $Enums.AttemptStatus
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  graded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment?: Prisma.AssessmentUpdateOneRequiredWithoutAttemptsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutAttemptsNestedInput
+  attempt_answers?: Prisma.AttemptAnswerUpdateManyWithoutAttemptNestedInput
+  grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAttemptNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutAttemptNestedInput
+}
+
+export type AttemptUncheckedUpdateWithoutTest_series_item_progressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAttemptStatusFieldUpdateOperationsInput | $Enums.AttemptStatus
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  graded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempt_answers?: Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
+  grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput
+}
+
 export type AttemptCreateWithoutAssessmentInput = {
   id: string
   status?: $Enums.AttemptStatus
@@ -740,6 +881,8 @@ export type AttemptCreateWithoutAssessmentInput = {
   attempt_answers?: Prisma.AttemptAnswerCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptUncheckedCreateWithoutAssessmentInput = {
@@ -755,6 +898,8 @@ export type AttemptUncheckedCreateWithoutAssessmentInput = {
   attempt_answers?: Prisma.AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptCreateOrConnectWithoutAssessmentInput = {
@@ -796,6 +941,8 @@ export type AttemptCreateWithoutAttempt_answersInput = {
   membership: Prisma.MembershipCreateNestedOneWithoutAttemptsInput
   grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptUncheckedCreateWithoutAttempt_answersInput = {
@@ -812,6 +959,8 @@ export type AttemptUncheckedCreateWithoutAttempt_answersInput = {
   idempotency_key?: string | null
   grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptCreateOrConnectWithoutAttempt_answersInput = {
@@ -843,6 +992,8 @@ export type AttemptUpdateWithoutAttempt_answersInput = {
   membership?: Prisma.MembershipUpdateOneRequiredWithoutAttemptsNestedInput
   grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateWithoutAttempt_answersInput = {
@@ -859,6 +1010,8 @@ export type AttemptUncheckedUpdateWithoutAttempt_answersInput = {
   idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptCreateWithoutGrading_tasksInput = {
@@ -874,6 +1027,8 @@ export type AttemptCreateWithoutGrading_tasksInput = {
   membership: Prisma.MembershipCreateNestedOneWithoutAttemptsInput
   attempt_answers?: Prisma.AttemptAnswerCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptUncheckedCreateWithoutGrading_tasksInput = {
@@ -890,6 +1045,8 @@ export type AttemptUncheckedCreateWithoutGrading_tasksInput = {
   idempotency_key?: string | null
   attempt_answers?: Prisma.AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptCreateOrConnectWithoutGrading_tasksInput = {
@@ -921,6 +1078,8 @@ export type AttemptUpdateWithoutGrading_tasksInput = {
   membership?: Prisma.MembershipUpdateOneRequiredWithoutAttemptsNestedInput
   attempt_answers?: Prisma.AttemptAnswerUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateWithoutGrading_tasksInput = {
@@ -937,6 +1096,8 @@ export type AttemptUncheckedUpdateWithoutGrading_tasksInput = {
   idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   attempt_answers?: Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptCreateWithoutProctoring_sessionsInput = {
@@ -952,6 +1113,8 @@ export type AttemptCreateWithoutProctoring_sessionsInput = {
   membership: Prisma.MembershipCreateNestedOneWithoutAttemptsInput
   attempt_answers?: Prisma.AttemptAnswerCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptUncheckedCreateWithoutProctoring_sessionsInput = {
@@ -968,6 +1131,8 @@ export type AttemptUncheckedCreateWithoutProctoring_sessionsInput = {
   idempotency_key?: string | null
   attempt_answers?: Prisma.AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
   grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAttemptInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput
 }
 
 export type AttemptCreateOrConnectWithoutProctoring_sessionsInput = {
@@ -999,6 +1164,8 @@ export type AttemptUpdateWithoutProctoring_sessionsInput = {
   membership?: Prisma.MembershipUpdateOneRequiredWithoutAttemptsNestedInput
   attempt_answers?: Prisma.AttemptAnswerUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateWithoutProctoring_sessionsInput = {
@@ -1015,6 +1182,94 @@ export type AttemptUncheckedUpdateWithoutProctoring_sessionsInput = {
   idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   attempt_answers?: Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput
+}
+
+export type AttemptCreateWithoutDiagnostic_sessionsInput = {
+  id: string
+  status?: $Enums.AttemptStatus
+  started_at?: Date | string
+  submitted_at?: Date | string | null
+  graded_at?: Date | string | null
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  assessment: Prisma.AssessmentCreateNestedOneWithoutAttemptsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutAttemptsInput
+  attempt_answers?: Prisma.AttemptAnswerCreateNestedManyWithoutAttemptInput
+  grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAttemptInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutAttemptInput
+}
+
+export type AttemptUncheckedCreateWithoutDiagnostic_sessionsInput = {
+  id: string
+  tenant_id: string
+  assessment_id: string
+  membership_id: string
+  status?: $Enums.AttemptStatus
+  started_at?: Date | string
+  submitted_at?: Date | string | null
+  graded_at?: Date | string | null
+  score_pct?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  attempt_answers?: Prisma.AttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
+  grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAttemptInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutAttemptInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutAttemptInput
+}
+
+export type AttemptCreateOrConnectWithoutDiagnostic_sessionsInput = {
+  where: Prisma.AttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.AttemptCreateWithoutDiagnostic_sessionsInput, Prisma.AttemptUncheckedCreateWithoutDiagnostic_sessionsInput>
+}
+
+export type AttemptUpsertWithoutDiagnostic_sessionsInput = {
+  update: Prisma.XOR<Prisma.AttemptUpdateWithoutDiagnostic_sessionsInput, Prisma.AttemptUncheckedUpdateWithoutDiagnostic_sessionsInput>
+  create: Prisma.XOR<Prisma.AttemptCreateWithoutDiagnostic_sessionsInput, Prisma.AttemptUncheckedCreateWithoutDiagnostic_sessionsInput>
+  where?: Prisma.AttemptWhereInput
+}
+
+export type AttemptUpdateToOneWithWhereWithoutDiagnostic_sessionsInput = {
+  where?: Prisma.AttemptWhereInput
+  data: Prisma.XOR<Prisma.AttemptUpdateWithoutDiagnostic_sessionsInput, Prisma.AttemptUncheckedUpdateWithoutDiagnostic_sessionsInput>
+}
+
+export type AttemptUpdateWithoutDiagnostic_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAttemptStatusFieldUpdateOperationsInput | $Enums.AttemptStatus
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  graded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment?: Prisma.AssessmentUpdateOneRequiredWithoutAttemptsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutAttemptsNestedInput
+  attempt_answers?: Prisma.AttemptAnswerUpdateManyWithoutAttemptNestedInput
+  grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAttemptNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput
+}
+
+export type AttemptUncheckedUpdateWithoutDiagnostic_sessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  assessment_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumAttemptStatusFieldUpdateOperationsInput | $Enums.AttemptStatus
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submitted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  graded_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  score_pct?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempt_answers?: Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
+  grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptCreateManyMembershipInput = {
@@ -1042,6 +1297,8 @@ export type AttemptUpdateWithoutMembershipInput = {
   attempt_answers?: Prisma.AttemptAnswerUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateWithoutMembershipInput = {
@@ -1057,6 +1314,8 @@ export type AttemptUncheckedUpdateWithoutMembershipInput = {
   attempt_answers?: Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateManyWithoutMembershipInput = {
@@ -1096,6 +1355,8 @@ export type AttemptUpdateWithoutAssessmentInput = {
   attempt_answers?: Prisma.AttemptAnswerUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateWithoutAssessmentInput = {
@@ -1111,6 +1372,8 @@ export type AttemptUncheckedUpdateWithoutAssessmentInput = {
   attempt_answers?: Prisma.AttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
   grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput
   proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
 export type AttemptUncheckedUpdateManyWithoutAssessmentInput = {
@@ -1134,12 +1397,16 @@ export type AttemptCountOutputType = {
   attempt_answers: number
   grading_tasks: number
   proctoring_sessions: number
+  diagnostic_sessions: number
+  test_series_item_progress: number
 }
 
 export type AttemptCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   attempt_answers?: boolean | AttemptCountOutputTypeCountAttempt_answersArgs
   grading_tasks?: boolean | AttemptCountOutputTypeCountGrading_tasksArgs
   proctoring_sessions?: boolean | AttemptCountOutputTypeCountProctoring_sessionsArgs
+  diagnostic_sessions?: boolean | AttemptCountOutputTypeCountDiagnostic_sessionsArgs
+  test_series_item_progress?: boolean | AttemptCountOutputTypeCountTest_series_item_progressArgs
 }
 
 /**
@@ -1173,6 +1440,20 @@ export type AttemptCountOutputTypeCountProctoring_sessionsArgs<ExtArgs extends r
   where?: Prisma.ProctoringSessionWhereInput
 }
 
+/**
+ * AttemptCountOutputType without action
+ */
+export type AttemptCountOutputTypeCountDiagnostic_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DiagnosticSessionWhereInput
+}
+
+/**
+ * AttemptCountOutputType without action
+ */
+export type AttemptCountOutputTypeCountTest_series_item_progressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TestSeriesItemProgressWhereInput
+}
+
 
 export type AttemptSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1191,6 +1472,8 @@ export type AttemptSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   attempt_answers?: boolean | Prisma.Attempt$attempt_answersArgs<ExtArgs>
   grading_tasks?: boolean | Prisma.Attempt$grading_tasksArgs<ExtArgs>
   proctoring_sessions?: boolean | Prisma.Attempt$proctoring_sessionsArgs<ExtArgs>
+  diagnostic_sessions?: boolean | Prisma.Attempt$diagnostic_sessionsArgs<ExtArgs>
+  test_series_item_progress?: boolean | Prisma.Attempt$test_series_item_progressArgs<ExtArgs>
   _count?: boolean | Prisma.AttemptCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["attempt"]>
 
@@ -1247,6 +1530,8 @@ export type AttemptInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   attempt_answers?: boolean | Prisma.Attempt$attempt_answersArgs<ExtArgs>
   grading_tasks?: boolean | Prisma.Attempt$grading_tasksArgs<ExtArgs>
   proctoring_sessions?: boolean | Prisma.Attempt$proctoring_sessionsArgs<ExtArgs>
+  diagnostic_sessions?: boolean | Prisma.Attempt$diagnostic_sessionsArgs<ExtArgs>
+  test_series_item_progress?: boolean | Prisma.Attempt$test_series_item_progressArgs<ExtArgs>
   _count?: boolean | Prisma.AttemptCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AttemptIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1266,6 +1551,8 @@ export type $AttemptPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     attempt_answers: Prisma.$AttemptAnswerPayload<ExtArgs>[]
     grading_tasks: Prisma.$GradingTaskPayload<ExtArgs>[]
     proctoring_sessions: Prisma.$ProctoringSessionPayload<ExtArgs>[]
+    diagnostic_sessions: Prisma.$DiagnosticSessionPayload<ExtArgs>[]
+    test_series_item_progress: Prisma.$TestSeriesItemProgressPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1678,6 +1965,8 @@ export interface Prisma__AttemptClient<T, Null = never, ExtArgs extends runtime.
   attempt_answers<T extends Prisma.Attempt$attempt_answersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Attempt$attempt_answersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttemptAnswerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   grading_tasks<T extends Prisma.Attempt$grading_tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Attempt$grading_tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GradingTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   proctoring_sessions<T extends Prisma.Attempt$proctoring_sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Attempt$proctoring_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProctoringSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  diagnostic_sessions<T extends Prisma.Attempt$diagnostic_sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Attempt$diagnostic_sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiagnosticSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  test_series_item_progress<T extends Prisma.Attempt$test_series_item_progressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Attempt$test_series_item_progressArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TestSeriesItemProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2188,6 +2477,54 @@ export type Attempt$proctoring_sessionsArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.ProctoringSessionScalarFieldEnum | Prisma.ProctoringSessionScalarFieldEnum[]
+}
+
+/**
+ * Attempt.diagnostic_sessions
+ */
+export type Attempt$diagnostic_sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DiagnosticSession
+   */
+  select?: Prisma.DiagnosticSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DiagnosticSession
+   */
+  omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
+  where?: Prisma.DiagnosticSessionWhereInput
+  orderBy?: Prisma.DiagnosticSessionOrderByWithRelationInput | Prisma.DiagnosticSessionOrderByWithRelationInput[]
+  cursor?: Prisma.DiagnosticSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DiagnosticSessionScalarFieldEnum | Prisma.DiagnosticSessionScalarFieldEnum[]
+}
+
+/**
+ * Attempt.test_series_item_progress
+ */
+export type Attempt$test_series_item_progressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TestSeriesItemProgress
+   */
+  select?: Prisma.TestSeriesItemProgressSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TestSeriesItemProgress
+   */
+  omit?: Prisma.TestSeriesItemProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TestSeriesItemProgressInclude<ExtArgs> | null
+  where?: Prisma.TestSeriesItemProgressWhereInput
+  orderBy?: Prisma.TestSeriesItemProgressOrderByWithRelationInput | Prisma.TestSeriesItemProgressOrderByWithRelationInput[]
+  cursor?: Prisma.TestSeriesItemProgressWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TestSeriesItemProgressScalarFieldEnum | Prisma.TestSeriesItemProgressScalarFieldEnum[]
 }
 
 /**

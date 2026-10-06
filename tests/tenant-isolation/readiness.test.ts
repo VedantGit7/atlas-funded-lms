@@ -14,6 +14,20 @@ import {
 } from "../fixtures/readiness-fixture";
 import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixture";
 
+// Tenant B's policy needs tenant B's own scoring profile: a reference to
+// tenant A's is refused by the composite tenant foreign key (audit M3).
+async function insertScoringProfile(
+  tx: Parameters<Parameters<typeof withTenantTx>[1]>[0],
+  tenantId: string,
+) {
+  const id = randomUUID();
+  await tx.$executeRaw`
+    insert into scoring_profiles (id, tenant_id, key, name, updated_at)
+    values (${id}::uuid, ${tenantId}::uuid, ${`isolation-${id}`}, 'Isolation profile', now())
+  `;
+  return id;
+}
+
 const describeWithDb =
   process.env["DATABASE_URL"] && process.env["PLATFORM_DATABASE_URL"] ? describe : describe.skip;
 
@@ -25,6 +39,7 @@ describeWithDb("readiness tenant isolation", () => {
 
     const policyId = await withTenantTx(tenantCtx(tenantB.tenantA), async (tx) => {
       const id = randomUUID();
+      const profileId = await insertScoringProfile(tx, tenantB.tenantA.tenantId);
       await tx.$executeRaw`
         insert into readiness_policies (
           id, tenant_id, key, scoring_profile_id, cta_policy_json, legal_copy_json, status, created_at, updated_at
@@ -33,7 +48,7 @@ describeWithDb("readiness tenant isolation", () => {
           ${id}::uuid,
           ${tenantB.tenantA.tenantId}::uuid,
           'default',
-          ${fixture.profileId}::uuid,
+          ${profileId}::uuid,
           ${JSON.stringify(fixture.defaultPolicyInput.ctaPolicy)}::jsonb,
           ${JSON.stringify(fixture.defaultPolicyInput.legalCopy)}::jsonb,
           'ACTIVE'::"EntityStatus",
@@ -77,6 +92,7 @@ describeWithDb("readiness tenant isolation", () => {
     await seedReadinessPolicy(fixture);
 
     await withTenantTx(tenantCtx(tenantB.tenantA), async (tx) => {
+      const profileId = await insertScoringProfile(tx, tenantB.tenantA.tenantId);
       await tx.$executeRaw`
         insert into readiness_policies (
           id, tenant_id, key, scoring_profile_id, cta_policy_json, legal_copy_json, status, created_at, updated_at
@@ -85,7 +101,7 @@ describeWithDb("readiness tenant isolation", () => {
           ${randomUUID()}::uuid,
           ${tenantB.tenantA.tenantId}::uuid,
           'default',
-          ${fixture.profileId}::uuid,
+          ${profileId}::uuid,
           ${JSON.stringify({
             ...fixture.defaultPolicyInput.ctaPolicy,
             outboundTargetUrl: "https://tenant-b.example/handoff",

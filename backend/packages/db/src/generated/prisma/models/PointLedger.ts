@@ -244,6 +244,7 @@ export type PointLedgerWhereInput = {
   idempotency_key?: Prisma.StringFilter<"PointLedger"> | string
   metadata_json?: Prisma.JsonNullableFilter<"PointLedger">
   occurred_at?: Prisma.DateTimeFilter<"PointLedger"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type PointLedgerOrderByWithRelationInput = {
@@ -256,6 +257,7 @@ export type PointLedgerOrderByWithRelationInput = {
   idempotency_key?: Prisma.SortOrder
   metadata_json?: Prisma.SortOrderInput | Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type PointLedgerWhereUniqueInput = Prisma.AtLeast<{
@@ -272,6 +274,7 @@ export type PointLedgerWhereUniqueInput = Prisma.AtLeast<{
   idempotency_key?: Prisma.StringFilter<"PointLedger"> | string
   metadata_json?: Prisma.JsonNullableFilter<"PointLedger">
   occurred_at?: Prisma.DateTimeFilter<"PointLedger"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_idempotency_key">
 
 export type PointLedgerOrderByWithAggregationInput = {
@@ -308,14 +311,13 @@ export type PointLedgerScalarWhereWithAggregatesInput = {
 
 export type PointLedgerCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   points: number
   reason_key: string
   source_event_id?: string | null
   idempotency_key: string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutPoint_ledgerInput
 }
 
 export type PointLedgerUncheckedCreateInput = {
@@ -332,14 +334,13 @@ export type PointLedgerUncheckedCreateInput = {
 
 export type PointLedgerUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   points?: Prisma.IntFieldUpdateOperationsInput | number
   reason_key?: Prisma.StringFieldUpdateOperationsInput | string
   source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPoint_ledgerNestedInput
 }
 
 export type PointLedgerUncheckedUpdateInput = {
@@ -368,8 +369,6 @@ export type PointLedgerCreateManyInput = {
 
 export type PointLedgerUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   points?: Prisma.IntFieldUpdateOperationsInput | number
   reason_key?: Prisma.StringFieldUpdateOperationsInput | string
   source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -388,6 +387,16 @@ export type PointLedgerUncheckedUpdateManyInput = {
   idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PointLedgerListRelationFilter = {
+  every?: Prisma.PointLedgerWhereInput
+  some?: Prisma.PointLedgerWhereInput
+  none?: Prisma.PointLedgerWhereInput
+}
+
+export type PointLedgerOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type PointLedgerTenant_idIdempotency_keyCompoundUniqueInput = {
@@ -437,6 +446,149 @@ export type PointLedgerSumOrderByAggregateInput = {
   points?: Prisma.SortOrder
 }
 
+export type PointLedgerCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PointLedgerCreateWithoutMembershipInput, Prisma.PointLedgerUncheckedCreateWithoutMembershipInput> | Prisma.PointLedgerCreateWithoutMembershipInput[] | Prisma.PointLedgerUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PointLedgerCreateOrConnectWithoutMembershipInput | Prisma.PointLedgerCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PointLedgerCreateManyMembershipInputEnvelope
+  connect?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+}
+
+export type PointLedgerUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PointLedgerCreateWithoutMembershipInput, Prisma.PointLedgerUncheckedCreateWithoutMembershipInput> | Prisma.PointLedgerCreateWithoutMembershipInput[] | Prisma.PointLedgerUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PointLedgerCreateOrConnectWithoutMembershipInput | Prisma.PointLedgerCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PointLedgerCreateManyMembershipInputEnvelope
+  connect?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+}
+
+export type PointLedgerUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PointLedgerCreateWithoutMembershipInput, Prisma.PointLedgerUncheckedCreateWithoutMembershipInput> | Prisma.PointLedgerCreateWithoutMembershipInput[] | Prisma.PointLedgerUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PointLedgerCreateOrConnectWithoutMembershipInput | Prisma.PointLedgerCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PointLedgerUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PointLedgerUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PointLedgerCreateManyMembershipInputEnvelope
+  set?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  disconnect?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  delete?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  connect?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  update?: Prisma.PointLedgerUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PointLedgerUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PointLedgerUpdateManyWithWhereWithoutMembershipInput | Prisma.PointLedgerUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PointLedgerScalarWhereInput | Prisma.PointLedgerScalarWhereInput[]
+}
+
+export type PointLedgerUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PointLedgerCreateWithoutMembershipInput, Prisma.PointLedgerUncheckedCreateWithoutMembershipInput> | Prisma.PointLedgerCreateWithoutMembershipInput[] | Prisma.PointLedgerUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PointLedgerCreateOrConnectWithoutMembershipInput | Prisma.PointLedgerCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PointLedgerUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PointLedgerUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PointLedgerCreateManyMembershipInputEnvelope
+  set?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  disconnect?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  delete?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  connect?: Prisma.PointLedgerWhereUniqueInput | Prisma.PointLedgerWhereUniqueInput[]
+  update?: Prisma.PointLedgerUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PointLedgerUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PointLedgerUpdateManyWithWhereWithoutMembershipInput | Prisma.PointLedgerUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PointLedgerScalarWhereInput | Prisma.PointLedgerScalarWhereInput[]
+}
+
+export type PointLedgerCreateWithoutMembershipInput = {
+  id: string
+  points: number
+  reason_key: string
+  source_event_id?: string | null
+  idempotency_key: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type PointLedgerUncheckedCreateWithoutMembershipInput = {
+  id: string
+  points: number
+  reason_key: string
+  source_event_id?: string | null
+  idempotency_key: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type PointLedgerCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PointLedgerWhereUniqueInput
+  create: Prisma.XOR<Prisma.PointLedgerCreateWithoutMembershipInput, Prisma.PointLedgerUncheckedCreateWithoutMembershipInput>
+}
+
+export type PointLedgerCreateManyMembershipInputEnvelope = {
+  data: Prisma.PointLedgerCreateManyMembershipInput | Prisma.PointLedgerCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PointLedgerUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PointLedgerWhereUniqueInput
+  update: Prisma.XOR<Prisma.PointLedgerUpdateWithoutMembershipInput, Prisma.PointLedgerUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PointLedgerCreateWithoutMembershipInput, Prisma.PointLedgerUncheckedCreateWithoutMembershipInput>
+}
+
+export type PointLedgerUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PointLedgerWhereUniqueInput
+  data: Prisma.XOR<Prisma.PointLedgerUpdateWithoutMembershipInput, Prisma.PointLedgerUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PointLedgerUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PointLedgerScalarWhereInput
+  data: Prisma.XOR<Prisma.PointLedgerUpdateManyMutationInput, Prisma.PointLedgerUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PointLedgerScalarWhereInput = {
+  AND?: Prisma.PointLedgerScalarWhereInput | Prisma.PointLedgerScalarWhereInput[]
+  OR?: Prisma.PointLedgerScalarWhereInput[]
+  NOT?: Prisma.PointLedgerScalarWhereInput | Prisma.PointLedgerScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PointLedger"> | string
+  tenant_id?: Prisma.UuidFilter<"PointLedger"> | string
+  membership_id?: Prisma.UuidFilter<"PointLedger"> | string
+  points?: Prisma.IntFilter<"PointLedger"> | number
+  reason_key?: Prisma.StringFilter<"PointLedger"> | string
+  source_event_id?: Prisma.UuidNullableFilter<"PointLedger"> | string | null
+  idempotency_key?: Prisma.StringFilter<"PointLedger"> | string
+  metadata_json?: Prisma.JsonNullableFilter<"PointLedger">
+  occurred_at?: Prisma.DateTimeFilter<"PointLedger"> | Date | string
+}
+
+export type PointLedgerCreateManyMembershipInput = {
+  id: string
+  points: number
+  reason_key: string
+  source_event_id?: string | null
+  idempotency_key: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type PointLedgerUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  points?: Prisma.IntFieldUpdateOperationsInput | number
+  reason_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PointLedgerUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  points?: Prisma.IntFieldUpdateOperationsInput | number
+  reason_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PointLedgerUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  points?: Prisma.IntFieldUpdateOperationsInput | number
+  reason_key?: Prisma.StringFieldUpdateOperationsInput | string
+  source_event_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  idempotency_key?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type PointLedgerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -449,6 +601,7 @@ export type PointLedgerSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   idempotency_key?: boolean
   metadata_json?: boolean
   occurred_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pointLedger"]>
 
 export type PointLedgerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -461,6 +614,7 @@ export type PointLedgerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   idempotency_key?: boolean
   metadata_json?: boolean
   occurred_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pointLedger"]>
 
 export type PointLedgerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -473,6 +627,7 @@ export type PointLedgerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   idempotency_key?: boolean
   metadata_json?: boolean
   occurred_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pointLedger"]>
 
 export type PointLedgerSelectScalar = {
@@ -488,10 +643,21 @@ export type PointLedgerSelectScalar = {
 }
 
 export type PointLedgerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "points" | "reason_key" | "source_event_id" | "idempotency_key" | "metadata_json" | "occurred_at", ExtArgs["result"]["pointLedger"]>
+export type PointLedgerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PointLedgerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PointLedgerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $PointLedgerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PointLedger"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -896,6 +1062,7 @@ readonly fields: PointLedgerFieldRefs;
  */
 export interface Prisma__PointLedgerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -951,6 +1118,10 @@ export type PointLedgerFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
+  /**
    * Filter, which PointLedger to fetch.
    */
   where: Prisma.PointLedgerWhereUniqueInput
@@ -969,6 +1140,10 @@ export type PointLedgerFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
+  /**
    * Filter, which PointLedger to fetch.
    */
   where: Prisma.PointLedgerWhereUniqueInput
@@ -986,6 +1161,10 @@ export type PointLedgerFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PointLedger
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
   /**
    * Filter, which PointLedger to fetch.
    */
@@ -1035,6 +1214,10 @@ export type PointLedgerFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
+  /**
    * Filter, which PointLedger to fetch.
    */
   where?: Prisma.PointLedgerWhereInput
@@ -1082,6 +1265,10 @@ export type PointLedgerFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the PointLedger
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
   /**
    * Filter, which PointLedgers to fetch.
    */
@@ -1131,6 +1318,10 @@ export type PointLedgerCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
+  /**
    * The data needed to create a PointLedger.
    */
   data: Prisma.XOR<Prisma.PointLedgerCreateInput, Prisma.PointLedgerUncheckedCreateInput>
@@ -1164,6 +1355,10 @@ export type PointLedgerCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.PointLedgerCreateManyInput | Prisma.PointLedgerCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1178,6 +1373,10 @@ export type PointLedgerUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the PointLedger
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
   /**
    * The data needed to update a PointLedger.
    */
@@ -1230,6 +1429,10 @@ export type PointLedgerUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many PointLedgers to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1244,6 +1447,10 @@ export type PointLedgerUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the PointLedger
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
   /**
    * The filter to search for the PointLedger to update in case it exists.
    */
@@ -1270,6 +1477,10 @@ export type PointLedgerDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the PointLedger
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
   /**
    * Filter which PointLedger to delete.
    */
@@ -1302,4 +1513,8 @@ export type PointLedgerDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the PointLedger
    */
   omit?: Prisma.PointLedgerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PointLedgerInclude<ExtArgs> | null
 }

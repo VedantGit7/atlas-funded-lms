@@ -200,6 +200,7 @@ export type PollResponseWhereInput = {
   updated_at?: Prisma.DateTimeFilter<"PollResponse"> | Date | string
   poll?: Prisma.XOR<Prisma.PollScalarRelationFilter, Prisma.PollWhereInput>
   option?: Prisma.XOR<Prisma.PollOptionScalarRelationFilter, Prisma.PollOptionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type PollResponseOrderByWithRelationInput = {
@@ -212,6 +213,7 @@ export type PollResponseOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrder
   poll?: Prisma.PollOrderByWithRelationInput
   option?: Prisma.PollOptionOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type PollResponseWhereUniqueInput = Prisma.AtLeast<{
@@ -228,6 +230,7 @@ export type PollResponseWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeFilter<"PollResponse"> | Date | string
   poll?: Prisma.XOR<Prisma.PollScalarRelationFilter, Prisma.PollWhereInput>
   option?: Prisma.XOR<Prisma.PollOptionScalarRelationFilter, Prisma.PollOptionWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_poll_id_membership_id">
 
 export type PollResponseOrderByWithAggregationInput = {
@@ -258,12 +261,11 @@ export type PollResponseScalarWhereWithAggregatesInput = {
 
 export type PollResponseCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   created_at?: Date | string
   updated_at?: Date | string
   poll: Prisma.PollCreateNestedOneWithoutResponsesInput
   option: Prisma.PollOptionCreateNestedOneWithoutResponsesInput
+  membership: Prisma.MembershipCreateNestedOneWithoutPoll_responsesInput
 }
 
 export type PollResponseUncheckedCreateInput = {
@@ -278,12 +280,11 @@ export type PollResponseUncheckedCreateInput = {
 
 export type PollResponseUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   poll?: Prisma.PollUpdateOneRequiredWithoutResponsesNestedInput
   option?: Prisma.PollOptionUpdateOneRequiredWithoutResponsesNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPoll_responsesNestedInput
 }
 
 export type PollResponseUncheckedUpdateInput = {
@@ -308,8 +309,6 @@ export type PollResponseCreateManyInput = {
 
 export type PollResponseUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -368,6 +367,48 @@ export type PollResponseMinOrderByAggregateInput = {
   membership_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+}
+
+export type PollResponseCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PollResponseCreateWithoutMembershipInput, Prisma.PollResponseUncheckedCreateWithoutMembershipInput> | Prisma.PollResponseCreateWithoutMembershipInput[] | Prisma.PollResponseUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PollResponseCreateOrConnectWithoutMembershipInput | Prisma.PollResponseCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PollResponseCreateManyMembershipInputEnvelope
+  connect?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+}
+
+export type PollResponseUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PollResponseCreateWithoutMembershipInput, Prisma.PollResponseUncheckedCreateWithoutMembershipInput> | Prisma.PollResponseCreateWithoutMembershipInput[] | Prisma.PollResponseUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PollResponseCreateOrConnectWithoutMembershipInput | Prisma.PollResponseCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PollResponseCreateManyMembershipInputEnvelope
+  connect?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+}
+
+export type PollResponseUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PollResponseCreateWithoutMembershipInput, Prisma.PollResponseUncheckedCreateWithoutMembershipInput> | Prisma.PollResponseCreateWithoutMembershipInput[] | Prisma.PollResponseUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PollResponseCreateOrConnectWithoutMembershipInput | Prisma.PollResponseCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PollResponseUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PollResponseUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PollResponseCreateManyMembershipInputEnvelope
+  set?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  disconnect?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  delete?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  connect?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  update?: Prisma.PollResponseUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PollResponseUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PollResponseUpdateManyWithWhereWithoutMembershipInput | Prisma.PollResponseUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PollResponseScalarWhereInput | Prisma.PollResponseScalarWhereInput[]
+}
+
+export type PollResponseUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PollResponseCreateWithoutMembershipInput, Prisma.PollResponseUncheckedCreateWithoutMembershipInput> | Prisma.PollResponseCreateWithoutMembershipInput[] | Prisma.PollResponseUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PollResponseCreateOrConnectWithoutMembershipInput | Prisma.PollResponseCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PollResponseUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PollResponseUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PollResponseCreateManyMembershipInputEnvelope
+  set?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  disconnect?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  delete?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  connect?: Prisma.PollResponseWhereUniqueInput | Prisma.PollResponseWhereUniqueInput[]
+  update?: Prisma.PollResponseUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PollResponseUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PollResponseUpdateManyWithWhereWithoutMembershipInput | Prisma.PollResponseUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PollResponseScalarWhereInput | Prisma.PollResponseScalarWhereInput[]
 }
 
 export type PollResponseCreateNestedManyWithoutPollInput = {
@@ -454,13 +495,67 @@ export type PollResponseUncheckedUpdateManyWithoutOptionNestedInput = {
   deleteMany?: Prisma.PollResponseScalarWhereInput | Prisma.PollResponseScalarWhereInput[]
 }
 
+export type PollResponseCreateWithoutMembershipInput = {
+  id: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  poll: Prisma.PollCreateNestedOneWithoutResponsesInput
+  option: Prisma.PollOptionCreateNestedOneWithoutResponsesInput
+}
+
+export type PollResponseUncheckedCreateWithoutMembershipInput = {
+  id: string
+  poll_id: string
+  poll_option_id: string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PollResponseCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PollResponseWhereUniqueInput
+  create: Prisma.XOR<Prisma.PollResponseCreateWithoutMembershipInput, Prisma.PollResponseUncheckedCreateWithoutMembershipInput>
+}
+
+export type PollResponseCreateManyMembershipInputEnvelope = {
+  data: Prisma.PollResponseCreateManyMembershipInput | Prisma.PollResponseCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PollResponseUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PollResponseWhereUniqueInput
+  update: Prisma.XOR<Prisma.PollResponseUpdateWithoutMembershipInput, Prisma.PollResponseUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PollResponseCreateWithoutMembershipInput, Prisma.PollResponseUncheckedCreateWithoutMembershipInput>
+}
+
+export type PollResponseUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PollResponseWhereUniqueInput
+  data: Prisma.XOR<Prisma.PollResponseUpdateWithoutMembershipInput, Prisma.PollResponseUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PollResponseUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PollResponseScalarWhereInput
+  data: Prisma.XOR<Prisma.PollResponseUpdateManyMutationInput, Prisma.PollResponseUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PollResponseScalarWhereInput = {
+  AND?: Prisma.PollResponseScalarWhereInput | Prisma.PollResponseScalarWhereInput[]
+  OR?: Prisma.PollResponseScalarWhereInput[]
+  NOT?: Prisma.PollResponseScalarWhereInput | Prisma.PollResponseScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PollResponse"> | string
+  tenant_id?: Prisma.UuidFilter<"PollResponse"> | string
+  poll_id?: Prisma.UuidFilter<"PollResponse"> | string
+  poll_option_id?: Prisma.UuidFilter<"PollResponse"> | string
+  membership_id?: Prisma.UuidFilter<"PollResponse"> | string
+  created_at?: Prisma.DateTimeFilter<"PollResponse"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"PollResponse"> | Date | string
+}
+
 export type PollResponseCreateWithoutPollInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   created_at?: Date | string
   updated_at?: Date | string
   option: Prisma.PollOptionCreateNestedOneWithoutResponsesInput
+  membership: Prisma.MembershipCreateNestedOneWithoutPoll_responsesInput
 }
 
 export type PollResponseUncheckedCreateWithoutPollInput = {
@@ -498,26 +593,12 @@ export type PollResponseUpdateManyWithWhereWithoutPollInput = {
   data: Prisma.XOR<Prisma.PollResponseUpdateManyMutationInput, Prisma.PollResponseUncheckedUpdateManyWithoutPollInput>
 }
 
-export type PollResponseScalarWhereInput = {
-  AND?: Prisma.PollResponseScalarWhereInput | Prisma.PollResponseScalarWhereInput[]
-  OR?: Prisma.PollResponseScalarWhereInput[]
-  NOT?: Prisma.PollResponseScalarWhereInput | Prisma.PollResponseScalarWhereInput[]
-  id?: Prisma.UuidFilter<"PollResponse"> | string
-  tenant_id?: Prisma.UuidFilter<"PollResponse"> | string
-  poll_id?: Prisma.UuidFilter<"PollResponse"> | string
-  poll_option_id?: Prisma.UuidFilter<"PollResponse"> | string
-  membership_id?: Prisma.UuidFilter<"PollResponse"> | string
-  created_at?: Prisma.DateTimeFilter<"PollResponse"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"PollResponse"> | Date | string
-}
-
 export type PollResponseCreateWithoutOptionInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   created_at?: Date | string
   updated_at?: Date | string
   poll: Prisma.PollCreateNestedOneWithoutResponsesInput
+  membership: Prisma.MembershipCreateNestedOneWithoutPoll_responsesInput
 }
 
 export type PollResponseUncheckedCreateWithoutOptionInput = {
@@ -555,6 +636,38 @@ export type PollResponseUpdateManyWithWhereWithoutOptionInput = {
   data: Prisma.XOR<Prisma.PollResponseUpdateManyMutationInput, Prisma.PollResponseUncheckedUpdateManyWithoutOptionInput>
 }
 
+export type PollResponseCreateManyMembershipInput = {
+  id: string
+  poll_id: string
+  poll_option_id: string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PollResponseUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  poll?: Prisma.PollUpdateOneRequiredWithoutResponsesNestedInput
+  option?: Prisma.PollOptionUpdateOneRequiredWithoutResponsesNestedInput
+}
+
+export type PollResponseUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  poll_id?: Prisma.StringFieldUpdateOperationsInput | string
+  poll_option_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PollResponseUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  poll_id?: Prisma.StringFieldUpdateOperationsInput | string
+  poll_option_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type PollResponseCreateManyPollInput = {
   id: string
   tenant_id: string
@@ -566,11 +679,10 @@ export type PollResponseCreateManyPollInput = {
 
 export type PollResponseUpdateWithoutPollInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   option?: Prisma.PollOptionUpdateOneRequiredWithoutResponsesNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPoll_responsesNestedInput
 }
 
 export type PollResponseUncheckedUpdateWithoutPollInput = {
@@ -602,11 +714,10 @@ export type PollResponseCreateManyOptionInput = {
 
 export type PollResponseUpdateWithoutOptionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   poll?: Prisma.PollUpdateOneRequiredWithoutResponsesNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPoll_responsesNestedInput
 }
 
 export type PollResponseUncheckedUpdateWithoutOptionInput = {
@@ -639,6 +750,7 @@ export type PollResponseSelect<ExtArgs extends runtime.Types.Extensions.Internal
   updated_at?: boolean
   poll?: boolean | Prisma.PollDefaultArgs<ExtArgs>
   option?: boolean | Prisma.PollOptionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pollResponse"]>
 
 export type PollResponseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -651,6 +763,7 @@ export type PollResponseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   updated_at?: boolean
   poll?: boolean | Prisma.PollDefaultArgs<ExtArgs>
   option?: boolean | Prisma.PollOptionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pollResponse"]>
 
 export type PollResponseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -663,6 +776,7 @@ export type PollResponseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   updated_at?: boolean
   poll?: boolean | Prisma.PollDefaultArgs<ExtArgs>
   option?: boolean | Prisma.PollOptionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pollResponse"]>
 
 export type PollResponseSelectScalar = {
@@ -679,14 +793,17 @@ export type PollResponseOmit<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type PollResponseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   poll?: boolean | Prisma.PollDefaultArgs<ExtArgs>
   option?: boolean | Prisma.PollOptionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type PollResponseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   poll?: boolean | Prisma.PollDefaultArgs<ExtArgs>
   option?: boolean | Prisma.PollOptionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type PollResponseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   poll?: boolean | Prisma.PollDefaultArgs<ExtArgs>
   option?: boolean | Prisma.PollOptionDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $PollResponsePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -694,6 +811,7 @@ export type $PollResponsePayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     poll: Prisma.$PollPayload<ExtArgs>
     option: Prisma.$PollOptionPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1099,6 +1217,7 @@ export interface Prisma__PollResponseClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   poll<T extends Prisma.PollDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PollDefaultArgs<ExtArgs>>): Prisma.Prisma__PollClient<runtime.Types.Result.GetResult<Prisma.$PollPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   option<T extends Prisma.PollOptionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PollOptionDefaultArgs<ExtArgs>>): Prisma.Prisma__PollOptionClient<runtime.Types.Result.GetResult<Prisma.$PollOptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

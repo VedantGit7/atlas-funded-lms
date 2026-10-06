@@ -292,6 +292,7 @@ export type SalesAttributionEventWhereInput = {
   occurred_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
   created_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }
 
 export type SalesAttributionEventOrderByWithRelationInput = {
@@ -310,6 +311,7 @@ export type SalesAttributionEventOrderByWithRelationInput = {
   occurred_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type SalesAttributionEventWhereUniqueInput = Prisma.AtLeast<{
@@ -331,6 +333,7 @@ export type SalesAttributionEventWhereUniqueInput = Prisma.AtLeast<{
   occurred_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
   created_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }, "id">
 
 export type SalesAttributionEventOrderByWithAggregationInput = {
@@ -379,8 +382,6 @@ export type SalesAttributionEventScalarWhereWithAggregatesInput = {
 
 export type SalesAttributionEventCreateInput = {
   id: string
-  tenant_id: string
-  membership_id?: string | null
   event_type: string
   utm_source?: string | null
   utm_medium?: string | null
@@ -393,6 +394,7 @@ export type SalesAttributionEventCreateInput = {
   occurred_at?: Date | string
   created_at?: Date | string
   updated_at?: Date | string
+  membership?: Prisma.MembershipCreateNestedOneWithoutSales_attribution_eventsInput
 }
 
 export type SalesAttributionEventUncheckedCreateInput = {
@@ -415,8 +417,6 @@ export type SalesAttributionEventUncheckedCreateInput = {
 
 export type SalesAttributionEventUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_type?: Prisma.StringFieldUpdateOperationsInput | string
   utm_source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   utm_medium?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -429,6 +429,7 @@ export type SalesAttributionEventUpdateInput = {
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneWithoutSales_attribution_eventsNestedInput
 }
 
 export type SalesAttributionEventUncheckedUpdateInput = {
@@ -469,8 +470,6 @@ export type SalesAttributionEventCreateManyInput = {
 
 export type SalesAttributionEventUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   event_type?: Prisma.StringFieldUpdateOperationsInput | string
   utm_source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   utm_medium?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -501,6 +500,16 @@ export type SalesAttributionEventUncheckedUpdateManyInput = {
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAttributionEventListRelationFilter = {
+  every?: Prisma.SalesAttributionEventWhereInput
+  some?: Prisma.SalesAttributionEventWhereInput
+  none?: Prisma.SalesAttributionEventWhereInput
+}
+
+export type SalesAttributionEventOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SalesAttributionEventCountOrderByAggregateInput = {
@@ -563,6 +572,191 @@ export type SalesAttributionEventSumOrderByAggregateInput = {
   revenue_cents?: Prisma.SortOrder
 }
 
+export type SalesAttributionEventCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesAttributionEventCreateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput> | Prisma.SalesAttributionEventCreateWithoutMembershipInput[] | Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput | Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesAttributionEventCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+}
+
+export type SalesAttributionEventUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesAttributionEventCreateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput> | Prisma.SalesAttributionEventCreateWithoutMembershipInput[] | Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput | Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesAttributionEventCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+}
+
+export type SalesAttributionEventUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAttributionEventCreateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput> | Prisma.SalesAttributionEventCreateWithoutMembershipInput[] | Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput | Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesAttributionEventUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesAttributionEventUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesAttributionEventCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  disconnect?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  delete?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  connect?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  update?: Prisma.SalesAttributionEventUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesAttributionEventUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesAttributionEventUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesAttributionEventUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesAttributionEventScalarWhereInput | Prisma.SalesAttributionEventScalarWhereInput[]
+}
+
+export type SalesAttributionEventUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAttributionEventCreateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput> | Prisma.SalesAttributionEventCreateWithoutMembershipInput[] | Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput | Prisma.SalesAttributionEventCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesAttributionEventUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesAttributionEventUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesAttributionEventCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  disconnect?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  delete?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  connect?: Prisma.SalesAttributionEventWhereUniqueInput | Prisma.SalesAttributionEventWhereUniqueInput[]
+  update?: Prisma.SalesAttributionEventUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesAttributionEventUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesAttributionEventUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesAttributionEventUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesAttributionEventScalarWhereInput | Prisma.SalesAttributionEventScalarWhereInput[]
+}
+
+export type SalesAttributionEventCreateWithoutMembershipInput = {
+  id: string
+  event_type: string
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_term?: string | null
+  utm_content?: string | null
+  revenue_cents?: number | null
+  currency?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAttributionEventUncheckedCreateWithoutMembershipInput = {
+  id: string
+  event_type: string
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_term?: string | null
+  utm_content?: string | null
+  revenue_cents?: number | null
+  currency?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAttributionEventCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.SalesAttributionEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesAttributionEventCreateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesAttributionEventCreateManyMembershipInputEnvelope = {
+  data: Prisma.SalesAttributionEventCreateManyMembershipInput | Prisma.SalesAttributionEventCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesAttributionEventUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesAttributionEventWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesAttributionEventUpdateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.SalesAttributionEventCreateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesAttributionEventUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesAttributionEventWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesAttributionEventUpdateWithoutMembershipInput, Prisma.SalesAttributionEventUncheckedUpdateWithoutMembershipInput>
+}
+
+export type SalesAttributionEventUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.SalesAttributionEventScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesAttributionEventUpdateManyMutationInput, Prisma.SalesAttributionEventUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type SalesAttributionEventScalarWhereInput = {
+  AND?: Prisma.SalesAttributionEventScalarWhereInput | Prisma.SalesAttributionEventScalarWhereInput[]
+  OR?: Prisma.SalesAttributionEventScalarWhereInput[]
+  NOT?: Prisma.SalesAttributionEventScalarWhereInput | Prisma.SalesAttributionEventScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesAttributionEvent"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesAttributionEvent"> | string
+  membership_id?: Prisma.UuidNullableFilter<"SalesAttributionEvent"> | string | null
+  event_type?: Prisma.StringFilter<"SalesAttributionEvent"> | string
+  utm_source?: Prisma.StringNullableFilter<"SalesAttributionEvent"> | string | null
+  utm_medium?: Prisma.StringNullableFilter<"SalesAttributionEvent"> | string | null
+  utm_campaign?: Prisma.StringNullableFilter<"SalesAttributionEvent"> | string | null
+  utm_term?: Prisma.StringNullableFilter<"SalesAttributionEvent"> | string | null
+  utm_content?: Prisma.StringNullableFilter<"SalesAttributionEvent"> | string | null
+  revenue_cents?: Prisma.IntNullableFilter<"SalesAttributionEvent"> | number | null
+  currency?: Prisma.StringNullableFilter<"SalesAttributionEvent"> | string | null
+  metadata_json?: Prisma.JsonNullableFilter<"SalesAttributionEvent">
+  occurred_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
+  created_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"SalesAttributionEvent"> | Date | string
+}
+
+export type SalesAttributionEventCreateManyMembershipInput = {
+  id: string
+  event_type: string
+  utm_source?: string | null
+  utm_medium?: string | null
+  utm_campaign?: string | null
+  utm_term?: string | null
+  utm_content?: string | null
+  revenue_cents?: number | null
+  currency?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAttributionEventUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  utm_source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_medium?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_campaign?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_term?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revenue_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAttributionEventUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  utm_source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_medium?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_campaign?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_term?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revenue_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAttributionEventUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  event_type?: Prisma.StringFieldUpdateOperationsInput | string
+  utm_source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_medium?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_campaign?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_term?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  utm_content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revenue_cents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type SalesAttributionEventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -581,6 +775,7 @@ export type SalesAttributionEventSelect<ExtArgs extends runtime.Types.Extensions
   occurred_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.SalesAttributionEvent$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["salesAttributionEvent"]>
 
 export type SalesAttributionEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -599,6 +794,7 @@ export type SalesAttributionEventSelectCreateManyAndReturn<ExtArgs extends runti
   occurred_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.SalesAttributionEvent$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["salesAttributionEvent"]>
 
 export type SalesAttributionEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -617,6 +813,7 @@ export type SalesAttributionEventSelectUpdateManyAndReturn<ExtArgs extends runti
   occurred_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.SalesAttributionEvent$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["salesAttributionEvent"]>
 
 export type SalesAttributionEventSelectScalar = {
@@ -638,10 +835,21 @@ export type SalesAttributionEventSelectScalar = {
 }
 
 export type SalesAttributionEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "event_type" | "utm_source" | "utm_medium" | "utm_campaign" | "utm_term" | "utm_content" | "revenue_cents" | "currency" | "metadata_json" | "occurred_at" | "created_at" | "updated_at", ExtArgs["result"]["salesAttributionEvent"]>
+export type SalesAttributionEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.SalesAttributionEvent$membershipArgs<ExtArgs>
+}
+export type SalesAttributionEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.SalesAttributionEvent$membershipArgs<ExtArgs>
+}
+export type SalesAttributionEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.SalesAttributionEvent$membershipArgs<ExtArgs>
+}
 
 export type $SalesAttributionEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesAttributionEvent"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1052,6 +1260,7 @@ readonly fields: SalesAttributionEventFieldRefs;
  */
 export interface Prisma__SalesAttributionEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.SalesAttributionEvent$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesAttributionEvent$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1113,6 +1322,10 @@ export type SalesAttributionEventFindUniqueArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAttributionEvent to fetch.
    */
   where: Prisma.SalesAttributionEventWhereUniqueInput
@@ -1131,6 +1344,10 @@ export type SalesAttributionEventFindUniqueOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAttributionEvent to fetch.
    */
   where: Prisma.SalesAttributionEventWhereUniqueInput
@@ -1148,6 +1365,10 @@ export type SalesAttributionEventFindFirstArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the SalesAttributionEvent
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
   /**
    * Filter, which SalesAttributionEvent to fetch.
    */
@@ -1197,6 +1418,10 @@ export type SalesAttributionEventFindFirstOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAttributionEvent to fetch.
    */
   where?: Prisma.SalesAttributionEventWhereInput
@@ -1244,6 +1469,10 @@ export type SalesAttributionEventFindManyArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the SalesAttributionEvent
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
   /**
    * Filter, which SalesAttributionEvents to fetch.
    */
@@ -1293,6 +1522,10 @@ export type SalesAttributionEventCreateArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
+  /**
    * The data needed to create a SalesAttributionEvent.
    */
   data: Prisma.XOR<Prisma.SalesAttributionEventCreateInput, Prisma.SalesAttributionEventUncheckedCreateInput>
@@ -1326,6 +1559,10 @@ export type SalesAttributionEventCreateManyAndReturnArgs<ExtArgs extends runtime
    */
   data: Prisma.SalesAttributionEventCreateManyInput | Prisma.SalesAttributionEventCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1340,6 +1577,10 @@ export type SalesAttributionEventUpdateArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAttributionEvent
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
   /**
    * The data needed to update a SalesAttributionEvent.
    */
@@ -1392,6 +1633,10 @@ export type SalesAttributionEventUpdateManyAndReturnArgs<ExtArgs extends runtime
    * Limit how many SalesAttributionEvents to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1406,6 +1651,10 @@ export type SalesAttributionEventUpsertArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAttributionEvent
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
   /**
    * The filter to search for the SalesAttributionEvent to update in case it exists.
    */
@@ -1433,6 +1682,10 @@ export type SalesAttributionEventDeleteArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
+  /**
    * Filter which SalesAttributionEvent to delete.
    */
   where: Prisma.SalesAttributionEventWhereUniqueInput
@@ -1453,6 +1706,25 @@ export type SalesAttributionEventDeleteManyArgs<ExtArgs extends runtime.Types.Ex
 }
 
 /**
+ * SalesAttributionEvent.membership
+ */
+export type SalesAttributionEvent$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
+}
+
+/**
  * SalesAttributionEvent without action
  */
 export type SalesAttributionEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1464,4 +1736,8 @@ export type SalesAttributionEventDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the SalesAttributionEvent
    */
   omit?: Prisma.SalesAttributionEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAttributionEventInclude<ExtArgs> | null
 }

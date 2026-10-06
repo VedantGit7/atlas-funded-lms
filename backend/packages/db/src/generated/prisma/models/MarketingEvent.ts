@@ -304,6 +304,7 @@ export type MarketingEventWhereInput = {
   published_at?: Prisma.DateTimeNullableFilter<"MarketingEvent"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingEvent"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingEvent"> | Date | string
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationListRelationFilter
 }
 
 export type MarketingEventOrderByWithRelationInput = {
@@ -323,10 +324,12 @@ export type MarketingEventOrderByWithRelationInput = {
   published_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationOrderByRelationAggregateInput
 }
 
 export type MarketingEventWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.MarketingEventTenant_idIdCompoundUniqueInput
   AND?: Prisma.MarketingEventWhereInput | Prisma.MarketingEventWhereInput[]
   OR?: Prisma.MarketingEventWhereInput[]
   NOT?: Prisma.MarketingEventWhereInput | Prisma.MarketingEventWhereInput[]
@@ -345,7 +348,8 @@ export type MarketingEventWhereUniqueInput = Prisma.AtLeast<{
   published_at?: Prisma.DateTimeNullableFilter<"MarketingEvent"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"MarketingEvent"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"MarketingEvent"> | Date | string
-}, "id">
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type MarketingEventOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -410,6 +414,7 @@ export type MarketingEventCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationCreateNestedManyWithoutEventInput
 }
 
 export type MarketingEventUncheckedCreateInput = {
@@ -429,6 +434,7 @@ export type MarketingEventUncheckedCreateInput = {
   published_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationUncheckedCreateNestedManyWithoutEventInput
 }
 
 export type MarketingEventUpdateInput = {
@@ -448,6 +454,7 @@ export type MarketingEventUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationUpdateManyWithoutEventNestedInput
 }
 
 export type MarketingEventUncheckedUpdateInput = {
@@ -467,6 +474,7 @@ export type MarketingEventUncheckedUpdateInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationUncheckedUpdateManyWithoutEventNestedInput
 }
 
 export type MarketingEventCreateManyInput = {
@@ -524,6 +532,11 @@ export type MarketingEventUncheckedUpdateManyInput = {
   published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type MarketingEventCountOrderByAggregateInput = {
@@ -591,6 +604,146 @@ export type MarketingEventSumOrderByAggregateInput = {
   reminder_minutes_before?: Prisma.SortOrder
 }
 
+export type MarketingEventScalarRelationFilter = {
+  is?: Prisma.MarketingEventWhereInput
+  isNot?: Prisma.MarketingEventWhereInput
+}
+
+export type MarketingEventCreateNestedOneWithoutMarketing_event_registrationsInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventCreateWithoutMarketing_event_registrationsInput, Prisma.MarketingEventUncheckedCreateWithoutMarketing_event_registrationsInput>
+  connectOrCreate?: Prisma.MarketingEventCreateOrConnectWithoutMarketing_event_registrationsInput
+  connect?: Prisma.MarketingEventWhereUniqueInput
+}
+
+export type MarketingEventUpdateOneRequiredWithoutMarketing_event_registrationsNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingEventCreateWithoutMarketing_event_registrationsInput, Prisma.MarketingEventUncheckedCreateWithoutMarketing_event_registrationsInput>
+  connectOrCreate?: Prisma.MarketingEventCreateOrConnectWithoutMarketing_event_registrationsInput
+  upsert?: Prisma.MarketingEventUpsertWithoutMarketing_event_registrationsInput
+  connect?: Prisma.MarketingEventWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MarketingEventUpdateToOneWithWhereWithoutMarketing_event_registrationsInput, Prisma.MarketingEventUpdateWithoutMarketing_event_registrationsInput>, Prisma.MarketingEventUncheckedUpdateWithoutMarketing_event_registrationsInput>
+}
+
+export type MarketingEventCreateWithoutMarketing_event_registrationsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  starts_at: Date | string
+  ends_at?: Date | string | null
+  location?: string | null
+  link_url?: string | null
+  join_url?: string | null
+  cover_image_url?: string | null
+  reminder_minutes_before?: number | null
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingEventUncheckedCreateWithoutMarketing_event_registrationsInput = {
+  id: string
+  tenant_id: string
+  title: string
+  description?: string | null
+  status?: string
+  starts_at: Date | string
+  ends_at?: Date | string | null
+  location?: string | null
+  link_url?: string | null
+  join_url?: string | null
+  cover_image_url?: string | null
+  reminder_minutes_before?: number | null
+  created_by_membership_id: string
+  published_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type MarketingEventCreateOrConnectWithoutMarketing_event_registrationsInput = {
+  where: Prisma.MarketingEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingEventCreateWithoutMarketing_event_registrationsInput, Prisma.MarketingEventUncheckedCreateWithoutMarketing_event_registrationsInput>
+}
+
+export type MarketingEventUpsertWithoutMarketing_event_registrationsInput = {
+  update: Prisma.XOR<Prisma.MarketingEventUpdateWithoutMarketing_event_registrationsInput, Prisma.MarketingEventUncheckedUpdateWithoutMarketing_event_registrationsInput>
+  create: Prisma.XOR<Prisma.MarketingEventCreateWithoutMarketing_event_registrationsInput, Prisma.MarketingEventUncheckedCreateWithoutMarketing_event_registrationsInput>
+  where?: Prisma.MarketingEventWhereInput
+}
+
+export type MarketingEventUpdateToOneWithWhereWithoutMarketing_event_registrationsInput = {
+  where?: Prisma.MarketingEventWhereInput
+  data: Prisma.XOR<Prisma.MarketingEventUpdateWithoutMarketing_event_registrationsInput, Prisma.MarketingEventUncheckedUpdateWithoutMarketing_event_registrationsInput>
+}
+
+export type MarketingEventUpdateWithoutMarketing_event_registrationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  starts_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  link_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  join_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cover_image_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminder_minutes_before?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingEventUncheckedUpdateWithoutMarketing_event_registrationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  starts_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ends_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  link_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  join_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cover_image_url?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reminder_minutes_before?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  published_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type MarketingEventCountOutputType
+ */
+
+export type MarketingEventCountOutputType = {
+  marketing_event_registrations: number
+}
+
+export type MarketingEventCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_event_registrations?: boolean | MarketingEventCountOutputTypeCountMarketing_event_registrationsArgs
+}
+
+/**
+ * MarketingEventCountOutputType without action
+ */
+export type MarketingEventCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingEventCountOutputType
+   */
+  select?: Prisma.MarketingEventCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MarketingEventCountOutputType without action
+ */
+export type MarketingEventCountOutputTypeCountMarketing_event_registrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MarketingEventRegistrationWhereInput
+}
 
 
 export type MarketingEventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -610,6 +763,8 @@ export type MarketingEventSelect<ExtArgs extends runtime.Types.Extensions.Intern
   published_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  marketing_event_registrations?: boolean | Prisma.MarketingEvent$marketing_event_registrationsArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingEventCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingEvent"]>
 
 export type MarketingEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -670,10 +825,18 @@ export type MarketingEventSelectScalar = {
 }
 
 export type MarketingEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "title" | "description" | "status" | "starts_at" | "ends_at" | "location" | "link_url" | "join_url" | "cover_image_url" | "reminder_minutes_before" | "created_by_membership_id" | "published_at" | "created_at" | "updated_at", ExtArgs["result"]["marketingEvent"]>
+export type MarketingEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  marketing_event_registrations?: boolean | Prisma.MarketingEvent$marketing_event_registrationsArgs<ExtArgs>
+  _count?: boolean | Prisma.MarketingEventCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type MarketingEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MarketingEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $MarketingEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingEvent"
-  objects: {}
+  objects: {
+    marketing_event_registrations: Prisma.$MarketingEventRegistrationPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1085,6 +1248,7 @@ readonly fields: MarketingEventFieldRefs;
  */
 export interface Prisma__MarketingEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  marketing_event_registrations<T extends Prisma.MarketingEvent$marketing_event_registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingEvent$marketing_event_registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MarketingEventRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1147,6 +1311,10 @@ export type MarketingEventFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingEvent to fetch.
    */
   where: Prisma.MarketingEventWhereUniqueInput
@@ -1165,6 +1333,10 @@ export type MarketingEventFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingEvent to fetch.
    */
   where: Prisma.MarketingEventWhereUniqueInput
@@ -1182,6 +1354,10 @@ export type MarketingEventFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the MarketingEvent
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
   /**
    * Filter, which MarketingEvent to fetch.
    */
@@ -1231,6 +1407,10 @@ export type MarketingEventFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingEvent to fetch.
    */
   where?: Prisma.MarketingEventWhereInput
@@ -1278,6 +1458,10 @@ export type MarketingEventFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the MarketingEvent
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
   /**
    * Filter, which MarketingEvents to fetch.
    */
@@ -1327,6 +1511,10 @@ export type MarketingEventCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingEvent.
    */
   data: Prisma.XOR<Prisma.MarketingEventCreateInput, Prisma.MarketingEventUncheckedCreateInput>
@@ -1374,6 +1562,10 @@ export type MarketingEventUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the MarketingEvent
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingEvent.
    */
@@ -1441,6 +1633,10 @@ export type MarketingEventUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
+  /**
    * The filter to search for the MarketingEvent to update in case it exists.
    */
   where: Prisma.MarketingEventWhereUniqueInput
@@ -1467,6 +1663,10 @@ export type MarketingEventDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
+  /**
    * Filter which MarketingEvent to delete.
    */
   where: Prisma.MarketingEventWhereUniqueInput
@@ -1487,6 +1687,30 @@ export type MarketingEventDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * MarketingEvent.marketing_event_registrations
+ */
+export type MarketingEvent$marketing_event_registrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MarketingEventRegistration
+   */
+  select?: Prisma.MarketingEventRegistrationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MarketingEventRegistration
+   */
+  omit?: Prisma.MarketingEventRegistrationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventRegistrationInclude<ExtArgs> | null
+  where?: Prisma.MarketingEventRegistrationWhereInput
+  orderBy?: Prisma.MarketingEventRegistrationOrderByWithRelationInput | Prisma.MarketingEventRegistrationOrderByWithRelationInput[]
+  cursor?: Prisma.MarketingEventRegistrationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MarketingEventRegistrationScalarFieldEnum | Prisma.MarketingEventRegistrationScalarFieldEnum[]
+}
+
+/**
  * MarketingEvent without action
  */
 export type MarketingEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1498,4 +1722,8 @@ export type MarketingEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the MarketingEvent
    */
   omit?: Prisma.MarketingEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingEventInclude<ExtArgs> | null
 }

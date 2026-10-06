@@ -127,6 +127,10 @@ export const liveRepository = {
   },
 
   async deleteSession(tx: TenantTx, sessionId: string): Promise<boolean> {
+    // Polls outlive the session they ran in (the foreign key restricts).
+    await tx.$executeRaw`
+      update polls set live_session_id = null, updated_at = now() where live_session_id = ${sessionId}::uuid
+    `;
     const count = await tx.$executeRaw`delete from live_sessions where id = ${sessionId}::uuid`;
     return count > 0;
   },

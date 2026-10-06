@@ -238,6 +238,9 @@ export type DiagnosticSessionWhereInput = {
   completed_at?: Prisma.DateTimeNullableFilter<"DiagnosticSession"> | Date | string | null
   merge_json?: Prisma.JsonNullableFilter<"DiagnosticSession">
   metadata_json?: Prisma.JsonNullableFilter<"DiagnosticSession">
+  assessment?: Prisma.XOR<Prisma.AssessmentNullableScalarRelationFilter, Prisma.AssessmentWhereInput> | null
+  attempt?: Prisma.XOR<Prisma.AttemptNullableScalarRelationFilter, Prisma.AttemptWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }
 
 export type DiagnosticSessionOrderByWithRelationInput = {
@@ -254,6 +257,9 @@ export type DiagnosticSessionOrderByWithRelationInput = {
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   merge_json?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata_json?: Prisma.SortOrderInput | Prisma.SortOrder
+  assessment?: Prisma.AssessmentOrderByWithRelationInput
+  attempt?: Prisma.AttemptOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type DiagnosticSessionWhereUniqueInput = Prisma.AtLeast<{
@@ -273,6 +279,9 @@ export type DiagnosticSessionWhereUniqueInput = Prisma.AtLeast<{
   completed_at?: Prisma.DateTimeNullableFilter<"DiagnosticSession"> | Date | string | null
   merge_json?: Prisma.JsonNullableFilter<"DiagnosticSession">
   metadata_json?: Prisma.JsonNullableFilter<"DiagnosticSession">
+  assessment?: Prisma.XOR<Prisma.AssessmentNullableScalarRelationFilter, Prisma.AssessmentWhereInput> | null
+  attempt?: Prisma.XOR<Prisma.AttemptNullableScalarRelationFilter, Prisma.AttemptWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
 }, "id">
 
 export type DiagnosticSessionOrderByWithAggregationInput = {
@@ -315,11 +324,7 @@ export type DiagnosticSessionScalarWhereWithAggregatesInput = {
 
 export type DiagnosticSessionCreateInput = {
   id: string
-  tenant_id: string
   anonymous_id?: string | null
-  membership_id?: string | null
-  assessment_id?: string | null
-  attempt_id?: string | null
   status?: string
   ip_hash?: string | null
   user_agent_hash?: string | null
@@ -327,6 +332,9 @@ export type DiagnosticSessionCreateInput = {
   completed_at?: Date | string | null
   merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  assessment?: Prisma.AssessmentCreateNestedOneWithoutDiagnostic_sessionsInput
+  attempt?: Prisma.AttemptCreateNestedOneWithoutDiagnostic_sessionsInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutDiagnostic_sessionsInput
 }
 
 export type DiagnosticSessionUncheckedCreateInput = {
@@ -347,11 +355,7 @@ export type DiagnosticSessionUncheckedCreateInput = {
 
 export type DiagnosticSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -359,6 +363,9 @@ export type DiagnosticSessionUpdateInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  assessment?: Prisma.AssessmentUpdateOneWithoutDiagnostic_sessionsNestedInput
+  attempt?: Prisma.AttemptUpdateOneWithoutDiagnostic_sessionsNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutDiagnostic_sessionsNestedInput
 }
 
 export type DiagnosticSessionUncheckedUpdateInput = {
@@ -395,11 +402,7 @@ export type DiagnosticSessionCreateManyInput = {
 
 export type DiagnosticSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -423,6 +426,16 @@ export type DiagnosticSessionUncheckedUpdateManyInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionListRelationFilter = {
+  every?: Prisma.DiagnosticSessionWhereInput
+  some?: Prisma.DiagnosticSessionWhereInput
+  none?: Prisma.DiagnosticSessionWhereInput
+}
+
+export type DiagnosticSessionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type DiagnosticSessionCountOrderByAggregateInput = {
@@ -469,6 +482,481 @@ export type DiagnosticSessionMinOrderByAggregateInput = {
   completed_at?: Prisma.SortOrder
 }
 
+export type DiagnosticSessionCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput> | Prisma.DiagnosticSessionCreateWithoutMembershipInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput | Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyMembershipInputEnvelope
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+}
+
+export type DiagnosticSessionUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput> | Prisma.DiagnosticSessionCreateWithoutMembershipInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput | Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyMembershipInputEnvelope
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+}
+
+export type DiagnosticSessionUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput> | Prisma.DiagnosticSessionCreateWithoutMembershipInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput | Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyMembershipInputEnvelope
+  set?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  disconnect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  delete?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  update?: Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.DiagnosticSessionUpdateManyWithWhereWithoutMembershipInput | Prisma.DiagnosticSessionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+}
+
+export type DiagnosticSessionUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput> | Prisma.DiagnosticSessionCreateWithoutMembershipInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput | Prisma.DiagnosticSessionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyMembershipInputEnvelope
+  set?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  disconnect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  delete?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  update?: Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.DiagnosticSessionUpdateManyWithWhereWithoutMembershipInput | Prisma.DiagnosticSessionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+}
+
+export type DiagnosticSessionCreateNestedManyWithoutAssessmentInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput> | Prisma.DiagnosticSessionCreateWithoutAssessmentInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAssessmentInputEnvelope
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+}
+
+export type DiagnosticSessionUncheckedCreateNestedManyWithoutAssessmentInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput> | Prisma.DiagnosticSessionCreateWithoutAssessmentInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAssessmentInputEnvelope
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+}
+
+export type DiagnosticSessionUpdateManyWithoutAssessmentNestedInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput> | Prisma.DiagnosticSessionCreateWithoutAssessmentInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput[]
+  upsert?: Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAssessmentInput | Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAssessmentInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAssessmentInputEnvelope
+  set?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  disconnect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  delete?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  update?: Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAssessmentInput | Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAssessmentInput[]
+  updateMany?: Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAssessmentInput | Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAssessmentInput[]
+  deleteMany?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+}
+
+export type DiagnosticSessionUncheckedUpdateManyWithoutAssessmentNestedInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput> | Prisma.DiagnosticSessionCreateWithoutAssessmentInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAssessmentInput[]
+  upsert?: Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAssessmentInput | Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAssessmentInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAssessmentInputEnvelope
+  set?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  disconnect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  delete?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  update?: Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAssessmentInput | Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAssessmentInput[]
+  updateMany?: Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAssessmentInput | Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAssessmentInput[]
+  deleteMany?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+}
+
+export type DiagnosticSessionCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput> | Prisma.DiagnosticSessionCreateWithoutAttemptInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAttemptInputEnvelope
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+}
+
+export type DiagnosticSessionUncheckedCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput> | Prisma.DiagnosticSessionCreateWithoutAttemptInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAttemptInputEnvelope
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+}
+
+export type DiagnosticSessionUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput> | Prisma.DiagnosticSessionCreateWithoutAttemptInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAttemptInput | Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAttemptInputEnvelope
+  set?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  disconnect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  delete?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  update?: Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAttemptInput | Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAttemptInput | Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+}
+
+export type DiagnosticSessionUncheckedUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput> | Prisma.DiagnosticSessionCreateWithoutAttemptInput[] | Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput | Prisma.DiagnosticSessionCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAttemptInput | Prisma.DiagnosticSessionUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.DiagnosticSessionCreateManyAttemptInputEnvelope
+  set?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  disconnect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  delete?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  connect?: Prisma.DiagnosticSessionWhereUniqueInput | Prisma.DiagnosticSessionWhereUniqueInput[]
+  update?: Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAttemptInput | Prisma.DiagnosticSessionUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAttemptInput | Prisma.DiagnosticSessionUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+}
+
+export type DiagnosticSessionCreateWithoutMembershipInput = {
+  id: string
+  anonymous_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  assessment?: Prisma.AssessmentCreateNestedOneWithoutDiagnostic_sessionsInput
+  attempt?: Prisma.AttemptCreateNestedOneWithoutDiagnostic_sessionsInput
+}
+
+export type DiagnosticSessionUncheckedCreateWithoutMembershipInput = {
+  id: string
+  anonymous_id?: string | null
+  assessment_id?: string | null
+  attempt_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput>
+}
+
+export type DiagnosticSessionCreateManyMembershipInputEnvelope = {
+  data: Prisma.DiagnosticSessionCreateManyMembershipInput | Prisma.DiagnosticSessionCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type DiagnosticSessionUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.DiagnosticSessionUpdateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedCreateWithoutMembershipInput>
+}
+
+export type DiagnosticSessionUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.DiagnosticSessionUpdateWithoutMembershipInput, Prisma.DiagnosticSessionUncheckedUpdateWithoutMembershipInput>
+}
+
+export type DiagnosticSessionUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.DiagnosticSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.DiagnosticSessionUpdateManyMutationInput, Prisma.DiagnosticSessionUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type DiagnosticSessionScalarWhereInput = {
+  AND?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+  OR?: Prisma.DiagnosticSessionScalarWhereInput[]
+  NOT?: Prisma.DiagnosticSessionScalarWhereInput | Prisma.DiagnosticSessionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"DiagnosticSession"> | string
+  tenant_id?: Prisma.UuidFilter<"DiagnosticSession"> | string
+  anonymous_id?: Prisma.StringNullableFilter<"DiagnosticSession"> | string | null
+  membership_id?: Prisma.UuidNullableFilter<"DiagnosticSession"> | string | null
+  assessment_id?: Prisma.UuidNullableFilter<"DiagnosticSession"> | string | null
+  attempt_id?: Prisma.UuidNullableFilter<"DiagnosticSession"> | string | null
+  status?: Prisma.StringFilter<"DiagnosticSession"> | string
+  ip_hash?: Prisma.StringNullableFilter<"DiagnosticSession"> | string | null
+  user_agent_hash?: Prisma.StringNullableFilter<"DiagnosticSession"> | string | null
+  started_at?: Prisma.DateTimeFilter<"DiagnosticSession"> | Date | string
+  completed_at?: Prisma.DateTimeNullableFilter<"DiagnosticSession"> | Date | string | null
+  merge_json?: Prisma.JsonNullableFilter<"DiagnosticSession">
+  metadata_json?: Prisma.JsonNullableFilter<"DiagnosticSession">
+}
+
+export type DiagnosticSessionCreateWithoutAssessmentInput = {
+  id: string
+  anonymous_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  attempt?: Prisma.AttemptCreateNestedOneWithoutDiagnostic_sessionsInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutDiagnostic_sessionsInput
+}
+
+export type DiagnosticSessionUncheckedCreateWithoutAssessmentInput = {
+  id: string
+  anonymous_id?: string | null
+  membership_id?: string | null
+  attempt_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionCreateOrConnectWithoutAssessmentInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput>
+}
+
+export type DiagnosticSessionCreateManyAssessmentInputEnvelope = {
+  data: Prisma.DiagnosticSessionCreateManyAssessmentInput | Prisma.DiagnosticSessionCreateManyAssessmentInput[]
+  skipDuplicates?: boolean
+}
+
+export type DiagnosticSessionUpsertWithWhereUniqueWithoutAssessmentInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.DiagnosticSessionUpdateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedUpdateWithoutAssessmentInput>
+  create: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAssessmentInput>
+}
+
+export type DiagnosticSessionUpdateWithWhereUniqueWithoutAssessmentInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.DiagnosticSessionUpdateWithoutAssessmentInput, Prisma.DiagnosticSessionUncheckedUpdateWithoutAssessmentInput>
+}
+
+export type DiagnosticSessionUpdateManyWithWhereWithoutAssessmentInput = {
+  where: Prisma.DiagnosticSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.DiagnosticSessionUpdateManyMutationInput, Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAssessmentInput>
+}
+
+export type DiagnosticSessionCreateWithoutAttemptInput = {
+  id: string
+  anonymous_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  assessment?: Prisma.AssessmentCreateNestedOneWithoutDiagnostic_sessionsInput
+  membership?: Prisma.MembershipCreateNestedOneWithoutDiagnostic_sessionsInput
+}
+
+export type DiagnosticSessionUncheckedCreateWithoutAttemptInput = {
+  id: string
+  anonymous_id?: string | null
+  membership_id?: string | null
+  assessment_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionCreateOrConnectWithoutAttemptInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput>
+}
+
+export type DiagnosticSessionCreateManyAttemptInputEnvelope = {
+  data: Prisma.DiagnosticSessionCreateManyAttemptInput | Prisma.DiagnosticSessionCreateManyAttemptInput[]
+  skipDuplicates?: boolean
+}
+
+export type DiagnosticSessionUpsertWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.DiagnosticSessionUpdateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedUpdateWithoutAttemptInput>
+  create: Prisma.XOR<Prisma.DiagnosticSessionCreateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedCreateWithoutAttemptInput>
+}
+
+export type DiagnosticSessionUpdateWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.DiagnosticSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.DiagnosticSessionUpdateWithoutAttemptInput, Prisma.DiagnosticSessionUncheckedUpdateWithoutAttemptInput>
+}
+
+export type DiagnosticSessionUpdateManyWithWhereWithoutAttemptInput = {
+  where: Prisma.DiagnosticSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.DiagnosticSessionUpdateManyMutationInput, Prisma.DiagnosticSessionUncheckedUpdateManyWithoutAttemptInput>
+}
+
+export type DiagnosticSessionCreateManyMembershipInput = {
+  id: string
+  anonymous_id?: string | null
+  assessment_id?: string | null
+  attempt_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  assessment?: Prisma.AssessmentUpdateOneWithoutDiagnostic_sessionsNestedInput
+  attempt?: Prisma.AttemptUpdateOneWithoutDiagnostic_sessionsNestedInput
+}
+
+export type DiagnosticSessionUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionCreateManyAssessmentInput = {
+  id: string
+  anonymous_id?: string | null
+  membership_id?: string | null
+  attempt_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionUpdateWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  attempt?: Prisma.AttemptUpdateOneWithoutDiagnostic_sessionsNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutDiagnostic_sessionsNestedInput
+}
+
+export type DiagnosticSessionUncheckedUpdateWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionUncheckedUpdateManyWithoutAssessmentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attempt_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionCreateManyAttemptInput = {
+  id: string
+  anonymous_id?: string | null
+  membership_id?: string | null
+  assessment_id?: string | null
+  status?: string
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  assessment?: Prisma.AssessmentUpdateOneWithoutDiagnostic_sessionsNestedInput
+  membership?: Prisma.MembershipUpdateOneWithoutDiagnostic_sessionsNestedInput
+}
+
+export type DiagnosticSessionUncheckedUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
+export type DiagnosticSessionUncheckedUpdateManyWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  anonymous_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assessment_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  merge_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+}
+
 
 
 export type DiagnosticSessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -485,6 +973,9 @@ export type DiagnosticSessionSelect<ExtArgs extends runtime.Types.Extensions.Int
   completed_at?: boolean
   merge_json?: boolean
   metadata_json?: boolean
+  assessment?: boolean | Prisma.DiagnosticSession$assessmentArgs<ExtArgs>
+  attempt?: boolean | Prisma.DiagnosticSession$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.DiagnosticSession$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["diagnosticSession"]>
 
 export type DiagnosticSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -501,6 +992,9 @@ export type DiagnosticSessionSelectCreateManyAndReturn<ExtArgs extends runtime.T
   completed_at?: boolean
   merge_json?: boolean
   metadata_json?: boolean
+  assessment?: boolean | Prisma.DiagnosticSession$assessmentArgs<ExtArgs>
+  attempt?: boolean | Prisma.DiagnosticSession$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.DiagnosticSession$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["diagnosticSession"]>
 
 export type DiagnosticSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -517,6 +1011,9 @@ export type DiagnosticSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   completed_at?: boolean
   merge_json?: boolean
   metadata_json?: boolean
+  assessment?: boolean | Prisma.DiagnosticSession$assessmentArgs<ExtArgs>
+  attempt?: boolean | Prisma.DiagnosticSession$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.DiagnosticSession$membershipArgs<ExtArgs>
 }, ExtArgs["result"]["diagnosticSession"]>
 
 export type DiagnosticSessionSelectScalar = {
@@ -536,10 +1033,29 @@ export type DiagnosticSessionSelectScalar = {
 }
 
 export type DiagnosticSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "anonymous_id" | "membership_id" | "assessment_id" | "attempt_id" | "status" | "ip_hash" | "user_agent_hash" | "started_at" | "completed_at" | "merge_json" | "metadata_json", ExtArgs["result"]["diagnosticSession"]>
+export type DiagnosticSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment?: boolean | Prisma.DiagnosticSession$assessmentArgs<ExtArgs>
+  attempt?: boolean | Prisma.DiagnosticSession$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.DiagnosticSession$membershipArgs<ExtArgs>
+}
+export type DiagnosticSessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment?: boolean | Prisma.DiagnosticSession$assessmentArgs<ExtArgs>
+  attempt?: boolean | Prisma.DiagnosticSession$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.DiagnosticSession$membershipArgs<ExtArgs>
+}
+export type DiagnosticSessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment?: boolean | Prisma.DiagnosticSession$assessmentArgs<ExtArgs>
+  attempt?: boolean | Prisma.DiagnosticSession$attemptArgs<ExtArgs>
+  membership?: boolean | Prisma.DiagnosticSession$membershipArgs<ExtArgs>
+}
 
 export type $DiagnosticSessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DiagnosticSession"
-  objects: {}
+  objects: {
+    assessment: Prisma.$AssessmentPayload<ExtArgs> | null
+    attempt: Prisma.$AttemptPayload<ExtArgs> | null
+    membership: Prisma.$MembershipPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -948,6 +1464,9 @@ readonly fields: DiagnosticSessionFieldRefs;
  */
 export interface Prisma__DiagnosticSessionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  assessment<T extends Prisma.DiagnosticSession$assessmentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DiagnosticSession$assessmentArgs<ExtArgs>>): Prisma.Prisma__AssessmentClient<runtime.Types.Result.GetResult<Prisma.$AssessmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  attempt<T extends Prisma.DiagnosticSession$attemptArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DiagnosticSession$attemptArgs<ExtArgs>>): Prisma.Prisma__AttemptClient<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.DiagnosticSession$membershipArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DiagnosticSession$membershipArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1007,6 +1526,10 @@ export type DiagnosticSessionFindUniqueArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
+  /**
    * Filter, which DiagnosticSession to fetch.
    */
   where: Prisma.DiagnosticSessionWhereUniqueInput
@@ -1025,6 +1548,10 @@ export type DiagnosticSessionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
+  /**
    * Filter, which DiagnosticSession to fetch.
    */
   where: Prisma.DiagnosticSessionWhereUniqueInput
@@ -1042,6 +1569,10 @@ export type DiagnosticSessionFindFirstArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the DiagnosticSession
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
   /**
    * Filter, which DiagnosticSession to fetch.
    */
@@ -1091,6 +1622,10 @@ export type DiagnosticSessionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
+  /**
    * Filter, which DiagnosticSession to fetch.
    */
   where?: Prisma.DiagnosticSessionWhereInput
@@ -1138,6 +1673,10 @@ export type DiagnosticSessionFindManyArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the DiagnosticSession
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
   /**
    * Filter, which DiagnosticSessions to fetch.
    */
@@ -1187,6 +1726,10 @@ export type DiagnosticSessionCreateArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
+  /**
    * The data needed to create a DiagnosticSession.
    */
   data: Prisma.XOR<Prisma.DiagnosticSessionCreateInput, Prisma.DiagnosticSessionUncheckedCreateInput>
@@ -1220,6 +1763,10 @@ export type DiagnosticSessionCreateManyAndReturnArgs<ExtArgs extends runtime.Typ
    */
   data: Prisma.DiagnosticSessionCreateManyInput | Prisma.DiagnosticSessionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1234,6 +1781,10 @@ export type DiagnosticSessionUpdateArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the DiagnosticSession
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
   /**
    * The data needed to update a DiagnosticSession.
    */
@@ -1286,6 +1837,10 @@ export type DiagnosticSessionUpdateManyAndReturnArgs<ExtArgs extends runtime.Typ
    * Limit how many DiagnosticSessions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1300,6 +1855,10 @@ export type DiagnosticSessionUpsertArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the DiagnosticSession
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
   /**
    * The filter to search for the DiagnosticSession to update in case it exists.
    */
@@ -1327,6 +1886,10 @@ export type DiagnosticSessionDeleteArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
+  /**
    * Filter which DiagnosticSession to delete.
    */
   where: Prisma.DiagnosticSessionWhereUniqueInput
@@ -1347,6 +1910,63 @@ export type DiagnosticSessionDeleteManyArgs<ExtArgs extends runtime.Types.Extens
 }
 
 /**
+ * DiagnosticSession.assessment
+ */
+export type DiagnosticSession$assessmentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Assessment
+   */
+  select?: Prisma.AssessmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Assessment
+   */
+  omit?: Prisma.AssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  where?: Prisma.AssessmentWhereInput
+}
+
+/**
+ * DiagnosticSession.attempt
+ */
+export type DiagnosticSession$attemptArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attempt
+   */
+  select?: Prisma.AttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attempt
+   */
+  omit?: Prisma.AttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptInclude<ExtArgs> | null
+  where?: Prisma.AttemptWhereInput
+}
+
+/**
+ * DiagnosticSession.membership
+ */
+export type DiagnosticSession$membershipArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Membership
+   */
+  select?: Prisma.MembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Membership
+   */
+  omit?: Prisma.MembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipInclude<ExtArgs> | null
+  where?: Prisma.MembershipWhereInput
+}
+
+/**
  * DiagnosticSession without action
  */
 export type DiagnosticSessionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1358,4 +1978,8 @@ export type DiagnosticSessionDefaultArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the DiagnosticSession
    */
   omit?: Prisma.DiagnosticSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DiagnosticSessionInclude<ExtArgs> | null
 }

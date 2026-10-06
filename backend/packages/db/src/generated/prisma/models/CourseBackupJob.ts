@@ -262,6 +262,7 @@ export type CourseBackupJobWhereInput = {
   expires_at?: Prisma.DateTimeNullableFilter<"CourseBackupJob"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"CourseBackupJob"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CourseBackupJob"> | Date | string
+  course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
 }
 
 export type CourseBackupJobOrderByWithRelationInput = {
@@ -281,6 +282,7 @@ export type CourseBackupJobOrderByWithRelationInput = {
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  course?: Prisma.CourseOrderByWithRelationInput
 }
 
 export type CourseBackupJobWhereUniqueInput = Prisma.AtLeast<{
@@ -303,6 +305,7 @@ export type CourseBackupJobWhereUniqueInput = Prisma.AtLeast<{
   expires_at?: Prisma.DateTimeNullableFilter<"CourseBackupJob"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"CourseBackupJob"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CourseBackupJob"> | Date | string
+  course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
 }, "id">
 
 export type CourseBackupJobOrderByWithAggregationInput = {
@@ -351,8 +354,6 @@ export type CourseBackupJobScalarWhereWithAggregatesInput = {
 
 export type CourseBackupJobCreateInput = {
   id: string
-  tenant_id: string
-  course_id: string
   requested_by_membership_id: string
   course_title: string
   scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -366,6 +367,7 @@ export type CourseBackupJobCreateInput = {
   expires_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  course: Prisma.CourseCreateNestedOneWithoutCourse_backup_jobsInput
 }
 
 export type CourseBackupJobUncheckedCreateInput = {
@@ -389,8 +391,6 @@ export type CourseBackupJobUncheckedCreateInput = {
 
 export type CourseBackupJobUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   course_title?: Prisma.StringFieldUpdateOperationsInput | string
   scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -404,6 +404,7 @@ export type CourseBackupJobUpdateInput = {
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  course?: Prisma.CourseUpdateOneRequiredWithoutCourse_backup_jobsNestedInput
 }
 
 export type CourseBackupJobUncheckedUpdateInput = {
@@ -446,8 +447,6 @@ export type CourseBackupJobCreateManyInput = {
 
 export type CourseBackupJobUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   course_title?: Prisma.StringFieldUpdateOperationsInput | string
   scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -480,6 +479,16 @@ export type CourseBackupJobUncheckedUpdateManyInput = {
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CourseBackupJobListRelationFilter = {
+  every?: Prisma.CourseBackupJobWhereInput
+  some?: Prisma.CourseBackupJobWhereInput
+  none?: Prisma.CourseBackupJobWhereInput
+}
+
+export type CourseBackupJobOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CourseBackupJobCountOrderByAggregateInput = {
@@ -535,6 +544,198 @@ export type CourseBackupJobMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type CourseBackupJobCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.CourseBackupJobCreateWithoutCourseInput, Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput> | Prisma.CourseBackupJobCreateWithoutCourseInput[] | Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput | Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.CourseBackupJobCreateManyCourseInputEnvelope
+  connect?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+}
+
+export type CourseBackupJobUncheckedCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.CourseBackupJobCreateWithoutCourseInput, Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput> | Prisma.CourseBackupJobCreateWithoutCourseInput[] | Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput | Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.CourseBackupJobCreateManyCourseInputEnvelope
+  connect?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+}
+
+export type CourseBackupJobUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseBackupJobCreateWithoutCourseInput, Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput> | Prisma.CourseBackupJobCreateWithoutCourseInput[] | Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput | Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.CourseBackupJobUpsertWithWhereUniqueWithoutCourseInput | Prisma.CourseBackupJobUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.CourseBackupJobCreateManyCourseInputEnvelope
+  set?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  disconnect?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  delete?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  connect?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  update?: Prisma.CourseBackupJobUpdateWithWhereUniqueWithoutCourseInput | Prisma.CourseBackupJobUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.CourseBackupJobUpdateManyWithWhereWithoutCourseInput | Prisma.CourseBackupJobUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.CourseBackupJobScalarWhereInput | Prisma.CourseBackupJobScalarWhereInput[]
+}
+
+export type CourseBackupJobUncheckedUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseBackupJobCreateWithoutCourseInput, Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput> | Prisma.CourseBackupJobCreateWithoutCourseInput[] | Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput | Prisma.CourseBackupJobCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.CourseBackupJobUpsertWithWhereUniqueWithoutCourseInput | Prisma.CourseBackupJobUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.CourseBackupJobCreateManyCourseInputEnvelope
+  set?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  disconnect?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  delete?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  connect?: Prisma.CourseBackupJobWhereUniqueInput | Prisma.CourseBackupJobWhereUniqueInput[]
+  update?: Prisma.CourseBackupJobUpdateWithWhereUniqueWithoutCourseInput | Prisma.CourseBackupJobUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.CourseBackupJobUpdateManyWithWhereWithoutCourseInput | Prisma.CourseBackupJobUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.CourseBackupJobScalarWhereInput | Prisma.CourseBackupJobScalarWhereInput[]
+}
+
+export type CourseBackupJobCreateWithoutCourseInput = {
+  id: string
+  requested_by_membership_id: string
+  course_title: string
+  scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.JobStatus
+  r2_object_key?: string | null
+  download_token?: string | null
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  otp_verified_at?: Date | string | null
+  started_at?: Date | string | null
+  completed_at?: Date | string | null
+  expires_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CourseBackupJobUncheckedCreateWithoutCourseInput = {
+  id: string
+  requested_by_membership_id: string
+  course_title: string
+  scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.JobStatus
+  r2_object_key?: string | null
+  download_token?: string | null
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  otp_verified_at?: Date | string | null
+  started_at?: Date | string | null
+  completed_at?: Date | string | null
+  expires_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CourseBackupJobCreateOrConnectWithoutCourseInput = {
+  where: Prisma.CourseBackupJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseBackupJobCreateWithoutCourseInput, Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput>
+}
+
+export type CourseBackupJobCreateManyCourseInputEnvelope = {
+  data: Prisma.CourseBackupJobCreateManyCourseInput | Prisma.CourseBackupJobCreateManyCourseInput[]
+  skipDuplicates?: boolean
+}
+
+export type CourseBackupJobUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.CourseBackupJobWhereUniqueInput
+  update: Prisma.XOR<Prisma.CourseBackupJobUpdateWithoutCourseInput, Prisma.CourseBackupJobUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.CourseBackupJobCreateWithoutCourseInput, Prisma.CourseBackupJobUncheckedCreateWithoutCourseInput>
+}
+
+export type CourseBackupJobUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.CourseBackupJobWhereUniqueInput
+  data: Prisma.XOR<Prisma.CourseBackupJobUpdateWithoutCourseInput, Prisma.CourseBackupJobUncheckedUpdateWithoutCourseInput>
+}
+
+export type CourseBackupJobUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.CourseBackupJobScalarWhereInput
+  data: Prisma.XOR<Prisma.CourseBackupJobUpdateManyMutationInput, Prisma.CourseBackupJobUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type CourseBackupJobScalarWhereInput = {
+  AND?: Prisma.CourseBackupJobScalarWhereInput | Prisma.CourseBackupJobScalarWhereInput[]
+  OR?: Prisma.CourseBackupJobScalarWhereInput[]
+  NOT?: Prisma.CourseBackupJobScalarWhereInput | Prisma.CourseBackupJobScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CourseBackupJob"> | string
+  tenant_id?: Prisma.UuidFilter<"CourseBackupJob"> | string
+  course_id?: Prisma.UuidFilter<"CourseBackupJob"> | string
+  requested_by_membership_id?: Prisma.UuidFilter<"CourseBackupJob"> | string
+  course_title?: Prisma.StringFilter<"CourseBackupJob"> | string
+  scope_json?: Prisma.JsonNullableFilter<"CourseBackupJob">
+  status?: Prisma.EnumJobStatusFilter<"CourseBackupJob"> | $Enums.JobStatus
+  r2_object_key?: Prisma.StringNullableFilter<"CourseBackupJob"> | string | null
+  download_token?: Prisma.StringNullableFilter<"CourseBackupJob"> | string | null
+  error_json?: Prisma.JsonNullableFilter<"CourseBackupJob">
+  otp_verified_at?: Prisma.DateTimeNullableFilter<"CourseBackupJob"> | Date | string | null
+  started_at?: Prisma.DateTimeNullableFilter<"CourseBackupJob"> | Date | string | null
+  completed_at?: Prisma.DateTimeNullableFilter<"CourseBackupJob"> | Date | string | null
+  expires_at?: Prisma.DateTimeNullableFilter<"CourseBackupJob"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"CourseBackupJob"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"CourseBackupJob"> | Date | string
+}
+
+export type CourseBackupJobCreateManyCourseInput = {
+  id: string
+  requested_by_membership_id: string
+  course_title: string
+  scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.JobStatus
+  r2_object_key?: string | null
+  download_token?: string | null
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  otp_verified_at?: Date | string | null
+  started_at?: Date | string | null
+  completed_at?: Date | string | null
+  expires_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CourseBackupJobUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_title?: Prisma.StringFieldUpdateOperationsInput | string
+  scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  download_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  otp_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CourseBackupJobUncheckedUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_title?: Prisma.StringFieldUpdateOperationsInput | string
+  scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  download_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  otp_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CourseBackupJobUncheckedUpdateManyWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  requested_by_membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_title?: Prisma.StringFieldUpdateOperationsInput | string
+  scope_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  download_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  error_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  otp_verified_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type CourseBackupJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -554,6 +755,7 @@ export type CourseBackupJobSelect<ExtArgs extends runtime.Types.Extensions.Inter
   expires_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["courseBackupJob"]>
 
 export type CourseBackupJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -573,6 +775,7 @@ export type CourseBackupJobSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   expires_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["courseBackupJob"]>
 
 export type CourseBackupJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -592,6 +795,7 @@ export type CourseBackupJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   expires_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["courseBackupJob"]>
 
 export type CourseBackupJobSelectScalar = {
@@ -614,10 +818,21 @@ export type CourseBackupJobSelectScalar = {
 }
 
 export type CourseBackupJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "course_id" | "requested_by_membership_id" | "course_title" | "scope_json" | "status" | "r2_object_key" | "download_token" | "error_json" | "otp_verified_at" | "started_at" | "completed_at" | "expires_at" | "created_at" | "updated_at", ExtArgs["result"]["courseBackupJob"]>
+export type CourseBackupJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
+export type CourseBackupJobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
+export type CourseBackupJobIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
 
 export type $CourseBackupJobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CourseBackupJob"
-  objects: {}
+  objects: {
+    course: Prisma.$CoursePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1029,6 +1244,7 @@ readonly fields: CourseBackupJobFieldRefs;
  */
 export interface Prisma__CourseBackupJobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  course<T extends Prisma.CourseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1091,6 +1307,10 @@ export type CourseBackupJobFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
+  /**
    * Filter, which CourseBackupJob to fetch.
    */
   where: Prisma.CourseBackupJobWhereUniqueInput
@@ -1109,6 +1329,10 @@ export type CourseBackupJobFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
+  /**
    * Filter, which CourseBackupJob to fetch.
    */
   where: Prisma.CourseBackupJobWhereUniqueInput
@@ -1126,6 +1350,10 @@ export type CourseBackupJobFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the CourseBackupJob
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
   /**
    * Filter, which CourseBackupJob to fetch.
    */
@@ -1175,6 +1403,10 @@ export type CourseBackupJobFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
+  /**
    * Filter, which CourseBackupJob to fetch.
    */
   where?: Prisma.CourseBackupJobWhereInput
@@ -1222,6 +1454,10 @@ export type CourseBackupJobFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the CourseBackupJob
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
   /**
    * Filter, which CourseBackupJobs to fetch.
    */
@@ -1271,6 +1507,10 @@ export type CourseBackupJobCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
+  /**
    * The data needed to create a CourseBackupJob.
    */
   data: Prisma.XOR<Prisma.CourseBackupJobCreateInput, Prisma.CourseBackupJobUncheckedCreateInput>
@@ -1304,6 +1544,10 @@ export type CourseBackupJobCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.CourseBackupJobCreateManyInput | Prisma.CourseBackupJobCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1318,6 +1562,10 @@ export type CourseBackupJobUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the CourseBackupJob
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
   /**
    * The data needed to update a CourseBackupJob.
    */
@@ -1370,6 +1618,10 @@ export type CourseBackupJobUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many CourseBackupJobs to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1384,6 +1636,10 @@ export type CourseBackupJobUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the CourseBackupJob
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
   /**
    * The filter to search for the CourseBackupJob to update in case it exists.
    */
@@ -1410,6 +1666,10 @@ export type CourseBackupJobDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the CourseBackupJob
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
   /**
    * Filter which CourseBackupJob to delete.
    */
@@ -1442,4 +1702,8 @@ export type CourseBackupJobDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the CourseBackupJob
    */
   omit?: Prisma.CourseBackupJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseBackupJobInclude<ExtArgs> | null
 }

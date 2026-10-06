@@ -218,6 +218,9 @@ export type PracticeSessionWhereInput = {
   completed_at?: Prisma.DateTimeNullableFilter<"PracticeSession"> | Date | string | null
   summary_json?: Prisma.JsonNullableFilter<"PracticeSession">
   idempotency_key?: Prisma.StringNullableFilter<"PracticeSession"> | string | null
+  practice_responses?: Prisma.PracticeResponseListRelationFilter
+  collection?: Prisma.XOR<Prisma.ItemCollectionNullableScalarRelationFilter, Prisma.ItemCollectionWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type PracticeSessionOrderByWithRelationInput = {
@@ -231,10 +234,14 @@ export type PracticeSessionOrderByWithRelationInput = {
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   summary_json?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotency_key?: Prisma.SortOrderInput | Prisma.SortOrder
+  practice_responses?: Prisma.PracticeResponseOrderByRelationAggregateInput
+  collection?: Prisma.ItemCollectionOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type PracticeSessionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.PracticeSessionTenant_idIdCompoundUniqueInput
   tenant_id_idempotency_key?: Prisma.PracticeSessionTenant_idIdempotency_keyCompoundUniqueInput
   AND?: Prisma.PracticeSessionWhereInput | Prisma.PracticeSessionWhereInput[]
   OR?: Prisma.PracticeSessionWhereInput[]
@@ -248,7 +255,10 @@ export type PracticeSessionWhereUniqueInput = Prisma.AtLeast<{
   completed_at?: Prisma.DateTimeNullableFilter<"PracticeSession"> | Date | string | null
   summary_json?: Prisma.JsonNullableFilter<"PracticeSession">
   idempotency_key?: Prisma.StringNullableFilter<"PracticeSession"> | string | null
-}, "id" | "tenant_id_idempotency_key">
+  practice_responses?: Prisma.PracticeResponseListRelationFilter
+  collection?: Prisma.XOR<Prisma.ItemCollectionNullableScalarRelationFilter, Prisma.ItemCollectionWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+}, "id" | "tenant_id_id" | "tenant_id_idempotency_key">
 
 export type PracticeSessionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -284,15 +294,15 @@ export type PracticeSessionScalarWhereWithAggregatesInput = {
 
 export type PracticeSessionCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
-  collection_id?: string | null
   session_type: string
   status?: string
   started_at?: Date | string
   completed_at?: Date | string | null
   summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   idempotency_key?: string | null
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutPractice_sessionInput
+  collection?: Prisma.ItemCollectionCreateNestedOneWithoutPractice_sessionsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutPractice_sessionsInput
 }
 
 export type PracticeSessionUncheckedCreateInput = {
@@ -306,19 +316,20 @@ export type PracticeSessionUncheckedCreateInput = {
   completed_at?: Date | string | null
   summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   idempotency_key?: string | null
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutPractice_sessionInput
 }
 
 export type PracticeSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  collection_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   session_type?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutPractice_sessionNestedInput
+  collection?: Prisma.ItemCollectionUpdateOneWithoutPractice_sessionsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPractice_sessionsNestedInput
 }
 
 export type PracticeSessionUncheckedUpdateInput = {
@@ -332,6 +343,7 @@ export type PracticeSessionUncheckedUpdateInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutPractice_sessionNestedInput
 }
 
 export type PracticeSessionCreateManyInput = {
@@ -349,9 +361,6 @@ export type PracticeSessionCreateManyInput = {
 
 export type PracticeSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  collection_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   session_type?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,6 +380,21 @@ export type PracticeSessionUncheckedUpdateManyInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type PracticeSessionListRelationFilter = {
+  every?: Prisma.PracticeSessionWhereInput
+  some?: Prisma.PracticeSessionWhereInput
+  none?: Prisma.PracticeSessionWhereInput
+}
+
+export type PracticeSessionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type PracticeSessionTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type PracticeSessionTenant_idIdempotency_keyCompoundUniqueInput = {
@@ -415,6 +439,412 @@ export type PracticeSessionMinOrderByAggregateInput = {
   idempotency_key?: Prisma.SortOrder
 }
 
+export type PracticeSessionScalarRelationFilter = {
+  is?: Prisma.PracticeSessionWhereInput
+  isNot?: Prisma.PracticeSessionWhereInput
+}
+
+export type PracticeSessionCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutMembershipInput, Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput> | Prisma.PracticeSessionCreateWithoutMembershipInput[] | Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput | Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PracticeSessionCreateManyMembershipInputEnvelope
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+}
+
+export type PracticeSessionUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutMembershipInput, Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput> | Prisma.PracticeSessionCreateWithoutMembershipInput[] | Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput | Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PracticeSessionCreateManyMembershipInputEnvelope
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+}
+
+export type PracticeSessionUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutMembershipInput, Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput> | Prisma.PracticeSessionCreateWithoutMembershipInput[] | Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput | Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PracticeSessionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PracticeSessionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PracticeSessionCreateManyMembershipInputEnvelope
+  set?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  disconnect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  delete?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  update?: Prisma.PracticeSessionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PracticeSessionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PracticeSessionUpdateManyWithWhereWithoutMembershipInput | Prisma.PracticeSessionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PracticeSessionScalarWhereInput | Prisma.PracticeSessionScalarWhereInput[]
+}
+
+export type PracticeSessionUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutMembershipInput, Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput> | Prisma.PracticeSessionCreateWithoutMembershipInput[] | Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput | Prisma.PracticeSessionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PracticeSessionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PracticeSessionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PracticeSessionCreateManyMembershipInputEnvelope
+  set?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  disconnect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  delete?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  update?: Prisma.PracticeSessionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PracticeSessionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PracticeSessionUpdateManyWithWhereWithoutMembershipInput | Prisma.PracticeSessionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PracticeSessionScalarWhereInput | Prisma.PracticeSessionScalarWhereInput[]
+}
+
+export type PracticeSessionCreateNestedManyWithoutCollectionInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutCollectionInput, Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput> | Prisma.PracticeSessionCreateWithoutCollectionInput[] | Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput | Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput[]
+  createMany?: Prisma.PracticeSessionCreateManyCollectionInputEnvelope
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+}
+
+export type PracticeSessionUncheckedCreateNestedManyWithoutCollectionInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutCollectionInput, Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput> | Prisma.PracticeSessionCreateWithoutCollectionInput[] | Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput | Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput[]
+  createMany?: Prisma.PracticeSessionCreateManyCollectionInputEnvelope
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+}
+
+export type PracticeSessionUpdateManyWithoutCollectionNestedInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutCollectionInput, Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput> | Prisma.PracticeSessionCreateWithoutCollectionInput[] | Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput | Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput[]
+  upsert?: Prisma.PracticeSessionUpsertWithWhereUniqueWithoutCollectionInput | Prisma.PracticeSessionUpsertWithWhereUniqueWithoutCollectionInput[]
+  createMany?: Prisma.PracticeSessionCreateManyCollectionInputEnvelope
+  set?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  disconnect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  delete?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  update?: Prisma.PracticeSessionUpdateWithWhereUniqueWithoutCollectionInput | Prisma.PracticeSessionUpdateWithWhereUniqueWithoutCollectionInput[]
+  updateMany?: Prisma.PracticeSessionUpdateManyWithWhereWithoutCollectionInput | Prisma.PracticeSessionUpdateManyWithWhereWithoutCollectionInput[]
+  deleteMany?: Prisma.PracticeSessionScalarWhereInput | Prisma.PracticeSessionScalarWhereInput[]
+}
+
+export type PracticeSessionUncheckedUpdateManyWithoutCollectionNestedInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutCollectionInput, Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput> | Prisma.PracticeSessionCreateWithoutCollectionInput[] | Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput[]
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput | Prisma.PracticeSessionCreateOrConnectWithoutCollectionInput[]
+  upsert?: Prisma.PracticeSessionUpsertWithWhereUniqueWithoutCollectionInput | Prisma.PracticeSessionUpsertWithWhereUniqueWithoutCollectionInput[]
+  createMany?: Prisma.PracticeSessionCreateManyCollectionInputEnvelope
+  set?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  disconnect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  delete?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  connect?: Prisma.PracticeSessionWhereUniqueInput | Prisma.PracticeSessionWhereUniqueInput[]
+  update?: Prisma.PracticeSessionUpdateWithWhereUniqueWithoutCollectionInput | Prisma.PracticeSessionUpdateWithWhereUniqueWithoutCollectionInput[]
+  updateMany?: Prisma.PracticeSessionUpdateManyWithWhereWithoutCollectionInput | Prisma.PracticeSessionUpdateManyWithWhereWithoutCollectionInput[]
+  deleteMany?: Prisma.PracticeSessionScalarWhereInput | Prisma.PracticeSessionScalarWhereInput[]
+}
+
+export type PracticeSessionCreateNestedOneWithoutPractice_responsesInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutPractice_responsesInput, Prisma.PracticeSessionUncheckedCreateWithoutPractice_responsesInput>
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutPractice_responsesInput
+  connect?: Prisma.PracticeSessionWhereUniqueInput
+}
+
+export type PracticeSessionUpdateOneRequiredWithoutPractice_responsesNestedInput = {
+  create?: Prisma.XOR<Prisma.PracticeSessionCreateWithoutPractice_responsesInput, Prisma.PracticeSessionUncheckedCreateWithoutPractice_responsesInput>
+  connectOrCreate?: Prisma.PracticeSessionCreateOrConnectWithoutPractice_responsesInput
+  upsert?: Prisma.PracticeSessionUpsertWithoutPractice_responsesInput
+  connect?: Prisma.PracticeSessionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PracticeSessionUpdateToOneWithWhereWithoutPractice_responsesInput, Prisma.PracticeSessionUpdateWithoutPractice_responsesInput>, Prisma.PracticeSessionUncheckedUpdateWithoutPractice_responsesInput>
+}
+
+export type PracticeSessionCreateWithoutMembershipInput = {
+  id: string
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutPractice_sessionInput
+  collection?: Prisma.ItemCollectionCreateNestedOneWithoutPractice_sessionsInput
+}
+
+export type PracticeSessionUncheckedCreateWithoutMembershipInput = {
+  id: string
+  collection_id?: string | null
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutPractice_sessionInput
+}
+
+export type PracticeSessionCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PracticeSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.PracticeSessionCreateWithoutMembershipInput, Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput>
+}
+
+export type PracticeSessionCreateManyMembershipInputEnvelope = {
+  data: Prisma.PracticeSessionCreateManyMembershipInput | Prisma.PracticeSessionCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PracticeSessionUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PracticeSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.PracticeSessionUpdateWithoutMembershipInput, Prisma.PracticeSessionUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PracticeSessionCreateWithoutMembershipInput, Prisma.PracticeSessionUncheckedCreateWithoutMembershipInput>
+}
+
+export type PracticeSessionUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PracticeSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.PracticeSessionUpdateWithoutMembershipInput, Prisma.PracticeSessionUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PracticeSessionUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PracticeSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.PracticeSessionUpdateManyMutationInput, Prisma.PracticeSessionUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PracticeSessionScalarWhereInput = {
+  AND?: Prisma.PracticeSessionScalarWhereInput | Prisma.PracticeSessionScalarWhereInput[]
+  OR?: Prisma.PracticeSessionScalarWhereInput[]
+  NOT?: Prisma.PracticeSessionScalarWhereInput | Prisma.PracticeSessionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PracticeSession"> | string
+  tenant_id?: Prisma.UuidFilter<"PracticeSession"> | string
+  membership_id?: Prisma.UuidFilter<"PracticeSession"> | string
+  collection_id?: Prisma.UuidNullableFilter<"PracticeSession"> | string | null
+  session_type?: Prisma.StringFilter<"PracticeSession"> | string
+  status?: Prisma.StringFilter<"PracticeSession"> | string
+  started_at?: Prisma.DateTimeFilter<"PracticeSession"> | Date | string
+  completed_at?: Prisma.DateTimeNullableFilter<"PracticeSession"> | Date | string | null
+  summary_json?: Prisma.JsonNullableFilter<"PracticeSession">
+  idempotency_key?: Prisma.StringNullableFilter<"PracticeSession"> | string | null
+}
+
+export type PracticeSessionCreateWithoutCollectionInput = {
+  id: string
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutPractice_sessionInput
+  membership: Prisma.MembershipCreateNestedOneWithoutPractice_sessionsInput
+}
+
+export type PracticeSessionUncheckedCreateWithoutCollectionInput = {
+  id: string
+  membership_id: string
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutPractice_sessionInput
+}
+
+export type PracticeSessionCreateOrConnectWithoutCollectionInput = {
+  where: Prisma.PracticeSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.PracticeSessionCreateWithoutCollectionInput, Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput>
+}
+
+export type PracticeSessionCreateManyCollectionInputEnvelope = {
+  data: Prisma.PracticeSessionCreateManyCollectionInput | Prisma.PracticeSessionCreateManyCollectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type PracticeSessionUpsertWithWhereUniqueWithoutCollectionInput = {
+  where: Prisma.PracticeSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.PracticeSessionUpdateWithoutCollectionInput, Prisma.PracticeSessionUncheckedUpdateWithoutCollectionInput>
+  create: Prisma.XOR<Prisma.PracticeSessionCreateWithoutCollectionInput, Prisma.PracticeSessionUncheckedCreateWithoutCollectionInput>
+}
+
+export type PracticeSessionUpdateWithWhereUniqueWithoutCollectionInput = {
+  where: Prisma.PracticeSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.PracticeSessionUpdateWithoutCollectionInput, Prisma.PracticeSessionUncheckedUpdateWithoutCollectionInput>
+}
+
+export type PracticeSessionUpdateManyWithWhereWithoutCollectionInput = {
+  where: Prisma.PracticeSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.PracticeSessionUpdateManyMutationInput, Prisma.PracticeSessionUncheckedUpdateManyWithoutCollectionInput>
+}
+
+export type PracticeSessionCreateWithoutPractice_responsesInput = {
+  id: string
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+  collection?: Prisma.ItemCollectionCreateNestedOneWithoutPractice_sessionsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutPractice_sessionsInput
+}
+
+export type PracticeSessionUncheckedCreateWithoutPractice_responsesInput = {
+  id: string
+  tenant_id: string
+  membership_id: string
+  collection_id?: string | null
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+}
+
+export type PracticeSessionCreateOrConnectWithoutPractice_responsesInput = {
+  where: Prisma.PracticeSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.PracticeSessionCreateWithoutPractice_responsesInput, Prisma.PracticeSessionUncheckedCreateWithoutPractice_responsesInput>
+}
+
+export type PracticeSessionUpsertWithoutPractice_responsesInput = {
+  update: Prisma.XOR<Prisma.PracticeSessionUpdateWithoutPractice_responsesInput, Prisma.PracticeSessionUncheckedUpdateWithoutPractice_responsesInput>
+  create: Prisma.XOR<Prisma.PracticeSessionCreateWithoutPractice_responsesInput, Prisma.PracticeSessionUncheckedCreateWithoutPractice_responsesInput>
+  where?: Prisma.PracticeSessionWhereInput
+}
+
+export type PracticeSessionUpdateToOneWithWhereWithoutPractice_responsesInput = {
+  where?: Prisma.PracticeSessionWhereInput
+  data: Prisma.XOR<Prisma.PracticeSessionUpdateWithoutPractice_responsesInput, Prisma.PracticeSessionUncheckedUpdateWithoutPractice_responsesInput>
+}
+
+export type PracticeSessionUpdateWithoutPractice_responsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  collection?: Prisma.ItemCollectionUpdateOneWithoutPractice_sessionsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPractice_sessionsNestedInput
+}
+
+export type PracticeSessionUncheckedUpdateWithoutPractice_responsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  collection_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type PracticeSessionCreateManyMembershipInput = {
+  id: string
+  collection_id?: string | null
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+}
+
+export type PracticeSessionUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutPractice_sessionNestedInput
+  collection?: Prisma.ItemCollectionUpdateOneWithoutPractice_sessionsNestedInput
+}
+
+export type PracticeSessionUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  collection_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutPractice_sessionNestedInput
+}
+
+export type PracticeSessionUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  collection_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type PracticeSessionCreateManyCollectionInput = {
+  id: string
+  membership_id: string
+  session_type: string
+  status?: string
+  started_at?: Date | string
+  completed_at?: Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: string | null
+}
+
+export type PracticeSessionUpdateWithoutCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutPractice_sessionNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPractice_sessionsNestedInput
+}
+
+export type PracticeSessionUncheckedUpdateWithoutCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutPractice_sessionNestedInput
+}
+
+export type PracticeSessionUncheckedUpdateManyWithoutCollectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  session_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  started_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  summary_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  idempotency_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+
+/**
+ * Count Type PracticeSessionCountOutputType
+ */
+
+export type PracticeSessionCountOutputType = {
+  practice_responses: number
+}
+
+export type PracticeSessionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  practice_responses?: boolean | PracticeSessionCountOutputTypeCountPractice_responsesArgs
+}
+
+/**
+ * PracticeSessionCountOutputType without action
+ */
+export type PracticeSessionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PracticeSessionCountOutputType
+   */
+  select?: Prisma.PracticeSessionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PracticeSessionCountOutputType without action
+ */
+export type PracticeSessionCountOutputTypeCountPractice_responsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PracticeResponseWhereInput
+}
 
 
 export type PracticeSessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -428,6 +858,10 @@ export type PracticeSessionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   completed_at?: boolean
   summary_json?: boolean
   idempotency_key?: boolean
+  practice_responses?: boolean | Prisma.PracticeSession$practice_responsesArgs<ExtArgs>
+  collection?: boolean | Prisma.PracticeSession$collectionArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.PracticeSessionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["practiceSession"]>
 
 export type PracticeSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -441,6 +875,8 @@ export type PracticeSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   completed_at?: boolean
   summary_json?: boolean
   idempotency_key?: boolean
+  collection?: boolean | Prisma.PracticeSession$collectionArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["practiceSession"]>
 
 export type PracticeSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -454,6 +890,8 @@ export type PracticeSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   completed_at?: boolean
   summary_json?: boolean
   idempotency_key?: boolean
+  collection?: boolean | Prisma.PracticeSession$collectionArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["practiceSession"]>
 
 export type PracticeSessionSelectScalar = {
@@ -470,10 +908,28 @@ export type PracticeSessionSelectScalar = {
 }
 
 export type PracticeSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "collection_id" | "session_type" | "status" | "started_at" | "completed_at" | "summary_json" | "idempotency_key", ExtArgs["result"]["practiceSession"]>
+export type PracticeSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  practice_responses?: boolean | Prisma.PracticeSession$practice_responsesArgs<ExtArgs>
+  collection?: boolean | Prisma.PracticeSession$collectionArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.PracticeSessionCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type PracticeSessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  collection?: boolean | Prisma.PracticeSession$collectionArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PracticeSessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  collection?: boolean | Prisma.PracticeSession$collectionArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $PracticeSessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PracticeSession"
-  objects: {}
+  objects: {
+    practice_responses: Prisma.$PracticeResponsePayload<ExtArgs>[]
+    collection: Prisma.$ItemCollectionPayload<ExtArgs> | null
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -879,6 +1335,9 @@ readonly fields: PracticeSessionFieldRefs;
  */
 export interface Prisma__PracticeSessionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  practice_responses<T extends Prisma.PracticeSession$practice_responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PracticeSession$practice_responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PracticeResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  collection<T extends Prisma.PracticeSession$collectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PracticeSession$collectionArgs<ExtArgs>>): Prisma.Prisma__ItemCollectionClient<runtime.Types.Result.GetResult<Prisma.$ItemCollectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -935,6 +1394,10 @@ export type PracticeSessionFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
+  /**
    * Filter, which PracticeSession to fetch.
    */
   where: Prisma.PracticeSessionWhereUniqueInput
@@ -953,6 +1416,10 @@ export type PracticeSessionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
+  /**
    * Filter, which PracticeSession to fetch.
    */
   where: Prisma.PracticeSessionWhereUniqueInput
@@ -970,6 +1437,10 @@ export type PracticeSessionFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the PracticeSession
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
   /**
    * Filter, which PracticeSession to fetch.
    */
@@ -1019,6 +1490,10 @@ export type PracticeSessionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
+  /**
    * Filter, which PracticeSession to fetch.
    */
   where?: Prisma.PracticeSessionWhereInput
@@ -1066,6 +1541,10 @@ export type PracticeSessionFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the PracticeSession
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
   /**
    * Filter, which PracticeSessions to fetch.
    */
@@ -1115,6 +1594,10 @@ export type PracticeSessionCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
+  /**
    * The data needed to create a PracticeSession.
    */
   data: Prisma.XOR<Prisma.PracticeSessionCreateInput, Prisma.PracticeSessionUncheckedCreateInput>
@@ -1148,6 +1631,10 @@ export type PracticeSessionCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.PracticeSessionCreateManyInput | Prisma.PracticeSessionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1162,6 +1649,10 @@ export type PracticeSessionUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the PracticeSession
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
   /**
    * The data needed to update a PracticeSession.
    */
@@ -1214,6 +1705,10 @@ export type PracticeSessionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many PracticeSessions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1228,6 +1723,10 @@ export type PracticeSessionUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the PracticeSession
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
   /**
    * The filter to search for the PracticeSession to update in case it exists.
    */
@@ -1255,6 +1754,10 @@ export type PracticeSessionDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
+  /**
    * Filter which PracticeSession to delete.
    */
   where: Prisma.PracticeSessionWhereUniqueInput
@@ -1275,6 +1778,49 @@ export type PracticeSessionDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * PracticeSession.practice_responses
+ */
+export type PracticeSession$practice_responsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PracticeResponse
+   */
+  select?: Prisma.PracticeResponseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PracticeResponse
+   */
+  omit?: Prisma.PracticeResponseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeResponseInclude<ExtArgs> | null
+  where?: Prisma.PracticeResponseWhereInput
+  orderBy?: Prisma.PracticeResponseOrderByWithRelationInput | Prisma.PracticeResponseOrderByWithRelationInput[]
+  cursor?: Prisma.PracticeResponseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PracticeResponseScalarFieldEnum | Prisma.PracticeResponseScalarFieldEnum[]
+}
+
+/**
+ * PracticeSession.collection
+ */
+export type PracticeSession$collectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemCollection
+   */
+  select?: Prisma.ItemCollectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItemCollection
+   */
+  omit?: Prisma.ItemCollectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionInclude<ExtArgs> | null
+  where?: Prisma.ItemCollectionWhereInput
+}
+
+/**
  * PracticeSession without action
  */
 export type PracticeSessionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1286,4 +1832,8 @@ export type PracticeSessionDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the PracticeSession
    */
   omit?: Prisma.PracticeSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeSessionInclude<ExtArgs> | null
 }

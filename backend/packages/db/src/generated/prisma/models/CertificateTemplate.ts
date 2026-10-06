@@ -210,6 +210,7 @@ export type CertificateTemplateWhereInput = {
   created_at?: Prisma.DateTimeFilter<"CertificateTemplate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CertificateTemplate"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"CertificateTemplate"> | Date | string | null
+  certificates?: Prisma.CertificateListRelationFilter
 }
 
 export type CertificateTemplateOrderByWithRelationInput = {
@@ -222,10 +223,12 @@ export type CertificateTemplateOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  certificates?: Prisma.CertificateOrderByRelationAggregateInput
 }
 
 export type CertificateTemplateWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.CertificateTemplateTenant_idIdCompoundUniqueInput
   AND?: Prisma.CertificateTemplateWhereInput | Prisma.CertificateTemplateWhereInput[]
   OR?: Prisma.CertificateTemplateWhereInput[]
   NOT?: Prisma.CertificateTemplateWhereInput | Prisma.CertificateTemplateWhereInput[]
@@ -237,7 +240,8 @@ export type CertificateTemplateWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"CertificateTemplate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CertificateTemplate"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"CertificateTemplate"> | Date | string | null
-}, "id">
+  certificates?: Prisma.CertificateListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type CertificateTemplateOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -279,6 +283,7 @@ export type CertificateTemplateCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  certificates?: Prisma.CertificateCreateNestedManyWithoutTemplateInput
 }
 
 export type CertificateTemplateUncheckedCreateInput = {
@@ -291,6 +296,7 @@ export type CertificateTemplateUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutTemplateInput
 }
 
 export type CertificateTemplateUpdateInput = {
@@ -303,6 +309,7 @@ export type CertificateTemplateUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  certificates?: Prisma.CertificateUpdateManyWithoutTemplateNestedInput
 }
 
 export type CertificateTemplateUncheckedUpdateInput = {
@@ -315,6 +322,7 @@ export type CertificateTemplateUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutTemplateNestedInput
 }
 
 export type CertificateTemplateCreateManyInput = {
@@ -353,6 +361,11 @@ export type CertificateTemplateUncheckedUpdateManyInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type CertificateTemplateTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type CertificateTemplateCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -387,6 +400,118 @@ export type CertificateTemplateMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type CertificateTemplateScalarRelationFilter = {
+  is?: Prisma.CertificateTemplateWhereInput
+  isNot?: Prisma.CertificateTemplateWhereInput
+}
+
+export type CertificateTemplateCreateNestedOneWithoutCertificatesInput = {
+  create?: Prisma.XOR<Prisma.CertificateTemplateCreateWithoutCertificatesInput, Prisma.CertificateTemplateUncheckedCreateWithoutCertificatesInput>
+  connectOrCreate?: Prisma.CertificateTemplateCreateOrConnectWithoutCertificatesInput
+  connect?: Prisma.CertificateTemplateWhereUniqueInput
+}
+
+export type CertificateTemplateUpdateOneRequiredWithoutCertificatesNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateTemplateCreateWithoutCertificatesInput, Prisma.CertificateTemplateUncheckedCreateWithoutCertificatesInput>
+  connectOrCreate?: Prisma.CertificateTemplateCreateOrConnectWithoutCertificatesInput
+  upsert?: Prisma.CertificateTemplateUpsertWithoutCertificatesInput
+  connect?: Prisma.CertificateTemplateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CertificateTemplateUpdateToOneWithWhereWithoutCertificatesInput, Prisma.CertificateTemplateUpdateWithoutCertificatesInput>, Prisma.CertificateTemplateUncheckedUpdateWithoutCertificatesInput>
+}
+
+export type CertificateTemplateCreateWithoutCertificatesInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  template_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PublishStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+}
+
+export type CertificateTemplateUncheckedCreateWithoutCertificatesInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  template_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.PublishStatus
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+}
+
+export type CertificateTemplateCreateOrConnectWithoutCertificatesInput = {
+  where: Prisma.CertificateTemplateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateTemplateCreateWithoutCertificatesInput, Prisma.CertificateTemplateUncheckedCreateWithoutCertificatesInput>
+}
+
+export type CertificateTemplateUpsertWithoutCertificatesInput = {
+  update: Prisma.XOR<Prisma.CertificateTemplateUpdateWithoutCertificatesInput, Prisma.CertificateTemplateUncheckedUpdateWithoutCertificatesInput>
+  create: Prisma.XOR<Prisma.CertificateTemplateCreateWithoutCertificatesInput, Prisma.CertificateTemplateUncheckedCreateWithoutCertificatesInput>
+  where?: Prisma.CertificateTemplateWhereInput
+}
+
+export type CertificateTemplateUpdateToOneWithWhereWithoutCertificatesInput = {
+  where?: Prisma.CertificateTemplateWhereInput
+  data: Prisma.XOR<Prisma.CertificateTemplateUpdateWithoutCertificatesInput, Prisma.CertificateTemplateUncheckedUpdateWithoutCertificatesInput>
+}
+
+export type CertificateTemplateUpdateWithoutCertificatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  template_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type CertificateTemplateUncheckedUpdateWithoutCertificatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  template_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+
+/**
+ * Count Type CertificateTemplateCountOutputType
+ */
+
+export type CertificateTemplateCountOutputType = {
+  certificates: number
+}
+
+export type CertificateTemplateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificates?: boolean | CertificateTemplateCountOutputTypeCountCertificatesArgs
+}
+
+/**
+ * CertificateTemplateCountOutputType without action
+ */
+export type CertificateTemplateCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CertificateTemplateCountOutputType
+   */
+  select?: Prisma.CertificateTemplateCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CertificateTemplateCountOutputType without action
+ */
+export type CertificateTemplateCountOutputTypeCountCertificatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CertificateWhereInput
+}
 
 
 export type CertificateTemplateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -399,6 +524,8 @@ export type CertificateTemplateSelect<ExtArgs extends runtime.Types.Extensions.I
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  certificates?: boolean | Prisma.CertificateTemplate$certificatesArgs<ExtArgs>
+  _count?: boolean | Prisma.CertificateTemplateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificateTemplate"]>
 
 export type CertificateTemplateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -438,10 +565,18 @@ export type CertificateTemplateSelectScalar = {
 }
 
 export type CertificateTemplateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "template_json" | "status" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["certificateTemplate"]>
+export type CertificateTemplateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificates?: boolean | Prisma.CertificateTemplate$certificatesArgs<ExtArgs>
+  _count?: boolean | Prisma.CertificateTemplateCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CertificateTemplateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type CertificateTemplateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $CertificateTemplatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CertificateTemplate"
-  objects: {}
+  objects: {
+    certificates: Prisma.$CertificatePayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -846,6 +981,7 @@ readonly fields: CertificateTemplateFieldRefs;
  */
 export interface Prisma__CertificateTemplateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  certificates<T extends Prisma.CertificateTemplate$certificatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CertificateTemplate$certificatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -901,6 +1037,10 @@ export type CertificateTemplateFindUniqueArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateTemplate to fetch.
    */
   where: Prisma.CertificateTemplateWhereUniqueInput
@@ -919,6 +1059,10 @@ export type CertificateTemplateFindUniqueOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateTemplate to fetch.
    */
   where: Prisma.CertificateTemplateWhereUniqueInput
@@ -936,6 +1080,10 @@ export type CertificateTemplateFindFirstArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the CertificateTemplate
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
   /**
    * Filter, which CertificateTemplate to fetch.
    */
@@ -985,6 +1133,10 @@ export type CertificateTemplateFindFirstOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateTemplate to fetch.
    */
   where?: Prisma.CertificateTemplateWhereInput
@@ -1032,6 +1184,10 @@ export type CertificateTemplateFindManyArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the CertificateTemplate
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
   /**
    * Filter, which CertificateTemplates to fetch.
    */
@@ -1081,6 +1237,10 @@ export type CertificateTemplateCreateArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
+  /**
    * The data needed to create a CertificateTemplate.
    */
   data: Prisma.XOR<Prisma.CertificateTemplateCreateInput, Prisma.CertificateTemplateUncheckedCreateInput>
@@ -1128,6 +1288,10 @@ export type CertificateTemplateUpdateArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the CertificateTemplate
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
   /**
    * The data needed to update a CertificateTemplate.
    */
@@ -1195,6 +1359,10 @@ export type CertificateTemplateUpsertArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
+  /**
    * The filter to search for the CertificateTemplate to update in case it exists.
    */
   where: Prisma.CertificateTemplateWhereUniqueInput
@@ -1221,6 +1389,10 @@ export type CertificateTemplateDeleteArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
+  /**
    * Filter which CertificateTemplate to delete.
    */
   where: Prisma.CertificateTemplateWhereUniqueInput
@@ -1241,6 +1413,30 @@ export type CertificateTemplateDeleteManyArgs<ExtArgs extends runtime.Types.Exte
 }
 
 /**
+ * CertificateTemplate.certificates
+ */
+export type CertificateTemplate$certificatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Certificate
+   */
+  select?: Prisma.CertificateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Certificate
+   */
+  omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  where?: Prisma.CertificateWhereInput
+  orderBy?: Prisma.CertificateOrderByWithRelationInput | Prisma.CertificateOrderByWithRelationInput[]
+  cursor?: Prisma.CertificateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CertificateScalarFieldEnum | Prisma.CertificateScalarFieldEnum[]
+}
+
+/**
  * CertificateTemplate without action
  */
 export type CertificateTemplateDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1252,4 +1448,8 @@ export type CertificateTemplateDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the CertificateTemplate
    */
   omit?: Prisma.CertificateTemplateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateTemplateInclude<ExtArgs> | null
 }

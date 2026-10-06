@@ -215,6 +215,7 @@ export type TestSeriesEnrollmentWhereInput = {
   expires_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
   test_series?: Prisma.XOR<Prisma.TestSeriesScalarRelationFilter, Prisma.TestSeriesWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type TestSeriesEnrollmentOrderByWithRelationInput = {
@@ -228,6 +229,7 @@ export type TestSeriesEnrollmentOrderByWithRelationInput = {
   expires_at?: Prisma.SortOrderInput | Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   test_series?: Prisma.TestSeriesOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type TestSeriesEnrollmentWhereUniqueInput = Prisma.AtLeast<{
@@ -245,6 +247,7 @@ export type TestSeriesEnrollmentWhereUniqueInput = Prisma.AtLeast<{
   expires_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
   test_series?: Prisma.XOR<Prisma.TestSeriesScalarRelationFilter, Prisma.TestSeriesWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_test_series_id_membership_id">
 
 export type TestSeriesEnrollmentOrderByWithAggregationInput = {
@@ -279,14 +282,13 @@ export type TestSeriesEnrollmentScalarWhereWithAggregatesInput = {
 
 export type TestSeriesEnrollmentCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   enrolled_type?: string
   enrolled_at?: Date | string
   expires_at?: Date | string | null
   completed_at?: Date | string | null
   test_series: Prisma.TestSeriesCreateNestedOneWithoutEnrollmentsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutTest_series_enrollmentsInput
 }
 
 export type TestSeriesEnrollmentUncheckedCreateInput = {
@@ -303,14 +305,13 @@ export type TestSeriesEnrollmentUncheckedCreateInput = {
 
 export type TestSeriesEnrollmentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   test_series?: Prisma.TestSeriesUpdateOneRequiredWithoutEnrollmentsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutTest_series_enrollmentsNestedInput
 }
 
 export type TestSeriesEnrollmentUncheckedUpdateInput = {
@@ -339,8 +340,6 @@ export type TestSeriesEnrollmentCreateManyInput = {
 
 export type TestSeriesEnrollmentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,6 +411,48 @@ export type TestSeriesEnrollmentMinOrderByAggregateInput = {
   completed_at?: Prisma.SortOrder
 }
 
+export type TestSeriesEnrollmentCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput[] | Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+}
+
+export type TestSeriesEnrollmentUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput[] | Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesEnrollmentCreateManyMembershipInputEnvelope
+  connect?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+}
+
+export type TestSeriesEnrollmentUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput[] | Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.TestSeriesEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  delete?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  connect?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  update?: Prisma.TestSeriesEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.TestSeriesEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.TestSeriesEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.TestSeriesEnrollmentScalarWhereInput | Prisma.TestSeriesEnrollmentScalarWhereInput[]
+}
+
+export type TestSeriesEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput> | Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput[] | Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput | Prisma.TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.TestSeriesEnrollmentUpsertWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesEnrollmentUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.TestSeriesEnrollmentCreateManyMembershipInputEnvelope
+  set?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  disconnect?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  delete?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  connect?: Prisma.TestSeriesEnrollmentWhereUniqueInput | Prisma.TestSeriesEnrollmentWhereUniqueInput[]
+  update?: Prisma.TestSeriesEnrollmentUpdateWithWhereUniqueWithoutMembershipInput | Prisma.TestSeriesEnrollmentUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.TestSeriesEnrollmentUpdateManyWithWhereWithoutMembershipInput | Prisma.TestSeriesEnrollmentUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.TestSeriesEnrollmentScalarWhereInput | Prisma.TestSeriesEnrollmentScalarWhereInput[]
+}
+
 export type TestSeriesEnrollmentCreateNestedManyWithoutTest_seriesInput = {
   create?: Prisma.XOR<Prisma.TestSeriesEnrollmentCreateWithoutTest_seriesInput, Prisma.TestSeriesEnrollmentUncheckedCreateWithoutTest_seriesInput> | Prisma.TestSeriesEnrollmentCreateWithoutTest_seriesInput[] | Prisma.TestSeriesEnrollmentUncheckedCreateWithoutTest_seriesInput[]
   connectOrCreate?: Prisma.TestSeriesEnrollmentCreateOrConnectWithoutTest_seriesInput | Prisma.TestSeriesEnrollmentCreateOrConnectWithoutTest_seriesInput[]
@@ -454,15 +495,75 @@ export type TestSeriesEnrollmentUncheckedUpdateManyWithoutTest_seriesNestedInput
   deleteMany?: Prisma.TestSeriesEnrollmentScalarWhereInput | Prisma.TestSeriesEnrollmentScalarWhereInput[]
 }
 
-export type TestSeriesEnrollmentCreateWithoutTest_seriesInput = {
+export type TestSeriesEnrollmentCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   enrolled_type?: string
   enrolled_at?: Date | string
   expires_at?: Date | string | null
   completed_at?: Date | string | null
+  test_series: Prisma.TestSeriesCreateNestedOneWithoutEnrollmentsInput
+}
+
+export type TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput = {
+  id: string
+  test_series_id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  expires_at?: Date | string | null
+  completed_at?: Date | string | null
+}
+
+export type TestSeriesEnrollmentCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.TestSeriesEnrollmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type TestSeriesEnrollmentCreateManyMembershipInputEnvelope = {
+  data: Prisma.TestSeriesEnrollmentCreateManyMembershipInput | Prisma.TestSeriesEnrollmentCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type TestSeriesEnrollmentUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.TestSeriesEnrollmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.TestSeriesEnrollmentUpdateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.TestSeriesEnrollmentCreateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedCreateWithoutMembershipInput>
+}
+
+export type TestSeriesEnrollmentUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.TestSeriesEnrollmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.TestSeriesEnrollmentUpdateWithoutMembershipInput, Prisma.TestSeriesEnrollmentUncheckedUpdateWithoutMembershipInput>
+}
+
+export type TestSeriesEnrollmentUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.TestSeriesEnrollmentScalarWhereInput
+  data: Prisma.XOR<Prisma.TestSeriesEnrollmentUpdateManyMutationInput, Prisma.TestSeriesEnrollmentUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type TestSeriesEnrollmentScalarWhereInput = {
+  AND?: Prisma.TestSeriesEnrollmentScalarWhereInput | Prisma.TestSeriesEnrollmentScalarWhereInput[]
+  OR?: Prisma.TestSeriesEnrollmentScalarWhereInput[]
+  NOT?: Prisma.TestSeriesEnrollmentScalarWhereInput | Prisma.TestSeriesEnrollmentScalarWhereInput[]
+  id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
+  tenant_id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
+  test_series_id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
+  membership_id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
+  status?: Prisma.StringFilter<"TestSeriesEnrollment"> | string
+  enrolled_type?: Prisma.StringFilter<"TestSeriesEnrollment"> | string
+  enrolled_at?: Prisma.DateTimeFilter<"TestSeriesEnrollment"> | Date | string
+  expires_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
+  completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
+}
+
+export type TestSeriesEnrollmentCreateWithoutTest_seriesInput = {
+  id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  expires_at?: Date | string | null
+  completed_at?: Date | string | null
+  membership: Prisma.MembershipCreateNestedOneWithoutTest_series_enrollmentsInput
 }
 
 export type TestSeriesEnrollmentUncheckedCreateWithoutTest_seriesInput = {
@@ -502,19 +603,44 @@ export type TestSeriesEnrollmentUpdateManyWithWhereWithoutTest_seriesInput = {
   data: Prisma.XOR<Prisma.TestSeriesEnrollmentUpdateManyMutationInput, Prisma.TestSeriesEnrollmentUncheckedUpdateManyWithoutTest_seriesInput>
 }
 
-export type TestSeriesEnrollmentScalarWhereInput = {
-  AND?: Prisma.TestSeriesEnrollmentScalarWhereInput | Prisma.TestSeriesEnrollmentScalarWhereInput[]
-  OR?: Prisma.TestSeriesEnrollmentScalarWhereInput[]
-  NOT?: Prisma.TestSeriesEnrollmentScalarWhereInput | Prisma.TestSeriesEnrollmentScalarWhereInput[]
-  id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
-  tenant_id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
-  test_series_id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
-  membership_id?: Prisma.UuidFilter<"TestSeriesEnrollment"> | string
-  status?: Prisma.StringFilter<"TestSeriesEnrollment"> | string
-  enrolled_type?: Prisma.StringFilter<"TestSeriesEnrollment"> | string
-  enrolled_at?: Prisma.DateTimeFilter<"TestSeriesEnrollment"> | Date | string
-  expires_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
-  completed_at?: Prisma.DateTimeNullableFilter<"TestSeriesEnrollment"> | Date | string | null
+export type TestSeriesEnrollmentCreateManyMembershipInput = {
+  id: string
+  test_series_id: string
+  status?: string
+  enrolled_type?: string
+  enrolled_at?: Date | string
+  expires_at?: Date | string | null
+  completed_at?: Date | string | null
+}
+
+export type TestSeriesEnrollmentUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  test_series?: Prisma.TestSeriesUpdateOneRequiredWithoutEnrollmentsNestedInput
+}
+
+export type TestSeriesEnrollmentUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type TestSeriesEnrollmentUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  test_series_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
+  enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type TestSeriesEnrollmentCreateManyTest_seriesInput = {
@@ -530,13 +656,12 @@ export type TestSeriesEnrollmentCreateManyTest_seriesInput = {
 
 export type TestSeriesEnrollmentUpdateWithoutTest_seriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_type?: Prisma.StringFieldUpdateOperationsInput | string
   enrolled_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutTest_series_enrollmentsNestedInput
 }
 
 export type TestSeriesEnrollmentUncheckedUpdateWithoutTest_seriesInput = {
@@ -574,6 +699,7 @@ export type TestSeriesEnrollmentSelect<ExtArgs extends runtime.Types.Extensions.
   expires_at?: boolean
   completed_at?: boolean
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesEnrollment"]>
 
 export type TestSeriesEnrollmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -587,6 +713,7 @@ export type TestSeriesEnrollmentSelectCreateManyAndReturn<ExtArgs extends runtim
   expires_at?: boolean
   completed_at?: boolean
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesEnrollment"]>
 
 export type TestSeriesEnrollmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -600,6 +727,7 @@ export type TestSeriesEnrollmentSelectUpdateManyAndReturn<ExtArgs extends runtim
   expires_at?: boolean
   completed_at?: boolean
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["testSeriesEnrollment"]>
 
 export type TestSeriesEnrollmentSelectScalar = {
@@ -617,18 +745,22 @@ export type TestSeriesEnrollmentSelectScalar = {
 export type TestSeriesEnrollmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "test_series_id" | "membership_id" | "status" | "enrolled_type" | "enrolled_at" | "expires_at" | "completed_at", ExtArgs["result"]["testSeriesEnrollment"]>
 export type TestSeriesEnrollmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type TestSeriesEnrollmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type TestSeriesEnrollmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   test_series?: boolean | Prisma.TestSeriesDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $TestSeriesEnrollmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "TestSeriesEnrollment"
   objects: {
     test_series: Prisma.$TestSeriesPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1035,6 +1167,7 @@ readonly fields: TestSeriesEnrollmentFieldRefs;
 export interface Prisma__TestSeriesEnrollmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   test_series<T extends Prisma.TestSeriesDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TestSeriesDefaultArgs<ExtArgs>>): Prisma.Prisma__TestSeriesClient<runtime.Types.Result.GetResult<Prisma.$TestSeriesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

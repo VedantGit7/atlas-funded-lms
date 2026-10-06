@@ -310,6 +310,7 @@ export type PollWhereInput = {
   updated_at?: Prisma.DateTimeFilter<"Poll"> | Date | string
   options?: Prisma.PollOptionListRelationFilter
   responses?: Prisma.PollResponseListRelationFilter
+  live_session?: Prisma.XOR<Prisma.LiveSessionNullableScalarRelationFilter, Prisma.LiveSessionWhereInput> | null
 }
 
 export type PollOrderByWithRelationInput = {
@@ -332,6 +333,7 @@ export type PollOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrder
   options?: Prisma.PollOptionOrderByRelationAggregateInput
   responses?: Prisma.PollResponseOrderByRelationAggregateInput
+  live_session?: Prisma.LiveSessionOrderByWithRelationInput
 }
 
 export type PollWhereUniqueInput = Prisma.AtLeast<{
@@ -357,6 +359,7 @@ export type PollWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeFilter<"Poll"> | Date | string
   options?: Prisma.PollOptionListRelationFilter
   responses?: Prisma.PollResponseListRelationFilter
+  live_session?: Prisma.XOR<Prisma.LiveSessionNullableScalarRelationFilter, Prisma.LiveSessionWhereInput> | null
 }, "id">
 
 export type PollOrderByWithAggregationInput = {
@@ -409,7 +412,6 @@ export type PollScalarWhereWithAggregatesInput = {
 
 export type PollCreateInput = {
   id: string
-  tenant_id: string
   title: string
   description?: string | null
   poll_type?: string
@@ -420,13 +422,13 @@ export type PollCreateInput = {
   result_visibility?: string
   layout?: string
   duration_seconds?: number | null
-  live_session_id?: string | null
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   closes_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   options?: Prisma.PollOptionCreateNestedManyWithoutPollInput
   responses?: Prisma.PollResponseCreateNestedManyWithoutPollInput
+  live_session?: Prisma.LiveSessionCreateNestedOneWithoutPollsInput
 }
 
 export type PollUncheckedCreateInput = {
@@ -453,7 +455,6 @@ export type PollUncheckedCreateInput = {
 
 export type PollUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   poll_type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -464,13 +465,13 @@ export type PollUpdateInput = {
   result_visibility?: Prisma.StringFieldUpdateOperationsInput | string
   layout?: Prisma.StringFieldUpdateOperationsInput | string
   duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  live_session_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   closes_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.PollOptionUpdateManyWithoutPollNestedInput
   responses?: Prisma.PollResponseUpdateManyWithoutPollNestedInput
+  live_session?: Prisma.LiveSessionUpdateOneWithoutPollsNestedInput
 }
 
 export type PollUncheckedUpdateInput = {
@@ -517,7 +518,6 @@ export type PollCreateManyInput = {
 
 export type PollUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   poll_type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -528,7 +528,6 @@ export type PollUpdateManyMutationInput = {
   result_visibility?: Prisma.StringFieldUpdateOperationsInput | string
   layout?: Prisma.StringFieldUpdateOperationsInput | string
   duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  live_session_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   closes_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -626,6 +625,16 @@ export type PollScalarRelationFilter = {
   isNot?: Prisma.PollWhereInput
 }
 
+export type PollListRelationFilter = {
+  every?: Prisma.PollWhereInput
+  some?: Prisma.PollWhereInput
+  none?: Prisma.PollWhereInput
+}
+
+export type PollOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type PollCreateNestedOneWithoutOptionsInput = {
   create?: Prisma.XOR<Prisma.PollCreateWithoutOptionsInput, Prisma.PollUncheckedCreateWithoutOptionsInput>
   connectOrCreate?: Prisma.PollCreateOrConnectWithoutOptionsInput
@@ -654,9 +663,50 @@ export type PollUpdateOneRequiredWithoutResponsesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PollUpdateToOneWithWhereWithoutResponsesInput, Prisma.PollUpdateWithoutResponsesInput>, Prisma.PollUncheckedUpdateWithoutResponsesInput>
 }
 
+export type PollCreateNestedManyWithoutLive_sessionInput = {
+  create?: Prisma.XOR<Prisma.PollCreateWithoutLive_sessionInput, Prisma.PollUncheckedCreateWithoutLive_sessionInput> | Prisma.PollCreateWithoutLive_sessionInput[] | Prisma.PollUncheckedCreateWithoutLive_sessionInput[]
+  connectOrCreate?: Prisma.PollCreateOrConnectWithoutLive_sessionInput | Prisma.PollCreateOrConnectWithoutLive_sessionInput[]
+  createMany?: Prisma.PollCreateManyLive_sessionInputEnvelope
+  connect?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+}
+
+export type PollUncheckedCreateNestedManyWithoutLive_sessionInput = {
+  create?: Prisma.XOR<Prisma.PollCreateWithoutLive_sessionInput, Prisma.PollUncheckedCreateWithoutLive_sessionInput> | Prisma.PollCreateWithoutLive_sessionInput[] | Prisma.PollUncheckedCreateWithoutLive_sessionInput[]
+  connectOrCreate?: Prisma.PollCreateOrConnectWithoutLive_sessionInput | Prisma.PollCreateOrConnectWithoutLive_sessionInput[]
+  createMany?: Prisma.PollCreateManyLive_sessionInputEnvelope
+  connect?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+}
+
+export type PollUpdateManyWithoutLive_sessionNestedInput = {
+  create?: Prisma.XOR<Prisma.PollCreateWithoutLive_sessionInput, Prisma.PollUncheckedCreateWithoutLive_sessionInput> | Prisma.PollCreateWithoutLive_sessionInput[] | Prisma.PollUncheckedCreateWithoutLive_sessionInput[]
+  connectOrCreate?: Prisma.PollCreateOrConnectWithoutLive_sessionInput | Prisma.PollCreateOrConnectWithoutLive_sessionInput[]
+  upsert?: Prisma.PollUpsertWithWhereUniqueWithoutLive_sessionInput | Prisma.PollUpsertWithWhereUniqueWithoutLive_sessionInput[]
+  createMany?: Prisma.PollCreateManyLive_sessionInputEnvelope
+  set?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  disconnect?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  delete?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  connect?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  update?: Prisma.PollUpdateWithWhereUniqueWithoutLive_sessionInput | Prisma.PollUpdateWithWhereUniqueWithoutLive_sessionInput[]
+  updateMany?: Prisma.PollUpdateManyWithWhereWithoutLive_sessionInput | Prisma.PollUpdateManyWithWhereWithoutLive_sessionInput[]
+  deleteMany?: Prisma.PollScalarWhereInput | Prisma.PollScalarWhereInput[]
+}
+
+export type PollUncheckedUpdateManyWithoutLive_sessionNestedInput = {
+  create?: Prisma.XOR<Prisma.PollCreateWithoutLive_sessionInput, Prisma.PollUncheckedCreateWithoutLive_sessionInput> | Prisma.PollCreateWithoutLive_sessionInput[] | Prisma.PollUncheckedCreateWithoutLive_sessionInput[]
+  connectOrCreate?: Prisma.PollCreateOrConnectWithoutLive_sessionInput | Prisma.PollCreateOrConnectWithoutLive_sessionInput[]
+  upsert?: Prisma.PollUpsertWithWhereUniqueWithoutLive_sessionInput | Prisma.PollUpsertWithWhereUniqueWithoutLive_sessionInput[]
+  createMany?: Prisma.PollCreateManyLive_sessionInputEnvelope
+  set?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  disconnect?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  delete?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  connect?: Prisma.PollWhereUniqueInput | Prisma.PollWhereUniqueInput[]
+  update?: Prisma.PollUpdateWithWhereUniqueWithoutLive_sessionInput | Prisma.PollUpdateWithWhereUniqueWithoutLive_sessionInput[]
+  updateMany?: Prisma.PollUpdateManyWithWhereWithoutLive_sessionInput | Prisma.PollUpdateManyWithWhereWithoutLive_sessionInput[]
+  deleteMany?: Prisma.PollScalarWhereInput | Prisma.PollScalarWhereInput[]
+}
+
 export type PollCreateWithoutOptionsInput = {
   id: string
-  tenant_id: string
   title: string
   description?: string | null
   poll_type?: string
@@ -667,12 +717,12 @@ export type PollCreateWithoutOptionsInput = {
   result_visibility?: string
   layout?: string
   duration_seconds?: number | null
-  live_session_id?: string | null
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   closes_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   responses?: Prisma.PollResponseCreateNestedManyWithoutPollInput
+  live_session?: Prisma.LiveSessionCreateNestedOneWithoutPollsInput
 }
 
 export type PollUncheckedCreateWithoutOptionsInput = {
@@ -714,7 +764,6 @@ export type PollUpdateToOneWithWhereWithoutOptionsInput = {
 
 export type PollUpdateWithoutOptionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   poll_type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -725,12 +774,12 @@ export type PollUpdateWithoutOptionsInput = {
   result_visibility?: Prisma.StringFieldUpdateOperationsInput | string
   layout?: Prisma.StringFieldUpdateOperationsInput | string
   duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  live_session_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   closes_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.PollResponseUpdateManyWithoutPollNestedInput
+  live_session?: Prisma.LiveSessionUpdateOneWithoutPollsNestedInput
 }
 
 export type PollUncheckedUpdateWithoutOptionsInput = {
@@ -756,7 +805,6 @@ export type PollUncheckedUpdateWithoutOptionsInput = {
 
 export type PollCreateWithoutResponsesInput = {
   id: string
-  tenant_id: string
   title: string
   description?: string | null
   poll_type?: string
@@ -767,12 +815,12 @@ export type PollCreateWithoutResponsesInput = {
   result_visibility?: string
   layout?: string
   duration_seconds?: number | null
-  live_session_id?: string | null
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   closes_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   options?: Prisma.PollOptionCreateNestedManyWithoutPollInput
+  live_session?: Prisma.LiveSessionCreateNestedOneWithoutPollsInput
 }
 
 export type PollUncheckedCreateWithoutResponsesInput = {
@@ -814,7 +862,6 @@ export type PollUpdateToOneWithWhereWithoutResponsesInput = {
 
 export type PollUpdateWithoutResponsesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   poll_type?: Prisma.StringFieldUpdateOperationsInput | string
@@ -825,12 +872,12 @@ export type PollUpdateWithoutResponsesInput = {
   result_visibility?: Prisma.StringFieldUpdateOperationsInput | string
   layout?: Prisma.StringFieldUpdateOperationsInput | string
   duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  live_session_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   closes_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.PollOptionUpdateManyWithoutPollNestedInput
+  live_session?: Prisma.LiveSessionUpdateOneWithoutPollsNestedInput
 }
 
 export type PollUncheckedUpdateWithoutResponsesInput = {
@@ -852,6 +899,171 @@ export type PollUncheckedUpdateWithoutResponsesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   options?: Prisma.PollOptionUncheckedUpdateManyWithoutPollNestedInput
+}
+
+export type PollCreateWithoutLive_sessionInput = {
+  id: string
+  title: string
+  description?: string | null
+  poll_type?: string
+  status?: $Enums.EntityStatus
+  quiz_mode?: boolean
+  allow_multiple_answers?: boolean
+  anonymous_vote?: boolean
+  result_visibility?: string
+  layout?: string
+  duration_seconds?: number | null
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  closes_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  options?: Prisma.PollOptionCreateNestedManyWithoutPollInput
+  responses?: Prisma.PollResponseCreateNestedManyWithoutPollInput
+}
+
+export type PollUncheckedCreateWithoutLive_sessionInput = {
+  id: string
+  title: string
+  description?: string | null
+  poll_type?: string
+  status?: $Enums.EntityStatus
+  quiz_mode?: boolean
+  allow_multiple_answers?: boolean
+  anonymous_vote?: boolean
+  result_visibility?: string
+  layout?: string
+  duration_seconds?: number | null
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  closes_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  options?: Prisma.PollOptionUncheckedCreateNestedManyWithoutPollInput
+  responses?: Prisma.PollResponseUncheckedCreateNestedManyWithoutPollInput
+}
+
+export type PollCreateOrConnectWithoutLive_sessionInput = {
+  where: Prisma.PollWhereUniqueInput
+  create: Prisma.XOR<Prisma.PollCreateWithoutLive_sessionInput, Prisma.PollUncheckedCreateWithoutLive_sessionInput>
+}
+
+export type PollCreateManyLive_sessionInputEnvelope = {
+  data: Prisma.PollCreateManyLive_sessionInput | Prisma.PollCreateManyLive_sessionInput[]
+  skipDuplicates?: boolean
+}
+
+export type PollUpsertWithWhereUniqueWithoutLive_sessionInput = {
+  where: Prisma.PollWhereUniqueInput
+  update: Prisma.XOR<Prisma.PollUpdateWithoutLive_sessionInput, Prisma.PollUncheckedUpdateWithoutLive_sessionInput>
+  create: Prisma.XOR<Prisma.PollCreateWithoutLive_sessionInput, Prisma.PollUncheckedCreateWithoutLive_sessionInput>
+}
+
+export type PollUpdateWithWhereUniqueWithoutLive_sessionInput = {
+  where: Prisma.PollWhereUniqueInput
+  data: Prisma.XOR<Prisma.PollUpdateWithoutLive_sessionInput, Prisma.PollUncheckedUpdateWithoutLive_sessionInput>
+}
+
+export type PollUpdateManyWithWhereWithoutLive_sessionInput = {
+  where: Prisma.PollScalarWhereInput
+  data: Prisma.XOR<Prisma.PollUpdateManyMutationInput, Prisma.PollUncheckedUpdateManyWithoutLive_sessionInput>
+}
+
+export type PollScalarWhereInput = {
+  AND?: Prisma.PollScalarWhereInput | Prisma.PollScalarWhereInput[]
+  OR?: Prisma.PollScalarWhereInput[]
+  NOT?: Prisma.PollScalarWhereInput | Prisma.PollScalarWhereInput[]
+  id?: Prisma.UuidFilter<"Poll"> | string
+  tenant_id?: Prisma.UuidFilter<"Poll"> | string
+  title?: Prisma.StringFilter<"Poll"> | string
+  description?: Prisma.StringNullableFilter<"Poll"> | string | null
+  poll_type?: Prisma.StringFilter<"Poll"> | string
+  status?: Prisma.EnumEntityStatusFilter<"Poll"> | $Enums.EntityStatus
+  quiz_mode?: Prisma.BoolFilter<"Poll"> | boolean
+  allow_multiple_answers?: Prisma.BoolFilter<"Poll"> | boolean
+  anonymous_vote?: Prisma.BoolFilter<"Poll"> | boolean
+  result_visibility?: Prisma.StringFilter<"Poll"> | string
+  layout?: Prisma.StringFilter<"Poll"> | string
+  duration_seconds?: Prisma.IntNullableFilter<"Poll"> | number | null
+  live_session_id?: Prisma.UuidNullableFilter<"Poll"> | string | null
+  context_json?: Prisma.JsonNullableFilter<"Poll">
+  closes_at?: Prisma.DateTimeNullableFilter<"Poll"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"Poll"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"Poll"> | Date | string
+}
+
+export type PollCreateManyLive_sessionInput = {
+  id: string
+  title: string
+  description?: string | null
+  poll_type?: string
+  status?: $Enums.EntityStatus
+  quiz_mode?: boolean
+  allow_multiple_answers?: boolean
+  anonymous_vote?: boolean
+  result_visibility?: string
+  layout?: string
+  duration_seconds?: number | null
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  closes_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PollUpdateWithoutLive_sessionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  poll_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  quiz_mode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allow_multiple_answers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  anonymous_vote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  result_visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  layout?: Prisma.StringFieldUpdateOperationsInput | string
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  closes_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  options?: Prisma.PollOptionUpdateManyWithoutPollNestedInput
+  responses?: Prisma.PollResponseUpdateManyWithoutPollNestedInput
+}
+
+export type PollUncheckedUpdateWithoutLive_sessionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  poll_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  quiz_mode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allow_multiple_answers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  anonymous_vote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  result_visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  layout?: Prisma.StringFieldUpdateOperationsInput | string
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  closes_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  options?: Prisma.PollOptionUncheckedUpdateManyWithoutPollNestedInput
+  responses?: Prisma.PollResponseUncheckedUpdateManyWithoutPollNestedInput
+}
+
+export type PollUncheckedUpdateManyWithoutLive_sessionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  poll_type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumEntityStatusFieldUpdateOperationsInput | $Enums.EntityStatus
+  quiz_mode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allow_multiple_answers?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  anonymous_vote?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  result_visibility?: Prisma.StringFieldUpdateOperationsInput | string
+  layout?: Prisma.StringFieldUpdateOperationsInput | string
+  duration_seconds?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  context_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  closes_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -914,6 +1126,7 @@ export type PollSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updated_at?: boolean
   options?: boolean | Prisma.Poll$optionsArgs<ExtArgs>
   responses?: boolean | Prisma.Poll$responsesArgs<ExtArgs>
+  live_session?: boolean | Prisma.Poll$live_sessionArgs<ExtArgs>
   _count?: boolean | Prisma.PollCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["poll"]>
 
@@ -935,6 +1148,7 @@ export type PollSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   closes_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  live_session?: boolean | Prisma.Poll$live_sessionArgs<ExtArgs>
 }, ExtArgs["result"]["poll"]>
 
 export type PollSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -955,6 +1169,7 @@ export type PollSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   closes_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  live_session?: boolean | Prisma.Poll$live_sessionArgs<ExtArgs>
 }, ExtArgs["result"]["poll"]>
 
 export type PollSelectScalar = {
@@ -981,16 +1196,22 @@ export type PollOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type PollInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   options?: boolean | Prisma.Poll$optionsArgs<ExtArgs>
   responses?: boolean | Prisma.Poll$responsesArgs<ExtArgs>
+  live_session?: boolean | Prisma.Poll$live_sessionArgs<ExtArgs>
   _count?: boolean | Prisma.PollCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type PollIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type PollIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type PollIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  live_session?: boolean | Prisma.Poll$live_sessionArgs<ExtArgs>
+}
+export type PollIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  live_session?: boolean | Prisma.Poll$live_sessionArgs<ExtArgs>
+}
 
 export type $PollPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Poll"
   objects: {
     options: Prisma.$PollOptionPayload<ExtArgs>[]
     responses: Prisma.$PollResponsePayload<ExtArgs>[]
+    live_session: Prisma.$LiveSessionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1415,6 +1636,7 @@ export interface Prisma__PollClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   options<T extends Prisma.Poll$optionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Poll$optionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PollOptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   responses<T extends Prisma.Poll$responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Poll$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PollResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  live_session<T extends Prisma.Poll$live_sessionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Poll$live_sessionArgs<ExtArgs>>): Prisma.Prisma__LiveSessionClient<runtime.Types.Result.GetResult<Prisma.$LiveSessionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1715,6 +1937,10 @@ export type PollCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    */
   data: Prisma.PollCreateManyInput | Prisma.PollCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PollIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1785,6 +2011,10 @@ export type PollUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many Polls to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PollIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1899,6 +2129,25 @@ export type Poll$responsesArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.PollResponseScalarFieldEnum | Prisma.PollResponseScalarFieldEnum[]
+}
+
+/**
+ * Poll.live_session
+ */
+export type Poll$live_sessionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LiveSession
+   */
+  select?: Prisma.LiveSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LiveSession
+   */
+  omit?: Prisma.LiveSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LiveSessionInclude<ExtArgs> | null
+  where?: Prisma.LiveSessionWhereInput
 }
 
 /**

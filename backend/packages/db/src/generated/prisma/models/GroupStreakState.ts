@@ -244,6 +244,7 @@ export type GroupStreakStateWhereInput = {
   longest_count?: Prisma.IntFilter<"GroupStreakState"> | number
   last_activity_period?: Prisma.StringNullableFilter<"GroupStreakState"> | string | null
   updated_at?: Prisma.DateTimeFilter<"GroupStreakState"> | Date | string
+  space?: Prisma.XOR<Prisma.CommunitySpaceScalarRelationFilter, Prisma.CommunitySpaceWhereInput>
 }
 
 export type GroupStreakStateOrderByWithRelationInput = {
@@ -255,6 +256,7 @@ export type GroupStreakStateOrderByWithRelationInput = {
   longest_count?: Prisma.SortOrder
   last_activity_period?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  space?: Prisma.CommunitySpaceOrderByWithRelationInput
 }
 
 export type GroupStreakStateWhereUniqueInput = Prisma.AtLeast<{
@@ -270,6 +272,7 @@ export type GroupStreakStateWhereUniqueInput = Prisma.AtLeast<{
   longest_count?: Prisma.IntFilter<"GroupStreakState"> | number
   last_activity_period?: Prisma.StringNullableFilter<"GroupStreakState"> | string | null
   updated_at?: Prisma.DateTimeFilter<"GroupStreakState"> | Date | string
+  space?: Prisma.XOR<Prisma.CommunitySpaceScalarRelationFilter, Prisma.CommunitySpaceWhereInput>
 }, "id" | "tenant_id_space_id_streak_key">
 
 export type GroupStreakStateOrderByWithAggregationInput = {
@@ -304,13 +307,12 @@ export type GroupStreakStateScalarWhereWithAggregatesInput = {
 
 export type GroupStreakStateCreateInput = {
   id: string
-  tenant_id: string
-  space_id: string
   streak_key: string
   current_count?: number
   longest_count?: number
   last_activity_period?: string | null
   updated_at?: Date | string
+  space: Prisma.CommunitySpaceCreateNestedOneWithoutGroup_streak_statesInput
 }
 
 export type GroupStreakStateUncheckedCreateInput = {
@@ -326,13 +328,12 @@ export type GroupStreakStateUncheckedCreateInput = {
 
 export type GroupStreakStateUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  space_id?: Prisma.StringFieldUpdateOperationsInput | string
   streak_key?: Prisma.StringFieldUpdateOperationsInput | string
   current_count?: Prisma.IntFieldUpdateOperationsInput | number
   longest_count?: Prisma.IntFieldUpdateOperationsInput | number
   last_activity_period?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  space?: Prisma.CommunitySpaceUpdateOneRequiredWithoutGroup_streak_statesNestedInput
 }
 
 export type GroupStreakStateUncheckedUpdateInput = {
@@ -359,8 +360,6 @@ export type GroupStreakStateCreateManyInput = {
 
 export type GroupStreakStateUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  space_id?: Prisma.StringFieldUpdateOperationsInput | string
   streak_key?: Prisma.StringFieldUpdateOperationsInput | string
   current_count?: Prisma.IntFieldUpdateOperationsInput | number
   longest_count?: Prisma.IntFieldUpdateOperationsInput | number
@@ -428,6 +427,152 @@ export type GroupStreakStateSumOrderByAggregateInput = {
   longest_count?: Prisma.SortOrder
 }
 
+export type GroupStreakStateListRelationFilter = {
+  every?: Prisma.GroupStreakStateWhereInput
+  some?: Prisma.GroupStreakStateWhereInput
+  none?: Prisma.GroupStreakStateWhereInput
+}
+
+export type GroupStreakStateOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type GroupStreakStateCreateNestedManyWithoutSpaceInput = {
+  create?: Prisma.XOR<Prisma.GroupStreakStateCreateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput> | Prisma.GroupStreakStateCreateWithoutSpaceInput[] | Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput | Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput[]
+  createMany?: Prisma.GroupStreakStateCreateManySpaceInputEnvelope
+  connect?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+}
+
+export type GroupStreakStateUncheckedCreateNestedManyWithoutSpaceInput = {
+  create?: Prisma.XOR<Prisma.GroupStreakStateCreateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput> | Prisma.GroupStreakStateCreateWithoutSpaceInput[] | Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput | Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput[]
+  createMany?: Prisma.GroupStreakStateCreateManySpaceInputEnvelope
+  connect?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+}
+
+export type GroupStreakStateUpdateManyWithoutSpaceNestedInput = {
+  create?: Prisma.XOR<Prisma.GroupStreakStateCreateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput> | Prisma.GroupStreakStateCreateWithoutSpaceInput[] | Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput | Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput[]
+  upsert?: Prisma.GroupStreakStateUpsertWithWhereUniqueWithoutSpaceInput | Prisma.GroupStreakStateUpsertWithWhereUniqueWithoutSpaceInput[]
+  createMany?: Prisma.GroupStreakStateCreateManySpaceInputEnvelope
+  set?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  disconnect?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  delete?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  connect?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  update?: Prisma.GroupStreakStateUpdateWithWhereUniqueWithoutSpaceInput | Prisma.GroupStreakStateUpdateWithWhereUniqueWithoutSpaceInput[]
+  updateMany?: Prisma.GroupStreakStateUpdateManyWithWhereWithoutSpaceInput | Prisma.GroupStreakStateUpdateManyWithWhereWithoutSpaceInput[]
+  deleteMany?: Prisma.GroupStreakStateScalarWhereInput | Prisma.GroupStreakStateScalarWhereInput[]
+}
+
+export type GroupStreakStateUncheckedUpdateManyWithoutSpaceNestedInput = {
+  create?: Prisma.XOR<Prisma.GroupStreakStateCreateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput> | Prisma.GroupStreakStateCreateWithoutSpaceInput[] | Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput[]
+  connectOrCreate?: Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput | Prisma.GroupStreakStateCreateOrConnectWithoutSpaceInput[]
+  upsert?: Prisma.GroupStreakStateUpsertWithWhereUniqueWithoutSpaceInput | Prisma.GroupStreakStateUpsertWithWhereUniqueWithoutSpaceInput[]
+  createMany?: Prisma.GroupStreakStateCreateManySpaceInputEnvelope
+  set?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  disconnect?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  delete?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  connect?: Prisma.GroupStreakStateWhereUniqueInput | Prisma.GroupStreakStateWhereUniqueInput[]
+  update?: Prisma.GroupStreakStateUpdateWithWhereUniqueWithoutSpaceInput | Prisma.GroupStreakStateUpdateWithWhereUniqueWithoutSpaceInput[]
+  updateMany?: Prisma.GroupStreakStateUpdateManyWithWhereWithoutSpaceInput | Prisma.GroupStreakStateUpdateManyWithWhereWithoutSpaceInput[]
+  deleteMany?: Prisma.GroupStreakStateScalarWhereInput | Prisma.GroupStreakStateScalarWhereInput[]
+}
+
+export type GroupStreakStateCreateWithoutSpaceInput = {
+  id: string
+  streak_key: string
+  current_count?: number
+  longest_count?: number
+  last_activity_period?: string | null
+  updated_at?: Date | string
+}
+
+export type GroupStreakStateUncheckedCreateWithoutSpaceInput = {
+  id: string
+  streak_key: string
+  current_count?: number
+  longest_count?: number
+  last_activity_period?: string | null
+  updated_at?: Date | string
+}
+
+export type GroupStreakStateCreateOrConnectWithoutSpaceInput = {
+  where: Prisma.GroupStreakStateWhereUniqueInput
+  create: Prisma.XOR<Prisma.GroupStreakStateCreateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput>
+}
+
+export type GroupStreakStateCreateManySpaceInputEnvelope = {
+  data: Prisma.GroupStreakStateCreateManySpaceInput | Prisma.GroupStreakStateCreateManySpaceInput[]
+  skipDuplicates?: boolean
+}
+
+export type GroupStreakStateUpsertWithWhereUniqueWithoutSpaceInput = {
+  where: Prisma.GroupStreakStateWhereUniqueInput
+  update: Prisma.XOR<Prisma.GroupStreakStateUpdateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedUpdateWithoutSpaceInput>
+  create: Prisma.XOR<Prisma.GroupStreakStateCreateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedCreateWithoutSpaceInput>
+}
+
+export type GroupStreakStateUpdateWithWhereUniqueWithoutSpaceInput = {
+  where: Prisma.GroupStreakStateWhereUniqueInput
+  data: Prisma.XOR<Prisma.GroupStreakStateUpdateWithoutSpaceInput, Prisma.GroupStreakStateUncheckedUpdateWithoutSpaceInput>
+}
+
+export type GroupStreakStateUpdateManyWithWhereWithoutSpaceInput = {
+  where: Prisma.GroupStreakStateScalarWhereInput
+  data: Prisma.XOR<Prisma.GroupStreakStateUpdateManyMutationInput, Prisma.GroupStreakStateUncheckedUpdateManyWithoutSpaceInput>
+}
+
+export type GroupStreakStateScalarWhereInput = {
+  AND?: Prisma.GroupStreakStateScalarWhereInput | Prisma.GroupStreakStateScalarWhereInput[]
+  OR?: Prisma.GroupStreakStateScalarWhereInput[]
+  NOT?: Prisma.GroupStreakStateScalarWhereInput | Prisma.GroupStreakStateScalarWhereInput[]
+  id?: Prisma.UuidFilter<"GroupStreakState"> | string
+  tenant_id?: Prisma.UuidFilter<"GroupStreakState"> | string
+  space_id?: Prisma.UuidFilter<"GroupStreakState"> | string
+  streak_key?: Prisma.StringFilter<"GroupStreakState"> | string
+  current_count?: Prisma.IntFilter<"GroupStreakState"> | number
+  longest_count?: Prisma.IntFilter<"GroupStreakState"> | number
+  last_activity_period?: Prisma.StringNullableFilter<"GroupStreakState"> | string | null
+  updated_at?: Prisma.DateTimeFilter<"GroupStreakState"> | Date | string
+}
+
+export type GroupStreakStateCreateManySpaceInput = {
+  id: string
+  streak_key: string
+  current_count?: number
+  longest_count?: number
+  last_activity_period?: string | null
+  updated_at?: Date | string
+}
+
+export type GroupStreakStateUpdateWithoutSpaceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  current_count?: Prisma.IntFieldUpdateOperationsInput | number
+  longest_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_activity_period?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GroupStreakStateUncheckedUpdateWithoutSpaceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  current_count?: Prisma.IntFieldUpdateOperationsInput | number
+  longest_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_activity_period?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GroupStreakStateUncheckedUpdateManyWithoutSpaceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  current_count?: Prisma.IntFieldUpdateOperationsInput | number
+  longest_count?: Prisma.IntFieldUpdateOperationsInput | number
+  last_activity_period?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type GroupStreakStateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -439,6 +584,7 @@ export type GroupStreakStateSelect<ExtArgs extends runtime.Types.Extensions.Inte
   longest_count?: boolean
   last_activity_period?: boolean
   updated_at?: boolean
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupStreakState"]>
 
 export type GroupStreakStateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -450,6 +596,7 @@ export type GroupStreakStateSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   longest_count?: boolean
   last_activity_period?: boolean
   updated_at?: boolean
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupStreakState"]>
 
 export type GroupStreakStateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -461,6 +608,7 @@ export type GroupStreakStateSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   longest_count?: boolean
   last_activity_period?: boolean
   updated_at?: boolean
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupStreakState"]>
 
 export type GroupStreakStateSelectScalar = {
@@ -475,10 +623,21 @@ export type GroupStreakStateSelectScalar = {
 }
 
 export type GroupStreakStateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "space_id" | "streak_key" | "current_count" | "longest_count" | "last_activity_period" | "updated_at", ExtArgs["result"]["groupStreakState"]>
+export type GroupStreakStateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
+}
+export type GroupStreakStateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
+}
+export type GroupStreakStateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  space?: boolean | Prisma.CommunitySpaceDefaultArgs<ExtArgs>
+}
 
 export type $GroupStreakStatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GroupStreakState"
-  objects: {}
+  objects: {
+    space: Prisma.$CommunitySpacePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -882,6 +1041,7 @@ readonly fields: GroupStreakStateFieldRefs;
  */
 export interface Prisma__GroupStreakStateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  space<T extends Prisma.CommunitySpaceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CommunitySpaceDefaultArgs<ExtArgs>>): Prisma.Prisma__CommunitySpaceClient<runtime.Types.Result.GetResult<Prisma.$CommunitySpacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -936,6 +1096,10 @@ export type GroupStreakStateFindUniqueArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
+  /**
    * Filter, which GroupStreakState to fetch.
    */
   where: Prisma.GroupStreakStateWhereUniqueInput
@@ -954,6 +1118,10 @@ export type GroupStreakStateFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
+  /**
    * Filter, which GroupStreakState to fetch.
    */
   where: Prisma.GroupStreakStateWhereUniqueInput
@@ -971,6 +1139,10 @@ export type GroupStreakStateFindFirstArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the GroupStreakState
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
   /**
    * Filter, which GroupStreakState to fetch.
    */
@@ -1020,6 +1192,10 @@ export type GroupStreakStateFindFirstOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
+  /**
    * Filter, which GroupStreakState to fetch.
    */
   where?: Prisma.GroupStreakStateWhereInput
@@ -1067,6 +1243,10 @@ export type GroupStreakStateFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the GroupStreakState
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
   /**
    * Filter, which GroupStreakStates to fetch.
    */
@@ -1116,6 +1296,10 @@ export type GroupStreakStateCreateArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
+  /**
    * The data needed to create a GroupStreakState.
    */
   data: Prisma.XOR<Prisma.GroupStreakStateCreateInput, Prisma.GroupStreakStateUncheckedCreateInput>
@@ -1149,6 +1333,10 @@ export type GroupStreakStateCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    */
   data: Prisma.GroupStreakStateCreateManyInput | Prisma.GroupStreakStateCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1163,6 +1351,10 @@ export type GroupStreakStateUpdateArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the GroupStreakState
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
   /**
    * The data needed to update a GroupStreakState.
    */
@@ -1215,6 +1407,10 @@ export type GroupStreakStateUpdateManyAndReturnArgs<ExtArgs extends runtime.Type
    * Limit how many GroupStreakStates to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1229,6 +1425,10 @@ export type GroupStreakStateUpsertArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the GroupStreakState
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
   /**
    * The filter to search for the GroupStreakState to update in case it exists.
    */
@@ -1255,6 +1455,10 @@ export type GroupStreakStateDeleteArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the GroupStreakState
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
   /**
    * Filter which GroupStreakState to delete.
    */
@@ -1287,4 +1491,8 @@ export type GroupStreakStateDefaultArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the GroupStreakState
    */
   omit?: Prisma.GroupStreakStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GroupStreakStateInclude<ExtArgs> | null
 }

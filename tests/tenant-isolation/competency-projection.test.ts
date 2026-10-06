@@ -22,6 +22,22 @@ describeWithDb("competency projection tenant isolation", () => {
     const tenantB = await createTenantIsolationFixture();
 
     await withTenantTx(tenantCtx(tenantB.tenantA), async (tx) => {
+      // Tenant B's own dimension, profile and config version: the composite
+      // tenant foreign keys (audit M3) refuse anything else.
+      const tenantId = tenantB.tenantA.tenantId;
+      const [dimensionId, profileId, versionId] = [randomUUID(), randomUUID(), randomUUID()];
+      await tx.$executeRaw`
+        insert into competency_dimensions (id, tenant_id, key, name, updated_at)
+        values (${dimensionId}::uuid, ${tenantId}::uuid, ${`dim-${dimensionId}`}, 'Tenant B Dim', now())
+      `;
+      await tx.$executeRaw`
+        insert into scoring_profiles (id, tenant_id, key, name, updated_at)
+        values (${profileId}::uuid, ${tenantId}::uuid, ${`profile-${profileId}`}, 'Tenant B Profile', now())
+      `;
+      await tx.$executeRaw`
+        insert into scoring_config_versions (id, tenant_id, scoring_profile_id, version, config_json)
+        values (${versionId}::uuid, ${tenantId}::uuid, ${profileId}::uuid, 1, '{}'::jsonb)
+      `;
       await tx.$executeRaw`
         insert into competency_scores (
           id, tenant_id, membership_id, dimension_id, scoring_profile_id,
@@ -29,14 +45,14 @@ describeWithDb("competency projection tenant isolation", () => {
         )
         values (
           ${randomUUID()}::uuid,
-          ${tenantB.tenantA.tenantId}::uuid,
+          ${tenantId}::uuid,
           ${tenantB.tenantA.membershipId}::uuid,
-          ${randomUUID()}::uuid,
-          ${randomUUID()}::uuid,
+          ${dimensionId}::uuid,
+          ${profileId}::uuid,
           88,
           'proficient',
           now(),
-          ${randomUUID()}::uuid
+          ${versionId}::uuid
         )
       `;
     });

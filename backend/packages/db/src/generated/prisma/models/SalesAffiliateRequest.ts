@@ -214,6 +214,7 @@ export type SalesAffiliateRequestWhereInput = {
   reviewed_at?: Prisma.DateTimeNullableFilter<"SalesAffiliateRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"SalesAffiliateRequest"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAffiliateRequest"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type SalesAffiliateRequestOrderByWithRelationInput = {
@@ -226,6 +227,7 @@ export type SalesAffiliateRequestOrderByWithRelationInput = {
   reviewed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type SalesAffiliateRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -241,6 +243,7 @@ export type SalesAffiliateRequestWhereUniqueInput = Prisma.AtLeast<{
   reviewed_at?: Prisma.DateTimeNullableFilter<"SalesAffiliateRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"SalesAffiliateRequest"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesAffiliateRequest"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id">
 
 export type SalesAffiliateRequestOrderByWithAggregationInput = {
@@ -275,14 +278,13 @@ export type SalesAffiliateRequestScalarWhereWithAggregatesInput = {
 
 export type SalesAffiliateRequestCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   status?: string
   note?: string | null
   reviewed_by_membership_id?: string | null
   reviewed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_affiliate_requestsInput
 }
 
 export type SalesAffiliateRequestUncheckedCreateInput = {
@@ -299,14 +301,13 @@ export type SalesAffiliateRequestUncheckedCreateInput = {
 
 export type SalesAffiliateRequestUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewed_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_affiliate_requestsNestedInput
 }
 
 export type SalesAffiliateRequestUncheckedUpdateInput = {
@@ -335,8 +336,6 @@ export type SalesAffiliateRequestCreateManyInput = {
 
 export type SalesAffiliateRequestUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewed_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -355,6 +354,16 @@ export type SalesAffiliateRequestUncheckedUpdateManyInput = {
   reviewed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAffiliateRequestListRelationFilter = {
+  every?: Prisma.SalesAffiliateRequestWhereInput
+  some?: Prisma.SalesAffiliateRequestWhereInput
+  none?: Prisma.SalesAffiliateRequestWhereInput
+}
+
+export type SalesAffiliateRequestOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SalesAffiliateRequestCountOrderByAggregateInput = {
@@ -393,6 +402,149 @@ export type SalesAffiliateRequestMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type SalesAffiliateRequestCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateRequestCreateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateRequestCreateWithoutMembershipInput[] | Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateRequestCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+}
+
+export type SalesAffiliateRequestUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateRequestCreateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateRequestCreateWithoutMembershipInput[] | Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateRequestCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+}
+
+export type SalesAffiliateRequestUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateRequestCreateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateRequestCreateWithoutMembershipInput[] | Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesAffiliateRequestUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateRequestUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateRequestCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  disconnect?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  delete?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  connect?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  update?: Prisma.SalesAffiliateRequestUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateRequestUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesAffiliateRequestUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesAffiliateRequestUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesAffiliateRequestScalarWhereInput | Prisma.SalesAffiliateRequestScalarWhereInput[]
+}
+
+export type SalesAffiliateRequestUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesAffiliateRequestCreateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput> | Prisma.SalesAffiliateRequestCreateWithoutMembershipInput[] | Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput | Prisma.SalesAffiliateRequestCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesAffiliateRequestUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateRequestUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesAffiliateRequestCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  disconnect?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  delete?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  connect?: Prisma.SalesAffiliateRequestWhereUniqueInput | Prisma.SalesAffiliateRequestWhereUniqueInput[]
+  update?: Prisma.SalesAffiliateRequestUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesAffiliateRequestUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesAffiliateRequestUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesAffiliateRequestUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesAffiliateRequestScalarWhereInput | Prisma.SalesAffiliateRequestScalarWhereInput[]
+}
+
+export type SalesAffiliateRequestCreateWithoutMembershipInput = {
+  id: string
+  status?: string
+  note?: string | null
+  reviewed_by_membership_id?: string | null
+  reviewed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAffiliateRequestUncheckedCreateWithoutMembershipInput = {
+  id: string
+  status?: string
+  note?: string | null
+  reviewed_by_membership_id?: string | null
+  reviewed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAffiliateRequestCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesAffiliateRequestCreateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesAffiliateRequestCreateManyMembershipInputEnvelope = {
+  data: Prisma.SalesAffiliateRequestCreateManyMembershipInput | Prisma.SalesAffiliateRequestCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesAffiliateRequestUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateRequestWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesAffiliateRequestUpdateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.SalesAffiliateRequestCreateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesAffiliateRequestUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateRequestWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesAffiliateRequestUpdateWithoutMembershipInput, Prisma.SalesAffiliateRequestUncheckedUpdateWithoutMembershipInput>
+}
+
+export type SalesAffiliateRequestUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.SalesAffiliateRequestScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesAffiliateRequestUpdateManyMutationInput, Prisma.SalesAffiliateRequestUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type SalesAffiliateRequestScalarWhereInput = {
+  AND?: Prisma.SalesAffiliateRequestScalarWhereInput | Prisma.SalesAffiliateRequestScalarWhereInput[]
+  OR?: Prisma.SalesAffiliateRequestScalarWhereInput[]
+  NOT?: Prisma.SalesAffiliateRequestScalarWhereInput | Prisma.SalesAffiliateRequestScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesAffiliateRequest"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesAffiliateRequest"> | string
+  membership_id?: Prisma.UuidFilter<"SalesAffiliateRequest"> | string
+  status?: Prisma.StringFilter<"SalesAffiliateRequest"> | string
+  note?: Prisma.StringNullableFilter<"SalesAffiliateRequest"> | string | null
+  reviewed_by_membership_id?: Prisma.UuidNullableFilter<"SalesAffiliateRequest"> | string | null
+  reviewed_at?: Prisma.DateTimeNullableFilter<"SalesAffiliateRequest"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"SalesAffiliateRequest"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"SalesAffiliateRequest"> | Date | string
+}
+
+export type SalesAffiliateRequestCreateManyMembershipInput = {
+  id: string
+  status?: string
+  note?: string | null
+  reviewed_by_membership_id?: string | null
+  reviewed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesAffiliateRequestUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewed_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAffiliateRequestUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewed_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesAffiliateRequestUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewed_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type SalesAffiliateRequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -405,6 +557,7 @@ export type SalesAffiliateRequestSelect<ExtArgs extends runtime.Types.Extensions
   reviewed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliateRequest"]>
 
 export type SalesAffiliateRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -417,6 +570,7 @@ export type SalesAffiliateRequestSelectCreateManyAndReturn<ExtArgs extends runti
   reviewed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliateRequest"]>
 
 export type SalesAffiliateRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -429,6 +583,7 @@ export type SalesAffiliateRequestSelectUpdateManyAndReturn<ExtArgs extends runti
   reviewed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesAffiliateRequest"]>
 
 export type SalesAffiliateRequestSelectScalar = {
@@ -444,10 +599,21 @@ export type SalesAffiliateRequestSelectScalar = {
 }
 
 export type SalesAffiliateRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "status" | "note" | "reviewed_by_membership_id" | "reviewed_at" | "created_at" | "updated_at", ExtArgs["result"]["salesAffiliateRequest"]>
+export type SalesAffiliateRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type SalesAffiliateRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type SalesAffiliateRequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $SalesAffiliateRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesAffiliateRequest"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -855,6 +1021,7 @@ readonly fields: SalesAffiliateRequestFieldRefs;
  */
 export interface Prisma__SalesAffiliateRequestClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -910,6 +1077,10 @@ export type SalesAffiliateRequestFindUniqueArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAffiliateRequest to fetch.
    */
   where: Prisma.SalesAffiliateRequestWhereUniqueInput
@@ -928,6 +1099,10 @@ export type SalesAffiliateRequestFindUniqueOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAffiliateRequest to fetch.
    */
   where: Prisma.SalesAffiliateRequestWhereUniqueInput
@@ -945,6 +1120,10 @@ export type SalesAffiliateRequestFindFirstArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the SalesAffiliateRequest
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
   /**
    * Filter, which SalesAffiliateRequest to fetch.
    */
@@ -994,6 +1173,10 @@ export type SalesAffiliateRequestFindFirstOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
+  /**
    * Filter, which SalesAffiliateRequest to fetch.
    */
   where?: Prisma.SalesAffiliateRequestWhereInput
@@ -1041,6 +1224,10 @@ export type SalesAffiliateRequestFindManyArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the SalesAffiliateRequest
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
   /**
    * Filter, which SalesAffiliateRequests to fetch.
    */
@@ -1090,6 +1277,10 @@ export type SalesAffiliateRequestCreateArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
+  /**
    * The data needed to create a SalesAffiliateRequest.
    */
   data: Prisma.XOR<Prisma.SalesAffiliateRequestCreateInput, Prisma.SalesAffiliateRequestUncheckedCreateInput>
@@ -1123,6 +1314,10 @@ export type SalesAffiliateRequestCreateManyAndReturnArgs<ExtArgs extends runtime
    */
   data: Prisma.SalesAffiliateRequestCreateManyInput | Prisma.SalesAffiliateRequestCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1137,6 +1332,10 @@ export type SalesAffiliateRequestUpdateArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAffiliateRequest
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
   /**
    * The data needed to update a SalesAffiliateRequest.
    */
@@ -1189,6 +1388,10 @@ export type SalesAffiliateRequestUpdateManyAndReturnArgs<ExtArgs extends runtime
    * Limit how many SalesAffiliateRequests to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1203,6 +1406,10 @@ export type SalesAffiliateRequestUpsertArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAffiliateRequest
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
   /**
    * The filter to search for the SalesAffiliateRequest to update in case it exists.
    */
@@ -1229,6 +1436,10 @@ export type SalesAffiliateRequestDeleteArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesAffiliateRequest
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
   /**
    * Filter which SalesAffiliateRequest to delete.
    */
@@ -1261,4 +1472,8 @@ export type SalesAffiliateRequestDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the SalesAffiliateRequest
    */
   omit?: Prisma.SalesAffiliateRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesAffiliateRequestInclude<ExtArgs> | null
 }

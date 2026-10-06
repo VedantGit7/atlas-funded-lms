@@ -262,6 +262,68 @@ model Membership {
   user_roles                UserRole[]
   permission_overrides      PermissionOverride[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  at_risk_alerts AtRiskAlert[]
+  attribution_tokens AttributionToken[]
+  badge_awards BadgeAward[]
+  batch_memberships BatchMembership[]
+  bundle_enrollments BundleEnrollment[]
+  comments Comment[]
+  competency_score_snapshots CompetencyScoreSnapshot[]
+  competency_scores CompetencyScore[]
+  competency_signals CompetencySignal[]
+  composite_readiness_state CompositeReadinessState[]
+  course_reviews CourseReview[]
+  custom_field_value_history CustomFieldValueHistory[]
+  custom_field_values CustomFieldValue[]
+  device_security_alerts DeviceSecurityAlert[]
+  device_sessions DeviceSession[]
+  diagnostic_sessions DiagnosticSession[]
+  gamification_profiles GamificationProfile[]
+  grading_tasks GradingTask[]
+  group_memberships GroupMembership[]
+  identity_verifications IdentityVerification[]
+  learner_subscription_enrollments LearnerSubscriptionEnrollment[]
+  live_attendance LiveAttendance[]
+  marketing_event_registrations MarketingEventRegistration[]
+  marketing_newsfeed_saves MarketingNewsfeedSave[]
+  marketing_workflow_runs MarketingWorkflowRun[]
+  member_balances MemberBalance[]
+  mentions Mention[]
+  messenger_messages MessengerMessage[]
+  mock_test_enrollments MockTestEnrollment[]
+  module_scorm_progress ModuleScormProgress[]
+  notification_dispatches NotificationDispatch[]
+  path_enrollments PathEnrollment[]
+  path_step_progress PathStepProgress[]
+  point_ledger PointLedger[]
+  poll_responses PollResponse[]
+  posts Post[]
+  practice_responses PracticeResponse[]
+  practice_sessions PracticeSession[]
+  quest_progress QuestProgress[]
+  reactions Reaction[]
+  reward_redemptions RewardRedemption[]
+  sales_affiliate_commissions_affiliate_membership SalesAffiliateCommission[] @relation("sales_affiliate_commissions_affiliate_membership_id_tenant_fkey")
+  sales_affiliate_commissions_buyer_membership SalesAffiliateCommission[] @relation("sales_affiliate_commissions_buyer_membership_id_tenant_fkey")
+  sales_affiliate_payouts SalesAffiliatePayout[]
+  sales_affiliate_requests SalesAffiliateRequest[]
+  sales_affiliates SalesAffiliate[]
+  sales_attribution_events SalesAttributionEvent[]
+  sales_referral_attributions_referee_membership SalesReferralAttribution[] @relation("sales_referral_attributions_referee_membership_id_tenant_fkey")
+  sales_referral_attributions_referrer_membership SalesReferralAttribution[] @relation("sales_referral_attributions_referrer_membership_id_tenant_fkey")
+  sales_referral_codes SalesReferralCode[]
+  sales_referral_purchase_credits_referee_membership SalesReferralPurchaseCredit[] @relation("sales_referral_purchase_credits_referee_membership_tenant_fkey")
+  sales_referral_purchase_credits_referrer_membership SalesReferralPurchaseCredit[] @relation("sales_referral_purchase_credits_referrer_membership_tenant_fkey")
+  srs_state SrsState[]
+  streak_freezes StreakFreeze[]
+  streak_states StreakState[]
+  tenant_active_days TenantActiveDay[]
+  test_series_enrollments TestSeriesEnrollment[]
+  test_series_item_progress TestSeriesItemProgress[]
+  whatsapp_conversations WhatsappConversation[]
+  zoom_meeting_participants ZoomMeetingParticipant[]
+
   @@unique([tenant_id, id], map: "memberships_tenant_id_id_key")
   @@unique([tenant_id, auth_principal_id])
   @@index([tenant_id, status])
@@ -504,6 +566,9 @@ model TenantActiveDay {
   membership_id String   @db.Uuid
   day           DateTime @db.Date
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "tenant_active_days_membership_id_tenant_fkey")
+
   @@id([tenant_id, membership_id, day])
   @@index([tenant_id, day])
   @@map("tenant_active_days")
@@ -540,6 +605,10 @@ model LearnerBillingLocation {
   created_at  DateTime @default(now()) @db.Timestamptz(6)
   updated_at  DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  payment_gateways PaymentGateway[]
+
+  @@unique([tenant_id, id], map: "learner_billing_locations_tenant_id_id_key")
   @@index([tenant_id])
   @@map("learner_billing_locations")
 }
@@ -573,6 +642,11 @@ model PaymentGateway {
   created_at          DateTime @default(now()) @db.Timestamptz(6)
   updated_at          DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  billing_location LearnerBillingLocation? @relation(fields: [tenant_id, billing_location_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "payment_gateways_billing_location_id_tenant_fkey")
+  payment_refund_intents PaymentRefundIntent[]
+
+  @@unique([tenant_id, id], map: "payment_gateways_tenant_id_id_key")
   @@unique([tenant_id, gateway_key])
   @@index([tenant_id])
   @@map("payment_gateways")
@@ -629,6 +703,11 @@ model OutboxEvent {
   occurred_at     DateTime @default(now()) @db.Timestamptz(6)
   available_at    DateTime @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  dead_letter_events DeadLetterEvent[]
+  event_deliveries EventDelivery[]
+
+  @@unique([tenant_id, id], map: "outbox_events_tenant_id_id_key")
   @@index([tenant_id, event_type, occurred_at])
   @@index([available_at])
   @@map("outbox_events")
@@ -646,6 +725,9 @@ model EventDelivery {
   response_json   Json?
   created_at      DateTime       @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  outbox_event OutboxEvent? @relation(fields: [tenant_id, outbox_event_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "event_deliveries_outbox_event_id_tenant_fkey")
+
   @@unique([outbox_event_id, destination_key, attempt_count], map: "event_deliveries_event_destination_attempt_key")
   @@index([tenant_id, status, next_attempt_at])
   @@map("event_deliveries")
@@ -658,6 +740,9 @@ model DeadLetterEvent {
   destination_key String?
   error_json      Json
   failed_at       DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  outbox_event OutboxEvent? @relation(fields: [tenant_id, outbox_event_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "dead_letter_events_outbox_event_id_tenant_fkey")
 
   @@index([tenant_id, failed_at])
   @@map("dead_letter_events")
@@ -800,6 +885,15 @@ model Course {
   sales_wallet_transactions   SalesWalletTransaction[]
   sales_affiliate_commissions SalesAffiliateCommission[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  batches Batch[]
+  course_backup_jobs CourseBackupJob[]
+  course_reviews CourseReview[]
+  course_tags CourseTag[]
+  live_sessions LiveSession[]
+  quest_definitions QuestDefinition[]
+  sales_affiliate_products SalesAffiliateProduct[]
+
   @@unique([tenant_id, id], map: "courses_tenant_id_id_key")
   @@index([tenant_id, slug])
   @@index([tenant_id, status, updated_at])
@@ -826,6 +920,9 @@ model CourseModule {
   course  Course   @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "course_modules_course_id_tenant_fkey")
   lessons Lesson[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  module_scorm_progress ModuleScormProgress[]
+
   @@unique([tenant_id, id], map: "course_modules_tenant_id_id_key")
   @@unique([tenant_id, course_id, position])
   @@index([tenant_id, course_id])
@@ -844,6 +941,10 @@ model ModuleScormProgress {
   completed_at  DateTime? @db.Timestamptz(6)
   last_seen_at  DateTime? @db.Timestamptz(6)
   updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "module_scorm_progress_membership_id_tenant_fkey")
+  module CourseModule @relation(fields: [tenant_id, module_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "module_scorm_progress_module_id_tenant_fkey")
 
   @@unique([tenant_id, module_id, membership_id])
   @@index([tenant_id, membership_id, updated_at])
@@ -871,6 +972,9 @@ model Lesson {
   lesson_assets   LessonAsset[]
   lesson_progress LessonProgress[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  lesson_tags LessonTag[]
+
   @@unique([tenant_id, id], map: "lessons_tenant_id_id_key")
   @@unique([tenant_id, module_id, position])
   @@index([tenant_id, slug])
@@ -895,6 +999,11 @@ model Tag {
   updated_at  DateTime            @updatedAt @db.Timestamptz(6)
   deleted_at  DateTime?           @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  course_tags CourseTag[]
+  lesson_tags LessonTag[]
+
+  @@unique([tenant_id, id], map: "tags_tenant_id_id_key")
   @@unique([tenant_id, slug])
   @@index([tenant_id, visibility])
   @@index([tenant_id, deleted_at])
@@ -908,6 +1017,10 @@ model LessonTag {
   tag_id     String   @db.Uuid
   created_at DateTime @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  lesson Lesson @relation(fields: [tenant_id, lesson_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "lesson_tags_lesson_id_tenant_fkey")
+  tag Tag @relation(fields: [tenant_id, tag_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "lesson_tags_tag_id_tenant_fkey")
+
   @@unique([tenant_id, lesson_id, tag_id])
   @@index([tenant_id, tag_id])
   @@index([tenant_id, lesson_id])
@@ -920,6 +1033,10 @@ model CourseTag {
   course_id  String   @db.Uuid
   tag_id     String   @db.Uuid
   created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  course Course @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "course_tags_course_id_tenant_fkey")
+  tag Tag @relation(fields: [tenant_id, tag_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "course_tags_tag_id_tenant_fkey")
 
   @@unique([tenant_id, course_id, tag_id])
   @@index([tenant_id, tag_id])
@@ -967,6 +1084,11 @@ model MockTest {
 
   enrollments MockTestEnrollment[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  assessment Assessment @relation(fields: [tenant_id, assessment_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "mock_tests_assessment_id_tenant_fkey")
+  test_series_items TestSeriesItem[]
+
+  @@unique([tenant_id, id], map: "mock_tests_tenant_id_id_key")
   @@unique([tenant_id, slug])
   @@index([tenant_id, status, updated_at])
   @@index([tenant_id, assessment_id])
@@ -985,6 +1107,9 @@ model MockTestEnrollment {
   completed_at  DateTime? @db.Timestamptz(6)
 
   mock_test MockTest @relation(fields: [mock_test_id], references: [id], onDelete: Cascade)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "mock_test_enrollments_membership_id_tenant_fkey")
 
   @@unique([tenant_id, mock_test_id, membership_id])
   @@index([tenant_id, membership_id, status])
@@ -1029,6 +1154,10 @@ model TestSeriesItem {
   test_series TestSeries               @relation(fields: [test_series_id], references: [id], onDelete: Cascade)
   progress    TestSeriesItemProgress[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  assessment Assessment? @relation(fields: [tenant_id, assessment_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "test_series_items_assessment_id_tenant_fkey")
+  mock_test MockTest? @relation(fields: [tenant_id, mock_test_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "test_series_items_mock_test_id_tenant_fkey")
+
   @@unique([tenant_id, test_series_id, position])
   @@index([tenant_id, test_series_id])
   @@index([tenant_id, mock_test_id])
@@ -1049,6 +1178,9 @@ model TestSeriesEnrollment {
 
   test_series TestSeries @relation(fields: [test_series_id], references: [id], onDelete: Cascade)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "test_series_enrollments_membership_id_tenant_fkey")
+
   @@unique([tenant_id, test_series_id, membership_id])
   @@index([tenant_id, membership_id, status])
   @@index([tenant_id, enrolled_at(sort: Desc)])
@@ -1067,6 +1199,10 @@ model TestSeriesItemProgress {
   updated_at          DateTime  @updatedAt @db.Timestamptz(6)
 
   item TestSeriesItem @relation(fields: [test_series_item_id], references: [id], onDelete: Cascade)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  attempt Attempt? @relation(fields: [tenant_id, attempt_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "test_series_item_progress_attempt_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "test_series_item_progress_membership_id_tenant_fkey")
 
   @@unique([tenant_id, test_series_item_id, membership_id])
   @@index([tenant_id, membership_id, updated_at])
@@ -1125,6 +1261,9 @@ model BundleEnrollment {
   completed_at  DateTime? @db.Timestamptz(6)
 
   bundle Bundle @relation(fields: [bundle_id], references: [id], onDelete: Cascade)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "bundle_enrollments_membership_id_tenant_fkey")
 
   @@unique([tenant_id, bundle_id, membership_id])
   @@index([tenant_id, membership_id, status])
@@ -1190,6 +1329,9 @@ model LearnerSubscriptionEnrollment {
 
   plan LearnerSubscriptionPlan @relation(fields: [plan_id], references: [id], onDelete: Cascade)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "learner_subscription_enrollments_membership_id_tenant_fkey")
+
   @@unique([tenant_id, plan_id, membership_id])
   @@index([tenant_id, membership_id, status])
   @@index([tenant_id, enrolled_at(sort: Desc)])
@@ -1228,6 +1370,10 @@ model CourseReview {
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  course Course @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "course_reviews_course_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "course_reviews_membership_id_tenant_fkey")
+
   @@unique([tenant_id, course_id, membership_id])
   @@index([tenant_id, course_id])
   @@index([tenant_id, membership_id])
@@ -1245,6 +1391,10 @@ model WorkflowDefinition {
   created_at      DateTime     @default(now()) @db.Timestamptz(6)
   updated_at      DateTime     @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  workflow_transitions WorkflowTransition[]
+
+  @@unique([tenant_id, id], map: "workflow_definitions_tenant_id_id_key")
   @@unique([tenant_id, key])
   @@map("workflow_definitions")
 }
@@ -1261,6 +1411,9 @@ model WorkflowTransition {
   reason                 String?
   metadata_json          Json?
   occurred_at            DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  workflow_definition WorkflowDefinition @relation(fields: [tenant_id, workflow_definition_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "workflow_transitions_workflow_definition_id_tenant_fkey")
 
   @@index([tenant_id, target_type, target_id, occurred_at])
   @@index([tenant_id, actor_membership_id, occurred_at])
@@ -1281,6 +1434,11 @@ model LearningPath {
   updated_at               DateTime      @updatedAt @db.Timestamptz(6)
   deleted_at               DateTime?     @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  path_enrollments PathEnrollment[]
+  path_steps PathStep[]
+
+  @@unique([tenant_id, id], map: "learning_paths_tenant_id_id_key")
   @@index([tenant_id, slug])
   @@index([tenant_id, status])
   @@index([tenant_id, path_type, status])
@@ -1298,6 +1456,11 @@ model PathStep {
   created_at DateTime @default(now()) @db.Timestamptz(6)
   updated_at DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  path_step_gates PathStepGate[]
+  path LearningPath @relation(fields: [tenant_id, path_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "path_steps_path_id_tenant_fkey")
+
+  @@unique([tenant_id, id], map: "path_steps_tenant_id_id_key")
   @@unique([tenant_id, path_id, position])
   @@index([tenant_id, path_id])
   @@map("path_steps")
@@ -1312,6 +1475,9 @@ model PathStepGate {
   created_at   DateTime @default(now()) @db.Timestamptz(6)
   updated_at   DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  path_step PathStep @relation(fields: [tenant_id, path_step_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "path_step_gates_path_step_id_tenant_fkey")
+
   @@index([tenant_id, path_step_id])
   @@map("path_step_gates")
 }
@@ -1324,6 +1490,10 @@ model PathEnrollment {
   status        String    @default("active")
   enrolled_at   DateTime  @default(now()) @db.Timestamptz(6)
   completed_at  DateTime? @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "path_enrollments_membership_id_tenant_fkey")
+  path LearningPath @relation(fields: [tenant_id, path_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "path_enrollments_path_id_tenant_fkey")
 
   @@unique([tenant_id, path_id, membership_id])
   @@index([tenant_id, membership_id, status])
@@ -1338,6 +1508,9 @@ model PathStepProgress {
   status        String    @default("locked")
   completed_at  DateTime? @db.Timestamptz(6)
   updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "path_step_progress_membership_id_tenant_fkey")
 
   @@unique([tenant_id, path_step_id, membership_id])
   @@index([tenant_id, membership_id, updated_at])
@@ -1376,6 +1549,13 @@ model Item {
   assessment_items AssessmentItem[]
   item_options     ItemOption[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  item_collection_items ItemCollectionItem[]
+  item_dimension_weights ItemDimensionWeight[]
+  item_statistics ItemStatistic[]
+  practice_responses PracticeResponse[]
+  srs_state SrsState[]
+
   @@unique([tenant_id, id], map: "items_tenant_id_id_key")
   @@index([tenant_id, item_type_key, status])
   @@index([tags], type: Gin)
@@ -1408,6 +1588,10 @@ model ItemDimensionWeight {
   weight       Decimal  @db.Decimal(8, 4)
   created_at   DateTime @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  dimension CompetencyDimension @relation(fields: [tenant_id, dimension_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "item_dimension_weights_dimension_id_tenant_fkey")
+  item Item @relation(fields: [tenant_id, item_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "item_dimension_weights_item_id_tenant_fkey")
+
   @@unique([tenant_id, item_id, dimension_id])
   @@index([tenant_id, dimension_id])
   @@map("item_dimension_weights")
@@ -1427,6 +1611,11 @@ model ItemCollection {
   updated_at               DateTime      @updatedAt @db.Timestamptz(6)
   deleted_at               DateTime?     @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  item_collection_items ItemCollectionItem[]
+  practice_sessions PracticeSession[]
+
+  @@unique([tenant_id, id], map: "item_collections_tenant_id_id_key")
   @@index([tenant_id, slug])
   @@index([tenant_id, collection_type, status])
   @@index([tenant_id, created_by_membership_id])
@@ -1441,6 +1630,10 @@ model ItemCollectionItem {
   position      Int
   weight        Decimal? @db.Decimal(8, 4)
   created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  collection ItemCollection @relation(fields: [tenant_id, collection_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "item_collection_items_collection_id_tenant_fkey")
+  item Item @relation(fields: [tenant_id, item_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "item_collection_items_item_id_tenant_fkey")
 
   @@unique([tenant_id, collection_id, item_id])
   @@unique([tenant_id, collection_id, position])
@@ -1462,6 +1655,11 @@ model Assessment {
   // Composite tenant foreign keys (audit M3).
   assessment_items AssessmentItem[]
   attempts         Attempt[]
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  diagnostic_sessions DiagnosticSession[]
+  mock_tests MockTest[]
+  test_series_items TestSeriesItem[]
 
   @@unique([tenant_id, id], map: "assessments_tenant_id_id_key")
   @@unique([tenant_id, slug])
@@ -1510,6 +1708,10 @@ model Attempt {
   grading_tasks       GradingTask[]
   proctoring_sessions ProctoringSession[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  diagnostic_sessions DiagnosticSession[]
+  test_series_item_progress TestSeriesItemProgress[]
+
   @@unique([tenant_id, id], map: "attempts_tenant_id_id_key")
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, assessment_id, membership_id, started_at])
@@ -1552,6 +1754,9 @@ model GradingTask {
   // Composite tenant foreign keys (audit M3).
   attempt Attempt @relation(fields: [tenant_id, attempt_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "grading_tasks_attempt_id_tenant_fkey")
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  assigned_to_membership Membership? @relation(fields: [tenant_id, assigned_to_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "grading_tasks_assigned_to_membership_id_tenant_fkey")
+
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, assigned_to_membership_id, status])
   @@map("grading_tasks")
@@ -1590,6 +1795,10 @@ model ProctoringSession {
   membership        Membership        @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "proctoring_sessions_membership_id_tenant_fkey")
   proctoring_events ProctoringEvent[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  identity_verifications IdentityVerification[]
+  proctoring_reports ProctoringReport[]
+
   @@unique([tenant_id, id], map: "proctoring_sessions_tenant_id_id_key")
   @@unique([tenant_id, attempt_id])
   @@index([tenant_id, membership_id, started_at])
@@ -1625,6 +1834,9 @@ model ProctoringReport {
   report_json           Json
   generated_at          DateTime @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  proctoring_session ProctoringSession @relation(fields: [tenant_id, proctoring_session_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "proctoring_reports_proctoring_session_id_tenant_fkey")
+
   @@index([tenant_id, generated_at])
   @@map("proctoring_reports")
 }
@@ -1640,6 +1852,10 @@ model IdentityVerification {
   metadata_json         Json?
   verified_at           DateTime? @db.Timestamptz(6)
   created_at            DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "identity_verifications_membership_id_tenant_fkey")
+  proctoring_session ProctoringSession @relation(fields: [tenant_id, proctoring_session_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "identity_verifications_proctoring_session_id_tenant_fkey")
 
   @@index([tenant_id, membership_id, created_at])
   @@map("identity_verifications")
@@ -1679,6 +1895,12 @@ model PracticeSession {
   summary_json    Json?
   idempotency_key String?
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  practice_responses PracticeResponse[]
+  collection ItemCollection? @relation(fields: [tenant_id, collection_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "practice_sessions_collection_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "practice_sessions_membership_id_tenant_fkey")
+
+  @@unique([tenant_id, id], map: "practice_sessions_tenant_id_id_key")
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, membership_id, started_at])
   @@map("practice_sessions")
@@ -1696,6 +1918,11 @@ model PracticeResponse {
   occurred_at         DateTime @default(now()) @db.Timestamptz(6)
   idempotency_key     String
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  item Item @relation(fields: [tenant_id, item_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "practice_responses_item_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "practice_responses_membership_id_tenant_fkey")
+  practice_session PracticeSession @relation(fields: [tenant_id, practice_session_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "practice_responses_practice_session_id_tenant_fkey")
+
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, membership_id, occurred_at])
   @@index([tenant_id, item_id, occurred_at])
@@ -1712,6 +1939,10 @@ model SrsState {
   due_at        DateTime @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  item Item @relation(fields: [tenant_id, item_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "srs_state_item_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "srs_state_membership_id_tenant_fkey")
+
   @@unique([tenant_id, membership_id, item_id])
   @@index([tenant_id, membership_id, due_at])
   @@map("srs_state")
@@ -1726,6 +1957,12 @@ model CompetencyDimension {
   created_at  DateTime @default(now()) @db.Timestamptz(6)
   updated_at  DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  competency_scores CompetencyScore[]
+  competency_signals CompetencySignal[]
+  item_dimension_weights ItemDimensionWeight[]
+
+  @@unique([tenant_id, id], map: "competency_dimensions_tenant_id_id_key")
   @@unique([tenant_id, key])
   @@map("competency_dimensions")
 }
@@ -1740,6 +1977,15 @@ model ScoringProfile {
   created_at               DateTime     @default(now()) @db.Timestamptz(6)
   updated_at               DateTime     @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  competency_bands CompetencyBand[]
+  competency_score_snapshots CompetencyScoreSnapshot[]
+  competency_scores CompetencyScore[]
+  composite_readiness_state CompositeReadinessState[]
+  readiness_policies ReadinessPolicy[]
+  scoring_config_versions ScoringConfigVersion[]
+
+  @@unique([tenant_id, id], map: "scoring_profiles_tenant_id_id_key")
   @@unique([tenant_id, key])
   @@map("scoring_profiles")
 }
@@ -1754,6 +2000,12 @@ model ScoringConfigVersion {
   created_by_membership_id String?   @db.Uuid
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  competency_scores CompetencyScore[]
+  composite_readiness_state CompositeReadinessState[]
+  scoring_profile ScoringProfile @relation(fields: [tenant_id, scoring_profile_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "scoring_config_versions_scoring_profile_id_tenant_fkey")
+
+  @@unique([tenant_id, id], map: "scoring_config_versions_tenant_id_id_key")
   @@unique([tenant_id, scoring_profile_id, version])
   @@index([tenant_id, scoring_profile_id, activated_at])
   @@map("scoring_config_versions")
@@ -1770,6 +2022,9 @@ model CompetencyBand {
   sort_order         Int
   created_at         DateTime @default(now()) @db.Timestamptz(6)
   updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  scoring_profile ScoringProfile @relation(fields: [tenant_id, scoring_profile_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_bands_scoring_profile_id_tenant_fkey")
 
   @@unique([tenant_id, scoring_profile_id, key])
   @@map("competency_bands")
@@ -1801,6 +2056,10 @@ model CompetencySignal {
   occurred_at       DateTime @default(now()) @db.Timestamptz(6)
   idempotency_key   String
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  dimension CompetencyDimension @relation(fields: [tenant_id, dimension_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_signals_dimension_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_signals_membership_id_tenant_fkey")
+
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, membership_id, dimension_id, occurred_at])
   @@index([tenant_id, signal_source_key, occurred_at])
@@ -1817,6 +2076,12 @@ model CompetencyScore {
   band_key           String?
   calculated_at      DateTime @default(now()) @db.Timestamptz(6)
   config_version_id  String   @db.Uuid
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  config_version ScoringConfigVersion @relation(fields: [tenant_id, config_version_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_scores_config_version_id_tenant_fkey")
+  dimension CompetencyDimension @relation(fields: [tenant_id, dimension_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_scores_dimension_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_scores_membership_id_tenant_fkey")
+  scoring_profile ScoringProfile @relation(fields: [tenant_id, scoring_profile_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_scores_scoring_profile_id_tenant_fkey")
 
   @@unique([tenant_id, membership_id, dimension_id, scoring_profile_id])
   @@index([tenant_id, dimension_id, band_key])
@@ -1835,6 +2100,11 @@ model CompositeReadinessState {
   calculated_at      DateTime @default(now()) @db.Timestamptz(6)
   config_version_id  String   @db.Uuid
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  config_version ScoringConfigVersion @relation(fields: [tenant_id, config_version_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "composite_readiness_state_config_version_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "composite_readiness_state_membership_id_tenant_fkey")
+  scoring_profile ScoringProfile @relation(fields: [tenant_id, scoring_profile_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "composite_readiness_state_scoring_profile_id_tenant_fkey")
+
   @@unique([tenant_id, membership_id, scoring_profile_id, composite_key])
   @@index([tenant_id, composite_key, band_key])
   @@map("composite_readiness_state")
@@ -1847,6 +2117,10 @@ model CompetencyScoreSnapshot {
   scoring_profile_id String   @db.Uuid
   snapshot_json      Json
   occurred_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_score_snapshots_membership_id_tenant_fkey")
+  scoring_profile ScoringProfile @relation(fields: [tenant_id, scoring_profile_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "competency_score_snapshots_scoring_profile_id_tenant_fkey")
 
   @@index([tenant_id, membership_id, occurred_at])
   @@map("competency_score_snapshots")
@@ -1867,6 +2141,11 @@ model DiagnosticSession {
   merge_json      Json?
   metadata_json   Json?
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  assessment Assessment? @relation(fields: [tenant_id, assessment_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "diagnostic_sessions_assessment_id_tenant_fkey")
+  attempt Attempt? @relation(fields: [tenant_id, attempt_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "diagnostic_sessions_attempt_id_tenant_fkey")
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "diagnostic_sessions_membership_id_tenant_fkey")
+
   @@index([tenant_id, anonymous_id, started_at])
   @@index([tenant_id, membership_id, started_at])
   @@map("diagnostic_sessions")
@@ -1882,6 +2161,9 @@ model ReadinessPolicy {
   status             EntityStatus @default(ACTIVE)
   created_at         DateTime     @default(now()) @db.Timestamptz(6)
   updated_at         DateTime     @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  scoring_profile ScoringProfile @relation(fields: [tenant_id, scoring_profile_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "readiness_policies_scoring_profile_id_tenant_fkey")
 
   @@unique([tenant_id, key])
   @@map("readiness_policies")
@@ -1901,6 +2183,9 @@ model AttributionToken {
   expires_at         DateTime  @db.Timestamptz(6)
   consumed_at        DateTime? @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "attribution_tokens_membership_id_tenant_fkey")
+
   @@index([tenant_id, membership_id, created_at])
   @@index([tenant_id, anonymous_id, created_at])
   @@map("attribution_tokens")
@@ -1917,6 +2202,10 @@ model CertificateTemplate {
   updated_at    DateTime      @updatedAt @db.Timestamptz(6)
   deleted_at    DateTime?     @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  certificates Certificate[]
+
+  @@unique([tenant_id, id], map: "certificate_templates_tenant_id_id_key")
   @@index([tenant_id, key])
   @@map("certificate_templates")
 }
@@ -1951,6 +2240,9 @@ model Certificate {
   certificate_wallet_passes CertificateWalletPass[]
   credential_verifications  CredentialVerification[]
   certificate_render_jobs   CertificateRenderJob[]
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  template CertificateTemplate @relation(fields: [tenant_id, template_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "certificates_template_id_tenant_fkey")
 
   @@unique([tenant_id, id], map: "certificates_tenant_id_id_key")
   @@index([tenant_id, membership_id, issued_at])
@@ -2055,6 +2347,9 @@ model GamificationProfile {
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "gamification_profiles_membership_id_tenant_fkey")
+
   @@unique([tenant_id, membership_id])
   @@index([tenant_id, xp_total])
   @@map("gamification_profiles")
@@ -2070,6 +2365,9 @@ model PointLedger {
   idempotency_key String
   metadata_json   Json?
   occurred_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "point_ledger_membership_id_tenant_fkey")
 
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, membership_id, occurred_at])
@@ -2087,6 +2385,10 @@ model Badge {
   created_at    DateTime     @default(now()) @db.Timestamptz(6)
   updated_at    DateTime     @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  badge_awards BadgeAward[]
+
+  @@unique([tenant_id, id], map: "badges_tenant_id_id_key")
   @@unique([tenant_id, key])
   @@map("badges")
 }
@@ -2098,6 +2400,10 @@ model BadgeAward {
   membership_id   String   @db.Uuid
   awarded_at      DateTime @default(now()) @db.Timestamptz(6)
   source_event_id String?  @db.Uuid
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  badge Badge @relation(fields: [tenant_id, badge_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "badge_awards_badge_id_tenant_fkey")
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "badge_awards_membership_id_tenant_fkey")
 
   @@unique([tenant_id, badge_id, membership_id])
   @@index([tenant_id, membership_id, awarded_at])
@@ -2114,6 +2420,9 @@ model StreakState {
   last_activity_date DateTime? @db.Date
   updated_at         DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "streak_states_membership_id_tenant_fkey")
+
   @@unique([tenant_id, membership_id, streak_key])
   @@map("streak_states")
 }
@@ -2128,6 +2437,9 @@ model StreakFreeze {
   created_at    DateTime  @default(now()) @db.Timestamptz(6)
   updated_at    DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "streak_freezes_membership_id_tenant_fkey")
+
   @@index([tenant_id, membership_id, streak_key, status])
   @@map("streak_freezes")
 }
@@ -2141,6 +2453,9 @@ model GroupStreakState {
   longest_count        Int      @default(0)
   last_activity_period String?
   updated_at           DateTime @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  space CommunitySpace @relation(fields: [tenant_id, space_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "group_streak_states_space_id_tenant_fkey")
 
   @@unique([tenant_id, space_id, streak_key])
   @@index([tenant_id, space_id])
@@ -2192,6 +2507,9 @@ model QuestDefinition {
   created_at    DateTime     @default(now()) @db.Timestamptz(6)
   updated_at    DateTime     @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  course Course? @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "quest_definitions_course_id_tenant_fkey")
+
   @@unique([tenant_id, key])
   @@index([tenant_id, status])
   @@map("quest_definitions")
@@ -2207,6 +2525,9 @@ model QuestProgress {
   completed_at  DateTime? @db.Timestamptz(6)
   created_at    DateTime  @default(now()) @db.Timestamptz(6)
   updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "quest_progress_membership_id_tenant_fkey")
 
   @@unique([tenant_id, quest_id, membership_id])
   @@index([tenant_id, membership_id, status])
@@ -2235,6 +2556,9 @@ model MemberBalance {
   balance       Int      @default(0)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "member_balances_membership_id_tenant_fkey")
+
   @@unique([tenant_id, membership_id, currency_key])
   @@map("member_balances")
 }
@@ -2254,6 +2578,10 @@ model RewardItem {
   created_at          DateTime     @default(now()) @db.Timestamptz(6)
   updated_at          DateTime     @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  reward_redemptions RewardRedemption[]
+
+  @@unique([tenant_id, id], map: "reward_items_tenant_id_id_key")
   @@unique([tenant_id, key])
   @@index([tenant_id, status])
   @@map("reward_items")
@@ -2267,6 +2595,10 @@ model RewardRedemption {
   cost_amount    Int
   status         String
   redeemed_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "reward_redemptions_membership_id_tenant_fkey")
+  reward_item RewardItem @relation(fields: [tenant_id, reward_item_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "reward_redemptions_reward_item_id_tenant_fkey")
 
   @@index([tenant_id, membership_id, redeemed_at])
   @@index([tenant_id, redeemed_at])
@@ -2324,6 +2656,9 @@ model NotificationDispatch {
   created_at      DateTime       @default(now()) @db.Timestamptz(6)
   sent_at         DateTime?      @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "notification_dispatches_membership_id_tenant_fkey")
+
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, membership_id, created_at])
   @@index([tenant_id, status, created_at], map: "notification_dispatches_tenant_status_created_at_idx")
@@ -2341,6 +2676,12 @@ model CommunitySpace {
   updated_at  DateTime   @updatedAt @db.Timestamptz(6)
   deleted_at  DateTime?  @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  group_memberships GroupMembership[]
+  group_streak_states GroupStreakState[]
+  posts Post[]
+
+  @@unique([tenant_id, id], map: "community_spaces_tenant_id_id_key")
   @@index([tenant_id, slug])
   @@index([tenant_id, visibility])
   @@map("community_spaces")
@@ -2353,6 +2694,10 @@ model GroupMembership {
   membership_id String   @db.Uuid
   role_key      String   @default("member")
   joined_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "group_memberships_membership_id_tenant_fkey")
+  space CommunitySpace @relation(fields: [tenant_id, space_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "group_memberships_space_id_tenant_fkey")
 
   @@unique([tenant_id, space_id, membership_id])
   @@index([tenant_id, membership_id])
@@ -2371,6 +2716,12 @@ model Post {
   updated_at           DateTime  @updatedAt @db.Timestamptz(6)
   deleted_at           DateTime? @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  comments Comment[]
+  author_membership Membership @relation(fields: [tenant_id, author_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "posts_author_membership_id_tenant_fkey")
+  space CommunitySpace @relation(fields: [tenant_id, space_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "posts_space_id_tenant_fkey")
+
+  @@unique([tenant_id, id], map: "posts_tenant_id_id_key")
   @@index([tenant_id, space_id, created_at])
   @@index([tenant_id, author_membership_id, created_at])
   @@map("posts")
@@ -2388,6 +2739,10 @@ model Comment {
   updated_at           DateTime  @updatedAt @db.Timestamptz(6)
   deleted_at           DateTime? @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  author_membership Membership @relation(fields: [tenant_id, author_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "comments_author_membership_id_tenant_fkey")
+  post Post @relation(fields: [tenant_id, post_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "comments_post_id_tenant_fkey")
+
   @@index([tenant_id, post_id, created_at])
   @@map("comments")
 }
@@ -2401,6 +2756,9 @@ model Reaction {
   reaction_key  String
   created_at    DateTime @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "reactions_membership_id_tenant_fkey")
+
   @@unique([tenant_id, membership_id, target_type, target_id, reaction_key])
   @@index([tenant_id, target_type, target_id])
   @@map("reactions")
@@ -2413,6 +2771,9 @@ model Mention {
   source_type             String
   source_id               String   @db.Uuid
   created_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  mentioned_membership Membership @relation(fields: [tenant_id, mentioned_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "mentions_mentioned_membership_id_tenant_fkey")
 
   @@index([tenant_id, mentioned_membership_id, created_at])
   @@map("mentions")
@@ -2429,6 +2790,11 @@ model ModerationCase {
   created_at              DateTime         @default(now()) @db.Timestamptz(6)
   updated_at              DateTime         @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  appeals Appeal[]
+  moderation_decisions ModerationDecision[]
+
+  @@unique([tenant_id, id], map: "moderation_cases_tenant_id_id_key")
   @@index([tenant_id, status, created_at])
   @@map("moderation_cases")
 }
@@ -2441,6 +2807,9 @@ model ModerationDecision {
   decision_key             String
   decision_json            Json?
   occurred_at              DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  moderation_case ModerationCase @relation(fields: [tenant_id, moderation_case_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "moderation_decisions_moderation_case_id_tenant_fkey")
 
   @@index([tenant_id, moderation_case_id, occurred_at])
   @@map("moderation_decisions")
@@ -2455,6 +2824,9 @@ model Appeal {
   body                       String
   created_at                 DateTime @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  moderation_case ModerationCase @relation(fields: [tenant_id, moderation_case_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "appeals_moderation_case_id_tenant_fkey")
 
   @@index([tenant_id, status, created_at])
   @@map("appeals")
@@ -2519,6 +2891,9 @@ model ItemStatistic {
   avg_latency_ms Int?
   metrics_json   Json?
   calculated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  item Item @relation(fields: [tenant_id, item_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "item_statistics_item_id_tenant_fkey")
 
   @@unique([tenant_id, item_id, window_key])
   @@index([tenant_id, calculated_at])
@@ -2796,6 +3171,10 @@ model ReportDeliveryDestination {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  report_delivery_effects ReportDeliveryEffect[]
+
+  @@unique([tenant_id, id], map: "report_delivery_destinations_tenant_id_id_key")
   @@index([tenant_id, kind, is_active], map: "report_delivery_destinations_tenant_kind_active_idx")
   @@index([tenant_id, updated_at], map: "report_delivery_destinations_tenant_updated_idx")
   @@map("report_delivery_destinations")
@@ -2843,6 +3222,9 @@ model AtRiskAlert {
 
   rule AtRiskRule @relation(fields: [at_risk_rule_id], references: [id], onDelete: Cascade)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "at_risk_alerts_membership_id_tenant_fkey")
+
   @@index([tenant_id, status, triggered_at])
   @@index([tenant_id, membership_id])
   @@map("at_risk_alerts")
@@ -2865,6 +3247,9 @@ model DeviceSecurityAlert {
   notes_json    Json?
   created_at    DateTime  @default(now()) @db.Timestamptz(6)
   updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "device_security_alerts_membership_id_tenant_fkey")
 
   @@unique([tenant_id, alert_key])
   @@index([tenant_id, status, detected_at])
@@ -2915,6 +3300,9 @@ model DeviceSession {
   last_seen_at       DateTime @default(now()) @db.Timestamptz(6)
   created_at         DateTime @default(now()) @db.Timestamptz(6)
   updated_at         DateTime @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "device_sessions_membership_id_tenant_fkey")
 
   @@index([tenant_id, membership_id, last_seen_at])
   @@index([tenant_id, last_seen_at])
@@ -3025,6 +3413,11 @@ model Batch {
 
   memberships BatchMembership[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  course Course? @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "batches_course_id_tenant_fkey")
+  live_sessions LiveSession[]
+
+  @@unique([tenant_id, id], map: "batches_tenant_id_id_key")
   @@unique([tenant_id, key])
   @@index([tenant_id, status])
   @@index([tenant_id, starts_at])
@@ -3041,6 +3434,9 @@ model BatchMembership {
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
 
   batch Batch @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "batch_memberships_membership_id_tenant_fkey")
 
   @@unique([tenant_id, batch_id, membership_id])
   @@index([tenant_id, membership_id])
@@ -3071,6 +3467,9 @@ model Poll {
 
   options   PollOption[]
   responses PollResponse[]
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  live_session LiveSession? @relation(fields: [tenant_id, live_session_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "polls_live_session_id_tenant_fkey")
 
   @@index([tenant_id, status])
   @@index([tenant_id, live_session_id])
@@ -3106,6 +3505,9 @@ model PollResponse {
   poll   Poll       @relation(fields: [poll_id], references: [id], onDelete: Cascade)
   option PollOption @relation(fields: [poll_option_id], references: [id], onDelete: Cascade)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "poll_responses_membership_id_tenant_fkey")
+
   @@unique([tenant_id, poll_id, membership_id])
   @@index([tenant_id, poll_id])
   @@map("poll_responses")
@@ -3127,6 +3529,9 @@ model SalesAttributionEvent {
   occurred_at   DateTime @default(now()) @db.Timestamptz(6)
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_attribution_events_membership_id_tenant_fkey")
 
   @@index([tenant_id, occurred_at])
   @@index([tenant_id, utm_source, utm_campaign])
@@ -3325,6 +3730,11 @@ model SalesReferralCode {
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  sales_referral_attributions SalesReferralAttribution[]
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_codes_membership_id_tenant_fkey")
+
+  @@unique([tenant_id, id], map: "sales_referral_codes_tenant_id_id_key")
   @@unique([tenant_id, membership_id])
   @@unique([tenant_id, code])
   @@index([tenant_id, created_at])
@@ -3341,6 +3751,13 @@ model SalesReferralAttribution {
   signup_credited_at     DateTime? @db.Timestamptz(6)
   created_at             DateTime  @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  referee_membership Membership @relation("sales_referral_attributions_referee_membership_id_tenant_fkey", fields: [tenant_id, referee_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_attributions_referee_membership_id_tenant_fkey")
+  referral_code SalesReferralCode @relation(fields: [tenant_id, referral_code_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_attributions_referral_code_id_tenant_fkey")
+  referrer_membership Membership @relation("sales_referral_attributions_referrer_membership_id_tenant_fkey", fields: [tenant_id, referrer_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_attributions_referrer_membership_id_tenant_fkey")
+  sales_referral_purchase_credits SalesReferralPurchaseCredit[]
+
+  @@unique([tenant_id, id], map: "sales_referral_attributions_tenant_id_id_key")
   @@unique([tenant_id, referee_membership_id])
   @@index([tenant_id, referrer_membership_id, created_at])
   @@index([tenant_id, referral_code_id, created_at])
@@ -3359,6 +3776,11 @@ model SalesReferralPurchaseCredit {
 
   // Composite tenant foreign keys (audit M3).
   payment_order PaymentOrder @relation(fields: [tenant_id, payment_order_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_purchase_credits_payment_order_id_tenant_fkey")
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  attribution SalesReferralAttribution @relation(fields: [tenant_id, attribution_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_purchase_credits_attribution_id_tenant_fkey")
+  referee_membership Membership @relation("sales_referral_purchase_credits_referee_membership_tenant_fkey", fields: [tenant_id, referee_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_purchase_credits_referee_membership_tenant_fkey")
+  referrer_membership Membership @relation("sales_referral_purchase_credits_referrer_membership_tenant_fkey", fields: [tenant_id, referrer_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_referral_purchase_credits_referrer_membership_tenant_fkey")
 
   @@unique([tenant_id, payment_order_id])
   @@index([tenant_id, referrer_membership_id, created_at])
@@ -3417,6 +3839,10 @@ model SalesAffiliate {
   // Composite tenant foreign keys (audit M3).
   sales_affiliate_commissions SalesAffiliateCommission[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  sales_affiliate_payouts SalesAffiliatePayout[]
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliates_membership_id_tenant_fkey")
+
   @@unique([tenant_id, id], map: "sales_affiliates_tenant_id_id_key")
   @@unique([tenant_id, membership_id])
   @@unique([tenant_id, coupon_code])
@@ -3436,6 +3862,9 @@ model SalesAffiliateProduct {
   created_at              DateTime @default(now()) @db.Timestamptz(6)
   updated_at              DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  course Course @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_products_course_id_tenant_fkey")
+
   @@unique([tenant_id, course_id])
   @@index([tenant_id, enabled])
   @@map("sales_affiliate_products")
@@ -3452,6 +3881,9 @@ model SalesAffiliateRequest {
   reviewed_at               DateTime? @db.Timestamptz(6)
   created_at                DateTime  @default(now()) @db.Timestamptz(6)
   updated_at                DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_requests_membership_id_tenant_fkey")
 
   @@index([tenant_id, status, created_at])
   @@map("sales_affiliate_requests")
@@ -3481,6 +3913,11 @@ model SalesAffiliateCommission {
   payment_order PaymentOrder   @relation(fields: [tenant_id, payment_order_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_commissions_payment_order_id_tenant_fkey")
   course        Course         @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_commissions_course_id_tenant_fkey")
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  affiliate_membership Membership @relation("sales_affiliate_commissions_affiliate_membership_id_tenant_fkey", fields: [tenant_id, affiliate_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_commissions_affiliate_membership_id_tenant_fkey")
+  buyer_membership Membership @relation("sales_affiliate_commissions_buyer_membership_id_tenant_fkey", fields: [tenant_id, buyer_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_commissions_buyer_membership_id_tenant_fkey")
+  payout SalesAffiliatePayout? @relation(fields: [tenant_id, payout_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_commissions_payout_id_tenant_fkey")
+
   @@unique([tenant_id, payment_order_id])
   @@index([tenant_id, affiliate_id, status])
   @@map("sales_affiliate_commissions")
@@ -3499,6 +3936,12 @@ model SalesAffiliatePayout {
   paid_at                 DateTime @default(now()) @db.Timestamptz(6)
   created_at              DateTime @default(now()) @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  sales_affiliate_commissions SalesAffiliateCommission[]
+  affiliate SalesAffiliate @relation(fields: [tenant_id, affiliate_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_payouts_affiliate_id_tenant_fkey")
+  affiliate_membership Membership @relation(fields: [tenant_id, affiliate_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "sales_affiliate_payouts_affiliate_membership_id_tenant_fkey")
+
+  @@unique([tenant_id, id], map: "sales_affiliate_payouts_tenant_id_id_key")
   @@index([tenant_id, affiliate_id, paid_at])
   @@map("sales_affiliate_payouts")
 }
@@ -3534,6 +3977,9 @@ model CustomFieldValue {
 
   definition CustomFieldDefinition @relation(fields: [custom_field_definition_id], references: [id], onDelete: Cascade)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "custom_field_values_membership_id_tenant_fkey")
+
   @@unique([tenant_id, custom_field_definition_id, membership_id])
   @@index([tenant_id, membership_id])
   @@index([tenant_id, updated_by_membership_id])
@@ -3551,6 +3997,9 @@ model CustomFieldValueHistory {
   changed_at                 DateTime @default(now()) @db.Timestamptz(6)
 
   definition CustomFieldDefinition @relation(fields: [custom_field_definition_id], references: [id], onDelete: Cascade)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "custom_field_value_history_membership_id_tenant_fkey")
 
   @@index([tenant_id, membership_id, changed_at(sort: Desc)])
   @@index([tenant_id, custom_field_definition_id, changed_at(sort: Desc)])
@@ -3606,6 +4055,10 @@ model ZoomConnection {
   meetings ZoomMeeting[]
   syncRuns ZoomSyncRun[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  zoom_webhook_events ZoomWebhookEvent[]
+
+  @@unique([tenant_id, id], map: "zoom_connections_tenant_id_id_key")
   @@unique([tenant_id])
   @@map("zoom_connections")
 }
@@ -3645,6 +4098,9 @@ model ZoomWebhookEvent {
   received_at        DateTime @default(now()) @db.Timestamptz(6)
   payload_json       Json?
   created_at         DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  zoom_connection ZoomConnection? @relation(fields: [tenant_id, zoom_connection_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "zoom_webhook_events_zoom_connection_id_tenant_fkey")
 
   @@index([tenant_id, received_at])
   @@map("zoom_webhook_events")
@@ -3686,6 +4142,9 @@ model ZoomMeetingParticipant {
 
   meeting ZoomMeeting @relation(fields: [zoom_meeting_id], references: [id], onDelete: Cascade)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "zoom_meeting_participants_membership_id_tenant_fkey")
+
   @@index([tenant_id, zoom_meeting_id])
   @@map("zoom_meeting_participants")
 }
@@ -3707,6 +4166,12 @@ model LiveSession {
 
   attendance LiveAttendance[]
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  batch Batch? @relation(fields: [tenant_id, batch_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "live_sessions_batch_id_tenant_fkey")
+  course Course? @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "live_sessions_course_id_tenant_fkey")
+  polls Poll[]
+
+  @@unique([tenant_id, id], map: "live_sessions_tenant_id_id_key")
   @@index([tenant_id, status, scheduled_at])
   @@index([tenant_id, batch_id])
   @@index([tenant_id, course_id])
@@ -3729,6 +4194,9 @@ model LiveAttendance {
   updated_at                  DateTime  @updatedAt @db.Timestamptz(6)
 
   session LiveSession @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "live_attendance_membership_id_tenant_fkey")
 
   @@unique([tenant_id, live_session_id, membership_id])
   @@index([tenant_id, live_session_id])
@@ -3763,6 +4231,9 @@ model MessengerMessage {
   updated_at           DateTime @updatedAt @db.Timestamptz(6)
 
   conversation MessengerConversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  sender_membership Membership @relation(fields: [tenant_id, sender_membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "messenger_messages_sender_membership_id_tenant_fkey")
 
   @@index([tenant_id, conversation_id, sent_at])
   @@map("messenger_messages")
@@ -3846,6 +4317,9 @@ model CourseBackupJob {
   expires_at                 DateTime? @db.Timestamptz(6)
   created_at                 DateTime  @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  course Course @relation(fields: [tenant_id, course_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "course_backup_jobs_course_id_tenant_fkey")
 
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, course_id, created_at])
@@ -3984,6 +4458,10 @@ model WhatsappTemplate {
   created_at               DateTime @default(now()) @db.Timestamptz(6)
   updated_at               DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  whatsapp_campaigns WhatsappCampaign[]
+
+  @@unique([tenant_id, id], map: "whatsapp_templates_tenant_id_id_key")
   @@unique([tenant_id, name])
   @@index([tenant_id, status, created_at])
   @@map("whatsapp_templates")
@@ -4006,6 +4484,9 @@ model WhatsappCampaign {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  template WhatsappTemplate? @relation(fields: [tenant_id, template_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "whatsapp_campaigns_template_id_tenant_fkey")
+
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, scheduled_at])
   @@map("whatsapp_campaigns")
@@ -4022,6 +4503,11 @@ model WhatsappConversation {
   created_at      DateTime @default(now()) @db.Timestamptz(6)
   updated_at      DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "whatsapp_conversations_membership_id_tenant_fkey")
+  whatsapp_inbox_messages WhatsappInboxMessage[]
+
+  @@unique([tenant_id, id], map: "whatsapp_conversations_tenant_id_id_key")
   @@unique([tenant_id, wa_phone])
   @@index([tenant_id, last_message_at])
   @@map("whatsapp_conversations")
@@ -4036,6 +4522,9 @@ model WhatsappInboxMessage {
   status          String   @default("SENT")
   meta_message_id String?
   created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  conversation WhatsappConversation @relation(fields: [tenant_id, conversation_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "whatsapp_inbox_messages_conversation_id_tenant_fkey")
 
   @@index([tenant_id, conversation_id, created_at])
   @@map("whatsapp_inbox_messages")
@@ -4055,6 +4544,10 @@ model MarketingWorkflow {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_workflow_runs MarketingWorkflowRun[]
+
+  @@unique([tenant_id, id], map: "marketing_workflows_tenant_id_id_key")
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, use_case_key])
   @@map("marketing_workflows")
@@ -4076,6 +4569,12 @@ model MarketingWorkflowRun {
   updated_at           DateTime  @updatedAt @db.Timestamptz(6)
   completed_at         DateTime? @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_workflow_run_logs MarketingWorkflowRunLog[]
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_workflow_runs_membership_id_tenant_fkey")
+  workflow MarketingWorkflow @relation(fields: [tenant_id, workflow_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_workflow_runs_workflow_id_tenant_fkey")
+
+  @@unique([tenant_id, id], map: "marketing_workflow_runs_tenant_id_id_key")
   @@unique([tenant_id, idempotency_key])
   @@index([tenant_id, workflow_id, created_at])
   @@index([tenant_id, status, wait_until])
@@ -4091,6 +4590,9 @@ model MarketingWorkflowRunLog {
   status     String
   message    String?
   created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  run MarketingWorkflowRun @relation(fields: [tenant_id, run_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_workflow_run_logs_run_id_tenant_fkey")
 
   @@index([tenant_id, run_id, created_at])
   @@map("marketing_workflow_run_logs")
@@ -4117,6 +4619,11 @@ model MarketingForm {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_ctas MarketingCta[]
+  marketing_form_submissions MarketingFormSubmission[]
+
+  @@unique([tenant_id, id], map: "marketing_forms_tenant_id_id_key")
   @@unique([tenant_id, share_token])
   @@index([tenant_id, status, created_at])
   @@map("marketing_forms")
@@ -4135,6 +4642,11 @@ model MarketingContact {
   created_at     DateTime @default(now()) @db.Timestamptz(6)
   updated_at     DateTime @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_event_registrations MarketingEventRegistration[]
+  marketing_form_submissions MarketingFormSubmission[]
+
+  @@unique([tenant_id, id], map: "marketing_contacts_tenant_id_id_key")
   @@unique([tenant_id, email])
   @@index([tenant_id, created_at])
   @@index([tenant_id, source_form_id])
@@ -4149,6 +4661,10 @@ model MarketingFormSubmission {
   answers_json Json     @default("{}")
   source       String   @default("LINK")
   created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  contact MarketingContact @relation(fields: [tenant_id, contact_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_form_submissions_contact_id_tenant_fkey")
+  form MarketingForm @relation(fields: [tenant_id, form_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_form_submissions_form_id_tenant_fkey")
 
   @@index([tenant_id, form_id, created_at])
   @@index([tenant_id, contact_id, created_at])
@@ -4180,6 +4696,9 @@ model MarketingCta {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  form MarketingForm? @relation(fields: [tenant_id, form_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_ctas_form_id_tenant_fkey")
+
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, cta_type, status])
   @@index([tenant_id, form_id])
@@ -4197,6 +4716,10 @@ model MarketingPromoSlider {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_promo_slides MarketingPromoSlide[]
+
+  @@unique([tenant_id, id], map: "marketing_promo_sliders_tenant_id_id_key")
   @@index([tenant_id, status, created_at])
   @@map("marketing_promo_sliders")
 }
@@ -4214,6 +4737,9 @@ model MarketingPromoSlide {
   sort_order Int       @default(0)
   created_at DateTime  @default(now()) @db.Timestamptz(6)
   updated_at DateTime  @updatedAt @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  slider MarketingPromoSlider @relation(fields: [tenant_id, slider_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_promo_slides_slider_id_tenant_fkey")
 
   @@index([tenant_id, slider_id, sort_order])
   @@index([tenant_id, ends_at])
@@ -4238,6 +4764,10 @@ model MarketingEvent {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_event_registrations MarketingEventRegistration[]
+
+  @@unique([tenant_id, id], map: "marketing_events_tenant_id_id_key")
   @@index([tenant_id, status, starts_at])
   @@index([tenant_id, status, created_at])
   @@map("marketing_events")
@@ -4253,6 +4783,11 @@ model MarketingEventRegistration {
   name          String?
   source        String   @default("LINK")
   created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  contact MarketingContact? @relation(fields: [tenant_id, contact_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_event_registrations_contact_id_tenant_fkey")
+  event MarketingEvent @relation(fields: [tenant_id, event_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_event_registrations_event_id_tenant_fkey")
+  membership Membership? @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_event_registrations_membership_id_tenant_fkey")
 
   @@unique([tenant_id, event_id, email])
   @@index([tenant_id, event_id, created_at])
@@ -4285,6 +4820,10 @@ model MarketingIntegrationWebhook {
   created_at           DateTime  @default(now()) @db.Timestamptz(6)
   updated_at           DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_integration_webhook_deliveries MarketingIntegrationWebhookDelivery[]
+
+  @@unique([tenant_id, id], map: "marketing_integration_webhooks_tenant_id_id_key")
   @@unique([tenant_id, event_key, url])
   @@index([tenant_id, event_key, enabled])
   @@map("marketing_integration_webhooks")
@@ -4302,6 +4841,9 @@ model MarketingIntegrationWebhookDelivery {
   request_body String?
   source       String   @default("dispatch")
   created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  webhook MarketingIntegrationWebhook @relation(fields: [tenant_id, webhook_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_integration_webhook_deliveries_webhook_id_tenant_fkey")
 
   @@index([tenant_id, webhook_id, created_at(sort: Desc)])
   @@index([tenant_id, created_at(sort: Desc)])
@@ -4339,6 +4881,10 @@ model MarketingNewsfeedPost {
   created_at               DateTime  @default(now()) @db.Timestamptz(6)
   updated_at               DateTime  @updatedAt @db.Timestamptz(6)
 
+  // Composite tenant foreign keys (audit M3 coverage).
+  marketing_newsfeed_saves MarketingNewsfeedSave[]
+
+  @@unique([tenant_id, id], map: "marketing_newsfeed_posts_tenant_id_id_key")
   @@unique([tenant_id, slug])
   @@index([tenant_id, status, created_at])
   @@index([tenant_id, post_type, status])
@@ -4353,6 +4899,10 @@ model MarketingNewsfeedSave {
   post_id       String   @db.Uuid
   membership_id String   @db.Uuid
   created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  membership Membership @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_newsfeed_saves_membership_id_tenant_fkey")
+  post MarketingNewsfeedPost @relation(fields: [tenant_id, post_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_newsfeed_saves_post_id_tenant_fkey")
 
   @@unique([tenant_id, post_id, membership_id])
   @@index([tenant_id, membership_id, created_at])
@@ -4380,6 +4930,9 @@ model PaymentRefundIntent {
   last_error          String?
   created_at          DateTime  @default(now()) @db.Timestamptz(6)
   updated_at          DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  gateway PaymentGateway? @relation(fields: [tenant_id, gateway_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "payment_refund_intents_gateway_id_tenant_fkey")
 
   @@unique([tenant_id, request_key], map: "payment_refund_request_key")
   @@index([tenant_id, order_id, created_at], map: "payment_refund_order_idx")
@@ -4426,6 +4979,9 @@ model ReportDeliveryEffect {
   last_error     String?
   created_at     DateTime  @default(now()) @db.Timestamptz(6)
   updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Composite tenant foreign keys (audit M3 coverage).
+  destination ReportDeliveryDestination? @relation(fields: [tenant_id, destination_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "report_delivery_effects_destination_id_tenant_fkey")
 
   @@unique([tenant_id, report_run_id, ordinal])
   @@index([tenant_id, report_run_id], map: "report_delivery_effects_run_idx")

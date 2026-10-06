@@ -186,6 +186,8 @@ export type CompetencyScoreSnapshotWhereInput = {
   scoring_profile_id?: Prisma.UuidFilter<"CompetencyScoreSnapshot"> | string
   snapshot_json?: Prisma.JsonFilter<"CompetencyScoreSnapshot">
   occurred_at?: Prisma.DateTimeFilter<"CompetencyScoreSnapshot"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }
 
 export type CompetencyScoreSnapshotOrderByWithRelationInput = {
@@ -195,6 +197,8 @@ export type CompetencyScoreSnapshotOrderByWithRelationInput = {
   scoring_profile_id?: Prisma.SortOrder
   snapshot_json?: Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  scoring_profile?: Prisma.ScoringProfileOrderByWithRelationInput
 }
 
 export type CompetencyScoreSnapshotWhereUniqueInput = Prisma.AtLeast<{
@@ -207,6 +211,8 @@ export type CompetencyScoreSnapshotWhereUniqueInput = Prisma.AtLeast<{
   scoring_profile_id?: Prisma.UuidFilter<"CompetencyScoreSnapshot"> | string
   snapshot_json?: Prisma.JsonFilter<"CompetencyScoreSnapshot">
   occurred_at?: Prisma.DateTimeFilter<"CompetencyScoreSnapshot"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  scoring_profile?: Prisma.XOR<Prisma.ScoringProfileScalarRelationFilter, Prisma.ScoringProfileWhereInput>
 }, "id">
 
 export type CompetencyScoreSnapshotOrderByWithAggregationInput = {
@@ -235,11 +241,10 @@ export type CompetencyScoreSnapshotScalarWhereWithAggregatesInput = {
 
 export type CompetencyScoreSnapshotCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
-  scoring_profile_id: string
   snapshot_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutCompetency_score_snapshotsInput
+  scoring_profile: Prisma.ScoringProfileCreateNestedOneWithoutCompetency_score_snapshotsInput
 }
 
 export type CompetencyScoreSnapshotUncheckedCreateInput = {
@@ -253,11 +258,10 @@ export type CompetencyScoreSnapshotUncheckedCreateInput = {
 
 export type CompetencyScoreSnapshotUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCompetency_score_snapshotsNestedInput
+  scoring_profile?: Prisma.ScoringProfileUpdateOneRequiredWithoutCompetency_score_snapshotsNestedInput
 }
 
 export type CompetencyScoreSnapshotUncheckedUpdateInput = {
@@ -280,9 +284,6 @@ export type CompetencyScoreSnapshotCreateManyInput = {
 
 export type CompetencyScoreSnapshotUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -294,6 +295,16 @@ export type CompetencyScoreSnapshotUncheckedUpdateManyInput = {
   scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
   snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyScoreSnapshotListRelationFilter = {
+  every?: Prisma.CompetencyScoreSnapshotWhereInput
+  some?: Prisma.CompetencyScoreSnapshotWhereInput
+  none?: Prisma.CompetencyScoreSnapshotWhereInput
+}
+
+export type CompetencyScoreSnapshotOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CompetencyScoreSnapshotCountOrderByAggregateInput = {
@@ -321,6 +332,238 @@ export type CompetencyScoreSnapshotMinOrderByAggregateInput = {
   occurred_at?: Prisma.SortOrder
 }
 
+export type CompetencyScoreSnapshotCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput> | Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyMembershipInputEnvelope
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+}
+
+export type CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput> | Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyMembershipInputEnvelope
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+}
+
+export type CompetencyScoreSnapshotUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput> | Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyMembershipInputEnvelope
+  set?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  disconnect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  delete?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  update?: Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutMembershipInput | Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CompetencyScoreSnapshotScalarWhereInput | Prisma.CompetencyScoreSnapshotScalarWhereInput[]
+}
+
+export type CompetencyScoreSnapshotUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput> | Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyMembershipInputEnvelope
+  set?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  disconnect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  delete?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  update?: Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutMembershipInput | Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CompetencyScoreSnapshotScalarWhereInput | Prisma.CompetencyScoreSnapshotScalarWhereInput[]
+}
+
+export type CompetencyScoreSnapshotCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+}
+
+export type CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutScoring_profileInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyScoring_profileInputEnvelope
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+}
+
+export type CompetencyScoreSnapshotUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyScoring_profileInputEnvelope
+  set?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  disconnect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  delete?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  update?: Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.CompetencyScoreSnapshotScalarWhereInput | Prisma.CompetencyScoreSnapshotScalarWhereInput[]
+}
+
+export type CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput> | Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput[] | Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput[]
+  connectOrCreate?: Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput[]
+  upsert?: Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutScoring_profileInput[]
+  createMany?: Prisma.CompetencyScoreSnapshotCreateManyScoring_profileInputEnvelope
+  set?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  disconnect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  delete?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  connect?: Prisma.CompetencyScoreSnapshotWhereUniqueInput | Prisma.CompetencyScoreSnapshotWhereUniqueInput[]
+  update?: Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutScoring_profileInput[]
+  updateMany?: Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutScoring_profileInput | Prisma.CompetencyScoreSnapshotUpdateManyWithWhereWithoutScoring_profileInput[]
+  deleteMany?: Prisma.CompetencyScoreSnapshotScalarWhereInput | Prisma.CompetencyScoreSnapshotScalarWhereInput[]
+}
+
+export type CompetencyScoreSnapshotCreateWithoutMembershipInput = {
+  id: string
+  snapshot_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  scoring_profile: Prisma.ScoringProfileCreateNestedOneWithoutCompetency_score_snapshotsInput
+}
+
+export type CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput = {
+  id: string
+  scoring_profile_id: string
+  snapshot_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type CompetencyScoreSnapshotCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput>
+}
+
+export type CompetencyScoreSnapshotCreateManyMembershipInputEnvelope = {
+  data: Prisma.CompetencyScoreSnapshotCreateManyMembershipInput | Prisma.CompetencyScoreSnapshotCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompetencyScoreSnapshotUpdateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutMembershipInput>
+}
+
+export type CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompetencyScoreSnapshotUpdateWithoutMembershipInput, Prisma.CompetencyScoreSnapshotUncheckedUpdateWithoutMembershipInput>
+}
+
+export type CompetencyScoreSnapshotUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.CompetencyScoreSnapshotScalarWhereInput
+  data: Prisma.XOR<Prisma.CompetencyScoreSnapshotUpdateManyMutationInput, Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type CompetencyScoreSnapshotScalarWhereInput = {
+  AND?: Prisma.CompetencyScoreSnapshotScalarWhereInput | Prisma.CompetencyScoreSnapshotScalarWhereInput[]
+  OR?: Prisma.CompetencyScoreSnapshotScalarWhereInput[]
+  NOT?: Prisma.CompetencyScoreSnapshotScalarWhereInput | Prisma.CompetencyScoreSnapshotScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CompetencyScoreSnapshot"> | string
+  tenant_id?: Prisma.UuidFilter<"CompetencyScoreSnapshot"> | string
+  membership_id?: Prisma.UuidFilter<"CompetencyScoreSnapshot"> | string
+  scoring_profile_id?: Prisma.UuidFilter<"CompetencyScoreSnapshot"> | string
+  snapshot_json?: Prisma.JsonFilter<"CompetencyScoreSnapshot">
+  occurred_at?: Prisma.DateTimeFilter<"CompetencyScoreSnapshot"> | Date | string
+}
+
+export type CompetencyScoreSnapshotCreateWithoutScoring_profileInput = {
+  id: string
+  snapshot_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutCompetency_score_snapshotsInput
+}
+
+export type CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput = {
+  id: string
+  membership_id: string
+  snapshot_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type CompetencyScoreSnapshotCreateOrConnectWithoutScoring_profileInput = {
+  where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type CompetencyScoreSnapshotCreateManyScoring_profileInputEnvelope = {
+  data: Prisma.CompetencyScoreSnapshotCreateManyScoring_profileInput | Prisma.CompetencyScoreSnapshotCreateManyScoring_profileInput[]
+  skipDuplicates?: boolean
+}
+
+export type CompetencyScoreSnapshotUpsertWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
+  update: Prisma.XOR<Prisma.CompetencyScoreSnapshotUpdateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedUpdateWithoutScoring_profileInput>
+  create: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedCreateWithoutScoring_profileInput>
+}
+
+export type CompetencyScoreSnapshotUpdateWithWhereUniqueWithoutScoring_profileInput = {
+  where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
+  data: Prisma.XOR<Prisma.CompetencyScoreSnapshotUpdateWithoutScoring_profileInput, Prisma.CompetencyScoreSnapshotUncheckedUpdateWithoutScoring_profileInput>
+}
+
+export type CompetencyScoreSnapshotUpdateManyWithWhereWithoutScoring_profileInput = {
+  where: Prisma.CompetencyScoreSnapshotScalarWhereInput
+  data: Prisma.XOR<Prisma.CompetencyScoreSnapshotUpdateManyMutationInput, Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileInput>
+}
+
+export type CompetencyScoreSnapshotCreateManyMembershipInput = {
+  id: string
+  scoring_profile_id: string
+  snapshot_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type CompetencyScoreSnapshotUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  scoring_profile?: Prisma.ScoringProfileUpdateOneRequiredWithoutCompetency_score_snapshotsNestedInput
+}
+
+export type CompetencyScoreSnapshotUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
+  snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyScoreSnapshotUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  scoring_profile_id?: Prisma.StringFieldUpdateOperationsInput | string
+  snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyScoreSnapshotCreateManyScoring_profileInput = {
+  id: string
+  membership_id: string
+  snapshot_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Date | string
+}
+
+export type CompetencyScoreSnapshotUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCompetency_score_snapshotsNestedInput
+}
+
+export type CompetencyScoreSnapshotUncheckedUpdateWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyScoreSnapshotUncheckedUpdateManyWithoutScoring_profileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  snapshot_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type CompetencyScoreSnapshotSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -330,6 +573,8 @@ export type CompetencyScoreSnapshotSelect<ExtArgs extends runtime.Types.Extensio
   scoring_profile_id?: boolean
   snapshot_json?: boolean
   occurred_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencyScoreSnapshot"]>
 
 export type CompetencyScoreSnapshotSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -339,6 +584,8 @@ export type CompetencyScoreSnapshotSelectCreateManyAndReturn<ExtArgs extends run
   scoring_profile_id?: boolean
   snapshot_json?: boolean
   occurred_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencyScoreSnapshot"]>
 
 export type CompetencyScoreSnapshotSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -348,6 +595,8 @@ export type CompetencyScoreSnapshotSelectUpdateManyAndReturn<ExtArgs extends run
   scoring_profile_id?: boolean
   snapshot_json?: boolean
   occurred_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencyScoreSnapshot"]>
 
 export type CompetencyScoreSnapshotSelectScalar = {
@@ -360,10 +609,25 @@ export type CompetencyScoreSnapshotSelectScalar = {
 }
 
 export type CompetencyScoreSnapshotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "scoring_profile_id" | "snapshot_json" | "occurred_at", ExtArgs["result"]["competencyScoreSnapshot"]>
+export type CompetencyScoreSnapshotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type CompetencyScoreSnapshotIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
+export type CompetencyScoreSnapshotIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  scoring_profile?: boolean | Prisma.ScoringProfileDefaultArgs<ExtArgs>
+}
 
 export type $CompetencyScoreSnapshotPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompetencyScoreSnapshot"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    scoring_profile: Prisma.$ScoringProfilePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -765,6 +1029,8 @@ readonly fields: CompetencyScoreSnapshotFieldRefs;
  */
 export interface Prisma__CompetencyScoreSnapshotClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  scoring_profile<T extends Prisma.ScoringProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ScoringProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__ScoringProfileClient<runtime.Types.Result.GetResult<Prisma.$ScoringProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -817,6 +1083,10 @@ export type CompetencyScoreSnapshotFindUniqueArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyScoreSnapshot to fetch.
    */
   where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
@@ -835,6 +1105,10 @@ export type CompetencyScoreSnapshotFindUniqueOrThrowArgs<ExtArgs extends runtime
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyScoreSnapshot to fetch.
    */
   where: Prisma.CompetencyScoreSnapshotWhereUniqueInput
@@ -852,6 +1126,10 @@ export type CompetencyScoreSnapshotFindFirstArgs<ExtArgs extends runtime.Types.E
    * Omit specific fields from the CompetencyScoreSnapshot
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
   /**
    * Filter, which CompetencyScoreSnapshot to fetch.
    */
@@ -901,6 +1179,10 @@ export type CompetencyScoreSnapshotFindFirstOrThrowArgs<ExtArgs extends runtime.
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyScoreSnapshot to fetch.
    */
   where?: Prisma.CompetencyScoreSnapshotWhereInput
@@ -948,6 +1230,10 @@ export type CompetencyScoreSnapshotFindManyArgs<ExtArgs extends runtime.Types.Ex
    * Omit specific fields from the CompetencyScoreSnapshot
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
   /**
    * Filter, which CompetencyScoreSnapshots to fetch.
    */
@@ -997,6 +1283,10 @@ export type CompetencyScoreSnapshotCreateArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
+  /**
    * The data needed to create a CompetencyScoreSnapshot.
    */
   data: Prisma.XOR<Prisma.CompetencyScoreSnapshotCreateInput, Prisma.CompetencyScoreSnapshotUncheckedCreateInput>
@@ -1030,6 +1320,10 @@ export type CompetencyScoreSnapshotCreateManyAndReturnArgs<ExtArgs extends runti
    */
   data: Prisma.CompetencyScoreSnapshotCreateManyInput | Prisma.CompetencyScoreSnapshotCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1044,6 +1338,10 @@ export type CompetencyScoreSnapshotUpdateArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CompetencyScoreSnapshot
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
   /**
    * The data needed to update a CompetencyScoreSnapshot.
    */
@@ -1096,6 +1394,10 @@ export type CompetencyScoreSnapshotUpdateManyAndReturnArgs<ExtArgs extends runti
    * Limit how many CompetencyScoreSnapshots to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1110,6 +1412,10 @@ export type CompetencyScoreSnapshotUpsertArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CompetencyScoreSnapshot
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
   /**
    * The filter to search for the CompetencyScoreSnapshot to update in case it exists.
    */
@@ -1136,6 +1442,10 @@ export type CompetencyScoreSnapshotDeleteArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CompetencyScoreSnapshot
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
   /**
    * Filter which CompetencyScoreSnapshot to delete.
    */
@@ -1168,4 +1478,8 @@ export type CompetencyScoreSnapshotDefaultArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the CompetencyScoreSnapshot
    */
   omit?: Prisma.CompetencyScoreSnapshotOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreSnapshotInclude<ExtArgs> | null
 }

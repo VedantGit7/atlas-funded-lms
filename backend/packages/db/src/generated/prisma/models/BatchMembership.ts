@@ -199,6 +199,7 @@ export type BatchMembershipWhereInput = {
   created_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
   batch?: Prisma.XOR<Prisma.BatchScalarRelationFilter, Prisma.BatchWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type BatchMembershipOrderByWithRelationInput = {
@@ -210,6 +211,7 @@ export type BatchMembershipOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   batch?: Prisma.BatchOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type BatchMembershipWhereUniqueInput = Prisma.AtLeast<{
@@ -225,6 +227,7 @@ export type BatchMembershipWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
   batch?: Prisma.XOR<Prisma.BatchScalarRelationFilter, Prisma.BatchWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_batch_id_membership_id">
 
 export type BatchMembershipOrderByWithAggregationInput = {
@@ -255,12 +258,11 @@ export type BatchMembershipScalarWhereWithAggregatesInput = {
 
 export type BatchMembershipCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   joined_at?: Date | string
   created_at?: Date | string
   updated_at?: Date | string
   batch: Prisma.BatchCreateNestedOneWithoutMembershipsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutBatch_membershipsInput
 }
 
 export type BatchMembershipUncheckedCreateInput = {
@@ -275,12 +277,11 @@ export type BatchMembershipUncheckedCreateInput = {
 
 export type BatchMembershipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batch?: Prisma.BatchUpdateOneRequiredWithoutMembershipsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutBatch_membershipsNestedInput
 }
 
 export type BatchMembershipUncheckedUpdateInput = {
@@ -305,8 +306,6 @@ export type BatchMembershipCreateManyInput = {
 
 export type BatchMembershipUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -368,6 +367,48 @@ export type BatchMembershipMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type BatchMembershipCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.BatchMembershipCreateWithoutMembershipInput, Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput> | Prisma.BatchMembershipCreateWithoutMembershipInput[] | Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput | Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.BatchMembershipCreateManyMembershipInputEnvelope
+  connect?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+}
+
+export type BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.BatchMembershipCreateWithoutMembershipInput, Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput> | Prisma.BatchMembershipCreateWithoutMembershipInput[] | Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput | Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.BatchMembershipCreateManyMembershipInputEnvelope
+  connect?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+}
+
+export type BatchMembershipUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.BatchMembershipCreateWithoutMembershipInput, Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput> | Prisma.BatchMembershipCreateWithoutMembershipInput[] | Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput | Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.BatchMembershipUpsertWithWhereUniqueWithoutMembershipInput | Prisma.BatchMembershipUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.BatchMembershipCreateManyMembershipInputEnvelope
+  set?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  disconnect?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  delete?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  connect?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  update?: Prisma.BatchMembershipUpdateWithWhereUniqueWithoutMembershipInput | Prisma.BatchMembershipUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.BatchMembershipUpdateManyWithWhereWithoutMembershipInput | Prisma.BatchMembershipUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.BatchMembershipScalarWhereInput | Prisma.BatchMembershipScalarWhereInput[]
+}
+
+export type BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.BatchMembershipCreateWithoutMembershipInput, Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput> | Prisma.BatchMembershipCreateWithoutMembershipInput[] | Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput | Prisma.BatchMembershipCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.BatchMembershipUpsertWithWhereUniqueWithoutMembershipInput | Prisma.BatchMembershipUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.BatchMembershipCreateManyMembershipInputEnvelope
+  set?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  disconnect?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  delete?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  connect?: Prisma.BatchMembershipWhereUniqueInput | Prisma.BatchMembershipWhereUniqueInput[]
+  update?: Prisma.BatchMembershipUpdateWithWhereUniqueWithoutMembershipInput | Prisma.BatchMembershipUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.BatchMembershipUpdateManyWithWhereWithoutMembershipInput | Prisma.BatchMembershipUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.BatchMembershipScalarWhereInput | Prisma.BatchMembershipScalarWhereInput[]
+}
+
 export type BatchMembershipCreateNestedManyWithoutBatchInput = {
   create?: Prisma.XOR<Prisma.BatchMembershipCreateWithoutBatchInput, Prisma.BatchMembershipUncheckedCreateWithoutBatchInput> | Prisma.BatchMembershipCreateWithoutBatchInput[] | Prisma.BatchMembershipUncheckedCreateWithoutBatchInput[]
   connectOrCreate?: Prisma.BatchMembershipCreateOrConnectWithoutBatchInput | Prisma.BatchMembershipCreateOrConnectWithoutBatchInput[]
@@ -410,13 +451,67 @@ export type BatchMembershipUncheckedUpdateManyWithoutBatchNestedInput = {
   deleteMany?: Prisma.BatchMembershipScalarWhereInput | Prisma.BatchMembershipScalarWhereInput[]
 }
 
-export type BatchMembershipCreateWithoutBatchInput = {
+export type BatchMembershipCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   joined_at?: Date | string
   created_at?: Date | string
   updated_at?: Date | string
+  batch: Prisma.BatchCreateNestedOneWithoutMembershipsInput
+}
+
+export type BatchMembershipUncheckedCreateWithoutMembershipInput = {
+  id: string
+  batch_id: string
+  joined_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type BatchMembershipCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.BatchMembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.BatchMembershipCreateWithoutMembershipInput, Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput>
+}
+
+export type BatchMembershipCreateManyMembershipInputEnvelope = {
+  data: Prisma.BatchMembershipCreateManyMembershipInput | Prisma.BatchMembershipCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type BatchMembershipUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.BatchMembershipWhereUniqueInput
+  update: Prisma.XOR<Prisma.BatchMembershipUpdateWithoutMembershipInput, Prisma.BatchMembershipUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.BatchMembershipCreateWithoutMembershipInput, Prisma.BatchMembershipUncheckedCreateWithoutMembershipInput>
+}
+
+export type BatchMembershipUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.BatchMembershipWhereUniqueInput
+  data: Prisma.XOR<Prisma.BatchMembershipUpdateWithoutMembershipInput, Prisma.BatchMembershipUncheckedUpdateWithoutMembershipInput>
+}
+
+export type BatchMembershipUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.BatchMembershipScalarWhereInput
+  data: Prisma.XOR<Prisma.BatchMembershipUpdateManyMutationInput, Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type BatchMembershipScalarWhereInput = {
+  AND?: Prisma.BatchMembershipScalarWhereInput | Prisma.BatchMembershipScalarWhereInput[]
+  OR?: Prisma.BatchMembershipScalarWhereInput[]
+  NOT?: Prisma.BatchMembershipScalarWhereInput | Prisma.BatchMembershipScalarWhereInput[]
+  id?: Prisma.UuidFilter<"BatchMembership"> | string
+  tenant_id?: Prisma.UuidFilter<"BatchMembership"> | string
+  batch_id?: Prisma.UuidFilter<"BatchMembership"> | string
+  membership_id?: Prisma.UuidFilter<"BatchMembership"> | string
+  joined_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
+  created_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
+}
+
+export type BatchMembershipCreateWithoutBatchInput = {
+  id: string
+  joined_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutBatch_membershipsInput
 }
 
 export type BatchMembershipUncheckedCreateWithoutBatchInput = {
@@ -454,17 +549,36 @@ export type BatchMembershipUpdateManyWithWhereWithoutBatchInput = {
   data: Prisma.XOR<Prisma.BatchMembershipUpdateManyMutationInput, Prisma.BatchMembershipUncheckedUpdateManyWithoutBatchInput>
 }
 
-export type BatchMembershipScalarWhereInput = {
-  AND?: Prisma.BatchMembershipScalarWhereInput | Prisma.BatchMembershipScalarWhereInput[]
-  OR?: Prisma.BatchMembershipScalarWhereInput[]
-  NOT?: Prisma.BatchMembershipScalarWhereInput | Prisma.BatchMembershipScalarWhereInput[]
-  id?: Prisma.UuidFilter<"BatchMembership"> | string
-  tenant_id?: Prisma.UuidFilter<"BatchMembership"> | string
-  batch_id?: Prisma.UuidFilter<"BatchMembership"> | string
-  membership_id?: Prisma.UuidFilter<"BatchMembership"> | string
-  joined_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
-  created_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"BatchMembership"> | Date | string
+export type BatchMembershipCreateManyMembershipInput = {
+  id: string
+  batch_id: string
+  joined_at?: Date | string
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type BatchMembershipUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  batch?: Prisma.BatchUpdateOneRequiredWithoutMembershipsNestedInput
+}
+
+export type BatchMembershipUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  batch_id?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BatchMembershipUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  batch_id?: Prisma.StringFieldUpdateOperationsInput | string
+  joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type BatchMembershipCreateManyBatchInput = {
@@ -478,11 +592,10 @@ export type BatchMembershipCreateManyBatchInput = {
 
 export type BatchMembershipUpdateWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   joined_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutBatch_membershipsNestedInput
 }
 
 export type BatchMembershipUncheckedUpdateWithoutBatchInput = {
@@ -514,6 +627,7 @@ export type BatchMembershipSelect<ExtArgs extends runtime.Types.Extensions.Inter
   created_at?: boolean
   updated_at?: boolean
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["batchMembership"]>
 
 export type BatchMembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -525,6 +639,7 @@ export type BatchMembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   created_at?: boolean
   updated_at?: boolean
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["batchMembership"]>
 
 export type BatchMembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -536,6 +651,7 @@ export type BatchMembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   created_at?: boolean
   updated_at?: boolean
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["batchMembership"]>
 
 export type BatchMembershipSelectScalar = {
@@ -551,18 +667,22 @@ export type BatchMembershipSelectScalar = {
 export type BatchMembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "batch_id" | "membership_id" | "joined_at" | "created_at" | "updated_at", ExtArgs["result"]["batchMembership"]>
 export type BatchMembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type BatchMembershipIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 export type BatchMembershipIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }
 
 export type $BatchMembershipPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "BatchMembership"
   objects: {
     batch: Prisma.$BatchPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -967,6 +1087,7 @@ readonly fields: BatchMembershipFieldRefs;
 export interface Prisma__BatchMembershipClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   batch<T extends Prisma.BatchDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BatchDefaultArgs<ExtArgs>>): Prisma.Prisma__BatchClient<runtime.Types.Result.GetResult<Prisma.$BatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

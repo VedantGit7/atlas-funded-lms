@@ -182,6 +182,8 @@ export type LessonTagWhereInput = {
   lesson_id?: Prisma.UuidFilter<"LessonTag"> | string
   tag_id?: Prisma.UuidFilter<"LessonTag"> | string
   created_at?: Prisma.DateTimeFilter<"LessonTag"> | Date | string
+  lesson?: Prisma.XOR<Prisma.LessonScalarRelationFilter, Prisma.LessonWhereInput>
+  tag?: Prisma.XOR<Prisma.TagScalarRelationFilter, Prisma.TagWhereInput>
 }
 
 export type LessonTagOrderByWithRelationInput = {
@@ -190,6 +192,8 @@ export type LessonTagOrderByWithRelationInput = {
   lesson_id?: Prisma.SortOrder
   tag_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  lesson?: Prisma.LessonOrderByWithRelationInput
+  tag?: Prisma.TagOrderByWithRelationInput
 }
 
 export type LessonTagWhereUniqueInput = Prisma.AtLeast<{
@@ -202,6 +206,8 @@ export type LessonTagWhereUniqueInput = Prisma.AtLeast<{
   lesson_id?: Prisma.UuidFilter<"LessonTag"> | string
   tag_id?: Prisma.UuidFilter<"LessonTag"> | string
   created_at?: Prisma.DateTimeFilter<"LessonTag"> | Date | string
+  lesson?: Prisma.XOR<Prisma.LessonScalarRelationFilter, Prisma.LessonWhereInput>
+  tag?: Prisma.XOR<Prisma.TagScalarRelationFilter, Prisma.TagWhereInput>
 }, "id" | "tenant_id_lesson_id_tag_id">
 
 export type LessonTagOrderByWithAggregationInput = {
@@ -228,10 +234,9 @@ export type LessonTagScalarWhereWithAggregatesInput = {
 
 export type LessonTagCreateInput = {
   id: string
-  tenant_id: string
-  lesson_id: string
-  tag_id: string
   created_at?: Date | string
+  lesson: Prisma.LessonCreateNestedOneWithoutLesson_tagsInput
+  tag: Prisma.TagCreateNestedOneWithoutLesson_tagsInput
 }
 
 export type LessonTagUncheckedCreateInput = {
@@ -244,10 +249,9 @@ export type LessonTagUncheckedCreateInput = {
 
 export type LessonTagUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
-  tag_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lesson?: Prisma.LessonUpdateOneRequiredWithoutLesson_tagsNestedInput
+  tag?: Prisma.TagUpdateOneRequiredWithoutLesson_tagsNestedInput
 }
 
 export type LessonTagUncheckedUpdateInput = {
@@ -268,9 +272,6 @@ export type LessonTagCreateManyInput = {
 
 export type LessonTagUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
-  tag_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -280,6 +281,16 @@ export type LessonTagUncheckedUpdateManyInput = {
   lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
   tag_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonTagListRelationFilter = {
+  every?: Prisma.LessonTagWhereInput
+  some?: Prisma.LessonTagWhereInput
+  none?: Prisma.LessonTagWhereInput
+}
+
+export type LessonTagOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type LessonTagTenant_idLesson_idTag_idCompoundUniqueInput = {
@@ -312,6 +323,225 @@ export type LessonTagMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
 }
 
+export type LessonTagCreateNestedManyWithoutLessonInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutLessonInput, Prisma.LessonTagUncheckedCreateWithoutLessonInput> | Prisma.LessonTagCreateWithoutLessonInput[] | Prisma.LessonTagUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutLessonInput | Prisma.LessonTagCreateOrConnectWithoutLessonInput[]
+  createMany?: Prisma.LessonTagCreateManyLessonInputEnvelope
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+}
+
+export type LessonTagUncheckedCreateNestedManyWithoutLessonInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutLessonInput, Prisma.LessonTagUncheckedCreateWithoutLessonInput> | Prisma.LessonTagCreateWithoutLessonInput[] | Prisma.LessonTagUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutLessonInput | Prisma.LessonTagCreateOrConnectWithoutLessonInput[]
+  createMany?: Prisma.LessonTagCreateManyLessonInputEnvelope
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+}
+
+export type LessonTagUpdateManyWithoutLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutLessonInput, Prisma.LessonTagUncheckedCreateWithoutLessonInput> | Prisma.LessonTagCreateWithoutLessonInput[] | Prisma.LessonTagUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutLessonInput | Prisma.LessonTagCreateOrConnectWithoutLessonInput[]
+  upsert?: Prisma.LessonTagUpsertWithWhereUniqueWithoutLessonInput | Prisma.LessonTagUpsertWithWhereUniqueWithoutLessonInput[]
+  createMany?: Prisma.LessonTagCreateManyLessonInputEnvelope
+  set?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  disconnect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  delete?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  update?: Prisma.LessonTagUpdateWithWhereUniqueWithoutLessonInput | Prisma.LessonTagUpdateWithWhereUniqueWithoutLessonInput[]
+  updateMany?: Prisma.LessonTagUpdateManyWithWhereWithoutLessonInput | Prisma.LessonTagUpdateManyWithWhereWithoutLessonInput[]
+  deleteMany?: Prisma.LessonTagScalarWhereInput | Prisma.LessonTagScalarWhereInput[]
+}
+
+export type LessonTagUncheckedUpdateManyWithoutLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutLessonInput, Prisma.LessonTagUncheckedCreateWithoutLessonInput> | Prisma.LessonTagCreateWithoutLessonInput[] | Prisma.LessonTagUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutLessonInput | Prisma.LessonTagCreateOrConnectWithoutLessonInput[]
+  upsert?: Prisma.LessonTagUpsertWithWhereUniqueWithoutLessonInput | Prisma.LessonTagUpsertWithWhereUniqueWithoutLessonInput[]
+  createMany?: Prisma.LessonTagCreateManyLessonInputEnvelope
+  set?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  disconnect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  delete?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  update?: Prisma.LessonTagUpdateWithWhereUniqueWithoutLessonInput | Prisma.LessonTagUpdateWithWhereUniqueWithoutLessonInput[]
+  updateMany?: Prisma.LessonTagUpdateManyWithWhereWithoutLessonInput | Prisma.LessonTagUpdateManyWithWhereWithoutLessonInput[]
+  deleteMany?: Prisma.LessonTagScalarWhereInput | Prisma.LessonTagScalarWhereInput[]
+}
+
+export type LessonTagCreateNestedManyWithoutTagInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutTagInput, Prisma.LessonTagUncheckedCreateWithoutTagInput> | Prisma.LessonTagCreateWithoutTagInput[] | Prisma.LessonTagUncheckedCreateWithoutTagInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutTagInput | Prisma.LessonTagCreateOrConnectWithoutTagInput[]
+  createMany?: Prisma.LessonTagCreateManyTagInputEnvelope
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+}
+
+export type LessonTagUncheckedCreateNestedManyWithoutTagInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutTagInput, Prisma.LessonTagUncheckedCreateWithoutTagInput> | Prisma.LessonTagCreateWithoutTagInput[] | Prisma.LessonTagUncheckedCreateWithoutTagInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutTagInput | Prisma.LessonTagCreateOrConnectWithoutTagInput[]
+  createMany?: Prisma.LessonTagCreateManyTagInputEnvelope
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+}
+
+export type LessonTagUpdateManyWithoutTagNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutTagInput, Prisma.LessonTagUncheckedCreateWithoutTagInput> | Prisma.LessonTagCreateWithoutTagInput[] | Prisma.LessonTagUncheckedCreateWithoutTagInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutTagInput | Prisma.LessonTagCreateOrConnectWithoutTagInput[]
+  upsert?: Prisma.LessonTagUpsertWithWhereUniqueWithoutTagInput | Prisma.LessonTagUpsertWithWhereUniqueWithoutTagInput[]
+  createMany?: Prisma.LessonTagCreateManyTagInputEnvelope
+  set?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  disconnect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  delete?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  update?: Prisma.LessonTagUpdateWithWhereUniqueWithoutTagInput | Prisma.LessonTagUpdateWithWhereUniqueWithoutTagInput[]
+  updateMany?: Prisma.LessonTagUpdateManyWithWhereWithoutTagInput | Prisma.LessonTagUpdateManyWithWhereWithoutTagInput[]
+  deleteMany?: Prisma.LessonTagScalarWhereInput | Prisma.LessonTagScalarWhereInput[]
+}
+
+export type LessonTagUncheckedUpdateManyWithoutTagNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonTagCreateWithoutTagInput, Prisma.LessonTagUncheckedCreateWithoutTagInput> | Prisma.LessonTagCreateWithoutTagInput[] | Prisma.LessonTagUncheckedCreateWithoutTagInput[]
+  connectOrCreate?: Prisma.LessonTagCreateOrConnectWithoutTagInput | Prisma.LessonTagCreateOrConnectWithoutTagInput[]
+  upsert?: Prisma.LessonTagUpsertWithWhereUniqueWithoutTagInput | Prisma.LessonTagUpsertWithWhereUniqueWithoutTagInput[]
+  createMany?: Prisma.LessonTagCreateManyTagInputEnvelope
+  set?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  disconnect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  delete?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  connect?: Prisma.LessonTagWhereUniqueInput | Prisma.LessonTagWhereUniqueInput[]
+  update?: Prisma.LessonTagUpdateWithWhereUniqueWithoutTagInput | Prisma.LessonTagUpdateWithWhereUniqueWithoutTagInput[]
+  updateMany?: Prisma.LessonTagUpdateManyWithWhereWithoutTagInput | Prisma.LessonTagUpdateManyWithWhereWithoutTagInput[]
+  deleteMany?: Prisma.LessonTagScalarWhereInput | Prisma.LessonTagScalarWhereInput[]
+}
+
+export type LessonTagCreateWithoutLessonInput = {
+  id: string
+  created_at?: Date | string
+  tag: Prisma.TagCreateNestedOneWithoutLesson_tagsInput
+}
+
+export type LessonTagUncheckedCreateWithoutLessonInput = {
+  id: string
+  tag_id: string
+  created_at?: Date | string
+}
+
+export type LessonTagCreateOrConnectWithoutLessonInput = {
+  where: Prisma.LessonTagWhereUniqueInput
+  create: Prisma.XOR<Prisma.LessonTagCreateWithoutLessonInput, Prisma.LessonTagUncheckedCreateWithoutLessonInput>
+}
+
+export type LessonTagCreateManyLessonInputEnvelope = {
+  data: Prisma.LessonTagCreateManyLessonInput | Prisma.LessonTagCreateManyLessonInput[]
+  skipDuplicates?: boolean
+}
+
+export type LessonTagUpsertWithWhereUniqueWithoutLessonInput = {
+  where: Prisma.LessonTagWhereUniqueInput
+  update: Prisma.XOR<Prisma.LessonTagUpdateWithoutLessonInput, Prisma.LessonTagUncheckedUpdateWithoutLessonInput>
+  create: Prisma.XOR<Prisma.LessonTagCreateWithoutLessonInput, Prisma.LessonTagUncheckedCreateWithoutLessonInput>
+}
+
+export type LessonTagUpdateWithWhereUniqueWithoutLessonInput = {
+  where: Prisma.LessonTagWhereUniqueInput
+  data: Prisma.XOR<Prisma.LessonTagUpdateWithoutLessonInput, Prisma.LessonTagUncheckedUpdateWithoutLessonInput>
+}
+
+export type LessonTagUpdateManyWithWhereWithoutLessonInput = {
+  where: Prisma.LessonTagScalarWhereInput
+  data: Prisma.XOR<Prisma.LessonTagUpdateManyMutationInput, Prisma.LessonTagUncheckedUpdateManyWithoutLessonInput>
+}
+
+export type LessonTagScalarWhereInput = {
+  AND?: Prisma.LessonTagScalarWhereInput | Prisma.LessonTagScalarWhereInput[]
+  OR?: Prisma.LessonTagScalarWhereInput[]
+  NOT?: Prisma.LessonTagScalarWhereInput | Prisma.LessonTagScalarWhereInput[]
+  id?: Prisma.UuidFilter<"LessonTag"> | string
+  tenant_id?: Prisma.UuidFilter<"LessonTag"> | string
+  lesson_id?: Prisma.UuidFilter<"LessonTag"> | string
+  tag_id?: Prisma.UuidFilter<"LessonTag"> | string
+  created_at?: Prisma.DateTimeFilter<"LessonTag"> | Date | string
+}
+
+export type LessonTagCreateWithoutTagInput = {
+  id: string
+  created_at?: Date | string
+  lesson: Prisma.LessonCreateNestedOneWithoutLesson_tagsInput
+}
+
+export type LessonTagUncheckedCreateWithoutTagInput = {
+  id: string
+  lesson_id: string
+  created_at?: Date | string
+}
+
+export type LessonTagCreateOrConnectWithoutTagInput = {
+  where: Prisma.LessonTagWhereUniqueInput
+  create: Prisma.XOR<Prisma.LessonTagCreateWithoutTagInput, Prisma.LessonTagUncheckedCreateWithoutTagInput>
+}
+
+export type LessonTagCreateManyTagInputEnvelope = {
+  data: Prisma.LessonTagCreateManyTagInput | Prisma.LessonTagCreateManyTagInput[]
+  skipDuplicates?: boolean
+}
+
+export type LessonTagUpsertWithWhereUniqueWithoutTagInput = {
+  where: Prisma.LessonTagWhereUniqueInput
+  update: Prisma.XOR<Prisma.LessonTagUpdateWithoutTagInput, Prisma.LessonTagUncheckedUpdateWithoutTagInput>
+  create: Prisma.XOR<Prisma.LessonTagCreateWithoutTagInput, Prisma.LessonTagUncheckedCreateWithoutTagInput>
+}
+
+export type LessonTagUpdateWithWhereUniqueWithoutTagInput = {
+  where: Prisma.LessonTagWhereUniqueInput
+  data: Prisma.XOR<Prisma.LessonTagUpdateWithoutTagInput, Prisma.LessonTagUncheckedUpdateWithoutTagInput>
+}
+
+export type LessonTagUpdateManyWithWhereWithoutTagInput = {
+  where: Prisma.LessonTagScalarWhereInput
+  data: Prisma.XOR<Prisma.LessonTagUpdateManyMutationInput, Prisma.LessonTagUncheckedUpdateManyWithoutTagInput>
+}
+
+export type LessonTagCreateManyLessonInput = {
+  id: string
+  tag_id: string
+  created_at?: Date | string
+}
+
+export type LessonTagUpdateWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tag?: Prisma.TagUpdateOneRequiredWithoutLesson_tagsNestedInput
+}
+
+export type LessonTagUncheckedUpdateWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tag_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonTagUncheckedUpdateManyWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tag_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonTagCreateManyTagInput = {
+  id: string
+  lesson_id: string
+  created_at?: Date | string
+}
+
+export type LessonTagUpdateWithoutTagInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lesson?: Prisma.LessonUpdateOneRequiredWithoutLesson_tagsNestedInput
+}
+
+export type LessonTagUncheckedUpdateWithoutTagInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonTagUncheckedUpdateManyWithoutTagInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type LessonTagSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -320,6 +550,8 @@ export type LessonTagSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   lesson_id?: boolean
   tag_id?: boolean
   created_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  tag?: boolean | Prisma.TagDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonTag"]>
 
 export type LessonTagSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -328,6 +560,8 @@ export type LessonTagSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   lesson_id?: boolean
   tag_id?: boolean
   created_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  tag?: boolean | Prisma.TagDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonTag"]>
 
 export type LessonTagSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -336,6 +570,8 @@ export type LessonTagSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   lesson_id?: boolean
   tag_id?: boolean
   created_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  tag?: boolean | Prisma.TagDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonTag"]>
 
 export type LessonTagSelectScalar = {
@@ -347,10 +583,25 @@ export type LessonTagSelectScalar = {
 }
 
 export type LessonTagOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "lesson_id" | "tag_id" | "created_at", ExtArgs["result"]["lessonTag"]>
+export type LessonTagInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  tag?: boolean | Prisma.TagDefaultArgs<ExtArgs>
+}
+export type LessonTagIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  tag?: boolean | Prisma.TagDefaultArgs<ExtArgs>
+}
+export type LessonTagIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  tag?: boolean | Prisma.TagDefaultArgs<ExtArgs>
+}
 
 export type $LessonTagPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LessonTag"
-  objects: {}
+  objects: {
+    lesson: Prisma.$LessonPayload<ExtArgs>
+    tag: Prisma.$TagPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -751,6 +1002,8 @@ readonly fields: LessonTagFieldRefs;
  */
 export interface Prisma__LessonTagClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  lesson<T extends Prisma.LessonDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LessonDefaultArgs<ExtArgs>>): Prisma.Prisma__LessonClient<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  tag<T extends Prisma.TagDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TagDefaultArgs<ExtArgs>>): Prisma.Prisma__TagClient<runtime.Types.Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -802,6 +1055,10 @@ export type LessonTagFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
+  /**
    * Filter, which LessonTag to fetch.
    */
   where: Prisma.LessonTagWhereUniqueInput
@@ -820,6 +1077,10 @@ export type LessonTagFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
+  /**
    * Filter, which LessonTag to fetch.
    */
   where: Prisma.LessonTagWhereUniqueInput
@@ -837,6 +1098,10 @@ export type LessonTagFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the LessonTag
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
   /**
    * Filter, which LessonTag to fetch.
    */
@@ -886,6 +1151,10 @@ export type LessonTagFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
+  /**
    * Filter, which LessonTag to fetch.
    */
   where?: Prisma.LessonTagWhereInput
@@ -933,6 +1202,10 @@ export type LessonTagFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the LessonTag
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
   /**
    * Filter, which LessonTags to fetch.
    */
@@ -982,6 +1255,10 @@ export type LessonTagCreateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
+  /**
    * The data needed to create a LessonTag.
    */
   data: Prisma.XOR<Prisma.LessonTagCreateInput, Prisma.LessonTagUncheckedCreateInput>
@@ -1015,6 +1292,10 @@ export type LessonTagCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    */
   data: Prisma.LessonTagCreateManyInput | Prisma.LessonTagCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1029,6 +1310,10 @@ export type LessonTagUpdateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the LessonTag
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
   /**
    * The data needed to update a LessonTag.
    */
@@ -1081,6 +1366,10 @@ export type LessonTagUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * Limit how many LessonTags to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1095,6 +1384,10 @@ export type LessonTagUpsertArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the LessonTag
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
   /**
    * The filter to search for the LessonTag to update in case it exists.
    */
@@ -1121,6 +1414,10 @@ export type LessonTagDeleteArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the LessonTag
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
   /**
    * Filter which LessonTag to delete.
    */
@@ -1153,4 +1450,8 @@ export type LessonTagDefaultArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the LessonTag
    */
   omit?: Prisma.LessonTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonTagInclude<ExtArgs> | null
 }

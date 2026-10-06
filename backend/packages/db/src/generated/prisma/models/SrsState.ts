@@ -244,6 +244,8 @@ export type SrsStateWhereInput = {
   interval_days?: Prisma.IntFilter<"SrsState"> | number
   due_at?: Prisma.DateTimeFilter<"SrsState"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SrsState"> | Date | string
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type SrsStateOrderByWithRelationInput = {
@@ -255,6 +257,8 @@ export type SrsStateOrderByWithRelationInput = {
   interval_days?: Prisma.SortOrder
   due_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  item?: Prisma.ItemOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type SrsStateWhereUniqueInput = Prisma.AtLeast<{
@@ -270,6 +274,8 @@ export type SrsStateWhereUniqueInput = Prisma.AtLeast<{
   interval_days?: Prisma.IntFilter<"SrsState"> | number
   due_at?: Prisma.DateTimeFilter<"SrsState"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SrsState"> | Date | string
+  item?: Prisma.XOR<Prisma.ItemScalarRelationFilter, Prisma.ItemWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_membership_id_item_id">
 
 export type SrsStateOrderByWithAggregationInput = {
@@ -304,13 +310,12 @@ export type SrsStateScalarWhereWithAggregatesInput = {
 
 export type SrsStateCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
-  item_id: string
   ease_factor: runtime.Decimal | runtime.DecimalJsLike | number | string
   interval_days: number
   due_at: Date | string
   updated_at?: Date | string
+  item: Prisma.ItemCreateNestedOneWithoutSrs_stateInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSrs_stateInput
 }
 
 export type SrsStateUncheckedCreateInput = {
@@ -326,13 +331,12 @@ export type SrsStateUncheckedCreateInput = {
 
 export type SrsStateUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
   ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   interval_days?: Prisma.IntFieldUpdateOperationsInput | number
   due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  item?: Prisma.ItemUpdateOneRequiredWithoutSrs_stateNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSrs_stateNestedInput
 }
 
 export type SrsStateUncheckedUpdateInput = {
@@ -359,9 +363,6 @@ export type SrsStateCreateManyInput = {
 
 export type SrsStateUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  item_id?: Prisma.StringFieldUpdateOperationsInput | string
   ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   interval_days?: Prisma.IntFieldUpdateOperationsInput | number
   due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -377,6 +378,16 @@ export type SrsStateUncheckedUpdateManyInput = {
   interval_days?: Prisma.IntFieldUpdateOperationsInput | number
   due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SrsStateListRelationFilter = {
+  every?: Prisma.SrsStateWhereInput
+  some?: Prisma.SrsStateWhereInput
+  none?: Prisma.SrsStateWhereInput
+}
+
+export type SrsStateOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SrsStateTenant_idMembership_idItem_idCompoundUniqueInput = {
@@ -428,6 +439,264 @@ export type SrsStateSumOrderByAggregateInput = {
   interval_days?: Prisma.SortOrder
 }
 
+export type SrsStateCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutMembershipInput, Prisma.SrsStateUncheckedCreateWithoutMembershipInput> | Prisma.SrsStateCreateWithoutMembershipInput[] | Prisma.SrsStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutMembershipInput | Prisma.SrsStateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SrsStateCreateManyMembershipInputEnvelope
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+}
+
+export type SrsStateUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutMembershipInput, Prisma.SrsStateUncheckedCreateWithoutMembershipInput> | Prisma.SrsStateCreateWithoutMembershipInput[] | Prisma.SrsStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutMembershipInput | Prisma.SrsStateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SrsStateCreateManyMembershipInputEnvelope
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+}
+
+export type SrsStateUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutMembershipInput, Prisma.SrsStateUncheckedCreateWithoutMembershipInput> | Prisma.SrsStateCreateWithoutMembershipInput[] | Prisma.SrsStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutMembershipInput | Prisma.SrsStateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SrsStateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SrsStateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SrsStateCreateManyMembershipInputEnvelope
+  set?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  disconnect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  delete?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  update?: Prisma.SrsStateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SrsStateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SrsStateUpdateManyWithWhereWithoutMembershipInput | Prisma.SrsStateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SrsStateScalarWhereInput | Prisma.SrsStateScalarWhereInput[]
+}
+
+export type SrsStateUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutMembershipInput, Prisma.SrsStateUncheckedCreateWithoutMembershipInput> | Prisma.SrsStateCreateWithoutMembershipInput[] | Prisma.SrsStateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutMembershipInput | Prisma.SrsStateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SrsStateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SrsStateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SrsStateCreateManyMembershipInputEnvelope
+  set?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  disconnect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  delete?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  update?: Prisma.SrsStateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SrsStateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SrsStateUpdateManyWithWhereWithoutMembershipInput | Prisma.SrsStateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SrsStateScalarWhereInput | Prisma.SrsStateScalarWhereInput[]
+}
+
+export type SrsStateCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutItemInput, Prisma.SrsStateUncheckedCreateWithoutItemInput> | Prisma.SrsStateCreateWithoutItemInput[] | Prisma.SrsStateUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutItemInput | Prisma.SrsStateCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.SrsStateCreateManyItemInputEnvelope
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+}
+
+export type SrsStateUncheckedCreateNestedManyWithoutItemInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutItemInput, Prisma.SrsStateUncheckedCreateWithoutItemInput> | Prisma.SrsStateCreateWithoutItemInput[] | Prisma.SrsStateUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutItemInput | Prisma.SrsStateCreateOrConnectWithoutItemInput[]
+  createMany?: Prisma.SrsStateCreateManyItemInputEnvelope
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+}
+
+export type SrsStateUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutItemInput, Prisma.SrsStateUncheckedCreateWithoutItemInput> | Prisma.SrsStateCreateWithoutItemInput[] | Prisma.SrsStateUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutItemInput | Prisma.SrsStateCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.SrsStateUpsertWithWhereUniqueWithoutItemInput | Prisma.SrsStateUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.SrsStateCreateManyItemInputEnvelope
+  set?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  disconnect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  delete?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  update?: Prisma.SrsStateUpdateWithWhereUniqueWithoutItemInput | Prisma.SrsStateUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.SrsStateUpdateManyWithWhereWithoutItemInput | Prisma.SrsStateUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.SrsStateScalarWhereInput | Prisma.SrsStateScalarWhereInput[]
+}
+
+export type SrsStateUncheckedUpdateManyWithoutItemNestedInput = {
+  create?: Prisma.XOR<Prisma.SrsStateCreateWithoutItemInput, Prisma.SrsStateUncheckedCreateWithoutItemInput> | Prisma.SrsStateCreateWithoutItemInput[] | Prisma.SrsStateUncheckedCreateWithoutItemInput[]
+  connectOrCreate?: Prisma.SrsStateCreateOrConnectWithoutItemInput | Prisma.SrsStateCreateOrConnectWithoutItemInput[]
+  upsert?: Prisma.SrsStateUpsertWithWhereUniqueWithoutItemInput | Prisma.SrsStateUpsertWithWhereUniqueWithoutItemInput[]
+  createMany?: Prisma.SrsStateCreateManyItemInputEnvelope
+  set?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  disconnect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  delete?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  connect?: Prisma.SrsStateWhereUniqueInput | Prisma.SrsStateWhereUniqueInput[]
+  update?: Prisma.SrsStateUpdateWithWhereUniqueWithoutItemInput | Prisma.SrsStateUpdateWithWhereUniqueWithoutItemInput[]
+  updateMany?: Prisma.SrsStateUpdateManyWithWhereWithoutItemInput | Prisma.SrsStateUpdateManyWithWhereWithoutItemInput[]
+  deleteMany?: Prisma.SrsStateScalarWhereInput | Prisma.SrsStateScalarWhereInput[]
+}
+
+export type SrsStateCreateWithoutMembershipInput = {
+  id: string
+  ease_factor: runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days: number
+  due_at: Date | string
+  updated_at?: Date | string
+  item: Prisma.ItemCreateNestedOneWithoutSrs_stateInput
+}
+
+export type SrsStateUncheckedCreateWithoutMembershipInput = {
+  id: string
+  item_id: string
+  ease_factor: runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days: number
+  due_at: Date | string
+  updated_at?: Date | string
+}
+
+export type SrsStateCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.SrsStateWhereUniqueInput
+  create: Prisma.XOR<Prisma.SrsStateCreateWithoutMembershipInput, Prisma.SrsStateUncheckedCreateWithoutMembershipInput>
+}
+
+export type SrsStateCreateManyMembershipInputEnvelope = {
+  data: Prisma.SrsStateCreateManyMembershipInput | Prisma.SrsStateCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SrsStateUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SrsStateWhereUniqueInput
+  update: Prisma.XOR<Prisma.SrsStateUpdateWithoutMembershipInput, Prisma.SrsStateUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.SrsStateCreateWithoutMembershipInput, Prisma.SrsStateUncheckedCreateWithoutMembershipInput>
+}
+
+export type SrsStateUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SrsStateWhereUniqueInput
+  data: Prisma.XOR<Prisma.SrsStateUpdateWithoutMembershipInput, Prisma.SrsStateUncheckedUpdateWithoutMembershipInput>
+}
+
+export type SrsStateUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.SrsStateScalarWhereInput
+  data: Prisma.XOR<Prisma.SrsStateUpdateManyMutationInput, Prisma.SrsStateUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type SrsStateScalarWhereInput = {
+  AND?: Prisma.SrsStateScalarWhereInput | Prisma.SrsStateScalarWhereInput[]
+  OR?: Prisma.SrsStateScalarWhereInput[]
+  NOT?: Prisma.SrsStateScalarWhereInput | Prisma.SrsStateScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SrsState"> | string
+  tenant_id?: Prisma.UuidFilter<"SrsState"> | string
+  membership_id?: Prisma.UuidFilter<"SrsState"> | string
+  item_id?: Prisma.UuidFilter<"SrsState"> | string
+  ease_factor?: Prisma.DecimalFilter<"SrsState"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days?: Prisma.IntFilter<"SrsState"> | number
+  due_at?: Prisma.DateTimeFilter<"SrsState"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"SrsState"> | Date | string
+}
+
+export type SrsStateCreateWithoutItemInput = {
+  id: string
+  ease_factor: runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days: number
+  due_at: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutSrs_stateInput
+}
+
+export type SrsStateUncheckedCreateWithoutItemInput = {
+  id: string
+  membership_id: string
+  ease_factor: runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days: number
+  due_at: Date | string
+  updated_at?: Date | string
+}
+
+export type SrsStateCreateOrConnectWithoutItemInput = {
+  where: Prisma.SrsStateWhereUniqueInput
+  create: Prisma.XOR<Prisma.SrsStateCreateWithoutItemInput, Prisma.SrsStateUncheckedCreateWithoutItemInput>
+}
+
+export type SrsStateCreateManyItemInputEnvelope = {
+  data: Prisma.SrsStateCreateManyItemInput | Prisma.SrsStateCreateManyItemInput[]
+  skipDuplicates?: boolean
+}
+
+export type SrsStateUpsertWithWhereUniqueWithoutItemInput = {
+  where: Prisma.SrsStateWhereUniqueInput
+  update: Prisma.XOR<Prisma.SrsStateUpdateWithoutItemInput, Prisma.SrsStateUncheckedUpdateWithoutItemInput>
+  create: Prisma.XOR<Prisma.SrsStateCreateWithoutItemInput, Prisma.SrsStateUncheckedCreateWithoutItemInput>
+}
+
+export type SrsStateUpdateWithWhereUniqueWithoutItemInput = {
+  where: Prisma.SrsStateWhereUniqueInput
+  data: Prisma.XOR<Prisma.SrsStateUpdateWithoutItemInput, Prisma.SrsStateUncheckedUpdateWithoutItemInput>
+}
+
+export type SrsStateUpdateManyWithWhereWithoutItemInput = {
+  where: Prisma.SrsStateScalarWhereInput
+  data: Prisma.XOR<Prisma.SrsStateUpdateManyMutationInput, Prisma.SrsStateUncheckedUpdateManyWithoutItemInput>
+}
+
+export type SrsStateCreateManyMembershipInput = {
+  id: string
+  item_id: string
+  ease_factor: runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days: number
+  due_at: Date | string
+  updated_at?: Date | string
+}
+
+export type SrsStateUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  item?: Prisma.ItemUpdateOneRequiredWithoutSrs_stateNestedInput
+}
+
+export type SrsStateUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SrsStateUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_id?: Prisma.StringFieldUpdateOperationsInput | string
+  ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SrsStateCreateManyItemInput = {
+  id: string
+  membership_id: string
+  ease_factor: runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days: number
+  due_at: Date | string
+  updated_at?: Date | string
+}
+
+export type SrsStateUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSrs_stateNestedInput
+}
+
+export type SrsStateUncheckedUpdateWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SrsStateUncheckedUpdateManyWithoutItemInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  ease_factor?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  interval_days?: Prisma.IntFieldUpdateOperationsInput | number
+  due_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type SrsStateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -439,6 +708,8 @@ export type SrsStateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   interval_days?: boolean
   due_at?: boolean
   updated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["srsState"]>
 
 export type SrsStateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -450,6 +721,8 @@ export type SrsStateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   interval_days?: boolean
   due_at?: boolean
   updated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["srsState"]>
 
 export type SrsStateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -461,6 +734,8 @@ export type SrsStateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   interval_days?: boolean
   due_at?: boolean
   updated_at?: boolean
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["srsState"]>
 
 export type SrsStateSelectScalar = {
@@ -475,10 +750,25 @@ export type SrsStateSelectScalar = {
 }
 
 export type SrsStateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "item_id" | "ease_factor" | "interval_days" | "due_at" | "updated_at", ExtArgs["result"]["srsState"]>
+export type SrsStateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type SrsStateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type SrsStateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  item?: boolean | Prisma.ItemDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $SrsStatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SrsState"
-  objects: {}
+  objects: {
+    item: Prisma.$ItemPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -882,6 +1172,8 @@ readonly fields: SrsStateFieldRefs;
  */
 export interface Prisma__SrsStateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  item<T extends Prisma.ItemDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ItemDefaultArgs<ExtArgs>>): Prisma.Prisma__ItemClient<runtime.Types.Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -936,6 +1228,10 @@ export type SrsStateFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
+  /**
    * Filter, which SrsState to fetch.
    */
   where: Prisma.SrsStateWhereUniqueInput
@@ -954,6 +1250,10 @@ export type SrsStateFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
+  /**
    * Filter, which SrsState to fetch.
    */
   where: Prisma.SrsStateWhereUniqueInput
@@ -971,6 +1271,10 @@ export type SrsStateFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the SrsState
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
   /**
    * Filter, which SrsState to fetch.
    */
@@ -1020,6 +1324,10 @@ export type SrsStateFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
+  /**
    * Filter, which SrsState to fetch.
    */
   where?: Prisma.SrsStateWhereInput
@@ -1067,6 +1375,10 @@ export type SrsStateFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the SrsState
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
   /**
    * Filter, which SrsStates to fetch.
    */
@@ -1116,6 +1428,10 @@ export type SrsStateCreateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
+  /**
    * The data needed to create a SrsState.
    */
   data: Prisma.XOR<Prisma.SrsStateCreateInput, Prisma.SrsStateUncheckedCreateInput>
@@ -1149,6 +1465,10 @@ export type SrsStateCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    */
   data: Prisma.SrsStateCreateManyInput | Prisma.SrsStateCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1163,6 +1483,10 @@ export type SrsStateUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the SrsState
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
   /**
    * The data needed to update a SrsState.
    */
@@ -1215,6 +1539,10 @@ export type SrsStateUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many SrsStates to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1229,6 +1557,10 @@ export type SrsStateUpsertArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the SrsState
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
   /**
    * The filter to search for the SrsState to update in case it exists.
    */
@@ -1255,6 +1587,10 @@ export type SrsStateDeleteArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Omit specific fields from the SrsState
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
   /**
    * Filter which SrsState to delete.
    */
@@ -1287,4 +1623,8 @@ export type SrsStateDefaultArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the SrsState
    */
   omit?: Prisma.SrsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
 }

@@ -198,6 +198,9 @@ export type CompetencyDimensionWhereInput = {
   description?: Prisma.StringNullableFilter<"CompetencyDimension"> | string | null
   created_at?: Prisma.DateTimeFilter<"CompetencyDimension"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CompetencyDimension"> | Date | string
+  competency_scores?: Prisma.CompetencyScoreListRelationFilter
+  competency_signals?: Prisma.CompetencySignalListRelationFilter
+  item_dimension_weights?: Prisma.ItemDimensionWeightListRelationFilter
 }
 
 export type CompetencyDimensionOrderByWithRelationInput = {
@@ -208,10 +211,14 @@ export type CompetencyDimensionOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  competency_scores?: Prisma.CompetencyScoreOrderByRelationAggregateInput
+  competency_signals?: Prisma.CompetencySignalOrderByRelationAggregateInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightOrderByRelationAggregateInput
 }
 
 export type CompetencyDimensionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.CompetencyDimensionTenant_idIdCompoundUniqueInput
   tenant_id_key?: Prisma.CompetencyDimensionTenant_idKeyCompoundUniqueInput
   AND?: Prisma.CompetencyDimensionWhereInput | Prisma.CompetencyDimensionWhereInput[]
   OR?: Prisma.CompetencyDimensionWhereInput[]
@@ -222,7 +229,10 @@ export type CompetencyDimensionWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"CompetencyDimension"> | string | null
   created_at?: Prisma.DateTimeFilter<"CompetencyDimension"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CompetencyDimension"> | Date | string
-}, "id" | "tenant_id_key">
+  competency_scores?: Prisma.CompetencyScoreListRelationFilter
+  competency_signals?: Prisma.CompetencySignalListRelationFilter
+  item_dimension_weights?: Prisma.ItemDimensionWeightListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_key">
 
 export type CompetencyDimensionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -258,6 +268,9 @@ export type CompetencyDimensionCreateInput = {
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutDimensionInput
+  competency_signals?: Prisma.CompetencySignalCreateNestedManyWithoutDimensionInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutDimensionInput
 }
 
 export type CompetencyDimensionUncheckedCreateInput = {
@@ -268,6 +281,9 @@ export type CompetencyDimensionUncheckedCreateInput = {
   description?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutDimensionInput
+  competency_signals?: Prisma.CompetencySignalUncheckedCreateNestedManyWithoutDimensionInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutDimensionInput
 }
 
 export type CompetencyDimensionUpdateInput = {
@@ -278,6 +294,9 @@ export type CompetencyDimensionUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutDimensionNestedInput
+  competency_signals?: Prisma.CompetencySignalUpdateManyWithoutDimensionNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutDimensionNestedInput
 }
 
 export type CompetencyDimensionUncheckedUpdateInput = {
@@ -288,6 +307,9 @@ export type CompetencyDimensionUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutDimensionNestedInput
+  competency_signals?: Prisma.CompetencySignalUncheckedUpdateManyWithoutDimensionNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutDimensionNestedInput
 }
 
 export type CompetencyDimensionCreateManyInput = {
@@ -318,6 +340,16 @@ export type CompetencyDimensionUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CompetencyDimensionScalarRelationFilter = {
+  is?: Prisma.CompetencyDimensionWhereInput
+  isNot?: Prisma.CompetencyDimensionWhereInput
+}
+
+export type CompetencyDimensionTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type CompetencyDimensionTenant_idKeyCompoundUniqueInput = {
@@ -355,6 +387,287 @@ export type CompetencyDimensionMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type CompetencyDimensionCreateNestedOneWithoutItem_dimension_weightsInput = {
+  create?: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutItem_dimension_weightsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutItem_dimension_weightsInput>
+  connectOrCreate?: Prisma.CompetencyDimensionCreateOrConnectWithoutItem_dimension_weightsInput
+  connect?: Prisma.CompetencyDimensionWhereUniqueInput
+}
+
+export type CompetencyDimensionUpdateOneRequiredWithoutItem_dimension_weightsNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutItem_dimension_weightsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutItem_dimension_weightsInput>
+  connectOrCreate?: Prisma.CompetencyDimensionCreateOrConnectWithoutItem_dimension_weightsInput
+  upsert?: Prisma.CompetencyDimensionUpsertWithoutItem_dimension_weightsInput
+  connect?: Prisma.CompetencyDimensionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompetencyDimensionUpdateToOneWithWhereWithoutItem_dimension_weightsInput, Prisma.CompetencyDimensionUpdateWithoutItem_dimension_weightsInput>, Prisma.CompetencyDimensionUncheckedUpdateWithoutItem_dimension_weightsInput>
+}
+
+export type CompetencyDimensionCreateNestedOneWithoutCompetency_signalsInput = {
+  create?: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_signalsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_signalsInput>
+  connectOrCreate?: Prisma.CompetencyDimensionCreateOrConnectWithoutCompetency_signalsInput
+  connect?: Prisma.CompetencyDimensionWhereUniqueInput
+}
+
+export type CompetencyDimensionUpdateOneRequiredWithoutCompetency_signalsNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_signalsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_signalsInput>
+  connectOrCreate?: Prisma.CompetencyDimensionCreateOrConnectWithoutCompetency_signalsInput
+  upsert?: Prisma.CompetencyDimensionUpsertWithoutCompetency_signalsInput
+  connect?: Prisma.CompetencyDimensionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompetencyDimensionUpdateToOneWithWhereWithoutCompetency_signalsInput, Prisma.CompetencyDimensionUpdateWithoutCompetency_signalsInput>, Prisma.CompetencyDimensionUncheckedUpdateWithoutCompetency_signalsInput>
+}
+
+export type CompetencyDimensionCreateNestedOneWithoutCompetency_scoresInput = {
+  create?: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_scoresInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_scoresInput>
+  connectOrCreate?: Prisma.CompetencyDimensionCreateOrConnectWithoutCompetency_scoresInput
+  connect?: Prisma.CompetencyDimensionWhereUniqueInput
+}
+
+export type CompetencyDimensionUpdateOneRequiredWithoutCompetency_scoresNestedInput = {
+  create?: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_scoresInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_scoresInput>
+  connectOrCreate?: Prisma.CompetencyDimensionCreateOrConnectWithoutCompetency_scoresInput
+  upsert?: Prisma.CompetencyDimensionUpsertWithoutCompetency_scoresInput
+  connect?: Prisma.CompetencyDimensionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CompetencyDimensionUpdateToOneWithWhereWithoutCompetency_scoresInput, Prisma.CompetencyDimensionUpdateWithoutCompetency_scoresInput>, Prisma.CompetencyDimensionUncheckedUpdateWithoutCompetency_scoresInput>
+}
+
+export type CompetencyDimensionCreateWithoutItem_dimension_weightsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutDimensionInput
+  competency_signals?: Prisma.CompetencySignalCreateNestedManyWithoutDimensionInput
+}
+
+export type CompetencyDimensionUncheckedCreateWithoutItem_dimension_weightsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutDimensionInput
+  competency_signals?: Prisma.CompetencySignalUncheckedCreateNestedManyWithoutDimensionInput
+}
+
+export type CompetencyDimensionCreateOrConnectWithoutItem_dimension_weightsInput = {
+  where: Prisma.CompetencyDimensionWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutItem_dimension_weightsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutItem_dimension_weightsInput>
+}
+
+export type CompetencyDimensionUpsertWithoutItem_dimension_weightsInput = {
+  update: Prisma.XOR<Prisma.CompetencyDimensionUpdateWithoutItem_dimension_weightsInput, Prisma.CompetencyDimensionUncheckedUpdateWithoutItem_dimension_weightsInput>
+  create: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutItem_dimension_weightsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutItem_dimension_weightsInput>
+  where?: Prisma.CompetencyDimensionWhereInput
+}
+
+export type CompetencyDimensionUpdateToOneWithWhereWithoutItem_dimension_weightsInput = {
+  where?: Prisma.CompetencyDimensionWhereInput
+  data: Prisma.XOR<Prisma.CompetencyDimensionUpdateWithoutItem_dimension_weightsInput, Prisma.CompetencyDimensionUncheckedUpdateWithoutItem_dimension_weightsInput>
+}
+
+export type CompetencyDimensionUpdateWithoutItem_dimension_weightsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutDimensionNestedInput
+  competency_signals?: Prisma.CompetencySignalUpdateManyWithoutDimensionNestedInput
+}
+
+export type CompetencyDimensionUncheckedUpdateWithoutItem_dimension_weightsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutDimensionNestedInput
+  competency_signals?: Prisma.CompetencySignalUncheckedUpdateManyWithoutDimensionNestedInput
+}
+
+export type CompetencyDimensionCreateWithoutCompetency_signalsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutDimensionInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutDimensionInput
+}
+
+export type CompetencyDimensionUncheckedCreateWithoutCompetency_signalsInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutDimensionInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutDimensionInput
+}
+
+export type CompetencyDimensionCreateOrConnectWithoutCompetency_signalsInput = {
+  where: Prisma.CompetencyDimensionWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_signalsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_signalsInput>
+}
+
+export type CompetencyDimensionUpsertWithoutCompetency_signalsInput = {
+  update: Prisma.XOR<Prisma.CompetencyDimensionUpdateWithoutCompetency_signalsInput, Prisma.CompetencyDimensionUncheckedUpdateWithoutCompetency_signalsInput>
+  create: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_signalsInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_signalsInput>
+  where?: Prisma.CompetencyDimensionWhereInput
+}
+
+export type CompetencyDimensionUpdateToOneWithWhereWithoutCompetency_signalsInput = {
+  where?: Prisma.CompetencyDimensionWhereInput
+  data: Prisma.XOR<Prisma.CompetencyDimensionUpdateWithoutCompetency_signalsInput, Prisma.CompetencyDimensionUncheckedUpdateWithoutCompetency_signalsInput>
+}
+
+export type CompetencyDimensionUpdateWithoutCompetency_signalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutDimensionNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutDimensionNestedInput
+}
+
+export type CompetencyDimensionUncheckedUpdateWithoutCompetency_signalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutDimensionNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutDimensionNestedInput
+}
+
+export type CompetencyDimensionCreateWithoutCompetency_scoresInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_signals?: Prisma.CompetencySignalCreateNestedManyWithoutDimensionInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutDimensionInput
+}
+
+export type CompetencyDimensionUncheckedCreateWithoutCompetency_scoresInput = {
+  id: string
+  tenant_id: string
+  key: string
+  name: string
+  description?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  competency_signals?: Prisma.CompetencySignalUncheckedCreateNestedManyWithoutDimensionInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutDimensionInput
+}
+
+export type CompetencyDimensionCreateOrConnectWithoutCompetency_scoresInput = {
+  where: Prisma.CompetencyDimensionWhereUniqueInput
+  create: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_scoresInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_scoresInput>
+}
+
+export type CompetencyDimensionUpsertWithoutCompetency_scoresInput = {
+  update: Prisma.XOR<Prisma.CompetencyDimensionUpdateWithoutCompetency_scoresInput, Prisma.CompetencyDimensionUncheckedUpdateWithoutCompetency_scoresInput>
+  create: Prisma.XOR<Prisma.CompetencyDimensionCreateWithoutCompetency_scoresInput, Prisma.CompetencyDimensionUncheckedCreateWithoutCompetency_scoresInput>
+  where?: Prisma.CompetencyDimensionWhereInput
+}
+
+export type CompetencyDimensionUpdateToOneWithWhereWithoutCompetency_scoresInput = {
+  where?: Prisma.CompetencyDimensionWhereInput
+  data: Prisma.XOR<Prisma.CompetencyDimensionUpdateWithoutCompetency_scoresInput, Prisma.CompetencyDimensionUncheckedUpdateWithoutCompetency_scoresInput>
+}
+
+export type CompetencyDimensionUpdateWithoutCompetency_scoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_signals?: Prisma.CompetencySignalUpdateManyWithoutDimensionNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutDimensionNestedInput
+}
+
+export type CompetencyDimensionUncheckedUpdateWithoutCompetency_scoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  competency_signals?: Prisma.CompetencySignalUncheckedUpdateManyWithoutDimensionNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutDimensionNestedInput
+}
+
+
+/**
+ * Count Type CompetencyDimensionCountOutputType
+ */
+
+export type CompetencyDimensionCountOutputType = {
+  competency_scores: number
+  competency_signals: number
+  item_dimension_weights: number
+}
+
+export type CompetencyDimensionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  competency_scores?: boolean | CompetencyDimensionCountOutputTypeCountCompetency_scoresArgs
+  competency_signals?: boolean | CompetencyDimensionCountOutputTypeCountCompetency_signalsArgs
+  item_dimension_weights?: boolean | CompetencyDimensionCountOutputTypeCountItem_dimension_weightsArgs
+}
+
+/**
+ * CompetencyDimensionCountOutputType without action
+ */
+export type CompetencyDimensionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompetencyDimensionCountOutputType
+   */
+  select?: Prisma.CompetencyDimensionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CompetencyDimensionCountOutputType without action
+ */
+export type CompetencyDimensionCountOutputTypeCountCompetency_scoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompetencyScoreWhereInput
+}
+
+/**
+ * CompetencyDimensionCountOutputType without action
+ */
+export type CompetencyDimensionCountOutputTypeCountCompetency_signalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CompetencySignalWhereInput
+}
+
+/**
+ * CompetencyDimensionCountOutputType without action
+ */
+export type CompetencyDimensionCountOutputTypeCountItem_dimension_weightsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ItemDimensionWeightWhereInput
+}
 
 
 export type CompetencyDimensionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -365,6 +678,10 @@ export type CompetencyDimensionSelect<ExtArgs extends runtime.Types.Extensions.I
   description?: boolean
   created_at?: boolean
   updated_at?: boolean
+  competency_scores?: boolean | Prisma.CompetencyDimension$competency_scoresArgs<ExtArgs>
+  competency_signals?: boolean | Prisma.CompetencyDimension$competency_signalsArgs<ExtArgs>
+  item_dimension_weights?: boolean | Prisma.CompetencyDimension$item_dimension_weightsArgs<ExtArgs>
+  _count?: boolean | Prisma.CompetencyDimensionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["competencyDimension"]>
 
 export type CompetencyDimensionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -398,10 +715,22 @@ export type CompetencyDimensionSelectScalar = {
 }
 
 export type CompetencyDimensionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "key" | "name" | "description" | "created_at" | "updated_at", ExtArgs["result"]["competencyDimension"]>
+export type CompetencyDimensionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  competency_scores?: boolean | Prisma.CompetencyDimension$competency_scoresArgs<ExtArgs>
+  competency_signals?: boolean | Prisma.CompetencyDimension$competency_signalsArgs<ExtArgs>
+  item_dimension_weights?: boolean | Prisma.CompetencyDimension$item_dimension_weightsArgs<ExtArgs>
+  _count?: boolean | Prisma.CompetencyDimensionCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CompetencyDimensionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type CompetencyDimensionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $CompetencyDimensionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CompetencyDimension"
-  objects: {}
+  objects: {
+    competency_scores: Prisma.$CompetencyScorePayload<ExtArgs>[]
+    competency_signals: Prisma.$CompetencySignalPayload<ExtArgs>[]
+    item_dimension_weights: Prisma.$ItemDimensionWeightPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -804,6 +1133,9 @@ readonly fields: CompetencyDimensionFieldRefs;
  */
 export interface Prisma__CompetencyDimensionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  competency_scores<T extends Prisma.CompetencyDimension$competency_scoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompetencyDimension$competency_scoresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompetencyScorePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  competency_signals<T extends Prisma.CompetencyDimension$competency_signalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompetencyDimension$competency_signalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CompetencySignalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  item_dimension_weights<T extends Prisma.CompetencyDimension$item_dimension_weightsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompetencyDimension$item_dimension_weightsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemDimensionWeightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -857,6 +1189,10 @@ export type CompetencyDimensionFindUniqueArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyDimension to fetch.
    */
   where: Prisma.CompetencyDimensionWhereUniqueInput
@@ -875,6 +1211,10 @@ export type CompetencyDimensionFindUniqueOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyDimension to fetch.
    */
   where: Prisma.CompetencyDimensionWhereUniqueInput
@@ -892,6 +1232,10 @@ export type CompetencyDimensionFindFirstArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the CompetencyDimension
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
   /**
    * Filter, which CompetencyDimension to fetch.
    */
@@ -941,6 +1285,10 @@ export type CompetencyDimensionFindFirstOrThrowArgs<ExtArgs extends runtime.Type
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
+  /**
    * Filter, which CompetencyDimension to fetch.
    */
   where?: Prisma.CompetencyDimensionWhereInput
@@ -988,6 +1336,10 @@ export type CompetencyDimensionFindManyArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the CompetencyDimension
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
   /**
    * Filter, which CompetencyDimensions to fetch.
    */
@@ -1037,6 +1389,10 @@ export type CompetencyDimensionCreateArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
+  /**
    * The data needed to create a CompetencyDimension.
    */
   data: Prisma.XOR<Prisma.CompetencyDimensionCreateInput, Prisma.CompetencyDimensionUncheckedCreateInput>
@@ -1084,6 +1440,10 @@ export type CompetencyDimensionUpdateArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the CompetencyDimension
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
   /**
    * The data needed to update a CompetencyDimension.
    */
@@ -1151,6 +1511,10 @@ export type CompetencyDimensionUpsertArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
+  /**
    * The filter to search for the CompetencyDimension to update in case it exists.
    */
   where: Prisma.CompetencyDimensionWhereUniqueInput
@@ -1177,6 +1541,10 @@ export type CompetencyDimensionDeleteArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
+  /**
    * Filter which CompetencyDimension to delete.
    */
   where: Prisma.CompetencyDimensionWhereUniqueInput
@@ -1197,6 +1565,78 @@ export type CompetencyDimensionDeleteManyArgs<ExtArgs extends runtime.Types.Exte
 }
 
 /**
+ * CompetencyDimension.competency_scores
+ */
+export type CompetencyDimension$competency_scoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompetencyScore
+   */
+  select?: Prisma.CompetencyScoreSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompetencyScore
+   */
+  omit?: Prisma.CompetencyScoreOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyScoreInclude<ExtArgs> | null
+  where?: Prisma.CompetencyScoreWhereInput
+  orderBy?: Prisma.CompetencyScoreOrderByWithRelationInput | Prisma.CompetencyScoreOrderByWithRelationInput[]
+  cursor?: Prisma.CompetencyScoreWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompetencyScoreScalarFieldEnum | Prisma.CompetencyScoreScalarFieldEnum[]
+}
+
+/**
+ * CompetencyDimension.competency_signals
+ */
+export type CompetencyDimension$competency_signalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CompetencySignal
+   */
+  select?: Prisma.CompetencySignalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CompetencySignal
+   */
+  omit?: Prisma.CompetencySignalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencySignalInclude<ExtArgs> | null
+  where?: Prisma.CompetencySignalWhereInput
+  orderBy?: Prisma.CompetencySignalOrderByWithRelationInput | Prisma.CompetencySignalOrderByWithRelationInput[]
+  cursor?: Prisma.CompetencySignalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CompetencySignalScalarFieldEnum | Prisma.CompetencySignalScalarFieldEnum[]
+}
+
+/**
+ * CompetencyDimension.item_dimension_weights
+ */
+export type CompetencyDimension$item_dimension_weightsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemDimensionWeight
+   */
+  select?: Prisma.ItemDimensionWeightSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItemDimensionWeight
+   */
+  omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
+  where?: Prisma.ItemDimensionWeightWhereInput
+  orderBy?: Prisma.ItemDimensionWeightOrderByWithRelationInput | Prisma.ItemDimensionWeightOrderByWithRelationInput[]
+  cursor?: Prisma.ItemDimensionWeightWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ItemDimensionWeightScalarFieldEnum | Prisma.ItemDimensionWeightScalarFieldEnum[]
+}
+
+/**
  * CompetencyDimension without action
  */
 export type CompetencyDimensionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1208,4 +1648,8 @@ export type CompetencyDimensionDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the CompetencyDimension
    */
   omit?: Prisma.CompetencyDimensionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompetencyDimensionInclude<ExtArgs> | null
 }

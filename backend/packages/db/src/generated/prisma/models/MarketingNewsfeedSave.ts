@@ -182,6 +182,8 @@ export type MarketingNewsfeedSaveWhereInput = {
   post_id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
   membership_id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingNewsfeedSave"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  post?: Prisma.XOR<Prisma.MarketingNewsfeedPostScalarRelationFilter, Prisma.MarketingNewsfeedPostWhereInput>
 }
 
 export type MarketingNewsfeedSaveOrderByWithRelationInput = {
@@ -190,6 +192,8 @@ export type MarketingNewsfeedSaveOrderByWithRelationInput = {
   post_id?: Prisma.SortOrder
   membership_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  post?: Prisma.MarketingNewsfeedPostOrderByWithRelationInput
 }
 
 export type MarketingNewsfeedSaveWhereUniqueInput = Prisma.AtLeast<{
@@ -202,6 +206,8 @@ export type MarketingNewsfeedSaveWhereUniqueInput = Prisma.AtLeast<{
   post_id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
   membership_id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingNewsfeedSave"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  post?: Prisma.XOR<Prisma.MarketingNewsfeedPostScalarRelationFilter, Prisma.MarketingNewsfeedPostWhereInput>
 }, "id" | "tenant_id_post_id_membership_id">
 
 export type MarketingNewsfeedSaveOrderByWithAggregationInput = {
@@ -228,10 +234,9 @@ export type MarketingNewsfeedSaveScalarWhereWithAggregatesInput = {
 
 export type MarketingNewsfeedSaveCreateInput = {
   id: string
-  tenant_id: string
-  post_id: string
-  membership_id: string
   created_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutMarketing_newsfeed_savesInput
+  post: Prisma.MarketingNewsfeedPostCreateNestedOneWithoutMarketing_newsfeed_savesInput
 }
 
 export type MarketingNewsfeedSaveUncheckedCreateInput = {
@@ -244,10 +249,9 @@ export type MarketingNewsfeedSaveUncheckedCreateInput = {
 
 export type MarketingNewsfeedSaveUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  post_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutMarketing_newsfeed_savesNestedInput
+  post?: Prisma.MarketingNewsfeedPostUpdateOneRequiredWithoutMarketing_newsfeed_savesNestedInput
 }
 
 export type MarketingNewsfeedSaveUncheckedUpdateInput = {
@@ -268,9 +272,6 @@ export type MarketingNewsfeedSaveCreateManyInput = {
 
 export type MarketingNewsfeedSaveUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  post_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -280,6 +281,16 @@ export type MarketingNewsfeedSaveUncheckedUpdateManyInput = {
   post_id?: Prisma.StringFieldUpdateOperationsInput | string
   membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingNewsfeedSaveListRelationFilter = {
+  every?: Prisma.MarketingNewsfeedSaveWhereInput
+  some?: Prisma.MarketingNewsfeedSaveWhereInput
+  none?: Prisma.MarketingNewsfeedSaveWhereInput
+}
+
+export type MarketingNewsfeedSaveOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type MarketingNewsfeedSaveTenant_idPost_idMembership_idCompoundUniqueInput = {
@@ -312,6 +323,225 @@ export type MarketingNewsfeedSaveMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
 }
 
+export type MarketingNewsfeedSaveCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput> | Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyMembershipInputEnvelope
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+}
+
+export type MarketingNewsfeedSaveUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput> | Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyMembershipInputEnvelope
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+}
+
+export type MarketingNewsfeedSaveUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput> | Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyMembershipInputEnvelope
+  set?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  disconnect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  delete?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  update?: Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutMembershipInput | Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MarketingNewsfeedSaveScalarWhereInput | Prisma.MarketingNewsfeedSaveScalarWhereInput[]
+}
+
+export type MarketingNewsfeedSaveUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput> | Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutMembershipInput | Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyMembershipInputEnvelope
+  set?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  disconnect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  delete?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  update?: Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutMembershipInput | Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutMembershipInput | Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.MarketingNewsfeedSaveScalarWhereInput | Prisma.MarketingNewsfeedSaveScalarWhereInput[]
+}
+
+export type MarketingNewsfeedSaveCreateNestedManyWithoutPostInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput> | Prisma.MarketingNewsfeedSaveCreateWithoutPostInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyPostInputEnvelope
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+}
+
+export type MarketingNewsfeedSaveUncheckedCreateNestedManyWithoutPostInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput> | Prisma.MarketingNewsfeedSaveCreateWithoutPostInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyPostInputEnvelope
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+}
+
+export type MarketingNewsfeedSaveUpdateManyWithoutPostNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput> | Prisma.MarketingNewsfeedSaveCreateWithoutPostInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput[]
+  upsert?: Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutPostInput | Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutPostInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyPostInputEnvelope
+  set?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  disconnect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  delete?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  update?: Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutPostInput | Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutPostInput[]
+  updateMany?: Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutPostInput | Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutPostInput[]
+  deleteMany?: Prisma.MarketingNewsfeedSaveScalarWhereInput | Prisma.MarketingNewsfeedSaveScalarWhereInput[]
+}
+
+export type MarketingNewsfeedSaveUncheckedUpdateManyWithoutPostNestedInput = {
+  create?: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput> | Prisma.MarketingNewsfeedSaveCreateWithoutPostInput[] | Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput[]
+  connectOrCreate?: Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput | Prisma.MarketingNewsfeedSaveCreateOrConnectWithoutPostInput[]
+  upsert?: Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutPostInput | Prisma.MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutPostInput[]
+  createMany?: Prisma.MarketingNewsfeedSaveCreateManyPostInputEnvelope
+  set?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  disconnect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  delete?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  connect?: Prisma.MarketingNewsfeedSaveWhereUniqueInput | Prisma.MarketingNewsfeedSaveWhereUniqueInput[]
+  update?: Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutPostInput | Prisma.MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutPostInput[]
+  updateMany?: Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutPostInput | Prisma.MarketingNewsfeedSaveUpdateManyWithWhereWithoutPostInput[]
+  deleteMany?: Prisma.MarketingNewsfeedSaveScalarWhereInput | Prisma.MarketingNewsfeedSaveScalarWhereInput[]
+}
+
+export type MarketingNewsfeedSaveCreateWithoutMembershipInput = {
+  id: string
+  created_at?: Date | string
+  post: Prisma.MarketingNewsfeedPostCreateNestedOneWithoutMarketing_newsfeed_savesInput
+}
+
+export type MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput = {
+  id: string
+  post_id: string
+  created_at?: Date | string
+}
+
+export type MarketingNewsfeedSaveCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput>
+}
+
+export type MarketingNewsfeedSaveCreateManyMembershipInputEnvelope = {
+  data: Prisma.MarketingNewsfeedSaveCreateManyMembershipInput | Prisma.MarketingNewsfeedSaveCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingNewsfeedSaveUpdateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutMembershipInput>
+}
+
+export type MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingNewsfeedSaveUpdateWithoutMembershipInput, Prisma.MarketingNewsfeedSaveUncheckedUpdateWithoutMembershipInput>
+}
+
+export type MarketingNewsfeedSaveUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.MarketingNewsfeedSaveScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingNewsfeedSaveUpdateManyMutationInput, Prisma.MarketingNewsfeedSaveUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type MarketingNewsfeedSaveScalarWhereInput = {
+  AND?: Prisma.MarketingNewsfeedSaveScalarWhereInput | Prisma.MarketingNewsfeedSaveScalarWhereInput[]
+  OR?: Prisma.MarketingNewsfeedSaveScalarWhereInput[]
+  NOT?: Prisma.MarketingNewsfeedSaveScalarWhereInput | Prisma.MarketingNewsfeedSaveScalarWhereInput[]
+  id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
+  tenant_id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
+  post_id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
+  membership_id?: Prisma.UuidFilter<"MarketingNewsfeedSave"> | string
+  created_at?: Prisma.DateTimeFilter<"MarketingNewsfeedSave"> | Date | string
+}
+
+export type MarketingNewsfeedSaveCreateWithoutPostInput = {
+  id: string
+  created_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutMarketing_newsfeed_savesInput
+}
+
+export type MarketingNewsfeedSaveUncheckedCreateWithoutPostInput = {
+  id: string
+  membership_id: string
+  created_at?: Date | string
+}
+
+export type MarketingNewsfeedSaveCreateOrConnectWithoutPostInput = {
+  where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
+  create: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput>
+}
+
+export type MarketingNewsfeedSaveCreateManyPostInputEnvelope = {
+  data: Prisma.MarketingNewsfeedSaveCreateManyPostInput | Prisma.MarketingNewsfeedSaveCreateManyPostInput[]
+  skipDuplicates?: boolean
+}
+
+export type MarketingNewsfeedSaveUpsertWithWhereUniqueWithoutPostInput = {
+  where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
+  update: Prisma.XOR<Prisma.MarketingNewsfeedSaveUpdateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedUpdateWithoutPostInput>
+  create: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedCreateWithoutPostInput>
+}
+
+export type MarketingNewsfeedSaveUpdateWithWhereUniqueWithoutPostInput = {
+  where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
+  data: Prisma.XOR<Prisma.MarketingNewsfeedSaveUpdateWithoutPostInput, Prisma.MarketingNewsfeedSaveUncheckedUpdateWithoutPostInput>
+}
+
+export type MarketingNewsfeedSaveUpdateManyWithWhereWithoutPostInput = {
+  where: Prisma.MarketingNewsfeedSaveScalarWhereInput
+  data: Prisma.XOR<Prisma.MarketingNewsfeedSaveUpdateManyMutationInput, Prisma.MarketingNewsfeedSaveUncheckedUpdateManyWithoutPostInput>
+}
+
+export type MarketingNewsfeedSaveCreateManyMembershipInput = {
+  id: string
+  post_id: string
+  created_at?: Date | string
+}
+
+export type MarketingNewsfeedSaveUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  post?: Prisma.MarketingNewsfeedPostUpdateOneRequiredWithoutMarketing_newsfeed_savesNestedInput
+}
+
+export type MarketingNewsfeedSaveUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  post_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingNewsfeedSaveUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  post_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingNewsfeedSaveCreateManyPostInput = {
+  id: string
+  membership_id: string
+  created_at?: Date | string
+}
+
+export type MarketingNewsfeedSaveUpdateWithoutPostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutMarketing_newsfeed_savesNestedInput
+}
+
+export type MarketingNewsfeedSaveUncheckedUpdateWithoutPostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type MarketingNewsfeedSaveUncheckedUpdateManyWithoutPostInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type MarketingNewsfeedSaveSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -320,6 +550,8 @@ export type MarketingNewsfeedSaveSelect<ExtArgs extends runtime.Types.Extensions
   post_id?: boolean
   membership_id?: boolean
   created_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  post?: boolean | Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingNewsfeedSave"]>
 
 export type MarketingNewsfeedSaveSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -328,6 +560,8 @@ export type MarketingNewsfeedSaveSelectCreateManyAndReturn<ExtArgs extends runti
   post_id?: boolean
   membership_id?: boolean
   created_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  post?: boolean | Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingNewsfeedSave"]>
 
 export type MarketingNewsfeedSaveSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -336,6 +570,8 @@ export type MarketingNewsfeedSaveSelectUpdateManyAndReturn<ExtArgs extends runti
   post_id?: boolean
   membership_id?: boolean
   created_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  post?: boolean | Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["marketingNewsfeedSave"]>
 
 export type MarketingNewsfeedSaveSelectScalar = {
@@ -347,10 +583,25 @@ export type MarketingNewsfeedSaveSelectScalar = {
 }
 
 export type MarketingNewsfeedSaveOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "post_id" | "membership_id" | "created_at", ExtArgs["result"]["marketingNewsfeedSave"]>
+export type MarketingNewsfeedSaveInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  post?: boolean | Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs>
+}
+export type MarketingNewsfeedSaveIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  post?: boolean | Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs>
+}
+export type MarketingNewsfeedSaveIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  post?: boolean | Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs>
+}
 
 export type $MarketingNewsfeedSavePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MarketingNewsfeedSave"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    post: Prisma.$MarketingNewsfeedPostPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -751,6 +1002,8 @@ readonly fields: MarketingNewsfeedSaveFieldRefs;
  */
 export interface Prisma__MarketingNewsfeedSaveClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  post<T extends Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MarketingNewsfeedPostDefaultArgs<ExtArgs>>): Prisma.Prisma__MarketingNewsfeedPostClient<runtime.Types.Result.GetResult<Prisma.$MarketingNewsfeedPostPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -802,6 +1055,10 @@ export type MarketingNewsfeedSaveFindUniqueArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingNewsfeedSave to fetch.
    */
   where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
@@ -820,6 +1077,10 @@ export type MarketingNewsfeedSaveFindUniqueOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingNewsfeedSave to fetch.
    */
   where: Prisma.MarketingNewsfeedSaveWhereUniqueInput
@@ -837,6 +1098,10 @@ export type MarketingNewsfeedSaveFindFirstArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the MarketingNewsfeedSave
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
   /**
    * Filter, which MarketingNewsfeedSave to fetch.
    */
@@ -886,6 +1151,10 @@ export type MarketingNewsfeedSaveFindFirstOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
+  /**
    * Filter, which MarketingNewsfeedSave to fetch.
    */
   where?: Prisma.MarketingNewsfeedSaveWhereInput
@@ -933,6 +1202,10 @@ export type MarketingNewsfeedSaveFindManyArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the MarketingNewsfeedSave
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
   /**
    * Filter, which MarketingNewsfeedSaves to fetch.
    */
@@ -982,6 +1255,10 @@ export type MarketingNewsfeedSaveCreateArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
+  /**
    * The data needed to create a MarketingNewsfeedSave.
    */
   data: Prisma.XOR<Prisma.MarketingNewsfeedSaveCreateInput, Prisma.MarketingNewsfeedSaveUncheckedCreateInput>
@@ -1015,6 +1292,10 @@ export type MarketingNewsfeedSaveCreateManyAndReturnArgs<ExtArgs extends runtime
    */
   data: Prisma.MarketingNewsfeedSaveCreateManyInput | Prisma.MarketingNewsfeedSaveCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1029,6 +1310,10 @@ export type MarketingNewsfeedSaveUpdateArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the MarketingNewsfeedSave
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
   /**
    * The data needed to update a MarketingNewsfeedSave.
    */
@@ -1081,6 +1366,10 @@ export type MarketingNewsfeedSaveUpdateManyAndReturnArgs<ExtArgs extends runtime
    * Limit how many MarketingNewsfeedSaves to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1095,6 +1384,10 @@ export type MarketingNewsfeedSaveUpsertArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the MarketingNewsfeedSave
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
   /**
    * The filter to search for the MarketingNewsfeedSave to update in case it exists.
    */
@@ -1121,6 +1414,10 @@ export type MarketingNewsfeedSaveDeleteArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the MarketingNewsfeedSave
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
   /**
    * Filter which MarketingNewsfeedSave to delete.
    */
@@ -1153,4 +1450,8 @@ export type MarketingNewsfeedSaveDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the MarketingNewsfeedSave
    */
   omit?: Prisma.MarketingNewsfeedSaveOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MarketingNewsfeedSaveInclude<ExtArgs> | null
 }

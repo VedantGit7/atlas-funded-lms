@@ -262,6 +262,11 @@ export type ItemWhereInput = {
   deleted_at?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
   assessment_items?: Prisma.AssessmentItemListRelationFilter
   item_options?: Prisma.ItemOptionListRelationFilter
+  item_collection_items?: Prisma.ItemCollectionItemListRelationFilter
+  item_dimension_weights?: Prisma.ItemDimensionWeightListRelationFilter
+  item_statistics?: Prisma.ItemStatisticListRelationFilter
+  practice_responses?: Prisma.PracticeResponseListRelationFilter
+  srs_state?: Prisma.SrsStateListRelationFilter
 }
 
 export type ItemOrderByWithRelationInput = {
@@ -279,6 +284,11 @@ export type ItemOrderByWithRelationInput = {
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   assessment_items?: Prisma.AssessmentItemOrderByRelationAggregateInput
   item_options?: Prisma.ItemOptionOrderByRelationAggregateInput
+  item_collection_items?: Prisma.ItemCollectionItemOrderByRelationAggregateInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightOrderByRelationAggregateInput
+  item_statistics?: Prisma.ItemStatisticOrderByRelationAggregateInput
+  practice_responses?: Prisma.PracticeResponseOrderByRelationAggregateInput
+  srs_state?: Prisma.SrsStateOrderByRelationAggregateInput
 }
 
 export type ItemWhereUniqueInput = Prisma.AtLeast<{
@@ -300,6 +310,11 @@ export type ItemWhereUniqueInput = Prisma.AtLeast<{
   deleted_at?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
   assessment_items?: Prisma.AssessmentItemListRelationFilter
   item_options?: Prisma.ItemOptionListRelationFilter
+  item_collection_items?: Prisma.ItemCollectionItemListRelationFilter
+  item_dimension_weights?: Prisma.ItemDimensionWeightListRelationFilter
+  item_statistics?: Prisma.ItemStatisticListRelationFilter
+  practice_responses?: Prisma.PracticeResponseListRelationFilter
+  srs_state?: Prisma.SrsStateListRelationFilter
 }, "id" | "tenant_id_id">
 
 export type ItemOrderByWithAggregationInput = {
@@ -355,6 +370,11 @@ export type ItemCreateInput = {
   deleted_at?: Date | string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutItemInput
 }
 
 export type ItemUncheckedCreateInput = {
@@ -372,6 +392,11 @@ export type ItemUncheckedCreateInput = {
   deleted_at?: Date | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticUncheckedCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type ItemUpdateInput = {
@@ -389,6 +414,11 @@ export type ItemUpdateInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutItemNestedInput
 }
 
 export type ItemUncheckedUpdateInput = {
@@ -406,6 +436,11 @@ export type ItemUncheckedUpdateInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUncheckedUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutItemNestedInput
 }
 
 export type ItemCreateManyInput = {
@@ -541,6 +576,34 @@ export type ItemUpdateOneRequiredWithoutItem_optionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutItem_optionsInput, Prisma.ItemUpdateWithoutItem_optionsInput>, Prisma.ItemUncheckedUpdateWithoutItem_optionsInput>
 }
 
+export type ItemCreateNestedOneWithoutItem_dimension_weightsInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_dimension_weightsInput, Prisma.ItemUncheckedCreateWithoutItem_dimension_weightsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_dimension_weightsInput
+  connect?: Prisma.ItemWhereUniqueInput
+}
+
+export type ItemUpdateOneRequiredWithoutItem_dimension_weightsNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_dimension_weightsInput, Prisma.ItemUncheckedCreateWithoutItem_dimension_weightsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_dimension_weightsInput
+  upsert?: Prisma.ItemUpsertWithoutItem_dimension_weightsInput
+  connect?: Prisma.ItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutItem_dimension_weightsInput, Prisma.ItemUpdateWithoutItem_dimension_weightsInput>, Prisma.ItemUncheckedUpdateWithoutItem_dimension_weightsInput>
+}
+
+export type ItemCreateNestedOneWithoutItem_collection_itemsInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_collection_itemsInput, Prisma.ItemUncheckedCreateWithoutItem_collection_itemsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_collection_itemsInput
+  connect?: Prisma.ItemWhereUniqueInput
+}
+
+export type ItemUpdateOneRequiredWithoutItem_collection_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_collection_itemsInput, Prisma.ItemUncheckedCreateWithoutItem_collection_itemsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_collection_itemsInput
+  upsert?: Prisma.ItemUpsertWithoutItem_collection_itemsInput
+  connect?: Prisma.ItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutItem_collection_itemsInput, Prisma.ItemUpdateWithoutItem_collection_itemsInput>, Prisma.ItemUncheckedUpdateWithoutItem_collection_itemsInput>
+}
+
 export type ItemCreateNestedOneWithoutAssessment_itemsInput = {
   create?: Prisma.XOR<Prisma.ItemCreateWithoutAssessment_itemsInput, Prisma.ItemUncheckedCreateWithoutAssessment_itemsInput>
   connectOrCreate?: Prisma.ItemCreateOrConnectWithoutAssessment_itemsInput
@@ -553,6 +616,48 @@ export type ItemUpdateOneRequiredWithoutAssessment_itemsNestedInput = {
   upsert?: Prisma.ItemUpsertWithoutAssessment_itemsInput
   connect?: Prisma.ItemWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutAssessment_itemsInput, Prisma.ItemUpdateWithoutAssessment_itemsInput>, Prisma.ItemUncheckedUpdateWithoutAssessment_itemsInput>
+}
+
+export type ItemCreateNestedOneWithoutPractice_responsesInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutPractice_responsesInput, Prisma.ItemUncheckedCreateWithoutPractice_responsesInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutPractice_responsesInput
+  connect?: Prisma.ItemWhereUniqueInput
+}
+
+export type ItemUpdateOneRequiredWithoutPractice_responsesNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutPractice_responsesInput, Prisma.ItemUncheckedCreateWithoutPractice_responsesInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutPractice_responsesInput
+  upsert?: Prisma.ItemUpsertWithoutPractice_responsesInput
+  connect?: Prisma.ItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutPractice_responsesInput, Prisma.ItemUpdateWithoutPractice_responsesInput>, Prisma.ItemUncheckedUpdateWithoutPractice_responsesInput>
+}
+
+export type ItemCreateNestedOneWithoutSrs_stateInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutSrs_stateInput, Prisma.ItemUncheckedCreateWithoutSrs_stateInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutSrs_stateInput
+  connect?: Prisma.ItemWhereUniqueInput
+}
+
+export type ItemUpdateOneRequiredWithoutSrs_stateNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutSrs_stateInput, Prisma.ItemUncheckedCreateWithoutSrs_stateInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutSrs_stateInput
+  upsert?: Prisma.ItemUpsertWithoutSrs_stateInput
+  connect?: Prisma.ItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutSrs_stateInput, Prisma.ItemUpdateWithoutSrs_stateInput>, Prisma.ItemUncheckedUpdateWithoutSrs_stateInput>
+}
+
+export type ItemCreateNestedOneWithoutItem_statisticsInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_statisticsInput, Prisma.ItemUncheckedCreateWithoutItem_statisticsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_statisticsInput
+  connect?: Prisma.ItemWhereUniqueInput
+}
+
+export type ItemUpdateOneRequiredWithoutItem_statisticsNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_statisticsInput, Prisma.ItemUncheckedCreateWithoutItem_statisticsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_statisticsInput
+  upsert?: Prisma.ItemUpsertWithoutItem_statisticsInput
+  connect?: Prisma.ItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutItem_statisticsInput, Prisma.ItemUpdateWithoutItem_statisticsInput>, Prisma.ItemUncheckedUpdateWithoutItem_statisticsInput>
 }
 
 export type ItemCreateWithoutItem_optionsInput = {
@@ -569,6 +674,11 @@ export type ItemCreateWithoutItem_optionsInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutItemInput
 }
 
 export type ItemUncheckedCreateWithoutItem_optionsInput = {
@@ -585,6 +695,11 @@ export type ItemUncheckedCreateWithoutItem_optionsInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticUncheckedCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type ItemCreateOrConnectWithoutItem_optionsInput = {
@@ -617,6 +732,11 @@ export type ItemUpdateWithoutItem_optionsInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutItemNestedInput
 }
 
 export type ItemUncheckedUpdateWithoutItem_optionsInput = {
@@ -633,6 +753,211 @@ export type ItemUncheckedUpdateWithoutItem_optionsInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUncheckedUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type ItemCreateWithoutItem_dimension_weightsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutItemInput
+}
+
+export type ItemUncheckedCreateWithoutItem_dimension_weightsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticUncheckedCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type ItemCreateOrConnectWithoutItem_dimension_weightsInput = {
+  where: Prisma.ItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_dimension_weightsInput, Prisma.ItemUncheckedCreateWithoutItem_dimension_weightsInput>
+}
+
+export type ItemUpsertWithoutItem_dimension_weightsInput = {
+  update: Prisma.XOR<Prisma.ItemUpdateWithoutItem_dimension_weightsInput, Prisma.ItemUncheckedUpdateWithoutItem_dimension_weightsInput>
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_dimension_weightsInput, Prisma.ItemUncheckedCreateWithoutItem_dimension_weightsInput>
+  where?: Prisma.ItemWhereInput
+}
+
+export type ItemUpdateToOneWithWhereWithoutItem_dimension_weightsInput = {
+  where?: Prisma.ItemWhereInput
+  data: Prisma.XOR<Prisma.ItemUpdateWithoutItem_dimension_weightsInput, Prisma.ItemUncheckedUpdateWithoutItem_dimension_weightsInput>
+}
+
+export type ItemUpdateWithoutItem_dimension_weightsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutItemNestedInput
+}
+
+export type ItemUncheckedUpdateWithoutItem_dimension_weightsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUncheckedUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type ItemCreateWithoutItem_collection_itemsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutItemInput
+}
+
+export type ItemUncheckedCreateWithoutItem_collection_itemsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticUncheckedCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type ItemCreateOrConnectWithoutItem_collection_itemsInput = {
+  where: Prisma.ItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_collection_itemsInput, Prisma.ItemUncheckedCreateWithoutItem_collection_itemsInput>
+}
+
+export type ItemUpsertWithoutItem_collection_itemsInput = {
+  update: Prisma.XOR<Prisma.ItemUpdateWithoutItem_collection_itemsInput, Prisma.ItemUncheckedUpdateWithoutItem_collection_itemsInput>
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_collection_itemsInput, Prisma.ItemUncheckedCreateWithoutItem_collection_itemsInput>
+  where?: Prisma.ItemWhereInput
+}
+
+export type ItemUpdateToOneWithWhereWithoutItem_collection_itemsInput = {
+  where?: Prisma.ItemWhereInput
+  data: Prisma.XOR<Prisma.ItemUpdateWithoutItem_collection_itemsInput, Prisma.ItemUncheckedUpdateWithoutItem_collection_itemsInput>
+}
+
+export type ItemUpdateWithoutItem_collection_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutItemNestedInput
+}
+
+export type ItemUncheckedUpdateWithoutItem_collection_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUncheckedUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutItemNestedInput
 }
 
 export type ItemCreateWithoutAssessment_itemsInput = {
@@ -649,6 +974,11 @@ export type ItemCreateWithoutAssessment_itemsInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutItemInput
 }
 
 export type ItemUncheckedCreateWithoutAssessment_itemsInput = {
@@ -665,6 +995,11 @@ export type ItemUncheckedCreateWithoutAssessment_itemsInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticUncheckedCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type ItemCreateOrConnectWithoutAssessment_itemsInput = {
@@ -697,6 +1032,11 @@ export type ItemUpdateWithoutAssessment_itemsInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutItemNestedInput
 }
 
 export type ItemUncheckedUpdateWithoutAssessment_itemsInput = {
@@ -713,6 +1053,311 @@ export type ItemUncheckedUpdateWithoutAssessment_itemsInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUncheckedUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type ItemCreateWithoutPractice_responsesInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutItemInput
+}
+
+export type ItemUncheckedCreateWithoutPractice_responsesInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticUncheckedCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type ItemCreateOrConnectWithoutPractice_responsesInput = {
+  where: Prisma.ItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCreateWithoutPractice_responsesInput, Prisma.ItemUncheckedCreateWithoutPractice_responsesInput>
+}
+
+export type ItemUpsertWithoutPractice_responsesInput = {
+  update: Prisma.XOR<Prisma.ItemUpdateWithoutPractice_responsesInput, Prisma.ItemUncheckedUpdateWithoutPractice_responsesInput>
+  create: Prisma.XOR<Prisma.ItemCreateWithoutPractice_responsesInput, Prisma.ItemUncheckedCreateWithoutPractice_responsesInput>
+  where?: Prisma.ItemWhereInput
+}
+
+export type ItemUpdateToOneWithWhereWithoutPractice_responsesInput = {
+  where?: Prisma.ItemWhereInput
+  data: Prisma.XOR<Prisma.ItemUpdateWithoutPractice_responsesInput, Prisma.ItemUncheckedUpdateWithoutPractice_responsesInput>
+}
+
+export type ItemUpdateWithoutPractice_responsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutItemNestedInput
+}
+
+export type ItemUncheckedUpdateWithoutPractice_responsesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUncheckedUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type ItemCreateWithoutSrs_stateInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutItemInput
+}
+
+export type ItemUncheckedCreateWithoutSrs_stateInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
+  item_statistics?: Prisma.ItemStatisticUncheckedCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type ItemCreateOrConnectWithoutSrs_stateInput = {
+  where: Prisma.ItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCreateWithoutSrs_stateInput, Prisma.ItemUncheckedCreateWithoutSrs_stateInput>
+}
+
+export type ItemUpsertWithoutSrs_stateInput = {
+  update: Prisma.XOR<Prisma.ItemUpdateWithoutSrs_stateInput, Prisma.ItemUncheckedUpdateWithoutSrs_stateInput>
+  create: Prisma.XOR<Prisma.ItemCreateWithoutSrs_stateInput, Prisma.ItemUncheckedCreateWithoutSrs_stateInput>
+  where?: Prisma.ItemWhereInput
+}
+
+export type ItemUpdateToOneWithWhereWithoutSrs_stateInput = {
+  where?: Prisma.ItemWhereInput
+  data: Prisma.XOR<Prisma.ItemUpdateWithoutSrs_stateInput, Prisma.ItemUncheckedUpdateWithoutSrs_stateInput>
+}
+
+export type ItemUpdateWithoutSrs_stateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutItemNestedInput
+}
+
+export type ItemUncheckedUpdateWithoutSrs_stateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
+  item_statistics?: Prisma.ItemStatisticUncheckedUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type ItemCreateWithoutItem_statisticsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutItemInput
+}
+
+export type ItemUncheckedCreateWithoutItem_statisticsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutItemInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type ItemCreateOrConnectWithoutItem_statisticsInput = {
+  where: Prisma.ItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_statisticsInput, Prisma.ItemUncheckedCreateWithoutItem_statisticsInput>
+}
+
+export type ItemUpsertWithoutItem_statisticsInput = {
+  update: Prisma.XOR<Prisma.ItemUpdateWithoutItem_statisticsInput, Prisma.ItemUncheckedUpdateWithoutItem_statisticsInput>
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_statisticsInput, Prisma.ItemUncheckedCreateWithoutItem_statisticsInput>
+  where?: Prisma.ItemWhereInput
+}
+
+export type ItemUpdateToOneWithWhereWithoutItem_statisticsInput = {
+  where?: Prisma.ItemWhereInput
+  data: Prisma.XOR<Prisma.ItemUpdateWithoutItem_statisticsInput, Prisma.ItemUncheckedUpdateWithoutItem_statisticsInput>
+}
+
+export type ItemUpdateWithoutItem_statisticsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutItemNestedInput
+}
+
+export type ItemUncheckedUpdateWithoutItem_statisticsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+  item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
+  item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutItemNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutItemNestedInput
 }
 
 
@@ -723,11 +1368,21 @@ export type ItemUncheckedUpdateWithoutAssessment_itemsInput = {
 export type ItemCountOutputType = {
   assessment_items: number
   item_options: number
+  item_collection_items: number
+  item_dimension_weights: number
+  item_statistics: number
+  practice_responses: number
+  srs_state: number
 }
 
 export type ItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessment_items?: boolean | ItemCountOutputTypeCountAssessment_itemsArgs
   item_options?: boolean | ItemCountOutputTypeCountItem_optionsArgs
+  item_collection_items?: boolean | ItemCountOutputTypeCountItem_collection_itemsArgs
+  item_dimension_weights?: boolean | ItemCountOutputTypeCountItem_dimension_weightsArgs
+  item_statistics?: boolean | ItemCountOutputTypeCountItem_statisticsArgs
+  practice_responses?: boolean | ItemCountOutputTypeCountPractice_responsesArgs
+  srs_state?: boolean | ItemCountOutputTypeCountSrs_stateArgs
 }
 
 /**
@@ -754,6 +1409,41 @@ export type ItemCountOutputTypeCountItem_optionsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.ItemOptionWhereInput
 }
 
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeCountItem_collection_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ItemCollectionItemWhereInput
+}
+
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeCountItem_dimension_weightsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ItemDimensionWeightWhereInput
+}
+
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeCountItem_statisticsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ItemStatisticWhereInput
+}
+
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeCountPractice_responsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PracticeResponseWhereInput
+}
+
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeCountSrs_stateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SrsStateWhereInput
+}
+
 
 export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -770,6 +1460,11 @@ export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   deleted_at?: boolean
   assessment_items?: boolean | Prisma.Item$assessment_itemsArgs<ExtArgs>
   item_options?: boolean | Prisma.Item$item_optionsArgs<ExtArgs>
+  item_collection_items?: boolean | Prisma.Item$item_collection_itemsArgs<ExtArgs>
+  item_dimension_weights?: boolean | Prisma.Item$item_dimension_weightsArgs<ExtArgs>
+  item_statistics?: boolean | Prisma.Item$item_statisticsArgs<ExtArgs>
+  practice_responses?: boolean | Prisma.Item$practice_responsesArgs<ExtArgs>
+  srs_state?: boolean | Prisma.Item$srs_stateArgs<ExtArgs>
   _count?: boolean | Prisma.ItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["item"]>
 
@@ -822,6 +1517,11 @@ export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type ItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessment_items?: boolean | Prisma.Item$assessment_itemsArgs<ExtArgs>
   item_options?: boolean | Prisma.Item$item_optionsArgs<ExtArgs>
+  item_collection_items?: boolean | Prisma.Item$item_collection_itemsArgs<ExtArgs>
+  item_dimension_weights?: boolean | Prisma.Item$item_dimension_weightsArgs<ExtArgs>
+  item_statistics?: boolean | Prisma.Item$item_statisticsArgs<ExtArgs>
+  practice_responses?: boolean | Prisma.Item$practice_responsesArgs<ExtArgs>
+  srs_state?: boolean | Prisma.Item$srs_stateArgs<ExtArgs>
   _count?: boolean | Prisma.ItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -832,6 +1532,11 @@ export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     assessment_items: Prisma.$AssessmentItemPayload<ExtArgs>[]
     item_options: Prisma.$ItemOptionPayload<ExtArgs>[]
+    item_collection_items: Prisma.$ItemCollectionItemPayload<ExtArgs>[]
+    item_dimension_weights: Prisma.$ItemDimensionWeightPayload<ExtArgs>[]
+    item_statistics: Prisma.$ItemStatisticPayload<ExtArgs>[]
+    practice_responses: Prisma.$PracticeResponsePayload<ExtArgs>[]
+    srs_state: Prisma.$SrsStatePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1242,6 +1947,11 @@ export interface Prisma__ItemClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assessment_items<T extends Prisma.Item$assessment_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$assessment_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssessmentItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   item_options<T extends Prisma.Item$item_optionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$item_optionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemOptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  item_collection_items<T extends Prisma.Item$item_collection_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$item_collection_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemCollectionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  item_dimension_weights<T extends Prisma.Item$item_dimension_weightsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$item_dimension_weightsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemDimensionWeightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  item_statistics<T extends Prisma.Item$item_statisticsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$item_statisticsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemStatisticPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  practice_responses<T extends Prisma.Item$practice_responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$practice_responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PracticeResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  srs_state<T extends Prisma.Item$srs_stateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$srs_stateArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SrsStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1721,6 +2431,126 @@ export type Item$item_optionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ItemOptionScalarFieldEnum | Prisma.ItemOptionScalarFieldEnum[]
+}
+
+/**
+ * Item.item_collection_items
+ */
+export type Item$item_collection_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemCollectionItem
+   */
+  select?: Prisma.ItemCollectionItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItemCollectionItem
+   */
+  omit?: Prisma.ItemCollectionItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemCollectionItemInclude<ExtArgs> | null
+  where?: Prisma.ItemCollectionItemWhereInput
+  orderBy?: Prisma.ItemCollectionItemOrderByWithRelationInput | Prisma.ItemCollectionItemOrderByWithRelationInput[]
+  cursor?: Prisma.ItemCollectionItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ItemCollectionItemScalarFieldEnum | Prisma.ItemCollectionItemScalarFieldEnum[]
+}
+
+/**
+ * Item.item_dimension_weights
+ */
+export type Item$item_dimension_weightsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemDimensionWeight
+   */
+  select?: Prisma.ItemDimensionWeightSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItemDimensionWeight
+   */
+  omit?: Prisma.ItemDimensionWeightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemDimensionWeightInclude<ExtArgs> | null
+  where?: Prisma.ItemDimensionWeightWhereInput
+  orderBy?: Prisma.ItemDimensionWeightOrderByWithRelationInput | Prisma.ItemDimensionWeightOrderByWithRelationInput[]
+  cursor?: Prisma.ItemDimensionWeightWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ItemDimensionWeightScalarFieldEnum | Prisma.ItemDimensionWeightScalarFieldEnum[]
+}
+
+/**
+ * Item.item_statistics
+ */
+export type Item$item_statisticsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemStatistic
+   */
+  select?: Prisma.ItemStatisticSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItemStatistic
+   */
+  omit?: Prisma.ItemStatisticOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemStatisticInclude<ExtArgs> | null
+  where?: Prisma.ItemStatisticWhereInput
+  orderBy?: Prisma.ItemStatisticOrderByWithRelationInput | Prisma.ItemStatisticOrderByWithRelationInput[]
+  cursor?: Prisma.ItemStatisticWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ItemStatisticScalarFieldEnum | Prisma.ItemStatisticScalarFieldEnum[]
+}
+
+/**
+ * Item.practice_responses
+ */
+export type Item$practice_responsesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PracticeResponse
+   */
+  select?: Prisma.PracticeResponseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PracticeResponse
+   */
+  omit?: Prisma.PracticeResponseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PracticeResponseInclude<ExtArgs> | null
+  where?: Prisma.PracticeResponseWhereInput
+  orderBy?: Prisma.PracticeResponseOrderByWithRelationInput | Prisma.PracticeResponseOrderByWithRelationInput[]
+  cursor?: Prisma.PracticeResponseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PracticeResponseScalarFieldEnum | Prisma.PracticeResponseScalarFieldEnum[]
+}
+
+/**
+ * Item.srs_state
+ */
+export type Item$srs_stateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SrsState
+   */
+  select?: Prisma.SrsStateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SrsState
+   */
+  omit?: Prisma.SrsStateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SrsStateInclude<ExtArgs> | null
+  where?: Prisma.SrsStateWhereInput
+  orderBy?: Prisma.SrsStateOrderByWithRelationInput | Prisma.SrsStateOrderByWithRelationInput[]
+  cursor?: Prisma.SrsStateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SrsStateScalarFieldEnum | Prisma.SrsStateScalarFieldEnum[]
 }
 
 /**

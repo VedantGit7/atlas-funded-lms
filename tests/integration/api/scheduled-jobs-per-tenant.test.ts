@@ -39,9 +39,14 @@ suite("scheduled jobs run per tenant (audit M5)", () => {
     const insert = (fixture: CourseAuthoringFixture, expiresAt: string) =>
       asTenant(fixture, async (tx) => {
         const id = randomUUID();
+        const templateId = randomUUID();
+        await tx.$executeRaw`
+          insert into certificate_templates (id, tenant_id, key, name, template_json, updated_at)
+          values (${templateId}::uuid, ${fixture.tenantId}::uuid, ${`m5-${templateId}`}, 'M5', '{}'::jsonb, now())
+        `;
         await tx.$executeRaw`
           insert into certificates (id, tenant_id, template_id, membership_id, credential_id, status, expires_at, updated_at)
-          values (${id}::uuid, ${fixture.tenantId}::uuid, ${randomUUID()}::uuid,
+          values (${id}::uuid, ${fixture.tenantId}::uuid, ${templateId}::uuid,
                   ${fixture.learnerMembershipId}::uuid, ${`m5-${id}`}, 'issued', ${expiresAt}::timestamptz, now())
         `;
         return id;

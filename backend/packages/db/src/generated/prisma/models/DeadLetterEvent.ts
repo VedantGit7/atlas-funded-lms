@@ -186,6 +186,7 @@ export type DeadLetterEventWhereInput = {
   destination_key?: Prisma.StringNullableFilter<"DeadLetterEvent"> | string | null
   error_json?: Prisma.JsonFilter<"DeadLetterEvent">
   failed_at?: Prisma.DateTimeFilter<"DeadLetterEvent"> | Date | string
+  outbox_event?: Prisma.XOR<Prisma.OutboxEventNullableScalarRelationFilter, Prisma.OutboxEventWhereInput> | null
 }
 
 export type DeadLetterEventOrderByWithRelationInput = {
@@ -195,6 +196,7 @@ export type DeadLetterEventOrderByWithRelationInput = {
   destination_key?: Prisma.SortOrderInput | Prisma.SortOrder
   error_json?: Prisma.SortOrder
   failed_at?: Prisma.SortOrder
+  outbox_event?: Prisma.OutboxEventOrderByWithRelationInput
 }
 
 export type DeadLetterEventWhereUniqueInput = Prisma.AtLeast<{
@@ -207,6 +209,7 @@ export type DeadLetterEventWhereUniqueInput = Prisma.AtLeast<{
   destination_key?: Prisma.StringNullableFilter<"DeadLetterEvent"> | string | null
   error_json?: Prisma.JsonFilter<"DeadLetterEvent">
   failed_at?: Prisma.DateTimeFilter<"DeadLetterEvent"> | Date | string
+  outbox_event?: Prisma.XOR<Prisma.OutboxEventNullableScalarRelationFilter, Prisma.OutboxEventWhereInput> | null
 }, "id">
 
 export type DeadLetterEventOrderByWithAggregationInput = {
@@ -235,11 +238,10 @@ export type DeadLetterEventScalarWhereWithAggregatesInput = {
 
 export type DeadLetterEventCreateInput = {
   id: string
-  tenant_id?: string | null
-  outbox_event_id: string
   destination_key?: string | null
   error_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   failed_at?: Date | string
+  outbox_event?: Prisma.OutboxEventCreateNestedOneWithoutDead_letter_eventsInput
 }
 
 export type DeadLetterEventUncheckedCreateInput = {
@@ -253,11 +255,10 @@ export type DeadLetterEventUncheckedCreateInput = {
 
 export type DeadLetterEventUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  outbox_event_id?: Prisma.StringFieldUpdateOperationsInput | string
   destination_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   failed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  outbox_event?: Prisma.OutboxEventUpdateOneWithoutDead_letter_eventsNestedInput
 }
 
 export type DeadLetterEventUncheckedUpdateInput = {
@@ -280,8 +281,6 @@ export type DeadLetterEventCreateManyInput = {
 
 export type DeadLetterEventUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  outbox_event_id?: Prisma.StringFieldUpdateOperationsInput | string
   destination_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   failed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -294,6 +293,16 @@ export type DeadLetterEventUncheckedUpdateManyInput = {
   destination_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   error_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   failed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeadLetterEventListRelationFilter = {
+  every?: Prisma.DeadLetterEventWhereInput
+  some?: Prisma.DeadLetterEventWhereInput
+  none?: Prisma.DeadLetterEventWhereInput
+}
+
+export type DeadLetterEventOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type DeadLetterEventCountOrderByAggregateInput = {
@@ -321,6 +330,128 @@ export type DeadLetterEventMinOrderByAggregateInput = {
   failed_at?: Prisma.SortOrder
 }
 
+export type DeadLetterEventCreateNestedManyWithoutOutbox_eventInput = {
+  create?: Prisma.XOR<Prisma.DeadLetterEventCreateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput> | Prisma.DeadLetterEventCreateWithoutOutbox_eventInput[] | Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput | Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput[]
+  createMany?: Prisma.DeadLetterEventCreateManyOutbox_eventInputEnvelope
+  connect?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+}
+
+export type DeadLetterEventUncheckedCreateNestedManyWithoutOutbox_eventInput = {
+  create?: Prisma.XOR<Prisma.DeadLetterEventCreateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput> | Prisma.DeadLetterEventCreateWithoutOutbox_eventInput[] | Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput | Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput[]
+  createMany?: Prisma.DeadLetterEventCreateManyOutbox_eventInputEnvelope
+  connect?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+}
+
+export type DeadLetterEventUpdateManyWithoutOutbox_eventNestedInput = {
+  create?: Prisma.XOR<Prisma.DeadLetterEventCreateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput> | Prisma.DeadLetterEventCreateWithoutOutbox_eventInput[] | Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput | Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput[]
+  upsert?: Prisma.DeadLetterEventUpsertWithWhereUniqueWithoutOutbox_eventInput | Prisma.DeadLetterEventUpsertWithWhereUniqueWithoutOutbox_eventInput[]
+  createMany?: Prisma.DeadLetterEventCreateManyOutbox_eventInputEnvelope
+  set?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  disconnect?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  delete?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  connect?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  update?: Prisma.DeadLetterEventUpdateWithWhereUniqueWithoutOutbox_eventInput | Prisma.DeadLetterEventUpdateWithWhereUniqueWithoutOutbox_eventInput[]
+  updateMany?: Prisma.DeadLetterEventUpdateManyWithWhereWithoutOutbox_eventInput | Prisma.DeadLetterEventUpdateManyWithWhereWithoutOutbox_eventInput[]
+  deleteMany?: Prisma.DeadLetterEventScalarWhereInput | Prisma.DeadLetterEventScalarWhereInput[]
+}
+
+export type DeadLetterEventUncheckedUpdateManyWithoutOutbox_eventNestedInput = {
+  create?: Prisma.XOR<Prisma.DeadLetterEventCreateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput> | Prisma.DeadLetterEventCreateWithoutOutbox_eventInput[] | Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput[]
+  connectOrCreate?: Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput | Prisma.DeadLetterEventCreateOrConnectWithoutOutbox_eventInput[]
+  upsert?: Prisma.DeadLetterEventUpsertWithWhereUniqueWithoutOutbox_eventInput | Prisma.DeadLetterEventUpsertWithWhereUniqueWithoutOutbox_eventInput[]
+  createMany?: Prisma.DeadLetterEventCreateManyOutbox_eventInputEnvelope
+  set?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  disconnect?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  delete?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  connect?: Prisma.DeadLetterEventWhereUniqueInput | Prisma.DeadLetterEventWhereUniqueInput[]
+  update?: Prisma.DeadLetterEventUpdateWithWhereUniqueWithoutOutbox_eventInput | Prisma.DeadLetterEventUpdateWithWhereUniqueWithoutOutbox_eventInput[]
+  updateMany?: Prisma.DeadLetterEventUpdateManyWithWhereWithoutOutbox_eventInput | Prisma.DeadLetterEventUpdateManyWithWhereWithoutOutbox_eventInput[]
+  deleteMany?: Prisma.DeadLetterEventScalarWhereInput | Prisma.DeadLetterEventScalarWhereInput[]
+}
+
+export type DeadLetterEventCreateWithoutOutbox_eventInput = {
+  id: string
+  destination_key?: string | null
+  error_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  failed_at?: Date | string
+}
+
+export type DeadLetterEventUncheckedCreateWithoutOutbox_eventInput = {
+  id: string
+  destination_key?: string | null
+  error_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  failed_at?: Date | string
+}
+
+export type DeadLetterEventCreateOrConnectWithoutOutbox_eventInput = {
+  where: Prisma.DeadLetterEventWhereUniqueInput
+  create: Prisma.XOR<Prisma.DeadLetterEventCreateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput>
+}
+
+export type DeadLetterEventCreateManyOutbox_eventInputEnvelope = {
+  data: Prisma.DeadLetterEventCreateManyOutbox_eventInput | Prisma.DeadLetterEventCreateManyOutbox_eventInput[]
+  skipDuplicates?: boolean
+}
+
+export type DeadLetterEventUpsertWithWhereUniqueWithoutOutbox_eventInput = {
+  where: Prisma.DeadLetterEventWhereUniqueInput
+  update: Prisma.XOR<Prisma.DeadLetterEventUpdateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedUpdateWithoutOutbox_eventInput>
+  create: Prisma.XOR<Prisma.DeadLetterEventCreateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedCreateWithoutOutbox_eventInput>
+}
+
+export type DeadLetterEventUpdateWithWhereUniqueWithoutOutbox_eventInput = {
+  where: Prisma.DeadLetterEventWhereUniqueInput
+  data: Prisma.XOR<Prisma.DeadLetterEventUpdateWithoutOutbox_eventInput, Prisma.DeadLetterEventUncheckedUpdateWithoutOutbox_eventInput>
+}
+
+export type DeadLetterEventUpdateManyWithWhereWithoutOutbox_eventInput = {
+  where: Prisma.DeadLetterEventScalarWhereInput
+  data: Prisma.XOR<Prisma.DeadLetterEventUpdateManyMutationInput, Prisma.DeadLetterEventUncheckedUpdateManyWithoutOutbox_eventInput>
+}
+
+export type DeadLetterEventScalarWhereInput = {
+  AND?: Prisma.DeadLetterEventScalarWhereInput | Prisma.DeadLetterEventScalarWhereInput[]
+  OR?: Prisma.DeadLetterEventScalarWhereInput[]
+  NOT?: Prisma.DeadLetterEventScalarWhereInput | Prisma.DeadLetterEventScalarWhereInput[]
+  id?: Prisma.UuidFilter<"DeadLetterEvent"> | string
+  tenant_id?: Prisma.UuidNullableFilter<"DeadLetterEvent"> | string | null
+  outbox_event_id?: Prisma.UuidFilter<"DeadLetterEvent"> | string
+  destination_key?: Prisma.StringNullableFilter<"DeadLetterEvent"> | string | null
+  error_json?: Prisma.JsonFilter<"DeadLetterEvent">
+  failed_at?: Prisma.DateTimeFilter<"DeadLetterEvent"> | Date | string
+}
+
+export type DeadLetterEventCreateManyOutbox_eventInput = {
+  id: string
+  destination_key?: string | null
+  error_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  failed_at?: Date | string
+}
+
+export type DeadLetterEventUpdateWithoutOutbox_eventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  error_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  failed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeadLetterEventUncheckedUpdateWithoutOutbox_eventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  error_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  failed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeadLetterEventUncheckedUpdateManyWithoutOutbox_eventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  destination_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  error_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  failed_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type DeadLetterEventSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -330,6 +461,7 @@ export type DeadLetterEventSelect<ExtArgs extends runtime.Types.Extensions.Inter
   destination_key?: boolean
   error_json?: boolean
   failed_at?: boolean
+  outbox_event?: boolean | Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs>
 }, ExtArgs["result"]["deadLetterEvent"]>
 
 export type DeadLetterEventSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -339,6 +471,7 @@ export type DeadLetterEventSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   destination_key?: boolean
   error_json?: boolean
   failed_at?: boolean
+  outbox_event?: boolean | Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs>
 }, ExtArgs["result"]["deadLetterEvent"]>
 
 export type DeadLetterEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -348,6 +481,7 @@ export type DeadLetterEventSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   destination_key?: boolean
   error_json?: boolean
   failed_at?: boolean
+  outbox_event?: boolean | Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs>
 }, ExtArgs["result"]["deadLetterEvent"]>
 
 export type DeadLetterEventSelectScalar = {
@@ -360,10 +494,21 @@ export type DeadLetterEventSelectScalar = {
 }
 
 export type DeadLetterEventOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "outbox_event_id" | "destination_key" | "error_json" | "failed_at", ExtArgs["result"]["deadLetterEvent"]>
+export type DeadLetterEventInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  outbox_event?: boolean | Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs>
+}
+export type DeadLetterEventIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  outbox_event?: boolean | Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs>
+}
+export type DeadLetterEventIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  outbox_event?: boolean | Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs>
+}
 
 export type $DeadLetterEventPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DeadLetterEvent"
-  objects: {}
+  objects: {
+    outbox_event: Prisma.$OutboxEventPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string | null
@@ -765,6 +910,7 @@ readonly fields: DeadLetterEventFieldRefs;
  */
 export interface Prisma__DeadLetterEventClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  outbox_event<T extends Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeadLetterEvent$outbox_eventArgs<ExtArgs>>): Prisma.Prisma__OutboxEventClient<runtime.Types.Result.GetResult<Prisma.$OutboxEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -817,6 +963,10 @@ export type DeadLetterEventFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
+  /**
    * Filter, which DeadLetterEvent to fetch.
    */
   where: Prisma.DeadLetterEventWhereUniqueInput
@@ -835,6 +985,10 @@ export type DeadLetterEventFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
+  /**
    * Filter, which DeadLetterEvent to fetch.
    */
   where: Prisma.DeadLetterEventWhereUniqueInput
@@ -852,6 +1006,10 @@ export type DeadLetterEventFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the DeadLetterEvent
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
   /**
    * Filter, which DeadLetterEvent to fetch.
    */
@@ -901,6 +1059,10 @@ export type DeadLetterEventFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
+  /**
    * Filter, which DeadLetterEvent to fetch.
    */
   where?: Prisma.DeadLetterEventWhereInput
@@ -948,6 +1110,10 @@ export type DeadLetterEventFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the DeadLetterEvent
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
   /**
    * Filter, which DeadLetterEvents to fetch.
    */
@@ -997,6 +1163,10 @@ export type DeadLetterEventCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
+  /**
    * The data needed to create a DeadLetterEvent.
    */
   data: Prisma.XOR<Prisma.DeadLetterEventCreateInput, Prisma.DeadLetterEventUncheckedCreateInput>
@@ -1030,6 +1200,10 @@ export type DeadLetterEventCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    */
   data: Prisma.DeadLetterEventCreateManyInput | Prisma.DeadLetterEventCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1044,6 +1218,10 @@ export type DeadLetterEventUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the DeadLetterEvent
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
   /**
    * The data needed to update a DeadLetterEvent.
    */
@@ -1096,6 +1274,10 @@ export type DeadLetterEventUpdateManyAndReturnArgs<ExtArgs extends runtime.Types
    * Limit how many DeadLetterEvents to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1110,6 +1292,10 @@ export type DeadLetterEventUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the DeadLetterEvent
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
   /**
    * The filter to search for the DeadLetterEvent to update in case it exists.
    */
@@ -1137,6 +1323,10 @@ export type DeadLetterEventDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
+  /**
    * Filter which DeadLetterEvent to delete.
    */
   where: Prisma.DeadLetterEventWhereUniqueInput
@@ -1157,6 +1347,25 @@ export type DeadLetterEventDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * DeadLetterEvent.outbox_event
+ */
+export type DeadLetterEvent$outbox_eventArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OutboxEvent
+   */
+  select?: Prisma.OutboxEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OutboxEvent
+   */
+  omit?: Prisma.OutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OutboxEventInclude<ExtArgs> | null
+  where?: Prisma.OutboxEventWhereInput
+}
+
+/**
  * DeadLetterEvent without action
  */
 export type DeadLetterEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1168,4 +1377,8 @@ export type DeadLetterEventDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the DeadLetterEvent
    */
   omit?: Prisma.DeadLetterEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeadLetterEventInclude<ExtArgs> | null
 }

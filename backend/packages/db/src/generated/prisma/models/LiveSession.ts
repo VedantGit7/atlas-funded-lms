@@ -235,6 +235,9 @@ export type LiveSessionWhereInput = {
   created_at?: Prisma.DateTimeFilter<"LiveSession"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LiveSession"> | Date | string
   attendance?: Prisma.LiveAttendanceListRelationFilter
+  batch?: Prisma.XOR<Prisma.BatchNullableScalarRelationFilter, Prisma.BatchWhereInput> | null
+  course?: Prisma.XOR<Prisma.CourseNullableScalarRelationFilter, Prisma.CourseWhereInput> | null
+  polls?: Prisma.PollListRelationFilter
 }
 
 export type LiveSessionOrderByWithRelationInput = {
@@ -251,10 +254,14 @@ export type LiveSessionOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   attendance?: Prisma.LiveAttendanceOrderByRelationAggregateInput
+  batch?: Prisma.BatchOrderByWithRelationInput
+  course?: Prisma.CourseOrderByWithRelationInput
+  polls?: Prisma.PollOrderByRelationAggregateInput
 }
 
 export type LiveSessionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.LiveSessionTenant_idIdCompoundUniqueInput
   AND?: Prisma.LiveSessionWhereInput | Prisma.LiveSessionWhereInput[]
   OR?: Prisma.LiveSessionWhereInput[]
   NOT?: Prisma.LiveSessionWhereInput | Prisma.LiveSessionWhereInput[]
@@ -270,7 +277,10 @@ export type LiveSessionWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"LiveSession"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"LiveSession"> | Date | string
   attendance?: Prisma.LiveAttendanceListRelationFilter
-}, "id">
+  batch?: Prisma.XOR<Prisma.BatchNullableScalarRelationFilter, Prisma.BatchWhereInput> | null
+  course?: Prisma.XOR<Prisma.CourseNullableScalarRelationFilter, Prisma.CourseWhereInput> | null
+  polls?: Prisma.PollListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type LiveSessionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -310,10 +320,7 @@ export type LiveSessionScalarWhereWithAggregatesInput = {
 
 export type LiveSessionCreateInput = {
   id: string
-  tenant_id: string
   title: string
-  course_id?: string | null
-  batch_id?: string | null
   status?: string
   scheduled_at?: Date | string | null
   started_at?: Date | string | null
@@ -322,6 +329,9 @@ export type LiveSessionCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   attendance?: Prisma.LiveAttendanceCreateNestedManyWithoutSessionInput
+  batch?: Prisma.BatchCreateNestedOneWithoutLive_sessionsInput
+  course?: Prisma.CourseCreateNestedOneWithoutLive_sessionsInput
+  polls?: Prisma.PollCreateNestedManyWithoutLive_sessionInput
 }
 
 export type LiveSessionUncheckedCreateInput = {
@@ -338,14 +348,12 @@ export type LiveSessionUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   attendance?: Prisma.LiveAttendanceUncheckedCreateNestedManyWithoutSessionInput
+  polls?: Prisma.PollUncheckedCreateNestedManyWithoutLive_sessionInput
 }
 
 export type LiveSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -354,6 +362,9 @@ export type LiveSessionUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attendance?: Prisma.LiveAttendanceUpdateManyWithoutSessionNestedInput
+  batch?: Prisma.BatchUpdateOneWithoutLive_sessionsNestedInput
+  course?: Prisma.CourseUpdateOneWithoutLive_sessionsNestedInput
+  polls?: Prisma.PollUpdateManyWithoutLive_sessionNestedInput
 }
 
 export type LiveSessionUncheckedUpdateInput = {
@@ -370,6 +381,7 @@ export type LiveSessionUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   attendance?: Prisma.LiveAttendanceUncheckedUpdateManyWithoutSessionNestedInput
+  polls?: Prisma.PollUncheckedUpdateManyWithoutLive_sessionNestedInput
 }
 
 export type LiveSessionCreateManyInput = {
@@ -389,10 +401,7 @@ export type LiveSessionCreateManyInput = {
 
 export type LiveSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -415,6 +424,26 @@ export type LiveSessionUncheckedUpdateManyInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LiveSessionListRelationFilter = {
+  every?: Prisma.LiveSessionWhereInput
+  some?: Prisma.LiveSessionWhereInput
+  none?: Prisma.LiveSessionWhereInput
+}
+
+export type LiveSessionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type LiveSessionNullableScalarRelationFilter = {
+  is?: Prisma.LiveSessionWhereInput | null
+  isNot?: Prisma.LiveSessionWhereInput | null
+}
+
+export type LiveSessionTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type LiveSessionCountOrderByAggregateInput = {
@@ -465,6 +494,106 @@ export type LiveSessionScalarRelationFilter = {
   isNot?: Prisma.LiveSessionWhereInput
 }
 
+export type LiveSessionCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutCourseInput, Prisma.LiveSessionUncheckedCreateWithoutCourseInput> | Prisma.LiveSessionCreateWithoutCourseInput[] | Prisma.LiveSessionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutCourseInput | Prisma.LiveSessionCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.LiveSessionCreateManyCourseInputEnvelope
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+}
+
+export type LiveSessionUncheckedCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutCourseInput, Prisma.LiveSessionUncheckedCreateWithoutCourseInput> | Prisma.LiveSessionCreateWithoutCourseInput[] | Prisma.LiveSessionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutCourseInput | Prisma.LiveSessionCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.LiveSessionCreateManyCourseInputEnvelope
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+}
+
+export type LiveSessionUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutCourseInput, Prisma.LiveSessionUncheckedCreateWithoutCourseInput> | Prisma.LiveSessionCreateWithoutCourseInput[] | Prisma.LiveSessionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutCourseInput | Prisma.LiveSessionCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.LiveSessionUpsertWithWhereUniqueWithoutCourseInput | Prisma.LiveSessionUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.LiveSessionCreateManyCourseInputEnvelope
+  set?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  disconnect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  delete?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  update?: Prisma.LiveSessionUpdateWithWhereUniqueWithoutCourseInput | Prisma.LiveSessionUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.LiveSessionUpdateManyWithWhereWithoutCourseInput | Prisma.LiveSessionUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.LiveSessionScalarWhereInput | Prisma.LiveSessionScalarWhereInput[]
+}
+
+export type LiveSessionUncheckedUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutCourseInput, Prisma.LiveSessionUncheckedCreateWithoutCourseInput> | Prisma.LiveSessionCreateWithoutCourseInput[] | Prisma.LiveSessionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutCourseInput | Prisma.LiveSessionCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.LiveSessionUpsertWithWhereUniqueWithoutCourseInput | Prisma.LiveSessionUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.LiveSessionCreateManyCourseInputEnvelope
+  set?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  disconnect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  delete?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  update?: Prisma.LiveSessionUpdateWithWhereUniqueWithoutCourseInput | Prisma.LiveSessionUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.LiveSessionUpdateManyWithWhereWithoutCourseInput | Prisma.LiveSessionUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.LiveSessionScalarWhereInput | Prisma.LiveSessionScalarWhereInput[]
+}
+
+export type LiveSessionCreateNestedManyWithoutBatchInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutBatchInput, Prisma.LiveSessionUncheckedCreateWithoutBatchInput> | Prisma.LiveSessionCreateWithoutBatchInput[] | Prisma.LiveSessionUncheckedCreateWithoutBatchInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutBatchInput | Prisma.LiveSessionCreateOrConnectWithoutBatchInput[]
+  createMany?: Prisma.LiveSessionCreateManyBatchInputEnvelope
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+}
+
+export type LiveSessionUncheckedCreateNestedManyWithoutBatchInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutBatchInput, Prisma.LiveSessionUncheckedCreateWithoutBatchInput> | Prisma.LiveSessionCreateWithoutBatchInput[] | Prisma.LiveSessionUncheckedCreateWithoutBatchInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutBatchInput | Prisma.LiveSessionCreateOrConnectWithoutBatchInput[]
+  createMany?: Prisma.LiveSessionCreateManyBatchInputEnvelope
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+}
+
+export type LiveSessionUpdateManyWithoutBatchNestedInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutBatchInput, Prisma.LiveSessionUncheckedCreateWithoutBatchInput> | Prisma.LiveSessionCreateWithoutBatchInput[] | Prisma.LiveSessionUncheckedCreateWithoutBatchInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutBatchInput | Prisma.LiveSessionCreateOrConnectWithoutBatchInput[]
+  upsert?: Prisma.LiveSessionUpsertWithWhereUniqueWithoutBatchInput | Prisma.LiveSessionUpsertWithWhereUniqueWithoutBatchInput[]
+  createMany?: Prisma.LiveSessionCreateManyBatchInputEnvelope
+  set?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  disconnect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  delete?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  update?: Prisma.LiveSessionUpdateWithWhereUniqueWithoutBatchInput | Prisma.LiveSessionUpdateWithWhereUniqueWithoutBatchInput[]
+  updateMany?: Prisma.LiveSessionUpdateManyWithWhereWithoutBatchInput | Prisma.LiveSessionUpdateManyWithWhereWithoutBatchInput[]
+  deleteMany?: Prisma.LiveSessionScalarWhereInput | Prisma.LiveSessionScalarWhereInput[]
+}
+
+export type LiveSessionUncheckedUpdateManyWithoutBatchNestedInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutBatchInput, Prisma.LiveSessionUncheckedCreateWithoutBatchInput> | Prisma.LiveSessionCreateWithoutBatchInput[] | Prisma.LiveSessionUncheckedCreateWithoutBatchInput[]
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutBatchInput | Prisma.LiveSessionCreateOrConnectWithoutBatchInput[]
+  upsert?: Prisma.LiveSessionUpsertWithWhereUniqueWithoutBatchInput | Prisma.LiveSessionUpsertWithWhereUniqueWithoutBatchInput[]
+  createMany?: Prisma.LiveSessionCreateManyBatchInputEnvelope
+  set?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  disconnect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  delete?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  connect?: Prisma.LiveSessionWhereUniqueInput | Prisma.LiveSessionWhereUniqueInput[]
+  update?: Prisma.LiveSessionUpdateWithWhereUniqueWithoutBatchInput | Prisma.LiveSessionUpdateWithWhereUniqueWithoutBatchInput[]
+  updateMany?: Prisma.LiveSessionUpdateManyWithWhereWithoutBatchInput | Prisma.LiveSessionUpdateManyWithWhereWithoutBatchInput[]
+  deleteMany?: Prisma.LiveSessionScalarWhereInput | Prisma.LiveSessionScalarWhereInput[]
+}
+
+export type LiveSessionCreateNestedOneWithoutPollsInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutPollsInput, Prisma.LiveSessionUncheckedCreateWithoutPollsInput>
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutPollsInput
+  connect?: Prisma.LiveSessionWhereUniqueInput
+}
+
+export type LiveSessionUpdateOneWithoutPollsNestedInput = {
+  create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutPollsInput, Prisma.LiveSessionUncheckedCreateWithoutPollsInput>
+  connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutPollsInput
+  upsert?: Prisma.LiveSessionUpsertWithoutPollsInput
+  disconnect?: Prisma.LiveSessionWhereInput | boolean
+  delete?: Prisma.LiveSessionWhereInput | boolean
+  connect?: Prisma.LiveSessionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LiveSessionUpdateToOneWithWhereWithoutPollsInput, Prisma.LiveSessionUpdateWithoutPollsInput>, Prisma.LiveSessionUncheckedUpdateWithoutPollsInput>
+}
+
 export type LiveSessionCreateNestedOneWithoutAttendanceInput = {
   create?: Prisma.XOR<Prisma.LiveSessionCreateWithoutAttendanceInput, Prisma.LiveSessionUncheckedCreateWithoutAttendanceInput>
   connectOrCreate?: Prisma.LiveSessionCreateOrConnectWithoutAttendanceInput
@@ -479,7 +608,152 @@ export type LiveSessionUpdateOneRequiredWithoutAttendanceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LiveSessionUpdateToOneWithWhereWithoutAttendanceInput, Prisma.LiveSessionUpdateWithoutAttendanceInput>, Prisma.LiveSessionUncheckedUpdateWithoutAttendanceInput>
 }
 
-export type LiveSessionCreateWithoutAttendanceInput = {
+export type LiveSessionCreateWithoutCourseInput = {
+  id: string
+  title: string
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  attendance?: Prisma.LiveAttendanceCreateNestedManyWithoutSessionInput
+  batch?: Prisma.BatchCreateNestedOneWithoutLive_sessionsInput
+  polls?: Prisma.PollCreateNestedManyWithoutLive_sessionInput
+}
+
+export type LiveSessionUncheckedCreateWithoutCourseInput = {
+  id: string
+  title: string
+  batch_id?: string | null
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  attendance?: Prisma.LiveAttendanceUncheckedCreateNestedManyWithoutSessionInput
+  polls?: Prisma.PollUncheckedCreateNestedManyWithoutLive_sessionInput
+}
+
+export type LiveSessionCreateOrConnectWithoutCourseInput = {
+  where: Prisma.LiveSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.LiveSessionCreateWithoutCourseInput, Prisma.LiveSessionUncheckedCreateWithoutCourseInput>
+}
+
+export type LiveSessionCreateManyCourseInputEnvelope = {
+  data: Prisma.LiveSessionCreateManyCourseInput | Prisma.LiveSessionCreateManyCourseInput[]
+  skipDuplicates?: boolean
+}
+
+export type LiveSessionUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.LiveSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.LiveSessionUpdateWithoutCourseInput, Prisma.LiveSessionUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.LiveSessionCreateWithoutCourseInput, Prisma.LiveSessionUncheckedCreateWithoutCourseInput>
+}
+
+export type LiveSessionUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.LiveSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.LiveSessionUpdateWithoutCourseInput, Prisma.LiveSessionUncheckedUpdateWithoutCourseInput>
+}
+
+export type LiveSessionUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.LiveSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.LiveSessionUpdateManyMutationInput, Prisma.LiveSessionUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type LiveSessionScalarWhereInput = {
+  AND?: Prisma.LiveSessionScalarWhereInput | Prisma.LiveSessionScalarWhereInput[]
+  OR?: Prisma.LiveSessionScalarWhereInput[]
+  NOT?: Prisma.LiveSessionScalarWhereInput | Prisma.LiveSessionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"LiveSession"> | string
+  tenant_id?: Prisma.UuidFilter<"LiveSession"> | string
+  title?: Prisma.StringFilter<"LiveSession"> | string
+  course_id?: Prisma.UuidNullableFilter<"LiveSession"> | string | null
+  batch_id?: Prisma.UuidNullableFilter<"LiveSession"> | string | null
+  status?: Prisma.StringFilter<"LiveSession"> | string
+  scheduled_at?: Prisma.DateTimeNullableFilter<"LiveSession"> | Date | string | null
+  started_at?: Prisma.DateTimeNullableFilter<"LiveSession"> | Date | string | null
+  ended_at?: Prisma.DateTimeNullableFilter<"LiveSession"> | Date | string | null
+  metadata_json?: Prisma.JsonNullableFilter<"LiveSession">
+  created_at?: Prisma.DateTimeFilter<"LiveSession"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"LiveSession"> | Date | string
+}
+
+export type LiveSessionCreateWithoutBatchInput = {
+  id: string
+  title: string
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  attendance?: Prisma.LiveAttendanceCreateNestedManyWithoutSessionInput
+  course?: Prisma.CourseCreateNestedOneWithoutLive_sessionsInput
+  polls?: Prisma.PollCreateNestedManyWithoutLive_sessionInput
+}
+
+export type LiveSessionUncheckedCreateWithoutBatchInput = {
+  id: string
+  title: string
+  course_id?: string | null
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  attendance?: Prisma.LiveAttendanceUncheckedCreateNestedManyWithoutSessionInput
+  polls?: Prisma.PollUncheckedCreateNestedManyWithoutLive_sessionInput
+}
+
+export type LiveSessionCreateOrConnectWithoutBatchInput = {
+  where: Prisma.LiveSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.LiveSessionCreateWithoutBatchInput, Prisma.LiveSessionUncheckedCreateWithoutBatchInput>
+}
+
+export type LiveSessionCreateManyBatchInputEnvelope = {
+  data: Prisma.LiveSessionCreateManyBatchInput | Prisma.LiveSessionCreateManyBatchInput[]
+  skipDuplicates?: boolean
+}
+
+export type LiveSessionUpsertWithWhereUniqueWithoutBatchInput = {
+  where: Prisma.LiveSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.LiveSessionUpdateWithoutBatchInput, Prisma.LiveSessionUncheckedUpdateWithoutBatchInput>
+  create: Prisma.XOR<Prisma.LiveSessionCreateWithoutBatchInput, Prisma.LiveSessionUncheckedCreateWithoutBatchInput>
+}
+
+export type LiveSessionUpdateWithWhereUniqueWithoutBatchInput = {
+  where: Prisma.LiveSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.LiveSessionUpdateWithoutBatchInput, Prisma.LiveSessionUncheckedUpdateWithoutBatchInput>
+}
+
+export type LiveSessionUpdateManyWithWhereWithoutBatchInput = {
+  where: Prisma.LiveSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.LiveSessionUpdateManyMutationInput, Prisma.LiveSessionUncheckedUpdateManyWithoutBatchInput>
+}
+
+export type LiveSessionCreateWithoutPollsInput = {
+  id: string
+  title: string
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  attendance?: Prisma.LiveAttendanceCreateNestedManyWithoutSessionInput
+  batch?: Prisma.BatchCreateNestedOneWithoutLive_sessionsInput
+  course?: Prisma.CourseCreateNestedOneWithoutLive_sessionsInput
+}
+
+export type LiveSessionUncheckedCreateWithoutPollsInput = {
   id: string
   tenant_id: string
   title: string
@@ -492,6 +766,69 @@ export type LiveSessionCreateWithoutAttendanceInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  attendance?: Prisma.LiveAttendanceUncheckedCreateNestedManyWithoutSessionInput
+}
+
+export type LiveSessionCreateOrConnectWithoutPollsInput = {
+  where: Prisma.LiveSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.LiveSessionCreateWithoutPollsInput, Prisma.LiveSessionUncheckedCreateWithoutPollsInput>
+}
+
+export type LiveSessionUpsertWithoutPollsInput = {
+  update: Prisma.XOR<Prisma.LiveSessionUpdateWithoutPollsInput, Prisma.LiveSessionUncheckedUpdateWithoutPollsInput>
+  create: Prisma.XOR<Prisma.LiveSessionCreateWithoutPollsInput, Prisma.LiveSessionUncheckedCreateWithoutPollsInput>
+  where?: Prisma.LiveSessionWhereInput
+}
+
+export type LiveSessionUpdateToOneWithWhereWithoutPollsInput = {
+  where?: Prisma.LiveSessionWhereInput
+  data: Prisma.XOR<Prisma.LiveSessionUpdateWithoutPollsInput, Prisma.LiveSessionUncheckedUpdateWithoutPollsInput>
+}
+
+export type LiveSessionUpdateWithoutPollsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendance?: Prisma.LiveAttendanceUpdateManyWithoutSessionNestedInput
+  batch?: Prisma.BatchUpdateOneWithoutLive_sessionsNestedInput
+  course?: Prisma.CourseUpdateOneWithoutLive_sessionsNestedInput
+}
+
+export type LiveSessionUncheckedUpdateWithoutPollsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendance?: Prisma.LiveAttendanceUncheckedUpdateManyWithoutSessionNestedInput
+}
+
+export type LiveSessionCreateWithoutAttendanceInput = {
+  id: string
+  title: string
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  batch?: Prisma.BatchCreateNestedOneWithoutLive_sessionsInput
+  course?: Prisma.CourseCreateNestedOneWithoutLive_sessionsInput
+  polls?: Prisma.PollCreateNestedManyWithoutLive_sessionInput
 }
 
 export type LiveSessionUncheckedCreateWithoutAttendanceInput = {
@@ -507,6 +844,7 @@ export type LiveSessionUncheckedCreateWithoutAttendanceInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  polls?: Prisma.PollUncheckedCreateNestedManyWithoutLive_sessionInput
 }
 
 export type LiveSessionCreateOrConnectWithoutAttendanceInput = {
@@ -527,6 +865,21 @@ export type LiveSessionUpdateToOneWithWhereWithoutAttendanceInput = {
 
 export type LiveSessionUpdateWithoutAttendanceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  batch?: Prisma.BatchUpdateOneWithoutLive_sessionsNestedInput
+  course?: Prisma.CourseUpdateOneWithoutLive_sessionsNestedInput
+  polls?: Prisma.PollUpdateManyWithoutLive_sessionNestedInput
+}
+
+export type LiveSessionUncheckedUpdateWithoutAttendanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -538,14 +891,112 @@ export type LiveSessionUpdateWithoutAttendanceInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  polls?: Prisma.PollUncheckedUpdateManyWithoutLive_sessionNestedInput
 }
 
-export type LiveSessionUncheckedUpdateWithoutAttendanceInput = {
+export type LiveSessionCreateManyCourseInput = {
+  id: string
+  title: string
+  batch_id?: string | null
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type LiveSessionUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendance?: Prisma.LiveAttendanceUpdateManyWithoutSessionNestedInput
+  batch?: Prisma.BatchUpdateOneWithoutLive_sessionsNestedInput
+  polls?: Prisma.PollUpdateManyWithoutLive_sessionNestedInput
+}
+
+export type LiveSessionUncheckedUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendance?: Prisma.LiveAttendanceUncheckedUpdateManyWithoutSessionNestedInput
+  polls?: Prisma.PollUncheckedUpdateManyWithoutLive_sessionNestedInput
+}
+
+export type LiveSessionUncheckedUpdateManyWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LiveSessionCreateManyBatchInput = {
+  id: string
+  title: string
+  course_id?: string | null
+  status?: string
+  scheduled_at?: Date | string | null
+  started_at?: Date | string | null
+  ended_at?: Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type LiveSessionUpdateWithoutBatchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendance?: Prisma.LiveAttendanceUpdateManyWithoutSessionNestedInput
+  course?: Prisma.CourseUpdateOneWithoutLive_sessionsNestedInput
+  polls?: Prisma.PollUpdateManyWithoutLive_sessionNestedInput
+}
+
+export type LiveSessionUncheckedUpdateWithoutBatchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attendance?: Prisma.LiveAttendanceUncheckedUpdateManyWithoutSessionNestedInput
+  polls?: Prisma.PollUncheckedUpdateManyWithoutLive_sessionNestedInput
+}
+
+export type LiveSessionUncheckedUpdateManyWithoutBatchInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   started_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -562,10 +1013,12 @@ export type LiveSessionUncheckedUpdateWithoutAttendanceInput = {
 
 export type LiveSessionCountOutputType = {
   attendance: number
+  polls: number
 }
 
 export type LiveSessionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   attendance?: boolean | LiveSessionCountOutputTypeCountAttendanceArgs
+  polls?: boolean | LiveSessionCountOutputTypeCountPollsArgs
 }
 
 /**
@@ -585,6 +1038,13 @@ export type LiveSessionCountOutputTypeCountAttendanceArgs<ExtArgs extends runtim
   where?: Prisma.LiveAttendanceWhereInput
 }
 
+/**
+ * LiveSessionCountOutputType without action
+ */
+export type LiveSessionCountOutputTypeCountPollsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PollWhereInput
+}
+
 
 export type LiveSessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -600,6 +1060,9 @@ export type LiveSessionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   created_at?: boolean
   updated_at?: boolean
   attendance?: boolean | Prisma.LiveSession$attendanceArgs<ExtArgs>
+  batch?: boolean | Prisma.LiveSession$batchArgs<ExtArgs>
+  course?: boolean | Prisma.LiveSession$courseArgs<ExtArgs>
+  polls?: boolean | Prisma.LiveSession$pollsArgs<ExtArgs>
   _count?: boolean | Prisma.LiveSessionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["liveSession"]>
 
@@ -616,6 +1079,8 @@ export type LiveSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   metadata_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  batch?: boolean | Prisma.LiveSession$batchArgs<ExtArgs>
+  course?: boolean | Prisma.LiveSession$courseArgs<ExtArgs>
 }, ExtArgs["result"]["liveSession"]>
 
 export type LiveSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -631,6 +1096,8 @@ export type LiveSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   metadata_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  batch?: boolean | Prisma.LiveSession$batchArgs<ExtArgs>
+  course?: boolean | Prisma.LiveSession$courseArgs<ExtArgs>
 }, ExtArgs["result"]["liveSession"]>
 
 export type LiveSessionSelectScalar = {
@@ -651,15 +1118,27 @@ export type LiveSessionSelectScalar = {
 export type LiveSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "title" | "course_id" | "batch_id" | "status" | "scheduled_at" | "started_at" | "ended_at" | "metadata_json" | "created_at" | "updated_at", ExtArgs["result"]["liveSession"]>
 export type LiveSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   attendance?: boolean | Prisma.LiveSession$attendanceArgs<ExtArgs>
+  batch?: boolean | Prisma.LiveSession$batchArgs<ExtArgs>
+  course?: boolean | Prisma.LiveSession$courseArgs<ExtArgs>
+  polls?: boolean | Prisma.LiveSession$pollsArgs<ExtArgs>
   _count?: boolean | Prisma.LiveSessionCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type LiveSessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type LiveSessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type LiveSessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  batch?: boolean | Prisma.LiveSession$batchArgs<ExtArgs>
+  course?: boolean | Prisma.LiveSession$courseArgs<ExtArgs>
+}
+export type LiveSessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  batch?: boolean | Prisma.LiveSession$batchArgs<ExtArgs>
+  course?: boolean | Prisma.LiveSession$courseArgs<ExtArgs>
+}
 
 export type $LiveSessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LiveSession"
   objects: {
     attendance: Prisma.$LiveAttendancePayload<ExtArgs>[]
+    batch: Prisma.$BatchPayload<ExtArgs> | null
+    course: Prisma.$CoursePayload<ExtArgs> | null
+    polls: Prisma.$PollPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1072,6 +1551,9 @@ readonly fields: LiveSessionFieldRefs;
 export interface Prisma__LiveSessionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   attendance<T extends Prisma.LiveSession$attendanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LiveSession$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LiveAttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  batch<T extends Prisma.LiveSession$batchArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LiveSession$batchArgs<ExtArgs>>): Prisma.Prisma__BatchClient<runtime.Types.Result.GetResult<Prisma.$BatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  course<T extends Prisma.LiveSession$courseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LiveSession$courseArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  polls<T extends Prisma.LiveSession$pollsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LiveSession$pollsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PollPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1367,6 +1849,10 @@ export type LiveSessionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.LiveSessionCreateManyInput | Prisma.LiveSessionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LiveSessionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1437,6 +1923,10 @@ export type LiveSessionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many LiveSessions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LiveSessionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1527,6 +2017,68 @@ export type LiveSession$attendanceArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.LiveAttendanceScalarFieldEnum | Prisma.LiveAttendanceScalarFieldEnum[]
+}
+
+/**
+ * LiveSession.batch
+ */
+export type LiveSession$batchArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Batch
+   */
+  select?: Prisma.BatchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Batch
+   */
+  omit?: Prisma.BatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BatchInclude<ExtArgs> | null
+  where?: Prisma.BatchWhereInput
+}
+
+/**
+ * LiveSession.course
+ */
+export type LiveSession$courseArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Course
+   */
+  select?: Prisma.CourseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Course
+   */
+  omit?: Prisma.CourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  where?: Prisma.CourseWhereInput
+}
+
+/**
+ * LiveSession.polls
+ */
+export type LiveSession$pollsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Poll
+   */
+  select?: Prisma.PollSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Poll
+   */
+  omit?: Prisma.PollOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PollInclude<ExtArgs> | null
+  where?: Prisma.PollWhereInput
+  orderBy?: Prisma.PollOrderByWithRelationInput | Prisma.PollOrderByWithRelationInput[]
+  cursor?: Prisma.PollWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PollScalarFieldEnum | Prisma.PollScalarFieldEnum[]
 }
 
 /**

@@ -206,6 +206,7 @@ export type StreakFreezeWhereInput = {
   used_for_date?: Prisma.DateTimeNullableFilter<"StreakFreeze"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"StreakFreeze"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"StreakFreeze"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type StreakFreezeOrderByWithRelationInput = {
@@ -217,6 +218,7 @@ export type StreakFreezeOrderByWithRelationInput = {
   used_for_date?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type StreakFreezeWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +233,7 @@ export type StreakFreezeWhereUniqueInput = Prisma.AtLeast<{
   used_for_date?: Prisma.DateTimeNullableFilter<"StreakFreeze"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"StreakFreeze"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"StreakFreeze"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id">
 
 export type StreakFreezeOrderByWithAggregationInput = {
@@ -263,13 +266,12 @@ export type StreakFreezeScalarWhereWithAggregatesInput = {
 
 export type StreakFreezeCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   streak_key: string
   status?: string
   used_for_date?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutStreak_freezesInput
 }
 
 export type StreakFreezeUncheckedCreateInput = {
@@ -285,13 +287,12 @@ export type StreakFreezeUncheckedCreateInput = {
 
 export type StreakFreezeUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   streak_key?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   used_for_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutStreak_freezesNestedInput
 }
 
 export type StreakFreezeUncheckedUpdateInput = {
@@ -318,8 +319,6 @@ export type StreakFreezeCreateManyInput = {
 
 export type StreakFreezeUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   streak_key?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   used_for_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -336,6 +335,16 @@ export type StreakFreezeUncheckedUpdateManyInput = {
   used_for_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StreakFreezeListRelationFilter = {
+  every?: Prisma.StreakFreezeWhereInput
+  some?: Prisma.StreakFreezeWhereInput
+  none?: Prisma.StreakFreezeWhereInput
+}
+
+export type StreakFreezeOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type StreakFreezeCountOrderByAggregateInput = {
@@ -371,6 +380,142 @@ export type StreakFreezeMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type StreakFreezeCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.StreakFreezeCreateWithoutMembershipInput, Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput> | Prisma.StreakFreezeCreateWithoutMembershipInput[] | Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput | Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.StreakFreezeCreateManyMembershipInputEnvelope
+  connect?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+}
+
+export type StreakFreezeUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.StreakFreezeCreateWithoutMembershipInput, Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput> | Prisma.StreakFreezeCreateWithoutMembershipInput[] | Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput | Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.StreakFreezeCreateManyMembershipInputEnvelope
+  connect?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+}
+
+export type StreakFreezeUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.StreakFreezeCreateWithoutMembershipInput, Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput> | Prisma.StreakFreezeCreateWithoutMembershipInput[] | Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput | Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.StreakFreezeUpsertWithWhereUniqueWithoutMembershipInput | Prisma.StreakFreezeUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.StreakFreezeCreateManyMembershipInputEnvelope
+  set?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  disconnect?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  delete?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  connect?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  update?: Prisma.StreakFreezeUpdateWithWhereUniqueWithoutMembershipInput | Prisma.StreakFreezeUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.StreakFreezeUpdateManyWithWhereWithoutMembershipInput | Prisma.StreakFreezeUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.StreakFreezeScalarWhereInput | Prisma.StreakFreezeScalarWhereInput[]
+}
+
+export type StreakFreezeUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.StreakFreezeCreateWithoutMembershipInput, Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput> | Prisma.StreakFreezeCreateWithoutMembershipInput[] | Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput | Prisma.StreakFreezeCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.StreakFreezeUpsertWithWhereUniqueWithoutMembershipInput | Prisma.StreakFreezeUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.StreakFreezeCreateManyMembershipInputEnvelope
+  set?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  disconnect?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  delete?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  connect?: Prisma.StreakFreezeWhereUniqueInput | Prisma.StreakFreezeWhereUniqueInput[]
+  update?: Prisma.StreakFreezeUpdateWithWhereUniqueWithoutMembershipInput | Prisma.StreakFreezeUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.StreakFreezeUpdateManyWithWhereWithoutMembershipInput | Prisma.StreakFreezeUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.StreakFreezeScalarWhereInput | Prisma.StreakFreezeScalarWhereInput[]
+}
+
+export type StreakFreezeCreateWithoutMembershipInput = {
+  id: string
+  streak_key: string
+  status?: string
+  used_for_date?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type StreakFreezeUncheckedCreateWithoutMembershipInput = {
+  id: string
+  streak_key: string
+  status?: string
+  used_for_date?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type StreakFreezeCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.StreakFreezeWhereUniqueInput
+  create: Prisma.XOR<Prisma.StreakFreezeCreateWithoutMembershipInput, Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput>
+}
+
+export type StreakFreezeCreateManyMembershipInputEnvelope = {
+  data: Prisma.StreakFreezeCreateManyMembershipInput | Prisma.StreakFreezeCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type StreakFreezeUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.StreakFreezeWhereUniqueInput
+  update: Prisma.XOR<Prisma.StreakFreezeUpdateWithoutMembershipInput, Prisma.StreakFreezeUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.StreakFreezeCreateWithoutMembershipInput, Prisma.StreakFreezeUncheckedCreateWithoutMembershipInput>
+}
+
+export type StreakFreezeUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.StreakFreezeWhereUniqueInput
+  data: Prisma.XOR<Prisma.StreakFreezeUpdateWithoutMembershipInput, Prisma.StreakFreezeUncheckedUpdateWithoutMembershipInput>
+}
+
+export type StreakFreezeUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.StreakFreezeScalarWhereInput
+  data: Prisma.XOR<Prisma.StreakFreezeUpdateManyMutationInput, Prisma.StreakFreezeUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type StreakFreezeScalarWhereInput = {
+  AND?: Prisma.StreakFreezeScalarWhereInput | Prisma.StreakFreezeScalarWhereInput[]
+  OR?: Prisma.StreakFreezeScalarWhereInput[]
+  NOT?: Prisma.StreakFreezeScalarWhereInput | Prisma.StreakFreezeScalarWhereInput[]
+  id?: Prisma.UuidFilter<"StreakFreeze"> | string
+  tenant_id?: Prisma.UuidFilter<"StreakFreeze"> | string
+  membership_id?: Prisma.UuidFilter<"StreakFreeze"> | string
+  streak_key?: Prisma.StringFilter<"StreakFreeze"> | string
+  status?: Prisma.StringFilter<"StreakFreeze"> | string
+  used_for_date?: Prisma.DateTimeNullableFilter<"StreakFreeze"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"StreakFreeze"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"StreakFreeze"> | Date | string
+}
+
+export type StreakFreezeCreateManyMembershipInput = {
+  id: string
+  streak_key: string
+  status?: string
+  used_for_date?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type StreakFreezeUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  used_for_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StreakFreezeUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  used_for_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StreakFreezeUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  streak_key?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  used_for_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type StreakFreezeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -382,6 +527,7 @@ export type StreakFreezeSelect<ExtArgs extends runtime.Types.Extensions.Internal
   used_for_date?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["streakFreeze"]>
 
 export type StreakFreezeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -393,6 +539,7 @@ export type StreakFreezeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   used_for_date?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["streakFreeze"]>
 
 export type StreakFreezeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -404,6 +551,7 @@ export type StreakFreezeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   used_for_date?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["streakFreeze"]>
 
 export type StreakFreezeSelectScalar = {
@@ -418,10 +566,21 @@ export type StreakFreezeSelectScalar = {
 }
 
 export type StreakFreezeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "streak_key" | "status" | "used_for_date" | "created_at" | "updated_at", ExtArgs["result"]["streakFreeze"]>
+export type StreakFreezeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type StreakFreezeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type StreakFreezeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $StreakFreezePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StreakFreeze"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -825,6 +984,7 @@ readonly fields: StreakFreezeFieldRefs;
  */
 export interface Prisma__StreakFreezeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -879,6 +1039,10 @@ export type StreakFreezeFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
+  /**
    * Filter, which StreakFreeze to fetch.
    */
   where: Prisma.StreakFreezeWhereUniqueInput
@@ -897,6 +1061,10 @@ export type StreakFreezeFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
+  /**
    * Filter, which StreakFreeze to fetch.
    */
   where: Prisma.StreakFreezeWhereUniqueInput
@@ -914,6 +1082,10 @@ export type StreakFreezeFindFirstArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the StreakFreeze
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
   /**
    * Filter, which StreakFreeze to fetch.
    */
@@ -963,6 +1135,10 @@ export type StreakFreezeFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
+  /**
    * Filter, which StreakFreeze to fetch.
    */
   where?: Prisma.StreakFreezeWhereInput
@@ -1010,6 +1186,10 @@ export type StreakFreezeFindManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the StreakFreeze
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
   /**
    * Filter, which StreakFreezes to fetch.
    */
@@ -1059,6 +1239,10 @@ export type StreakFreezeCreateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
+  /**
    * The data needed to create a StreakFreeze.
    */
   data: Prisma.XOR<Prisma.StreakFreezeCreateInput, Prisma.StreakFreezeUncheckedCreateInput>
@@ -1092,6 +1276,10 @@ export type StreakFreezeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    */
   data: Prisma.StreakFreezeCreateManyInput | Prisma.StreakFreezeCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1106,6 +1294,10 @@ export type StreakFreezeUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the StreakFreeze
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
   /**
    * The data needed to update a StreakFreeze.
    */
@@ -1158,6 +1350,10 @@ export type StreakFreezeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * Limit how many StreakFreezes to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1172,6 +1368,10 @@ export type StreakFreezeUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the StreakFreeze
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
   /**
    * The filter to search for the StreakFreeze to update in case it exists.
    */
@@ -1198,6 +1398,10 @@ export type StreakFreezeDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the StreakFreeze
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
   /**
    * Filter which StreakFreeze to delete.
    */
@@ -1230,4 +1434,8 @@ export type StreakFreezeDefaultArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the StreakFreeze
    */
   omit?: Prisma.StreakFreezeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreakFreezeInclude<ExtArgs> | null
 }

@@ -254,6 +254,8 @@ export type PaymentGatewayWhereInput = {
   is_published?: Prisma.BoolFilter<"PaymentGateway"> | boolean
   created_at?: Prisma.DateTimeFilter<"PaymentGateway"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentGateway"> | Date | string
+  billing_location?: Prisma.XOR<Prisma.LearnerBillingLocationNullableScalarRelationFilter, Prisma.LearnerBillingLocationWhereInput> | null
+  payment_refund_intents?: Prisma.PaymentRefundIntentListRelationFilter
 }
 
 export type PaymentGatewayOrderByWithRelationInput = {
@@ -271,10 +273,13 @@ export type PaymentGatewayOrderByWithRelationInput = {
   is_published?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  billing_location?: Prisma.LearnerBillingLocationOrderByWithRelationInput
+  payment_refund_intents?: Prisma.PaymentRefundIntentOrderByRelationAggregateInput
 }
 
 export type PaymentGatewayWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.PaymentGatewayTenant_idIdCompoundUniqueInput
   tenant_id_gateway_key?: Prisma.PaymentGatewayTenant_idGateway_keyCompoundUniqueInput
   AND?: Prisma.PaymentGatewayWhereInput | Prisma.PaymentGatewayWhereInput[]
   OR?: Prisma.PaymentGatewayWhereInput[]
@@ -292,7 +297,9 @@ export type PaymentGatewayWhereUniqueInput = Prisma.AtLeast<{
   is_published?: Prisma.BoolFilter<"PaymentGateway"> | boolean
   created_at?: Prisma.DateTimeFilter<"PaymentGateway"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentGateway"> | Date | string
-}, "id" | "tenant_id_gateway_key">
+  billing_location?: Prisma.XOR<Prisma.LearnerBillingLocationNullableScalarRelationFilter, Prisma.LearnerBillingLocationWhereInput> | null
+  payment_refund_intents?: Prisma.PaymentRefundIntentListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_gateway_key">
 
 export type PaymentGatewayOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -336,19 +343,19 @@ export type PaymentGatewayScalarWhereWithAggregatesInput = {
 
 export type PaymentGatewayCreateInput = {
   id: string
-  tenant_id: string
   gateway_key: string
   display_name: string
   user_id?: string | null
   publishable_key?: string | null
   secret_ciphertext?: string | null
   secret_last4?: string | null
-  billing_location_id?: string | null
   is_default?: boolean
   is_configured?: boolean
   is_published?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  billing_location?: Prisma.LearnerBillingLocationCreateNestedOneWithoutPayment_gatewaysInput
+  payment_refund_intents?: Prisma.PaymentRefundIntentCreateNestedManyWithoutGatewayInput
 }
 
 export type PaymentGatewayUncheckedCreateInput = {
@@ -366,23 +373,24 @@ export type PaymentGatewayUncheckedCreateInput = {
   is_published?: boolean
   created_at?: Date | string
   updated_at?: Date | string
+  payment_refund_intents?: Prisma.PaymentRefundIntentUncheckedCreateNestedManyWithoutGatewayInput
 }
 
 export type PaymentGatewayUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   gateway_key?: Prisma.StringFieldUpdateOperationsInput | string
   display_name?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishable_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secret_ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secret_last4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  billing_location_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_configured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  billing_location?: Prisma.LearnerBillingLocationUpdateOneWithoutPayment_gatewaysNestedInput
+  payment_refund_intents?: Prisma.PaymentRefundIntentUpdateManyWithoutGatewayNestedInput
 }
 
 export type PaymentGatewayUncheckedUpdateInput = {
@@ -400,6 +408,7 @@ export type PaymentGatewayUncheckedUpdateInput = {
   is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_refund_intents?: Prisma.PaymentRefundIntentUncheckedUpdateManyWithoutGatewayNestedInput
 }
 
 export type PaymentGatewayCreateManyInput = {
@@ -421,14 +430,12 @@ export type PaymentGatewayCreateManyInput = {
 
 export type PaymentGatewayUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   gateway_key?: Prisma.StringFieldUpdateOperationsInput | string
   display_name?: Prisma.StringFieldUpdateOperationsInput | string
   user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishable_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secret_ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secret_last4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  billing_location_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_configured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -451,6 +458,21 @@ export type PaymentGatewayUncheckedUpdateManyInput = {
   is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentGatewayListRelationFilter = {
+  every?: Prisma.PaymentGatewayWhereInput
+  some?: Prisma.PaymentGatewayWhereInput
+  none?: Prisma.PaymentGatewayWhereInput
+}
+
+export type PaymentGatewayOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type PaymentGatewayTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type PaymentGatewayTenant_idGateway_keyCompoundUniqueInput = {
@@ -509,6 +531,320 @@ export type PaymentGatewayMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type PaymentGatewayNullableScalarRelationFilter = {
+  is?: Prisma.PaymentGatewayWhereInput | null
+  isNot?: Prisma.PaymentGatewayWhereInput | null
+}
+
+export type PaymentGatewayCreateNestedManyWithoutBilling_locationInput = {
+  create?: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput> | Prisma.PaymentGatewayCreateWithoutBilling_locationInput[] | Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput[]
+  connectOrCreate?: Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput | Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput[]
+  createMany?: Prisma.PaymentGatewayCreateManyBilling_locationInputEnvelope
+  connect?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+}
+
+export type PaymentGatewayUncheckedCreateNestedManyWithoutBilling_locationInput = {
+  create?: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput> | Prisma.PaymentGatewayCreateWithoutBilling_locationInput[] | Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput[]
+  connectOrCreate?: Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput | Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput[]
+  createMany?: Prisma.PaymentGatewayCreateManyBilling_locationInputEnvelope
+  connect?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+}
+
+export type PaymentGatewayUpdateManyWithoutBilling_locationNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput> | Prisma.PaymentGatewayCreateWithoutBilling_locationInput[] | Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput[]
+  connectOrCreate?: Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput | Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput[]
+  upsert?: Prisma.PaymentGatewayUpsertWithWhereUniqueWithoutBilling_locationInput | Prisma.PaymentGatewayUpsertWithWhereUniqueWithoutBilling_locationInput[]
+  createMany?: Prisma.PaymentGatewayCreateManyBilling_locationInputEnvelope
+  set?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  disconnect?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  delete?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  connect?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  update?: Prisma.PaymentGatewayUpdateWithWhereUniqueWithoutBilling_locationInput | Prisma.PaymentGatewayUpdateWithWhereUniqueWithoutBilling_locationInput[]
+  updateMany?: Prisma.PaymentGatewayUpdateManyWithWhereWithoutBilling_locationInput | Prisma.PaymentGatewayUpdateManyWithWhereWithoutBilling_locationInput[]
+  deleteMany?: Prisma.PaymentGatewayScalarWhereInput | Prisma.PaymentGatewayScalarWhereInput[]
+}
+
+export type PaymentGatewayUncheckedUpdateManyWithoutBilling_locationNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput> | Prisma.PaymentGatewayCreateWithoutBilling_locationInput[] | Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput[]
+  connectOrCreate?: Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput | Prisma.PaymentGatewayCreateOrConnectWithoutBilling_locationInput[]
+  upsert?: Prisma.PaymentGatewayUpsertWithWhereUniqueWithoutBilling_locationInput | Prisma.PaymentGatewayUpsertWithWhereUniqueWithoutBilling_locationInput[]
+  createMany?: Prisma.PaymentGatewayCreateManyBilling_locationInputEnvelope
+  set?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  disconnect?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  delete?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  connect?: Prisma.PaymentGatewayWhereUniqueInput | Prisma.PaymentGatewayWhereUniqueInput[]
+  update?: Prisma.PaymentGatewayUpdateWithWhereUniqueWithoutBilling_locationInput | Prisma.PaymentGatewayUpdateWithWhereUniqueWithoutBilling_locationInput[]
+  updateMany?: Prisma.PaymentGatewayUpdateManyWithWhereWithoutBilling_locationInput | Prisma.PaymentGatewayUpdateManyWithWhereWithoutBilling_locationInput[]
+  deleteMany?: Prisma.PaymentGatewayScalarWhereInput | Prisma.PaymentGatewayScalarWhereInput[]
+}
+
+export type PaymentGatewayCreateNestedOneWithoutPayment_refund_intentsInput = {
+  create?: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutPayment_refund_intentsInput, Prisma.PaymentGatewayUncheckedCreateWithoutPayment_refund_intentsInput>
+  connectOrCreate?: Prisma.PaymentGatewayCreateOrConnectWithoutPayment_refund_intentsInput
+  connect?: Prisma.PaymentGatewayWhereUniqueInput
+}
+
+export type PaymentGatewayUpdateOneWithoutPayment_refund_intentsNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutPayment_refund_intentsInput, Prisma.PaymentGatewayUncheckedCreateWithoutPayment_refund_intentsInput>
+  connectOrCreate?: Prisma.PaymentGatewayCreateOrConnectWithoutPayment_refund_intentsInput
+  upsert?: Prisma.PaymentGatewayUpsertWithoutPayment_refund_intentsInput
+  disconnect?: Prisma.PaymentGatewayWhereInput | boolean
+  delete?: Prisma.PaymentGatewayWhereInput | boolean
+  connect?: Prisma.PaymentGatewayWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentGatewayUpdateToOneWithWhereWithoutPayment_refund_intentsInput, Prisma.PaymentGatewayUpdateWithoutPayment_refund_intentsInput>, Prisma.PaymentGatewayUncheckedUpdateWithoutPayment_refund_intentsInput>
+}
+
+export type PaymentGatewayCreateWithoutBilling_locationInput = {
+  id: string
+  gateway_key: string
+  display_name: string
+  user_id?: string | null
+  publishable_key?: string | null
+  secret_ciphertext?: string | null
+  secret_last4?: string | null
+  is_default?: boolean
+  is_configured?: boolean
+  is_published?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_refund_intents?: Prisma.PaymentRefundIntentCreateNestedManyWithoutGatewayInput
+}
+
+export type PaymentGatewayUncheckedCreateWithoutBilling_locationInput = {
+  id: string
+  gateway_key: string
+  display_name: string
+  user_id?: string | null
+  publishable_key?: string | null
+  secret_ciphertext?: string | null
+  secret_last4?: string | null
+  is_default?: boolean
+  is_configured?: boolean
+  is_published?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  payment_refund_intents?: Prisma.PaymentRefundIntentUncheckedCreateNestedManyWithoutGatewayInput
+}
+
+export type PaymentGatewayCreateOrConnectWithoutBilling_locationInput = {
+  where: Prisma.PaymentGatewayWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput>
+}
+
+export type PaymentGatewayCreateManyBilling_locationInputEnvelope = {
+  data: Prisma.PaymentGatewayCreateManyBilling_locationInput | Prisma.PaymentGatewayCreateManyBilling_locationInput[]
+  skipDuplicates?: boolean
+}
+
+export type PaymentGatewayUpsertWithWhereUniqueWithoutBilling_locationInput = {
+  where: Prisma.PaymentGatewayWhereUniqueInput
+  update: Prisma.XOR<Prisma.PaymentGatewayUpdateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedUpdateWithoutBilling_locationInput>
+  create: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedCreateWithoutBilling_locationInput>
+}
+
+export type PaymentGatewayUpdateWithWhereUniqueWithoutBilling_locationInput = {
+  where: Prisma.PaymentGatewayWhereUniqueInput
+  data: Prisma.XOR<Prisma.PaymentGatewayUpdateWithoutBilling_locationInput, Prisma.PaymentGatewayUncheckedUpdateWithoutBilling_locationInput>
+}
+
+export type PaymentGatewayUpdateManyWithWhereWithoutBilling_locationInput = {
+  where: Prisma.PaymentGatewayScalarWhereInput
+  data: Prisma.XOR<Prisma.PaymentGatewayUpdateManyMutationInput, Prisma.PaymentGatewayUncheckedUpdateManyWithoutBilling_locationInput>
+}
+
+export type PaymentGatewayScalarWhereInput = {
+  AND?: Prisma.PaymentGatewayScalarWhereInput | Prisma.PaymentGatewayScalarWhereInput[]
+  OR?: Prisma.PaymentGatewayScalarWhereInput[]
+  NOT?: Prisma.PaymentGatewayScalarWhereInput | Prisma.PaymentGatewayScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PaymentGateway"> | string
+  tenant_id?: Prisma.UuidFilter<"PaymentGateway"> | string
+  gateway_key?: Prisma.StringFilter<"PaymentGateway"> | string
+  display_name?: Prisma.StringFilter<"PaymentGateway"> | string
+  user_id?: Prisma.StringNullableFilter<"PaymentGateway"> | string | null
+  publishable_key?: Prisma.StringNullableFilter<"PaymentGateway"> | string | null
+  secret_ciphertext?: Prisma.StringNullableFilter<"PaymentGateway"> | string | null
+  secret_last4?: Prisma.StringNullableFilter<"PaymentGateway"> | string | null
+  billing_location_id?: Prisma.UuidNullableFilter<"PaymentGateway"> | string | null
+  is_default?: Prisma.BoolFilter<"PaymentGateway"> | boolean
+  is_configured?: Prisma.BoolFilter<"PaymentGateway"> | boolean
+  is_published?: Prisma.BoolFilter<"PaymentGateway"> | boolean
+  created_at?: Prisma.DateTimeFilter<"PaymentGateway"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"PaymentGateway"> | Date | string
+}
+
+export type PaymentGatewayCreateWithoutPayment_refund_intentsInput = {
+  id: string
+  gateway_key: string
+  display_name: string
+  user_id?: string | null
+  publishable_key?: string | null
+  secret_ciphertext?: string | null
+  secret_last4?: string | null
+  is_default?: boolean
+  is_configured?: boolean
+  is_published?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+  billing_location?: Prisma.LearnerBillingLocationCreateNestedOneWithoutPayment_gatewaysInput
+}
+
+export type PaymentGatewayUncheckedCreateWithoutPayment_refund_intentsInput = {
+  id: string
+  tenant_id: string
+  gateway_key: string
+  display_name: string
+  user_id?: string | null
+  publishable_key?: string | null
+  secret_ciphertext?: string | null
+  secret_last4?: string | null
+  billing_location_id?: string | null
+  is_default?: boolean
+  is_configured?: boolean
+  is_published?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PaymentGatewayCreateOrConnectWithoutPayment_refund_intentsInput = {
+  where: Prisma.PaymentGatewayWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutPayment_refund_intentsInput, Prisma.PaymentGatewayUncheckedCreateWithoutPayment_refund_intentsInput>
+}
+
+export type PaymentGatewayUpsertWithoutPayment_refund_intentsInput = {
+  update: Prisma.XOR<Prisma.PaymentGatewayUpdateWithoutPayment_refund_intentsInput, Prisma.PaymentGatewayUncheckedUpdateWithoutPayment_refund_intentsInput>
+  create: Prisma.XOR<Prisma.PaymentGatewayCreateWithoutPayment_refund_intentsInput, Prisma.PaymentGatewayUncheckedCreateWithoutPayment_refund_intentsInput>
+  where?: Prisma.PaymentGatewayWhereInput
+}
+
+export type PaymentGatewayUpdateToOneWithWhereWithoutPayment_refund_intentsInput = {
+  where?: Prisma.PaymentGatewayWhereInput
+  data: Prisma.XOR<Prisma.PaymentGatewayUpdateWithoutPayment_refund_intentsInput, Prisma.PaymentGatewayUncheckedUpdateWithoutPayment_refund_intentsInput>
+}
+
+export type PaymentGatewayUpdateWithoutPayment_refund_intentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  gateway_key?: Prisma.StringFieldUpdateOperationsInput | string
+  display_name?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishable_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_last4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_configured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  billing_location?: Prisma.LearnerBillingLocationUpdateOneWithoutPayment_gatewaysNestedInput
+}
+
+export type PaymentGatewayUncheckedUpdateWithoutPayment_refund_intentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  gateway_key?: Prisma.StringFieldUpdateOperationsInput | string
+  display_name?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishable_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_last4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  billing_location_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_configured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentGatewayCreateManyBilling_locationInput = {
+  id: string
+  gateway_key: string
+  display_name: string
+  user_id?: string | null
+  publishable_key?: string | null
+  secret_ciphertext?: string | null
+  secret_last4?: string | null
+  is_default?: boolean
+  is_configured?: boolean
+  is_published?: boolean
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PaymentGatewayUpdateWithoutBilling_locationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  gateway_key?: Prisma.StringFieldUpdateOperationsInput | string
+  display_name?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishable_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_last4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_configured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_refund_intents?: Prisma.PaymentRefundIntentUpdateManyWithoutGatewayNestedInput
+}
+
+export type PaymentGatewayUncheckedUpdateWithoutBilling_locationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  gateway_key?: Prisma.StringFieldUpdateOperationsInput | string
+  display_name?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishable_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_last4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_configured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_refund_intents?: Prisma.PaymentRefundIntentUncheckedUpdateManyWithoutGatewayNestedInput
+}
+
+export type PaymentGatewayUncheckedUpdateManyWithoutBilling_locationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  gateway_key?: Prisma.StringFieldUpdateOperationsInput | string
+  display_name?: Prisma.StringFieldUpdateOperationsInput | string
+  user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  publishable_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_ciphertext?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secret_last4?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_default?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_configured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  is_published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type PaymentGatewayCountOutputType
+ */
+
+export type PaymentGatewayCountOutputType = {
+  payment_refund_intents: number
+}
+
+export type PaymentGatewayCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  payment_refund_intents?: boolean | PaymentGatewayCountOutputTypeCountPayment_refund_intentsArgs
+}
+
+/**
+ * PaymentGatewayCountOutputType without action
+ */
+export type PaymentGatewayCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentGatewayCountOutputType
+   */
+  select?: Prisma.PaymentGatewayCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PaymentGatewayCountOutputType without action
+ */
+export type PaymentGatewayCountOutputTypeCountPayment_refund_intentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaymentRefundIntentWhereInput
+}
 
 
 export type PaymentGatewaySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -526,6 +862,9 @@ export type PaymentGatewaySelect<ExtArgs extends runtime.Types.Extensions.Intern
   is_published?: boolean
   created_at?: boolean
   updated_at?: boolean
+  billing_location?: boolean | Prisma.PaymentGateway$billing_locationArgs<ExtArgs>
+  payment_refund_intents?: boolean | Prisma.PaymentGateway$payment_refund_intentsArgs<ExtArgs>
+  _count?: boolean | Prisma.PaymentGatewayCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paymentGateway"]>
 
 export type PaymentGatewaySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -543,6 +882,7 @@ export type PaymentGatewaySelectCreateManyAndReturn<ExtArgs extends runtime.Type
   is_published?: boolean
   created_at?: boolean
   updated_at?: boolean
+  billing_location?: boolean | Prisma.PaymentGateway$billing_locationArgs<ExtArgs>
 }, ExtArgs["result"]["paymentGateway"]>
 
 export type PaymentGatewaySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -560,6 +900,7 @@ export type PaymentGatewaySelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   is_published?: boolean
   created_at?: boolean
   updated_at?: boolean
+  billing_location?: boolean | Prisma.PaymentGateway$billing_locationArgs<ExtArgs>
 }, ExtArgs["result"]["paymentGateway"]>
 
 export type PaymentGatewaySelectScalar = {
@@ -580,10 +921,24 @@ export type PaymentGatewaySelectScalar = {
 }
 
 export type PaymentGatewayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "gateway_key" | "display_name" | "user_id" | "publishable_key" | "secret_ciphertext" | "secret_last4" | "billing_location_id" | "is_default" | "is_configured" | "is_published" | "created_at" | "updated_at", ExtArgs["result"]["paymentGateway"]>
+export type PaymentGatewayInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  billing_location?: boolean | Prisma.PaymentGateway$billing_locationArgs<ExtArgs>
+  payment_refund_intents?: boolean | Prisma.PaymentGateway$payment_refund_intentsArgs<ExtArgs>
+  _count?: boolean | Prisma.PaymentGatewayCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type PaymentGatewayIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  billing_location?: boolean | Prisma.PaymentGateway$billing_locationArgs<ExtArgs>
+}
+export type PaymentGatewayIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  billing_location?: boolean | Prisma.PaymentGateway$billing_locationArgs<ExtArgs>
+}
 
 export type $PaymentGatewayPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PaymentGateway"
-  objects: {}
+  objects: {
+    billing_location: Prisma.$LearnerBillingLocationPayload<ExtArgs> | null
+    payment_refund_intents: Prisma.$PaymentRefundIntentPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -993,6 +1348,8 @@ readonly fields: PaymentGatewayFieldRefs;
  */
 export interface Prisma__PaymentGatewayClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  billing_location<T extends Prisma.PaymentGateway$billing_locationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentGateway$billing_locationArgs<ExtArgs>>): Prisma.Prisma__LearnerBillingLocationClient<runtime.Types.Result.GetResult<Prisma.$LearnerBillingLocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  payment_refund_intents<T extends Prisma.PaymentGateway$payment_refund_intentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentGateway$payment_refund_intentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentRefundIntentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1053,6 +1410,10 @@ export type PaymentGatewayFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
+  /**
    * Filter, which PaymentGateway to fetch.
    */
   where: Prisma.PaymentGatewayWhereUniqueInput
@@ -1071,6 +1432,10 @@ export type PaymentGatewayFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
+  /**
    * Filter, which PaymentGateway to fetch.
    */
   where: Prisma.PaymentGatewayWhereUniqueInput
@@ -1088,6 +1453,10 @@ export type PaymentGatewayFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the PaymentGateway
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
   /**
    * Filter, which PaymentGateway to fetch.
    */
@@ -1137,6 +1506,10 @@ export type PaymentGatewayFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
+  /**
    * Filter, which PaymentGateway to fetch.
    */
   where?: Prisma.PaymentGatewayWhereInput
@@ -1184,6 +1557,10 @@ export type PaymentGatewayFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the PaymentGateway
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
   /**
    * Filter, which PaymentGateways to fetch.
    */
@@ -1233,6 +1610,10 @@ export type PaymentGatewayCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
+  /**
    * The data needed to create a PaymentGateway.
    */
   data: Prisma.XOR<Prisma.PaymentGatewayCreateInput, Prisma.PaymentGatewayUncheckedCreateInput>
@@ -1266,6 +1647,10 @@ export type PaymentGatewayCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    */
   data: Prisma.PaymentGatewayCreateManyInput | Prisma.PaymentGatewayCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1280,6 +1665,10 @@ export type PaymentGatewayUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PaymentGateway
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
   /**
    * The data needed to update a PaymentGateway.
    */
@@ -1332,6 +1721,10 @@ export type PaymentGatewayUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * Limit how many PaymentGateways to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1346,6 +1739,10 @@ export type PaymentGatewayUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PaymentGateway
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
   /**
    * The filter to search for the PaymentGateway to update in case it exists.
    */
@@ -1373,6 +1770,10 @@ export type PaymentGatewayDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
+  /**
    * Filter which PaymentGateway to delete.
    */
   where: Prisma.PaymentGatewayWhereUniqueInput
@@ -1393,6 +1794,49 @@ export type PaymentGatewayDeleteManyArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
+ * PaymentGateway.billing_location
+ */
+export type PaymentGateway$billing_locationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LearnerBillingLocation
+   */
+  select?: Prisma.LearnerBillingLocationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LearnerBillingLocation
+   */
+  omit?: Prisma.LearnerBillingLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LearnerBillingLocationInclude<ExtArgs> | null
+  where?: Prisma.LearnerBillingLocationWhereInput
+}
+
+/**
+ * PaymentGateway.payment_refund_intents
+ */
+export type PaymentGateway$payment_refund_intentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentRefundIntent
+   */
+  select?: Prisma.PaymentRefundIntentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentRefundIntent
+   */
+  omit?: Prisma.PaymentRefundIntentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentRefundIntentInclude<ExtArgs> | null
+  where?: Prisma.PaymentRefundIntentWhereInput
+  orderBy?: Prisma.PaymentRefundIntentOrderByWithRelationInput | Prisma.PaymentRefundIntentOrderByWithRelationInput[]
+  cursor?: Prisma.PaymentRefundIntentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaymentRefundIntentScalarFieldEnum | Prisma.PaymentRefundIntentScalarFieldEnum[]
+}
+
+/**
  * PaymentGateway without action
  */
 export type PaymentGatewayDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1404,4 +1848,8 @@ export type PaymentGatewayDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the PaymentGateway
    */
   omit?: Prisma.PaymentGatewayOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentGatewayInclude<ExtArgs> | null
 }

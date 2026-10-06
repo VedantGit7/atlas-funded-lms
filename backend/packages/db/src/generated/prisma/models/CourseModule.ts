@@ -290,6 +290,7 @@ export type CourseModuleWhereInput = {
   deleted_at?: Prisma.DateTimeNullableFilter<"CourseModule"> | Date | string | null
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
   lessons?: Prisma.LessonListRelationFilter
+  module_scorm_progress?: Prisma.ModuleScormProgressListRelationFilter
 }
 
 export type CourseModuleOrderByWithRelationInput = {
@@ -309,6 +310,7 @@ export type CourseModuleOrderByWithRelationInput = {
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
   course?: Prisma.CourseOrderByWithRelationInput
   lessons?: Prisma.LessonOrderByRelationAggregateInput
+  module_scorm_progress?: Prisma.ModuleScormProgressOrderByRelationAggregateInput
 }
 
 export type CourseModuleWhereUniqueInput = Prisma.AtLeast<{
@@ -333,6 +335,7 @@ export type CourseModuleWhereUniqueInput = Prisma.AtLeast<{
   deleted_at?: Prisma.DateTimeNullableFilter<"CourseModule"> | Date | string | null
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
   lessons?: Prisma.LessonListRelationFilter
+  module_scorm_progress?: Prisma.ModuleScormProgressListRelationFilter
 }, "id" | "tenant_id_id" | "tenant_id_course_id_position">
 
 export type CourseModuleOrderByWithAggregationInput = {
@@ -392,6 +395,7 @@ export type CourseModuleCreateInput = {
   deleted_at?: Date | string | null
   course: Prisma.CourseCreateNestedOneWithoutCourse_modulesInput
   lessons?: Prisma.LessonCreateNestedManyWithoutModuleInput
+  module_scorm_progress?: Prisma.ModuleScormProgressCreateNestedManyWithoutModuleInput
 }
 
 export type CourseModuleUncheckedCreateInput = {
@@ -410,6 +414,7 @@ export type CourseModuleUncheckedCreateInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutModuleInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedCreateNestedManyWithoutModuleInput
 }
 
 export type CourseModuleUpdateInput = {
@@ -427,6 +432,7 @@ export type CourseModuleUpdateInput = {
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   course?: Prisma.CourseUpdateOneRequiredWithoutCourse_modulesNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutModuleNestedInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUpdateManyWithoutModuleNestedInput
 }
 
 export type CourseModuleUncheckedUpdateInput = {
@@ -445,6 +451,7 @@ export type CourseModuleUncheckedUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutModuleNestedInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedUpdateManyWithoutModuleNestedInput
 }
 
 export type CourseModuleCreateManyInput = {
@@ -627,6 +634,20 @@ export type EnumCourseModuleContentKindFieldUpdateOperationsInput = {
   set?: $Enums.CourseModuleContentKind
 }
 
+export type CourseModuleCreateNestedOneWithoutModule_scorm_progressInput = {
+  create?: Prisma.XOR<Prisma.CourseModuleCreateWithoutModule_scorm_progressInput, Prisma.CourseModuleUncheckedCreateWithoutModule_scorm_progressInput>
+  connectOrCreate?: Prisma.CourseModuleCreateOrConnectWithoutModule_scorm_progressInput
+  connect?: Prisma.CourseModuleWhereUniqueInput
+}
+
+export type CourseModuleUpdateOneRequiredWithoutModule_scorm_progressNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseModuleCreateWithoutModule_scorm_progressInput, Prisma.CourseModuleUncheckedCreateWithoutModule_scorm_progressInput>
+  connectOrCreate?: Prisma.CourseModuleCreateOrConnectWithoutModule_scorm_progressInput
+  upsert?: Prisma.CourseModuleUpsertWithoutModule_scorm_progressInput
+  connect?: Prisma.CourseModuleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseModuleUpdateToOneWithWhereWithoutModule_scorm_progressInput, Prisma.CourseModuleUpdateWithoutModule_scorm_progressInput>, Prisma.CourseModuleUncheckedUpdateWithoutModule_scorm_progressInput>
+}
+
 export type CourseModuleCreateNestedOneWithoutLessonsInput = {
   create?: Prisma.XOR<Prisma.CourseModuleCreateWithoutLessonsInput, Prisma.CourseModuleUncheckedCreateWithoutLessonsInput>
   connectOrCreate?: Prisma.CourseModuleCreateOrConnectWithoutLessonsInput
@@ -655,6 +676,7 @@ export type CourseModuleCreateWithoutCourseInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   lessons?: Prisma.LessonCreateNestedManyWithoutModuleInput
+  module_scorm_progress?: Prisma.ModuleScormProgressCreateNestedManyWithoutModuleInput
 }
 
 export type CourseModuleUncheckedCreateWithoutCourseInput = {
@@ -671,6 +693,7 @@ export type CourseModuleUncheckedCreateWithoutCourseInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutModuleInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedCreateNestedManyWithoutModuleInput
 }
 
 export type CourseModuleCreateOrConnectWithoutCourseInput = {
@@ -719,6 +742,92 @@ export type CourseModuleScalarWhereInput = {
   deleted_at?: Prisma.DateTimeNullableFilter<"CourseModule"> | Date | string | null
 }
 
+export type CourseModuleCreateWithoutModule_scorm_progressInput = {
+  id: string
+  title: string
+  position: number
+  status?: $Enums.PublishStatus
+  content_kind?: $Enums.CourseModuleContentKind
+  scorm_package_reference_id?: string | null
+  scorm_launch_path?: string | null
+  scorm_version?: string | null
+  scormContentVersion?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  course: Prisma.CourseCreateNestedOneWithoutCourse_modulesInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutModuleInput
+}
+
+export type CourseModuleUncheckedCreateWithoutModule_scorm_progressInput = {
+  id: string
+  tenant_id: string
+  course_id: string
+  title: string
+  position: number
+  status?: $Enums.PublishStatus
+  content_kind?: $Enums.CourseModuleContentKind
+  scorm_package_reference_id?: string | null
+  scorm_launch_path?: string | null
+  scorm_version?: string | null
+  scormContentVersion?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutModuleInput
+}
+
+export type CourseModuleCreateOrConnectWithoutModule_scorm_progressInput = {
+  where: Prisma.CourseModuleWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseModuleCreateWithoutModule_scorm_progressInput, Prisma.CourseModuleUncheckedCreateWithoutModule_scorm_progressInput>
+}
+
+export type CourseModuleUpsertWithoutModule_scorm_progressInput = {
+  update: Prisma.XOR<Prisma.CourseModuleUpdateWithoutModule_scorm_progressInput, Prisma.CourseModuleUncheckedUpdateWithoutModule_scorm_progressInput>
+  create: Prisma.XOR<Prisma.CourseModuleCreateWithoutModule_scorm_progressInput, Prisma.CourseModuleUncheckedCreateWithoutModule_scorm_progressInput>
+  where?: Prisma.CourseModuleWhereInput
+}
+
+export type CourseModuleUpdateToOneWithWhereWithoutModule_scorm_progressInput = {
+  where?: Prisma.CourseModuleWhereInput
+  data: Prisma.XOR<Prisma.CourseModuleUpdateWithoutModule_scorm_progressInput, Prisma.CourseModuleUncheckedUpdateWithoutModule_scorm_progressInput>
+}
+
+export type CourseModuleUpdateWithoutModule_scorm_progressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  content_kind?: Prisma.EnumCourseModuleContentKindFieldUpdateOperationsInput | $Enums.CourseModuleContentKind
+  scorm_package_reference_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scorm_launch_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scorm_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scormContentVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course?: Prisma.CourseUpdateOneRequiredWithoutCourse_modulesNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutModuleNestedInput
+}
+
+export type CourseModuleUncheckedUpdateWithoutModule_scorm_progressInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  content_kind?: Prisma.EnumCourseModuleContentKindFieldUpdateOperationsInput | $Enums.CourseModuleContentKind
+  scorm_package_reference_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scorm_launch_path?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scorm_version?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scormContentVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutModuleNestedInput
+}
+
 export type CourseModuleCreateWithoutLessonsInput = {
   id: string
   title: string
@@ -733,6 +842,7 @@ export type CourseModuleCreateWithoutLessonsInput = {
   updated_at?: Date | string
   deleted_at?: Date | string | null
   course: Prisma.CourseCreateNestedOneWithoutCourse_modulesInput
+  module_scorm_progress?: Prisma.ModuleScormProgressCreateNestedManyWithoutModuleInput
 }
 
 export type CourseModuleUncheckedCreateWithoutLessonsInput = {
@@ -750,6 +860,7 @@ export type CourseModuleUncheckedCreateWithoutLessonsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedCreateNestedManyWithoutModuleInput
 }
 
 export type CourseModuleCreateOrConnectWithoutLessonsInput = {
@@ -782,6 +893,7 @@ export type CourseModuleUpdateWithoutLessonsInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   course?: Prisma.CourseUpdateOneRequiredWithoutCourse_modulesNestedInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUpdateManyWithoutModuleNestedInput
 }
 
 export type CourseModuleUncheckedUpdateWithoutLessonsInput = {
@@ -799,6 +911,7 @@ export type CourseModuleUncheckedUpdateWithoutLessonsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedUpdateManyWithoutModuleNestedInput
 }
 
 export type CourseModuleCreateManyCourseInput = {
@@ -830,6 +943,7 @@ export type CourseModuleUpdateWithoutCourseInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lessons?: Prisma.LessonUpdateManyWithoutModuleNestedInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUpdateManyWithoutModuleNestedInput
 }
 
 export type CourseModuleUncheckedUpdateWithoutCourseInput = {
@@ -846,6 +960,7 @@ export type CourseModuleUncheckedUpdateWithoutCourseInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutModuleNestedInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedUpdateManyWithoutModuleNestedInput
 }
 
 export type CourseModuleUncheckedUpdateManyWithoutCourseInput = {
@@ -870,10 +985,12 @@ export type CourseModuleUncheckedUpdateManyWithoutCourseInput = {
 
 export type CourseModuleCountOutputType = {
   lessons: number
+  module_scorm_progress: number
 }
 
 export type CourseModuleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   lessons?: boolean | CourseModuleCountOutputTypeCountLessonsArgs
+  module_scorm_progress?: boolean | CourseModuleCountOutputTypeCountModule_scorm_progressArgs
 }
 
 /**
@@ -891,6 +1008,13 @@ export type CourseModuleCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types
  */
 export type CourseModuleCountOutputTypeCountLessonsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LessonWhereInput
+}
+
+/**
+ * CourseModuleCountOutputType without action
+ */
+export type CourseModuleCountOutputTypeCountModule_scorm_progressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ModuleScormProgressWhereInput
 }
 
 
@@ -911,6 +1035,7 @@ export type CourseModuleSelect<ExtArgs extends runtime.Types.Extensions.Internal
   deleted_at?: boolean
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   lessons?: boolean | Prisma.CourseModule$lessonsArgs<ExtArgs>
+  module_scorm_progress?: boolean | Prisma.CourseModule$module_scorm_progressArgs<ExtArgs>
   _count?: boolean | Prisma.CourseModuleCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["courseModule"]>
 
@@ -971,6 +1096,7 @@ export type CourseModuleOmit<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type CourseModuleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   lessons?: boolean | Prisma.CourseModule$lessonsArgs<ExtArgs>
+  module_scorm_progress?: boolean | Prisma.CourseModule$module_scorm_progressArgs<ExtArgs>
   _count?: boolean | Prisma.CourseModuleCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CourseModuleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -985,6 +1111,7 @@ export type $CourseModulePayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     course: Prisma.$CoursePayload<ExtArgs>
     lessons: Prisma.$LessonPayload<ExtArgs>[]
+    module_scorm_progress: Prisma.$ModuleScormProgressPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1397,6 +1524,7 @@ export interface Prisma__CourseModuleClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   course<T extends Prisma.CourseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   lessons<T extends Prisma.CourseModule$lessonsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseModule$lessonsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  module_scorm_progress<T extends Prisma.CourseModule$module_scorm_progressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseModule$module_scorm_progressArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ModuleScormProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1862,6 +1990,30 @@ export type CourseModule$lessonsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.LessonScalarFieldEnum | Prisma.LessonScalarFieldEnum[]
+}
+
+/**
+ * CourseModule.module_scorm_progress
+ */
+export type CourseModule$module_scorm_progressArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ModuleScormProgress
+   */
+  select?: Prisma.ModuleScormProgressSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ModuleScormProgress
+   */
+  omit?: Prisma.ModuleScormProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModuleScormProgressInclude<ExtArgs> | null
+  where?: Prisma.ModuleScormProgressWhereInput
+  orderBy?: Prisma.ModuleScormProgressOrderByWithRelationInput | Prisma.ModuleScormProgressOrderByWithRelationInput[]
+  cursor?: Prisma.ModuleScormProgressWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ModuleScormProgressScalarFieldEnum | Prisma.ModuleScormProgressScalarFieldEnum[]
 }
 
 /**

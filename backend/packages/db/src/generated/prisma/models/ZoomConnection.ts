@@ -342,6 +342,7 @@ export type ZoomConnectionWhereInput = {
   updated_at?: Prisma.DateTimeFilter<"ZoomConnection"> | Date | string
   meetings?: Prisma.ZoomMeetingListRelationFilter
   syncRuns?: Prisma.ZoomSyncRunListRelationFilter
+  zoom_webhook_events?: Prisma.ZoomWebhookEventListRelationFilter
 }
 
 export type ZoomConnectionOrderByWithRelationInput = {
@@ -368,11 +369,13 @@ export type ZoomConnectionOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrder
   meetings?: Prisma.ZoomMeetingOrderByRelationAggregateInput
   syncRuns?: Prisma.ZoomSyncRunOrderByRelationAggregateInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventOrderByRelationAggregateInput
 }
 
 export type ZoomConnectionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   tenant_id?: string
+  tenant_id_id?: Prisma.ZoomConnectionTenant_idIdCompoundUniqueInput
   AND?: Prisma.ZoomConnectionWhereInput | Prisma.ZoomConnectionWhereInput[]
   OR?: Prisma.ZoomConnectionWhereInput[]
   NOT?: Prisma.ZoomConnectionWhereInput | Prisma.ZoomConnectionWhereInput[]
@@ -397,7 +400,8 @@ export type ZoomConnectionWhereUniqueInput = Prisma.AtLeast<{
   updated_at?: Prisma.DateTimeFilter<"ZoomConnection"> | Date | string
   meetings?: Prisma.ZoomMeetingListRelationFilter
   syncRuns?: Prisma.ZoomSyncRunListRelationFilter
-}, "id" | "tenant_id">
+  zoom_webhook_events?: Prisma.ZoomWebhookEventListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id">
 
 export type ZoomConnectionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -479,6 +483,7 @@ export type ZoomConnectionCreateInput = {
   updated_at?: Date | string
   meetings?: Prisma.ZoomMeetingCreateNestedManyWithoutConnectionInput
   syncRuns?: Prisma.ZoomSyncRunCreateNestedManyWithoutConnectionInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventCreateNestedManyWithoutZoom_connectionInput
 }
 
 export type ZoomConnectionUncheckedCreateInput = {
@@ -505,6 +510,7 @@ export type ZoomConnectionUncheckedCreateInput = {
   updated_at?: Date | string
   meetings?: Prisma.ZoomMeetingUncheckedCreateNestedManyWithoutConnectionInput
   syncRuns?: Prisma.ZoomSyncRunUncheckedCreateNestedManyWithoutConnectionInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUncheckedCreateNestedManyWithoutZoom_connectionInput
 }
 
 export type ZoomConnectionUpdateInput = {
@@ -531,6 +537,7 @@ export type ZoomConnectionUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   meetings?: Prisma.ZoomMeetingUpdateManyWithoutConnectionNestedInput
   syncRuns?: Prisma.ZoomSyncRunUpdateManyWithoutConnectionNestedInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUpdateManyWithoutZoom_connectionNestedInput
 }
 
 export type ZoomConnectionUncheckedUpdateInput = {
@@ -557,6 +564,7 @@ export type ZoomConnectionUncheckedUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   meetings?: Prisma.ZoomMeetingUncheckedUpdateManyWithoutConnectionNestedInput
   syncRuns?: Prisma.ZoomSyncRunUncheckedUpdateManyWithoutConnectionNestedInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUncheckedUpdateManyWithoutZoom_connectionNestedInput
 }
 
 export type ZoomConnectionCreateManyInput = {
@@ -629,6 +637,11 @@ export type ZoomConnectionUncheckedUpdateManyInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ZoomConnectionTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type ZoomConnectionCountOrderByAggregateInput = {
@@ -714,6 +727,11 @@ export type ZoomConnectionScalarRelationFilter = {
   isNot?: Prisma.ZoomConnectionWhereInput
 }
 
+export type ZoomConnectionNullableScalarRelationFilter = {
+  is?: Prisma.ZoomConnectionWhereInput | null
+  isNot?: Prisma.ZoomConnectionWhereInput | null
+}
+
 export type ZoomConnectionCreateNestedOneWithoutSyncRunsInput = {
   create?: Prisma.XOR<Prisma.ZoomConnectionCreateWithoutSyncRunsInput, Prisma.ZoomConnectionUncheckedCreateWithoutSyncRunsInput>
   connectOrCreate?: Prisma.ZoomConnectionCreateOrConnectWithoutSyncRunsInput
@@ -726,6 +744,22 @@ export type ZoomConnectionUpdateOneRequiredWithoutSyncRunsNestedInput = {
   upsert?: Prisma.ZoomConnectionUpsertWithoutSyncRunsInput
   connect?: Prisma.ZoomConnectionWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ZoomConnectionUpdateToOneWithWhereWithoutSyncRunsInput, Prisma.ZoomConnectionUpdateWithoutSyncRunsInput>, Prisma.ZoomConnectionUncheckedUpdateWithoutSyncRunsInput>
+}
+
+export type ZoomConnectionCreateNestedOneWithoutZoom_webhook_eventsInput = {
+  create?: Prisma.XOR<Prisma.ZoomConnectionCreateWithoutZoom_webhook_eventsInput, Prisma.ZoomConnectionUncheckedCreateWithoutZoom_webhook_eventsInput>
+  connectOrCreate?: Prisma.ZoomConnectionCreateOrConnectWithoutZoom_webhook_eventsInput
+  connect?: Prisma.ZoomConnectionWhereUniqueInput
+}
+
+export type ZoomConnectionUpdateOneWithoutZoom_webhook_eventsNestedInput = {
+  create?: Prisma.XOR<Prisma.ZoomConnectionCreateWithoutZoom_webhook_eventsInput, Prisma.ZoomConnectionUncheckedCreateWithoutZoom_webhook_eventsInput>
+  connectOrCreate?: Prisma.ZoomConnectionCreateOrConnectWithoutZoom_webhook_eventsInput
+  upsert?: Prisma.ZoomConnectionUpsertWithoutZoom_webhook_eventsInput
+  disconnect?: Prisma.ZoomConnectionWhereInput | boolean
+  delete?: Prisma.ZoomConnectionWhereInput | boolean
+  connect?: Prisma.ZoomConnectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ZoomConnectionUpdateToOneWithWhereWithoutZoom_webhook_eventsInput, Prisma.ZoomConnectionUpdateWithoutZoom_webhook_eventsInput>, Prisma.ZoomConnectionUncheckedUpdateWithoutZoom_webhook_eventsInput>
 }
 
 export type ZoomConnectionCreateNestedOneWithoutMeetingsInput = {
@@ -765,6 +799,7 @@ export type ZoomConnectionCreateWithoutSyncRunsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   meetings?: Prisma.ZoomMeetingCreateNestedManyWithoutConnectionInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventCreateNestedManyWithoutZoom_connectionInput
 }
 
 export type ZoomConnectionUncheckedCreateWithoutSyncRunsInput = {
@@ -790,6 +825,7 @@ export type ZoomConnectionUncheckedCreateWithoutSyncRunsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   meetings?: Prisma.ZoomMeetingUncheckedCreateNestedManyWithoutConnectionInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUncheckedCreateNestedManyWithoutZoom_connectionInput
 }
 
 export type ZoomConnectionCreateOrConnectWithoutSyncRunsInput = {
@@ -831,6 +867,7 @@ export type ZoomConnectionUpdateWithoutSyncRunsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   meetings?: Prisma.ZoomMeetingUpdateManyWithoutConnectionNestedInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUpdateManyWithoutZoom_connectionNestedInput
 }
 
 export type ZoomConnectionUncheckedUpdateWithoutSyncRunsInput = {
@@ -856,6 +893,127 @@ export type ZoomConnectionUncheckedUpdateWithoutSyncRunsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   meetings?: Prisma.ZoomMeetingUncheckedUpdateManyWithoutConnectionNestedInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUncheckedUpdateManyWithoutZoom_connectionNestedInput
+}
+
+export type ZoomConnectionCreateWithoutZoom_webhook_eventsInput = {
+  id: string
+  tenant_id: string
+  account_id?: string | null
+  account_name?: string | null
+  account_email?: string | null
+  app_id?: string | null
+  scopes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  access_token_ref?: string | null
+  refresh_token_ref?: string | null
+  webhook_secret_ref?: string | null
+  status?: string
+  connected_at?: Date | string | null
+  disconnected_at?: Date | string | null
+  last_synced_at?: Date | string | null
+  token_expires_at?: Date | string | null
+  schedule_enabled?: boolean
+  schedule_interval_minutes?: number
+  coverage_gap_count?: number
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  meetings?: Prisma.ZoomMeetingCreateNestedManyWithoutConnectionInput
+  syncRuns?: Prisma.ZoomSyncRunCreateNestedManyWithoutConnectionInput
+}
+
+export type ZoomConnectionUncheckedCreateWithoutZoom_webhook_eventsInput = {
+  id: string
+  tenant_id: string
+  account_id?: string | null
+  account_name?: string | null
+  account_email?: string | null
+  app_id?: string | null
+  scopes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  access_token_ref?: string | null
+  refresh_token_ref?: string | null
+  webhook_secret_ref?: string | null
+  status?: string
+  connected_at?: Date | string | null
+  disconnected_at?: Date | string | null
+  last_synced_at?: Date | string | null
+  token_expires_at?: Date | string | null
+  schedule_enabled?: boolean
+  schedule_interval_minutes?: number
+  coverage_gap_count?: number
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  meetings?: Prisma.ZoomMeetingUncheckedCreateNestedManyWithoutConnectionInput
+  syncRuns?: Prisma.ZoomSyncRunUncheckedCreateNestedManyWithoutConnectionInput
+}
+
+export type ZoomConnectionCreateOrConnectWithoutZoom_webhook_eventsInput = {
+  where: Prisma.ZoomConnectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ZoomConnectionCreateWithoutZoom_webhook_eventsInput, Prisma.ZoomConnectionUncheckedCreateWithoutZoom_webhook_eventsInput>
+}
+
+export type ZoomConnectionUpsertWithoutZoom_webhook_eventsInput = {
+  update: Prisma.XOR<Prisma.ZoomConnectionUpdateWithoutZoom_webhook_eventsInput, Prisma.ZoomConnectionUncheckedUpdateWithoutZoom_webhook_eventsInput>
+  create: Prisma.XOR<Prisma.ZoomConnectionCreateWithoutZoom_webhook_eventsInput, Prisma.ZoomConnectionUncheckedCreateWithoutZoom_webhook_eventsInput>
+  where?: Prisma.ZoomConnectionWhereInput
+}
+
+export type ZoomConnectionUpdateToOneWithWhereWithoutZoom_webhook_eventsInput = {
+  where?: Prisma.ZoomConnectionWhereInput
+  data: Prisma.XOR<Prisma.ZoomConnectionUpdateWithoutZoom_webhook_eventsInput, Prisma.ZoomConnectionUncheckedUpdateWithoutZoom_webhook_eventsInput>
+}
+
+export type ZoomConnectionUpdateWithoutZoom_webhook_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  account_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  account_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  account_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  app_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  access_token_ref?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_token_ref?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhook_secret_ref?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_synced_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  schedule_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schedule_interval_minutes?: Prisma.IntFieldUpdateOperationsInput | number
+  coverage_gap_count?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  meetings?: Prisma.ZoomMeetingUpdateManyWithoutConnectionNestedInput
+  syncRuns?: Prisma.ZoomSyncRunUpdateManyWithoutConnectionNestedInput
+}
+
+export type ZoomConnectionUncheckedUpdateWithoutZoom_webhook_eventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  account_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  account_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  account_email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  app_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scopes_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  access_token_ref?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  refresh_token_ref?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webhook_secret_ref?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  connected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  disconnected_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_synced_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  token_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  schedule_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  schedule_interval_minutes?: Prisma.IntFieldUpdateOperationsInput | number
+  coverage_gap_count?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  meetings?: Prisma.ZoomMeetingUncheckedUpdateManyWithoutConnectionNestedInput
+  syncRuns?: Prisma.ZoomSyncRunUncheckedUpdateManyWithoutConnectionNestedInput
 }
 
 export type ZoomConnectionCreateWithoutMeetingsInput = {
@@ -881,6 +1039,7 @@ export type ZoomConnectionCreateWithoutMeetingsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   syncRuns?: Prisma.ZoomSyncRunCreateNestedManyWithoutConnectionInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventCreateNestedManyWithoutZoom_connectionInput
 }
 
 export type ZoomConnectionUncheckedCreateWithoutMeetingsInput = {
@@ -906,6 +1065,7 @@ export type ZoomConnectionUncheckedCreateWithoutMeetingsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   syncRuns?: Prisma.ZoomSyncRunUncheckedCreateNestedManyWithoutConnectionInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUncheckedCreateNestedManyWithoutZoom_connectionInput
 }
 
 export type ZoomConnectionCreateOrConnectWithoutMeetingsInput = {
@@ -947,6 +1107,7 @@ export type ZoomConnectionUpdateWithoutMeetingsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   syncRuns?: Prisma.ZoomSyncRunUpdateManyWithoutConnectionNestedInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUpdateManyWithoutZoom_connectionNestedInput
 }
 
 export type ZoomConnectionUncheckedUpdateWithoutMeetingsInput = {
@@ -972,6 +1133,7 @@ export type ZoomConnectionUncheckedUpdateWithoutMeetingsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   syncRuns?: Prisma.ZoomSyncRunUncheckedUpdateManyWithoutConnectionNestedInput
+  zoom_webhook_events?: Prisma.ZoomWebhookEventUncheckedUpdateManyWithoutZoom_connectionNestedInput
 }
 
 
@@ -982,11 +1144,13 @@ export type ZoomConnectionUncheckedUpdateWithoutMeetingsInput = {
 export type ZoomConnectionCountOutputType = {
   meetings: number
   syncRuns: number
+  zoom_webhook_events: number
 }
 
 export type ZoomConnectionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   meetings?: boolean | ZoomConnectionCountOutputTypeCountMeetingsArgs
   syncRuns?: boolean | ZoomConnectionCountOutputTypeCountSyncRunsArgs
+  zoom_webhook_events?: boolean | ZoomConnectionCountOutputTypeCountZoom_webhook_eventsArgs
 }
 
 /**
@@ -1011,6 +1175,13 @@ export type ZoomConnectionCountOutputTypeCountMeetingsArgs<ExtArgs extends runti
  */
 export type ZoomConnectionCountOutputTypeCountSyncRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ZoomSyncRunWhereInput
+}
+
+/**
+ * ZoomConnectionCountOutputType without action
+ */
+export type ZoomConnectionCountOutputTypeCountZoom_webhook_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ZoomWebhookEventWhereInput
 }
 
 
@@ -1038,6 +1209,7 @@ export type ZoomConnectionSelect<ExtArgs extends runtime.Types.Extensions.Intern
   updated_at?: boolean
   meetings?: boolean | Prisma.ZoomConnection$meetingsArgs<ExtArgs>
   syncRuns?: boolean | Prisma.ZoomConnection$syncRunsArgs<ExtArgs>
+  zoom_webhook_events?: boolean | Prisma.ZoomConnection$zoom_webhook_eventsArgs<ExtArgs>
   _count?: boolean | Prisma.ZoomConnectionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["zoomConnection"]>
 
@@ -1117,6 +1289,7 @@ export type ZoomConnectionOmit<ExtArgs extends runtime.Types.Extensions.Internal
 export type ZoomConnectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   meetings?: boolean | Prisma.ZoomConnection$meetingsArgs<ExtArgs>
   syncRuns?: boolean | Prisma.ZoomConnection$syncRunsArgs<ExtArgs>
+  zoom_webhook_events?: boolean | Prisma.ZoomConnection$zoom_webhook_eventsArgs<ExtArgs>
   _count?: boolean | Prisma.ZoomConnectionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ZoomConnectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1127,6 +1300,7 @@ export type $ZoomConnectionPayload<ExtArgs extends runtime.Types.Extensions.Inte
   objects: {
     meetings: Prisma.$ZoomMeetingPayload<ExtArgs>[]
     syncRuns: Prisma.$ZoomSyncRunPayload<ExtArgs>[]
+    zoom_webhook_events: Prisma.$ZoomWebhookEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1546,6 +1720,7 @@ export interface Prisma__ZoomConnectionClient<T, Null = never, ExtArgs extends r
   readonly [Symbol.toStringTag]: "PrismaPromise"
   meetings<T extends Prisma.ZoomConnection$meetingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ZoomConnection$meetingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ZoomMeetingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   syncRuns<T extends Prisma.ZoomConnection$syncRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ZoomConnection$syncRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ZoomSyncRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  zoom_webhook_events<T extends Prisma.ZoomConnection$zoom_webhook_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ZoomConnection$zoom_webhook_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ZoomWebhookEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2034,6 +2209,30 @@ export type ZoomConnection$syncRunsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.ZoomSyncRunScalarFieldEnum | Prisma.ZoomSyncRunScalarFieldEnum[]
+}
+
+/**
+ * ZoomConnection.zoom_webhook_events
+ */
+export type ZoomConnection$zoom_webhook_eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ZoomWebhookEvent
+   */
+  select?: Prisma.ZoomWebhookEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ZoomWebhookEvent
+   */
+  omit?: Prisma.ZoomWebhookEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ZoomWebhookEventInclude<ExtArgs> | null
+  where?: Prisma.ZoomWebhookEventWhereInput
+  orderBy?: Prisma.ZoomWebhookEventOrderByWithRelationInput | Prisma.ZoomWebhookEventOrderByWithRelationInput[]
+  cursor?: Prisma.ZoomWebhookEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ZoomWebhookEventScalarFieldEnum | Prisma.ZoomWebhookEventScalarFieldEnum[]
 }
 
 /**

@@ -210,6 +210,7 @@ export type QuestProgressWhereInput = {
   completed_at?: Prisma.DateTimeNullableFilter<"QuestProgress"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"QuestProgress"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"QuestProgress"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type QuestProgressOrderByWithRelationInput = {
@@ -222,6 +223,7 @@ export type QuestProgressOrderByWithRelationInput = {
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type QuestProgressWhereUniqueInput = Prisma.AtLeast<{
@@ -238,6 +240,7 @@ export type QuestProgressWhereUniqueInput = Prisma.AtLeast<{
   completed_at?: Prisma.DateTimeNullableFilter<"QuestProgress"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"QuestProgress"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"QuestProgress"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_quest_id_membership_id">
 
 export type QuestProgressOrderByWithAggregationInput = {
@@ -272,14 +275,13 @@ export type QuestProgressScalarWhereWithAggregatesInput = {
 
 export type QuestProgressCreateInput = {
   id: string
-  tenant_id: string
   quest_id: string
-  membership_id: string
   status?: string
   progress_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
   completed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutQuest_progressInput
 }
 
 export type QuestProgressUncheckedCreateInput = {
@@ -296,14 +298,13 @@ export type QuestProgressUncheckedCreateInput = {
 
 export type QuestProgressUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   quest_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   progress_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutQuest_progressNestedInput
 }
 
 export type QuestProgressUncheckedUpdateInput = {
@@ -332,9 +333,7 @@ export type QuestProgressCreateManyInput = {
 
 export type QuestProgressUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   quest_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   progress_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -352,6 +351,16 @@ export type QuestProgressUncheckedUpdateManyInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuestProgressListRelationFilter = {
+  every?: Prisma.QuestProgressWhereInput
+  some?: Prisma.QuestProgressWhereInput
+  none?: Prisma.QuestProgressWhereInput
+}
+
+export type QuestProgressOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type QuestProgressTenant_idQuest_idMembership_idCompoundUniqueInput = {
@@ -394,6 +403,149 @@ export type QuestProgressMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type QuestProgressCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.QuestProgressCreateWithoutMembershipInput, Prisma.QuestProgressUncheckedCreateWithoutMembershipInput> | Prisma.QuestProgressCreateWithoutMembershipInput[] | Prisma.QuestProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.QuestProgressCreateOrConnectWithoutMembershipInput | Prisma.QuestProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.QuestProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+}
+
+export type QuestProgressUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.QuestProgressCreateWithoutMembershipInput, Prisma.QuestProgressUncheckedCreateWithoutMembershipInput> | Prisma.QuestProgressCreateWithoutMembershipInput[] | Prisma.QuestProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.QuestProgressCreateOrConnectWithoutMembershipInput | Prisma.QuestProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.QuestProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+}
+
+export type QuestProgressUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.QuestProgressCreateWithoutMembershipInput, Prisma.QuestProgressUncheckedCreateWithoutMembershipInput> | Prisma.QuestProgressCreateWithoutMembershipInput[] | Prisma.QuestProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.QuestProgressCreateOrConnectWithoutMembershipInput | Prisma.QuestProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.QuestProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.QuestProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.QuestProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  disconnect?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  delete?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  connect?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  update?: Prisma.QuestProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.QuestProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.QuestProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.QuestProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.QuestProgressScalarWhereInput | Prisma.QuestProgressScalarWhereInput[]
+}
+
+export type QuestProgressUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.QuestProgressCreateWithoutMembershipInput, Prisma.QuestProgressUncheckedCreateWithoutMembershipInput> | Prisma.QuestProgressCreateWithoutMembershipInput[] | Prisma.QuestProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.QuestProgressCreateOrConnectWithoutMembershipInput | Prisma.QuestProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.QuestProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.QuestProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.QuestProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  disconnect?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  delete?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  connect?: Prisma.QuestProgressWhereUniqueInput | Prisma.QuestProgressWhereUniqueInput[]
+  update?: Prisma.QuestProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.QuestProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.QuestProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.QuestProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.QuestProgressScalarWhereInput | Prisma.QuestProgressScalarWhereInput[]
+}
+
+export type QuestProgressCreateWithoutMembershipInput = {
+  id: string
+  quest_id: string
+  status?: string
+  progress_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type QuestProgressUncheckedCreateWithoutMembershipInput = {
+  id: string
+  quest_id: string
+  status?: string
+  progress_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type QuestProgressCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.QuestProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.QuestProgressCreateWithoutMembershipInput, Prisma.QuestProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type QuestProgressCreateManyMembershipInputEnvelope = {
+  data: Prisma.QuestProgressCreateManyMembershipInput | Prisma.QuestProgressCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type QuestProgressUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.QuestProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.QuestProgressUpdateWithoutMembershipInput, Prisma.QuestProgressUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.QuestProgressCreateWithoutMembershipInput, Prisma.QuestProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type QuestProgressUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.QuestProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.QuestProgressUpdateWithoutMembershipInput, Prisma.QuestProgressUncheckedUpdateWithoutMembershipInput>
+}
+
+export type QuestProgressUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.QuestProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.QuestProgressUpdateManyMutationInput, Prisma.QuestProgressUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type QuestProgressScalarWhereInput = {
+  AND?: Prisma.QuestProgressScalarWhereInput | Prisma.QuestProgressScalarWhereInput[]
+  OR?: Prisma.QuestProgressScalarWhereInput[]
+  NOT?: Prisma.QuestProgressScalarWhereInput | Prisma.QuestProgressScalarWhereInput[]
+  id?: Prisma.UuidFilter<"QuestProgress"> | string
+  tenant_id?: Prisma.UuidFilter<"QuestProgress"> | string
+  quest_id?: Prisma.UuidFilter<"QuestProgress"> | string
+  membership_id?: Prisma.UuidFilter<"QuestProgress"> | string
+  status?: Prisma.StringFilter<"QuestProgress"> | string
+  progress_json?: Prisma.JsonFilter<"QuestProgress">
+  completed_at?: Prisma.DateTimeNullableFilter<"QuestProgress"> | Date | string | null
+  created_at?: Prisma.DateTimeFilter<"QuestProgress"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"QuestProgress"> | Date | string
+}
+
+export type QuestProgressCreateManyMembershipInput = {
+  id: string
+  quest_id: string
+  status?: string
+  progress_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type QuestProgressUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  quest_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuestProgressUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  quest_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type QuestProgressUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  quest_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type QuestProgressSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -406,6 +558,7 @@ export type QuestProgressSelect<ExtArgs extends runtime.Types.Extensions.Interna
   completed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["questProgress"]>
 
 export type QuestProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -418,6 +571,7 @@ export type QuestProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   completed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["questProgress"]>
 
 export type QuestProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -430,6 +584,7 @@ export type QuestProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   completed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["questProgress"]>
 
 export type QuestProgressSelectScalar = {
@@ -445,10 +600,21 @@ export type QuestProgressSelectScalar = {
 }
 
 export type QuestProgressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "quest_id" | "membership_id" | "status" | "progress_json" | "completed_at" | "created_at" | "updated_at", ExtArgs["result"]["questProgress"]>
+export type QuestProgressInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type QuestProgressIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type QuestProgressIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $QuestProgressPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "QuestProgress"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -853,6 +1019,7 @@ readonly fields: QuestProgressFieldRefs;
  */
 export interface Prisma__QuestProgressClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -908,6 +1075,10 @@ export type QuestProgressFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
+  /**
    * Filter, which QuestProgress to fetch.
    */
   where: Prisma.QuestProgressWhereUniqueInput
@@ -926,6 +1097,10 @@ export type QuestProgressFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
+  /**
    * Filter, which QuestProgress to fetch.
    */
   where: Prisma.QuestProgressWhereUniqueInput
@@ -943,6 +1118,10 @@ export type QuestProgressFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the QuestProgress
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
   /**
    * Filter, which QuestProgress to fetch.
    */
@@ -992,6 +1171,10 @@ export type QuestProgressFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
+  /**
    * Filter, which QuestProgress to fetch.
    */
   where?: Prisma.QuestProgressWhereInput
@@ -1039,6 +1222,10 @@ export type QuestProgressFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the QuestProgress
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
   /**
    * Filter, which QuestProgresses to fetch.
    */
@@ -1088,6 +1275,10 @@ export type QuestProgressCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
+  /**
    * The data needed to create a QuestProgress.
    */
   data: Prisma.XOR<Prisma.QuestProgressCreateInput, Prisma.QuestProgressUncheckedCreateInput>
@@ -1121,6 +1312,10 @@ export type QuestProgressCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.QuestProgressCreateManyInput | Prisma.QuestProgressCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1135,6 +1330,10 @@ export type QuestProgressUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the QuestProgress
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
   /**
    * The data needed to update a QuestProgress.
    */
@@ -1187,6 +1386,10 @@ export type QuestProgressUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many QuestProgresses to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1201,6 +1404,10 @@ export type QuestProgressUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the QuestProgress
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
   /**
    * The filter to search for the QuestProgress to update in case it exists.
    */
@@ -1227,6 +1434,10 @@ export type QuestProgressDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the QuestProgress
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
   /**
    * Filter which QuestProgress to delete.
    */
@@ -1259,4 +1470,8 @@ export type QuestProgressDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the QuestProgress
    */
   omit?: Prisma.QuestProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestProgressInclude<ExtArgs> | null
 }
