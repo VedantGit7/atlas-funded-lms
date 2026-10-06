@@ -1,4 +1,6 @@
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
 import {
@@ -14,6 +16,10 @@ import {
   updateAffiliate,
   updateMyAffiliatePayoutDetails,
 } from "../../../backend/apps/api/src/server/sales-affiliates/sales-affiliates.service";
+import {
+  BackfillRefused,
+  backfillAffiliatePayoutDetails,
+} from "../../../scripts/data/affiliate-payout-backfill";
 
 /**
  * Audit M6 against Postgres: payout details are ciphertext in the table, masked
@@ -145,8 +151,21 @@ suite("affiliate payout details at rest (audit M6)", () => {
     expect((await storedColumns()).payout_upi).toBeNull();
   });
 
-  it("backfills rows written before encryption, and is safe to re-run", async () => {
-    await asAdmin(
+  // The backfill works across tenants as the database owner. Each test limits
+  // it to its own tenants, so it never touches rows other suites wrote.
+  const ownerUrl = () => process.env["DIRECT_DATABASE_URL"] ?? process.env["DATABASE_URL"];
+  const backfill = (options: {
+    apply: boolean;
+    allowUnverifiedKey?: boolean;
+    tenantIds?: string[];
+  }) =>
+    backfillAffiliatePayoutDetails({
+      databaseUrl: ownerUrl(),
+      tenantIds: [fixture.tenantId],
+      ...options,
+    });
+  const writeLegacyPlainText = () =>
+    asAdmin(
       (tx) => tx.$executeRaw`
         update sales_affiliates
            set payout_bank_account = '000011112222', payout_upi = 'legacy@okaxis'
@@ -154,30 +173,26 @@ suite("affiliate payout details at rest (audit M6)", () => {
       `,
     );
 
-    const run = (args: string[]) =>
-      execFileSync(
-        "pnpm",
-        ["exec", "tsx", "scripts/data/encrypt-affiliate-payout-details.ts", ...args],
-        {
-          cwd: process.cwd(),
-          shell: true,
-          stdio: "pipe",
-          env: {
-            ...process.env,
-            DIRECT_DATABASE_URL: process.env["DIRECT_DATABASE_URL"] ?? process.env["DATABASE_URL"],
-            LEARNER_BILLING_ENC_KEY: KEY,
-          },
-        },
-      ).toString();
+  it("backfills rows written before encryption, proving the key, and is safe to re-run", async () => {
+    await writeLegacyPlainText();
 
-    expect(run([])).toMatch(/[1-9]\d* affiliate\(s\) hold plain-text payout details\.\s+Dry run/);
+    const dryRun = await backfill({ apply: false });
+    expect(dryRun).toMatchObject({
+      plainTextAffiliates: 1,
+      plainTextTenants: 1,
+      plainTextValues: { bankAccount: 1, upi: 1, ifsc: 0, accountName: 0 },
+      encrypted: 0,
+      remaining: 1,
+    });
+    // IFSC and account name were encrypted by the API: the key opens them.
+    expect(dryRun.key).toEqual({ verified: 2, failed: 0 });
     expect((await storedColumns()).payout_bank_account).toBe("000011112222");
 
-    expect(run(["--apply"])).toMatch(/Encrypted [1-9]/);
+    const applied = await backfill({ apply: true });
+    expect(applied).toMatchObject({ encrypted: 1, failedIds: [], remaining: 0 });
     const stored = await storedColumns();
     expect(stored.payout_bank_account).toMatch(/^enc:v1:/);
     expect(stored.payout_upi).toMatch(/^enc:v1:/);
-    expect(run([])).toMatch(/^0 affiliate\(s\)/m);
 
     const revealed = await asAdmin((tx) =>
       revealAffiliatePayoutDetails(tx, ctxFor(fixture.adminMembershipId), affiliateId),
@@ -185,6 +200,109 @@ suite("affiliate payout details at rest (audit M6)", () => {
     expect(revealed.data).toMatchObject({
       payoutBankAccount: "000011112222",
       payoutUpi: "legacy@okaxis",
+      payoutIfsc: "HDFC0001234",
+      payoutAccountName: "Ada King",
     });
+
+    const again = await backfill({ apply: true });
+    expect(again).toMatchObject({ plainTextAffiliates: 0, encrypted: 0, remaining: 0 });
+    expect(await storedColumns()).toEqual(stored);
+  });
+
+  it("exits 1 while plain text remains and 0 once it is gone, printing no values", async () => {
+    await writeLegacyPlainText();
+    const run = (args: string[]) =>
+      spawnSync(
+        "pnpm",
+        [
+          "exec",
+          "tsx",
+          "scripts/data/encrypt-affiliate-payout-details.ts",
+          "--tenant",
+          fixture.tenantId,
+          ...args,
+        ],
+        {
+          cwd: process.cwd(),
+          shell: true,
+          encoding: "utf8",
+          env: { ...process.env, DIRECT_DATABASE_URL: ownerUrl(), LEARNER_BILLING_ENC_KEY: KEY },
+        },
+      );
+
+    const dryRun = run([]);
+    expect(dryRun.stdout).toMatch(/1 affiliate\(s\) hold plain-text payout details[\s\S]*Dry run/);
+    expect(dryRun.status).toBe(1);
+
+    const applied = run(["--apply"]);
+    expect(applied.stdout).toMatch(/Encrypted 1/);
+    expect(applied.status).toBe(0);
+    expect(run([]).status).toBe(0);
+
+    const output = [dryRun, applied].map((result) => result.stdout + result.stderr).join("");
+    expect(output).not.toContain("000011112222");
+    expect(output).not.toContain("legacy@okaxis");
+  });
+
+  it("refuses a key that does not decrypt what is stored, and changes nothing", async () => {
+    await writeLegacyPlainText();
+    process.env["LEARNER_BILLING_ENC_KEY"] = Buffer.alloc(32, 7).toString("base64");
+    try {
+      await expect(backfill({ apply: true })).rejects.toThrow(
+        /does not decrypt 2 of 2 existing ciphertexts/,
+      );
+    } finally {
+      process.env["LEARNER_BILLING_ENC_KEY"] = KEY;
+    }
+    expect((await storedColumns()).payout_bank_account).toBe("000011112222");
+    await backfill({ apply: true });
+  });
+
+  it("refuses a login that row-level security would hide affiliates from", async () => {
+    const role = `m6_backfill_${randomUUID().slice(0, 8)}`;
+    const admin = new Client({ connectionString: ownerUrl() });
+    await admin.connect();
+    try {
+      await admin.query(`create role ${role} login password 'm6-backfill-probe'`);
+      await admin.query(`grant select, update on sales_affiliates, payment_gateways to ${role}`);
+      const url = new URL(ownerUrl() ?? "");
+      url.username = role;
+      url.password = "m6-backfill-probe";
+      await expect(
+        backfillAffiliatePayoutDetails({ databaseUrl: url.toString(), apply: false }),
+      ).rejects.toBeInstanceOf(BackfillRefused);
+    } finally {
+      await admin.query(`revoke all on sales_affiliates, payment_gateways from ${role}`);
+      await admin.query(`drop role if exists ${role}`);
+      await admin.end();
+    }
+  });
+
+  it("needs --allow-unverified-key when no ciphertext can prove the key", async () => {
+    const other = await createCourseAuthoringFixture();
+    const created = await withTenantTx(authoringTenantTx(other, other.adminMembershipId), (tx) =>
+      createAffiliate(
+        tx,
+        {
+          tenantId: other.tenantId,
+          actorMembershipId: other.adminMembershipId,
+          requestId: "req-m6-key",
+        },
+        { membershipId: other.learnerMembershipId },
+      ),
+    );
+    await withTenantTx(
+      authoringTenantTx(other, other.adminMembershipId),
+      (tx) => tx.$executeRaw`
+        update sales_affiliates set payout_upi = 'first@okicici'
+         where id = ${created.data.id}::uuid
+      `,
+    );
+    const options = { tenantIds: [other.tenantId] };
+
+    await expect(backfill({ ...options, apply: true })).rejects.toThrow(/--allow-unverified-key/);
+    await expect(
+      backfill({ ...options, apply: true, allowUnverifiedKey: true }),
+    ).resolves.toMatchObject({ key: { verified: 0, failed: 0 }, encrypted: 1, remaining: 0 });
   });
 });
