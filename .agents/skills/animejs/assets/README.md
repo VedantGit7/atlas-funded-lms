@@ -82,7 +82,7 @@ Minimal Anime.js setup:
     "animejs": "^3.2.2"
   },
   "devDependencies": {
-    "vite": "^5.0.8"
+    "vite": "^8.3.3"
   }
 }
 ```

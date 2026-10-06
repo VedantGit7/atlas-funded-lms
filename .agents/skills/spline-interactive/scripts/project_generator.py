@@ -43,8 +43,8 @@ def create_project_structure(project_name, include_nextjs=False):
             "@splinetool/runtime": "^0.9.508"
         },
         "devDependencies": {
-            "@vitejs/plugin-react": "^4.0.0",
-            "vite": "^4.3.9"
+            "@vitejs/plugin-react": "^6.1.2",
+            "vite": "^8.3.3"
         },
         "scripts": {
             "dev": "vite",
