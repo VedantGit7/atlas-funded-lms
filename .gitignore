@@ -42,7 +42,6 @@ Thumbs.db
 .next-perf/
 test-results/
 playwright-report/
-lhci-reports/
 release-evidence.json
 ci-evidence.json
 

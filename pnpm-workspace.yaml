@@ -14,8 +14,6 @@ minimumReleaseAgeExclude:
 # Transitive advisories with no direct dependency to bump. Each key is scoped to
 # the vulnerable range so the override lifts only the affected copy and leaves
 # other consumers on the major they were resolved against.
-#
-# `extract-zip` is deliberately absent -- see the auditConfig note at the bottom.
 overrides:
   # Three separate advisories, one per major line. The 1.x copy is not dev-only:
   # it reaches production through exceljs -> archiver -> glob -> minimatch.
@@ -27,12 +25,7 @@ overrides:
   # Test tooling only (vitest -> jsdom): WebSocket DoS, TLS validation bypass
   # and cache poisoning, all fixed in 8.10.2.
   "undici@>=8.0.0 <8.10.2": "^8.10.2"
-  # Lighthouse CI tooling only (@lhci/cli -> puppeteer -> proxy-agent -> get-uri):
-  # quadratic CPU in Client.list(), fixed in 6.2.1.
-  "basic-ftp@<6.2.1": "^6.2.1"
   "@hono/node-server@<1.19.13": "^1.19.13"
-  "body-parser@<1.20.6": "^1.20.6"
-  "cookie@<0.7.0": "^0.7.0"
   "deepmerge-ts@<8.0.0": "^8.0.0"
   # Raised (2026-10-04): IN_PLACE sanitising with a node-removing afterSanitize
   # hook left event handlers armed (low; we use neither). Production: the web
@@ -47,17 +40,7 @@ overrides:
   # F12: retain each consumer's fflate minor line and use its ZIP64 fix.
   "fflate@>=0.4.5 <0.4.9": "^0.4.9"
   "fflate@>=0.6.0 <0.6.11": "^0.6.11"
-  # Fix both query-parser DoS advisories in the Lighthouse tooling tree.
-  "qs@<6.16.0": "^6.16.0"
   "baseline-browser-mapping@>=2.0.0 <2.11.0": "^2.11.0"
-  # Raised (2026-10-04): four further advisories (NAT64 and link-local
-  # classification, cross-family subnet checks, unbounded parse diagnostics),
-  # fixed in 10.7.1. Lighthouse CI tooling only (@lhci/cli -> proxy-agent -> socks).
-  "ip-address@<10.7.1": "^10.7.1"
-  # maxTotalMergeKeys does not bound CPU on merge keys. The previous floor
-  # (^3.15.0) resolved 3.15.1, which is still affected. Scoped to the 3.x
-  # line that @lhci/utils pins; 5.x consumers are untouched.
-  "js-yaml@<3.15.2": "^3.15.2"
   # Unbounded cache growth and a prototype-write crash on untrusted queries.
   # Two copies resolve; only 4.28.2 is affected, reached through
   # update-browserslist-db and the web app build.
@@ -76,45 +59,15 @@ overrides:
   # anyway because uuid still ships a CJS build and exceljs keeps working.
   "uuid@<11.1.1": "^11.1.1"
   "valibot@<1.4.2": "^1.4.2"
-  # Raised (2026-10-06). Lighthouse CI tooling only (@lhci/cli -> express):
-  # proxy-addr trusted an IPv4-mapped IPv6 address as inside an IPv4 trust
-  # subnet (critical, IP spoofing), and compression leaked memory when a
-  # response closed early (DoS). Patched in 2.0.8 and 1.8.2.
-  "proxy-addr@<2.0.8": "^2.0.8"
-  "compression@<1.8.2": "^1.8.2"
   # Raised (2026-10-06): indexed source-map section offsets could stall the
   # event loop. Build tooling (postcss via next, vite and tailwind); fixed in
   # 1.2.2.
   "source-map-js@<1.2.2": "^1.2.2"
 
-# GHSA-jmr9-qjv8-65gv and GHSA-7pqw-9j4j-h8q3 (extract-zip, symlink path
-# traversal / arbitrary file write through symlink archive entries, both high).
-#
-# This is NOT a judgement that the advisory is unimportant -- it is unfixable
-# today: 2.0.1 is the latest published release of extract-zip, so the "patched
-# >=2.0.2" version does not exist yet. The only path into the tree is
-#   @lhci/cli (devDependency) -> lighthouse -> puppeteer-core -> @puppeteer/browsers
-# so it never ships in the application runtime, and the archives it extracts are
-# Chrome builds fetched by Lighthouse rather than user-supplied uploads.
-#
-# Ignored here so `pnpm security:check` fails loudly on any NEW advisory instead
-# of being permanently red on one nobody can act on. Tracked as SEC-09 in
-# docs/release/security-exception-register.md -- revisit when extract-zip
-# publishes a fix or @lhci/cli moves off puppeteer.
-# F12 rechecked 2026-09-20: npm still publishes 2.0.1 as latest; an unfiltered
-# audit returns only these two existing exceptions after the security updates.
-# Rechecked 2026-10-04: still 2.0.1. Upgrading @lhci/cli does not help: its
-# newest release reaches lighthouse 12.6.1 -> puppeteer-core 24.43.1 ->
-# @puppeteer/browsers 2.13.2, which still uses extract-zip. The downloader
-# without it ships with puppeteer 25, which lighthouse does not support yet.
 auditConfig:
+  # Suppressed by advisory id, so any NEW advisory still fails security:check.
+  # The extract-zip pair (SEC-09) went with @lhci/cli, its only path in.
   ignoreGhsas:
-    - GHSA-jmr9-qjv8-65gv
-    # Second advisory id for the same defect in the same package, published
-    # after the first was suppressed. Same unavailable fix, same single path,
-    # so the reasoning above applies unchanged -- but it had to be named
-    # explicitly, because suppressing by id is what keeps a NEW advisory loud.
-    - GHSA-7pqw-9j4j-h8q3
     # SEC-10: node-forge RSA PKCS#1 v1.5 signature VERIFICATION accepts extra
     # nested DigestAlgorithm elements (high). Unfixable today: 1.4.0 is the latest
     # published release and the advisory's "patched >=1.4.1" does not exist yet.

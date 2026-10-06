@@ -38,7 +38,6 @@
     "ci:frontend-api-closure": "node scripts/ci/check-frontend-api-closure.mjs",
     "ci:frontend-api-closure:strict": "node scripts/ci/check-frontend-api-closure.mjs --strict",
     "ci:learner-bundle-boundary": "node scripts/ci/check-learner-bundle-boundary.mjs",
-    "ci:lighthouse": "lhci autorun",
     "db:generate": "prisma generate --config backend/prisma.generate.config.ts",
     "db:generate:ci": "prisma generate --config backend/prisma.generate.config.ts",
     "db:validate": "prisma validate --config backend/prisma.config.ts",
@@ -143,7 +142,6 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
     "@eslint/js": "^10.0.1",
-    "@lhci/cli": "^0.14.0",
     "@playwright/test": "^1.61.0",
     "@types/adm-zip": "^0.5.8",
     "@types/node": "^24.0.0",
