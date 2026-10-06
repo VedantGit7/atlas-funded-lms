@@ -248,6 +248,8 @@ export type LessonProgressWhereInput = {
   last_seen_at?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
+  lesson?: Prisma.XOR<Prisma.LessonScalarRelationFilter, Prisma.LessonWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type LessonProgressOrderByWithRelationInput = {
@@ -260,6 +262,8 @@ export type LessonProgressOrderByWithRelationInput = {
   last_seen_at?: Prisma.SortOrderInput | Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  lesson?: Prisma.LessonOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type LessonProgressWhereUniqueInput = Prisma.AtLeast<{
@@ -276,6 +280,8 @@ export type LessonProgressWhereUniqueInput = Prisma.AtLeast<{
   last_seen_at?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
   completed_at?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
   updated_at?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
+  lesson?: Prisma.XOR<Prisma.LessonScalarRelationFilter, Prisma.LessonWhereInput>
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id" | "tenant_id_lesson_id_membership_id">
 
 export type LessonProgressOrderByWithAggregationInput = {
@@ -312,14 +318,13 @@ export type LessonProgressScalarWhereWithAggregatesInput = {
 
 export type LessonProgressCreateInput = {
   id: string
-  tenant_id: string
-  lesson_id: string
-  membership_id: string
   status?: string
   progress_pct?: number
   last_seen_at?: Date | string | null
   completed_at?: Date | string | null
   updated_at?: Date | string
+  lesson: Prisma.LessonCreateNestedOneWithoutLesson_progressInput
+  membership: Prisma.MembershipCreateNestedOneWithoutLesson_progressInput
 }
 
 export type LessonProgressUncheckedCreateInput = {
@@ -336,14 +341,13 @@ export type LessonProgressUncheckedCreateInput = {
 
 export type LessonProgressUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
   last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lesson?: Prisma.LessonUpdateOneRequiredWithoutLesson_progressNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutLesson_progressNestedInput
 }
 
 export type LessonProgressUncheckedUpdateInput = {
@@ -372,9 +376,6 @@ export type LessonProgressCreateManyInput = {
 
 export type LessonProgressUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
   last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -392,6 +393,16 @@ export type LessonProgressUncheckedUpdateManyInput = {
   last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonProgressListRelationFilter = {
+  every?: Prisma.LessonProgressWhereInput
+  some?: Prisma.LessonProgressWhereInput
+  none?: Prisma.LessonProgressWhereInput
+}
+
+export type LessonProgressOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type LessonProgressTenant_idLesson_idMembership_idCompoundUniqueInput = {
@@ -444,6 +455,277 @@ export type LessonProgressSumOrderByAggregateInput = {
   progress_pct?: Prisma.SortOrder
 }
 
+export type LessonProgressCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutMembershipInput, Prisma.LessonProgressUncheckedCreateWithoutMembershipInput> | Prisma.LessonProgressCreateWithoutMembershipInput[] | Prisma.LessonProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutMembershipInput | Prisma.LessonProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.LessonProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+}
+
+export type LessonProgressUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutMembershipInput, Prisma.LessonProgressUncheckedCreateWithoutMembershipInput> | Prisma.LessonProgressCreateWithoutMembershipInput[] | Prisma.LessonProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutMembershipInput | Prisma.LessonProgressCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.LessonProgressCreateManyMembershipInputEnvelope
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+}
+
+export type LessonProgressUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutMembershipInput, Prisma.LessonProgressUncheckedCreateWithoutMembershipInput> | Prisma.LessonProgressCreateWithoutMembershipInput[] | Prisma.LessonProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutMembershipInput | Prisma.LessonProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.LessonProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.LessonProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.LessonProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  disconnect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  delete?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  update?: Prisma.LessonProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.LessonProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.LessonProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.LessonProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.LessonProgressScalarWhereInput | Prisma.LessonProgressScalarWhereInput[]
+}
+
+export type LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutMembershipInput, Prisma.LessonProgressUncheckedCreateWithoutMembershipInput> | Prisma.LessonProgressCreateWithoutMembershipInput[] | Prisma.LessonProgressUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutMembershipInput | Prisma.LessonProgressCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.LessonProgressUpsertWithWhereUniqueWithoutMembershipInput | Prisma.LessonProgressUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.LessonProgressCreateManyMembershipInputEnvelope
+  set?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  disconnect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  delete?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  update?: Prisma.LessonProgressUpdateWithWhereUniqueWithoutMembershipInput | Prisma.LessonProgressUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.LessonProgressUpdateManyWithWhereWithoutMembershipInput | Prisma.LessonProgressUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.LessonProgressScalarWhereInput | Prisma.LessonProgressScalarWhereInput[]
+}
+
+export type LessonProgressCreateNestedManyWithoutLessonInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutLessonInput, Prisma.LessonProgressUncheckedCreateWithoutLessonInput> | Prisma.LessonProgressCreateWithoutLessonInput[] | Prisma.LessonProgressUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutLessonInput | Prisma.LessonProgressCreateOrConnectWithoutLessonInput[]
+  createMany?: Prisma.LessonProgressCreateManyLessonInputEnvelope
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+}
+
+export type LessonProgressUncheckedCreateNestedManyWithoutLessonInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutLessonInput, Prisma.LessonProgressUncheckedCreateWithoutLessonInput> | Prisma.LessonProgressCreateWithoutLessonInput[] | Prisma.LessonProgressUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutLessonInput | Prisma.LessonProgressCreateOrConnectWithoutLessonInput[]
+  createMany?: Prisma.LessonProgressCreateManyLessonInputEnvelope
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+}
+
+export type LessonProgressUpdateManyWithoutLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutLessonInput, Prisma.LessonProgressUncheckedCreateWithoutLessonInput> | Prisma.LessonProgressCreateWithoutLessonInput[] | Prisma.LessonProgressUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutLessonInput | Prisma.LessonProgressCreateOrConnectWithoutLessonInput[]
+  upsert?: Prisma.LessonProgressUpsertWithWhereUniqueWithoutLessonInput | Prisma.LessonProgressUpsertWithWhereUniqueWithoutLessonInput[]
+  createMany?: Prisma.LessonProgressCreateManyLessonInputEnvelope
+  set?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  disconnect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  delete?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  update?: Prisma.LessonProgressUpdateWithWhereUniqueWithoutLessonInput | Prisma.LessonProgressUpdateWithWhereUniqueWithoutLessonInput[]
+  updateMany?: Prisma.LessonProgressUpdateManyWithWhereWithoutLessonInput | Prisma.LessonProgressUpdateManyWithWhereWithoutLessonInput[]
+  deleteMany?: Prisma.LessonProgressScalarWhereInput | Prisma.LessonProgressScalarWhereInput[]
+}
+
+export type LessonProgressUncheckedUpdateManyWithoutLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonProgressCreateWithoutLessonInput, Prisma.LessonProgressUncheckedCreateWithoutLessonInput> | Prisma.LessonProgressCreateWithoutLessonInput[] | Prisma.LessonProgressUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonProgressCreateOrConnectWithoutLessonInput | Prisma.LessonProgressCreateOrConnectWithoutLessonInput[]
+  upsert?: Prisma.LessonProgressUpsertWithWhereUniqueWithoutLessonInput | Prisma.LessonProgressUpsertWithWhereUniqueWithoutLessonInput[]
+  createMany?: Prisma.LessonProgressCreateManyLessonInputEnvelope
+  set?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  disconnect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  delete?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  connect?: Prisma.LessonProgressWhereUniqueInput | Prisma.LessonProgressWhereUniqueInput[]
+  update?: Prisma.LessonProgressUpdateWithWhereUniqueWithoutLessonInput | Prisma.LessonProgressUpdateWithWhereUniqueWithoutLessonInput[]
+  updateMany?: Prisma.LessonProgressUpdateManyWithWhereWithoutLessonInput | Prisma.LessonProgressUpdateManyWithWhereWithoutLessonInput[]
+  deleteMany?: Prisma.LessonProgressScalarWhereInput | Prisma.LessonProgressScalarWhereInput[]
+}
+
+export type LessonProgressCreateWithoutMembershipInput = {
+  id: string
+  status?: string
+  progress_pct?: number
+  last_seen_at?: Date | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+  lesson: Prisma.LessonCreateNestedOneWithoutLesson_progressInput
+}
+
+export type LessonProgressUncheckedCreateWithoutMembershipInput = {
+  id: string
+  lesson_id: string
+  status?: string
+  progress_pct?: number
+  last_seen_at?: Date | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type LessonProgressCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.LessonProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.LessonProgressCreateWithoutMembershipInput, Prisma.LessonProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type LessonProgressCreateManyMembershipInputEnvelope = {
+  data: Prisma.LessonProgressCreateManyMembershipInput | Prisma.LessonProgressCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type LessonProgressUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.LessonProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.LessonProgressUpdateWithoutMembershipInput, Prisma.LessonProgressUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.LessonProgressCreateWithoutMembershipInput, Prisma.LessonProgressUncheckedCreateWithoutMembershipInput>
+}
+
+export type LessonProgressUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.LessonProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.LessonProgressUpdateWithoutMembershipInput, Prisma.LessonProgressUncheckedUpdateWithoutMembershipInput>
+}
+
+export type LessonProgressUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.LessonProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.LessonProgressUpdateManyMutationInput, Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type LessonProgressScalarWhereInput = {
+  AND?: Prisma.LessonProgressScalarWhereInput | Prisma.LessonProgressScalarWhereInput[]
+  OR?: Prisma.LessonProgressScalarWhereInput[]
+  NOT?: Prisma.LessonProgressScalarWhereInput | Prisma.LessonProgressScalarWhereInput[]
+  id?: Prisma.UuidFilter<"LessonProgress"> | string
+  tenant_id?: Prisma.UuidFilter<"LessonProgress"> | string
+  lesson_id?: Prisma.UuidFilter<"LessonProgress"> | string
+  membership_id?: Prisma.UuidFilter<"LessonProgress"> | string
+  status?: Prisma.StringFilter<"LessonProgress"> | string
+  progress_pct?: Prisma.IntFilter<"LessonProgress"> | number
+  last_seen_at?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
+  completed_at?: Prisma.DateTimeNullableFilter<"LessonProgress"> | Date | string | null
+  updated_at?: Prisma.DateTimeFilter<"LessonProgress"> | Date | string
+}
+
+export type LessonProgressCreateWithoutLessonInput = {
+  id: string
+  status?: string
+  progress_pct?: number
+  last_seen_at?: Date | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutLesson_progressInput
+}
+
+export type LessonProgressUncheckedCreateWithoutLessonInput = {
+  id: string
+  membership_id: string
+  status?: string
+  progress_pct?: number
+  last_seen_at?: Date | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type LessonProgressCreateOrConnectWithoutLessonInput = {
+  where: Prisma.LessonProgressWhereUniqueInput
+  create: Prisma.XOR<Prisma.LessonProgressCreateWithoutLessonInput, Prisma.LessonProgressUncheckedCreateWithoutLessonInput>
+}
+
+export type LessonProgressCreateManyLessonInputEnvelope = {
+  data: Prisma.LessonProgressCreateManyLessonInput | Prisma.LessonProgressCreateManyLessonInput[]
+  skipDuplicates?: boolean
+}
+
+export type LessonProgressUpsertWithWhereUniqueWithoutLessonInput = {
+  where: Prisma.LessonProgressWhereUniqueInput
+  update: Prisma.XOR<Prisma.LessonProgressUpdateWithoutLessonInput, Prisma.LessonProgressUncheckedUpdateWithoutLessonInput>
+  create: Prisma.XOR<Prisma.LessonProgressCreateWithoutLessonInput, Prisma.LessonProgressUncheckedCreateWithoutLessonInput>
+}
+
+export type LessonProgressUpdateWithWhereUniqueWithoutLessonInput = {
+  where: Prisma.LessonProgressWhereUniqueInput
+  data: Prisma.XOR<Prisma.LessonProgressUpdateWithoutLessonInput, Prisma.LessonProgressUncheckedUpdateWithoutLessonInput>
+}
+
+export type LessonProgressUpdateManyWithWhereWithoutLessonInput = {
+  where: Prisma.LessonProgressScalarWhereInput
+  data: Prisma.XOR<Prisma.LessonProgressUpdateManyMutationInput, Prisma.LessonProgressUncheckedUpdateManyWithoutLessonInput>
+}
+
+export type LessonProgressCreateManyMembershipInput = {
+  id: string
+  lesson_id: string
+  status?: string
+  progress_pct?: number
+  last_seen_at?: Date | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type LessonProgressUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lesson?: Prisma.LessonUpdateOneRequiredWithoutLesson_progressNestedInput
+}
+
+export type LessonProgressUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonProgressUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonProgressCreateManyLessonInput = {
+  id: string
+  membership_id: string
+  status?: string
+  progress_pct?: number
+  last_seen_at?: Date | string | null
+  completed_at?: Date | string | null
+  updated_at?: Date | string
+}
+
+export type LessonProgressUpdateWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutLesson_progressNestedInput
+}
+
+export type LessonProgressUncheckedUpdateWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LessonProgressUncheckedUpdateManyWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  progress_pct?: Prisma.IntFieldUpdateOperationsInput | number
+  last_seen_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type LessonProgressSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -456,6 +738,8 @@ export type LessonProgressSelect<ExtArgs extends runtime.Types.Extensions.Intern
   last_seen_at?: boolean
   completed_at?: boolean
   updated_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonProgress"]>
 
 export type LessonProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +752,8 @@ export type LessonProgressSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   last_seen_at?: boolean
   completed_at?: boolean
   updated_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonProgress"]>
 
 export type LessonProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -480,6 +766,8 @@ export type LessonProgressSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   last_seen_at?: boolean
   completed_at?: boolean
   updated_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonProgress"]>
 
 export type LessonProgressSelectScalar = {
@@ -495,10 +783,25 @@ export type LessonProgressSelectScalar = {
 }
 
 export type LessonProgressOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "lesson_id" | "membership_id" | "status" | "progress_pct" | "last_seen_at" | "completed_at" | "updated_at", ExtArgs["result"]["lessonProgress"]>
+export type LessonProgressInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type LessonProgressIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type LessonProgressIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $LessonProgressPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LessonProgress"
-  objects: {}
+  objects: {
+    lesson: Prisma.$LessonPayload<ExtArgs>
+    membership: Prisma.$MembershipPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -903,6 +1206,8 @@ readonly fields: LessonProgressFieldRefs;
  */
 export interface Prisma__LessonProgressClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  lesson<T extends Prisma.LessonDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LessonDefaultArgs<ExtArgs>>): Prisma.Prisma__LessonClient<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -958,6 +1263,10 @@ export type LessonProgressFindUniqueArgs<ExtArgs extends runtime.Types.Extension
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
+  /**
    * Filter, which LessonProgress to fetch.
    */
   where: Prisma.LessonProgressWhereUniqueInput
@@ -976,6 +1285,10 @@ export type LessonProgressFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
+  /**
    * Filter, which LessonProgress to fetch.
    */
   where: Prisma.LessonProgressWhereUniqueInput
@@ -993,6 +1306,10 @@ export type LessonProgressFindFirstArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the LessonProgress
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
   /**
    * Filter, which LessonProgress to fetch.
    */
@@ -1042,6 +1359,10 @@ export type LessonProgressFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
+  /**
    * Filter, which LessonProgress to fetch.
    */
   where?: Prisma.LessonProgressWhereInput
@@ -1089,6 +1410,10 @@ export type LessonProgressFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the LessonProgress
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
   /**
    * Filter, which LessonProgresses to fetch.
    */
@@ -1138,6 +1463,10 @@ export type LessonProgressCreateArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
+  /**
    * The data needed to create a LessonProgress.
    */
   data: Prisma.XOR<Prisma.LessonProgressCreateInput, Prisma.LessonProgressUncheckedCreateInput>
@@ -1171,6 +1500,10 @@ export type LessonProgressCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    */
   data: Prisma.LessonProgressCreateManyInput | Prisma.LessonProgressCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1185,6 +1518,10 @@ export type LessonProgressUpdateArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the LessonProgress
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
   /**
    * The data needed to update a LessonProgress.
    */
@@ -1237,6 +1574,10 @@ export type LessonProgressUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * Limit how many LessonProgresses to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1251,6 +1592,10 @@ export type LessonProgressUpsertArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the LessonProgress
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
   /**
    * The filter to search for the LessonProgress to update in case it exists.
    */
@@ -1277,6 +1622,10 @@ export type LessonProgressDeleteArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the LessonProgress
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
   /**
    * Filter which LessonProgress to delete.
    */
@@ -1309,4 +1658,8 @@ export type LessonProgressDefaultArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the LessonProgress
    */
   omit?: Prisma.LessonProgressOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonProgressInclude<ExtArgs> | null
 }

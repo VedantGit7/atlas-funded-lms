@@ -182,6 +182,8 @@ export type SalesCouponCourseWhereInput = {
   coupon_id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
   course_id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
   created_at?: Prisma.DateTimeFilter<"SalesCouponCourse"> | Date | string
+  coupon?: Prisma.XOR<Prisma.SalesCouponScalarRelationFilter, Prisma.SalesCouponWhereInput>
+  course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
 }
 
 export type SalesCouponCourseOrderByWithRelationInput = {
@@ -190,6 +192,8 @@ export type SalesCouponCourseOrderByWithRelationInput = {
   coupon_id?: Prisma.SortOrder
   course_id?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  coupon?: Prisma.SalesCouponOrderByWithRelationInput
+  course?: Prisma.CourseOrderByWithRelationInput
 }
 
 export type SalesCouponCourseWhereUniqueInput = Prisma.AtLeast<{
@@ -202,6 +206,8 @@ export type SalesCouponCourseWhereUniqueInput = Prisma.AtLeast<{
   coupon_id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
   course_id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
   created_at?: Prisma.DateTimeFilter<"SalesCouponCourse"> | Date | string
+  coupon?: Prisma.XOR<Prisma.SalesCouponScalarRelationFilter, Prisma.SalesCouponWhereInput>
+  course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
 }, "id" | "tenant_id_coupon_id_course_id">
 
 export type SalesCouponCourseOrderByWithAggregationInput = {
@@ -228,10 +234,9 @@ export type SalesCouponCourseScalarWhereWithAggregatesInput = {
 
 export type SalesCouponCourseCreateInput = {
   id: string
-  tenant_id: string
-  coupon_id: string
-  course_id: string
   created_at?: Date | string
+  coupon: Prisma.SalesCouponCreateNestedOneWithoutSales_coupon_coursesInput
+  course: Prisma.CourseCreateNestedOneWithoutSales_coupon_coursesInput
 }
 
 export type SalesCouponCourseUncheckedCreateInput = {
@@ -244,10 +249,9 @@ export type SalesCouponCourseUncheckedCreateInput = {
 
 export type SalesCouponCourseUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coupon?: Prisma.SalesCouponUpdateOneRequiredWithoutSales_coupon_coursesNestedInput
+  course?: Prisma.CourseUpdateOneRequiredWithoutSales_coupon_coursesNestedInput
 }
 
 export type SalesCouponCourseUncheckedUpdateInput = {
@@ -268,9 +272,6 @@ export type SalesCouponCourseCreateManyInput = {
 
 export type SalesCouponCourseUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -280,6 +281,16 @@ export type SalesCouponCourseUncheckedUpdateManyInput = {
   coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
   course_id?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponCourseListRelationFilter = {
+  every?: Prisma.SalesCouponCourseWhereInput
+  some?: Prisma.SalesCouponCourseWhereInput
+  none?: Prisma.SalesCouponCourseWhereInput
+}
+
+export type SalesCouponCourseOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SalesCouponCourseTenant_idCoupon_idCourse_idCompoundUniqueInput = {
@@ -312,6 +323,225 @@ export type SalesCouponCourseMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
 }
 
+export type SalesCouponCourseCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponCourseCreateWithoutCourseInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCourseInputEnvelope
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+}
+
+export type SalesCouponCourseUncheckedCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponCourseCreateWithoutCourseInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCourseInputEnvelope
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+}
+
+export type SalesCouponCourseUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponCourseCreateWithoutCourseInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCourseInputEnvelope
+  set?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  delete?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  update?: Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCourseInput | Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.SalesCouponCourseScalarWhereInput | Prisma.SalesCouponCourseScalarWhereInput[]
+}
+
+export type SalesCouponCourseUncheckedUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponCourseCreateWithoutCourseInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCourseInputEnvelope
+  set?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  delete?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  update?: Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCourseInput | Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.SalesCouponCourseScalarWhereInput | Prisma.SalesCouponCourseScalarWhereInput[]
+}
+
+export type SalesCouponCourseCreateNestedManyWithoutCouponInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponCourseCreateWithoutCouponInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCouponInputEnvelope
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+}
+
+export type SalesCouponCourseUncheckedCreateNestedManyWithoutCouponInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponCourseCreateWithoutCouponInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCouponInputEnvelope
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+}
+
+export type SalesCouponCourseUpdateManyWithoutCouponNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponCourseCreateWithoutCouponInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput[]
+  upsert?: Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCouponInputEnvelope
+  set?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  delete?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  update?: Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCouponInput[]
+  updateMany?: Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCouponInput | Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCouponInput[]
+  deleteMany?: Prisma.SalesCouponCourseScalarWhereInput | Prisma.SalesCouponCourseScalarWhereInput[]
+}
+
+export type SalesCouponCourseUncheckedUpdateManyWithoutCouponNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponCourseCreateWithoutCouponInput[] | Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput | Prisma.SalesCouponCourseCreateOrConnectWithoutCouponInput[]
+  upsert?: Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponCourseUpsertWithWhereUniqueWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponCourseCreateManyCouponInputEnvelope
+  set?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  delete?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  connect?: Prisma.SalesCouponCourseWhereUniqueInput | Prisma.SalesCouponCourseWhereUniqueInput[]
+  update?: Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponCourseUpdateWithWhereUniqueWithoutCouponInput[]
+  updateMany?: Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCouponInput | Prisma.SalesCouponCourseUpdateManyWithWhereWithoutCouponInput[]
+  deleteMany?: Prisma.SalesCouponCourseScalarWhereInput | Prisma.SalesCouponCourseScalarWhereInput[]
+}
+
+export type SalesCouponCourseCreateWithoutCourseInput = {
+  id: string
+  created_at?: Date | string
+  coupon: Prisma.SalesCouponCreateNestedOneWithoutSales_coupon_coursesInput
+}
+
+export type SalesCouponCourseUncheckedCreateWithoutCourseInput = {
+  id: string
+  coupon_id: string
+  created_at?: Date | string
+}
+
+export type SalesCouponCourseCreateOrConnectWithoutCourseInput = {
+  where: Prisma.SalesCouponCourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput>
+}
+
+export type SalesCouponCourseCreateManyCourseInputEnvelope = {
+  data: Prisma.SalesCouponCourseCreateManyCourseInput | Prisma.SalesCouponCourseCreateManyCourseInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesCouponCourseUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.SalesCouponCourseWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesCouponCourseUpdateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCourseInput>
+}
+
+export type SalesCouponCourseUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.SalesCouponCourseWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesCouponCourseUpdateWithoutCourseInput, Prisma.SalesCouponCourseUncheckedUpdateWithoutCourseInput>
+}
+
+export type SalesCouponCourseUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.SalesCouponCourseScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesCouponCourseUpdateManyMutationInput, Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type SalesCouponCourseScalarWhereInput = {
+  AND?: Prisma.SalesCouponCourseScalarWhereInput | Prisma.SalesCouponCourseScalarWhereInput[]
+  OR?: Prisma.SalesCouponCourseScalarWhereInput[]
+  NOT?: Prisma.SalesCouponCourseScalarWhereInput | Prisma.SalesCouponCourseScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
+  coupon_id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
+  course_id?: Prisma.UuidFilter<"SalesCouponCourse"> | string
+  created_at?: Prisma.DateTimeFilter<"SalesCouponCourse"> | Date | string
+}
+
+export type SalesCouponCourseCreateWithoutCouponInput = {
+  id: string
+  created_at?: Date | string
+  course: Prisma.CourseCreateNestedOneWithoutSales_coupon_coursesInput
+}
+
+export type SalesCouponCourseUncheckedCreateWithoutCouponInput = {
+  id: string
+  course_id: string
+  created_at?: Date | string
+}
+
+export type SalesCouponCourseCreateOrConnectWithoutCouponInput = {
+  where: Prisma.SalesCouponCourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput>
+}
+
+export type SalesCouponCourseCreateManyCouponInputEnvelope = {
+  data: Prisma.SalesCouponCourseCreateManyCouponInput | Prisma.SalesCouponCourseCreateManyCouponInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesCouponCourseUpsertWithWhereUniqueWithoutCouponInput = {
+  where: Prisma.SalesCouponCourseWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesCouponCourseUpdateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedUpdateWithoutCouponInput>
+  create: Prisma.XOR<Prisma.SalesCouponCourseCreateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedCreateWithoutCouponInput>
+}
+
+export type SalesCouponCourseUpdateWithWhereUniqueWithoutCouponInput = {
+  where: Prisma.SalesCouponCourseWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesCouponCourseUpdateWithoutCouponInput, Prisma.SalesCouponCourseUncheckedUpdateWithoutCouponInput>
+}
+
+export type SalesCouponCourseUpdateManyWithWhereWithoutCouponInput = {
+  where: Prisma.SalesCouponCourseScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesCouponCourseUpdateManyMutationInput, Prisma.SalesCouponCourseUncheckedUpdateManyWithoutCouponInput>
+}
+
+export type SalesCouponCourseCreateManyCourseInput = {
+  id: string
+  coupon_id: string
+  created_at?: Date | string
+}
+
+export type SalesCouponCourseUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coupon?: Prisma.SalesCouponUpdateOneRequiredWithoutSales_coupon_coursesNestedInput
+}
+
+export type SalesCouponCourseUncheckedUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponCourseUncheckedUpdateManyWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponCourseCreateManyCouponInput = {
+  id: string
+  course_id: string
+  created_at?: Date | string
+}
+
+export type SalesCouponCourseUpdateWithoutCouponInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  course?: Prisma.CourseUpdateOneRequiredWithoutSales_coupon_coursesNestedInput
+}
+
+export type SalesCouponCourseUncheckedUpdateWithoutCouponInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponCourseUncheckedUpdateManyWithoutCouponInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type SalesCouponCourseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -320,6 +550,8 @@ export type SalesCouponCourseSelect<ExtArgs extends runtime.Types.Extensions.Int
   coupon_id?: boolean
   course_id?: boolean
   created_at?: boolean
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesCouponCourse"]>
 
 export type SalesCouponCourseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -328,6 +560,8 @@ export type SalesCouponCourseSelectCreateManyAndReturn<ExtArgs extends runtime.T
   coupon_id?: boolean
   course_id?: boolean
   created_at?: boolean
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesCouponCourse"]>
 
 export type SalesCouponCourseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -336,6 +570,8 @@ export type SalesCouponCourseSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   coupon_id?: boolean
   course_id?: boolean
   created_at?: boolean
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesCouponCourse"]>
 
 export type SalesCouponCourseSelectScalar = {
@@ -347,10 +583,25 @@ export type SalesCouponCourseSelectScalar = {
 }
 
 export type SalesCouponCourseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "coupon_id" | "course_id" | "created_at", ExtArgs["result"]["salesCouponCourse"]>
+export type SalesCouponCourseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
+export type SalesCouponCourseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
+export type SalesCouponCourseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+}
 
 export type $SalesCouponCoursePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesCouponCourse"
-  objects: {}
+  objects: {
+    coupon: Prisma.$SalesCouponPayload<ExtArgs>
+    course: Prisma.$CoursePayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -751,6 +1002,8 @@ readonly fields: SalesCouponCourseFieldRefs;
  */
 export interface Prisma__SalesCouponCourseClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  coupon<T extends Prisma.SalesCouponDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesCouponDefaultArgs<ExtArgs>>): Prisma.Prisma__SalesCouponClient<runtime.Types.Result.GetResult<Prisma.$SalesCouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  course<T extends Prisma.CourseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -802,6 +1055,10 @@ export type SalesCouponCourseFindUniqueArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
+  /**
    * Filter, which SalesCouponCourse to fetch.
    */
   where: Prisma.SalesCouponCourseWhereUniqueInput
@@ -820,6 +1077,10 @@ export type SalesCouponCourseFindUniqueOrThrowArgs<ExtArgs extends runtime.Types
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
+  /**
    * Filter, which SalesCouponCourse to fetch.
    */
   where: Prisma.SalesCouponCourseWhereUniqueInput
@@ -837,6 +1098,10 @@ export type SalesCouponCourseFindFirstArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the SalesCouponCourse
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
   /**
    * Filter, which SalesCouponCourse to fetch.
    */
@@ -886,6 +1151,10 @@ export type SalesCouponCourseFindFirstOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
+  /**
    * Filter, which SalesCouponCourse to fetch.
    */
   where?: Prisma.SalesCouponCourseWhereInput
@@ -933,6 +1202,10 @@ export type SalesCouponCourseFindManyArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the SalesCouponCourse
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
   /**
    * Filter, which SalesCouponCourses to fetch.
    */
@@ -982,6 +1255,10 @@ export type SalesCouponCourseCreateArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
+  /**
    * The data needed to create a SalesCouponCourse.
    */
   data: Prisma.XOR<Prisma.SalesCouponCourseCreateInput, Prisma.SalesCouponCourseUncheckedCreateInput>
@@ -1015,6 +1292,10 @@ export type SalesCouponCourseCreateManyAndReturnArgs<ExtArgs extends runtime.Typ
    */
   data: Prisma.SalesCouponCourseCreateManyInput | Prisma.SalesCouponCourseCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1029,6 +1310,10 @@ export type SalesCouponCourseUpdateArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the SalesCouponCourse
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
   /**
    * The data needed to update a SalesCouponCourse.
    */
@@ -1081,6 +1366,10 @@ export type SalesCouponCourseUpdateManyAndReturnArgs<ExtArgs extends runtime.Typ
    * Limit how many SalesCouponCourses to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1095,6 +1384,10 @@ export type SalesCouponCourseUpsertArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the SalesCouponCourse
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
   /**
    * The filter to search for the SalesCouponCourse to update in case it exists.
    */
@@ -1121,6 +1414,10 @@ export type SalesCouponCourseDeleteArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the SalesCouponCourse
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
   /**
    * Filter which SalesCouponCourse to delete.
    */
@@ -1153,4 +1450,8 @@ export type SalesCouponCourseDefaultArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the SalesCouponCourse
    */
   omit?: Prisma.SalesCouponCourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponCourseInclude<ExtArgs> | null
 }

@@ -230,6 +230,7 @@ export type CertificateRenderJobWhereInput = {
   created_at?: Prisma.DateTimeFilter<"CertificateRenderJob"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CertificateRenderJob"> | Date | string
   completed_at?: Prisma.DateTimeNullableFilter<"CertificateRenderJob"> | Date | string | null
+  certificate?: Prisma.XOR<Prisma.CertificateNullableScalarRelationFilter, Prisma.CertificateWhereInput> | null
 }
 
 export type CertificateRenderJobOrderByWithRelationInput = {
@@ -244,6 +245,7 @@ export type CertificateRenderJobOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  certificate?: Prisma.CertificateOrderByWithRelationInput
 }
 
 export type CertificateRenderJobWhereUniqueInput = Prisma.AtLeast<{
@@ -261,6 +263,7 @@ export type CertificateRenderJobWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"CertificateRenderJob"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CertificateRenderJob"> | Date | string
   completed_at?: Prisma.DateTimeNullableFilter<"CertificateRenderJob"> | Date | string | null
+  certificate?: Prisma.XOR<Prisma.CertificateNullableScalarRelationFilter, Prisma.CertificateWhereInput> | null
 }, "id">
 
 export type CertificateRenderJobOrderByWithAggregationInput = {
@@ -299,8 +302,6 @@ export type CertificateRenderJobScalarWhereWithAggregatesInput = {
 
 export type CertificateRenderJobCreateInput = {
   id: string
-  tenant_id: string
-  certificate_id?: string | null
   template_id?: string | null
   status?: $Enums.JobStatus
   error_message?: string | null
@@ -309,6 +310,7 @@ export type CertificateRenderJobCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   completed_at?: Date | string | null
+  certificate?: Prisma.CertificateCreateNestedOneWithoutCertificate_render_jobsInput
 }
 
 export type CertificateRenderJobUncheckedCreateInput = {
@@ -327,8 +329,6 @@ export type CertificateRenderJobUncheckedCreateInput = {
 
 export type CertificateRenderJobUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  certificate_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   template_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -337,6 +337,7 @@ export type CertificateRenderJobUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  certificate?: Prisma.CertificateUpdateOneWithoutCertificate_render_jobsNestedInput
 }
 
 export type CertificateRenderJobUncheckedUpdateInput = {
@@ -369,8 +370,6 @@ export type CertificateRenderJobCreateManyInput = {
 
 export type CertificateRenderJobUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  certificate_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   template_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -393,6 +392,16 @@ export type CertificateRenderJobUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type CertificateRenderJobListRelationFilter = {
+  every?: Prisma.CertificateRenderJobWhereInput
+  some?: Prisma.CertificateRenderJobWhereInput
+  none?: Prisma.CertificateRenderJobWhereInput
+}
+
+export type CertificateRenderJobOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type CertificateRenderJobCountOrderByAggregateInput = {
@@ -437,6 +446,163 @@ export type CertificateRenderJobMinOrderByAggregateInput = {
   completed_at?: Prisma.SortOrder
 }
 
+export type CertificateRenderJobCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.CertificateRenderJobCreateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput> | Prisma.CertificateRenderJobCreateWithoutCertificateInput[] | Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput | Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.CertificateRenderJobCreateManyCertificateInputEnvelope
+  connect?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+}
+
+export type CertificateRenderJobUncheckedCreateNestedManyWithoutCertificateInput = {
+  create?: Prisma.XOR<Prisma.CertificateRenderJobCreateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput> | Prisma.CertificateRenderJobCreateWithoutCertificateInput[] | Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput | Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput[]
+  createMany?: Prisma.CertificateRenderJobCreateManyCertificateInputEnvelope
+  connect?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+}
+
+export type CertificateRenderJobUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateRenderJobCreateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput> | Prisma.CertificateRenderJobCreateWithoutCertificateInput[] | Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput | Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.CertificateRenderJobUpsertWithWhereUniqueWithoutCertificateInput | Prisma.CertificateRenderJobUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.CertificateRenderJobCreateManyCertificateInputEnvelope
+  set?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  disconnect?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  delete?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  connect?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  update?: Prisma.CertificateRenderJobUpdateWithWhereUniqueWithoutCertificateInput | Prisma.CertificateRenderJobUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.CertificateRenderJobUpdateManyWithWhereWithoutCertificateInput | Prisma.CertificateRenderJobUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.CertificateRenderJobScalarWhereInput | Prisma.CertificateRenderJobScalarWhereInput[]
+}
+
+export type CertificateRenderJobUncheckedUpdateManyWithoutCertificateNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateRenderJobCreateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput> | Prisma.CertificateRenderJobCreateWithoutCertificateInput[] | Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput[]
+  connectOrCreate?: Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput | Prisma.CertificateRenderJobCreateOrConnectWithoutCertificateInput[]
+  upsert?: Prisma.CertificateRenderJobUpsertWithWhereUniqueWithoutCertificateInput | Prisma.CertificateRenderJobUpsertWithWhereUniqueWithoutCertificateInput[]
+  createMany?: Prisma.CertificateRenderJobCreateManyCertificateInputEnvelope
+  set?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  disconnect?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  delete?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  connect?: Prisma.CertificateRenderJobWhereUniqueInput | Prisma.CertificateRenderJobWhereUniqueInput[]
+  update?: Prisma.CertificateRenderJobUpdateWithWhereUniqueWithoutCertificateInput | Prisma.CertificateRenderJobUpdateWithWhereUniqueWithoutCertificateInput[]
+  updateMany?: Prisma.CertificateRenderJobUpdateManyWithWhereWithoutCertificateInput | Prisma.CertificateRenderJobUpdateManyWithWhereWithoutCertificateInput[]
+  deleteMany?: Prisma.CertificateRenderJobScalarWhereInput | Prisma.CertificateRenderJobScalarWhereInput[]
+}
+
+export type CertificateRenderJobCreateWithoutCertificateInput = {
+  id: string
+  template_id?: string | null
+  status?: $Enums.JobStatus
+  error_message?: string | null
+  r2_object_key?: string | null
+  format: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type CertificateRenderJobUncheckedCreateWithoutCertificateInput = {
+  id: string
+  template_id?: string | null
+  status?: $Enums.JobStatus
+  error_message?: string | null
+  r2_object_key?: string | null
+  format: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type CertificateRenderJobCreateOrConnectWithoutCertificateInput = {
+  where: Prisma.CertificateRenderJobWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateRenderJobCreateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput>
+}
+
+export type CertificateRenderJobCreateManyCertificateInputEnvelope = {
+  data: Prisma.CertificateRenderJobCreateManyCertificateInput | Prisma.CertificateRenderJobCreateManyCertificateInput[]
+  skipDuplicates?: boolean
+}
+
+export type CertificateRenderJobUpsertWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.CertificateRenderJobWhereUniqueInput
+  update: Prisma.XOR<Prisma.CertificateRenderJobUpdateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedUpdateWithoutCertificateInput>
+  create: Prisma.XOR<Prisma.CertificateRenderJobCreateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedCreateWithoutCertificateInput>
+}
+
+export type CertificateRenderJobUpdateWithWhereUniqueWithoutCertificateInput = {
+  where: Prisma.CertificateRenderJobWhereUniqueInput
+  data: Prisma.XOR<Prisma.CertificateRenderJobUpdateWithoutCertificateInput, Prisma.CertificateRenderJobUncheckedUpdateWithoutCertificateInput>
+}
+
+export type CertificateRenderJobUpdateManyWithWhereWithoutCertificateInput = {
+  where: Prisma.CertificateRenderJobScalarWhereInput
+  data: Prisma.XOR<Prisma.CertificateRenderJobUpdateManyMutationInput, Prisma.CertificateRenderJobUncheckedUpdateManyWithoutCertificateInput>
+}
+
+export type CertificateRenderJobScalarWhereInput = {
+  AND?: Prisma.CertificateRenderJobScalarWhereInput | Prisma.CertificateRenderJobScalarWhereInput[]
+  OR?: Prisma.CertificateRenderJobScalarWhereInput[]
+  NOT?: Prisma.CertificateRenderJobScalarWhereInput | Prisma.CertificateRenderJobScalarWhereInput[]
+  id?: Prisma.UuidFilter<"CertificateRenderJob"> | string
+  tenant_id?: Prisma.UuidFilter<"CertificateRenderJob"> | string
+  certificate_id?: Prisma.UuidNullableFilter<"CertificateRenderJob"> | string | null
+  template_id?: Prisma.UuidNullableFilter<"CertificateRenderJob"> | string | null
+  status?: Prisma.EnumJobStatusFilter<"CertificateRenderJob"> | $Enums.JobStatus
+  error_message?: Prisma.StringNullableFilter<"CertificateRenderJob"> | string | null
+  r2_object_key?: Prisma.StringNullableFilter<"CertificateRenderJob"> | string | null
+  format?: Prisma.StringFilter<"CertificateRenderJob"> | string
+  created_at?: Prisma.DateTimeFilter<"CertificateRenderJob"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"CertificateRenderJob"> | Date | string
+  completed_at?: Prisma.DateTimeNullableFilter<"CertificateRenderJob"> | Date | string | null
+}
+
+export type CertificateRenderJobCreateManyCertificateInput = {
+  id: string
+  template_id?: string | null
+  status?: $Enums.JobStatus
+  error_message?: string | null
+  r2_object_key?: string | null
+  format: string
+  created_at?: Date | string
+  updated_at?: Date | string
+  completed_at?: Date | string | null
+}
+
+export type CertificateRenderJobUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  format?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type CertificateRenderJobUncheckedUpdateWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  format?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type CertificateRenderJobUncheckedUpdateManyWithoutCertificateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  error_message?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  format?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 
 
 export type CertificateRenderJobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -451,6 +617,7 @@ export type CertificateRenderJobSelect<ExtArgs extends runtime.Types.Extensions.
   created_at?: boolean
   updated_at?: boolean
   completed_at?: boolean
+  certificate?: boolean | Prisma.CertificateRenderJob$certificateArgs<ExtArgs>
 }, ExtArgs["result"]["certificateRenderJob"]>
 
 export type CertificateRenderJobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -465,6 +632,7 @@ export type CertificateRenderJobSelectCreateManyAndReturn<ExtArgs extends runtim
   created_at?: boolean
   updated_at?: boolean
   completed_at?: boolean
+  certificate?: boolean | Prisma.CertificateRenderJob$certificateArgs<ExtArgs>
 }, ExtArgs["result"]["certificateRenderJob"]>
 
 export type CertificateRenderJobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -479,6 +647,7 @@ export type CertificateRenderJobSelectUpdateManyAndReturn<ExtArgs extends runtim
   created_at?: boolean
   updated_at?: boolean
   completed_at?: boolean
+  certificate?: boolean | Prisma.CertificateRenderJob$certificateArgs<ExtArgs>
 }, ExtArgs["result"]["certificateRenderJob"]>
 
 export type CertificateRenderJobSelectScalar = {
@@ -496,10 +665,21 @@ export type CertificateRenderJobSelectScalar = {
 }
 
 export type CertificateRenderJobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "certificate_id" | "template_id" | "status" | "error_message" | "r2_object_key" | "format" | "created_at" | "updated_at" | "completed_at", ExtArgs["result"]["certificateRenderJob"]>
+export type CertificateRenderJobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateRenderJob$certificateArgs<ExtArgs>
+}
+export type CertificateRenderJobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateRenderJob$certificateArgs<ExtArgs>
+}
+export type CertificateRenderJobIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate?: boolean | Prisma.CertificateRenderJob$certificateArgs<ExtArgs>
+}
 
 export type $CertificateRenderJobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "CertificateRenderJob"
-  objects: {}
+  objects: {
+    certificate: Prisma.$CertificatePayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -906,6 +1086,7 @@ readonly fields: CertificateRenderJobFieldRefs;
  */
 export interface Prisma__CertificateRenderJobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  certificate<T extends Prisma.CertificateRenderJob$certificateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CertificateRenderJob$certificateArgs<ExtArgs>>): Prisma.Prisma__CertificateClient<runtime.Types.Result.GetResult<Prisma.$CertificatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -963,6 +1144,10 @@ export type CertificateRenderJobFindUniqueArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateRenderJob to fetch.
    */
   where: Prisma.CertificateRenderJobWhereUniqueInput
@@ -981,6 +1166,10 @@ export type CertificateRenderJobFindUniqueOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateRenderJob to fetch.
    */
   where: Prisma.CertificateRenderJobWhereUniqueInput
@@ -998,6 +1187,10 @@ export type CertificateRenderJobFindFirstArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the CertificateRenderJob
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
   /**
    * Filter, which CertificateRenderJob to fetch.
    */
@@ -1047,6 +1240,10 @@ export type CertificateRenderJobFindFirstOrThrowArgs<ExtArgs extends runtime.Typ
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
+  /**
    * Filter, which CertificateRenderJob to fetch.
    */
   where?: Prisma.CertificateRenderJobWhereInput
@@ -1094,6 +1291,10 @@ export type CertificateRenderJobFindManyArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the CertificateRenderJob
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
   /**
    * Filter, which CertificateRenderJobs to fetch.
    */
@@ -1143,6 +1344,10 @@ export type CertificateRenderJobCreateArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
+  /**
    * The data needed to create a CertificateRenderJob.
    */
   data: Prisma.XOR<Prisma.CertificateRenderJobCreateInput, Prisma.CertificateRenderJobUncheckedCreateInput>
@@ -1176,6 +1381,10 @@ export type CertificateRenderJobCreateManyAndReturnArgs<ExtArgs extends runtime.
    */
   data: Prisma.CertificateRenderJobCreateManyInput | Prisma.CertificateRenderJobCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1190,6 +1399,10 @@ export type CertificateRenderJobUpdateArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the CertificateRenderJob
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
   /**
    * The data needed to update a CertificateRenderJob.
    */
@@ -1242,6 +1455,10 @@ export type CertificateRenderJobUpdateManyAndReturnArgs<ExtArgs extends runtime.
    * Limit how many CertificateRenderJobs to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1256,6 +1473,10 @@ export type CertificateRenderJobUpsertArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the CertificateRenderJob
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
   /**
    * The filter to search for the CertificateRenderJob to update in case it exists.
    */
@@ -1283,6 +1504,10 @@ export type CertificateRenderJobDeleteArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
+  /**
    * Filter which CertificateRenderJob to delete.
    */
   where: Prisma.CertificateRenderJobWhereUniqueInput
@@ -1303,6 +1528,25 @@ export type CertificateRenderJobDeleteManyArgs<ExtArgs extends runtime.Types.Ext
 }
 
 /**
+ * CertificateRenderJob.certificate
+ */
+export type CertificateRenderJob$certificateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Certificate
+   */
+  select?: Prisma.CertificateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Certificate
+   */
+  omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  where?: Prisma.CertificateWhereInput
+}
+
+/**
  * CertificateRenderJob without action
  */
 export type CertificateRenderJobDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1314,4 +1558,8 @@ export type CertificateRenderJobDefaultArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the CertificateRenderJob
    */
   omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
 }

@@ -137,6 +137,7 @@
     "test:supabase-security": "node scripts/security/verify-f19-event-trigger.mjs",
     "test:scorm-browser": "node scripts/security/verify-scorm-runtime-bridge.mjs",
     "db:proctoring-integrity:check": "node scripts/db/check-proctoring-integrity.mjs",
+    "db:tenant-fk:check": "node scripts/db/check-tenant-fk-integrity.mjs",
     "test:proctoring-integrity": "node scripts/db/verify-proctoring-integrity.mjs"
   },
   "devDependencies": {

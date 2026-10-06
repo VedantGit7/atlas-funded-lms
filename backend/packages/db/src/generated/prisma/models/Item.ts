@@ -260,6 +260,8 @@ export type ItemWhereInput = {
   created_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
+  assessment_items?: Prisma.AssessmentItemListRelationFilter
+  item_options?: Prisma.ItemOptionListRelationFilter
 }
 
 export type ItemOrderByWithRelationInput = {
@@ -275,10 +277,13 @@ export type ItemOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  assessment_items?: Prisma.AssessmentItemOrderByRelationAggregateInput
+  item_options?: Prisma.ItemOptionOrderByRelationAggregateInput
 }
 
 export type ItemWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.ItemTenant_idIdCompoundUniqueInput
   AND?: Prisma.ItemWhereInput | Prisma.ItemWhereInput[]
   OR?: Prisma.ItemWhereInput[]
   NOT?: Prisma.ItemWhereInput | Prisma.ItemWhereInput[]
@@ -293,7 +298,9 @@ export type ItemWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
-}, "id">
+  assessment_items?: Prisma.AssessmentItemListRelationFilter
+  item_options?: Prisma.ItemOptionListRelationFilter
+}, "id" | "tenant_id_id">
 
 export type ItemOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -346,6 +353,8 @@ export type ItemCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
 }
 
 export type ItemUncheckedCreateInput = {
@@ -361,6 +370,8 @@ export type ItemUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+  item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
 }
 
 export type ItemUpdateInput = {
@@ -376,6 +387,8 @@ export type ItemUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
 }
 
 export type ItemUncheckedUpdateInput = {
@@ -391,6 +404,8 @@ export type ItemUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+  item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
 }
 
 export type ItemCreateManyInput = {
@@ -446,6 +461,11 @@ export type StringNullableListFilter<$PrismaModel = never> = {
   isEmpty?: boolean
 }
 
+export type ItemTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
+}
+
 export type ItemCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -493,6 +513,11 @@ export type ItemSumOrderByAggregateInput = {
   difficulty?: Prisma.SortOrder
 }
 
+export type ItemScalarRelationFilter = {
+  is?: Prisma.ItemWhereInput
+  isNot?: Prisma.ItemWhereInput
+}
+
 export type ItemCreatetagsInput = {
   set: string[]
 }
@@ -502,6 +527,232 @@ export type ItemUpdatetagsInput = {
   push?: string | string[]
 }
 
+export type ItemCreateNestedOneWithoutItem_optionsInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_optionsInput, Prisma.ItemUncheckedCreateWithoutItem_optionsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_optionsInput
+  connect?: Prisma.ItemWhereUniqueInput
+}
+
+export type ItemUpdateOneRequiredWithoutItem_optionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutItem_optionsInput, Prisma.ItemUncheckedCreateWithoutItem_optionsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutItem_optionsInput
+  upsert?: Prisma.ItemUpsertWithoutItem_optionsInput
+  connect?: Prisma.ItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutItem_optionsInput, Prisma.ItemUpdateWithoutItem_optionsInput>, Prisma.ItemUncheckedUpdateWithoutItem_optionsInput>
+}
+
+export type ItemCreateNestedOneWithoutAssessment_itemsInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutAssessment_itemsInput, Prisma.ItemUncheckedCreateWithoutAssessment_itemsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutAssessment_itemsInput
+  connect?: Prisma.ItemWhereUniqueInput
+}
+
+export type ItemUpdateOneRequiredWithoutAssessment_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.ItemCreateWithoutAssessment_itemsInput, Prisma.ItemUncheckedCreateWithoutAssessment_itemsInput>
+  connectOrCreate?: Prisma.ItemCreateOrConnectWithoutAssessment_itemsInput
+  upsert?: Prisma.ItemUpsertWithoutAssessment_itemsInput
+  connect?: Prisma.ItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ItemUpdateToOneWithWhereWithoutAssessment_itemsInput, Prisma.ItemUpdateWithoutAssessment_itemsInput>, Prisma.ItemUncheckedUpdateWithoutAssessment_itemsInput>
+}
+
+export type ItemCreateWithoutItem_optionsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
+}
+
+export type ItemUncheckedCreateWithoutItem_optionsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type ItemCreateOrConnectWithoutItem_optionsInput = {
+  where: Prisma.ItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_optionsInput, Prisma.ItemUncheckedCreateWithoutItem_optionsInput>
+}
+
+export type ItemUpsertWithoutItem_optionsInput = {
+  update: Prisma.XOR<Prisma.ItemUpdateWithoutItem_optionsInput, Prisma.ItemUncheckedUpdateWithoutItem_optionsInput>
+  create: Prisma.XOR<Prisma.ItemCreateWithoutItem_optionsInput, Prisma.ItemUncheckedCreateWithoutItem_optionsInput>
+  where?: Prisma.ItemWhereInput
+}
+
+export type ItemUpdateToOneWithWhereWithoutItem_optionsInput = {
+  where?: Prisma.ItemWhereInput
+  data: Prisma.XOR<Prisma.ItemUpdateWithoutItem_optionsInput, Prisma.ItemUncheckedUpdateWithoutItem_optionsInput>
+}
+
+export type ItemUpdateWithoutItem_optionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
+}
+
+export type ItemUncheckedUpdateWithoutItem_optionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
+}
+
+export type ItemCreateWithoutAssessment_itemsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
+}
+
+export type ItemUncheckedCreateWithoutAssessment_itemsInput = {
+  id: string
+  tenant_id: string
+  item_type_key: string
+  stem_json: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: number | null
+  status?: $Enums.PublishStatus
+  tags?: Prisma.ItemCreatetagsInput | string[]
+  created_by_membership_id?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
+}
+
+export type ItemCreateOrConnectWithoutAssessment_itemsInput = {
+  where: Prisma.ItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.ItemCreateWithoutAssessment_itemsInput, Prisma.ItemUncheckedCreateWithoutAssessment_itemsInput>
+}
+
+export type ItemUpsertWithoutAssessment_itemsInput = {
+  update: Prisma.XOR<Prisma.ItemUpdateWithoutAssessment_itemsInput, Prisma.ItemUncheckedUpdateWithoutAssessment_itemsInput>
+  create: Prisma.XOR<Prisma.ItemCreateWithoutAssessment_itemsInput, Prisma.ItemUncheckedCreateWithoutAssessment_itemsInput>
+  where?: Prisma.ItemWhereInput
+}
+
+export type ItemUpdateToOneWithWhereWithoutAssessment_itemsInput = {
+  where?: Prisma.ItemWhereInput
+  data: Prisma.XOR<Prisma.ItemUpdateWithoutAssessment_itemsInput, Prisma.ItemUncheckedUpdateWithoutAssessment_itemsInput>
+}
+
+export type ItemUpdateWithoutAssessment_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
+}
+
+export type ItemUncheckedUpdateWithoutAssessment_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  item_type_key?: Prisma.StringFieldUpdateOperationsInput | string
+  stem_json?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  explanation_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  difficulty?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  status?: Prisma.EnumPublishStatusFieldUpdateOperationsInput | $Enums.PublishStatus
+  tags?: Prisma.ItemUpdatetagsInput | string[]
+  created_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
+}
+
+
+/**
+ * Count Type ItemCountOutputType
+ */
+
+export type ItemCountOutputType = {
+  assessment_items: number
+  item_options: number
+}
+
+export type ItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment_items?: boolean | ItemCountOutputTypeCountAssessment_itemsArgs
+  item_options?: boolean | ItemCountOutputTypeCountItem_optionsArgs
+}
+
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemCountOutputType
+   */
+  select?: Prisma.ItemCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeCountAssessment_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssessmentItemWhereInput
+}
+
+/**
+ * ItemCountOutputType without action
+ */
+export type ItemCountOutputTypeCountItem_optionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ItemOptionWhereInput
+}
 
 
 export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -517,6 +768,9 @@ export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  assessment_items?: boolean | Prisma.Item$assessment_itemsArgs<ExtArgs>
+  item_options?: boolean | Prisma.Item$item_optionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["item"]>
 
 export type ItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -565,10 +819,20 @@ export type ItemSelectScalar = {
 }
 
 export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "item_type_key" | "stem_json" | "explanation_json" | "difficulty" | "status" | "tags" | "created_by_membership_id" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["item"]>
+export type ItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessment_items?: boolean | Prisma.Item$assessment_itemsArgs<ExtArgs>
+  item_options?: boolean | Prisma.Item$item_optionsArgs<ExtArgs>
+  _count?: boolean | Prisma.ItemCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type ItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ItemIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Item"
-  objects: {}
+  objects: {
+    assessment_items: Prisma.$AssessmentItemPayload<ExtArgs>[]
+    item_options: Prisma.$ItemOptionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -976,6 +1240,8 @@ readonly fields: ItemFieldRefs;
  */
 export interface Prisma__ItemClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  assessment_items<T extends Prisma.Item$assessment_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$assessment_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssessmentItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  item_options<T extends Prisma.Item$item_optionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Item$item_optionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemOptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1034,6 +1300,10 @@ export type ItemFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
+  /**
    * Filter, which Item to fetch.
    */
   where: Prisma.ItemWhereUniqueInput
@@ -1052,6 +1322,10 @@ export type ItemFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
+  /**
    * Filter, which Item to fetch.
    */
   where: Prisma.ItemWhereUniqueInput
@@ -1069,6 +1343,10 @@ export type ItemFindFirstArgs<ExtArgs extends runtime.Types.Extensions.InternalA
    * Omit specific fields from the Item
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
   /**
    * Filter, which Item to fetch.
    */
@@ -1118,6 +1396,10 @@ export type ItemFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
+  /**
    * Filter, which Item to fetch.
    */
   where?: Prisma.ItemWhereInput
@@ -1165,6 +1447,10 @@ export type ItemFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
    * Omit specific fields from the Item
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
   /**
    * Filter, which Items to fetch.
    */
@@ -1214,6 +1500,10 @@ export type ItemCreateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
+  /**
    * The data needed to create a Item.
    */
   data: Prisma.XOR<Prisma.ItemCreateInput, Prisma.ItemUncheckedCreateInput>
@@ -1261,6 +1551,10 @@ export type ItemUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    * Omit specific fields from the Item
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
   /**
    * The data needed to update a Item.
    */
@@ -1328,6 +1622,10 @@ export type ItemUpsertArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
+  /**
    * The filter to search for the Item to update in case it exists.
    */
   where: Prisma.ItemWhereUniqueInput
@@ -1354,6 +1652,10 @@ export type ItemDeleteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
+  /**
    * Filter which Item to delete.
    */
   where: Prisma.ItemWhereUniqueInput
@@ -1374,6 +1676,54 @@ export type ItemDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * Item.assessment_items
+ */
+export type Item$assessment_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssessmentItem
+   */
+  select?: Prisma.AssessmentItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssessmentItem
+   */
+  omit?: Prisma.AssessmentItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentItemInclude<ExtArgs> | null
+  where?: Prisma.AssessmentItemWhereInput
+  orderBy?: Prisma.AssessmentItemOrderByWithRelationInput | Prisma.AssessmentItemOrderByWithRelationInput[]
+  cursor?: Prisma.AssessmentItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssessmentItemScalarFieldEnum | Prisma.AssessmentItemScalarFieldEnum[]
+}
+
+/**
+ * Item.item_options
+ */
+export type Item$item_optionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ItemOption
+   */
+  select?: Prisma.ItemOptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ItemOption
+   */
+  omit?: Prisma.ItemOptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemOptionInclude<ExtArgs> | null
+  where?: Prisma.ItemOptionWhereInput
+  orderBy?: Prisma.ItemOptionOrderByWithRelationInput | Prisma.ItemOptionOrderByWithRelationInput[]
+  cursor?: Prisma.ItemOptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ItemOptionScalarFieldEnum | Prisma.ItemOptionScalarFieldEnum[]
+}
+
+/**
  * Item without action
  */
 export type ItemDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1385,4 +1735,8 @@ export type ItemDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Omit specific fields from the Item
    */
   omit?: Prisma.ItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ItemInclude<ExtArgs> | null
 }

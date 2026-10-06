@@ -206,6 +206,7 @@ export type GradingTaskWhereInput = {
   result_json?: Prisma.JsonNullableFilter<"GradingTask">
   created_at?: Prisma.DateTimeFilter<"GradingTask"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"GradingTask"> | Date | string
+  attempt?: Prisma.XOR<Prisma.AttemptScalarRelationFilter, Prisma.AttemptWhereInput>
 }
 
 export type GradingTaskOrderByWithRelationInput = {
@@ -218,6 +219,7 @@ export type GradingTaskOrderByWithRelationInput = {
   result_json?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  attempt?: Prisma.AttemptOrderByWithRelationInput
 }
 
 export type GradingTaskWhereUniqueInput = Prisma.AtLeast<{
@@ -233,6 +235,7 @@ export type GradingTaskWhereUniqueInput = Prisma.AtLeast<{
   result_json?: Prisma.JsonNullableFilter<"GradingTask">
   created_at?: Prisma.DateTimeFilter<"GradingTask"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"GradingTask"> | Date | string
+  attempt?: Prisma.XOR<Prisma.AttemptScalarRelationFilter, Prisma.AttemptWhereInput>
 }, "id">
 
 export type GradingTaskOrderByWithAggregationInput = {
@@ -267,14 +270,13 @@ export type GradingTaskScalarWhereWithAggregatesInput = {
 
 export type GradingTaskCreateInput = {
   id: string
-  tenant_id: string
-  attempt_id: string
   assigned_to_membership_id?: string | null
   status?: string
   rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  attempt: Prisma.AttemptCreateNestedOneWithoutGrading_tasksInput
 }
 
 export type GradingTaskUncheckedCreateInput = {
@@ -291,14 +293,13 @@ export type GradingTaskUncheckedCreateInput = {
 
 export type GradingTaskUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  attempt_id?: Prisma.StringFieldUpdateOperationsInput | string
   assigned_to_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attempt?: Prisma.AttemptUpdateOneRequiredWithoutGrading_tasksNestedInput
 }
 
 export type GradingTaskUncheckedUpdateInput = {
@@ -327,8 +328,6 @@ export type GradingTaskCreateManyInput = {
 
 export type GradingTaskUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  attempt_id?: Prisma.StringFieldUpdateOperationsInput | string
   assigned_to_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -347,6 +346,16 @@ export type GradingTaskUncheckedUpdateManyInput = {
   result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GradingTaskListRelationFilter = {
+  every?: Prisma.GradingTaskWhereInput
+  some?: Prisma.GradingTaskWhereInput
+  none?: Prisma.GradingTaskWhereInput
+}
+
+export type GradingTaskOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type GradingTaskCountOrderByAggregateInput = {
@@ -381,6 +390,149 @@ export type GradingTaskMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type GradingTaskCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.GradingTaskCreateWithoutAttemptInput, Prisma.GradingTaskUncheckedCreateWithoutAttemptInput> | Prisma.GradingTaskCreateWithoutAttemptInput[] | Prisma.GradingTaskUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.GradingTaskCreateOrConnectWithoutAttemptInput | Prisma.GradingTaskCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.GradingTaskCreateManyAttemptInputEnvelope
+  connect?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+}
+
+export type GradingTaskUncheckedCreateNestedManyWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.GradingTaskCreateWithoutAttemptInput, Prisma.GradingTaskUncheckedCreateWithoutAttemptInput> | Prisma.GradingTaskCreateWithoutAttemptInput[] | Prisma.GradingTaskUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.GradingTaskCreateOrConnectWithoutAttemptInput | Prisma.GradingTaskCreateOrConnectWithoutAttemptInput[]
+  createMany?: Prisma.GradingTaskCreateManyAttemptInputEnvelope
+  connect?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+}
+
+export type GradingTaskUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.GradingTaskCreateWithoutAttemptInput, Prisma.GradingTaskUncheckedCreateWithoutAttemptInput> | Prisma.GradingTaskCreateWithoutAttemptInput[] | Prisma.GradingTaskUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.GradingTaskCreateOrConnectWithoutAttemptInput | Prisma.GradingTaskCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.GradingTaskUpsertWithWhereUniqueWithoutAttemptInput | Prisma.GradingTaskUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.GradingTaskCreateManyAttemptInputEnvelope
+  set?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  disconnect?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  delete?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  connect?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  update?: Prisma.GradingTaskUpdateWithWhereUniqueWithoutAttemptInput | Prisma.GradingTaskUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.GradingTaskUpdateManyWithWhereWithoutAttemptInput | Prisma.GradingTaskUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.GradingTaskScalarWhereInput | Prisma.GradingTaskScalarWhereInput[]
+}
+
+export type GradingTaskUncheckedUpdateManyWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.GradingTaskCreateWithoutAttemptInput, Prisma.GradingTaskUncheckedCreateWithoutAttemptInput> | Prisma.GradingTaskCreateWithoutAttemptInput[] | Prisma.GradingTaskUncheckedCreateWithoutAttemptInput[]
+  connectOrCreate?: Prisma.GradingTaskCreateOrConnectWithoutAttemptInput | Prisma.GradingTaskCreateOrConnectWithoutAttemptInput[]
+  upsert?: Prisma.GradingTaskUpsertWithWhereUniqueWithoutAttemptInput | Prisma.GradingTaskUpsertWithWhereUniqueWithoutAttemptInput[]
+  createMany?: Prisma.GradingTaskCreateManyAttemptInputEnvelope
+  set?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  disconnect?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  delete?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  connect?: Prisma.GradingTaskWhereUniqueInput | Prisma.GradingTaskWhereUniqueInput[]
+  update?: Prisma.GradingTaskUpdateWithWhereUniqueWithoutAttemptInput | Prisma.GradingTaskUpdateWithWhereUniqueWithoutAttemptInput[]
+  updateMany?: Prisma.GradingTaskUpdateManyWithWhereWithoutAttemptInput | Prisma.GradingTaskUpdateManyWithWhereWithoutAttemptInput[]
+  deleteMany?: Prisma.GradingTaskScalarWhereInput | Prisma.GradingTaskScalarWhereInput[]
+}
+
+export type GradingTaskCreateWithoutAttemptInput = {
+  id: string
+  assigned_to_membership_id?: string | null
+  status?: string
+  rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type GradingTaskUncheckedCreateWithoutAttemptInput = {
+  id: string
+  assigned_to_membership_id?: string | null
+  status?: string
+  rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type GradingTaskCreateOrConnectWithoutAttemptInput = {
+  where: Prisma.GradingTaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.GradingTaskCreateWithoutAttemptInput, Prisma.GradingTaskUncheckedCreateWithoutAttemptInput>
+}
+
+export type GradingTaskCreateManyAttemptInputEnvelope = {
+  data: Prisma.GradingTaskCreateManyAttemptInput | Prisma.GradingTaskCreateManyAttemptInput[]
+  skipDuplicates?: boolean
+}
+
+export type GradingTaskUpsertWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.GradingTaskWhereUniqueInput
+  update: Prisma.XOR<Prisma.GradingTaskUpdateWithoutAttemptInput, Prisma.GradingTaskUncheckedUpdateWithoutAttemptInput>
+  create: Prisma.XOR<Prisma.GradingTaskCreateWithoutAttemptInput, Prisma.GradingTaskUncheckedCreateWithoutAttemptInput>
+}
+
+export type GradingTaskUpdateWithWhereUniqueWithoutAttemptInput = {
+  where: Prisma.GradingTaskWhereUniqueInput
+  data: Prisma.XOR<Prisma.GradingTaskUpdateWithoutAttemptInput, Prisma.GradingTaskUncheckedUpdateWithoutAttemptInput>
+}
+
+export type GradingTaskUpdateManyWithWhereWithoutAttemptInput = {
+  where: Prisma.GradingTaskScalarWhereInput
+  data: Prisma.XOR<Prisma.GradingTaskUpdateManyMutationInput, Prisma.GradingTaskUncheckedUpdateManyWithoutAttemptInput>
+}
+
+export type GradingTaskScalarWhereInput = {
+  AND?: Prisma.GradingTaskScalarWhereInput | Prisma.GradingTaskScalarWhereInput[]
+  OR?: Prisma.GradingTaskScalarWhereInput[]
+  NOT?: Prisma.GradingTaskScalarWhereInput | Prisma.GradingTaskScalarWhereInput[]
+  id?: Prisma.UuidFilter<"GradingTask"> | string
+  tenant_id?: Prisma.UuidFilter<"GradingTask"> | string
+  attempt_id?: Prisma.UuidFilter<"GradingTask"> | string
+  assigned_to_membership_id?: Prisma.UuidNullableFilter<"GradingTask"> | string | null
+  status?: Prisma.StringFilter<"GradingTask"> | string
+  rubric_json?: Prisma.JsonNullableFilter<"GradingTask">
+  result_json?: Prisma.JsonNullableFilter<"GradingTask">
+  created_at?: Prisma.DateTimeFilter<"GradingTask"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"GradingTask"> | Date | string
+}
+
+export type GradingTaskCreateManyAttemptInput = {
+  id: string
+  assigned_to_membership_id?: string | null
+  status?: string
+  rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type GradingTaskUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assigned_to_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GradingTaskUncheckedUpdateWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assigned_to_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type GradingTaskUncheckedUpdateManyWithoutAttemptInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assigned_to_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  rubric_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  result_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type GradingTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -393,6 +545,7 @@ export type GradingTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   result_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gradingTask"]>
 
 export type GradingTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -405,6 +558,7 @@ export type GradingTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   result_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gradingTask"]>
 
 export type GradingTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -417,6 +571,7 @@ export type GradingTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   result_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gradingTask"]>
 
 export type GradingTaskSelectScalar = {
@@ -432,10 +587,21 @@ export type GradingTaskSelectScalar = {
 }
 
 export type GradingTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "attempt_id" | "assigned_to_membership_id" | "status" | "rubric_json" | "result_json" | "created_at" | "updated_at", ExtArgs["result"]["gradingTask"]>
+export type GradingTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+}
+export type GradingTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+}
+export type GradingTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  attempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+}
 
 export type $GradingTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GradingTask"
-  objects: {}
+  objects: {
+    attempt: Prisma.$AttemptPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -840,6 +1006,7 @@ readonly fields: GradingTaskFieldRefs;
  */
 export interface Prisma__GradingTaskClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  attempt<T extends Prisma.AttemptDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AttemptDefaultArgs<ExtArgs>>): Prisma.Prisma__AttemptClient<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -895,6 +1062,10 @@ export type GradingTaskFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
+  /**
    * Filter, which GradingTask to fetch.
    */
   where: Prisma.GradingTaskWhereUniqueInput
@@ -913,6 +1084,10 @@ export type GradingTaskFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
+  /**
    * Filter, which GradingTask to fetch.
    */
   where: Prisma.GradingTaskWhereUniqueInput
@@ -930,6 +1105,10 @@ export type GradingTaskFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the GradingTask
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
   /**
    * Filter, which GradingTask to fetch.
    */
@@ -979,6 +1158,10 @@ export type GradingTaskFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
+  /**
    * Filter, which GradingTask to fetch.
    */
   where?: Prisma.GradingTaskWhereInput
@@ -1026,6 +1209,10 @@ export type GradingTaskFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the GradingTask
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
   /**
    * Filter, which GradingTasks to fetch.
    */
@@ -1075,6 +1262,10 @@ export type GradingTaskCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
+  /**
    * The data needed to create a GradingTask.
    */
   data: Prisma.XOR<Prisma.GradingTaskCreateInput, Prisma.GradingTaskUncheckedCreateInput>
@@ -1108,6 +1299,10 @@ export type GradingTaskCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.GradingTaskCreateManyInput | Prisma.GradingTaskCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1122,6 +1317,10 @@ export type GradingTaskUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the GradingTask
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
   /**
    * The data needed to update a GradingTask.
    */
@@ -1174,6 +1373,10 @@ export type GradingTaskUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many GradingTasks to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1188,6 +1391,10 @@ export type GradingTaskUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the GradingTask
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
   /**
    * The filter to search for the GradingTask to update in case it exists.
    */
@@ -1214,6 +1421,10 @@ export type GradingTaskDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the GradingTask
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
   /**
    * Filter which GradingTask to delete.
    */
@@ -1246,4 +1457,8 @@ export type GradingTaskDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the GradingTask
    */
   omit?: Prisma.GradingTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GradingTaskInclude<ExtArgs> | null
 }

@@ -248,6 +248,8 @@ export type SalesWalletWhereInput = {
   used_credits?: Prisma.IntFilter<"SalesWallet"> | number
   created_at?: Prisma.DateTimeFilter<"SalesWallet"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesWallet"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
 }
 
 export type SalesWalletOrderByWithRelationInput = {
@@ -259,10 +261,13 @@ export type SalesWalletOrderByWithRelationInput = {
   used_credits?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionOrderByRelationAggregateInput
 }
 
 export type SalesWalletWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  tenant_id_id?: Prisma.SalesWalletTenant_idIdCompoundUniqueInput
   tenant_id_membership_id?: Prisma.SalesWalletTenant_idMembership_idCompoundUniqueInput
   AND?: Prisma.SalesWalletWhereInput | Prisma.SalesWalletWhereInput[]
   OR?: Prisma.SalesWalletWhereInput[]
@@ -274,7 +279,9 @@ export type SalesWalletWhereUniqueInput = Prisma.AtLeast<{
   used_credits?: Prisma.IntFilter<"SalesWallet"> | number
   created_at?: Prisma.DateTimeFilter<"SalesWallet"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"SalesWallet"> | Date | string
-}, "id" | "tenant_id_membership_id">
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionListRelationFilter
+}, "id" | "tenant_id_id" | "tenant_id_membership_id">
 
 export type SalesWalletOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -308,13 +315,13 @@ export type SalesWalletScalarWhereWithAggregatesInput = {
 
 export type SalesWalletCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   balance_credits?: number
   earned_credits?: number
   used_credits?: number
   created_at?: Date | string
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_walletsInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutWalletInput
 }
 
 export type SalesWalletUncheckedCreateInput = {
@@ -326,17 +333,18 @@ export type SalesWalletUncheckedCreateInput = {
   used_credits?: number
   created_at?: Date | string
   updated_at?: Date | string
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutWalletInput
 }
 
 export type SalesWalletUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   balance_credits?: Prisma.IntFieldUpdateOperationsInput | number
   earned_credits?: Prisma.IntFieldUpdateOperationsInput | number
   used_credits?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_walletsNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutWalletNestedInput
 }
 
 export type SalesWalletUncheckedUpdateInput = {
@@ -348,6 +356,7 @@ export type SalesWalletUncheckedUpdateInput = {
   used_credits?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutWalletNestedInput
 }
 
 export type SalesWalletCreateManyInput = {
@@ -363,8 +372,6 @@ export type SalesWalletCreateManyInput = {
 
 export type SalesWalletUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   balance_credits?: Prisma.IntFieldUpdateOperationsInput | number
   earned_credits?: Prisma.IntFieldUpdateOperationsInput | number
   used_credits?: Prisma.IntFieldUpdateOperationsInput | number
@@ -381,6 +388,21 @@ export type SalesWalletUncheckedUpdateManyInput = {
   used_credits?: Prisma.IntFieldUpdateOperationsInput | number
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesWalletListRelationFilter = {
+  every?: Prisma.SalesWalletWhereInput
+  some?: Prisma.SalesWalletWhereInput
+  none?: Prisma.SalesWalletWhereInput
+}
+
+export type SalesWalletOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type SalesWalletTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type SalesWalletTenant_idMembership_idCompoundUniqueInput = {
@@ -433,6 +455,252 @@ export type SalesWalletSumOrderByAggregateInput = {
   used_credits?: Prisma.SortOrder
 }
 
+export type SalesWalletScalarRelationFilter = {
+  is?: Prisma.SalesWalletWhereInput
+  isNot?: Prisma.SalesWalletWhereInput
+}
+
+export type SalesWalletCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesWalletCreateWithoutMembershipInput, Prisma.SalesWalletUncheckedCreateWithoutMembershipInput> | Prisma.SalesWalletCreateWithoutMembershipInput[] | Prisma.SalesWalletUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesWalletCreateOrConnectWithoutMembershipInput | Prisma.SalesWalletCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesWalletCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+}
+
+export type SalesWalletUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesWalletCreateWithoutMembershipInput, Prisma.SalesWalletUncheckedCreateWithoutMembershipInput> | Prisma.SalesWalletCreateWithoutMembershipInput[] | Prisma.SalesWalletUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesWalletCreateOrConnectWithoutMembershipInput | Prisma.SalesWalletCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesWalletCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+}
+
+export type SalesWalletUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesWalletCreateWithoutMembershipInput, Prisma.SalesWalletUncheckedCreateWithoutMembershipInput> | Prisma.SalesWalletCreateWithoutMembershipInput[] | Prisma.SalesWalletUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesWalletCreateOrConnectWithoutMembershipInput | Prisma.SalesWalletCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesWalletUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesWalletUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesWalletCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  disconnect?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  delete?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  connect?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  update?: Prisma.SalesWalletUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesWalletUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesWalletUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesWalletUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesWalletScalarWhereInput | Prisma.SalesWalletScalarWhereInput[]
+}
+
+export type SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesWalletCreateWithoutMembershipInput, Prisma.SalesWalletUncheckedCreateWithoutMembershipInput> | Prisma.SalesWalletCreateWithoutMembershipInput[] | Prisma.SalesWalletUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesWalletCreateOrConnectWithoutMembershipInput | Prisma.SalesWalletCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesWalletUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesWalletUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesWalletCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  disconnect?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  delete?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  connect?: Prisma.SalesWalletWhereUniqueInput | Prisma.SalesWalletWhereUniqueInput[]
+  update?: Prisma.SalesWalletUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesWalletUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesWalletUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesWalletUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesWalletScalarWhereInput | Prisma.SalesWalletScalarWhereInput[]
+}
+
+export type SalesWalletCreateNestedOneWithoutSales_wallet_transactionsInput = {
+  create?: Prisma.XOR<Prisma.SalesWalletCreateWithoutSales_wallet_transactionsInput, Prisma.SalesWalletUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.SalesWalletCreateOrConnectWithoutSales_wallet_transactionsInput
+  connect?: Prisma.SalesWalletWhereUniqueInput
+}
+
+export type SalesWalletUpdateOneRequiredWithoutSales_wallet_transactionsNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesWalletCreateWithoutSales_wallet_transactionsInput, Prisma.SalesWalletUncheckedCreateWithoutSales_wallet_transactionsInput>
+  connectOrCreate?: Prisma.SalesWalletCreateOrConnectWithoutSales_wallet_transactionsInput
+  upsert?: Prisma.SalesWalletUpsertWithoutSales_wallet_transactionsInput
+  connect?: Prisma.SalesWalletWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SalesWalletUpdateToOneWithWhereWithoutSales_wallet_transactionsInput, Prisma.SalesWalletUpdateWithoutSales_wallet_transactionsInput>, Prisma.SalesWalletUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
+export type SalesWalletCreateWithoutMembershipInput = {
+  id: string
+  balance_credits?: number
+  earned_credits?: number
+  used_credits?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutWalletInput
+}
+
+export type SalesWalletUncheckedCreateWithoutMembershipInput = {
+  id: string
+  balance_credits?: number
+  earned_credits?: number
+  used_credits?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutWalletInput
+}
+
+export type SalesWalletCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.SalesWalletWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesWalletCreateWithoutMembershipInput, Prisma.SalesWalletUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesWalletCreateManyMembershipInputEnvelope = {
+  data: Prisma.SalesWalletCreateManyMembershipInput | Prisma.SalesWalletCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesWalletUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesWalletWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesWalletUpdateWithoutMembershipInput, Prisma.SalesWalletUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.SalesWalletCreateWithoutMembershipInput, Prisma.SalesWalletUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesWalletUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesWalletWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesWalletUpdateWithoutMembershipInput, Prisma.SalesWalletUncheckedUpdateWithoutMembershipInput>
+}
+
+export type SalesWalletUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.SalesWalletScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesWalletUpdateManyMutationInput, Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type SalesWalletScalarWhereInput = {
+  AND?: Prisma.SalesWalletScalarWhereInput | Prisma.SalesWalletScalarWhereInput[]
+  OR?: Prisma.SalesWalletScalarWhereInput[]
+  NOT?: Prisma.SalesWalletScalarWhereInput | Prisma.SalesWalletScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesWallet"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesWallet"> | string
+  membership_id?: Prisma.UuidFilter<"SalesWallet"> | string
+  balance_credits?: Prisma.IntFilter<"SalesWallet"> | number
+  earned_credits?: Prisma.IntFilter<"SalesWallet"> | number
+  used_credits?: Prisma.IntFilter<"SalesWallet"> | number
+  created_at?: Prisma.DateTimeFilter<"SalesWallet"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"SalesWallet"> | Date | string
+}
+
+export type SalesWalletCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  balance_credits?: number
+  earned_credits?: number
+  used_credits?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_walletsInput
+}
+
+export type SalesWalletUncheckedCreateWithoutSales_wallet_transactionsInput = {
+  id: string
+  tenant_id: string
+  membership_id: string
+  balance_credits?: number
+  earned_credits?: number
+  used_credits?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesWalletCreateOrConnectWithoutSales_wallet_transactionsInput = {
+  where: Prisma.SalesWalletWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesWalletCreateWithoutSales_wallet_transactionsInput, Prisma.SalesWalletUncheckedCreateWithoutSales_wallet_transactionsInput>
+}
+
+export type SalesWalletUpsertWithoutSales_wallet_transactionsInput = {
+  update: Prisma.XOR<Prisma.SalesWalletUpdateWithoutSales_wallet_transactionsInput, Prisma.SalesWalletUncheckedUpdateWithoutSales_wallet_transactionsInput>
+  create: Prisma.XOR<Prisma.SalesWalletCreateWithoutSales_wallet_transactionsInput, Prisma.SalesWalletUncheckedCreateWithoutSales_wallet_transactionsInput>
+  where?: Prisma.SalesWalletWhereInput
+}
+
+export type SalesWalletUpdateToOneWithWhereWithoutSales_wallet_transactionsInput = {
+  where?: Prisma.SalesWalletWhereInput
+  data: Prisma.XOR<Prisma.SalesWalletUpdateWithoutSales_wallet_transactionsInput, Prisma.SalesWalletUncheckedUpdateWithoutSales_wallet_transactionsInput>
+}
+
+export type SalesWalletUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  balance_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  earned_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  used_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_walletsNestedInput
+}
+
+export type SalesWalletUncheckedUpdateWithoutSales_wallet_transactionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  balance_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  earned_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  used_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesWalletCreateManyMembershipInput = {
+  id: string
+  balance_credits?: number
+  earned_credits?: number
+  used_credits?: number
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type SalesWalletUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  balance_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  earned_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  used_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutWalletNestedInput
+}
+
+export type SalesWalletUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  balance_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  earned_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  used_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutWalletNestedInput
+}
+
+export type SalesWalletUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  balance_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  earned_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  used_credits?: Prisma.IntFieldUpdateOperationsInput | number
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type SalesWalletCountOutputType
+ */
+
+export type SalesWalletCountOutputType = {
+  sales_wallet_transactions: number
+}
+
+export type SalesWalletCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sales_wallet_transactions?: boolean | SalesWalletCountOutputTypeCountSales_wallet_transactionsArgs
+}
+
+/**
+ * SalesWalletCountOutputType without action
+ */
+export type SalesWalletCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesWalletCountOutputType
+   */
+  select?: Prisma.SalesWalletCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * SalesWalletCountOutputType without action
+ */
+export type SalesWalletCountOutputTypeCountSales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SalesWalletTransactionWhereInput
+}
 
 
 export type SalesWalletSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -444,6 +712,9 @@ export type SalesWalletSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   used_credits?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.SalesWallet$sales_wallet_transactionsArgs<ExtArgs>
+  _count?: boolean | Prisma.SalesWalletCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesWallet"]>
 
 export type SalesWalletSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -455,6 +726,7 @@ export type SalesWalletSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   used_credits?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesWallet"]>
 
 export type SalesWalletSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -466,6 +738,7 @@ export type SalesWalletSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   used_credits?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["salesWallet"]>
 
 export type SalesWalletSelectScalar = {
@@ -480,10 +753,24 @@ export type SalesWalletSelectScalar = {
 }
 
 export type SalesWalletOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "balance_credits" | "earned_credits" | "used_credits" | "created_at" | "updated_at", ExtArgs["result"]["salesWallet"]>
+export type SalesWalletInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  sales_wallet_transactions?: boolean | Prisma.SalesWallet$sales_wallet_transactionsArgs<ExtArgs>
+  _count?: boolean | Prisma.SalesWalletCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type SalesWalletIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type SalesWalletIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $SalesWalletPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesWallet"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    sales_wallet_transactions: Prisma.$SalesWalletTransactionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -887,6 +1174,8 @@ readonly fields: SalesWalletFieldRefs;
  */
 export interface Prisma__SalesWalletClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sales_wallet_transactions<T extends Prisma.SalesWallet$sales_wallet_transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesWallet$sales_wallet_transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SalesWalletTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -941,6 +1230,10 @@ export type SalesWalletFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
+  /**
    * Filter, which SalesWallet to fetch.
    */
   where: Prisma.SalesWalletWhereUniqueInput
@@ -959,6 +1252,10 @@ export type SalesWalletFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
+  /**
    * Filter, which SalesWallet to fetch.
    */
   where: Prisma.SalesWalletWhereUniqueInput
@@ -976,6 +1273,10 @@ export type SalesWalletFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the SalesWallet
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
   /**
    * Filter, which SalesWallet to fetch.
    */
@@ -1025,6 +1326,10 @@ export type SalesWalletFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
+  /**
    * Filter, which SalesWallet to fetch.
    */
   where?: Prisma.SalesWalletWhereInput
@@ -1072,6 +1377,10 @@ export type SalesWalletFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the SalesWallet
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
   /**
    * Filter, which SalesWallets to fetch.
    */
@@ -1121,6 +1430,10 @@ export type SalesWalletCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
+  /**
    * The data needed to create a SalesWallet.
    */
   data: Prisma.XOR<Prisma.SalesWalletCreateInput, Prisma.SalesWalletUncheckedCreateInput>
@@ -1154,6 +1467,10 @@ export type SalesWalletCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.SalesWalletCreateManyInput | Prisma.SalesWalletCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1168,6 +1485,10 @@ export type SalesWalletUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the SalesWallet
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
   /**
    * The data needed to update a SalesWallet.
    */
@@ -1220,6 +1541,10 @@ export type SalesWalletUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many SalesWallets to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1234,6 +1559,10 @@ export type SalesWalletUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the SalesWallet
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
   /**
    * The filter to search for the SalesWallet to update in case it exists.
    */
@@ -1261,6 +1590,10 @@ export type SalesWalletDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
+  /**
    * Filter which SalesWallet to delete.
    */
   where: Prisma.SalesWalletWhereUniqueInput
@@ -1281,6 +1614,30 @@ export type SalesWalletDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * SalesWallet.sales_wallet_transactions
+ */
+export type SalesWallet$sales_wallet_transactionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SalesWalletTransaction
+   */
+  select?: Prisma.SalesWalletTransactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SalesWalletTransaction
+   */
+  omit?: Prisma.SalesWalletTransactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletTransactionInclude<ExtArgs> | null
+  where?: Prisma.SalesWalletTransactionWhereInput
+  orderBy?: Prisma.SalesWalletTransactionOrderByWithRelationInput | Prisma.SalesWalletTransactionOrderByWithRelationInput[]
+  cursor?: Prisma.SalesWalletTransactionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SalesWalletTransactionScalarFieldEnum | Prisma.SalesWalletTransactionScalarFieldEnum[]
+}
+
+/**
  * SalesWallet without action
  */
 export type SalesWalletDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1292,4 +1649,8 @@ export type SalesWalletDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the SalesWallet
    */
   omit?: Prisma.SalesWalletOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesWalletInclude<ExtArgs> | null
 }

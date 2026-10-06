@@ -210,6 +210,7 @@ export type LessonAssetWhereInput = {
   metadata_json?: Prisma.JsonNullableFilter<"LessonAsset">
   created_at?: Prisma.DateTimeFilter<"LessonAsset"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"LessonAsset"> | Date | string | null
+  lesson?: Prisma.XOR<Prisma.LessonScalarRelationFilter, Prisma.LessonWhereInput>
 }
 
 export type LessonAssetOrderByWithRelationInput = {
@@ -222,6 +223,7 @@ export type LessonAssetOrderByWithRelationInput = {
   metadata_json?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  lesson?: Prisma.LessonOrderByWithRelationInput
 }
 
 export type LessonAssetWhereUniqueInput = Prisma.AtLeast<{
@@ -237,6 +239,7 @@ export type LessonAssetWhereUniqueInput = Prisma.AtLeast<{
   metadata_json?: Prisma.JsonNullableFilter<"LessonAsset">
   created_at?: Prisma.DateTimeFilter<"LessonAsset"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"LessonAsset"> | Date | string | null
+  lesson?: Prisma.XOR<Prisma.LessonScalarRelationFilter, Prisma.LessonWhereInput>
 }, "id">
 
 export type LessonAssetOrderByWithAggregationInput = {
@@ -271,14 +274,13 @@ export type LessonAssetScalarWhereWithAggregatesInput = {
 
 export type LessonAssetCreateInput = {
   id: string
-  tenant_id: string
-  lesson_id: string
   asset_type: string
   provider: string
   object_key_or_url: string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   deleted_at?: Date | string | null
+  lesson: Prisma.LessonCreateNestedOneWithoutLesson_assetsInput
 }
 
 export type LessonAssetUncheckedCreateInput = {
@@ -295,14 +297,13 @@ export type LessonAssetUncheckedCreateInput = {
 
 export type LessonAssetUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
   asset_type?: Prisma.StringFieldUpdateOperationsInput | string
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   object_key_or_url?: Prisma.StringFieldUpdateOperationsInput | string
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lesson?: Prisma.LessonUpdateOneRequiredWithoutLesson_assetsNestedInput
 }
 
 export type LessonAssetUncheckedUpdateInput = {
@@ -331,8 +332,6 @@ export type LessonAssetCreateManyInput = {
 
 export type LessonAssetUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  lesson_id?: Prisma.StringFieldUpdateOperationsInput | string
   asset_type?: Prisma.StringFieldUpdateOperationsInput | string
   provider?: Prisma.StringFieldUpdateOperationsInput | string
   object_key_or_url?: Prisma.StringFieldUpdateOperationsInput | string
@@ -387,6 +386,159 @@ export type LessonAssetMinOrderByAggregateInput = {
   deleted_at?: Prisma.SortOrder
 }
 
+export type LessonAssetListRelationFilter = {
+  every?: Prisma.LessonAssetWhereInput
+  some?: Prisma.LessonAssetWhereInput
+  none?: Prisma.LessonAssetWhereInput
+}
+
+export type LessonAssetOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type LessonAssetCreateNestedManyWithoutLessonInput = {
+  create?: Prisma.XOR<Prisma.LessonAssetCreateWithoutLessonInput, Prisma.LessonAssetUncheckedCreateWithoutLessonInput> | Prisma.LessonAssetCreateWithoutLessonInput[] | Prisma.LessonAssetUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonAssetCreateOrConnectWithoutLessonInput | Prisma.LessonAssetCreateOrConnectWithoutLessonInput[]
+  createMany?: Prisma.LessonAssetCreateManyLessonInputEnvelope
+  connect?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+}
+
+export type LessonAssetUncheckedCreateNestedManyWithoutLessonInput = {
+  create?: Prisma.XOR<Prisma.LessonAssetCreateWithoutLessonInput, Prisma.LessonAssetUncheckedCreateWithoutLessonInput> | Prisma.LessonAssetCreateWithoutLessonInput[] | Prisma.LessonAssetUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonAssetCreateOrConnectWithoutLessonInput | Prisma.LessonAssetCreateOrConnectWithoutLessonInput[]
+  createMany?: Prisma.LessonAssetCreateManyLessonInputEnvelope
+  connect?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+}
+
+export type LessonAssetUpdateManyWithoutLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonAssetCreateWithoutLessonInput, Prisma.LessonAssetUncheckedCreateWithoutLessonInput> | Prisma.LessonAssetCreateWithoutLessonInput[] | Prisma.LessonAssetUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonAssetCreateOrConnectWithoutLessonInput | Prisma.LessonAssetCreateOrConnectWithoutLessonInput[]
+  upsert?: Prisma.LessonAssetUpsertWithWhereUniqueWithoutLessonInput | Prisma.LessonAssetUpsertWithWhereUniqueWithoutLessonInput[]
+  createMany?: Prisma.LessonAssetCreateManyLessonInputEnvelope
+  set?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  disconnect?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  delete?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  connect?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  update?: Prisma.LessonAssetUpdateWithWhereUniqueWithoutLessonInput | Prisma.LessonAssetUpdateWithWhereUniqueWithoutLessonInput[]
+  updateMany?: Prisma.LessonAssetUpdateManyWithWhereWithoutLessonInput | Prisma.LessonAssetUpdateManyWithWhereWithoutLessonInput[]
+  deleteMany?: Prisma.LessonAssetScalarWhereInput | Prisma.LessonAssetScalarWhereInput[]
+}
+
+export type LessonAssetUncheckedUpdateManyWithoutLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonAssetCreateWithoutLessonInput, Prisma.LessonAssetUncheckedCreateWithoutLessonInput> | Prisma.LessonAssetCreateWithoutLessonInput[] | Prisma.LessonAssetUncheckedCreateWithoutLessonInput[]
+  connectOrCreate?: Prisma.LessonAssetCreateOrConnectWithoutLessonInput | Prisma.LessonAssetCreateOrConnectWithoutLessonInput[]
+  upsert?: Prisma.LessonAssetUpsertWithWhereUniqueWithoutLessonInput | Prisma.LessonAssetUpsertWithWhereUniqueWithoutLessonInput[]
+  createMany?: Prisma.LessonAssetCreateManyLessonInputEnvelope
+  set?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  disconnect?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  delete?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  connect?: Prisma.LessonAssetWhereUniqueInput | Prisma.LessonAssetWhereUniqueInput[]
+  update?: Prisma.LessonAssetUpdateWithWhereUniqueWithoutLessonInput | Prisma.LessonAssetUpdateWithWhereUniqueWithoutLessonInput[]
+  updateMany?: Prisma.LessonAssetUpdateManyWithWhereWithoutLessonInput | Prisma.LessonAssetUpdateManyWithWhereWithoutLessonInput[]
+  deleteMany?: Prisma.LessonAssetScalarWhereInput | Prisma.LessonAssetScalarWhereInput[]
+}
+
+export type LessonAssetCreateWithoutLessonInput = {
+  id: string
+  asset_type: string
+  provider: string
+  object_key_or_url: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  deleted_at?: Date | string | null
+}
+
+export type LessonAssetUncheckedCreateWithoutLessonInput = {
+  id: string
+  asset_type: string
+  provider: string
+  object_key_or_url: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  deleted_at?: Date | string | null
+}
+
+export type LessonAssetCreateOrConnectWithoutLessonInput = {
+  where: Prisma.LessonAssetWhereUniqueInput
+  create: Prisma.XOR<Prisma.LessonAssetCreateWithoutLessonInput, Prisma.LessonAssetUncheckedCreateWithoutLessonInput>
+}
+
+export type LessonAssetCreateManyLessonInputEnvelope = {
+  data: Prisma.LessonAssetCreateManyLessonInput | Prisma.LessonAssetCreateManyLessonInput[]
+  skipDuplicates?: boolean
+}
+
+export type LessonAssetUpsertWithWhereUniqueWithoutLessonInput = {
+  where: Prisma.LessonAssetWhereUniqueInput
+  update: Prisma.XOR<Prisma.LessonAssetUpdateWithoutLessonInput, Prisma.LessonAssetUncheckedUpdateWithoutLessonInput>
+  create: Prisma.XOR<Prisma.LessonAssetCreateWithoutLessonInput, Prisma.LessonAssetUncheckedCreateWithoutLessonInput>
+}
+
+export type LessonAssetUpdateWithWhereUniqueWithoutLessonInput = {
+  where: Prisma.LessonAssetWhereUniqueInput
+  data: Prisma.XOR<Prisma.LessonAssetUpdateWithoutLessonInput, Prisma.LessonAssetUncheckedUpdateWithoutLessonInput>
+}
+
+export type LessonAssetUpdateManyWithWhereWithoutLessonInput = {
+  where: Prisma.LessonAssetScalarWhereInput
+  data: Prisma.XOR<Prisma.LessonAssetUpdateManyMutationInput, Prisma.LessonAssetUncheckedUpdateManyWithoutLessonInput>
+}
+
+export type LessonAssetScalarWhereInput = {
+  AND?: Prisma.LessonAssetScalarWhereInput | Prisma.LessonAssetScalarWhereInput[]
+  OR?: Prisma.LessonAssetScalarWhereInput[]
+  NOT?: Prisma.LessonAssetScalarWhereInput | Prisma.LessonAssetScalarWhereInput[]
+  id?: Prisma.UuidFilter<"LessonAsset"> | string
+  tenant_id?: Prisma.UuidFilter<"LessonAsset"> | string
+  lesson_id?: Prisma.UuidFilter<"LessonAsset"> | string
+  asset_type?: Prisma.StringFilter<"LessonAsset"> | string
+  provider?: Prisma.StringFilter<"LessonAsset"> | string
+  object_key_or_url?: Prisma.StringFilter<"LessonAsset"> | string
+  metadata_json?: Prisma.JsonNullableFilter<"LessonAsset">
+  created_at?: Prisma.DateTimeFilter<"LessonAsset"> | Date | string
+  deleted_at?: Prisma.DateTimeNullableFilter<"LessonAsset"> | Date | string | null
+}
+
+export type LessonAssetCreateManyLessonInput = {
+  id: string
+  asset_type: string
+  provider: string
+  object_key_or_url: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  deleted_at?: Date | string | null
+}
+
+export type LessonAssetUpdateWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  asset_type?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  object_key_or_url?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type LessonAssetUncheckedUpdateWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  asset_type?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  object_key_or_url?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type LessonAssetUncheckedUpdateManyWithoutLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  asset_type?: Prisma.StringFieldUpdateOperationsInput | string
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  object_key_or_url?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
 
 
 export type LessonAssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -399,6 +551,7 @@ export type LessonAssetSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   metadata_json?: boolean
   created_at?: boolean
   deleted_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonAsset"]>
 
 export type LessonAssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -411,6 +564,7 @@ export type LessonAssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   metadata_json?: boolean
   created_at?: boolean
   deleted_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonAsset"]>
 
 export type LessonAssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -423,6 +577,7 @@ export type LessonAssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   metadata_json?: boolean
   created_at?: boolean
   deleted_at?: boolean
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["lessonAsset"]>
 
 export type LessonAssetSelectScalar = {
@@ -438,10 +593,21 @@ export type LessonAssetSelectScalar = {
 }
 
 export type LessonAssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "lesson_id" | "asset_type" | "provider" | "object_key_or_url" | "metadata_json" | "created_at" | "deleted_at", ExtArgs["result"]["lessonAsset"]>
+export type LessonAssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+}
+export type LessonAssetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+}
+export type LessonAssetIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  lesson?: boolean | Prisma.LessonDefaultArgs<ExtArgs>
+}
 
 export type $LessonAssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LessonAsset"
-  objects: {}
+  objects: {
+    lesson: Prisma.$LessonPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -846,6 +1012,7 @@ readonly fields: LessonAssetFieldRefs;
  */
 export interface Prisma__LessonAssetClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  lesson<T extends Prisma.LessonDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LessonDefaultArgs<ExtArgs>>): Prisma.Prisma__LessonClient<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -901,6 +1068,10 @@ export type LessonAssetFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
+  /**
    * Filter, which LessonAsset to fetch.
    */
   where: Prisma.LessonAssetWhereUniqueInput
@@ -919,6 +1090,10 @@ export type LessonAssetFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
+  /**
    * Filter, which LessonAsset to fetch.
    */
   where: Prisma.LessonAssetWhereUniqueInput
@@ -936,6 +1111,10 @@ export type LessonAssetFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the LessonAsset
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
   /**
    * Filter, which LessonAsset to fetch.
    */
@@ -985,6 +1164,10 @@ export type LessonAssetFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
+  /**
    * Filter, which LessonAsset to fetch.
    */
   where?: Prisma.LessonAssetWhereInput
@@ -1032,6 +1215,10 @@ export type LessonAssetFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the LessonAsset
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
   /**
    * Filter, which LessonAssets to fetch.
    */
@@ -1081,6 +1268,10 @@ export type LessonAssetCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
+  /**
    * The data needed to create a LessonAsset.
    */
   data: Prisma.XOR<Prisma.LessonAssetCreateInput, Prisma.LessonAssetUncheckedCreateInput>
@@ -1114,6 +1305,10 @@ export type LessonAssetCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.LessonAssetCreateManyInput | Prisma.LessonAssetCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1128,6 +1323,10 @@ export type LessonAssetUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the LessonAsset
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
   /**
    * The data needed to update a LessonAsset.
    */
@@ -1180,6 +1379,10 @@ export type LessonAssetUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many LessonAssets to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1194,6 +1397,10 @@ export type LessonAssetUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the LessonAsset
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
   /**
    * The filter to search for the LessonAsset to update in case it exists.
    */
@@ -1220,6 +1427,10 @@ export type LessonAssetDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the LessonAsset
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
   /**
    * Filter which LessonAsset to delete.
    */
@@ -1252,4 +1463,8 @@ export type LessonAssetDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the LessonAsset
    */
   omit?: Prisma.LessonAssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonAssetInclude<ExtArgs> | null
 }

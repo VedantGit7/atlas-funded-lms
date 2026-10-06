@@ -348,6 +348,10 @@ export type CertificateWhereInput = {
   blockchain_anchor?: Prisma.StringNullableFilter<"Certificate"> | string | null
   created_at?: Prisma.DateTimeFilter<"Certificate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Certificate"> | Date | string
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  certificate_wallet_passes?: Prisma.CertificateWalletPassListRelationFilter
+  credential_verifications?: Prisma.CredentialVerificationListRelationFilter
+  certificate_render_jobs?: Prisma.CertificateRenderJobListRelationFilter
 }
 
 export type CertificateOrderByWithRelationInput = {
@@ -374,11 +378,16 @@ export type CertificateOrderByWithRelationInput = {
   blockchain_anchor?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  certificate_wallet_passes?: Prisma.CertificateWalletPassOrderByRelationAggregateInput
+  credential_verifications?: Prisma.CredentialVerificationOrderByRelationAggregateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobOrderByRelationAggregateInput
 }
 
 export type CertificateWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   credential_id?: string
+  tenant_id_id?: Prisma.CertificateTenant_idIdCompoundUniqueInput
   AND?: Prisma.CertificateWhereInput | Prisma.CertificateWhereInput[]
   OR?: Prisma.CertificateWhereInput[]
   NOT?: Prisma.CertificateWhereInput | Prisma.CertificateWhereInput[]
@@ -403,7 +412,11 @@ export type CertificateWhereUniqueInput = Prisma.AtLeast<{
   blockchain_anchor?: Prisma.StringNullableFilter<"Certificate"> | string | null
   created_at?: Prisma.DateTimeFilter<"Certificate"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Certificate"> | Date | string
-}, "id" | "credential_id">
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  certificate_wallet_passes?: Prisma.CertificateWalletPassListRelationFilter
+  credential_verifications?: Prisma.CredentialVerificationListRelationFilter
+  certificate_render_jobs?: Prisma.CertificateRenderJobListRelationFilter
+}, "id" | "credential_id" | "tenant_id_id">
 
 export type CertificateOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -467,9 +480,7 @@ export type CertificateScalarWhereWithAggregatesInput = {
 
 export type CertificateCreateInput = {
   id: string
-  tenant_id: string
   template_id: string
-  membership_id: string
   credential_id: string
   status?: string
   issued_at?: Date | string
@@ -489,6 +500,10 @@ export type CertificateCreateInput = {
   blockchain_anchor?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutCertificatesInput
+  certificate_wallet_passes?: Prisma.CertificateWalletPassCreateNestedManyWithoutCertificateInput
+  credential_verifications?: Prisma.CredentialVerificationCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUncheckedCreateInput = {
@@ -515,13 +530,14 @@ export type CertificateUncheckedCreateInput = {
   blockchain_anchor?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedCreateNestedManyWithoutCertificateInput
+  credential_verifications?: Prisma.CredentialVerificationUncheckedCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedCreateNestedManyWithoutCertificateInput
 }
 
 export type CertificateUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   template_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   credential_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -541,6 +557,10 @@ export type CertificateUpdateInput = {
   blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCertificatesNestedInput
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUpdateManyWithoutCertificateNestedInput
+  credential_verifications?: Prisma.CredentialVerificationUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateUncheckedUpdateInput = {
@@ -567,6 +587,9 @@ export type CertificateUncheckedUpdateInput = {
   blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedUpdateManyWithoutCertificateNestedInput
+  credential_verifications?: Prisma.CredentialVerificationUncheckedUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedUpdateManyWithoutCertificateNestedInput
 }
 
 export type CertificateCreateManyInput = {
@@ -597,9 +620,7 @@ export type CertificateCreateManyInput = {
 
 export type CertificateUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   template_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   credential_id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -645,6 +666,21 @@ export type CertificateUncheckedUpdateManyInput = {
   blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type CertificateListRelationFilter = {
+  every?: Prisma.CertificateWhereInput
+  some?: Prisma.CertificateWhereInput
+  none?: Prisma.CertificateWhereInput
+}
+
+export type CertificateOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type CertificateTenant_idIdCompoundUniqueInput = {
+  tenant_id: string
+  id: string
 }
 
 export type CertificateCountOrderByAggregateInput = {
@@ -727,6 +763,738 @@ export type CertificateSumOrderByAggregateInput = {
   status_list_index?: Prisma.SortOrder
 }
 
+export type CertificateNullableScalarRelationFilter = {
+  is?: Prisma.CertificateWhereInput | null
+  isNot?: Prisma.CertificateWhereInput | null
+}
+
+export type CertificateScalarRelationFilter = {
+  is?: Prisma.CertificateWhereInput
+  isNot?: Prisma.CertificateWhereInput
+}
+
+export type CertificateCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutMembershipInput, Prisma.CertificateUncheckedCreateWithoutMembershipInput> | Prisma.CertificateCreateWithoutMembershipInput[] | Prisma.CertificateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutMembershipInput | Prisma.CertificateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CertificateCreateManyMembershipInputEnvelope
+  connect?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+}
+
+export type CertificateUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutMembershipInput, Prisma.CertificateUncheckedCreateWithoutMembershipInput> | Prisma.CertificateCreateWithoutMembershipInput[] | Prisma.CertificateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutMembershipInput | Prisma.CertificateCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.CertificateCreateManyMembershipInputEnvelope
+  connect?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+}
+
+export type CertificateUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutMembershipInput, Prisma.CertificateUncheckedCreateWithoutMembershipInput> | Prisma.CertificateCreateWithoutMembershipInput[] | Prisma.CertificateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutMembershipInput | Prisma.CertificateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CertificateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CertificateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CertificateCreateManyMembershipInputEnvelope
+  set?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  disconnect?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  delete?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  connect?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  update?: Prisma.CertificateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CertificateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CertificateUpdateManyWithWhereWithoutMembershipInput | Prisma.CertificateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CertificateScalarWhereInput | Prisma.CertificateScalarWhereInput[]
+}
+
+export type CertificateUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutMembershipInput, Prisma.CertificateUncheckedCreateWithoutMembershipInput> | Prisma.CertificateCreateWithoutMembershipInput[] | Prisma.CertificateUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutMembershipInput | Prisma.CertificateCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.CertificateUpsertWithWhereUniqueWithoutMembershipInput | Prisma.CertificateUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.CertificateCreateManyMembershipInputEnvelope
+  set?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  disconnect?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  delete?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  connect?: Prisma.CertificateWhereUniqueInput | Prisma.CertificateWhereUniqueInput[]
+  update?: Prisma.CertificateUpdateWithWhereUniqueWithoutMembershipInput | Prisma.CertificateUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.CertificateUpdateManyWithWhereWithoutMembershipInput | Prisma.CertificateUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.CertificateScalarWhereInput | Prisma.CertificateScalarWhereInput[]
+}
+
+export type CertificateCreateNestedOneWithoutCertificate_render_jobsInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_render_jobsInput, Prisma.CertificateUncheckedCreateWithoutCertificate_render_jobsInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutCertificate_render_jobsInput
+  connect?: Prisma.CertificateWhereUniqueInput
+}
+
+export type CertificateUpdateOneWithoutCertificate_render_jobsNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_render_jobsInput, Prisma.CertificateUncheckedCreateWithoutCertificate_render_jobsInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutCertificate_render_jobsInput
+  upsert?: Prisma.CertificateUpsertWithoutCertificate_render_jobsInput
+  disconnect?: Prisma.CertificateWhereInput | boolean
+  delete?: Prisma.CertificateWhereInput | boolean
+  connect?: Prisma.CertificateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CertificateUpdateToOneWithWhereWithoutCertificate_render_jobsInput, Prisma.CertificateUpdateWithoutCertificate_render_jobsInput>, Prisma.CertificateUncheckedUpdateWithoutCertificate_render_jobsInput>
+}
+
+export type CertificateCreateNestedOneWithoutCertificate_wallet_passesInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_wallet_passesInput, Prisma.CertificateUncheckedCreateWithoutCertificate_wallet_passesInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutCertificate_wallet_passesInput
+  connect?: Prisma.CertificateWhereUniqueInput
+}
+
+export type CertificateUpdateOneRequiredWithoutCertificate_wallet_passesNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_wallet_passesInput, Prisma.CertificateUncheckedCreateWithoutCertificate_wallet_passesInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutCertificate_wallet_passesInput
+  upsert?: Prisma.CertificateUpsertWithoutCertificate_wallet_passesInput
+  connect?: Prisma.CertificateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CertificateUpdateToOneWithWhereWithoutCertificate_wallet_passesInput, Prisma.CertificateUpdateWithoutCertificate_wallet_passesInput>, Prisma.CertificateUncheckedUpdateWithoutCertificate_wallet_passesInput>
+}
+
+export type CertificateCreateNestedOneWithoutCredential_verificationsInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutCredential_verificationsInput, Prisma.CertificateUncheckedCreateWithoutCredential_verificationsInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutCredential_verificationsInput
+  connect?: Prisma.CertificateWhereUniqueInput
+}
+
+export type CertificateUpdateOneRequiredWithoutCredential_verificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.CertificateCreateWithoutCredential_verificationsInput, Prisma.CertificateUncheckedCreateWithoutCredential_verificationsInput>
+  connectOrCreate?: Prisma.CertificateCreateOrConnectWithoutCredential_verificationsInput
+  upsert?: Prisma.CertificateUpsertWithoutCredential_verificationsInput
+  connect?: Prisma.CertificateWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CertificateUpdateToOneWithWhereWithoutCredential_verificationsInput, Prisma.CertificateUpdateWithoutCredential_verificationsInput>, Prisma.CertificateUncheckedUpdateWithoutCredential_verificationsInput>
+}
+
+export type CertificateCreateWithoutMembershipInput = {
+  id: string
+  template_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassCreateNestedManyWithoutCertificateInput
+  credential_verifications?: Prisma.CredentialVerificationCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateUncheckedCreateWithoutMembershipInput = {
+  id: string
+  template_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedCreateNestedManyWithoutCertificateInput
+  credential_verifications?: Prisma.CredentialVerificationUncheckedCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.CertificateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutMembershipInput, Prisma.CertificateUncheckedCreateWithoutMembershipInput>
+}
+
+export type CertificateCreateManyMembershipInputEnvelope = {
+  data: Prisma.CertificateCreateManyMembershipInput | Prisma.CertificateCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type CertificateUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CertificateWhereUniqueInput
+  update: Prisma.XOR<Prisma.CertificateUpdateWithoutMembershipInput, Prisma.CertificateUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutMembershipInput, Prisma.CertificateUncheckedCreateWithoutMembershipInput>
+}
+
+export type CertificateUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.CertificateWhereUniqueInput
+  data: Prisma.XOR<Prisma.CertificateUpdateWithoutMembershipInput, Prisma.CertificateUncheckedUpdateWithoutMembershipInput>
+}
+
+export type CertificateUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.CertificateScalarWhereInput
+  data: Prisma.XOR<Prisma.CertificateUpdateManyMutationInput, Prisma.CertificateUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type CertificateScalarWhereInput = {
+  AND?: Prisma.CertificateScalarWhereInput | Prisma.CertificateScalarWhereInput[]
+  OR?: Prisma.CertificateScalarWhereInput[]
+  NOT?: Prisma.CertificateScalarWhereInput | Prisma.CertificateScalarWhereInput[]
+  id?: Prisma.UuidFilter<"Certificate"> | string
+  tenant_id?: Prisma.UuidFilter<"Certificate"> | string
+  template_id?: Prisma.UuidFilter<"Certificate"> | string
+  membership_id?: Prisma.UuidFilter<"Certificate"> | string
+  credential_id?: Prisma.StringFilter<"Certificate"> | string
+  status?: Prisma.StringFilter<"Certificate"> | string
+  issued_at?: Prisma.DateTimeFilter<"Certificate"> | Date | string
+  revoked_at?: Prisma.DateTimeNullableFilter<"Certificate"> | Date | string | null
+  r2_object_key?: Prisma.StringNullableFilter<"Certificate"> | string | null
+  metadata_json?: Prisma.JsonNullableFilter<"Certificate">
+  expires_at?: Prisma.DateTimeNullableFilter<"Certificate"> | Date | string | null
+  suspended_at?: Prisma.DateTimeNullableFilter<"Certificate"> | Date | string | null
+  serial_number?: Prisma.StringNullableFilter<"Certificate"> | string | null
+  design_snapshot_json?: Prisma.JsonNullableFilter<"Certificate">
+  design_snapshot_hash?: Prisma.StringNullableFilter<"Certificate"> | string | null
+  recipient_name?: Prisma.StringNullableFilter<"Certificate"> | string | null
+  course_title?: Prisma.StringNullableFilter<"Certificate"> | string | null
+  status_list_index?: Prisma.IntNullableFilter<"Certificate"> | number | null
+  vc_json?: Prisma.JsonNullableFilter<"Certificate">
+  vc_object_key?: Prisma.StringNullableFilter<"Certificate"> | string | null
+  blockchain_anchor?: Prisma.StringNullableFilter<"Certificate"> | string | null
+  created_at?: Prisma.DateTimeFilter<"Certificate"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"Certificate"> | Date | string
+}
+
+export type CertificateCreateWithoutCertificate_render_jobsInput = {
+  id: string
+  template_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutCertificatesInput
+  certificate_wallet_passes?: Prisma.CertificateWalletPassCreateNestedManyWithoutCertificateInput
+  credential_verifications?: Prisma.CredentialVerificationCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateUncheckedCreateWithoutCertificate_render_jobsInput = {
+  id: string
+  tenant_id: string
+  template_id: string
+  membership_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedCreateNestedManyWithoutCertificateInput
+  credential_verifications?: Prisma.CredentialVerificationUncheckedCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateCreateOrConnectWithoutCertificate_render_jobsInput = {
+  where: Prisma.CertificateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_render_jobsInput, Prisma.CertificateUncheckedCreateWithoutCertificate_render_jobsInput>
+}
+
+export type CertificateUpsertWithoutCertificate_render_jobsInput = {
+  update: Prisma.XOR<Prisma.CertificateUpdateWithoutCertificate_render_jobsInput, Prisma.CertificateUncheckedUpdateWithoutCertificate_render_jobsInput>
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_render_jobsInput, Prisma.CertificateUncheckedCreateWithoutCertificate_render_jobsInput>
+  where?: Prisma.CertificateWhereInput
+}
+
+export type CertificateUpdateToOneWithWhereWithoutCertificate_render_jobsInput = {
+  where?: Prisma.CertificateWhereInput
+  data: Prisma.XOR<Prisma.CertificateUpdateWithoutCertificate_render_jobsInput, Prisma.CertificateUncheckedUpdateWithoutCertificate_render_jobsInput>
+}
+
+export type CertificateUpdateWithoutCertificate_render_jobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCertificatesNestedInput
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUpdateManyWithoutCertificateNestedInput
+  credential_verifications?: Prisma.CredentialVerificationUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateUncheckedUpdateWithoutCertificate_render_jobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedUpdateManyWithoutCertificateNestedInput
+  credential_verifications?: Prisma.CredentialVerificationUncheckedUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateCreateWithoutCertificate_wallet_passesInput = {
+  id: string
+  template_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutCertificatesInput
+  credential_verifications?: Prisma.CredentialVerificationCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateUncheckedCreateWithoutCertificate_wallet_passesInput = {
+  id: string
+  tenant_id: string
+  template_id: string
+  membership_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  credential_verifications?: Prisma.CredentialVerificationUncheckedCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateCreateOrConnectWithoutCertificate_wallet_passesInput = {
+  where: Prisma.CertificateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_wallet_passesInput, Prisma.CertificateUncheckedCreateWithoutCertificate_wallet_passesInput>
+}
+
+export type CertificateUpsertWithoutCertificate_wallet_passesInput = {
+  update: Prisma.XOR<Prisma.CertificateUpdateWithoutCertificate_wallet_passesInput, Prisma.CertificateUncheckedUpdateWithoutCertificate_wallet_passesInput>
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutCertificate_wallet_passesInput, Prisma.CertificateUncheckedCreateWithoutCertificate_wallet_passesInput>
+  where?: Prisma.CertificateWhereInput
+}
+
+export type CertificateUpdateToOneWithWhereWithoutCertificate_wallet_passesInput = {
+  where?: Prisma.CertificateWhereInput
+  data: Prisma.XOR<Prisma.CertificateUpdateWithoutCertificate_wallet_passesInput, Prisma.CertificateUncheckedUpdateWithoutCertificate_wallet_passesInput>
+}
+
+export type CertificateUpdateWithoutCertificate_wallet_passesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCertificatesNestedInput
+  credential_verifications?: Prisma.CredentialVerificationUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateUncheckedUpdateWithoutCertificate_wallet_passesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  credential_verifications?: Prisma.CredentialVerificationUncheckedUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateCreateWithoutCredential_verificationsInput = {
+  id: string
+  template_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutCertificatesInput
+  certificate_wallet_passes?: Prisma.CertificateWalletPassCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateUncheckedCreateWithoutCredential_verificationsInput = {
+  id: string
+  tenant_id: string
+  template_id: string
+  membership_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedCreateNestedManyWithoutCertificateInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedCreateNestedManyWithoutCertificateInput
+}
+
+export type CertificateCreateOrConnectWithoutCredential_verificationsInput = {
+  where: Prisma.CertificateWhereUniqueInput
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutCredential_verificationsInput, Prisma.CertificateUncheckedCreateWithoutCredential_verificationsInput>
+}
+
+export type CertificateUpsertWithoutCredential_verificationsInput = {
+  update: Prisma.XOR<Prisma.CertificateUpdateWithoutCredential_verificationsInput, Prisma.CertificateUncheckedUpdateWithoutCredential_verificationsInput>
+  create: Prisma.XOR<Prisma.CertificateCreateWithoutCredential_verificationsInput, Prisma.CertificateUncheckedCreateWithoutCredential_verificationsInput>
+  where?: Prisma.CertificateWhereInput
+}
+
+export type CertificateUpdateToOneWithWhereWithoutCredential_verificationsInput = {
+  where?: Prisma.CertificateWhereInput
+  data: Prisma.XOR<Prisma.CertificateUpdateWithoutCredential_verificationsInput, Prisma.CertificateUncheckedUpdateWithoutCredential_verificationsInput>
+}
+
+export type CertificateUpdateWithoutCredential_verificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutCertificatesNestedInput
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateUncheckedUpdateWithoutCredential_verificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateCreateManyMembershipInput = {
+  id: string
+  template_id: string
+  credential_id: string
+  status?: string
+  issued_at?: Date | string
+  revoked_at?: Date | string | null
+  r2_object_key?: string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Date | string | null
+  suspended_at?: Date | string | null
+  serial_number?: string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: string | null
+  recipient_name?: string | null
+  course_title?: string | null
+  status_list_index?: number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: string | null
+  blockchain_anchor?: string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type CertificateUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUpdateManyWithoutCertificateNestedInput
+  credential_verifications?: Prisma.CredentialVerificationUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  certificate_wallet_passes?: Prisma.CertificateWalletPassUncheckedUpdateManyWithoutCertificateNestedInput
+  credential_verifications?: Prisma.CredentialVerificationUncheckedUpdateManyWithoutCertificateNestedInput
+  certificate_render_jobs?: Prisma.CertificateRenderJobUncheckedUpdateManyWithoutCertificateNestedInput
+}
+
+export type CertificateUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  template_id?: Prisma.StringFieldUpdateOperationsInput | string
+  credential_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issued_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revoked_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  r2_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serial_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  design_snapshot_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  design_snapshot_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipient_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  course_title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status_list_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  vc_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  vc_object_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  blockchain_anchor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type CertificateCountOutputType
+ */
+
+export type CertificateCountOutputType = {
+  certificate_wallet_passes: number
+  credential_verifications: number
+  certificate_render_jobs: number
+}
+
+export type CertificateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  certificate_wallet_passes?: boolean | CertificateCountOutputTypeCountCertificate_wallet_passesArgs
+  credential_verifications?: boolean | CertificateCountOutputTypeCountCredential_verificationsArgs
+  certificate_render_jobs?: boolean | CertificateCountOutputTypeCountCertificate_render_jobsArgs
+}
+
+/**
+ * CertificateCountOutputType without action
+ */
+export type CertificateCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CertificateCountOutputType
+   */
+  select?: Prisma.CertificateCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CertificateCountOutputType without action
+ */
+export type CertificateCountOutputTypeCountCertificate_wallet_passesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CertificateWalletPassWhereInput
+}
+
+/**
+ * CertificateCountOutputType without action
+ */
+export type CertificateCountOutputTypeCountCredential_verificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CredentialVerificationWhereInput
+}
+
+/**
+ * CertificateCountOutputType without action
+ */
+export type CertificateCountOutputTypeCountCertificate_render_jobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CertificateRenderJobWhereInput
+}
 
 
 export type CertificateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -753,6 +1521,11 @@ export type CertificateSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   blockchain_anchor?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  certificate_wallet_passes?: boolean | Prisma.Certificate$certificate_wallet_passesArgs<ExtArgs>
+  credential_verifications?: boolean | Prisma.Certificate$credential_verificationsArgs<ExtArgs>
+  certificate_render_jobs?: boolean | Prisma.Certificate$certificate_render_jobsArgs<ExtArgs>
+  _count?: boolean | Prisma.CertificateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificate"]>
 
 export type CertificateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -779,6 +1552,7 @@ export type CertificateSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   blockchain_anchor?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificate"]>
 
 export type CertificateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -805,6 +1579,7 @@ export type CertificateSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   blockchain_anchor?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["certificate"]>
 
 export type CertificateSelectScalar = {
@@ -834,10 +1609,28 @@ export type CertificateSelectScalar = {
 }
 
 export type CertificateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "template_id" | "membership_id" | "credential_id" | "status" | "issued_at" | "revoked_at" | "r2_object_key" | "metadata_json" | "expires_at" | "suspended_at" | "serial_number" | "design_snapshot_json" | "design_snapshot_hash" | "recipient_name" | "course_title" | "status_list_index" | "vc_json" | "vc_object_key" | "blockchain_anchor" | "created_at" | "updated_at", ExtArgs["result"]["certificate"]>
+export type CertificateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  certificate_wallet_passes?: boolean | Prisma.Certificate$certificate_wallet_passesArgs<ExtArgs>
+  credential_verifications?: boolean | Prisma.Certificate$credential_verificationsArgs<ExtArgs>
+  certificate_render_jobs?: boolean | Prisma.Certificate$certificate_render_jobsArgs<ExtArgs>
+  _count?: boolean | Prisma.CertificateCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type CertificateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type CertificateIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $CertificatePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Certificate"
-  objects: {}
+  objects: {
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    certificate_wallet_passes: Prisma.$CertificateWalletPassPayload<ExtArgs>[]
+    credential_verifications: Prisma.$CredentialVerificationPayload<ExtArgs>[]
+    certificate_render_jobs: Prisma.$CertificateRenderJobPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -1256,6 +2049,10 @@ readonly fields: CertificateFieldRefs;
  */
 export interface Prisma__CertificateClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  certificate_wallet_passes<T extends Prisma.Certificate$certificate_wallet_passesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Certificate$certificate_wallet_passesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificateWalletPassPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  credential_verifications<T extends Prisma.Certificate$credential_verificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Certificate$credential_verificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CredentialVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  certificate_render_jobs<T extends Prisma.Certificate$certificate_render_jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Certificate$certificate_render_jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CertificateRenderJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1325,6 +2122,10 @@ export type CertificateFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  /**
    * Filter, which Certificate to fetch.
    */
   where: Prisma.CertificateWhereUniqueInput
@@ -1343,6 +2144,10 @@ export type CertificateFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  /**
    * Filter, which Certificate to fetch.
    */
   where: Prisma.CertificateWhereUniqueInput
@@ -1360,6 +2165,10 @@ export type CertificateFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the Certificate
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
   /**
    * Filter, which Certificate to fetch.
    */
@@ -1409,6 +2218,10 @@ export type CertificateFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  /**
    * Filter, which Certificate to fetch.
    */
   where?: Prisma.CertificateWhereInput
@@ -1456,6 +2269,10 @@ export type CertificateFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the Certificate
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
   /**
    * Filter, which Certificates to fetch.
    */
@@ -1505,6 +2322,10 @@ export type CertificateCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  /**
    * The data needed to create a Certificate.
    */
   data: Prisma.XOR<Prisma.CertificateCreateInput, Prisma.CertificateUncheckedCreateInput>
@@ -1538,6 +2359,10 @@ export type CertificateCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.CertificateCreateManyInput | Prisma.CertificateCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1552,6 +2377,10 @@ export type CertificateUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the Certificate
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
   /**
    * The data needed to update a Certificate.
    */
@@ -1604,6 +2433,10 @@ export type CertificateUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many Certificates to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1618,6 +2451,10 @@ export type CertificateUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the Certificate
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
   /**
    * The filter to search for the Certificate to update in case it exists.
    */
@@ -1645,6 +2482,10 @@ export type CertificateDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
+  /**
    * Filter which Certificate to delete.
    */
   where: Prisma.CertificateWhereUniqueInput
@@ -1665,6 +2506,78 @@ export type CertificateDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * Certificate.certificate_wallet_passes
+ */
+export type Certificate$certificate_wallet_passesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CertificateWalletPass
+   */
+  select?: Prisma.CertificateWalletPassSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CertificateWalletPass
+   */
+  omit?: Prisma.CertificateWalletPassOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateWalletPassInclude<ExtArgs> | null
+  where?: Prisma.CertificateWalletPassWhereInput
+  orderBy?: Prisma.CertificateWalletPassOrderByWithRelationInput | Prisma.CertificateWalletPassOrderByWithRelationInput[]
+  cursor?: Prisma.CertificateWalletPassWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CertificateWalletPassScalarFieldEnum | Prisma.CertificateWalletPassScalarFieldEnum[]
+}
+
+/**
+ * Certificate.credential_verifications
+ */
+export type Certificate$credential_verificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CredentialVerification
+   */
+  select?: Prisma.CredentialVerificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CredentialVerification
+   */
+  omit?: Prisma.CredentialVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CredentialVerificationInclude<ExtArgs> | null
+  where?: Prisma.CredentialVerificationWhereInput
+  orderBy?: Prisma.CredentialVerificationOrderByWithRelationInput | Prisma.CredentialVerificationOrderByWithRelationInput[]
+  cursor?: Prisma.CredentialVerificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CredentialVerificationScalarFieldEnum | Prisma.CredentialVerificationScalarFieldEnum[]
+}
+
+/**
+ * Certificate.certificate_render_jobs
+ */
+export type Certificate$certificate_render_jobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CertificateRenderJob
+   */
+  select?: Prisma.CertificateRenderJobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CertificateRenderJob
+   */
+  omit?: Prisma.CertificateRenderJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateRenderJobInclude<ExtArgs> | null
+  where?: Prisma.CertificateRenderJobWhereInput
+  orderBy?: Prisma.CertificateRenderJobOrderByWithRelationInput | Prisma.CertificateRenderJobOrderByWithRelationInput[]
+  cursor?: Prisma.CertificateRenderJobWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CertificateRenderJobScalarFieldEnum | Prisma.CertificateRenderJobScalarFieldEnum[]
+}
+
+/**
  * Certificate without action
  */
 export type CertificateDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1676,4 +2589,8 @@ export type CertificateDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the Certificate
    */
   omit?: Prisma.CertificateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CertificateInclude<ExtArgs> | null
 }

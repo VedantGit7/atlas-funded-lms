@@ -281,6 +281,7 @@ export type PaymentInstalmentPlanWhereInput = {
   created_at?: Prisma.DateTimeFilter<"PaymentInstalmentPlan"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentInstalmentPlan"> | Date | string
   instalments?: Prisma.PaymentInstalmentListRelationFilter
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }
 
 export type PaymentInstalmentPlanOrderByWithRelationInput = {
@@ -298,6 +299,7 @@ export type PaymentInstalmentPlanOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   instalments?: Prisma.PaymentInstalmentOrderByRelationAggregateInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
 }
 
 export type PaymentInstalmentPlanWhereUniqueInput = Prisma.AtLeast<{
@@ -318,6 +320,7 @@ export type PaymentInstalmentPlanWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"PaymentInstalmentPlan"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"PaymentInstalmentPlan"> | Date | string
   instalments?: Prisma.PaymentInstalmentListRelationFilter
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
 }, "id">
 
 export type PaymentInstalmentPlanOrderByWithAggregationInput = {
@@ -362,8 +365,6 @@ export type PaymentInstalmentPlanScalarWhereWithAggregatesInput = {
 
 export type PaymentInstalmentPlanCreateInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   product_title: string
   product_type?: string
   pricing_plan_label?: string | null
@@ -375,6 +376,7 @@ export type PaymentInstalmentPlanCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPlanInput
+  membership: Prisma.MembershipCreateNestedOneWithoutPayment_instalment_plansInput
 }
 
 export type PaymentInstalmentPlanUncheckedCreateInput = {
@@ -396,8 +398,6 @@ export type PaymentInstalmentPlanUncheckedCreateInput = {
 
 export type PaymentInstalmentPlanUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   product_title?: Prisma.StringFieldUpdateOperationsInput | string
   product_type?: Prisma.StringFieldUpdateOperationsInput | string
   pricing_plan_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -409,6 +409,7 @@ export type PaymentInstalmentPlanUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPlanNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPayment_instalment_plansNestedInput
 }
 
 export type PaymentInstalmentPlanUncheckedUpdateInput = {
@@ -446,8 +447,6 @@ export type PaymentInstalmentPlanCreateManyInput = {
 
 export type PaymentInstalmentPlanUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   product_title?: Prisma.StringFieldUpdateOperationsInput | string
   product_type?: Prisma.StringFieldUpdateOperationsInput | string
   pricing_plan_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -474,6 +473,16 @@ export type PaymentInstalmentPlanUncheckedUpdateManyInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PaymentInstalmentPlanListRelationFilter = {
+  every?: Prisma.PaymentInstalmentPlanWhereInput
+  some?: Prisma.PaymentInstalmentPlanWhereInput
+  none?: Prisma.PaymentInstalmentPlanWhereInput
+}
+
+export type PaymentInstalmentPlanOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type PaymentInstalmentPlanCountOrderByAggregateInput = {
@@ -537,6 +546,48 @@ export type PaymentInstalmentPlanScalarRelationFilter = {
   isNot?: Prisma.PaymentInstalmentPlanWhereInput
 }
 
+export type PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput> | Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput[] | Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput | Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PaymentInstalmentPlanCreateManyMembershipInputEnvelope
+  connect?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+}
+
+export type PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput> | Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput[] | Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput | Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.PaymentInstalmentPlanCreateManyMembershipInputEnvelope
+  connect?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+}
+
+export type PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput> | Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput[] | Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput | Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PaymentInstalmentPlanUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PaymentInstalmentPlanUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PaymentInstalmentPlanCreateManyMembershipInputEnvelope
+  set?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  disconnect?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  delete?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  connect?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  update?: Prisma.PaymentInstalmentPlanUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PaymentInstalmentPlanUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PaymentInstalmentPlanUpdateManyWithWhereWithoutMembershipInput | Prisma.PaymentInstalmentPlanUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PaymentInstalmentPlanScalarWhereInput | Prisma.PaymentInstalmentPlanScalarWhereInput[]
+}
+
+export type PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput> | Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput[] | Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput | Prisma.PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.PaymentInstalmentPlanUpsertWithWhereUniqueWithoutMembershipInput | Prisma.PaymentInstalmentPlanUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.PaymentInstalmentPlanCreateManyMembershipInputEnvelope
+  set?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  disconnect?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  delete?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  connect?: Prisma.PaymentInstalmentPlanWhereUniqueInput | Prisma.PaymentInstalmentPlanWhereUniqueInput[]
+  update?: Prisma.PaymentInstalmentPlanUpdateWithWhereUniqueWithoutMembershipInput | Prisma.PaymentInstalmentPlanUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.PaymentInstalmentPlanUpdateManyWithWhereWithoutMembershipInput | Prisma.PaymentInstalmentPlanUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.PaymentInstalmentPlanScalarWhereInput | Prisma.PaymentInstalmentPlanScalarWhereInput[]
+}
+
 export type PaymentInstalmentPlanCreateNestedOneWithoutInstalmentsInput = {
   create?: Prisma.XOR<Prisma.PaymentInstalmentPlanCreateWithoutInstalmentsInput, Prisma.PaymentInstalmentPlanUncheckedCreateWithoutInstalmentsInput>
   connectOrCreate?: Prisma.PaymentInstalmentPlanCreateOrConnectWithoutInstalmentsInput
@@ -551,10 +602,8 @@ export type PaymentInstalmentPlanUpdateOneRequiredWithoutInstalmentsNestedInput 
   update?: Prisma.XOR<Prisma.XOR<Prisma.PaymentInstalmentPlanUpdateToOneWithWhereWithoutInstalmentsInput, Prisma.PaymentInstalmentPlanUpdateWithoutInstalmentsInput>, Prisma.PaymentInstalmentPlanUncheckedUpdateWithoutInstalmentsInput>
 }
 
-export type PaymentInstalmentPlanCreateWithoutInstalmentsInput = {
+export type PaymentInstalmentPlanCreateWithoutMembershipInput = {
   id: string
-  tenant_id: string
-  membership_id: string
   product_title: string
   product_type?: string
   pricing_plan_label?: string | null
@@ -565,6 +614,82 @@ export type PaymentInstalmentPlanCreateWithoutInstalmentsInput = {
   metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   created_at?: Date | string
   updated_at?: Date | string
+  instalments?: Prisma.PaymentInstalmentCreateNestedManyWithoutPlanInput
+}
+
+export type PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput = {
+  id: string
+  product_title: string
+  product_type?: string
+  pricing_plan_label?: string | null
+  total_amount_cents: number
+  currency?: string
+  remaining_amount_cents: number
+  status?: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  instalments?: Prisma.PaymentInstalmentUncheckedCreateNestedManyWithoutPlanInput
+}
+
+export type PaymentInstalmentPlanCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.PaymentInstalmentPlanWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput>
+}
+
+export type PaymentInstalmentPlanCreateManyMembershipInputEnvelope = {
+  data: Prisma.PaymentInstalmentPlanCreateManyMembershipInput | Prisma.PaymentInstalmentPlanCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type PaymentInstalmentPlanUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PaymentInstalmentPlanWhereUniqueInput
+  update: Prisma.XOR<Prisma.PaymentInstalmentPlanUpdateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.PaymentInstalmentPlanCreateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedCreateWithoutMembershipInput>
+}
+
+export type PaymentInstalmentPlanUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.PaymentInstalmentPlanWhereUniqueInput
+  data: Prisma.XOR<Prisma.PaymentInstalmentPlanUpdateWithoutMembershipInput, Prisma.PaymentInstalmentPlanUncheckedUpdateWithoutMembershipInput>
+}
+
+export type PaymentInstalmentPlanUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.PaymentInstalmentPlanScalarWhereInput
+  data: Prisma.XOR<Prisma.PaymentInstalmentPlanUpdateManyMutationInput, Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type PaymentInstalmentPlanScalarWhereInput = {
+  AND?: Prisma.PaymentInstalmentPlanScalarWhereInput | Prisma.PaymentInstalmentPlanScalarWhereInput[]
+  OR?: Prisma.PaymentInstalmentPlanScalarWhereInput[]
+  NOT?: Prisma.PaymentInstalmentPlanScalarWhereInput | Prisma.PaymentInstalmentPlanScalarWhereInput[]
+  id?: Prisma.UuidFilter<"PaymentInstalmentPlan"> | string
+  tenant_id?: Prisma.UuidFilter<"PaymentInstalmentPlan"> | string
+  membership_id?: Prisma.UuidFilter<"PaymentInstalmentPlan"> | string
+  product_title?: Prisma.StringFilter<"PaymentInstalmentPlan"> | string
+  product_type?: Prisma.StringFilter<"PaymentInstalmentPlan"> | string
+  pricing_plan_label?: Prisma.StringNullableFilter<"PaymentInstalmentPlan"> | string | null
+  total_amount_cents?: Prisma.IntFilter<"PaymentInstalmentPlan"> | number
+  currency?: Prisma.StringFilter<"PaymentInstalmentPlan"> | string
+  remaining_amount_cents?: Prisma.IntFilter<"PaymentInstalmentPlan"> | number
+  status?: Prisma.StringFilter<"PaymentInstalmentPlan"> | string
+  metadata_json?: Prisma.JsonNullableFilter<"PaymentInstalmentPlan">
+  created_at?: Prisma.DateTimeFilter<"PaymentInstalmentPlan"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"PaymentInstalmentPlan"> | Date | string
+}
+
+export type PaymentInstalmentPlanCreateWithoutInstalmentsInput = {
+  id: string
+  product_title: string
+  product_type?: string
+  pricing_plan_label?: string | null
+  total_amount_cents: number
+  currency?: string
+  remaining_amount_cents: number
+  status?: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  membership: Prisma.MembershipCreateNestedOneWithoutPayment_instalment_plansInput
 }
 
 export type PaymentInstalmentPlanUncheckedCreateWithoutInstalmentsInput = {
@@ -601,6 +726,21 @@ export type PaymentInstalmentPlanUpdateToOneWithWhereWithoutInstalmentsInput = {
 
 export type PaymentInstalmentPlanUpdateWithoutInstalmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  product_title?: Prisma.StringFieldUpdateOperationsInput | string
+  product_type?: Prisma.StringFieldUpdateOperationsInput | string
+  pricing_plan_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  total_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  remaining_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutPayment_instalment_plansNestedInput
+}
+
+export type PaymentInstalmentPlanUncheckedUpdateWithoutInstalmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
   membership_id?: Prisma.StringFieldUpdateOperationsInput | string
   product_title?: Prisma.StringFieldUpdateOperationsInput | string
@@ -615,10 +755,52 @@ export type PaymentInstalmentPlanUpdateWithoutInstalmentsInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type PaymentInstalmentPlanUncheckedUpdateWithoutInstalmentsInput = {
+export type PaymentInstalmentPlanCreateManyMembershipInput = {
+  id: string
+  product_title: string
+  product_type?: string
+  pricing_plan_label?: string | null
+  total_amount_cents: number
+  currency?: string
+  remaining_amount_cents: number
+  status?: string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type PaymentInstalmentPlanUpdateWithoutMembershipInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  product_title?: Prisma.StringFieldUpdateOperationsInput | string
+  product_type?: Prisma.StringFieldUpdateOperationsInput | string
+  pricing_plan_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  total_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  remaining_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instalments?: Prisma.PaymentInstalmentUpdateManyWithoutPlanNestedInput
+}
+
+export type PaymentInstalmentPlanUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  product_title?: Prisma.StringFieldUpdateOperationsInput | string
+  product_type?: Prisma.StringFieldUpdateOperationsInput | string
+  pricing_plan_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  total_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  remaining_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  instalments?: Prisma.PaymentInstalmentUncheckedUpdateManyWithoutPlanNestedInput
+}
+
+export type PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   product_title?: Prisma.StringFieldUpdateOperationsInput | string
   product_type?: Prisma.StringFieldUpdateOperationsInput | string
   pricing_plan_label?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -677,6 +859,7 @@ export type PaymentInstalmentPlanSelect<ExtArgs extends runtime.Types.Extensions
   created_at?: boolean
   updated_at?: boolean
   instalments?: boolean | Prisma.PaymentInstalmentPlan$instalmentsArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.PaymentInstalmentPlanCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paymentInstalmentPlan"]>
 
@@ -694,6 +877,7 @@ export type PaymentInstalmentPlanSelectCreateManyAndReturn<ExtArgs extends runti
   metadata_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paymentInstalmentPlan"]>
 
 export type PaymentInstalmentPlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -710,6 +894,7 @@ export type PaymentInstalmentPlanSelectUpdateManyAndReturn<ExtArgs extends runti
   metadata_json?: boolean
   created_at?: boolean
   updated_at?: boolean
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paymentInstalmentPlan"]>
 
 export type PaymentInstalmentPlanSelectScalar = {
@@ -731,15 +916,21 @@ export type PaymentInstalmentPlanSelectScalar = {
 export type PaymentInstalmentPlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "membership_id" | "product_title" | "product_type" | "pricing_plan_label" | "total_amount_cents" | "currency" | "remaining_amount_cents" | "status" | "metadata_json" | "created_at" | "updated_at", ExtArgs["result"]["paymentInstalmentPlan"]>
 export type PaymentInstalmentPlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   instalments?: boolean | Prisma.PaymentInstalmentPlan$instalmentsArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.PaymentInstalmentPlanCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type PaymentInstalmentPlanIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type PaymentInstalmentPlanIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type PaymentInstalmentPlanIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
+export type PaymentInstalmentPlanIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+}
 
 export type $PaymentInstalmentPlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PaymentInstalmentPlan"
   objects: {
     instalments: Prisma.$PaymentInstalmentPayload<ExtArgs>[]
+    membership: Prisma.$MembershipPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1150,6 +1341,7 @@ readonly fields: PaymentInstalmentPlanFieldRefs;
 export interface Prisma__PaymentInstalmentPlanClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   instalments<T extends Prisma.PaymentInstalmentPlan$instalmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PaymentInstalmentPlan$instalmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaymentInstalmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1446,6 +1638,10 @@ export type PaymentInstalmentPlanCreateManyAndReturnArgs<ExtArgs extends runtime
    */
   data: Prisma.PaymentInstalmentPlanCreateManyInput | Prisma.PaymentInstalmentPlanCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInstalmentPlanIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1516,6 +1712,10 @@ export type PaymentInstalmentPlanUpdateManyAndReturnArgs<ExtArgs extends runtime
    * Limit how many PaymentInstalmentPlans to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentInstalmentPlanIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

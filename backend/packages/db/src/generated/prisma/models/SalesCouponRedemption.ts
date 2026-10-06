@@ -280,6 +280,10 @@ export type SalesCouponRedemptionWhereInput = {
   currency?: Prisma.StringFilter<"SalesCouponRedemption"> | string
   code_snapshot?: Prisma.StringFilter<"SalesCouponRedemption"> | string
   created_at?: Prisma.DateTimeFilter<"SalesCouponRedemption"> | Date | string
+  coupon?: Prisma.XOR<Prisma.SalesCouponScalarRelationFilter, Prisma.SalesCouponWhereInput>
+  payment_order?: Prisma.XOR<Prisma.PaymentOrderNullableScalarRelationFilter, Prisma.PaymentOrderWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  course?: Prisma.XOR<Prisma.CourseNullableScalarRelationFilter, Prisma.CourseWhereInput> | null
 }
 
 export type SalesCouponRedemptionOrderByWithRelationInput = {
@@ -295,6 +299,10 @@ export type SalesCouponRedemptionOrderByWithRelationInput = {
   currency?: Prisma.SortOrder
   code_snapshot?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  coupon?: Prisma.SalesCouponOrderByWithRelationInput
+  payment_order?: Prisma.PaymentOrderOrderByWithRelationInput
+  membership?: Prisma.MembershipOrderByWithRelationInput
+  course?: Prisma.CourseOrderByWithRelationInput
 }
 
 export type SalesCouponRedemptionWhereUniqueInput = Prisma.AtLeast<{
@@ -313,6 +321,10 @@ export type SalesCouponRedemptionWhereUniqueInput = Prisma.AtLeast<{
   currency?: Prisma.StringFilter<"SalesCouponRedemption"> | string
   code_snapshot?: Prisma.StringFilter<"SalesCouponRedemption"> | string
   created_at?: Prisma.DateTimeFilter<"SalesCouponRedemption"> | Date | string
+  coupon?: Prisma.XOR<Prisma.SalesCouponScalarRelationFilter, Prisma.SalesCouponWhereInput>
+  payment_order?: Prisma.XOR<Prisma.PaymentOrderNullableScalarRelationFilter, Prisma.PaymentOrderWhereInput> | null
+  membership?: Prisma.XOR<Prisma.MembershipScalarRelationFilter, Prisma.MembershipWhereInput>
+  course?: Prisma.XOR<Prisma.CourseNullableScalarRelationFilter, Prisma.CourseWhereInput> | null
 }, "id">
 
 export type SalesCouponRedemptionOrderByWithAggregationInput = {
@@ -355,17 +367,16 @@ export type SalesCouponRedemptionScalarWhereWithAggregatesInput = {
 
 export type SalesCouponRedemptionCreateInput = {
   id: string
-  tenant_id: string
-  coupon_id: string
-  membership_id: string
-  course_id?: string | null
-  payment_order_id?: string | null
   discount_cents: number
   original_amount_cents: number
   final_amount_cents: number
   currency: string
   code_snapshot: string
   created_at?: Date | string
+  coupon: Prisma.SalesCouponCreateNestedOneWithoutSales_coupon_redemptionsInput
+  payment_order?: Prisma.PaymentOrderCreateNestedOneWithoutSales_coupon_redemptionsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_coupon_redemptionsInput
+  course?: Prisma.CourseCreateNestedOneWithoutSales_coupon_redemptionsInput
 }
 
 export type SalesCouponRedemptionUncheckedCreateInput = {
@@ -385,17 +396,16 @@ export type SalesCouponRedemptionUncheckedCreateInput = {
 
 export type SalesCouponRedemptionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coupon?: Prisma.SalesCouponUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+  payment_order?: Prisma.PaymentOrderUpdateOneWithoutSales_coupon_redemptionsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+  course?: Prisma.CourseUpdateOneWithoutSales_coupon_redemptionsNestedInput
 }
 
 export type SalesCouponRedemptionUncheckedUpdateInput = {
@@ -430,11 +440,6 @@ export type SalesCouponRedemptionCreateManyInput = {
 
 export type SalesCouponRedemptionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
-  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
-  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
-  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
   final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
@@ -456,6 +461,16 @@ export type SalesCouponRedemptionUncheckedUpdateManyInput = {
   currency?: Prisma.StringFieldUpdateOperationsInput | string
   code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionListRelationFilter = {
+  every?: Prisma.SalesCouponRedemptionWhereInput
+  some?: Prisma.SalesCouponRedemptionWhereInput
+  none?: Prisma.SalesCouponRedemptionWhereInput
+}
+
+export type SalesCouponRedemptionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SalesCouponRedemptionCountOrderByAggregateInput = {
@@ -515,6 +530,608 @@ export type SalesCouponRedemptionSumOrderByAggregateInput = {
   final_amount_cents?: Prisma.SortOrder
 }
 
+export type SalesCouponRedemptionCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.SalesCouponRedemptionCreateWithoutMembershipInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.SalesCouponRedemptionCreateWithoutMembershipInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyMembershipInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.SalesCouponRedemptionCreateWithoutMembershipInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput> | Prisma.SalesCouponRedemptionCreateWithoutMembershipInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutMembershipInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutMembershipInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutMembershipInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyMembershipInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutMembershipInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutMembershipInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutMembershipInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutMembershipInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponRedemptionCreateWithoutCourseInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCourseInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUncheckedCreateNestedManyWithoutCourseInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponRedemptionCreateWithoutCourseInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCourseInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponRedemptionCreateWithoutCourseInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCourseInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCourseInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutCourseNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput> | Prisma.SalesCouponRedemptionCreateWithoutCourseInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCourseInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCourseInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCourseInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCourseInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCourseInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCourseInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCourseInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionCreateNestedManyWithoutPayment_orderInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput> | Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyPayment_orderInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUncheckedCreateNestedManyWithoutPayment_orderInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput> | Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyPayment_orderInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUpdateManyWithoutPayment_orderNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput> | Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutPayment_orderInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutPayment_orderInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyPayment_orderInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutPayment_orderInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutPayment_orderInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutPayment_orderInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutPayment_orderInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput> | Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutPayment_orderInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutPayment_orderInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyPayment_orderInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutPayment_orderInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutPayment_orderInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutPayment_orderInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutPayment_orderInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionCreateNestedManyWithoutCouponInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponRedemptionCreateWithoutCouponInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCouponInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUncheckedCreateNestedManyWithoutCouponInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponRedemptionCreateWithoutCouponInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCouponInputEnvelope
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+}
+
+export type SalesCouponRedemptionUpdateManyWithoutCouponNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponRedemptionCreateWithoutCouponInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCouponInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCouponInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCouponInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCouponInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutCouponNestedInput = {
+  create?: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput> | Prisma.SalesCouponRedemptionCreateWithoutCouponInput[] | Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput[]
+  connectOrCreate?: Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput | Prisma.SalesCouponRedemptionCreateOrConnectWithoutCouponInput[]
+  upsert?: Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponRedemptionUpsertWithWhereUniqueWithoutCouponInput[]
+  createMany?: Prisma.SalesCouponRedemptionCreateManyCouponInputEnvelope
+  set?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  disconnect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  delete?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  connect?: Prisma.SalesCouponRedemptionWhereUniqueInput | Prisma.SalesCouponRedemptionWhereUniqueInput[]
+  update?: Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCouponInput | Prisma.SalesCouponRedemptionUpdateWithWhereUniqueWithoutCouponInput[]
+  updateMany?: Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCouponInput | Prisma.SalesCouponRedemptionUpdateManyWithWhereWithoutCouponInput[]
+  deleteMany?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+}
+
+export type SalesCouponRedemptionCreateWithoutMembershipInput = {
+  id: string
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+  coupon: Prisma.SalesCouponCreateNestedOneWithoutSales_coupon_redemptionsInput
+  payment_order?: Prisma.PaymentOrderCreateNestedOneWithoutSales_coupon_redemptionsInput
+  course?: Prisma.CourseCreateNestedOneWithoutSales_coupon_redemptionsInput
+}
+
+export type SalesCouponRedemptionUncheckedCreateWithoutMembershipInput = {
+  id: string
+  coupon_id: string
+  course_id?: string | null
+  payment_order_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionCreateOrConnectWithoutMembershipInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesCouponRedemptionCreateManyMembershipInputEnvelope = {
+  data: Prisma.SalesCouponRedemptionCreateManyMembershipInput | Prisma.SalesCouponRedemptionCreateManyMembershipInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesCouponRedemptionUpsertWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutMembershipInput>
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutMembershipInput>
+}
+
+export type SalesCouponRedemptionUpdateWithWhereUniqueWithoutMembershipInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutMembershipInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutMembershipInput>
+}
+
+export type SalesCouponRedemptionUpdateManyWithWhereWithoutMembershipInput = {
+  where: Prisma.SalesCouponRedemptionScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateManyMutationInput, Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipInput>
+}
+
+export type SalesCouponRedemptionScalarWhereInput = {
+  AND?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+  OR?: Prisma.SalesCouponRedemptionScalarWhereInput[]
+  NOT?: Prisma.SalesCouponRedemptionScalarWhereInput | Prisma.SalesCouponRedemptionScalarWhereInput[]
+  id?: Prisma.UuidFilter<"SalesCouponRedemption"> | string
+  tenant_id?: Prisma.UuidFilter<"SalesCouponRedemption"> | string
+  coupon_id?: Prisma.UuidFilter<"SalesCouponRedemption"> | string
+  membership_id?: Prisma.UuidFilter<"SalesCouponRedemption"> | string
+  course_id?: Prisma.UuidNullableFilter<"SalesCouponRedemption"> | string | null
+  payment_order_id?: Prisma.UuidNullableFilter<"SalesCouponRedemption"> | string | null
+  discount_cents?: Prisma.IntFilter<"SalesCouponRedemption"> | number
+  original_amount_cents?: Prisma.IntFilter<"SalesCouponRedemption"> | number
+  final_amount_cents?: Prisma.IntFilter<"SalesCouponRedemption"> | number
+  currency?: Prisma.StringFilter<"SalesCouponRedemption"> | string
+  code_snapshot?: Prisma.StringFilter<"SalesCouponRedemption"> | string
+  created_at?: Prisma.DateTimeFilter<"SalesCouponRedemption"> | Date | string
+}
+
+export type SalesCouponRedemptionCreateWithoutCourseInput = {
+  id: string
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+  coupon: Prisma.SalesCouponCreateNestedOneWithoutSales_coupon_redemptionsInput
+  payment_order?: Prisma.PaymentOrderCreateNestedOneWithoutSales_coupon_redemptionsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_coupon_redemptionsInput
+}
+
+export type SalesCouponRedemptionUncheckedCreateWithoutCourseInput = {
+  id: string
+  coupon_id: string
+  membership_id: string
+  payment_order_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionCreateOrConnectWithoutCourseInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput>
+}
+
+export type SalesCouponRedemptionCreateManyCourseInputEnvelope = {
+  data: Prisma.SalesCouponRedemptionCreateManyCourseInput | Prisma.SalesCouponRedemptionCreateManyCourseInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesCouponRedemptionUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCourseInput>
+}
+
+export type SalesCouponRedemptionUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutCourseInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutCourseInput>
+}
+
+export type SalesCouponRedemptionUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.SalesCouponRedemptionScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateManyMutationInput, Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type SalesCouponRedemptionCreateWithoutPayment_orderInput = {
+  id: string
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+  coupon: Prisma.SalesCouponCreateNestedOneWithoutSales_coupon_redemptionsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_coupon_redemptionsInput
+  course?: Prisma.CourseCreateNestedOneWithoutSales_coupon_redemptionsInput
+}
+
+export type SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput = {
+  id: string
+  coupon_id: string
+  membership_id: string
+  course_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionCreateOrConnectWithoutPayment_orderInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput>
+}
+
+export type SalesCouponRedemptionCreateManyPayment_orderInputEnvelope = {
+  data: Prisma.SalesCouponRedemptionCreateManyPayment_orderInput | Prisma.SalesCouponRedemptionCreateManyPayment_orderInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesCouponRedemptionUpsertWithWhereUniqueWithoutPayment_orderInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutPayment_orderInput>
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutPayment_orderInput>
+}
+
+export type SalesCouponRedemptionUpdateWithWhereUniqueWithoutPayment_orderInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutPayment_orderInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutPayment_orderInput>
+}
+
+export type SalesCouponRedemptionUpdateManyWithWhereWithoutPayment_orderInput = {
+  where: Prisma.SalesCouponRedemptionScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateManyMutationInput, Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderInput>
+}
+
+export type SalesCouponRedemptionCreateWithoutCouponInput = {
+  id: string
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+  payment_order?: Prisma.PaymentOrderCreateNestedOneWithoutSales_coupon_redemptionsInput
+  membership: Prisma.MembershipCreateNestedOneWithoutSales_coupon_redemptionsInput
+  course?: Prisma.CourseCreateNestedOneWithoutSales_coupon_redemptionsInput
+}
+
+export type SalesCouponRedemptionUncheckedCreateWithoutCouponInput = {
+  id: string
+  membership_id: string
+  course_id?: string | null
+  payment_order_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionCreateOrConnectWithoutCouponInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput>
+}
+
+export type SalesCouponRedemptionCreateManyCouponInputEnvelope = {
+  data: Prisma.SalesCouponRedemptionCreateManyCouponInput | Prisma.SalesCouponRedemptionCreateManyCouponInput[]
+  skipDuplicates?: boolean
+}
+
+export type SalesCouponRedemptionUpsertWithWhereUniqueWithoutCouponInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  update: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutCouponInput>
+  create: Prisma.XOR<Prisma.SalesCouponRedemptionCreateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedCreateWithoutCouponInput>
+}
+
+export type SalesCouponRedemptionUpdateWithWhereUniqueWithoutCouponInput = {
+  where: Prisma.SalesCouponRedemptionWhereUniqueInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateWithoutCouponInput, Prisma.SalesCouponRedemptionUncheckedUpdateWithoutCouponInput>
+}
+
+export type SalesCouponRedemptionUpdateManyWithWhereWithoutCouponInput = {
+  where: Prisma.SalesCouponRedemptionScalarWhereInput
+  data: Prisma.XOR<Prisma.SalesCouponRedemptionUpdateManyMutationInput, Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutCouponInput>
+}
+
+export type SalesCouponRedemptionCreateManyMembershipInput = {
+  id: string
+  coupon_id: string
+  course_id?: string | null
+  payment_order_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coupon?: Prisma.SalesCouponUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+  payment_order?: Prisma.PaymentOrderUpdateOneWithoutSales_coupon_redemptionsNestedInput
+  course?: Prisma.CourseUpdateOneWithoutSales_coupon_redemptionsNestedInput
+}
+
+export type SalesCouponRedemptionUncheckedUpdateWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionCreateManyCourseInput = {
+  id: string
+  coupon_id: string
+  membership_id: string
+  payment_order_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coupon?: Prisma.SalesCouponUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+  payment_order?: Prisma.PaymentOrderUpdateOneWithoutSales_coupon_redemptionsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+}
+
+export type SalesCouponRedemptionUncheckedUpdateWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionCreateManyPayment_orderInput = {
+  id: string
+  coupon_id: string
+  membership_id: string
+  course_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionUpdateWithoutPayment_orderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coupon?: Prisma.SalesCouponUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+  course?: Prisma.CourseUpdateOneWithoutSales_coupon_redemptionsNestedInput
+}
+
+export type SalesCouponRedemptionUncheckedUpdateWithoutPayment_orderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutPayment_orderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  coupon_id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionCreateManyCouponInput = {
+  id: string
+  membership_id: string
+  course_id?: string | null
+  payment_order_id?: string | null
+  discount_cents: number
+  original_amount_cents: number
+  final_amount_cents: number
+  currency: string
+  code_snapshot: string
+  created_at?: Date | string
+}
+
+export type SalesCouponRedemptionUpdateWithoutCouponInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  payment_order?: Prisma.PaymentOrderUpdateOneWithoutSales_coupon_redemptionsNestedInput
+  membership?: Prisma.MembershipUpdateOneRequiredWithoutSales_coupon_redemptionsNestedInput
+  course?: Prisma.CourseUpdateOneWithoutSales_coupon_redemptionsNestedInput
+}
+
+export type SalesCouponRedemptionUncheckedUpdateWithoutCouponInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type SalesCouponRedemptionUncheckedUpdateManyWithoutCouponInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  membership_id?: Prisma.StringFieldUpdateOperationsInput | string
+  course_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  payment_order_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  original_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  final_amount_cents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  code_snapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type SalesCouponRedemptionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -530,6 +1147,10 @@ export type SalesCouponRedemptionSelect<ExtArgs extends runtime.Types.Extensions
   currency?: boolean
   code_snapshot?: boolean
   created_at?: boolean
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.SalesCouponRedemption$courseArgs<ExtArgs>
 }, ExtArgs["result"]["salesCouponRedemption"]>
 
 export type SalesCouponRedemptionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -545,6 +1166,10 @@ export type SalesCouponRedemptionSelectCreateManyAndReturn<ExtArgs extends runti
   currency?: boolean
   code_snapshot?: boolean
   created_at?: boolean
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.SalesCouponRedemption$courseArgs<ExtArgs>
 }, ExtArgs["result"]["salesCouponRedemption"]>
 
 export type SalesCouponRedemptionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -560,6 +1185,10 @@ export type SalesCouponRedemptionSelectUpdateManyAndReturn<ExtArgs extends runti
   currency?: boolean
   code_snapshot?: boolean
   created_at?: boolean
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.SalesCouponRedemption$courseArgs<ExtArgs>
 }, ExtArgs["result"]["salesCouponRedemption"]>
 
 export type SalesCouponRedemptionSelectScalar = {
@@ -578,10 +1207,33 @@ export type SalesCouponRedemptionSelectScalar = {
 }
 
 export type SalesCouponRedemptionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "coupon_id" | "membership_id" | "course_id" | "payment_order_id" | "discount_cents" | "original_amount_cents" | "final_amount_cents" | "currency" | "code_snapshot" | "created_at", ExtArgs["result"]["salesCouponRedemption"]>
+export type SalesCouponRedemptionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.SalesCouponRedemption$courseArgs<ExtArgs>
+}
+export type SalesCouponRedemptionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.SalesCouponRedemption$courseArgs<ExtArgs>
+}
+export type SalesCouponRedemptionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  coupon?: boolean | Prisma.SalesCouponDefaultArgs<ExtArgs>
+  payment_order?: boolean | Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs>
+  membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
+  course?: boolean | Prisma.SalesCouponRedemption$courseArgs<ExtArgs>
+}
 
 export type $SalesCouponRedemptionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SalesCouponRedemption"
-  objects: {}
+  objects: {
+    coupon: Prisma.$SalesCouponPayload<ExtArgs>
+    payment_order: Prisma.$PaymentOrderPayload<ExtArgs> | null
+    membership: Prisma.$MembershipPayload<ExtArgs>
+    course: Prisma.$CoursePayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -989,6 +1641,10 @@ readonly fields: SalesCouponRedemptionFieldRefs;
  */
 export interface Prisma__SalesCouponRedemptionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  coupon<T extends Prisma.SalesCouponDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesCouponDefaultArgs<ExtArgs>>): Prisma.Prisma__SalesCouponClient<runtime.Types.Result.GetResult<Prisma.$SalesCouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  payment_order<T extends Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesCouponRedemption$payment_orderArgs<ExtArgs>>): Prisma.Prisma__PaymentOrderClient<runtime.Types.Result.GetResult<Prisma.$PaymentOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  membership<T extends Prisma.MembershipDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MembershipDefaultArgs<ExtArgs>>): Prisma.Prisma__MembershipClient<runtime.Types.Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  course<T extends Prisma.SalesCouponRedemption$courseArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SalesCouponRedemption$courseArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1047,6 +1703,10 @@ export type SalesCouponRedemptionFindUniqueArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  /**
    * Filter, which SalesCouponRedemption to fetch.
    */
   where: Prisma.SalesCouponRedemptionWhereUniqueInput
@@ -1065,6 +1725,10 @@ export type SalesCouponRedemptionFindUniqueOrThrowArgs<ExtArgs extends runtime.T
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  /**
    * Filter, which SalesCouponRedemption to fetch.
    */
   where: Prisma.SalesCouponRedemptionWhereUniqueInput
@@ -1082,6 +1746,10 @@ export type SalesCouponRedemptionFindFirstArgs<ExtArgs extends runtime.Types.Ext
    * Omit specific fields from the SalesCouponRedemption
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
   /**
    * Filter, which SalesCouponRedemption to fetch.
    */
@@ -1131,6 +1799,10 @@ export type SalesCouponRedemptionFindFirstOrThrowArgs<ExtArgs extends runtime.Ty
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  /**
    * Filter, which SalesCouponRedemption to fetch.
    */
   where?: Prisma.SalesCouponRedemptionWhereInput
@@ -1178,6 +1850,10 @@ export type SalesCouponRedemptionFindManyArgs<ExtArgs extends runtime.Types.Exte
    * Omit specific fields from the SalesCouponRedemption
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
   /**
    * Filter, which SalesCouponRedemptions to fetch.
    */
@@ -1227,6 +1903,10 @@ export type SalesCouponRedemptionCreateArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  /**
    * The data needed to create a SalesCouponRedemption.
    */
   data: Prisma.XOR<Prisma.SalesCouponRedemptionCreateInput, Prisma.SalesCouponRedemptionUncheckedCreateInput>
@@ -1260,6 +1940,10 @@ export type SalesCouponRedemptionCreateManyAndReturnArgs<ExtArgs extends runtime
    */
   data: Prisma.SalesCouponRedemptionCreateManyInput | Prisma.SalesCouponRedemptionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1274,6 +1958,10 @@ export type SalesCouponRedemptionUpdateArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesCouponRedemption
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
   /**
    * The data needed to update a SalesCouponRedemption.
    */
@@ -1326,6 +2014,10 @@ export type SalesCouponRedemptionUpdateManyAndReturnArgs<ExtArgs extends runtime
    * Limit how many SalesCouponRedemptions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1340,6 +2032,10 @@ export type SalesCouponRedemptionUpsertArgs<ExtArgs extends runtime.Types.Extens
    * Omit specific fields from the SalesCouponRedemption
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
   /**
    * The filter to search for the SalesCouponRedemption to update in case it exists.
    */
@@ -1367,6 +2063,10 @@ export type SalesCouponRedemptionDeleteArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
+  /**
    * Filter which SalesCouponRedemption to delete.
    */
   where: Prisma.SalesCouponRedemptionWhereUniqueInput
@@ -1387,6 +2087,44 @@ export type SalesCouponRedemptionDeleteManyArgs<ExtArgs extends runtime.Types.Ex
 }
 
 /**
+ * SalesCouponRedemption.payment_order
+ */
+export type SalesCouponRedemption$payment_orderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaymentOrder
+   */
+  select?: Prisma.PaymentOrderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaymentOrder
+   */
+  omit?: Prisma.PaymentOrderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaymentOrderInclude<ExtArgs> | null
+  where?: Prisma.PaymentOrderWhereInput
+}
+
+/**
+ * SalesCouponRedemption.course
+ */
+export type SalesCouponRedemption$courseArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Course
+   */
+  select?: Prisma.CourseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Course
+   */
+  omit?: Prisma.CourseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CourseInclude<ExtArgs> | null
+  where?: Prisma.CourseWhereInput
+}
+
+/**
  * SalesCouponRedemption without action
  */
 export type SalesCouponRedemptionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1398,4 +2136,8 @@ export type SalesCouponRedemptionDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Omit specific fields from the SalesCouponRedemption
    */
   omit?: Prisma.SalesCouponRedemptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SalesCouponRedemptionInclude<ExtArgs> | null
 }

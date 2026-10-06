@@ -1,0 +1,60 @@
+-- Audit finding M3, stage 2: validate existing rows against the composite
+-- tenant foreign keys added NOT VALID in migration 120.
+--
+-- A failure means a row references a parent that is missing or belongs to
+-- another tenant. Nothing is lost: stage 1 keeps protecting new writes. Find
+-- the rows with `pnpm db:tenant-fk:check`, resolve them, and re-run.
+--
+-- VALIDATE takes only a SHARE UPDATE EXCLUSIVE lock, so reads and writes
+-- continue while each table is scanned.
+
+BEGIN;
+SET LOCAL lock_timeout = '5s';
+SET LOCAL statement_timeout = '15min';
+
+ALTER TABLE public.course_modules VALIDATE CONSTRAINT course_modules_course_id_tenant_fkey;
+ALTER TABLE public.lessons VALIDATE CONSTRAINT lessons_module_id_tenant_fkey;
+ALTER TABLE public.lesson_assets VALIDATE CONSTRAINT lesson_assets_lesson_id_tenant_fkey;
+ALTER TABLE public.lesson_progress VALIDATE CONSTRAINT lesson_progress_lesson_id_tenant_fkey;
+ALTER TABLE public.lesson_progress VALIDATE CONSTRAINT lesson_progress_membership_id_tenant_fkey;
+ALTER TABLE public.enrollments VALIDATE CONSTRAINT enrollments_course_id_tenant_fkey;
+ALTER TABLE public.enrollments VALIDATE CONSTRAINT enrollments_membership_id_tenant_fkey;
+ALTER TABLE public.assessment_items VALIDATE CONSTRAINT assessment_items_assessment_id_tenant_fkey;
+ALTER TABLE public.assessment_items VALIDATE CONSTRAINT assessment_items_item_id_tenant_fkey;
+ALTER TABLE public.item_options VALIDATE CONSTRAINT item_options_item_id_tenant_fkey;
+ALTER TABLE public.attempts VALIDATE CONSTRAINT attempts_assessment_id_tenant_fkey;
+ALTER TABLE public.attempts VALIDATE CONSTRAINT attempts_membership_id_tenant_fkey;
+ALTER TABLE public.attempt_answers VALIDATE CONSTRAINT attempt_answers_attempt_id_tenant_fkey;
+ALTER TABLE public.attempt_answers VALIDATE CONSTRAINT attempt_answers_assessment_item_id_tenant_fkey;
+ALTER TABLE public.grading_tasks VALIDATE CONSTRAINT grading_tasks_attempt_id_tenant_fkey;
+ALTER TABLE public.proctoring_sessions VALIDATE CONSTRAINT proctoring_sessions_attempt_id_tenant_fkey;
+ALTER TABLE public.proctoring_sessions VALIDATE CONSTRAINT proctoring_sessions_membership_id_tenant_fkey;
+ALTER TABLE public.proctoring_events VALIDATE CONSTRAINT proctoring_events_proctoring_session_id_tenant_fkey;
+ALTER TABLE public.certificates VALIDATE CONSTRAINT certificates_membership_id_tenant_fkey;
+ALTER TABLE public.certificate_wallet_passes VALIDATE CONSTRAINT certificate_wallet_passes_certificate_id_tenant_fkey;
+ALTER TABLE public.credential_verifications VALIDATE CONSTRAINT credential_verifications_certificate_id_tenant_fkey;
+ALTER TABLE public.certificate_render_jobs VALIDATE CONSTRAINT certificate_render_jobs_certificate_id_tenant_fkey;
+ALTER TABLE public.payment_orders VALIDATE CONSTRAINT payment_orders_membership_id_tenant_fkey;
+ALTER TABLE public.payment_instalments VALIDATE CONSTRAINT payment_instalments_payment_order_id_tenant_fkey;
+ALTER TABLE public.payment_instalment_plans VALIDATE CONSTRAINT payment_instalment_plans_membership_id_tenant_fkey;
+ALTER TABLE public.sales_coupon_redemptions VALIDATE CONSTRAINT sales_coupon_redemptions_coupon_id_tenant_fkey;
+ALTER TABLE public.sales_coupon_redemptions VALIDATE CONSTRAINT sales_coupon_redemptions_payment_order_id_tenant_fkey;
+ALTER TABLE public.sales_coupon_redemptions VALIDATE CONSTRAINT sales_coupon_redemptions_membership_id_tenant_fkey;
+ALTER TABLE public.sales_coupon_redemptions VALIDATE CONSTRAINT sales_coupon_redemptions_course_id_tenant_fkey;
+ALTER TABLE public.sales_coupon_courses VALIDATE CONSTRAINT sales_coupon_courses_coupon_id_tenant_fkey;
+ALTER TABLE public.sales_coupon_courses VALIDATE CONSTRAINT sales_coupon_courses_course_id_tenant_fkey;
+ALTER TABLE public.sales_wallets VALIDATE CONSTRAINT sales_wallets_membership_id_tenant_fkey;
+ALTER TABLE public.sales_wallet_transactions VALIDATE CONSTRAINT sales_wallet_transactions_wallet_id_tenant_fkey;
+ALTER TABLE public.sales_wallet_transactions VALIDATE CONSTRAINT sales_wallet_transactions_payment_order_id_tenant_fkey;
+ALTER TABLE public.sales_wallet_transactions VALIDATE CONSTRAINT sales_wallet_transactions_membership_id_tenant_fkey;
+ALTER TABLE public.sales_wallet_transactions VALIDATE CONSTRAINT sales_wallet_transactions_course_id_tenant_fkey;
+ALTER TABLE public.sales_affiliate_commissions VALIDATE CONSTRAINT sales_affiliate_commissions_affiliate_id_tenant_fkey;
+ALTER TABLE public.sales_affiliate_commissions VALIDATE CONSTRAINT sales_affiliate_commissions_payment_order_id_tenant_fkey;
+ALTER TABLE public.sales_affiliate_commissions VALIDATE CONSTRAINT sales_affiliate_commissions_course_id_tenant_fkey;
+ALTER TABLE public.sales_referral_purchase_credits VALIDATE CONSTRAINT sales_referral_purchase_credits_payment_order_id_tenant_fkey;
+ALTER TABLE public.role_permissions VALIDATE CONSTRAINT role_permissions_role_id_tenant_fkey;
+ALTER TABLE public.user_roles VALIDATE CONSTRAINT user_roles_role_id_tenant_fkey;
+ALTER TABLE public.user_roles VALIDATE CONSTRAINT user_roles_membership_id_tenant_fkey;
+ALTER TABLE public.permission_overrides VALIDATE CONSTRAINT permission_overrides_membership_id_tenant_fkey;
+
+COMMIT;
