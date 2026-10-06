@@ -19,7 +19,9 @@ const { mockResolveTenant, mockResendSignupVerification, mockRejectClientTenantI
   }),
 );
 
-vi.mock("@atlas/tenancy", () => ({
+vi.mock("@atlas/tenancy", async (importOriginal) => ({
+  // Real host helpers: the redirect check resolves the request host with them.
+  ...(await importOriginal<Record<string, unknown>>()),
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
@@ -94,4 +96,16 @@ describe("POST /api/v1/public/auth/resend", () => {
     expect(body.error.code).toBe("VALIDATION_ERROR");
     expect(mockResendSignupVerification).not.toHaveBeenCalled();
   });
+
+  it.each(["https://tenant-b.example.com/auth/confirm", "https://evil.example/auth/confirm"])(
+    "refuses a link that would lead to %s, and sends nothing",
+    async (emailRedirectTo) => {
+      const response = await POST(createRequest({ email: "user@example.com", emailRedirectTo }));
+      const body = (await response.json()) as { error: { code: string } };
+
+      expect(response.status).toBe(400);
+      expect(body.error.code).toBe("VALIDATION_ERROR");
+      expect(mockResendSignupVerification).not.toHaveBeenCalled();
+    },
+  );
 });

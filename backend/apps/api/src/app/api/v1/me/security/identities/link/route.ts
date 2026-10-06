@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { createTenantRoute } from "@atlas/api";
+import { assertRedirectOnRequestHost, createTenantRoute } from "@atlas/api";
 import { startLinkIdentity } from "@atlas/auth";
 import { LinkIdentityRequestSchema, LinkIdentityResponseSchema } from "@atlas/domain-identity";
 import { securityMutationMetadata } from "../../route.metadata";
@@ -13,10 +13,14 @@ export const POST = createTenantRoute<
   metadata: securityMutationMetadata,
   body: LinkIdentityRequestSchema,
   output: LinkIdentityResponseSchema,
-  handler: async ({ input }) => {
+  handler: async ({ input, requestHost }) => {
     const result = await startLinkIdentity({
       provider: input.provider,
-      redirectTo: input.redirectTo,
+      redirectTo: assertRedirectOnRequestHost({
+        value: input.redirectTo,
+        requestHost: requestHost ?? "",
+        field: "redirectTo",
+      }),
     });
     return { data: result };
   },

@@ -49,7 +49,9 @@ const {
   };
 });
 
-vi.mock("@atlas/tenancy", () => ({
+vi.mock("@atlas/tenancy", async (importOriginal) => ({
+  // Real host helpers: the redirect check resolves the request host with them.
+  ...(await importOriginal<Record<string, unknown>>()),
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
@@ -203,4 +205,21 @@ describe("POST /api/v1/public/auth/signup", () => {
       }),
     );
   });
+
+  it.each(["https://tenant-b.example.com/auth/confirm", "https://evil.example/auth/confirm"])(
+    "refuses a confirmation link that would lead to %s, before creating anything",
+    async (emailRedirectTo) => {
+      const response = await POST(
+        createRequest({
+          email: "user@example.com",
+          password: "password123",
+          displayName: "Atlas User",
+          emailRedirectTo,
+        }),
+      );
+
+      expect(response.status).toBe(400);
+      expect(mockSignupWithPassword).not.toHaveBeenCalled();
+    },
+  );
 });

@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { createTenantRoute } from "@atlas/api";
+import { assertRedirectOnRequestHost, createTenantRoute } from "@atlas/api";
 import { changeEmail } from "@atlas/auth";
 import { AccountSecurityOkResponseSchema, ChangeEmailRequestSchema } from "@atlas/domain-identity";
 import { emitSecurityNotification } from "../../../../../../lib/account-security-orchestrator";
@@ -14,10 +14,17 @@ export const POST = createTenantRoute<
   metadata: securityMutationMetadata,
   body: ChangeEmailRequestSchema,
   output: AccountSecurityOkResponseSchema,
-  handler: async ({ tx, ctx, input }) => {
+  handler: async ({ tx, ctx, input, requestHost }) => {
+    const emailRedirectTo = input.emailRedirectTo
+      ? assertRedirectOnRequestHost({
+          value: input.emailRedirectTo,
+          requestHost: requestHost ?? "",
+          field: "emailRedirectTo",
+        })
+      : undefined;
     const result = await changeEmail({
       newEmail: input.newEmail,
-      ...(input.emailRedirectTo ? { emailRedirectTo: input.emailRedirectTo } : {}),
+      ...(emailRedirectTo ? { emailRedirectTo } : {}),
     });
 
     await emitSecurityNotification(tx, ctx, {
