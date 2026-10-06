@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler } from "@atlas/api";
+import { assertRedirectOnRequestHostFrom, createPublicRouteHandler } from "@atlas/api";
 import { resendSignupVerification } from "@atlas/auth";
 import { PublicAuthResendRequestSchema, rejectClientTenantId } from "@atlas/domain-identity";
 import { routeMetadata } from "./route.metadata";
@@ -14,9 +14,13 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req }) => {
   rejectClientTenantId(rawBody);
   const input = PublicAuthResendRequestSchema.parse(rawBody);
 
+  const emailRedirectTo = input.emailRedirectTo
+    ? assertRedirectOnRequestHostFrom(req.headers, input.emailRedirectTo, "emailRedirectTo")
+    : undefined;
+
   await resendSignupVerification({
     email: input.email,
-    ...(input.emailRedirectTo ? { emailRedirectTo: input.emailRedirectTo } : {}),
+    ...(emailRedirectTo ? { emailRedirectTo } : {}),
   });
 
   return NextResponse.json({

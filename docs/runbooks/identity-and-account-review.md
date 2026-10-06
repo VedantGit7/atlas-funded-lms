@@ -94,6 +94,21 @@ The command exits non-zero if confirmations are off, the minimum is below 10, or
 secure password change is off. Pass `-- --require-hibp` to fail on the leaked-password
 setting too.
 
+## Where auth emails and OAuth send people back
+
+Signup, magic-link, resend and email-change emails, OAuth sign-in and identity
+linking all carry a return URL that Supabase puts in the link or provider
+redirect. The API accepts it only on the host the request came from: the
+tenant domain (or platform host) the user is on, `https` only, with no
+credentials or explicit port. Plain `http` and ports are allowed only on
+development hostnames (`*.localhost`, `*.test`). Anything else is a 400 before
+Supabase is called (`backend/packages/api/src/redirect-target.ts`). The web app
+builds these URLs from its own origin, so real requests always pass.
+
+Supabase's own redirect allow-list (Authentication → URL configuration) is a
+second check. Keep it to the patterns your tenant domains need; a broad
+wildcard there no longer opens a redirect, but it removes that second check.
+
 ## Deploying the migration
 
 Migration `118_identity_bootstrap` marks existing placeholders `unclaimed`: on a

@@ -2,6 +2,11 @@ export { EntitlementRequiredError } from "./errors";
 export { enforceEntitlement } from "@atlas/authorization";
 export { toSafeErrorEnvelope } from "./error-envelope";
 export { assertSameOrigin } from "./assert-same-origin";
+export {
+  assertRedirectOnRequestHost,
+  assertRedirectOnRequestHostFrom,
+  type RedirectField,
+} from "./redirect-target";
 export { enforcePublicRateLimit, resetRateLimitsForTests } from "./rate-limit";
 export {
   MemoryRateLimitStore,

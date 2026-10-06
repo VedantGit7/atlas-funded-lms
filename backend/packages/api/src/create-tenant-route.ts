@@ -145,6 +145,8 @@ export type ProtectedTenantRouteHandler<TInput, TOutput, TParams = Record<string
   input: TInput;
   resource: ResourceRef;
   params: TParams;
+  /** The host the request came from (tenant domain or platform host), normalized. */
+  requestHost?: string;
 }) => Promise<TOutput>;
 
 export async function runProtectedTenantRouteHandler<
@@ -158,6 +160,7 @@ export async function runProtectedTenantRouteHandler<
   params: TParams;
   input: TInput;
   sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
+  requestHost?: string;
   handler: ProtectedTenantRouteHandler<TInput, TOutput, TParams>;
 }): Promise<TOutput> {
   const resource = await runProtectedTenantRoutePipeline({
@@ -175,6 +178,7 @@ export async function runProtectedTenantRouteHandler<
     input: args.input,
     resource,
     params: args.params,
+    ...(args.requestHost ? { requestHost: args.requestHost } : {}),
   });
 }
 
@@ -431,6 +435,7 @@ export function createTenantRoute<
                       input,
                       resource,
                       params,
+                      requestHost: tenant.host,
                     });
                     // M7: a mutation declaring audit: "required" is on the record.
                     await ensureMutationAudited(tx, {

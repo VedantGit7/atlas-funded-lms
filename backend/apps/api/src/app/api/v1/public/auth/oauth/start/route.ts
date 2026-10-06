@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler } from "@atlas/api";
+import { assertRedirectOnRequestHostFrom, createPublicRouteHandler } from "@atlas/api";
 import { startOAuthSignIn } from "@atlas/auth";
 import {
   PublicOAuthStartRequestSchema,
@@ -15,7 +15,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req }) => {
 
   const { url, codeVerifier } = await startOAuthSignIn({
     provider: input.provider,
-    redirectTo: input.redirectTo,
+    redirectTo: assertRedirectOnRequestHostFrom(req.headers, input.redirectTo, "redirectTo"),
   });
 
   const body = PublicOAuthStartResponseSchema.parse({

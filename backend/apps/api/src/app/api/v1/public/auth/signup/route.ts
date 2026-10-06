@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler, globalDbPerStatement, resolveRequestTenant } from "@atlas/api";
+import {
+  assertRedirectOnRequestHostFrom,
+  createPublicRouteHandler,
+  globalDbPerStatement,
+  resolveRequestTenant,
+} from "@atlas/api";
 import { publicSignupInputSchema, setAuthCookies, signupWithPassword } from "@atlas/auth";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
@@ -22,6 +27,10 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
   const rawBody: unknown = await req.json();
   rejectClientTenantId(rawBody);
   const input = PublicSignupRequestSchema.parse(rawBody);
+  // The confirmation link must lead back to this site (before anything is created).
+  const emailRedirectTo = input.emailRedirectTo
+    ? assertRedirectOnRequestHostFrom(req.headers, input.emailRedirectTo, "emailRedirectTo")
+    : undefined;
 
   // Validate + stash referral before creating the auth principal so a bad
   // code cannot leave an orphaned signup behind.
@@ -50,7 +59,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       displayName: input.displayName,
       inviteToken: input.inviteToken,
       referralCode: input.referralCode,
-      emailRedirectTo: input.emailRedirectTo,
+      emailRedirectTo,
     }),
   });
 
