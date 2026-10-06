@@ -14,9 +14,10 @@ describe("F8 hardening infrastructure", () => {
     }
   });
 
-  it("includes Playwright, Lighthouse CI, Suspense dashboard island", () => {
+  // Lighthouse CI (@lhci/cli) was removed on 2026-10-06: no CI job ran it, and
+  // its puppeteer tree carried the only unfixable advisories (SEC-09).
+  it("includes Playwright and the Suspense dashboard island", () => {
     expect(existsSync(resolve(repoRoot, "playwright.config.ts"))).toBe(true);
-    expect(existsSync(resolve(repoRoot, "lighthouserc.cjs"))).toBe(true);
     const homePage = readFileSync(resolve(repoRoot, "frontend/apps/web/src/app/page.tsx"), "utf8");
     expect(homePage).toContain("Suspense");
     expect(homePage).toContain("DashboardPersonalizedIsland");

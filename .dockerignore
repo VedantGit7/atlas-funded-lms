@@ -15,7 +15,6 @@
 **/test-results
 **/.test-results
 **/playwright-report
-**/lhci-reports
 **/*.pem
 **/*.key
 **/*.p12
