@@ -13,7 +13,8 @@
     "./actor/system-actor": "./src/actor/system-actor.ts",
     "./config/runtime-environment": "./src/config/runtime-environment.ts",
     "./config/deployment-contract": "./src/config/deployment-contract.ts",
-    "./config/scorm-content-keys": "./src/config/scorm-content-keys.ts"
+    "./config/scorm-content-keys": "./src/config/scorm-content-keys.ts",
+    "./text/safe-text": "./src/text/safe-text.ts"
   },
   "dependencies": {
     "uuid": "^14.0.0"

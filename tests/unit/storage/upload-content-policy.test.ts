@@ -71,6 +71,9 @@ describe("content sniffing", () => {
       ["text/csv", ELF],
       ["audio/mpeg", HTML],
       ["application/zip", PDF],
+      // A leading comment or prolog cannot hide markup from the text check.
+      ["text/plain", Buffer.from("<!-- notes --><html><script>alert(1)</script></html>")],
+      ["text/csv", Buffer.from('<?xml version="1.0"?><!-- a --><!-- b --><html></html>')],
       // UTF-16 markup is still markup.
       ["text/plain", Buffer.from("\uFEFF<html><script>x</script>", "utf16le")],
     ] as const) {
@@ -78,6 +81,21 @@ describe("content sniffing", () => {
         "ASSET_CONTENT_MISMATCH",
       );
     }
+  });
+});
+
+describe("content sniffing behind prologs and comments", () => {
+  it("finds an SVG root behind several comments and a doctype", () => {
+    const svg = Buffer.from(
+      '<!-- a --><!-- b --><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "x"><svg xmlns="http://www.w3.org/2000/svg"></svg>',
+    );
+    expect(sniffContent(svg)).toBe("svg");
+  });
+
+  it("calls anything else behind a comment markup, never plain text", () => {
+    expect(sniffContent(Buffer.from("<!-- x --><html></html>"))).toBe("markup");
+    expect(sniffContent(Buffer.from("<!-- just a comment -->"))).toBe("markup");
+    expect(sniffContent(Buffer.from("name,score\nada,9\n"))).toBe("text");
   });
 });
 

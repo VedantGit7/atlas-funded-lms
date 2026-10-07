@@ -423,8 +423,8 @@ export function CohortActionsDrawer({
             <a
               href={
                 effectiveAudience.sourceKind === "progress"
-                  ? `/admin/reports/progress-score/progress/${effectiveAudience.productType}/${effectiveAudience.productId}`
-                  : `/admin/reports/progress-score/scores/quizzes/${effectiveAudience.assessmentId}`
+                  ? `/admin/reports/progress-score/progress/${encodeURIComponent(effectiveAudience.productType)}/${encodeURIComponent(effectiveAudience.productId)}`
+                  : `/admin/reports/progress-score/scores/quizzes/${encodeURIComponent(effectiveAudience.assessmentId)}`
               }
               className="inline-flex items-center gap-1 text-sm text-[var(--admin-primary)] hover:underline"
             >

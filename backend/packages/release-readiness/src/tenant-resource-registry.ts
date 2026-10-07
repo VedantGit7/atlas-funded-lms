@@ -123,8 +123,14 @@ function inferDomainFromMetadata(content: string, metadataPath: string): string 
 
 function apiPathFromMetadata(metadataPath: string): string {
   const normalized = metadataPath.replace(/\\/g, "/");
-  const match = normalized.match(/\/api\/v1\/(.+)\/route\.metadata\.ts$/);
-  return match?.[1] ?? normalized;
+  // String slicing rather than `/\/api\/v1\/(.+)\/route\.metadata\.ts$/`, which
+  // backtracks on repeated "/api/v1/" (CodeQL js/polynomial-redos).
+  const prefix = "/api/v1/";
+  const suffix = "/route.metadata.ts";
+  const start = normalized.indexOf(prefix);
+  if (start === -1 || !normalized.endsWith(suffix)) return normalized;
+  const path = normalized.slice(start + prefix.length, normalized.length - suffix.length);
+  return path.length > 0 ? path : normalized;
 }
 
 function hasIdParam(apiPath: string): boolean {

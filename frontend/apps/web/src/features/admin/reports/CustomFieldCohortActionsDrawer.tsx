@@ -241,7 +241,7 @@ export function CustomFieldCohortActionsDrawer({
           <Link
             href={
               audienceKind === "segment" && segmentId
-                ? `/admin/reports/custom-field/segments/${segmentId}`
+                ? `/admin/reports/custom-field/segments/${encodeURIComponent(segmentId)}`
                 : "/admin/reports/custom-field"
             }
             className="mb-5 inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--admin-primary)] hover:underline"

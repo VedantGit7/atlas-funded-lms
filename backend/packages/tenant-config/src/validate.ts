@@ -5,8 +5,11 @@ import type { ValidationIssue } from "./types";
 
 const SECRET_PATTERNS = [
   /sk_live_[a-zA-Z0-9]+/,
-  /eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/,
-  /https?:\/\/[^\s"']+\.(r2\.cloudflarestorage\.com|amazonaws\.com)/i,
+  // A JWT starts at a token boundary; without the lookbehind every "eyJ" in a
+  // long run is a fresh start and the scan is quadratic (CodeQL js/polynomial-redos).
+  /(?<![a-zA-Z0-9_-])eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/,
+  // Host labels cannot contain "." or "/", so the match cannot backtrack.
+  /https?:\/\/(?:[^\s"'/.]+\.)*(?:r2\.cloudflarestorage\.com|amazonaws\.com)/i,
   /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
 ] as const;
 

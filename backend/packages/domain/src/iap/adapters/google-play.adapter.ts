@@ -36,7 +36,7 @@ function parseServiceAccountJson(raw: string | null | undefined): GoogleServiceA
 
 function base64Url(input: Buffer | string): string {
   const buffer = typeof input === "string" ? Buffer.from(input) : input;
-  return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  return buffer.toString("base64url");
 }
 
 async function createGoogleAccessToken(account: GoogleServiceAccount): Promise<string> {

@@ -1,4 +1,5 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import { toPlainText } from "@atlas/core/text/safe-text";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { createAndSendAnnouncement } from "../announcements/announcements.service";
@@ -367,7 +368,7 @@ export async function launchMarketingCampaign(
       });
       await composePushMessage(tx, ctx, pushId, {
         subject,
-        body: bodyText.replace(/<[^>]+>/g, "").slice(0, 4000) || subject,
+        body: toPlainText(bodyText).slice(0, 4000) || subject,
         deepLink: null,
         imageUrl: null,
         channels: { android: true, ios: true, web: true },
@@ -396,7 +397,7 @@ export async function launchMarketingCampaign(
       }
       const created = await createAndSendAnnouncement(tx, ctx, {
         title: point.title,
-        message: bodyText.replace(/<[^>]+>/g, "").slice(0, 4000) || point.title,
+        message: toPlainText(bodyText).slice(0, 4000) || point.title,
         deepLink: null,
         imageUrl: null,
         batchId: dto.audienceType === "GROUP" ? dto.audienceBatchId : null,

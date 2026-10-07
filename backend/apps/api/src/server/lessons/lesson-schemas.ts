@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isHttpUrl } from "@atlas/core/text/safe-text";
 import { mutationBodySchema } from "@atlas/membership/schemas/shared";
 import { publishStatusStudioSchema } from "../courses/course-authoring-schemas";
 import { tagSummarySchema } from "../tags/tag-schemas";
@@ -26,11 +27,7 @@ const updateLessonForbiddenFields = {
   status: z.never().optional(),
 };
 
-const safeUrlSchema = z
-  .url()
-  .refine((value) => !value.trim().toLowerCase().startsWith("javascript:"), {
-    message: "javascript: URLs are not allowed.",
-  });
+const safeUrlSchema = z.url().refine(isHttpUrl, { message: "Video links must use http or https." });
 
 const lessonContentSchema = z
   .union([z.string().trim().max(500_000), z.record(z.string(), z.unknown())])

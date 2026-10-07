@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isHttpUrlOrRootPath, toPlainText } from "../core/text/safe-text";
 import { certificateDesignDocumentSchema } from "./certificate-design-document";
 
 const rejectClientTenantFields = z
@@ -8,12 +9,8 @@ const rejectClientTenantFields = z
   })
   .loose();
 
-const htmlTagPattern = /<[^>]*>/g;
-const scriptPattern = /javascript:/i;
-
 export function sanitizeCertificateText(value: string): string {
-  const stripped = value.replace(htmlTagPattern, "").replace(scriptPattern, "").trim();
-  return stripped;
+  return toPlainText(value);
 }
 
 export const certificateTemplateFieldSchema = z
@@ -291,7 +288,7 @@ const brandAssetUrlSchema = z
   .string()
   .min(1)
   .max(2048)
-  .refine((value) => !scriptPattern.test(value), "Unsafe URL scheme.");
+  .refine(isHttpUrlOrRootPath, "Must be an http(s) URL or a path on this site.");
 
 export const certificateBrandKitColorSchema = z
   .object({

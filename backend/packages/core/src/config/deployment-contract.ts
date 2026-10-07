@@ -316,7 +316,9 @@ export function validateDeploymentConfiguration(
   const sender = requireValue("NOTIFICATION_EMAIL_FROM");
   if (
     sender &&
-    (/[\r\n]/.test(sender) || !/^(?:[^<>]+<)?[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+>?$/.test(sender))
+    (/[\r\n]/.test(sender) ||
+      // Domain labels exclude "." so the pattern cannot backtrack (CodeQL js/polynomial-redos).
+      !/^(?:[^<>]+<)?[^<>\s@]+@[^<>\s@.]+(?:\.[^<>\s@.]+)+>?$/.test(sender))
   )
     issues.push("NOTIFICATION_EMAIL_FROM must be a valid sender mailbox");
 
