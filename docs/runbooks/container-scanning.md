@@ -24,11 +24,21 @@ The API image is compiled with an empty dotenv build secret. The scan covers the
    - **Node itself**: bump `.node-version` and every `FROM node:` line together. `tests/ci/ci-gate.test.ts` enforces the match.
 3. If a fix is genuinely unreachable from our code and cannot be taken yet, add the CVE to a `.trivyignore` file at the repository root. Each entry needs a comment with the reason and a review date. No such file exists today; keep it that way where possible.
 
-## Known unfixed findings (7 October 2026)
+## Known unfixed findings (8 October 2026)
 
-- About 50 HIGH findings in the API image and 80 in the worker image, plus a few CRITICAL in each, have no fix available. The extra worker findings are Chromium's libraries for PDF rendering: glib, libxml2, sqlite and X11.
-- Debian 12 (bookworm) is now `oldstable`. Moving both images to Debian 13 (trixie) should clear many of these findings, but it needs Chromium/PDF re-verification and is tracked as separate work.
+Both images use Debian 13 (trixie). The move from Debian 12 lowered the HIGH/CRITICAL counts from 49 to 43 (API) and from 80 to 63 (worker).
+
+- **API: 43 HIGH, no CRITICAL.** These are base-system packages Debian has not patched yet: util-linux, systemd's libraries, ncurses, acl and perl-base.
+- **Worker: 62 HIGH and 1 CRITICAL.** The worker has the same base-system findings, plus Chromium's libraries for PDF rendering: libxml2 (the CRITICAL), X11, expat and CUPS.
 - `node-forge` CVE-2026-85393 concerns RSA signature _verification_. The wallet-pass code only _creates_ PKCS#7 signatures, so it is not reachable.
+
+## Changing the Debian release
+
+Chromium's system libraries and fonts come from `playwright-core install --with-deps chromium`, so a Debian upgrade changes what certificates render with. Certificate PDF failures are soft: the worker falls back to HTML. A broken renderer therefore passes the build's import check, so verify rendering directly:
+
+- Render a certificate with Latin, Devanagari, Arabic, CJK and emoji text through `renderCertificatePdfBuffer` in both the old and new worker images.
+- Compare the PDFs and the fonts they embed. The Debian 13 move changed the Arabic fallback from FreeMono to FreeSerif, which fixed previously broken Arabic letter joining; nothing else changed.
+- Confirm Playwright's installed version has a dependency table for the new release.
 
 ## Scanning locally
 
