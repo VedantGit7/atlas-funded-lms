@@ -172,8 +172,9 @@ WHERE table_schema = 'public'
         console.error(`  ${row.relname}.${row.polname}  USING (${row.qual ?? "true"})`);
       }
       console.error(
-        "\nScope the policy to the case it exists for — e.g. add `AND app.current_tenant_id() IS NULL` " +
-          "for a pre-context lookup — or make it RESTRICTIVE.",
+        "\nScope the policy to the tenant context, or make it RESTRICTIVE. For a lookup before the " +
+          "context exists, use an exact-match SECURITY DEFINER function like app.resolve_tenant_host " +
+          "(docs/runbooks/tenant-host-resolution.md), not a policy.",
       );
       process.exit(1);
     }

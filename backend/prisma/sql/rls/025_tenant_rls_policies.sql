@@ -247,14 +247,12 @@ END $$;
 -- `atlas_app` with `app.tenant_id` set to one tenant — 2 domains across 2
 -- distinct tenants were visible.
 --
--- Adding `app.current_tenant_id() IS NULL` scopes the exemption to exactly the
--- pre-context case it exists for. `current_tenant_id()` returns NULL when the
--- setting is unset or empty, so host resolution keeps working while any
--- tenant-scoped request falls through to the isolation policy alone.
+-- Scoping that policy with `app.current_tenant_id() IS NULL` closed the
+-- cross-tenant read, but the pre-context case still listed every tenant's
+-- hostnames: a policy cannot see the query's WHERE clause, so it could only
+-- allow the whole table. Migration 124 replaced it with
+-- `app.resolve_tenant_host(host)`, a SECURITY DEFINER function that answers one
+-- exact, verified hostname. Drop the policy here as well, because this file
+-- runs after migrations on a fresh database and used to recreate it.
+-- docs/runbooks/tenant-host-resolution.md has the policy and its reasoning.
 DROP POLICY IF EXISTS tenant_domains_host_resolution ON tenant_domains;
-
-CREATE POLICY tenant_domains_host_resolution
-  ON tenant_domains
-  FOR SELECT
-  TO atlas_app, atlas_worker
-  USING (deleted_at IS NULL AND app.current_tenant_id() IS NULL);
