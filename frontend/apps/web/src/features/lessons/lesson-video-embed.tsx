@@ -1,3 +1,5 @@
+import { isHttpUrl } from "@atlas/contracts/core/text/safe-text";
+
 type LessonVideoEmbedProps = {
   provider: string;
   url: string;
@@ -42,7 +44,7 @@ export function canEmbedLessonVideo(provider: string, url: string): boolean {
   if (!provider || !trimmed) return false;
   if (provider === "youtube") return Boolean(getYoutubeVideoId(trimmed));
   if (provider === "vimeo") return Boolean(getVimeoVideoId(trimmed));
-  if (provider === "bunny") return true;
+  if (provider === "bunny") return isHttpUrl(trimmed);
   return false;
 }
 
@@ -52,8 +54,13 @@ export function LessonVideoEmbed({
   title = "Lesson video",
   className = "aspect-video w-full rounded-lg border border-[var(--admin-border)]",
 }: LessonVideoEmbedProps) {
+  // The author typed this URL and learners click it: only an http(s) link is
+  // ever rendered (the API refuses anything else too).
+  const safeUrl = url.trim();
+  if (!isHttpUrl(safeUrl)) return null;
+
   if (provider === "youtube") {
-    const videoId = getYoutubeVideoId(url);
+    const videoId = getYoutubeVideoId(safeUrl);
     if (!videoId) return null;
 
     return (
@@ -69,7 +76,7 @@ export function LessonVideoEmbed({
   }
 
   if (provider === "vimeo") {
-    const videoId = getVimeoVideoId(url);
+    const videoId = getVimeoVideoId(safeUrl);
     if (!videoId) return null;
 
     return (
@@ -84,12 +91,12 @@ export function LessonVideoEmbed({
     );
   }
 
-  if (provider === "bunny" && url.trim()) {
+  if (provider === "bunny") {
     return (
       <p className="rounded-lg border border-[var(--admin-border)] p-4 text-sm text-[var(--admin-on-surface-variant)]">
         Bunny video:{" "}
         <a
-          href={url}
+          href={safeUrl}
           target="_blank"
           rel="noreferrer"
           className="font-medium text-[var(--admin-primary)] underline-offset-2 hover:underline"

@@ -83,7 +83,7 @@ function candidates(specifier, file, options) {
     const match =
       star === -1 ? "" : specifier.slice(star, specifier.length - (pattern.length - star - 1));
     for (const target of targets)
-      result.push(resolve(options.baseUrl ?? options.pathsBasePath, target.replace("*", match)));
+      result.push(resolve(options.baseUrl ?? options.pathsBasePath, target.replaceAll("*", match)));
   }
   return result;
 }

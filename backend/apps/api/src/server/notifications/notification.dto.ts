@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toPlainText } from "@atlas/core/text/safe-text";
 import { NOTIFICATION_SOURCE_EVENT_KEYS } from "./notification.events";
 
 const rejectClientTenantFields = z
@@ -8,7 +9,8 @@ const rejectClientTenantFields = z
   })
   .loose();
 
-const htmlTagPattern = /<[^>]*>/g;
+// Not global: `.test()` on a /g pattern resumes from the previous match.
+const htmlTagPattern = /<[^>]*>/;
 const scriptPattern = /javascript:/i;
 const unsafeUrlPattern = /^\s*(javascript:|data:|vbscript:)/i;
 
@@ -19,7 +21,7 @@ export const notificationChannelSchema = z.enum(NOTIFICATION_CHANNELS);
 export const notificationSourceEventKeySchema = z.enum(NOTIFICATION_SOURCE_EVENT_KEYS);
 
 export function sanitizePlainText(value: string): string {
-  return value.replace(htmlTagPattern, "").replace(scriptPattern, "").trim();
+  return toPlainText(value);
 }
 
 export const internalActionPathSchema = z

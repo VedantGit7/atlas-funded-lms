@@ -33,6 +33,7 @@ const files = [
   "backend/packages/audit/src/schemas/audit.ts",
   "backend/apps/api/src/server/certificates/certificate-design-document.ts",
   "backend/apps/api/src/server/marketing-workflows/marketing-workflow.graph.ts",
+  "backend/packages/core/src/text/safe-text.ts",
 ];
 const manual = [
   "access/permission-guards.ts",

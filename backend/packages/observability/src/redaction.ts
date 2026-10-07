@@ -13,7 +13,14 @@ export function redactValue(value: unknown): unknown {
       return value;
     }
 
-    if (/^https?:\/\/.+\?.*(X-Amz-Signature|sig|token|signature)=/i.test(value)) {
+    // A signed or tokenised URL. The query string is tested on its own: `.+\?.*`
+    // in one pattern backtracks badly on long values (CodeQL js/polynomial-redos).
+    const query = value.indexOf("?");
+    if (
+      /^https?:\/\/./i.test(value) &&
+      query > 0 &&
+      /(?:X-Amz-Signature|sig|token|signature)=/i.test(value.slice(query + 1))
+    ) {
       return REDACTED;
     }
 

@@ -41,12 +41,17 @@ import { customFieldRosterRepository } from "./custom-field-roster.repository";
 import { csvEscape } from "@atlas/core/csv/escape";
 const STALE_MS = 30 * 24 * 60 * 60 * 1000;
 
+/** Without leading or trailing "-"; a loop, as `^-+|-+$` is quadratic on long runs. */
+function trimDashes(value: string): string {
+  let start = 0;
+  let end = value.length;
+  while (start < end && value[start] === "-") start += 1;
+  while (end > start && value[end - 1] === "-") end -= 1;
+  return value.slice(start, end);
+}
+
 function slugifyKey(value: string): string {
-  const base = value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48);
+  const base = trimDashes(value.toLowerCase().replace(/[^a-z0-9]+/g, "-")).slice(0, 48);
   return `${base || "segment"}-${randomUUID().slice(0, 8)}`;
 }
 

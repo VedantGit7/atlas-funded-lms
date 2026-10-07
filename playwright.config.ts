@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { browserServers } from "./scripts/e2e/browser-servers.mjs";
 
 // The local dev host for the primary tenant fixture, overridable by environment.
 // This is tenant configuration for the browser suite, not a brand in product code.
@@ -31,13 +32,13 @@ const visualSpecs = "**/tests/browser/visual/**";
  * Playwright spawns this through the platform shell, and a nested `sh -c '...'`
  * does not survive cmd.exe on Windows.
  */
-const apiServerCommand = useDevServer
-  ? "pnpm exec dotenv -e .env.local -- pnpm --filter @atlas/api-app dev"
-  : "pnpm exec dotenv -e .env.local -- pnpm browser:serve:api";
+const [apiServer, webServer] = browserServers(process.env);
 
-const webServerCommand = useDevServer
-  ? "pnpm --filter @atlas/web dev"
-  : "pnpm exec dotenv -e .env.local -- pnpm browser:serve:web";
+/**
+ * CI starts fresh servers for each run, except when the failure-probe script has
+ * already started them once for all its probes (scripts/e2e/browser-servers.mjs).
+ */
+const reuseExistingServer = !process.env["CI"] || process.env["E2E_REUSE_SERVERS"] === "1";
 
 export default defineConfig({
   testDir: "tests/browser",
@@ -107,9 +108,9 @@ export default defineConfig({
           // answers 500. The accessibility suite then fails on toBeVisible()
           // long before axe runs, which reads as a broken page rather than a
           // misconfigured harness.
-          command: apiServerCommand,
-          url: "http://127.0.0.1:3001/api/v1/health",
-          reuseExistingServer: !process.env["CI"],
+          command: apiServer.command,
+          url: apiServer.url,
+          reuseExistingServer,
           // Long enough to cover a cold production build of both apps.
           timeout: 420_000,
         },
@@ -118,9 +119,9 @@ export default defineConfig({
           // run with the same Supabase configuration the journeys authenticate
           // against. Building first and configuring later would ship the wrong
           // auth endpoint into the client bundle.
-          command: webServerCommand,
-          url: tenantBaseUrl,
-          reuseExistingServer: !process.env["CI"],
+          command: webServer.command,
+          url: webServer.url,
+          reuseExistingServer,
           timeout: 420_000,
         },
       ]

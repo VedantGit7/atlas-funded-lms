@@ -80,6 +80,23 @@ describe("lesson schemas", () => {
     ).toThrow();
   });
 
+  it.each([
+    "java\tscript:alert(1)",
+    "data:text/html,<script>alert(1)</script>",
+    "vbscript:msgbox(1)",
+  ])("rejects a non-web video URL a browser could still run: %s", (videoUrl) => {
+    expect(() => updateLessonBodySchema.parse({ videoProvider: "bunny", videoUrl })).toThrow();
+  });
+
+  it("accepts an https video URL", () => {
+    expect(
+      updateLessonBodySchema.parse({
+        videoProvider: "bunny",
+        videoUrl: "https://video.bunnycdn.com/play/1/abc",
+      }).videoUrl,
+    ).toBe("https://video.bunnycdn.com/play/1/abc");
+  });
+
   it("accepts asset create with storage reference", () => {
     const parsed = createLessonAssetBodySchema.parse({
       assetType: "file",

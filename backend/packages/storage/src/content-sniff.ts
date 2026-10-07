@@ -82,14 +82,21 @@ const MARKUP_STARTS = [
   "<svg",
 ];
 
-/** True when the text, ignoring a leading XML prolog, comments and doctype, has an `<svg` root. */
-function hasSvgRoot(text: string): boolean {
-  const stripped = text
-    .replace(/<\?xml[\s\S]*?\?>/g, "")
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/<!doctype[^>[]*(\[[\s\S]*?\])?\s*>/g, "")
-    .trimStart();
-  return stripped.startsWith("<svg");
+const LEADING_PROLOG =
+  /^\s*(?:<\?xml[\s\S]*?\?>|<!--[\s\S]*?-->|<!doctype[^>[]*(?:\[[\s\S]*?\])?\s*>)/;
+
+/**
+ * The text after any leading XML prolog, comments and doctype. Removed one at a
+ * time from the start until none is left, so a comment cannot hide the root
+ * element from the checks below.
+ */
+function withoutLeadingProlog(text: string): string {
+  let current = text;
+  for (;;) {
+    const next = current.replace(LEADING_PROLOG, "");
+    if (next === current) return current.trimStart();
+    current = next;
+  }
 }
 
 function looksLikeText(head: Buffer): boolean {
@@ -122,8 +129,10 @@ export function sniffContent(head: Buffer): SniffedKind {
   if (!isUtf16(head) && isAudio(head)) return "audio";
   if (looksLikeText(head)) {
     const text = leadingText(head);
-    if (hasSvgRoot(text)) return "svg";
-    if (MARKUP_STARTS.some((start) => text.startsWith(start))) return "markup";
+    const root = withoutLeadingProlog(text);
+    if (root.startsWith("<svg")) return "svg";
+    // A comment or prolog in front must not let markup pass as plain text.
+    if (root !== text || MARKUP_STARTS.some((start) => root.startsWith(start))) return "markup";
     return "text";
   }
   return "binary";

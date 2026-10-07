@@ -87,7 +87,8 @@ function resolveAlias(specifier: string): string | null {
     }
     const prefix = pattern.slice(0, pattern.indexOf("*"));
     if (specifier.startsWith(prefix)) {
-      return join(baseUrl, target.replace("*", specifier.slice(prefix.length)));
+      // A tsconfig path target has at most one "*"; replaceAll says so plainly.
+      return join(baseUrl, target.replaceAll("*", specifier.slice(prefix.length)));
     }
   }
   return null;

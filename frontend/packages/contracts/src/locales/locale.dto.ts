@@ -1,10 +1,10 @@
 import { z } from "zod";
+import { toPlainText } from "../core/text/safe-text";
 
-const htmlTagPattern = /<[^>]*>/g;
 const scriptPattern = /javascript:/i;
 
 export function sanitizeLocalePlainText(value: string): string {
-  return value.replace(htmlTagPattern, "").replace(scriptPattern, "").trim();
+  return toPlainText(value);
 }
 
 export const localeCodeSchema = z

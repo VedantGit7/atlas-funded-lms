@@ -23,7 +23,7 @@ const key = "synthetic-internal-forwarding-key-0123456789";
 function expectForwarding() {
   expect(mocks.fetch).toHaveBeenCalledOnce();
   const [url, init] = mocks.fetch.mock.calls[0] as [string | URL, RequestInit];
-  expect(String(url)).toMatch(/^https:\/\/api.example.com\/api\/v1\//);
+  expect(String(url)).toMatch(/^https:\/\/api\.example\.com\/api\/v1\//);
   expect(init.redirect).toBe("error");
   const headers = new Headers(init.headers);
   expect(headers.get("x-atlas-proxy-key")).toBe(key);

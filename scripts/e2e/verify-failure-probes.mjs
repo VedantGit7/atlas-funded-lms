@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { browserServers, startBrowserServers, stopBrowserServers } from "./browser-servers.mjs";
 import { assertIsolatedFixtureTarget } from "./isolated-target.mjs";
 
 const probes = [
@@ -251,12 +252,33 @@ function phaseDiagnostics(test, spec) {
   return { phaseTimings, courseResponses };
 }
 
+/** Kept out of the uploaded evidence: only evidence.json leaves the runner. */
+const serverLog = resolve(directory, "servers.log");
+const logSize = () => (existsSync(serverLog) ? statSync(serverLog).size : 0);
+/** Server lines written since `offset`, for this probe's route-failure diagnostics. */
+const serverOutputSince = (offset) =>
+  existsSync(serverLog) ? readFileSync(serverLog).subarray(offset).toString("utf8") : "";
+// A real browser run starts the servers once and every probe reuses them; a
+// fresh pair per probe compiled every page cold and made the probes flaky.
+const ownServers = process.env.BROWSER_E2E === "1";
+let servers = { handles: [] };
+
 persist("running");
 try {
   assertIsolatedFixtureTarget({
     databaseUrl: process.env.E2E_OWNER_DATABASE_URL,
     authUrl: process.env.SUPABASE_URL,
   });
+  if (ownServers) {
+    current = { stage: "servers" };
+    persist("running");
+    try {
+      servers = await startBrowserServers(browserServers(process.env), { logFile: serverLog });
+    } catch (error) {
+      servers = { handles: error?.handles ?? [] };
+      throw error;
+    }
+  }
   const runDirectory = mkdtempSync(resolve(directory, "run-"));
   for (const probe of probes) {
     current = { fault: probe.fault, spec: probe.spec, stage: "seed" };
@@ -270,6 +292,7 @@ try {
     const report = resolve(runDirectory, `${probe.fault}.json`);
     current = { fault: probe.fault, spec: probe.spec, stage: "spawn" };
     persist("running");
+    const logOffset = logSize();
     const result = spawnSync(
       process.execPath,
       [
@@ -285,12 +308,15 @@ try {
           ...process.env,
           E2E_FAILURE_PROBE: probe.fault,
           PLAYWRIGHT_JSON_OUTPUT_FILE: report,
+          ...(ownServers ? { E2E_REUSE_SERVERS: "1" } : {}),
         },
         encoding: "utf8",
       },
     );
     current.process = processSummary(result);
-    current.serverFailures = serverFailures(`${result.stdout ?? ""}\n${result.stderr ?? ""}`);
+    current.serverFailures = serverFailures(
+      `${result.stdout ?? ""}\n${result.stderr ?? ""}\n${serverOutputSince(logOffset)}`,
+    );
     if (result.error) throw new Error("Probe process failed");
     current.stage = "report";
     current.reportStatus = "pending";
@@ -364,8 +390,10 @@ try {
     console.log(`Detected injected fault: ${probe.fault}`);
   }
   persist("passed");
+  stopBrowserServers(servers.handles);
 } catch {
   persist("failed");
+  stopBrowserServers(servers.handles);
   throw new Error(
     `Failure-probe verification failed at ${current.stage}${current.fault ? ` for ${current.fault}` : ""}. Inspect .test-results/f16-probes/evidence.json.`,
   );

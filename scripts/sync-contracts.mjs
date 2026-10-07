@@ -78,11 +78,13 @@ const sourceFiles = [
     "backend/apps/api/src/server/marketing-workflows/marketing-workflow.graph.ts",
     "marketing-workflows/marketing-workflow.graph.ts",
   ],
+  ["backend/packages/core/src/text/safe-text.ts", "core/text/safe-text.ts"],
 ];
 const rewrites = new Map([
   ["@atlas/membership/schemas/shared", "membership/schemas/shared"],
   ["@atlas/events/event-types", "events/event-types"],
   ["@atlas/access", "access/permission-guards"],
+  ["@atlas/core/text/safe-text", "core/text/safe-text"],
 ]);
 
 function walk(dir) {
