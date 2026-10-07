@@ -911,7 +911,7 @@ jobs:
           GIT_SHA: ${{ github.sha }}
 
       - name: Upload candidate release evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() }}
         with:
           name: release-evidence-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
@@ -1243,7 +1243,7 @@ jobs:
           docker logs "$container" 2>&1 |
             jq -Rr 'fromjson? | select(.path != null and .status != null) | "\(.method) \(.path) \(.status)"' |
             sort | uniq -c | sort -rn | head -n 30
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() }}
         with:
           name: playwright-report
@@ -1388,7 +1388,7 @@ jobs:
         env:
           CI_NEEDS_JSON: ${{ toJSON(needs) }}
       - name: Upload candidate CI evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() }}
         with:
           name: ci-evidence-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
