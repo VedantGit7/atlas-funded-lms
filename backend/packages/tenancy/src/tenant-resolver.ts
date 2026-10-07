@@ -17,6 +17,48 @@ type TenantResolverDb = {
   $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
 };
 
+/**
+ * The verified domain for exactly this hostname, or nothing.
+ *
+ * `app.resolve_tenant_host` is the only way the application roles can read
+ * `tenant_domains` before a tenant context exists, and it answers one exact
+ * hostname: an unknown, deleted or unverified domain all come back empty, so
+ * callers cannot tell them apart. See docs/runbooks/tenant-host-resolution.md.
+ */
+async function findVerifiedDomain(
+  db: TenantResolverDb,
+  host: string,
+): Promise<TenantResolutionRow | null> {
+  const rows = await db.$queryRaw<TenantResolutionRow[]>`
+    select
+      tenant_id::text as tenant_id,
+      tenant_slug,
+      tenant_state,
+      domain_id::text as domain_id,
+      domain_status,
+      hostname
+    from app.resolve_tenant_host(${host})
+  `;
+
+  return rows[0] ?? null;
+}
+
+function toContext(
+  row: TenantResolutionRow,
+  host: string,
+  requestId: string,
+): ResolvedTenantContext {
+  return {
+    requestId,
+    host,
+    tenantId: row.tenant_id,
+    tenantSlug: row.tenant_slug,
+    tenantState: row.tenant_state,
+    tenantDomainId: row.domain_id,
+    tenantDomainStatus: row.domain_status,
+  };
+}
+
 export async function resolveTenantFromRequest(args: {
   req: Request;
   db: TenantResolverDb;
@@ -37,24 +79,7 @@ export async function resolveTenantFromHost(args: {
   db: TenantResolverDb;
 }): Promise<ResolvedTenantContext> {
   const host = normalizeHost(args.host);
-
-  const rows = await args.db.$queryRaw<TenantResolutionRow[]>`
-    select
-      t.id::text as tenant_id,
-      t.slug::text as tenant_slug,
-      t.state::text as tenant_state,
-      td.id::text as domain_id,
-      td.status::text as domain_status,
-      td.hostname::text as hostname
-    from tenant_domains td
-    join tenants t on t.id = td.tenant_id
-    where lower(td.hostname) = ${host}
-      and td.deleted_at is null
-      and t.deleted_at is null
-    limit 1
-  `;
-
-  const row = rows[0];
+  const row = await findVerifiedDomain(args.db, host);
 
   if (!row) {
     throw tenantNotFound();
@@ -63,15 +88,7 @@ export async function resolveTenantFromHost(args: {
   assertTenantDomainActive(row.domain_status);
   assertTenantActive(row.tenant_state);
 
-  return {
-    requestId: args.requestId,
-    host,
-    tenantId: row.tenant_id,
-    tenantSlug: row.tenant_slug,
-    tenantState: row.tenant_state,
-    tenantDomainId: row.domain_id,
-    tenantDomainStatus: row.domain_status,
-  };
+  return toContext(row, host, args.requestId);
 }
 
 export async function lookupTenantFromHost(args: {
@@ -80,36 +97,7 @@ export async function lookupTenantFromHost(args: {
   db: TenantResolverDb;
 }): Promise<ResolvedTenantContext | null> {
   const host = normalizeHost(args.host);
+  const row = await findVerifiedDomain(args.db, host);
 
-  const rows = await args.db.$queryRaw<TenantResolutionRow[]>`
-    select
-      t.id::text as tenant_id,
-      t.slug::text as tenant_slug,
-      t.state::text as tenant_state,
-      td.id::text as domain_id,
-      td.status::text as domain_status,
-      td.hostname::text as hostname
-    from tenant_domains td
-    join tenants t on t.id = td.tenant_id
-    where lower(td.hostname) = ${host}
-      and td.deleted_at is null
-      and t.deleted_at is null
-    limit 1
-  `;
-
-  const row = rows[0];
-
-  if (!row) {
-    return null;
-  }
-
-  return {
-    requestId: args.requestId,
-    host,
-    tenantId: row.tenant_id,
-    tenantSlug: row.tenant_slug,
-    tenantState: row.tenant_state,
-    tenantDomainId: row.domain_id,
-    tenantDomainStatus: row.domain_status,
-  };
+  return row ? toContext(row, host, args.requestId) : null;
 }

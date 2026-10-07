@@ -72,7 +72,9 @@ describe("resolveTenantFromHost", () => {
     });
   });
 
-  it("blocks inactive domain status", async () => {
+  it("answers an unverified domain exactly like an unknown host", async () => {
+    // The database function already returns only verified domains; this is
+    // the defensive check behind it, and it must not reveal the claim either.
     const db = mockDb([
       {
         tenant_id: "018f0000-0000-7000-8000-000000000001",
@@ -91,8 +93,23 @@ describe("resolveTenantFromHost", () => {
         db,
       }),
     ).rejects.toMatchObject({
-      code: "TENANT_DOMAIN_INACTIVE",
+      code: "TENANT_NOT_FOUND",
       status: 404,
     });
+  });
+
+  it("looks the host up through the exact-match function, never the table", async () => {
+    const db = mockDb([]);
+
+    await resolveTenantFromHost({
+      host: "Academy.Tenant-B.example.com:443",
+      requestId: "req_00000000-0000-4000-8000-000000000000",
+      db,
+    }).catch(() => undefined);
+
+    const [strings, ...values] = db.$queryRaw.mock.calls[0] as [TemplateStringsArray, ...unknown[]];
+    expect(strings.join("?")).toMatch(/from app\.resolve_tenant_host\(\?\)/);
+    expect(strings.join("?")).not.toMatch(/tenant_domains/);
+    expect(values).toEqual(["academy.tenant-b.example.com"]);
   });
 });

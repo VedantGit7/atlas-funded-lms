@@ -1,9 +1,9 @@
 import type { TenantDomainStatus, TenantState } from "./types";
-import { tenantDomainInactive, tenantUnavailable } from "./tenant-errors";
+import { tenantNotFound, tenantUnavailable } from "./tenant-errors";
 
 export function assertTenantDomainActive(status: TenantDomainStatus): void {
   if (status !== "ACTIVE") {
-    throw tenantDomainInactive();
+    throw tenantNotFound();
   }
 }
 

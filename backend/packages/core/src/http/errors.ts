@@ -1,6 +1,5 @@
 export type AtlasErrorCode =
   | "TENANT_NOT_FOUND"
-  | "TENANT_DOMAIN_INACTIVE"
   | "TENANT_UNAVAILABLE"
   | "AUTH_REQUIRED"
   // Audit finding H6. Each needs a different next step from the person signing
