@@ -968,6 +968,9 @@ jobs:
     needs: install
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # gitleaks scans every commit, not just the checked-out tree.
+          fetch-depth: 0
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -979,6 +982,13 @@ jobs:
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
       - run: pnpm check:secrets
+      # Allowlists and reviewed findings: docs/runbooks/secret-scanning.md
+      - name: Scan full git history with gitleaks
+        run: |
+          curl --fail --silent --show-error --location https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz --output "$RUNNER_TEMP/gitleaks.tar.gz"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git --config .gitleaks.toml --gitleaks-ignore-path .gitleaksignore --redact --verbose --no-banner --exit-code 1 .
 
   dependency-scan:
     name: dependency-scan
@@ -998,6 +1008,51 @@ jobs:
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
       - run: pnpm audit --audit-level high
+
+  # Policy and triage: docs/runbooks/container-scanning.md
+  container-scan:
+    name: container-scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      TRIVY_NO_PROGRESS: "true"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # The worker image (Chromium) plus Trivy's image export exceed the default free space.
+      - name: Free runner disk space
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
+
+      # Trivy's own GitHub Actions were compromised in March 2026 (GHSA-69fq-xp46-6x23):
+      # install the immutable release binary pinned by checksum instead.
+      - name: Install Trivy
+        run: |
+          curl --fail --silent --show-error --location https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz --output "$RUNNER_TEMP/trivy.tar.gz"
+          echo "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  $RUNNER_TEMP/trivy.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/trivy.tar.gz" -C "$RUNNER_TEMP" trivy
+
+      - name: Build API and worker images
+        run: |
+          # The API build needs its dotenv secret to exist; compiling requires no values.
+          printf '# Compile-only fixture: no runtime credentials or live providers.\n' > "$RUNNER_TEMP/api-build.env"
+          docker build -f deploy/managed-node/Dockerfile --target api --secret id=api_build_env,src="$RUNNER_TEMP/api-build.env" -t atlas-api:ci .
+          docker build -f deploy/managed-node/Dockerfile --target worker -t atlas-worker:ci .
+
+      - name: List HIGH/CRITICAL vulnerabilities, including those without a fix
+        run: |
+          for image in atlas-api:ci atlas-worker:ci; do
+            "$RUNNER_TEMP/trivy" image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 "$image"
+          done
+
+      - name: Fail on fixable HIGH/CRITICAL vulnerabilities
+        run: |
+          status=0
+          for image in atlas-api:ci atlas-worker:ci; do
+            "$RUNNER_TEMP/trivy" image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table "$image" || status=1
+          done
+          exit "$status"
 
   learner-bundle-boundary:
     name: learner-bundle-boundary
@@ -1233,6 +1288,7 @@ jobs:
       - observability-contract-check
       - secret-scan
       - dependency-scan
+      - container-scan
       - learner-bundle-boundary
       - frontend-api-closure
       - browser-smoke
@@ -1316,6 +1372,7 @@ jobs:
       - observability-contract-check
       - secret-scan
       - dependency-scan
+      - container-scan
       - learner-bundle-boundary
       - frontend-api-closure
       - browser-smoke

@@ -30,6 +30,7 @@
     "observability-contract-check",
     "secret-scan",
     "dependency-scan",
+    "container-scan",
     "learner-bundle-boundary",
     "frontend-api-closure",
     "browser-smoke",

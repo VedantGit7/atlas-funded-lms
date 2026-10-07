@@ -14,7 +14,7 @@ Verified against npm registry on **2026-06-23**. Use `npm view <pkg> version` be
 | Requirement    | Version                                                      |
 | -------------- | ------------------------------------------------------------ |
 | **Node.js**    | `>=22.0.0` (Next.js 16 requires 20.9+; repo standard is 22+) |
-| **pnpm**       | `11.6.0` (packageManager in root `package.json`)             |
+| **pnpm**       | `11.28.2` (packageManager in root `package.json`)            |
 | **TypeScript** | `^6.0.3`                                                     |
 
 ## Core framework

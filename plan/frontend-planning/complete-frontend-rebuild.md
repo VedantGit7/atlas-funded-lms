@@ -48,7 +48,7 @@ Pin policy: `^` ranges in `package.json`; run `npm view <pkg> version` before ea
 | Requirement | Version    |
 | ----------- | ---------- |
 | Node.js     | `>=22.0.0` |
-| pnpm        | `11.6.0`   |
+| pnpm        | `11.28.2`  |
 | TypeScript  | `^6.0.3`   |
 
 ### 2.2 Core

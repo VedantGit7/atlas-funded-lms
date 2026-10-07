@@ -1,0 +1,26 @@
+# Findings reviewed and confirmed not to be live credentials (2026-10-07).
+# One line per finding: <commit>:<path>:<rule>:<line>. A fingerprint covers
+# only that occurrence; the same value committed again elsewhere fails the
+# scan. See docs/runbooks/secret-scanning.md before adding a line.
+
+# Self-signed TLS identity for hooks.example.test, used by loopback tests only
+# (tests/fixtures/outbound-tls/README.md).
+faa7064ba89a60929ad5c20df732f2416154b2a0:tests/fixtures/outbound-tls/key.pem:private-key:1
+
+# Random values in the synthetic deployment environment used by unit tests.
+faa7064ba89a60929ad5c20df732f2416154b2a0:tests/helpers/deployment-env.ts:generic-api-key:33
+faa7064ba89a60929ad5c20df732f2416154b2a0:tests/helpers/deployment-env.ts:generic-api-key:34
+faa7064ba89a60929ad5c20df732f2416154b2a0:tests/helpers/deployment-env.ts:generic-api-key:35
+
+# RFC 6238 TOTP test-vector seed, base32 of "12345678901234567890" (or of its
+# first ten digits).
+faa7064ba89a60929ad5c20df732f2416154b2a0:tests/unit/auth/platform-fixture-seeding.test.ts:generic-api-key:29
+faa7064ba89a60929ad5c20df732f2416154b2a0:tests/unit/browser/totp.test.ts:generic-api-key:4
+
+# A value literally named "synthetic-..." in a header-forwarding test.
+faa7064ba89a60929ad5c20df732f2416154b2a0:tests/unit/web/internal-api-forwarding.test.ts:generic-api-key:21
+
+# Idempotency keys in request fixtures, not secrets.
+1ab7bcfc6c59647a58ffb797029f4c8d5966460a:tests/unit/grading/grading-service.test.ts:generic-api-key:33
+1ab7bcfc6c59647a58ffb797029f4c8d5966460a:tests/integration/api/grading.test.ts:generic-api-key:169
+7ce790dd1a7e04e64dca24063755f931006139ee:tests/api/branding-publish.post.test.ts:generic-api-key:156

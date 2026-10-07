@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Atlas LMS multi-tenant white-label learning platform",
-  "packageManager": "pnpm@11.6.0",
+  "packageManager": "pnpm@11.28.2",
   "engines": {
     "node": ">=24.15.0 <25",
     "pnpm": ">=11.0.0"

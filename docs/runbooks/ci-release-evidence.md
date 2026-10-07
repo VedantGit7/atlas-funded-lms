@@ -2,7 +2,7 @@
 
 ## Candidate checks
 
-Publish the reviewed remediation as a committed candidate through the normal repository process. Open a pull request, push to a configured CI branch, or manually dispatch CI against that candidate. `ci-required` must run and succeed after all 34 required jobs succeed. The optional health job may be skipped only when its environment is unconfigured; if it runs and fails, the aggregate fails.
+Publish the reviewed remediation as a committed candidate through the normal repository process. Open a pull request, push to a configured CI branch, or manually dispatch CI against that candidate. `ci-required` must run and succeed after all 35 required jobs succeed. The optional health job may be skipped only when its environment is unconfigured; if it runs and fails, the aggregate fails.
 
 Inspect the run's job list. A failed workflow with zero jobs is an admission/dispatch problem, not proof that tests ran. Read GitHub's workflow annotations and resolve the actual reported cause. The local `workflow-validation` job cannot execute if the workflow itself is rejected, so validate workflow edits locally with Actionlint as well.
 

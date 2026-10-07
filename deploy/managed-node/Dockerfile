@@ -13,14 +13,23 @@ RUN mkdir -p /manifests/backend/prisma \
     && cp backend/prisma/schema.prisma /manifests/backend/prisma/ \
     && find backend frontend -name package.json -exec cp --parents '{}' /manifests/ \;
 
-FROM node:24.21.0-bookworm-slim AS dependencies
+# Every shipped image starts here. The upstream Node image trails Debian security
+# releases, so install the fixes already published rather than ship them unpatched.
+FROM node:24.21.0-bookworm-slim AS runtime-base
+RUN --mount=type=cache,id=atlas-apt-cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=atlas-apt-lists,target=/var/lib/apt/lists,sharing=locked \
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+
+FROM runtime-base AS dependencies
 WORKDIR /app
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 ENV HUSKY=0
-RUN corepack enable && corepack prepare pnpm@11.6.0 --activate
+RUN corepack enable && corepack prepare pnpm@11.28.2 --activate
 COPY --from=manifests /manifests/ ./
+# The metadata cache stays out of the image layers, like the store.
 RUN --mount=type=cache,id=atlas-pnpm-store-v11,target=/pnpm/store \
+    --mount=type=cache,id=atlas-pnpm-metadata-v11,target=/root/.cache/pnpm \
     pnpm install --frozen-lockfile --store-dir=/pnpm/store
 # pnpm lifecycle policy must not decide whether the runtime client exists.
 # This schema-only generation needs no database connection or environment file.
@@ -45,18 +54,26 @@ COPY --from=source /source/ ./
 ENV NODE_ENV=production
 ENV ATLAS_SERVICE_RUNTIME=managed-node
 ENV TSX_TSCONFIG_PATH=/app/backend/apps/api/tsconfig.json
+# Runtime starts node directly; package managers and root's build caches are build-time only.
+RUN rm -rf /root/.cache /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+       /usr/local/bin/pnpm /usr/local/bin/pnpx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 USER node
 RUN --network=none APP_ENV=test NODE_ENV=test node --import tsx deploy/managed-node/check-worker-imports.ts
 EXPOSE 8081
 STOPSIGNAL SIGTERM
 CMD ["node", "--import", "tsx", "backend/apps/api/src/worker/index.ts"]
 
-FROM node:24.21.0-bookworm-slim AS api
+FROM runtime-base AS api
 WORKDIR /app
 ENV NODE_ENV=production
 ENV ATLAS_SERVICE_RUNTIME=managed-node
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3001
+# Runtime starts node directly; package managers are build-time only.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+       /usr/local/bin/yarn /usr/local/bin/yarnpkg
 COPY --from=api-build --chown=node:node /app/backend/apps/api/.next/standalone ./
 COPY --from=api-build --chown=node:node /app/backend/apps/api/.next/static ./backend/apps/api/.next/static
 USER node
