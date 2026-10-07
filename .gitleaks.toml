@@ -1,0 +1,21 @@
+# Secret scanning of the full git history (CI job `secret-scan`).
+#
+# Extends gitleaks' default rules. Each allowlist below is a *shape* that can
+# never be a live credential; anything else that is known to be safe is
+# acknowledged one finding at a time in `.gitleaksignore`, so a new secret of
+# the same kind still fails the scan. See docs/runbooks/secret-scanning.md.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "SHA-256 digests of files, recorded in audit evidence"
+condition = "AND"
+paths = ['''^docs/engineering/audits/.+\.json$''']
+regexTarget = "secret"
+regexes = ['''^[a-f0-9]{64}$''']
+
+[[allowlists]]
+description = "Supabase local-development JWTs (iss: supabase-demo), signed with the public demo secret"
+regexTarget = "secret"
+regexes = ['''^eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIi''']
