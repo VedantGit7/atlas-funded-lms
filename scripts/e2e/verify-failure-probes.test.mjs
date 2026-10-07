@@ -19,7 +19,7 @@ function runFixture(t, mode = "valid") {
     mkdirSync(dirname(join(root, file)), { recursive: true });
     writeFileSync(join(root, file), content);
   };
-  for (const file of ["verify-failure-probes.mjs", "isolated-target.mjs"]) {
+  for (const file of ["verify-failure-probes.mjs", "isolated-target.mjs", "browser-servers.mjs"]) {
     mkdirSync(join(root, "scripts/e2e"), { recursive: true });
     copyFileSync(join(repository, "scripts/e2e", file), join(root, "scripts/e2e", file));
   }
@@ -140,6 +140,8 @@ function runFixture(t, mode = "valid") {
       E2E_OWNER_DATABASE_URL: "postgresql://127.0.0.1:5432/atlas_lms_ci",
       SUPABASE_URL: "http://127.0.0.1:54321",
       E2E_PRIVATE_CANARY: sentinel,
+      // The fake Playwright needs no servers; a real run (BROWSER_E2E=1) starts them once.
+      BROWSER_E2E: "",
     },
     encoding: "utf8",
     timeout: 30000,
