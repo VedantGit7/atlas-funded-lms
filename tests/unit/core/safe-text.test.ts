@@ -16,12 +16,21 @@ describe("toPlainText", () => {
     ["javajavascript:script:alert(1)", "alert(1)"],
     ["JaVaScRiPt:alert(1)", "alert(1)"],
     ["<!-- hidden -->text", "text"],
-    ["<script", "script"],
+    ["<script", ""],
+    ["<<b>script>alert(1)", "script>alert(1)"],
   ])("leaves no markup in %j", (input, expected) => {
     const output = toPlainText(input);
     expect(output).toBe(expected);
     expect(output).not.toMatch(/<[!/?a-z]/i);
     expect(output).not.toMatch(/javascript:/i);
+  });
+
+  it("stays linear on long runs of '<' (CodeQL js/polynomial-redos)", () => {
+    for (const attack of ["<".repeat(50_000), "<a".repeat(50_000), "javascript".repeat(20_000)]) {
+      const started = performance.now();
+      toPlainText(attack);
+      expect(performance.now() - started).toBeLessThan(250);
+    }
   });
 
   it("keeps ordinary text, including a < that cannot open a tag", () => {
