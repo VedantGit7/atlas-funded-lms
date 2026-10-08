@@ -70,6 +70,7 @@
     "db:check-no-leaked-test-tenants": "dotenv -e .env.test -- node scripts/db/check-no-leaked-test-tenants.mjs",
     "data:encrypt-affiliate-payouts": "tsx scripts/data/encrypt-affiliate-payout-details.ts",
     "data:sanitize-svg-assets": "tsx scripts/data/sanitize-stored-svg-assets.ts",
+    "data:rerender-certificate-pdfs": "tsx scripts/data/rerender-certificate-pdfs.ts",
     "storage:r2-cors": "tsx scripts/storage/r2-cors.ts",
     "db:check-no-direct-prisma": "tsx scripts/check-no-direct-prisma.ts",
     "db:check-no-session-tenant-set": "node scripts/db/check-no-session-tenant-set.mjs",
