@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # Build from the repository root. No deployment or database migration runs here.
-FROM node:24.21.0-bookworm-slim AS source
+FROM node:24.21.0-trixie-slim AS source
 WORKDIR /source
 COPY . .
 
@@ -15,7 +15,7 @@ RUN mkdir -p /manifests/backend/prisma \
 
 # Every shipped image starts here. The upstream Node image trails Debian security
 # releases, so install the fixes already published rather than ship them unpatched.
-FROM node:24.21.0-bookworm-slim AS runtime-base
+FROM node:24.21.0-trixie-slim AS runtime-base
 RUN --mount=type=cache,id=atlas-apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=atlas-apt-lists,target=/var/lib/apt/lists,sharing=locked \
     apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
