@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import {
+  browserServerEnv,
   browserServers,
   isServerReady,
   startBrowserServers,
@@ -90,4 +91,35 @@ test("fails fast, with the started handles, when a server exits before it is rea
     }),
     (error) => /exited before it was ready/.test(error.message) && Array.isArray(error.handles),
   );
+});
+
+test("starts both servers with the long keep-alive preload, keeping any NODE_OPTIONS", () => {
+  for (const server of browserServers({ NODE_OPTIONS: "--max-old-space-size=4096" })) {
+    const options = server.env.NODE_OPTIONS;
+    assert.match(options, /^--max-old-space-size=4096 --require ".+long-keep-alive\.cjs"$/);
+    assert.equal(existsSync(JSON.parse(options.slice(options.indexOf('"')))), true);
+  }
+  assert.match(browserServerEnv({}).NODE_OPTIONS, /^--require ".+long-keep-alive\.cjs"$/);
+});
+
+test("a server started with that environment keeps idle connections for ten minutes", async (t) => {
+  // Socket hang-ups: see long-keep-alive.cjs. Node's default is 5 s.
+  const directory = mkdtempSync(join(tmpdir(), "atlas-browser-servers-"));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const logFile = join(directory, "servers.log");
+  const port = await freePort();
+  const script = `const s = require('node:http').createServer((q, r) => r.end('ok')); console.log('keepAliveTimeout=' + s.keepAliveTimeout); s.listen(${port}, '127.0.0.1')`;
+  const server = {
+    name: "keep-alive",
+    command: `"${process.execPath}" -e "${script}"`,
+    url: `http://127.0.0.1:${port}/`,
+    env: browserServerEnv({}),
+  };
+  const { handles } = await startBrowserServers([server], {
+    logFile,
+    pollMs: 50,
+    timeoutMs: 20_000,
+  });
+  t.after(() => stopBrowserServers(handles));
+  assert.match(readFileSync(logFile, "utf8"), /keepAliveTimeout=600000/);
 });

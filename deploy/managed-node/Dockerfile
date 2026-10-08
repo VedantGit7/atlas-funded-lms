@@ -70,6 +70,11 @@ ENV NODE_ENV=production
 ENV ATLAS_SERVICE_RUNTIME=managed-node
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3001
+# Idle connections stay open longer than the 60 s idle timeout most proxies and
+# load balancers use, so the proxy always closes first. With Node's 5 s default
+# the server can close a connection just as the proxy reuses it: a 502 that
+# neither side logs (managed-node-runtime.md).
+ENV KEEP_ALIVE_TIMEOUT=65000
 # Runtime starts node directly; package managers are build-time only.
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \

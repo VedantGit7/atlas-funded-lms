@@ -1,5 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import { closeSync, openSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 /**
  * The API and web servers the browser suite runs against, shared by
@@ -19,10 +20,22 @@ import { closeSync, openSync } from "node:fs";
 /** Playwright's own readiness rule for a webServer `url`. */
 const READY_STATUSES = new Set([400, 401, 402, 403]);
 
+/**
+ * Environment for both servers: a preload that keeps idle connections open far
+ * longer than Node's default, so a busy dev server cannot close one just as a
+ * client reuses it (see long-keep-alive.cjs). Added to any existing NODE_OPTIONS.
+ */
+export function browserServerEnv(env = process.env) {
+  const preload = fileURLToPath(new URL("./long-keep-alive.cjs", import.meta.url));
+  const requirePreload = `--require ${JSON.stringify(preload)}`;
+  return { NODE_OPTIONS: [env.NODE_OPTIONS, requirePreload].filter(Boolean).join(" ") };
+}
+
 export function browserServers(env = process.env) {
   const useDevServer = env.BROWSER_E2E_DEV === "1";
   // The primary tenant fixture's local dev host (browser-suite configuration).
   const tenantBaseUrl = env.E2E_TENANT_BASE_URL ?? "http://fundedbeyond.localhost.test:3000";
+  const serverEnv = browserServerEnv(env);
   return [
     {
       name: "api",
@@ -30,6 +43,7 @@ export function browserServers(env = process.env) {
         ? "pnpm exec dotenv -e .env.local -- pnpm --filter @atlas/api-app dev"
         : "pnpm exec dotenv -e .env.local -- pnpm browser:serve:api",
       url: "http://127.0.0.1:3001/api/v1/health",
+      env: serverEnv,
     },
     {
       name: "web",
@@ -37,6 +51,7 @@ export function browserServers(env = process.env) {
         ? "pnpm --filter @atlas/web dev"
         : "pnpm exec dotenv -e .env.local -- pnpm browser:serve:web",
       url: tenantBaseUrl,
+      env: serverEnv,
     },
   ];
 }
@@ -67,7 +82,7 @@ export async function startBrowserServers(
     const fd = logFile ? openSync(logFile, "a") : "ignore";
     const child = spawn(server.command, {
       shell: true,
-      env: process.env,
+      env: { ...process.env, ...server.env },
       stdio: ["ignore", fd, fd],
       // Its own process group on POSIX, so stopping it stops pnpm and Next too.
       detached: process.platform !== "win32",

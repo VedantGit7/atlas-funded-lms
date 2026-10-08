@@ -45,6 +45,22 @@ export function authEmailRateLimited(): AtlasHttpError {
   });
 }
 
+/**
+ * The auth service refused a sign-in for its per-IP rate limit. Says nothing
+ * about the account, so unlike a refused password it can be named.
+ */
+export const SIGN_IN_RATE_LIMITED_MESSAGE =
+  "Too many sign-in attempts. Wait a few minutes, then try again.";
+
+export function signInRateLimited(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "RATE_LIMITED",
+    status: 429,
+    message: SIGN_IN_RATE_LIMITED_MESSAGE,
+    retryAfterSeconds: 60,
+  });
+}
+
 export function accountDisabled(): AtlasHttpError {
   return new AtlasHttpError({
     code: "ACCOUNT_DISABLED",

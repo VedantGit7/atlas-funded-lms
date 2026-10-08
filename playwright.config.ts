@@ -110,6 +110,7 @@ export default defineConfig({
           // misconfigured harness.
           command: apiServer.command,
           url: apiServer.url,
+          env: apiServer.env,
           reuseExistingServer,
           // Long enough to cover a cold production build of both apps.
           timeout: 420_000,
@@ -121,6 +122,7 @@ export default defineConfig({
           // auth endpoint into the client bundle.
           command: webServer.command,
           url: webServer.url,
+          env: webServer.env,
           reuseExistingServer,
           timeout: 420_000,
         },

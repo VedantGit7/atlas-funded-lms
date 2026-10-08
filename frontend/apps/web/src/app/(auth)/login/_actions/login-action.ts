@@ -5,7 +5,11 @@ import {
   resolvePostAuthRedirect,
   resolveSafeRedirectPath,
 } from "../../../../lib/auth/safe-redirect";
-import { GENERIC_LOGIN_ERROR_MESSAGE, identityBlockMessage } from "../../../../lib/auth-messages";
+import {
+  GENERIC_LOGIN_ERROR_MESSAGE,
+  identityBlockMessage,
+  loginFailureMessage,
+} from "../../../../lib/auth-messages";
 import { readFormString } from "../../../../lib/server/form";
 import { serverPublicApi, ServerPublicApiError } from "../../../../lib/server/public-auth-fetch";
 
@@ -44,14 +48,17 @@ export async function loginAction(
     body = await serverPublicApi.login(parsed.data);
   } catch (error) {
     // Only reached after the password was accepted, so naming the account
-    // state reveals nothing a wrong password could learn (audit H6).
-    const identityMessage =
-      error instanceof ServerPublicApiError ? identityBlockMessage(error.code) : null;
+    // state reveals nothing a wrong password could learn (audit H6). Rate
+    // limits and outages are not about the account at all.
+    const specificMessage =
+      error instanceof ServerPublicApiError
+        ? (identityBlockMessage(error.code) ?? loginFailureMessage(error.status))
+        : null;
     return {
       ok: false,
-      message: identityMessage ?? GENERIC_LOGIN_ERROR_MESSAGE,
+      message: specificMessage ?? GENERIC_LOGIN_ERROR_MESSAGE,
       requestId:
-        identityMessage && error instanceof ServerPublicApiError ? error.requestId : requestId,
+        specificMessage && error instanceof ServerPublicApiError ? error.requestId : requestId,
     };
   }
 

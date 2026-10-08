@@ -1,4 +1,21 @@
 export const GENERIC_LOGIN_ERROR_MESSAGE = "Invalid email or password";
+
+/**
+ * Sign-in failures that are not about the account: too many attempts from this
+ * connection, or the service failing. Naming them reveals nothing a wrong
+ * password could not, and "Invalid email or password" sent people to reset
+ * passwords that were fine.
+ */
+export const LOGIN_RATE_LIMITED_MESSAGE =
+  "Too many sign-in attempts. Wait a few minutes, then try again.";
+export const LOGIN_UNAVAILABLE_MESSAGE =
+  "Sign-in is temporarily unavailable. Please try again in a moment.";
+
+export function loginFailureMessage(status: number): string | null {
+  if (status === 429) return LOGIN_RATE_LIMITED_MESSAGE;
+  if (status >= 500) return LOGIN_UNAVAILABLE_MESSAGE;
+  return null;
+}
 export const GENERIC_SIGNUP_ERROR_MESSAGE = "Unable to create account. Please try again.";
 export const GENERIC_PASSWORD_RESET_MESSAGE =
   "If an account exists for that email, you will receive reset instructions.";

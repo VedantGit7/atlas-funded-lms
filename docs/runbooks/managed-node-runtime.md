@@ -21,6 +21,8 @@ CI builds both targets and fails on fixable HIGH/CRITICAL vulnerabilities; the r
 
 Export `ATLAS_API_IMAGE`, `ATLAS_WORKER_IMAGE`, `ATLAS_API_ENV_FILE`, and `ATLAS_WORKER_ENV_FILE`, then review `docker compose -f deploy/managed-node/compose.yaml config --quiet` before `up -d`. The API binds only loopback port 3001 in this reference deployment; connect it to an authenticated TLS ingress or private managed-service origin. Do not expose worker port 8081 publicly. Web remains on its existing Vercel deployment.
 
+The API image sets `KEEP_ALIVE_TIMEOUT=65000`: idle connections stay open 65 s. The ingress's upstream idle timeout must be shorter, so it always closes an idle connection first. If the API closes first, a request the ingress sends on that connection at the same moment fails as a 502 that neither side logs. Most ingresses default to 60 s; if the chosen one keeps idle upstream connections longer, raise this above it.
+
 The worker image starts Node directly with the TypeScript loader, preserving SIGTERM delivery. Set `TSX_TSCONFIG_PATH=/app/backend/apps/api/tsconfig.json` when starting outside Compose. Both services run as an unprivileged user. The reference limits are 2 CPUs/2 GiB per service, 256 MiB `/tmp` and 256 MiB worker shared memory; validate measured workload headroom before changing replica counts. Compose restarts exited processes; an unhealthy Docker health check by itself does **not** restart a container. Configure the managed host's liveness restart policy against `/healthz` and readiness against `/readyz`.
 
 ## Work and recovery contract
