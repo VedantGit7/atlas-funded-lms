@@ -1,34 +1,31 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
 import { postBadgesBodySchema } from "../../backend/apps/api/src/server/gamification/gamification.schemas";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function adminTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "badge.manage" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "badge.manage" }],
+      [],
+      [{ role_key: "admin", bypasses_resource_predicates: true }],
+    ),
   };
 }
 
 function learnerTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "gamification.profile.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "gamification.profile.read" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function learnerWithoutManageTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "badge.manage" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]),
+    $queryRaw: authorizationFactsQuery([{ key: "badge.manage" }], [], []),
   };
 }
 

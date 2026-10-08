@@ -1,23 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function adminAutomationTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "automation.rule.manage" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "automation.rule.manage" }],
+      [],
+      [{ role_key: "admin", bypasses_resource_predicates: true }],
+    ),
   };
 }
 
 function instructorAutomationTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "automation.rule.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "automation.rule.read" }],
+      [],
+      [{ role_key: "instructor", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
@@ -55,11 +56,11 @@ describe("automation and locale authorization", () => {
   it("deny override wins for locale manage", async () => {
     const decision = await can({
       tx: {
-        $queryRaw: vi
-          .fn()
-          .mockResolvedValueOnce([{ key: "locale.manage" }])
-          .mockResolvedValueOnce([{ key: "locale.manage", effect: "DENY" }])
-          .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+        $queryRaw: authorizationFactsQuery(
+          [{ key: "locale.manage" }],
+          [{ key: "locale.manage", effect: "DENY" }],
+          [{ role_key: "admin", bypasses_resource_predicates: true }],
+        ),
       },
       actor: { tenantId: "tenant-a", membershipId: "admin-a" },
       permission: "locale.manage",

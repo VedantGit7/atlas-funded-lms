@@ -1,18 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function gradingTx(roleKeys: string[]) {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "assessment.grade" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(
-        roleKeys.map((role_key) => ({
-          role_key,
-          bypasses_resource_predicates: role_key === "owner" || role_key === "admin",
-        })),
-      ),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "assessment.grade" }],
+      [],
+      roleKeys.map((role_key) => ({
+        role_key,
+        bypasses_resource_predicates: role_key === "owner" || role_key === "admin",
+      })),
+    ),
   };
 }
 
@@ -20,11 +19,7 @@ describe("grading authorization", () => {
   it("denies learner grading queue access", async () => {
     const decision = await can({
       tx: {
-        $queryRaw: vi
-          .fn()
-          .mockResolvedValueOnce([{ key: "assessment.grade" }])
-          .mockResolvedValueOnce([])
-          .mockResolvedValueOnce([]),
+        $queryRaw: authorizationFactsQuery([{ key: "assessment.grade" }], [], []),
       },
       actor: { tenantId: "tenant-a", membershipId: "learner-a" },
       permission: "assessment.grade",
@@ -112,11 +107,11 @@ describe("grading authorization", () => {
   it("blocks grading when explicit deny override exists", async () => {
     const decision = await can({
       tx: {
-        $queryRaw: vi
-          .fn()
-          .mockResolvedValueOnce([{ key: "assessment.grade" }])
-          .mockResolvedValueOnce([{ effect: "DENY" }])
-          .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+        $queryRaw: authorizationFactsQuery(
+          [{ key: "assessment.grade" }],
+          [{ effect: "DENY" }],
+          [{ role_key: "instructor", bypasses_resource_predicates: false }],
+        ),
       },
       actor: { tenantId: "tenant-a", membershipId: "grader-a" },
       permission: "assessment.grade",

@@ -1,37 +1,34 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
 import {
   createAttributionTokenBodySchema,
   updateReadinessPolicyBodySchema,
 } from "../../backend/apps/api/src/server/readiness/readiness.schemas";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function adminTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "readiness_policy.manage" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "readiness_policy.manage" }],
+      [],
+      [{ role_key: "admin", bypasses_resource_predicates: true }],
+    ),
   };
 }
 
 function learnerReadTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "readiness_policy.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "readiness_policy.read" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function learnerWithoutManageTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "readiness_policy.manage" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]),
+    $queryRaw: authorizationFactsQuery([{ key: "readiness_policy.manage" }], [], []),
   };
 }
 

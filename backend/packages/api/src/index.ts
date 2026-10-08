@@ -28,6 +28,7 @@ export {
 export {
   runProtectedTenantRouteHandler,
   runProtectedTenantRoutePipeline,
+  enforceTenantRouteRateLimit,
   createTenantRoute,
   type ProtectedTenantRouteHandler,
 } from "./create-tenant-route";

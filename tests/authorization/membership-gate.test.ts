@@ -12,12 +12,15 @@ describe("membership gate authorization", () => {
     ["SUSPENDED", "MEMBERSHIP_SUSPENDED"],
     ["REMOVED", "MEMBERSHIP_REMOVED"],
   ] as const)("blocks %s membership with %s", async (status, code) => {
-    vi.spyOn(membershipRepository, "findMembershipByPrincipal").mockResolvedValue({
-      id: "membership-id",
-      tenantId: "tenant-a-id",
-      authPrincipalId: "principal-id",
-      status,
-      invitedEmailNormalized: null,
+    vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue({
+      membership: {
+        id: "membership-id",
+        tenantId: "tenant-a-id",
+        authPrincipalId: "principal-id",
+        status,
+        invitedEmailNormalized: null,
+      },
+      principalStatus: "active",
     });
 
     await expect(
@@ -33,7 +36,7 @@ describe("membership gate authorization", () => {
   });
 
   it("blocks principals with no membership row", async () => {
-    vi.spyOn(membershipRepository, "findMembershipByPrincipal").mockResolvedValue(null);
+    vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue(null);
 
     await expect(
       requireActiveMembership({

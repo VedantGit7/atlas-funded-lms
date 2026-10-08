@@ -1,23 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function adminTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "data.export.run" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "data.export.run" }],
+      [],
+      [{ role_key: "admin", bypasses_resource_predicates: true }],
+    ),
   };
 }
 
 function learnerTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "data.deletion.request" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "data.deletion.request" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
@@ -75,11 +76,11 @@ describe("data-rights authorization", () => {
 
   it("allows data.deletion.manage for admin on deletion request resource", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "data.deletion.manage" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "data.deletion.manage" }],
+        [],
+        [{ role_key: "admin", bypasses_resource_predicates: true }],
+      ),
     };
 
     const decision = await can({

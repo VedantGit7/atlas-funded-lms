@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 describe("members route IDOR protection via can()", () => {
   it("denies membership.read on another tenant membership collection", async () => {
@@ -26,11 +27,7 @@ describe("members route IDOR protection via can()", () => {
 
   it("denies learners without membership.read even inside the same tenant", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "membership.read" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]),
+      $queryRaw: authorizationFactsQuery([{ key: "membership.read" }], [], []),
     };
 
     const decision = await can({

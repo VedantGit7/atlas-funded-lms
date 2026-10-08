@@ -1,14 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 describe("can default deny", () => {
   it("denies when no role grant or override exists", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "membership.read" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]),
+      $queryRaw: authorizationFactsQuery([{ key: "membership.read" }], [], []),
     };
 
     const decision = await can({

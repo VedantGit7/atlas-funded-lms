@@ -1,14 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 describe("can relationship predicates", () => {
   it("allows relationship-bound permission when relationship exists", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "assessment.grade" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "assessment.grade" }],
+        [],
+        [{ role_key: "instructor", bypasses_resource_predicates: false }],
+      ),
     };
 
     const decision = await can({
@@ -31,11 +32,11 @@ describe("can relationship predicates", () => {
 
   it("denies relationship-bound permission when relationship is missing", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "assessment.grade" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "assessment.grade" }],
+        [],
+        [{ role_key: "instructor", bypasses_resource_predicates: false }],
+      ),
     };
 
     const decision = await can({

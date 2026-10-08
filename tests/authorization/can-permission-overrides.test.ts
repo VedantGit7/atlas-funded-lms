@@ -1,13 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 describe("can permission overrides", () => {
   it("denies when an explicit DENY override exists", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "membership.read" }])
-        .mockResolvedValueOnce([{ effect: "DENY", permission_key: "membership.read" }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "membership.read" }],
+        [{ effect: "DENY", permission_key: "membership.read" }],
+      ),
     };
 
     const decision = await can({
@@ -28,11 +29,11 @@ describe("can permission overrides", () => {
 
   it("allows explicit ALLOW override without a role grant when predicates pass", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "profile.update" }])
-        .mockResolvedValueOnce([{ effect: "ALLOW", permission_key: "profile.update" }])
-        .mockResolvedValueOnce([]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "profile.update" }],
+        [{ effect: "ALLOW", permission_key: "profile.update" }],
+        [],
+      ),
     };
 
     const decision = await can({
@@ -53,11 +54,11 @@ describe("can permission overrides", () => {
 
   it("still enforces ownership predicates for explicit ALLOW overrides", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "profile.update" }])
-        .mockResolvedValueOnce([{ effect: "ALLOW", permission_key: "profile.update" }])
-        .mockResolvedValueOnce([]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "profile.update" }],
+        [{ effect: "ALLOW", permission_key: "profile.update" }],
+        [],
+      ),
     };
 
     const decision = await can({

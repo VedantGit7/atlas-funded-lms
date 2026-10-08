@@ -1,27 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
 import {
   createCourseBodySchema,
   updateCourseBodySchema,
 } from "../../backend/apps/api/src/server/courses/course-authoring-schemas";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function instructorTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "course.create" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "course.create" }],
+      [],
+      [{ role_key: "instructor", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function learnerWithoutCourseCreateTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "course.create" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]),
+    $queryRaw: authorizationFactsQuery([{ key: "course.create" }], [], []),
   };
 }
 

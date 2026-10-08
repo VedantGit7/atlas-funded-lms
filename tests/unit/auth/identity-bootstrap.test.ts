@@ -29,11 +29,12 @@ describe("membership gate refuses disabled accounts (audit H6)", () => {
   it.each(["disabled", "unclaimed", null])(
     "blocks an ACTIVE membership whose account is %s",
     async (status) => {
-      vi.spyOn(membershipRepository, "findMembershipByPrincipal").mockResolvedValue(
-        activeMembership,
-      );
-      vi.spyOn(membershipRepository, "findPrincipalGlobalStatus").mockResolvedValue(status);
-      const touch = vi.spyOn(membershipRepository, "touchMembershipLastActive");
+      // Activity is written only for an admitted request: the SQL that does it
+      // is covered against Postgres in hot-path-round-trips.test.ts.
+      vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue({
+        membership: activeMembership,
+        principalStatus: status,
+      });
 
       await expect(
         requireActiveMembership({
@@ -42,15 +43,14 @@ describe("membership gate refuses disabled accounts (audit H6)", () => {
           authPrincipalId: "principal-id",
         }),
       ).rejects.toMatchObject({ code: "ACCOUNT_DISABLED", status: 403 });
-      expect(touch).not.toHaveBeenCalled();
     },
   );
 
   it("admits an ACTIVE membership of an active account", async () => {
-    vi.spyOn(membershipRepository, "findMembershipByPrincipal").mockResolvedValue(activeMembership);
-    vi.spyOn(membershipRepository, "findPrincipalGlobalStatus").mockResolvedValue("active");
-    vi.spyOn(membershipRepository, "touchMembershipLastActive").mockResolvedValue(undefined);
-    vi.spyOn(membershipRepository, "recordMembershipActiveDay").mockResolvedValue(undefined);
+    vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue({
+      membership: activeMembership,
+      principalStatus: "active",
+    });
 
     await expect(
       requireActiveMembership({

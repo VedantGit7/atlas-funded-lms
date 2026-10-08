@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import {
   authenticateTenantRequest,
+  enforceTenantRouteRateLimit,
   runProtectedTenantRouteHandler,
   toSafeErrorEnvelope,
 } from "@atlas/api";
@@ -34,6 +35,12 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     // Supabase verification, then tenant and principal, each releasing its
     // connection before the tenant transaction (audit H3).
     const { supabaseUser, tenant, principal } = await authenticateTenantRequest(req);
+    await enforceTenantRouteRateLimit({
+      tenantId: tenant.tenantId,
+      principalId: principal.id,
+      metadata: downloadCertificateMetadata,
+      requestId,
+    });
 
     const plan = await withTenantTx(
       { tenantId: tenant.tenantId, requestId, allowAnonymousTenantRead: true },
@@ -46,6 +53,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 
         return runProtectedTenantRouteHandler({
           sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+          rateLimitEnforced: true,
           tx,
           ctx: {
             tenantId: tenant.tenantId,

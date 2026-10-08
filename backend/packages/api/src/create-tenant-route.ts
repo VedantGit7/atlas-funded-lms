@@ -44,6 +44,29 @@ function asParamRecord(params: object): Record<string, string> {
   return params as Record<string, string>;
 }
 
+/**
+ * The route's per-actor rate limit, checked before the tenant transaction so
+ * no pooled connection waits on Redis (audit §3.1). Keyed on the principal: a
+ * principal has at most one membership per tenant, so this is the same budget
+ * as keying on the membership, known before the membership is read.
+ * Pass `rateLimitEnforced: true` to the pipeline after calling it.
+ */
+export async function enforceTenantRouteRateLimit(args: {
+  tenantId: string;
+  principalId: string;
+  metadata: Pick<RouteMetadata, "permission" | "rateLimit">;
+  requestId: string;
+}): Promise<void> {
+  await enforceProtectedRateLimit({
+    plane: "tenant",
+    tenantId: args.tenantId,
+    actorId: args.principalId,
+    permission: args.metadata.permission,
+    bucket: args.metadata.rateLimit,
+    requestId: args.requestId,
+  });
+}
+
 async function authorizeProtectedTenantRoute<TInput>(args: {
   tx: TenantTx;
   ctx: TenantRouteContext;
@@ -55,15 +78,19 @@ async function authorizeProtectedTenantRoute<TInput>(args: {
    * Missing assurance fails closed on routes requiring MFA.
    */
   sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
+  /** The caller ran enforceTenantRouteRateLimit before the transaction. */
+  rateLimitEnforced?: boolean | undefined;
 }): Promise<ResourceRef> {
-  await enforceProtectedRateLimit({
-    plane: "tenant",
-    tenantId: args.ctx.tenantId,
-    actorId: args.ctx.actorMembershipId,
-    permission: args.metadata.permission,
-    bucket: args.metadata.rateLimit,
-    requestId: args.ctx.requestId,
-  });
+  if (args.rateLimitEnforced !== true) {
+    await enforceProtectedRateLimit({
+      plane: "tenant",
+      tenantId: args.ctx.tenantId,
+      actorId: args.ctx.actorMembershipId,
+      permission: args.metadata.permission,
+      bucket: args.metadata.rateLimit,
+      requestId: args.ctx.requestId,
+    });
+  }
   await enforceEntitlement(args.tx, {
     tenantId: args.ctx.tenantId,
     key: args.metadata.entitlement ?? null,
@@ -160,6 +187,8 @@ export async function runProtectedTenantRouteHandler<
   params: TParams;
   input: TInput;
   sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
+  /** The caller ran enforceTenantRouteRateLimit before the transaction. */
+  rateLimitEnforced?: boolean | undefined;
   requestHost?: string;
   handler: ProtectedTenantRouteHandler<TInput, TOutput, TParams>;
 }): Promise<TOutput> {
@@ -170,6 +199,7 @@ export async function runProtectedTenantRouteHandler<
     params: asParamRecord(args.params),
     input: args.input,
     sessionAssuranceLevel: args.sessionAssuranceLevel,
+    rateLimitEnforced: args.rateLimitEnforced,
   });
 
   return args.handler({
@@ -384,6 +414,13 @@ export function createTenantRoute<
           const usage = createTenantRequestUsage(tenant.tenantId);
           metered.usage = usage;
 
+          await enforceTenantRouteRateLimit({
+            tenantId: tenant.tenantId,
+            principalId: principal.id,
+            metadata: config.metadata,
+            requestId,
+          });
+
           // Cross-tenant CSRF guard. Runs after tenant resolution because it
           // needs the resolved host to compare against. See assert-same-origin.ts
           // for why SameSite=Lax does not separate tenants on a shared base domain.
@@ -422,6 +459,7 @@ export function createTenantRoute<
                     params: asParamRecord(params),
                     input,
                     sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+                    rateLimitEnforced: true,
                   };
                   // F03: every request, including a replay, uses current resource,
                   // permission, entitlement, and session-MFA evidence.

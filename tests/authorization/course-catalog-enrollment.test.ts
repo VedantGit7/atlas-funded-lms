@@ -1,24 +1,21 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
 import { enrollmentCreateBodySchema } from "../../backend/apps/api/src/server/enrollments/schemas";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function learnerTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "course.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "course.read" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function learnerWithoutEnrollmentCreateTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "enrollment.create" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]),
+    $queryRaw: authorizationFactsQuery([{ key: "enrollment.create" }], [], []),
   };
 }
 

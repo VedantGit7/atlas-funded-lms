@@ -1,23 +1,20 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function instructorTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "item.create" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "item.create" }],
+      [],
+      [{ role_key: "instructor", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function learnerWithoutItemCreateTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "item.create" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([]),
+    $queryRaw: authorizationFactsQuery([{ key: "item.create" }], [], []),
   };
 }
 

@@ -21,16 +21,17 @@ vi.mock("@atlas/domain-config", async () => {
 });
 
 import { findActiveEntitlementByKey } from "@atlas/domain-config";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 const findActiveEntitlementByKeyMock = vi.mocked(findActiveEntitlementByKey);
 
 function moderatorTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "community.moderate" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "moderator", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "community.moderate" }],
+      [],
+      [{ role_key: "moderator", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
@@ -55,11 +56,11 @@ describe("moderation authorization", () => {
 
   it("allows community.moderate for tenant-wide admin bypass", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "community.moderate" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "community.moderate" }],
+        [],
+        [{ role_key: "admin", bypasses_resource_predicates: true }],
+      ),
     };
 
     const decision = await can({
@@ -80,11 +81,11 @@ describe("moderation authorization", () => {
 
   it("allows post.delete for moderator relationship without ownership", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "post.delete" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "moderator", bypasses_resource_predicates: false }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "post.delete" }],
+        [],
+        [{ role_key: "moderator", bypasses_resource_predicates: false }],
+      ),
     };
 
     const decision = await can({
@@ -106,11 +107,11 @@ describe("moderation authorization", () => {
 
   it("denies comment.update for non-owner even with moderate relationship", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "comment.update" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "moderator", bypasses_resource_predicates: false }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "comment.update" }],
+        [],
+        [{ role_key: "moderator", bypasses_resource_predicates: false }],
+      ),
     };
 
     const decision = await can({
@@ -133,11 +134,11 @@ describe("moderation authorization", () => {
 
   it("allows appeal.create only for target author ownership", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "appeal.create" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "appeal.create" }],
+        [],
+        [{ role_key: "learner", bypasses_resource_predicates: false }],
+      ),
     };
 
     const allowed = await can({
@@ -158,10 +159,7 @@ describe("moderation authorization", () => {
 
   it("applies explicit deny override before allow", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "appeal.review" }])
-        .mockResolvedValueOnce([{ effect: "DENY" }]),
+      $queryRaw: authorizationFactsQuery([{ key: "appeal.review" }], [{ effect: "DENY" }]),
     };
 
     const decision = await can({
