@@ -9,18 +9,14 @@ import { CERTIFICATE_ISSUED_EVENT, CERTIFICATE_REVOKED_EVENT } from "./certifica
 import { isCertificateFeatureEnabled } from "./certificate-feature-flags";
 import {
   CertificatePdfUnavailableError,
+  certificatePdfMergeData,
   renderCertificatePdfBuffer,
 } from "./certificate-pdf.service";
 import { storeCertificatePdfArtifact } from "./certificate-pdf-store";
 import { certificateDesignDocumentSchema } from "./certificate-design-document";
-import { sampleDataFromVariables } from "./certificate-design-to-html";
 import type { CertificateDesignDocument } from "./certificate-design-document";
 
 export const CERTIFICATE_WORKER_DESTINATION = "certificates";
-
-function buildVerificationPath(credentialId: string): string {
-  return `/verify/${credentialId}`;
-}
 
 type PreparedRender = {
   certificateId: string;
@@ -62,11 +58,7 @@ async function prepareCertificatePdfRender(
     format: "pdf",
   });
 
-  const mergeData = sampleDataFromVariables(parsed.data);
-  if (certificate.recipient_name) mergeData["recipient_name"] = certificate.recipient_name;
-  if (certificate.course_title) mergeData["course_title"] = certificate.course_title;
-  mergeData["credential_id"] = certificate.credential_id;
-  mergeData["verification_url"] = buildVerificationPath(certificate.credential_id);
+  const mergeData = certificatePdfMergeData(parsed.data, certificate);
 
   return {
     certificateId: certificate.id,

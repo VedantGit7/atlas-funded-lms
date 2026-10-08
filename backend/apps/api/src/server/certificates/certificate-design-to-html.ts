@@ -43,6 +43,23 @@ function pagePixelSize(page: Pick<CertificateDesignPage, "width" | "height" | "u
   };
 }
 
+/**
+ * Physical page size as CSS lengths in the document's own unit (e.g. "297mm").
+ * Shared by the `@page` rule and the PDF renderer so printed output matches the
+ * on-screen page box. Width/height are authoritative — the studio derives
+ * `orientation` from them — and bleed sits outside the trim box in the studio,
+ * so it does not enlarge the page.
+ */
+export function pageCssSize(page: Pick<CertificateDesignPage, "width" | "height" | "unit">): {
+  width: string;
+  height: string;
+} {
+  return {
+    width: `${page.width}${page.unit}`,
+    height: `${page.height}${page.unit}`,
+  };
+}
+
 export type DesignToHtmlOptions = {
   watermark?: boolean;
   verificationUrl?: string;
@@ -383,6 +400,7 @@ function wrapDocumentHtml(
   options?: DesignToHtmlOptions,
 ): string {
   const { width, height } = pagePixelSize(doc.page);
+  const pageSize = pageCssSize(doc.page);
   const watermark =
     options?.watermark === true
       ? `<div data-watermark="preview" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9999;overflow:hidden;"><span style="font-family:system-ui,sans-serif;font-size:${Math.round(Math.min(width, height) * 0.12)}px;font-weight:800;letter-spacing:0.12em;color:rgba(0,0,0,0.08);transform:rotate(-28deg);user-select:none;">PREVIEW</span></div>`
@@ -407,9 +425,13 @@ function wrapDocumentHtml(
     ${backgroundCss(doc)}
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   }
+  @page { size: ${pageSize.width} ${pageSize.height}; margin: 0; }
   @media print {
     html, body { background: #fff; }
-    .cert-page { margin: 0; box-shadow: none; }
+    /* Size containment stops elements lying wholly off the page (e.g. after an
+       orientation flip) from widening the layout, which makes Chromium shrink
+       the whole certificate to fit the PDF page. */
+    .cert-page { margin: 0; box-shadow: none; contain: strict; }
   }
 </style>
 </head>
