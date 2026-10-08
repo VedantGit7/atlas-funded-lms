@@ -15,6 +15,7 @@ import {
 } from "./certificate-design-to-html";
 import {
   certificateDesignDocumentSchema,
+  type CertificateDesignDocument,
   type CertificateDesignPage,
 } from "./certificate-design-document";
 
@@ -30,6 +31,27 @@ export type RenderCertificatePdfInput = {
   mergeData?: Record<string, string>;
   verificationUrl?: string;
 };
+
+/**
+ * Merge data for an issued certificate's PDF: the design's sample values,
+ * overridden by the recipient, course, credential id and verification path.
+ * Shared by the PDF worker and the re-render backfill so both print the same.
+ */
+export function certificatePdfMergeData(
+  design: CertificateDesignDocument,
+  certificate: {
+    recipient_name: string | null;
+    course_title: string | null;
+    credential_id: string;
+  },
+): Record<string, string> {
+  const mergeData = sampleDataFromVariables(design);
+  if (certificate.recipient_name) mergeData["recipient_name"] = certificate.recipient_name;
+  if (certificate.course_title) mergeData["course_title"] = certificate.course_title;
+  mergeData["credential_id"] = certificate.credential_id;
+  mergeData["verification_url"] = `/verify/${certificate.credential_id}`;
+  return mergeData;
+}
 
 /**
  * Render a certificate design snapshot to a single-page PDF sized to the
