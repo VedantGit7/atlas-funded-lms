@@ -7,6 +7,7 @@ const state = vi.hoisted(() => ({
   order: [] as string[],
   authDepths: [] as number[],
   tenantDepths: [] as number[],
+  rateLimitDepths: [] as number[],
 }));
 const mocks = vi.hoisted(() => ({
   ingress: vi.fn(),
@@ -19,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   profile: vi.fn(),
   roles: vi.fn(),
   protected: vi.fn(),
+  rateLimit: vi.fn(),
 }));
 vi.mock("@atlas/api/rate-limit", () => ({ enforceIngressRateLimit: mocks.ingress }));
 vi.mock("@atlas/tenancy", () => ({ resolveTenantFromRequest: mocks.resolveTenant }));
@@ -45,6 +47,7 @@ vi.mock("@atlas/authorization", () => ({ createTenantResourceRef: (value: unknow
 vi.mock("@atlas/api", async () => ({
   toSafeErrorEnvelope: (await import("@atlas/core/http/errors")).toSafeErrorEnvelope,
   runProtectedTenantRouteHandler: mocks.protected,
+  enforceTenantRouteRateLimit: mocks.rateLimit,
 }));
 import { GET } from "../../../backend/apps/api/src/app/api/v1/me/route";
 
@@ -58,7 +61,12 @@ beforeEach(() => {
   state.order = [];
   state.authDepths = [];
   state.tenantDepths = [];
+  state.rateLimitDepths = [];
   mocks.ingress.mockResolvedValue(undefined);
+  mocks.rateLimit.mockImplementation(async () => {
+    state.rateLimitDepths.push(state.globalDepth);
+    state.order.push("rate-limit");
+  });
   mocks.user.mockImplementation(async () => {
     state.authDepths.push(state.globalDepth);
     state.order.push("authenticate");
@@ -127,6 +135,12 @@ describe("identity route transaction lifetime", () => {
     expect(state.tenantDepths).toEqual([0]);
     expect(state.order.indexOf("global-release")).toBeLessThan(
       state.order.indexOf("tenant-acquire"),
+    );
+    // The per-actor rate limit waits on Redis holding no pooled connection.
+    expect(state.rateLimitDepths).toEqual([0]);
+    expect(state.order.indexOf("rate-limit")).toBeLessThan(state.order.indexOf("tenant-acquire"));
+    expect(mocks.protected).toHaveBeenCalledWith(
+      expect.objectContaining({ rateLimitEnforced: true }),
     );
     expect(await response.json()).toEqual({
       data: {

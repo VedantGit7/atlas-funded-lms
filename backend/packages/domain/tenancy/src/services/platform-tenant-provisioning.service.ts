@@ -76,7 +76,9 @@ export async function provisionTenant(
     step: "seeding.foundation",
   });
 
-  const fallbackHostname = `${input.slug}.${ctx.tenantBaseDomain}`;
+  // tenant_domains stores hostnames lowercased (a CHECK constraint); the base
+  // domain comes from configuration, whose case is not guaranteed.
+  const fallbackHostname = `${input.slug}.${ctx.tenantBaseDomain}`.toLowerCase();
 
   await insertFallbackTenantDomain(tx, {
     tenantId: tenant.id,

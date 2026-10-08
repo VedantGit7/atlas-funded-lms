@@ -22,16 +22,17 @@ vi.mock("@atlas/domain-config", async () => {
 });
 
 import { findActiveEntitlementByKey } from "@atlas/domain-config";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 const findActiveEntitlementByKeyMock = vi.mocked(findActiveEntitlementByKey);
 
 function learnerTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "post.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "post.read" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
@@ -149,10 +150,7 @@ describe("community authorization", () => {
 
   it("applies permission override deny before allow", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "post.create" }])
-        .mockResolvedValueOnce([{ effect: "DENY" }]),
+      $queryRaw: authorizationFactsQuery([{ key: "post.create" }], [{ effect: "DENY" }]),
     };
 
     const decision = await can({

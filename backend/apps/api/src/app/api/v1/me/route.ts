@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import {
+  enforceTenantRouteRateLimit,
   runProtectedTenantRouteHandler,
   toSafeErrorEnvelope,
   type RouteMetadata,
@@ -72,6 +73,13 @@ export async function GET(req: NextRequest) {
       ),
     );
 
+    await enforceTenantRouteRateLimit({
+      tenantId: tenant.tenantId,
+      principalId: principal.id,
+      metadata: meRouteMetadata,
+      requestId,
+    });
+
     const result = await measureRouteStage("tenant_total", () =>
       withTenantTx(
         {
@@ -89,6 +97,7 @@ export async function GET(req: NextRequest) {
 
             return runProtectedTenantRouteHandler({
               sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+              rateLimitEnforced: true,
               tx,
               ctx: {
                 tenantId: tenant.tenantId,

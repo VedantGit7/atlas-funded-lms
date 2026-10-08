@@ -25,6 +25,8 @@ const fixture = vi.hoisted(() => {
               auth_principal_id: "principal-1",
               status: state.status,
               invited_email_normalized: null,
+              // The membership gate reads the account status in the same statement.
+              principal_status: "active",
             },
           ]
         : [];

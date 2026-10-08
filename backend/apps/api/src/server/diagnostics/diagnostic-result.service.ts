@@ -49,13 +49,17 @@ export function presentationFromProjection(questions: DiagnosticQuestion[]): Pre
 
 async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<ScoringItem[]> {
   const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
+  const loaded = await itemRegistryRepository.loadItemsWithOptions(
+    tx,
+    rows.map((row) => row.item_id),
+  );
   const items: ScoringItem[] = [];
 
   for (const row of rows) {
-    const item = await itemRegistryRepository.findItemById(tx, row.item_id);
-    if (!item) continue;
+    const found = loaded.get(row.item_id);
+    if (!found) continue;
 
-    const options = await itemRegistryRepository.listItemOptions(tx, row.item_id);
+    const { item, options } = found;
     const decoded = decodeExplanationJson(item.explanation_json);
 
     items.push({
@@ -107,13 +111,17 @@ export async function buildPublicDiagnosticQuestions(
       ? secureShuffle(sorted)
       : sorted;
 
+  const loaded = await itemRegistryRepository.loadItemsWithOptions(
+    tx,
+    orderedRows.map((row) => row.item_id),
+  );
   const items: DiagnosticQuestion[] = [];
 
   for (const row of orderedRows) {
-    const item = await itemRegistryRepository.findItemById(tx, row.item_id);
-    if (!item) continue;
+    const found = loaded.get(row.item_id);
+    if (!found) continue;
 
-    const stored = await itemRegistryRepository.listItemOptions(tx, row.item_id);
+    const { item, options: stored } = found;
     const options = attempt
       ? orderOptions(stored, {
           order: attempt.presentation,

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
@@ -41,7 +41,7 @@ vi.mock("../../../backend/packages/auth/src/cookie-store", () => ({
   readSessionPersistence: async () => false,
 }));
 
-import { requireSupabaseUser } from "@atlas/auth/session";
+import { requireSupabaseUser, resetVerifiedSessionCacheForTests } from "@atlas/auth/session";
 import {
   ATLAS_ACCESS_TOKEN_COOKIE,
   ATLAS_REFRESH_TOKEN_COOKIE,
@@ -66,6 +66,7 @@ function request(transport: "bearer" | "cookie" = "bearer") {
 describe("verified session assurance (F01)", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    resetVerifiedSessionCacheForTests();
     mocks.cookieValues.clear();
     mocks.getUser.mockResolvedValue({ data: { user: enrolledUser }, error: null });
     mocks.getClaims.mockResolvedValue({
@@ -197,5 +198,85 @@ describe("verified session assurance (F01)", () => {
     await expect(
       requireSupabaseUser(new Request("https://tenant.example.com/api/v1/me")),
     ).rejects.toMatchObject({ status: 503, expose: false });
+  });
+});
+
+describe("verified session reuse (audit §3.1)", () => {
+  const now = new Date("2026-10-08T09:00:00Z").getTime();
+  const tokenExpiresIn = (seconds: number) => Math.floor(now / 1000) + seconds;
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(now);
+    resetVerifiedSessionCacheForTests();
+    mocks.cookieValues.clear();
+    mocks.getUser.mockResolvedValue({ data: { user: enrolledUser }, error: null });
+    mocks.getClaims.mockResolvedValue({
+      data: { claims: { sub: enrolledUser.id, aal: "aal1", exp: tokenExpiresIn(3600) } },
+      error: null,
+    });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("asks the auth service once a minute per token, verifying the token every time", async () => {
+    await requireSupabaseUser(request());
+    vi.setSystemTime(now + 59_000);
+    await expect(requireSupabaseUser(request())).resolves.toMatchObject({
+      supabaseUserId: "user-1",
+      mfaEnabled: true,
+      sessionAssuranceLevel: "aal1",
+    });
+    expect(mocks.getUser).toHaveBeenCalledTimes(1);
+    expect(mocks.getClaims).toHaveBeenCalledTimes(2);
+
+    vi.setSystemTime(now + 61_000);
+    await requireSupabaseUser(request());
+    expect(mocks.getUser).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a cached token whose signature or subject no longer verifies", async () => {
+    await requireSupabaseUser(request());
+    for (const claimsResult of [
+      { data: null, error: { message: "invalid signature" } },
+      { data: { claims: { sub: "other-user", aal: "aal1" } }, error: null },
+    ]) {
+      mocks.getClaims.mockResolvedValueOnce(claimsResult);
+      await expect(requireSupabaseUser(request())).rejects.toMatchObject({ status: 401 });
+    }
+    expect(mocks.getUser).toHaveBeenCalledTimes(1);
+  });
+
+  it("never reuses an answer past the token's expiry", async () => {
+    mocks.getClaims.mockResolvedValue({
+      data: { claims: { sub: enrolledUser.id, aal: "aal1", exp: tokenExpiresIn(20) } },
+      error: null,
+    });
+    await requireSupabaseUser(request());
+    vi.setSystemTime(now + 21_000);
+    await requireSupabaseUser(request());
+    expect(mocks.getUser).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not share an answer between tokens", async () => {
+    await requireSupabaseUser(request());
+    await requireSupabaseUser(
+      new Request("https://tenant.example.com/api/v1/me", {
+        headers: { authorization: "Bearer another-token" },
+      }),
+    );
+    expect(mocks.getUser).toHaveBeenCalledTimes(2);
+    expect(mocks.getUser).toHaveBeenLastCalledWith("another-token");
+  });
+
+  it("does not remember a refusal", async () => {
+    mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: { message: "revoked" } });
+    await expect(requireSupabaseUser(request())).rejects.toMatchObject({ status: 401 });
+    await expect(requireSupabaseUser(request())).resolves.toMatchObject({
+      supabaseUserId: "user-1",
+    });
+    expect(mocks.getUser).toHaveBeenCalledTimes(2);
   });
 });

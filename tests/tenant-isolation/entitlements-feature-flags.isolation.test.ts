@@ -314,7 +314,7 @@ describe("entitlements and feature flags tenant isolation", () => {
   });
 
   it("returns NO_MEMBERSHIP on tenant B host when the same JWT principal has no tenant B membership", async () => {
-    vi.spyOn(membershipRepository, "findMembershipByPrincipal").mockResolvedValue(null);
+    vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue(null);
 
     await expect(
       requireActiveMembership({

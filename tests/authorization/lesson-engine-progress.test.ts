@@ -1,37 +1,38 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
 import {
   createLessonBodySchema,
   lessonProgressBodySchema,
 } from "../../backend/apps/api/src/server/lessons/lesson-schemas";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function learnerTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "course.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "course.read" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function learnerProgressTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "progress.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "progress.read" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function instructorWithoutUpdateTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "course.update" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "course.update" }],
+      [],
+      [{ role_key: "instructor", bypasses_resource_predicates: false }],
+    ),
   };
 }
 

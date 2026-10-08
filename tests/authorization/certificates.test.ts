@@ -1,33 +1,34 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function adminTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "certificate.issue" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "certificate.issue" }],
+      [],
+      [{ role_key: "admin", bypasses_resource_predicates: true }],
+    ),
   };
 }
 
 function instructorWithoutRelationshipTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "certificate.issue" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "certificate.issue" }],
+      [],
+      [{ role_key: "instructor", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function learnerTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "certificate.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "certificate.read" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
@@ -126,10 +127,7 @@ describe("certificate authorization", () => {
 
   it("honors explicit deny override", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "certificate.read" }])
-        .mockResolvedValueOnce([{ effect: "DENY" }]),
+      $queryRaw: authorizationFactsQuery([{ key: "certificate.read" }], [{ effect: "DENY" }]),
     };
 
     const decision = await can({

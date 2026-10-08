@@ -107,13 +107,17 @@ async function planAttemptPresentation(
   config: ReturnType<typeof extractAssessmentConfig>,
 ): Promise<PresentationOrder> {
   const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
-  const items = [];
-  for (const row of rows) {
-    const options = config.shuffleOptions
-      ? await itemRegistryRepository.listItemOptions(tx, row.item_id)
-      : [];
-    items.push({ id: row.id, position: row.position, options });
-  }
+  const loaded = config.shuffleOptions
+    ? await itemRegistryRepository.loadItemsWithOptions(
+        tx,
+        rows.map((row) => row.item_id),
+      )
+    : new Map<string, { options: Array<{ id: string; position: number }> }>();
+  const items = rows.map((row) => ({
+    id: row.id,
+    position: row.position,
+    options: loaded.get(row.item_id)?.options ?? [],
+  }));
   return planPresentationOrder({
     items,
     shuffleItems: config.shuffleItems,
@@ -123,15 +127,19 @@ async function planAttemptPresentation(
 
 async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<ScoringItem[]> {
   const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
+  const loaded = await itemRegistryRepository.loadItemsWithOptions(
+    tx,
+    rows.map((row) => row.item_id),
+  );
   const items: ScoringItem[] = [];
 
   for (const row of rows) {
-    const item = await itemRegistryRepository.findItemById(tx, row.item_id);
-    if (!item) {
+    const found = loaded.get(row.item_id);
+    if (!found) {
       continue;
     }
 
-    const options = await itemRegistryRepository.listItemOptions(tx, row.item_id);
+    const { item, options } = found;
     const decoded = decodeExplanationJson(item.explanation_json);
 
     items.push({
@@ -166,15 +174,20 @@ async function buildRunnerItems(
     shuffleItems: config.shuffleItems,
   });
 
+  const loaded = await itemRegistryRepository.loadItemsWithOptions(
+    tx,
+    orderedRows.map((row) => row.item_id),
+  );
   const items = [];
 
   for (const row of orderedRows) {
-    const item = await itemRegistryRepository.findItemById(tx, row.item_id);
-    if (!item) {
+    const found = loaded.get(row.item_id);
+    if (!found) {
       continue;
     }
 
-    const options = orderOptions(await itemRegistryRepository.listItemOptions(tx, row.item_id), {
+    const { item } = found;
+    const options = orderOptions(found.options, {
       order,
       attemptId: attempt.id,
       assessmentItemId: row.id,

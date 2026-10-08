@@ -1,23 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function learnerTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "search.query" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "search.query" }],
+      [],
+      [{ role_key: "learner", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
 function adminTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "search.reindex.manage" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "search.reindex.manage" }],
+      [],
+      [{ role_key: "admin", bypasses_resource_predicates: true }],
+    ),
   };
 }
 
@@ -56,11 +57,11 @@ describe("search authorization", () => {
 
   it("denies search.reindex.manage for learner grants", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }]),
+      $queryRaw: authorizationFactsQuery(
+        [],
+        [],
+        [{ role_key: "learner", bypasses_resource_predicates: false }],
+      ),
     };
 
     const decision = await can({
@@ -80,10 +81,7 @@ describe("search authorization", () => {
 
   it("applies permission override deny before allow", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "search.query" }])
-        .mockResolvedValueOnce([{ effect: "DENY" }]),
+      $queryRaw: authorizationFactsQuery([{ key: "search.query" }], [{ effect: "DENY" }]),
     };
 
     const decision = await can({

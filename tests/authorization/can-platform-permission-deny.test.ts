@@ -1,10 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 describe("can platform permission isolation", () => {
   it("denies platform permissions in tenant scope", async () => {
     const tx = {
-      $queryRaw: vi.fn().mockResolvedValueOnce([{ key: "platform.tenant.manage" }]),
+      $queryRaw: authorizationFactsQuery([{ key: "platform.tenant.manage" }]),
     };
 
     const decision = await can({

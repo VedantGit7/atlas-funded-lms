@@ -1,13 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function instructorTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "enrollment.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "enrollment.read" }],
+      [],
+      [{ role_key: "instructor", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
@@ -51,11 +52,11 @@ describe("studio roster authorization", () => {
 
   it("allows instructor progress.read via instructorOfCourse relationship", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "progress.read" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "progress.read" }],
+        [],
+        [{ role_key: "instructor", bypasses_resource_predicates: false }],
+      ),
     };
 
     const decision = await can({

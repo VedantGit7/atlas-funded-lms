@@ -99,13 +99,26 @@ beforeEach(() => {
 
 describe("authorization-loaded learner projections", () => {
   it("checks fresh permission overrides before reusing the next request's projections", async () => {
+    // One authorization statement per request: allowed by role, then denied by
+    // an override added in between.
     const query = vi
       .fn()
-      .mockResolvedValueOnce([{ key: "course.read" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "learner", bypasses_resource_predicates: false }])
-      .mockResolvedValueOnce([{ key: "course.read" }])
-      .mockResolvedValueOnce([{ effect: "DENY", permission_key: "course.read" }]);
+      .mockResolvedValueOnce([
+        {
+          permission_exists: true,
+          override_effect: null,
+          role_keys: ["learner"],
+          bypasses_resource_predicates: false,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          permission_exists: true,
+          override_effect: "DENY",
+          role_keys: ["learner"],
+          bypasses_resource_predicates: false,
+        },
+      ]);
     const authTx = { $queryRaw: query } as unknown as TenantTx;
     const handler = vi.fn(
       async ({ resource }: { resource: Awaited<ReturnType<typeof loadCourseResourceRef>> }) =>
@@ -127,7 +140,7 @@ describe("authorization-loaded learner projections", () => {
     };
     await runProtectedTenantRouteHandler(args);
     await expect(runProtectedTenantRouteHandler(args)).rejects.toThrow();
-    expect(query).toHaveBeenCalledTimes(5);
+    expect(query).toHaveBeenCalledTimes(2);
     expect(handler).toHaveBeenCalledTimes(1);
     expect(mocks.course).toHaveBeenCalledTimes(2);
     expect(mocks.enrollment).toHaveBeenCalledTimes(2);

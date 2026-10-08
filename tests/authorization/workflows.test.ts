@@ -1,18 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function workflowTransitionTx(roleKeys: string[]) {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "workflow.transition.act" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(
-        roleKeys.map((role_key) => ({
-          role_key,
-          bypasses_resource_predicates: role_key === "owner" || role_key === "admin",
-        })),
-      ),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "workflow.transition.act" }],
+      [],
+      roleKeys.map((role_key) => ({
+        role_key,
+        bypasses_resource_predicates: role_key === "owner" || role_key === "admin",
+      })),
+    ),
   };
 }
 
@@ -20,11 +19,7 @@ describe("workflow authorization", () => {
   it("denies learner workflow.transition.act", async () => {
     const decision = await can({
       tx: {
-        $queryRaw: vi
-          .fn()
-          .mockResolvedValueOnce([{ key: "workflow.transition.act" }])
-          .mockResolvedValueOnce([])
-          .mockResolvedValueOnce([]),
+        $queryRaw: authorizationFactsQuery([{ key: "workflow.transition.act" }], [], []),
       },
       actor: { tenantId: "tenant-a", membershipId: "learner-a" },
       permission: "workflow.transition.act",
@@ -98,11 +93,11 @@ describe("workflow authorization", () => {
   it("blocks workflow.transition.act when explicit deny override exists", async () => {
     const decision = await can({
       tx: {
-        $queryRaw: vi
-          .fn()
-          .mockResolvedValueOnce([{ key: "workflow.transition.act" }])
-          .mockResolvedValueOnce([{ effect: "DENY" }])
-          .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+        $queryRaw: authorizationFactsQuery(
+          [{ key: "workflow.transition.act" }],
+          [{ effect: "DENY" }],
+          [{ role_key: "admin", bypasses_resource_predicates: true }],
+        ),
       },
       actor: { tenantId: "tenant-a", membershipId: "admin-a" },
       permission: "workflow.transition.act",

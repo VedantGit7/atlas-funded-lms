@@ -3,15 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockFindMembership = vi.fn();
 
 // `vi.mock` replaces the whole module, so every export the gate calls has to
-// be listed. `requireActiveMembership` gained activity tracking
-// (touchMembershipLastActive, recordMembershipActiveDay) after this mock was
-// written, and the missing exports made the gate throw rather than resolve.
-// It also reads the account's status (audit H6), refusing disabled accounts.
+// be listed. The gate reads the membership and the account's status (audit H6)
+// in one call; an active account is assumed here.
 vi.mock("../../../backend/packages/membership/src/membership.repository", () => ({
-  findMembershipByPrincipal: (...args: unknown[]) => mockFindMembership(...args),
-  findPrincipalGlobalStatus: () => Promise.resolve("active"),
-  touchMembershipLastActive: () => Promise.resolve(),
-  recordMembershipActiveDay: () => Promise.resolve(),
+  findMembershipForRequest: async (...args: unknown[]) => {
+    const membership: unknown = await mockFindMembership(...args);
+    return membership ? { membership, principalStatus: "active" } : null;
+  },
 }));
 
 import { requireActiveMembership } from "../../../backend/packages/membership/src/membership-gate";

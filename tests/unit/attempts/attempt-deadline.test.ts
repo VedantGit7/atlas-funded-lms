@@ -69,16 +69,36 @@ vi.mock(
     return {
       ...actual,
       itemRegistryRepository: {
-        findItemById: vi.fn(async () => ({
-          id: itemId,
-          item_type_key: "mcq_single",
-          stem_json: { stem: "2 + 2?" },
-          explanation_json: null,
-        })),
-        listItemOptions: vi.fn(async () => [
-          { id: correctOptionId, option_json: { text: "4" }, is_correct: true, position: 1 },
-          { id: wrongOptionId, option_json: { text: "5" }, is_correct: false, position: 2 },
-        ]),
+        loadItemsWithOptions: vi.fn(
+          async () =>
+            new Map([
+              [
+                itemId,
+                {
+                  item: {
+                    id: itemId,
+                    item_type_key: "mcq_single",
+                    stem_json: { stem: "2 + 2?" },
+                    explanation_json: null,
+                  },
+                  options: [
+                    {
+                      id: correctOptionId,
+                      option_json: { text: "4" },
+                      is_correct: true,
+                      position: 1,
+                    },
+                    {
+                      id: wrongOptionId,
+                      option_json: { text: "5" },
+                      is_correct: false,
+                      position: 2,
+                    },
+                  ],
+                },
+              ],
+            ]),
+        ),
       },
     };
   },

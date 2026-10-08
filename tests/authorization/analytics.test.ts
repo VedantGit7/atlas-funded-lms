@@ -1,23 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 function adminTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "analytics.dashboard.view" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "analytics.dashboard.view" }],
+      [],
+      [{ role_key: "admin", bypasses_resource_predicates: true }],
+    ),
   };
 }
 
 function instructorTx() {
   return {
-    $queryRaw: vi
-      .fn()
-      .mockResolvedValueOnce([{ key: "analytics.dashboard.view" }])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ role_key: "instructor", bypasses_resource_predicates: false }]),
+    $queryRaw: authorizationFactsQuery(
+      [{ key: "analytics.dashboard.view" }],
+      [],
+      [{ role_key: "instructor", bypasses_resource_predicates: false }],
+    ),
   };
 }
 
@@ -75,11 +76,11 @@ describe("analytics authorization", () => {
 
   it("allows analytics.funnel.view for admin", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "analytics.funnel.view" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "analytics.funnel.view" }],
+        [],
+        [{ role_key: "admin", bypasses_resource_predicates: true }],
+      ),
     };
 
     const decision = await can({

@@ -51,22 +51,71 @@ export async function findMembershipByPrincipal(args: {
 }
 
 /**
- * The principal's account status, read by the membership gate (audit H6).
- * Principal resolution already refuses a disabled principal at sign-in and on
- * every request; reading it again here keeps tenant access closed even for a
- * caller that reached the gate some other way. Null when no principal exists.
+ * The membership gate's whole database work in one round trip (audit §3.1):
+ * the membership, its principal's account status (audit H6), and the activity
+ * bookkeeping. This runs on every authenticated tenant request.
+ *
+ * Activity is recorded only for an ACTIVE membership of an active account: the
+ * throttled `last_active_at` touch, and the per-day row behind MAU/DAU (a no-op
+ * after the day's first request thanks to its primary key). A refused request
+ * writes nothing. The returned row is the state before those writes.
+ *
+ * `principalStatus` is null when the principal row no longer exists.
  */
-export async function findPrincipalGlobalStatus(args: {
+export async function findMembershipForRequest(args: {
   tx: Tx;
+  tenantId: string;
   authPrincipalId: string;
-}): Promise<string | null> {
-  const rows = await args.tx.$queryRaw<{ global_status: string }[]>`
-    select global_status
-    from auth_principals
-    where id = ${args.authPrincipalId}::uuid
+  lastActiveThrottleMinutes: number;
+}): Promise<{ membership: MembershipProjection; principalStatus: string | null } | null> {
+  const rows = await args.tx.$queryRaw<Array<MembershipRow & { principal_status: string | null }>>`
+    with found as (
+      select m.id, m.tenant_id, m.auth_principal_id, m.status, m.invited_email_normalized,
+             ap.global_status as principal_status
+      from memberships m
+      left join auth_principals ap on ap.id = m.auth_principal_id
+      where m.tenant_id = ${args.tenantId}::uuid
+        and m.auth_principal_id = ${args.authPrincipalId}::uuid
+      limit 1
+    ),
+    admitted as (
+      select id, tenant_id from found
+      where status = 'ACTIVE' and principal_status = 'active'
+    ),
+    touched as (
+      update memberships m
+      set last_active_at = now()
+      from admitted
+      where m.tenant_id = admitted.tenant_id
+        and m.id = admitted.id
+        and (
+          m.last_active_at is null
+          or m.last_active_at < now() - make_interval(mins => ${args.lastActiveThrottleMinutes})
+        )
+      returning m.id
+    ),
+    active_day as (
+      insert into tenant_active_days (tenant_id, membership_id, day)
+      select tenant_id, id, current_date from admitted
+      on conflict (tenant_id, membership_id, day) do nothing
+      returning membership_id
+    )
+    select
+      id::text,
+      tenant_id::text,
+      auth_principal_id::text,
+      status::text,
+      invited_email_normalized::text,
+      principal_status
+    from found
   `;
 
-  return rows[0]?.global_status ?? null;
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+
+  return { membership: mapMembershipRow(row), principalStatus: row.principal_status };
 }
 
 /**
@@ -113,48 +162,6 @@ export async function insertActiveSelfServiceMembership(args: {
   `;
 
   return rows[0] ?? null;
-}
-
-/**
- * Records that a member was active "now", throttled so the row is only written
- * at most once per `throttleMinutes`. Runs inside the request's tenant
- * transaction; the WHERE clause keeps it a no-op write on most requests.
- */
-export async function touchMembershipLastActive(args: {
-  tx: Tx;
-  tenantId: string;
-  membershipId: string;
-  throttleMinutes: number;
-}): Promise<void> {
-  await args.tx.$queryRaw`
-    update memberships
-    set last_active_at = now()
-    where tenant_id = ${args.tenantId}::uuid
-      and id = ${args.membershipId}::uuid
-      and status = 'ACTIVE'
-      and (
-        last_active_at is null
-        or last_active_at < now() - make_interval(mins => ${args.throttleMinutes})
-      )
-    returning id
-  `;
-}
-
-/**
- * Records that a membership was active today (idempotent per tenant/member/day).
- * Feeds the Usage Insights MAU/DAU metrics; a no-op after the first hit of the
- * day thanks to the composite primary key.
- */
-export async function recordMembershipActiveDay(args: {
-  tx: Tx;
-  tenantId: string;
-  membershipId: string;
-}): Promise<void> {
-  await args.tx.$queryRaw`
-    insert into tenant_active_days (tenant_id, membership_id, day)
-    values (${args.tenantId}::uuid, ${args.membershipId}::uuid, current_date)
-    on conflict (tenant_id, membership_id, day) do nothing
-  `;
 }
 
 export async function findInvitedMembershipByTokenHash(args: {

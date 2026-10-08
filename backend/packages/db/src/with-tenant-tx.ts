@@ -35,7 +35,7 @@ function assertTenantContext(ctx: TenantRequestContext): void {
  * All tenant-scoped database work must run through this helper.
  *
  * Rules:
- * - Uses SET LOCAL ROLE atlas_app inside the transaction
+ * - Switches to atlas_app for the transaction only (set_config('role', ..., true))
  * - Uses transaction-local set_config(..., true)
  * - Never uses session-level SET
  * - Does not accept client-supplied tenant_id
@@ -57,20 +57,22 @@ export async function withTenantTx<T>(
   return await prisma.$transaction(
     async (tx) =>
       holdingConnection("withTenantTx", async () => {
-        // SET LOCAL ROLE cannot be parameterised or combined into a SELECT, so it
-        // stays its own statement.
-        await tx.$executeRawUnsafe("SET LOCAL ROLE atlas_app");
-
-        // The four GUCs are set in ONE round trip rather than four. Latency per
-        // request converts directly into how long the pooled connection is held,
-        // which converts directly into concurrent capacity — so against a remote
-        // database this removes three round trips from every tenant request.
+        // The role and the four GUCs are set in ONE round trip rather than five.
+        // Latency per request converts directly into how long the pooled
+        // connection is held, which converts directly into concurrent capacity,
+        // so against a remote database this saves four round trips on every
+        // tenant request.
+        //
+        // set_config('role', ..., true) is SET LOCAL ROLE: it runs the same
+        // membership check and is reverted at transaction end. The role comes
+        // first, though nothing here depends on it until the next statement.
         //
         // statement_timeout is a transaction-local per-statement guard in
         // milliseconds, independent of the Prisma interactive transaction
         // wall-clock in `txOptions.timeout`.
         await tx.$executeRaw`
       SELECT
+        set_config('role', 'atlas_app', true),
         set_config('app.tenant_id', ${ctx.tenantId}, true),
         set_config('app.actor_membership_id', ${ctx.actorMembershipId ?? ""}, true),
         set_config('app.request_id', ${ctx.requestId}, true),

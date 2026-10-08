@@ -1,14 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { can, createTenantResourceRef } from "@atlas/authorization";
+import { authorizationFactsQuery } from "../helpers/authorization-facts";
 
 describe("can role permission grants", () => {
   it("allows when a role grants the requested permission", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "membership.read" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "admin", bypasses_resource_predicates: true }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "membership.read" }],
+        [],
+        [{ role_key: "admin", bypasses_resource_predicates: true }],
+      ),
     };
 
     const decision = await can({
@@ -32,11 +33,11 @@ describe("can role permission grants", () => {
 
   it("bypasses ownership predicates for owner and admin roles", async () => {
     const tx = {
-      $queryRaw: vi
-        .fn()
-        .mockResolvedValueOnce([{ key: "profile.update" }])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([{ role_key: "owner", bypasses_resource_predicates: true }]),
+      $queryRaw: authorizationFactsQuery(
+        [{ key: "profile.update" }],
+        [],
+        [{ role_key: "owner", bypasses_resource_predicates: true }],
+      ),
     };
 
     const decision = await can({

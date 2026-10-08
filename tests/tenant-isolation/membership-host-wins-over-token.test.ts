@@ -9,7 +9,7 @@ describe("membership tenant isolation", () => {
 
   it("checks membership for host tenant, not token claims", async () => {
     const findMembership = vi
-      .spyOn(membershipRepository, "findMembershipByPrincipal")
+      .spyOn(membershipRepository, "findMembershipForRequest")
       .mockResolvedValue(null);
 
     await expect(

@@ -1,8 +1,4 @@
-import {
-  findPermissionOverride,
-  findRolePermissionGrant,
-  permissionExists,
-} from "./authorization.repository";
+import { findAuthorizationFacts } from "./authorization.repository";
 import { allowsOwnershipOrRelationship } from "./ownership-or-relationship-permissions";
 import { actorOwnsResource, requiresOwnership } from "./ownership-predicates";
 import { hasRequiredRelationship, requiredRelationships } from "./relationship-predicates";
@@ -13,7 +9,7 @@ import type {
   ResourceRef,
 } from "./types";
 
-type Tx = Parameters<typeof permissionExists>[0]["tx"];
+type Tx = Parameters<typeof findAuthorizationFacts>[0]["tx"];
 
 function deny(
   permission: string,
@@ -42,36 +38,26 @@ export async function can(args: {
     return deny(args.permission, "TENANT_MISMATCH");
   }
 
-  const permission = await permissionExists({
-    tx: args.tx,
-    permissionKey: args.permission,
-  });
-
-  if (!permission.exists) {
-    return deny(args.permission, "UNKNOWN_PERMISSION");
-  }
-
-  if (permission.platformOnly || args.permission.startsWith("platform.")) {
-    return deny(args.permission, "PLATFORM_PERMISSION_IN_TENANT_SCOPE");
-  }
-
-  const override = await findPermissionOverride({
+  // One round trip for the catalogue entry, override and role grants; the
+  // checks below still apply in the same order.
+  const { permissionExists, override, grant } = await findAuthorizationFacts({
     tx: args.tx,
     tenantId: args.ctx.tenantId,
     membershipId: args.actor.membershipId,
     permissionKey: args.permission,
   });
+
+  if (!permissionExists) {
+    return deny(args.permission, "UNKNOWN_PERMISSION");
+  }
+
+  if (args.permission.startsWith("platform.")) {
+    return deny(args.permission, "PLATFORM_PERMISSION_IN_TENANT_SCOPE");
+  }
 
   if (override?.effect === "DENY") {
     return deny(args.permission, "EXPLICIT_DENY");
   }
-
-  const grant = await findRolePermissionGrant({
-    tx: args.tx,
-    tenantId: args.ctx.tenantId,
-    membershipId: args.actor.membershipId,
-    permissionKey: args.permission,
-  });
 
   const roleKeys = grant?.roleKeys ?? [];
   const hasOverrideAllow = override?.effect === "ALLOW";
