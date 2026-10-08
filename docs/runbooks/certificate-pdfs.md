@@ -20,8 +20,9 @@ It needs:
   the script refuses a login that would see only part of it;
 - the API's storage settings (`STORAGE_PROVIDER=r2` and the `R2_*` values),
   so it reads and writes the same bucket;
-- Chromium for `--apply`: run it in the managed-node worker image. That image
-  has no pnpm, so call the script with `node --import tsx`.
+- Chromium for `--apply`: run it in the managed-node worker image, which
+  carries the script bundled as `rerender-certificate-pdfs.mjs` (the image has
+  no source tree and no pnpm).
 
 ```bash
 # 1. Dry run (anywhere with the env; no Chromium needed): which stored PDFs are
@@ -30,15 +31,15 @@ DIRECT_DATABASE_URL=... <storage env> pnpm data:rerender-certificate-pdfs
 
 # 2. One tenant first, in the worker image.
 docker run --rm --env-file <worker env + DIRECT_DATABASE_URL> <worker image> \
-  node --import tsx scripts/data/rerender-certificate-pdfs.ts --apply --tenant <tenant-id>
+  node rerender-certificate-pdfs.mjs --apply --tenant <tenant-id>
 
 # 3. Everyone.
 docker run --rm --env-file <...> <worker image> \
-  node --import tsx scripts/data/rerender-certificate-pdfs.ts --apply
+  node rerender-certificate-pdfs.mjs --apply
 
 # 4. Confirm: exits 0.
 docker run --rm --env-file <...> <worker image> \
-  node --import tsx scripts/data/rerender-certificate-pdfs.ts
+  node rerender-certificate-pdfs.mjs
 ```
 
 What it guarantees (details in `scripts/data/certificate-pdf-backfill.ts`):

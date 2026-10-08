@@ -41,28 +41,47 @@ COPY --from=source /source/ ./
 RUN --mount=type=secret,id=api_build_env,required=true \
     pnpm exec dotenv -e /run/secrets/api_build_env -- pnpm --filter @atlas/api-app build
 
-FROM dependencies AS worker-dependencies
+# The worker ships as a bundle (build-worker.mjs), not as the monorepo run
+# through tsx: no source, no other workspace's dependencies, no dev tools.
+FROM dependencies AS worker-build
+COPY --from=source /source/ ./
+RUN node deploy/managed-node/build-worker.mjs /worker
+
+# playwright-core is the one package the bundle loads at runtime: it starts
+# Chromium from files beside its own code. The locked version, from installed
+# dependencies rather than source, so source edits keep the browser layer.
+FROM dependencies AS worker-playwright
+RUN mkdir -p /out/node_modules \
+    && cp -RL "$(node -p "require('path').dirname(require.resolve('playwright-core/package.json', { paths: ['backend/apps/api'] }))")" \
+       /out/node_modules/playwright-core
+
+FROM runtime-base AS worker-browser
+WORKDIR /app
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-# Install the browser matching the locked Playwright dependency for certificate PDFs.
+COPY --from=worker-playwright /out/node_modules ./node_modules
+# The browser matching that playwright-core, with its system libraries, for certificate PDFs.
 RUN --mount=type=cache,id=atlas-apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=atlas-apt-lists,target=/var/lib/apt/lists,sharing=locked \
-    pnpm --filter @atlas/api-app exec playwright-core install --with-deps chromium \
+    node node_modules/playwright-core/cli.js install --with-deps chromium \
     && chmod -R a+rX /ms-playwright
 
-FROM worker-dependencies AS worker
-COPY --from=source /source/ ./
+FROM worker-browser AS worker
+COPY --from=worker-build /worker/ ./
 ENV NODE_ENV=production
 ENV ATLAS_SERVICE_RUNTIME=managed-node
-ENV TSX_TSCONFIG_PATH=/app/backend/apps/api/tsconfig.json
 # Runtime starts node directly; package managers and root's build caches are build-time only.
 RUN rm -rf /root/.cache /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
        /usr/local/bin/pnpm /usr/local/bin/pnpx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 USER node
-RUN --network=none APP_ENV=test NODE_ENV=test node --import tsx deploy/managed-node/check-worker-imports.ts
+# As the runtime user, offline: the whole processor graph imports, and the paths
+# a bundle or a missing library breaks lazily run (SVG sanitizing, report
+# workbooks, a certificate PDF through Chromium).
+RUN --network=none APP_ENV=test NODE_ENV=test node check-worker-imports.mjs \
+    && APP_ENV=test NODE_ENV=test node check-worker-runtime.mjs
 EXPOSE 8081
 STOPSIGNAL SIGTERM
-CMD ["node", "--import", "tsx", "backend/apps/api/src/worker/index.ts"]
+CMD ["node", "worker.mjs"]
 
 FROM runtime-base AS api
 WORKDIR /app

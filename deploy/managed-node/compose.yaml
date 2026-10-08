@@ -24,7 +24,6 @@ services:
       - ${ATLAS_WORKER_ENV_FILE:?Set the worker runtime env file path}
     environment:
       ATLAS_SERVICE_RUNTIME: managed-node
-      TSX_TSCONFIG_PATH: /app/backend/apps/api/tsconfig.json
       OUTBOX_WORKER_BATCH_LIMIT: "25"
       OUTBOX_WORKER_HEALTH_PORT: "8081"
       OUTBOX_WORKER_SHUTDOWN_TIMEOUT_MS: "30000"

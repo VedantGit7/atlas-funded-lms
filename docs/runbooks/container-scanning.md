@@ -13,6 +13,7 @@ The API image is compiled with an empty dotenv build secret. The scan covers the
 - **Debian security updates.** Shipped images start from the `runtime-base` stage, which applies published Debian security updates on top of the pinned Node image. The upstream Node image can lag Debian's fixes by weeks. CI builds start without a cache, so they always take current updates. A local builder may reuse a cached `apt-get upgrade` layer; rebuild with `--no-cache` before relying on a local scan.
 - **No package managers at runtime.** npm, npx, corepack, pnpm and Yarn, plus root's build caches, are removed from both runtime images. Both images start `node` directly, so they need none of these. These tools bundle their own dependencies and were most of the Node findings.
 - **pnpm metadata stays out of layers.** pnpm's metadata cache lives on a BuildKit cache mount, like its store.
+- **The worker is a bundle, and still scannable.** The worker image carries the worker bundled with its dependencies (`deploy/managed-node/build-worker.mjs`), plus `playwright-core`. A bundle has no `package.json` files, so the build writes one per bundled package, with name and version, under `/app/bundled-packages/node_modules`. Trivy reads those when scanning an image, and ignores lockfiles there. Keep that directory: without it the scan cannot see a vulnerable library inside the worker.
 
 ## When the scan fails
 
