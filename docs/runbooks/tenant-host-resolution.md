@@ -19,7 +19,13 @@ resolver in `backend/packages/tenancy`, or the public bootstrap route.
 3. Before any tenant context exists, `withGlobalDb` calls
    `app.resolve_tenant_host(host)` as `atlas_app`. The function returns at most
    one row: a **verified** (`ACTIVE`), undeleted domain with exactly that
-   hostname, belonging to a tenant that is not deleted.
+   hostname, belonging to a tenant that is not deleted. Stored hostnames are
+   always lowercase (the `tenant_domains_hostname_lowercase` check), so the
+   function compares the stored value with `lower(host)` and uses the hostname
+   index. Keep the comparison in that form: under row-level security a
+   condition containing a non-leakproof function such as `lower()` on the
+   column is applied only after the policy, which makes every request scan the
+   table.
 4. With the tenant known, the request runs in `withTenantTx`, where row-level
    security limits every tenant table to that tenant.
 
