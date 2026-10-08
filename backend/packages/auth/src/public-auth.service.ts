@@ -1,7 +1,13 @@
-import type { EmailOtpType } from "@supabase/supabase-js";
+import { isAuthError, isAuthRetryableFetchError, type EmailOtpType } from "@supabase/supabase-js";
 import type { PublicLoginInput, PublicSignupInput } from "./schemas";
 import { createSupabasePublicServerClient } from "./supabase-server";
-import { invalidCredentials, authEmailRateLimited, passwordPolicyRejection } from "./auth-errors";
+import {
+  authEmailRateLimited,
+  authProviderUnavailable,
+  invalidCredentials,
+  passwordPolicyRejection,
+  signInRateLimited,
+} from "./auth-errors";
 import { upsertAuthPrincipal } from "./auth-principal.repository";
 import { toSessionSafeIdentity } from "./auth-principal.service";
 import { assertPasswordNotBreached } from "./password-policy";
@@ -21,8 +27,29 @@ type SupabasePasswordSignInResult = {
     } | null;
     session: { access_token: string; refresh_token: string; expires_in: number } | null;
   };
-  error: { message: string } | null;
+  error: { message: string; status?: number | undefined; code?: string | undefined } | null;
 };
+
+/**
+ * Why a password sign-in failed, as far as the caller may know. A wrong email
+ * or password, and anything else about the account, stays one generic answer
+ * so it cannot reveal which accounts exist. The auth service being rate limited
+ * or unavailable is not about the account, and calling it a wrong password sent
+ * people to reset passwords that were fine.
+ */
+function signInFailure(error: NonNullable<SupabasePasswordSignInResult["error"]>) {
+  if (error.status === 429 || error.code === "over_request_rate_limit") {
+    return signInRateLimited();
+  }
+  if (
+    isAuthRetryableFetchError(error) ||
+    (typeof error.status === "number" && error.status >= 500) ||
+    (error instanceof Error && !isAuthError(error))
+  ) {
+    return authProviderUnavailable();
+  }
+  return invalidCredentials();
+}
 
 function assertPasswordSignInResult(result: SupabasePasswordSignInResult): asserts result is {
   data: {
@@ -37,7 +64,10 @@ function assertPasswordSignInResult(result: SupabasePasswordSignInResult): asser
   };
   error: null;
 } {
-  if (result.error || !result.data.user?.id || !result.data.user.email || !result.data.session) {
+  if (result.error) {
+    throw signInFailure(result.error);
+  }
+  if (!result.data.user?.id || !result.data.user.email || !result.data.session) {
     throw invalidCredentials();
   }
 }
