@@ -159,7 +159,7 @@ describe("workflow graph and supply chain", () => {
     const dockerfile = readFileSync(join(root, "deploy/managed-node/Dockerfile"), "utf8");
     const images = [...dockerfile.matchAll(/^FROM (node:\S+)/gm)].map((match) => match[1]);
     expect(images).toHaveLength(2);
-    expect(images.every((image) => image === `node:${version}-bookworm-slim`)).toBe(true);
+    expect(images.every((image) => image === `node:${version}-trixie-slim`)).toBe(true);
   });
   it("covers every job in one always-running aggregate check", () => {
     expect(
