@@ -174,6 +174,53 @@ export const itemRegistryRepository = {
     });
   },
 
+  /**
+   * Many items and their options in two queries, rather than two per item
+   * (audit §3.2: a 100-question exam cost about 200 queries per load). Keyed
+   * by item id; a deleted or missing item is absent. Options are in position
+   * order, as from `listItemOptions`.
+   */
+  async loadItemsWithOptions(tx: TenantTx, itemIds: readonly string[]) {
+    const ids = [...new Set(itemIds)];
+    const [items, options] = await Promise.all([
+      tx.item.findMany({
+        where: { id: { in: ids }, deleted_at: null },
+        select: {
+          id: true,
+          item_type_key: true,
+          stem_json: true,
+          explanation_json: true,
+          status: true,
+          tags: true,
+          created_by_membership_id: true,
+          created_at: true,
+          updated_at: true,
+        },
+      }),
+      tx.itemOption.findMany({
+        where: { item_id: { in: ids } },
+        orderBy: [{ item_id: "asc" }, { position: "asc" }],
+        select: {
+          id: true,
+          item_id: true,
+          option_json: true,
+          is_correct: true,
+          position: true,
+        },
+      }),
+    ]);
+
+    type Option = Omit<(typeof options)[number], "item_id">;
+    const loaded = new Map<string, { item: (typeof items)[number]; options: Option[] }>();
+    for (const item of items) {
+      loaded.set(item.id, { item, options: [] });
+    }
+    for (const { item_id: itemId, ...option } of options) {
+      loaded.get(itemId)?.options.push(option);
+    }
+    return loaded;
+  },
+
   async listItemOptions(tx: TenantTx, itemId: string) {
     return tx.itemOption.findMany({
       where: { item_id: itemId },

@@ -123,15 +123,19 @@ async function hydrateAssessmentItems(
   includeAnswerKeys: boolean,
 ) {
   const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
+  const loaded = await itemRegistryRepository.loadItemsWithOptions(
+    tx,
+    rows.map((row) => row.item_id),
+  );
   const items = [];
 
   for (const row of rows) {
-    const item = await itemRegistryRepository.findItemById(tx, row.item_id);
-    if (!item) {
+    const found = loaded.get(row.item_id);
+    if (!found) {
       continue;
     }
 
-    const options = await itemRegistryRepository.listItemOptions(tx, row.item_id);
+    const { item, options } = found;
     const decoded = decodeExplanationJson(item.explanation_json);
 
     items.push({
