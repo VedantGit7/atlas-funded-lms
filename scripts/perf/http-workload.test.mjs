@@ -389,21 +389,40 @@ test("fixture proxy credentials are local-only and transmitted per distinct acto
 
 test("periodic progress is sanitized and latency gates cannot turn a slow functional success into a performance pass", async () => {
   const events = [];
+  const tickEvents = [];
+  const intervals = [];
+  let tick = null;
   const c = { ...config(), slo: { requestP95Ms: 1000, journeyP95Ms: 3000 } };
   assert.throws(() => validateConfig({ ...c, slo: { requestP95Ms: 0, journeyP95Ms: 3000 } }));
   const result = await runWorkload(c, {
-    request: async () => ({ ms: 2000, ok: true, status: 200, reason: null }),
+    request: async () => {
+      // One periodic report from inside the sustained phase, while both actors are mid-journey.
+      // The test fires it rather than a wall-clock timer, which a slow runner could delay past the phase.
+      if (tick && events.at(-1)?.phase === "sustained" && tickEvents.length === 0) {
+        const before = events.length;
+        tick();
+        tickEvents.push(...events.slice(before));
+      }
+      return { ms: 2000, ok: true, status: 200, reason: null };
+    },
     onProgress: (progress) => events.push(progress),
     progressIntervalMs: 500,
+    startProgressTimer: (report, ms) => {
+      intervals.push(ms);
+      tick = report;
+      return () => {
+        tick = null;
+      };
+    },
   });
   assert.equal(result.passed, true);
   assert.equal(result.performancePassed, false);
   assert.equal(result.slo.requestP95Ms, 1000);
-  assert.ok(
-    events.some(
-      (event) => event.phase === "sustained" && event.elapsedMs >= 500 && event.activeActors === 2,
-    ),
-  );
+  assert.deepEqual(intervals, [500, 500, 500]);
+  assert.equal(tickEvents.length, 1);
+  assert.equal(tickEvents[0].phase, "sustained");
+  assert.equal(tickEvents[0].activeActors, 2);
+  assert.equal(tickEvents[0].targetActors, 2);
   assert.ok(
     result.phases.filter((p) => p.name !== "warmup").every((p) => p.performancePassed === false),
   );
