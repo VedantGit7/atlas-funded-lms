@@ -281,7 +281,6 @@ export async function listZoomUnmatchedIdentities(
 }
 
 export async function getZoomMatchingRules(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   const rules = await zoomInsightsUnmatchedRepository.getMatchingRules(tx);
   return zoomMatchingRulesResponseSchema.parse({ data: rules });
 }

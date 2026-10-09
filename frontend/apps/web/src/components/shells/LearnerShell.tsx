@@ -15,7 +15,6 @@ type LearnerShellProps = {
 };
 
 export function LearnerShell({ children }: LearnerShellProps) {
-  void learnerShellNavigationContract;
   return <LearnerShellGate>{children}</LearnerShellGate>;
 }
 

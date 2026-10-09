@@ -180,8 +180,6 @@ export async function ingestProctoringEvents(
   input: IngestProctoringEventsBody,
   _batchIdempotencyKey: string,
 ) {
-  void _batchIdempotencyKey;
-
   const attempt = await attemptsRepository.findById(tx, attemptId);
   if (!attempt || attempt.tenant_id !== ctx.tenantId) {
     throw attemptNotFound();

@@ -206,7 +206,6 @@ export async function getScheduleDetail(
   scheduleId: string,
   query: ScheduleDetailQuery,
 ) {
-  void ctx;
   const schedule = await reportsRepository.findScheduleById(tx, scheduleId);
   if (!schedule || schedule.tenant_id !== ctx.tenantId) {
     throw reportScheduleNotFound();

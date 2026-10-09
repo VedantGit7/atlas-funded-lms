@@ -558,7 +558,6 @@ export function CourseChaptersSidebar({
             });
             setLessonsByModule((current) => {
               const { [deleteModuleState.moduleId]: _removed, ...rest } = current;
-              void _removed;
               return rest;
             });
           }

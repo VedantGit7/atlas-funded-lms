@@ -307,15 +307,12 @@ export async function createCustomReportDefinition(
     defaultFormat: "csv",
   });
 
-  void ctx;
-
   return createCustomReportDefinitionResponseSchema.parse({
     data: mapDefinitionDto(created),
   });
 }
 
-export async function listReportDefinitions(tx: TenantTx, ctx: ServiceCtx) {
-  void ctx;
+export async function listReportDefinitions(tx: TenantTx, _ctx: ServiceCtx) {
   await ensureTenantReportDefinitions(tx);
   const rows = await reportsRepository.listDefinitions(tx);
 
@@ -465,8 +462,7 @@ export async function getReportRun(tx: TenantTx, ctx: ServiceCtx, reportRunId: s
   });
 }
 
-export async function listReportSchedules(tx: TenantTx, ctx: ServiceCtx) {
-  void ctx;
+export async function listReportSchedules(tx: TenantTx, _ctx: ServiceCtx) {
   await ensureTenantReportDefinitions(tx);
   const rows = await reportsRepository.listSchedules(tx);
 
@@ -640,7 +636,6 @@ export async function deleteReportSchedule(tx: TenantTx, ctx: ServiceCtx, schedu
 }
 
 export async function tickReportSchedules(tx: TenantTx, ctx: ServiceCtx) {
-  void ctx;
   await ensureTenantReportDefinitions(tx);
 
   const asOf = new Date();

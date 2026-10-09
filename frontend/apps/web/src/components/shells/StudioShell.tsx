@@ -15,7 +15,6 @@ type StudioShellProps = {
 };
 
 export function StudioShell({ children }: StudioShellProps) {
-  void studioShellNavigationContract;
   return <StudioShellGate>{children}</StudioShellGate>;
 }
 

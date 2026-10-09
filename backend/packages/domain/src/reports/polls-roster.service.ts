@@ -1239,7 +1239,6 @@ export async function comparePolls(tx: TenantTx, _ctx: ServiceCtx, query: PollsC
       optionsAligned,
       polls: loaded.map((entry) => {
         const { index, ...poll } = entry;
-        void index;
         return poll;
       }),
       optionRows,

@@ -85,7 +85,8 @@ function EventPublicPreview({
   coverImageUrl,
   registrationCount,
 }: EventPreviewProps) {
-  const [tick, setTick] = useState(0);
+  // Re-renders every 30 s so the countdown stays current; the count itself is unused.
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -98,7 +99,6 @@ function EventPublicPreview({
 
   const startsIso = fromLocalInputValue(startsAt) ?? startsAt;
   const countdown = countdownParts(startsIso);
-  void tick;
 
   const displayTitle = title.trim() || "Event title";
   const displayDescription =

@@ -2283,7 +2283,6 @@ export async function getInsightAlerts(
   slug: string,
   range: InsightDashboardRange = "12m",
 ): Promise<InsightAlertsBoard> {
-  void ctx;
   await assertInsightSectionVisible(tx, slug);
   return buildInsightAlertsBoard(tx, slug, range, true);
 }
@@ -2694,7 +2693,6 @@ export async function getInsightSettings(
   ctx: InsightsCtx,
   slug: string,
 ): Promise<InsightSettingsBoard> {
-  void ctx;
   if (!SLUG_TITLES[slug]) {
     throw new AtlasHttpError({
       code: "VALIDATION_ERROR",

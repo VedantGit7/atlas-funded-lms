@@ -664,7 +664,6 @@ export async function removeBatchLearner(
   membershipId: string,
   _input: { reason: string; notes?: string | undefined },
 ) {
-  void _input;
   const meta = await batchesRosterRepository.findBatchMeta(tx, batchId);
   if (!meta) throw batchRosterNotFound();
   const member = await batchesRosterRepository.findBatchMember(tx, batchId, membershipId);

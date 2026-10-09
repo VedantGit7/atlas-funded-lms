@@ -45,7 +45,6 @@ export async function connectZoom(tx: TenantTx, _ctx: ServiceCtx, rawBody: unkno
 }
 
 export async function listZoomMeetings(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   const rows = await zoomRepository.listMeetings(tx);
   return listZoomMeetingsResponseSchema.parse({
     data: {

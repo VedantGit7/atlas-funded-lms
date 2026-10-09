@@ -21,10 +21,10 @@
     "@atlas/audit": "workspace:*",
     "@atlas/authorization": "workspace:*",
     "@atlas/core": "workspace:*",
-    "@atlas/events": "workspace:*",
-    "@atlas/domain-config": "workspace:*",
     "@atlas/db": "workspace:*",
-    "zod": "^4.4.3"
+    "@atlas/domain-config": "workspace:*",
+    "@atlas/events": "workspace:*",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"

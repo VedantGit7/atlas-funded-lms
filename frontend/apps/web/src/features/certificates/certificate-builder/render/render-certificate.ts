@@ -57,7 +57,6 @@ export async function renderCertificatePdf(
   data?: Record<string, string>,
   options?: DesignToHtmlOptions & { pdfa?: boolean },
 ): Promise<Buffer> {
-  void options?.pdfa;
   const preview = await renderCertificatePreviewHtml(doc, data, options);
   return Buffer.from(preview.html, "utf8");
 }

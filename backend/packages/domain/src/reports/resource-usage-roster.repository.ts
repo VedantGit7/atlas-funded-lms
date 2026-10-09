@@ -2156,7 +2156,6 @@ export const resourceUsageRosterRepository = {
       has_scorm: boolean;
     }>;
   }> {
-    void _dormantDays;
     const courseRows = await tx.$queryRaw<
       Array<{
         course_id: string;

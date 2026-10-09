@@ -139,7 +139,6 @@ function CourseEditStandardPricingPlanScreen({
   editingPlan,
   planKind,
 }: CourseEditStandardPricingPlanScreenProps) {
-  void _planId;
   const titleId = useId();
   const isEditing = Boolean(editingPlan);
   const selectedKind = editingPlan?.planKind ?? planKind ?? "ONE_TIME";

@@ -27,9 +27,6 @@ export async function seedOwnerInvitationFromExistingHelper(
     requestId: string;
   },
 ): Promise<void> {
-  void args.displayName;
-  void args.requestId;
-
   const invitedEmailNormalized = args.email.trim().toLowerCase();
   const inviteToken = randomBytes(32).toString("base64url");
   const inviteTokenHash = createHash("sha256").update(inviteToken, "utf8").digest("hex");

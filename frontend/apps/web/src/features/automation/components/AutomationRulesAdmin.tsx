@@ -425,7 +425,6 @@ export function AutomationRulesAdmin({
     setFieldErrors((current) => {
       if (!current[key]) return current;
       const { [key]: _removed, ...next } = current;
-      void _removed;
       return next;
     });
     setMessage(null);
