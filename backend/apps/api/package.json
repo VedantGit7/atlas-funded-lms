@@ -30,7 +30,7 @@
     "@atlas/storage": "workspace:*",
     "@atlas/tenancy": "workspace:*",
     "@sentry/nextjs": "^10.59.0",
-    "@supabase/supabase-js": "^2.108.2",
+    "@supabase/supabase-js": "^2.117.2",
     "ethers": "^6.17.0",
     "jose": "^6.2.8",
     "jszip": "^3.10.1",

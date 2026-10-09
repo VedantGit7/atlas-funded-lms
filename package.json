@@ -174,7 +174,7 @@
     "@atlas/db": "workspace:*",
     "@atlas/release-readiness": "workspace:*",
     "@atlas/tenant-config": "workspace:*",
-    "@supabase/supabase-js": "^2.108.2",
+    "@supabase/supabase-js": "^2.117.2",
     "uuid": "^14.0.0"
   }
 }
