@@ -247,9 +247,21 @@ export async function requestJson({
   }
 }
 
+/** Calls `tick` every `ms` without keeping the process alive; returns a function that stops it. */
+function startUnrefInterval(tick, ms) {
+  const timer = setInterval(tick, ms);
+  timer.unref();
+  return () => clearInterval(timer);
+}
+
 export async function runWorkload(
   config,
-  { request = requestJson, onProgress = () => {}, progressIntervalMs = 60000 } = {},
+  {
+    request = requestJson,
+    onProgress = () => {},
+    progressIntervalMs = 60000,
+    startProgressTimer = startUnrefInterval,
+  } = {},
 ) {
   const c = validateConfig(config);
   if (!integer(progressIntervalMs, 100, 60000)) throw new Error("Invalid progress interval");
@@ -339,8 +351,7 @@ export async function runWorkload(
           capacityVerified: false,
         });
       reportProgress();
-      const progressTimer = setInterval(reportProgress, progressIntervalMs);
-      progressTimer.unref();
+      const stopProgressTimer = startProgressTimer(reportProgress, progressIntervalMs);
       // Closed loop: one sequence at a time per distinct actor. Report achieved load, not a fixed arrival-rate capacity claim.
       try {
         await Promise.all(
@@ -446,7 +457,7 @@ export async function runWorkload(
           }),
         );
       } finally {
-        clearInterval(progressTimer);
+        stopProgressTimer();
       }
       reportProgress();
       const elapsedMs = performance.now() - started;
