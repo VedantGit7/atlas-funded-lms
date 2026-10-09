@@ -41,12 +41,33 @@ function createMemoryStorage(seed?: Record<string, string>): {
   return { storage, map };
 }
 
+/**
+ * The client stores values JSON-encoded, so the verifier sits in storage as a
+ * quoted string. The cookie carries the bare verifier; the callback encodes it
+ * again when seeding storage for the exchange.
+ */
+function readStoredVerifier(stored: string | undefined): string | undefined {
+  if (stored === undefined) return undefined;
+  try {
+    const parsed: unknown = JSON.parse(stored);
+    return typeof parsed === "string" && parsed.length > 0 ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function createOAuthClient(storage: MemoryStorage) {
   const env = getAuthEnv();
 
   return createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
     auth: {
-      persistSession: false,
+      // Must be true: with persistSession false the client ignores `storage`
+      // and keeps the PKCE verifier in an internal memory store, so nothing
+      // reached the map, every sign-in start failed and a callback's seeded
+      // verifier was never read. The storage is a per-request throwaway map,
+      // so "persisting" goes no further than this request.
+      // tests/unit/auth/oauth-pkce-sdk-contract.test.ts runs the real client.
+      persistSession: true,
       autoRefreshToken: false,
       detectSessionInUrl: false,
       flowType: "pkce",
@@ -82,7 +103,7 @@ export async function startOAuthSignIn(args: {
   })) as SignInWithOAuthResult;
 
   const url = result.data?.url;
-  const codeVerifier = map.get(CODE_VERIFIER_KEY);
+  const codeVerifier = readStoredVerifier(map.get(CODE_VERIFIER_KEY));
 
   if (result.error || !url || !codeVerifier) {
     throw invalidCredentials();
@@ -114,7 +135,9 @@ export async function completeOAuthSignIn(args: {
   code: string;
   codeVerifier: string;
 }) {
-  const { storage } = createMemoryStorage({ [CODE_VERIFIER_KEY]: args.codeVerifier });
+  const { storage } = createMemoryStorage({
+    [CODE_VERIFIER_KEY]: JSON.stringify(args.codeVerifier),
+  });
   const supabase = createOAuthClient(storage);
 
   const result = (await supabase.auth.exchangeCodeForSession(args.code)) as ExchangeCodeResult;
