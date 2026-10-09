@@ -808,8 +808,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@next/bundle-analyzer':
-        specifier: ^16.2.9
-        version: 16.2.9
+        specifier: ^16.3.8
+        version: 16.3.8
       '@tailwindcss/postcss':
         specifier: ^4.3.1
         version: 4.3.1
@@ -1609,8 +1609,8 @@ packages:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.4
 
-  '@next/bundle-analyzer@16.2.9':
-    resolution: {integrity: sha512-yGWyLbC8MMn+hk9j6l6GammpbUz5S3yZzl3lpoWfVXhIpJfh6kAWG7JwF4WoG3f0VnYRY959yo1QQEI8mV/+jg==}
+  '@next/bundle-analyzer@16.3.8':
+    resolution: {integrity: sha512-8VBk5/pjANz7fxbQZrDwUMTAs598Vckb4PE7BSYrDIPthJskKCXEHOK+WEMgDD6X2xWlKjrXPo2r41N/G1azSw==}
 
   '@next/env@16.3.8':
     resolution: {integrity: sha512-Al9zqHVV7TJv0eFuOU4U7Lvv74PTih4Ch63sk2xCIpSTkE3udFnaOcnzP2lQVymiL7yS9Cj2iClUXlR3EQ5sEw==}
@@ -5941,7 +5941,7 @@ snapshots:
       '@tybys/wasm-util': 0.10.4
     optional: true
 
-  '@next/bundle-analyzer@16.2.9':
+  '@next/bundle-analyzer@16.3.8':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
