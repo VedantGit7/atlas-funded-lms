@@ -5,7 +5,7 @@ import {
   checkoutQuoteResponseSchema,
 } from "../../../../../server/sales-coupons/sales-coupons.schemas";
 import { learnerCouponMetadata } from "../../../../../server/sales-coupons/sales-coupons.route-metadata";
-import { quoteCheckout } from "../../../../../server/sales-coupons/sales-coupons.service";
+import { quoteCheckout } from "../../../../../server/sales-coupons/checkout-pricing";
 
 export const POST = createTenantRoute<
   z.output<typeof checkoutQuoteBodySchema>,

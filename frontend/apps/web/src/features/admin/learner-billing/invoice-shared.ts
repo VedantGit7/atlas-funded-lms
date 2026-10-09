@@ -2,7 +2,7 @@
  * Invoice numbering rules, for the settings screen.
  *
  * `formatInvoiceNumber` mirrors `allocateInvoiceNumber` in
- * sales-coupons.service.ts, and the prefix rules mirror
+ * order-fulfillment.service.ts, and the prefix rules mirror
  * `UpdateInvoiceRequestSchema`. Both are duplicated rather than imported —
  * the client bundle cannot pull the domain package — and
  * `tests/unit/admin/invoice-settings.test.ts` asserts the copies agree.

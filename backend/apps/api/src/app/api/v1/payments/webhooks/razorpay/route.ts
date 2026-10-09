@@ -6,7 +6,7 @@ import { razorpayWebhookResponseSchema } from "@atlas/domain/payments/payments.d
 import { razorpayWebhookMetadata } from "@atlas/domain/payments/payments.route-metadata";
 import { resolvePaymentProvider } from "@atlas/domain/payments/payment-provider.registry";
 import { paymentsRepository } from "@atlas/domain/payments/payments.repository";
-import { fulfillPaidCourseOrderByExternalId } from "../../../../../../server/sales-coupons/sales-coupons.service";
+import { fulfillPaidCourseOrderByExternalId } from "../../../../../../server/sales-coupons/order-fulfillment.service";
 import { systemServiceCtx } from "@atlas/core/actor/system-actor";
 
 export const POST = createPublicRouteHandler(

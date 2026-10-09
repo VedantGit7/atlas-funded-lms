@@ -5,7 +5,7 @@ import {
   couponPerformanceResponseSchema,
 } from "../../../../../../server/sales-coupons/sales-coupons.schemas";
 import { listCouponsMetadata } from "../../../../../../server/sales-coupons/sales-coupons.route-metadata";
-import { getCouponPerformance } from "../../../../../../server/sales-coupons/sales-coupons.service";
+import { getCouponPerformance } from "../../../../../../server/sales-coupons/coupons.service";
 
 export const GET = createTenantRoute<
   z.output<typeof couponPerformanceQuerySchema>,

@@ -10,10 +10,7 @@ import {
   listCouponsMetadata,
   mutateCouponsMetadata,
 } from "../../../../../server/sales-coupons/sales-coupons.route-metadata";
-import {
-  createCoupon,
-  listCoupons,
-} from "../../../../../server/sales-coupons/sales-coupons.service";
+import { createCoupon, listCoupons } from "../../../../../server/sales-coupons/coupons.service";
 
 export const GET = createTenantRoute<
   z.output<typeof couponsListQuerySchema>,

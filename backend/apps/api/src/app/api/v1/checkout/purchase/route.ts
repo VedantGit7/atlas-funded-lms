@@ -9,7 +9,7 @@ import {
   completeCheckoutPurchase,
   planCheckoutPurchase,
   type CheckoutPurchasePlan,
-} from "../../../../../server/sales-coupons/sales-coupons.service";
+} from "../../../../../server/sales-coupons/checkout-purchase.service";
 
 /**
  * Creates (or reuses) the learner's payment order in the request transaction,

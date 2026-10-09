@@ -5,7 +5,7 @@ import {
   publicCouponsForCourseResponseSchema,
 } from "../../../../../server/sales-coupons/sales-coupons.schemas";
 import { learnerCouponReadMetadata } from "../../../../../server/sales-coupons/sales-coupons.route-metadata";
-import { listPublicCouponsForCourse } from "../../../../../server/sales-coupons/sales-coupons.service";
+import { listPublicCouponsForCourse } from "../../../../../server/sales-coupons/checkout-pricing";
 
 export const GET = createTenantRoute<
   z.output<typeof publicCouponsForCourseQuerySchema>,

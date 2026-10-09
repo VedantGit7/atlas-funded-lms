@@ -220,7 +220,7 @@ describe("parsePercentage", () => {
 
 describe("taxCents matches the checkout arithmetic", () => {
   it("applies the rate and rounds the same way", () => {
-    // computeTaxCents in sales-coupons.service.ts: round(amount * pct / 100).
+    // computeTaxCents in checkout-pricing.ts: round(amount * pct / 100).
     expect(taxCents(100_000, 18)).toBe(18_000);
     expect(taxCents(99_999, 18)).toBe(Math.round((99_999 * 18) / 100));
   });

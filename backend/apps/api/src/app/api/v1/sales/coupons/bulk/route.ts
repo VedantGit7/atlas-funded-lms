@@ -5,7 +5,7 @@ import {
   createBulkCouponsResponseSchema,
 } from "../../../../../../server/sales-coupons/sales-coupons.schemas";
 import { mutateCouponsMetadata } from "../../../../../../server/sales-coupons/sales-coupons.route-metadata";
-import { createBulkCoupons } from "../../../../../../server/sales-coupons/sales-coupons.service";
+import { createBulkCoupons } from "../../../../../../server/sales-coupons/coupons.service";
 
 export const POST = createTenantRoute<
   z.output<typeof createBulkCouponsBodySchema>,
