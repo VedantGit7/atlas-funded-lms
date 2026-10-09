@@ -50,7 +50,6 @@ function asRecord(value: unknown): Record<string, unknown> {
 }
 
 export async function previewExportBuilder(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
-  void ctx;
   const body: ExportBuilderPreviewBody = exportBuilderPreviewBodySchema.parse(rawBody);
   await ensureTenantReportDefinitions(tx);
 

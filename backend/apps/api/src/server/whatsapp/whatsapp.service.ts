@@ -192,13 +192,11 @@ async function requireCampaign(tx: TenantTx, id: string) {
 }
 
 export async function getWhatsappConnection(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   const row = await whatsappRepository.getConnection(tx);
   return whatsappConnectionResponseSchema.parse({ data: toConnectionDto(row) });
 }
 
 export async function connectWhatsappMock(tx: TenantTx, _ctx: ServiceCtx, rawBody: unknown) {
-  void _ctx;
   const body = connectWhatsappMockBodySchema.parse(rawBody);
   await whatsappRepository.upsertConnection(tx, {
     status: "CONNECTED",
@@ -215,7 +213,6 @@ export async function connectWhatsappMock(tx: TenantTx, _ctx: ServiceCtx, rawBod
 }
 
 export async function connectWhatsappMeta(tx: TenantTx, _ctx: ServiceCtx, rawBody: unknown) {
-  void _ctx;
   const body = connectWhatsappMetaBodySchema.parse(rawBody);
   const ciphertext = encryptWhatsappSecret(body.accessToken);
   await whatsappRepository.upsertConnection(tx, {
@@ -233,14 +230,12 @@ export async function connectWhatsappMeta(tx: TenantTx, _ctx: ServiceCtx, rawBod
 }
 
 export async function disconnectWhatsapp(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   await whatsappRepository.disconnect(tx);
   const row = await whatsappRepository.getConnection(tx);
   return whatsappConnectionResponseSchema.parse({ data: toConnectionDto(row) });
 }
 
 export async function listWhatsappTemplates(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   await requireConnected(tx);
   const rows = await whatsappRepository.listTemplates(tx);
   return whatsappTemplatesListResponseSchema.parse({
@@ -302,7 +297,6 @@ export async function listWhatsappCampaigns(tx: TenantTx, ctx: ServiceCtx, rawQu
 }
 
 export async function getWhatsappCampaign(tx: TenantTx, _ctx: ServiceCtx, id: string) {
-  void _ctx;
   const row = await requireCampaign(tx, id);
   return whatsappCampaignResponseSchema.parse({ data: toCampaignDto(row) });
 }
@@ -324,7 +318,6 @@ export async function updateWhatsappCampaignTitle(
   id: string,
   rawBody: unknown,
 ) {
-  void _ctx;
   const body = updateWhatsappCampaignTitleBodySchema.parse(rawBody);
   await requireCampaign(tx, id);
   await whatsappRepository.updateCampaignTitle(tx, id, body.title);
@@ -338,7 +331,6 @@ export async function setWhatsappCampaignAudience(
   id: string,
   rawBody: unknown,
 ) {
-  void _ctx;
   const body = setWhatsappCampaignAudienceBodySchema.parse(rawBody);
   const existing = await requireCampaign(tx, id);
   if (existing.status !== "DRAFT") {
@@ -373,7 +365,6 @@ export async function setWhatsappCampaignAudience(
 }
 
 export async function listWhatsappCampaignRecipients(tx: TenantTx, _ctx: ServiceCtx, id: string) {
-  void _ctx;
   const existing = await requireCampaign(tx, id);
   if (!existing.audience_type) {
     return whatsappRecipientsResponseSchema.parse({
@@ -405,7 +396,6 @@ export async function selectWhatsappCampaignTemplate(
   id: string,
   rawBody: unknown,
 ) {
-  void _ctx;
   const body = selectWhatsappTemplateBodySchema.parse(rawBody);
   const existing = await requireCampaign(tx, id);
   if (!existing.audience_type) {
@@ -583,7 +573,6 @@ export async function deleteWhatsappCampaign(
   id: string,
   rawBody: unknown,
 ) {
-  void _ctx;
   const body = deleteWhatsappCampaignBodySchema.parse(rawBody);
   const existing = await requireCampaign(tx, id);
   if (existing.title.trim() !== body.titleConfirmation.trim()) {
@@ -597,7 +586,6 @@ export async function deleteWhatsappCampaign(
 }
 
 export async function listWhatsappConversations(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   await requireConnected(tx);
   const rows = await whatsappRepository.listConversations(tx);
   return whatsappConversationsListResponseSchema.parse({
@@ -616,7 +604,6 @@ export async function listWhatsappConversations(tx: TenantTx, _ctx: ServiceCtx) 
 }
 
 export async function getWhatsappConversation(tx: TenantTx, _ctx: ServiceCtx, id: string) {
-  void _ctx;
   await requireConnected(tx);
   const conversation = await whatsappRepository.findConversation(tx, id);
   if (!conversation) throw notFound("Conversation not found.");

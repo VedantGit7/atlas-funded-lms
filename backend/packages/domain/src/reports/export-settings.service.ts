@@ -172,8 +172,7 @@ async function buildResponse(tx: TenantTx) {
   });
 }
 
-export async function getExportSettings(tx: TenantTx, ctx: ServiceCtx) {
-  void ctx;
+export async function getExportSettings(tx: TenantTx, _ctx: ServiceCtx) {
   return buildResponse(tx);
 }
 

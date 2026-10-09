@@ -117,7 +117,6 @@ function maskSecret(ref: string | null): string | null {
 }
 
 export async function getZoomConnectionDetail(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   const [connection, meetingsImported, meetingsImportedToday, syncRuns, webhookEvents] =
     await Promise.all([
       zoomInsightsConnectionRepository.getConnection(tx),
@@ -184,8 +183,7 @@ export async function getZoomConnectionDetail(tx: TenantTx, _ctx: ServiceCtx) {
   });
 }
 
-export async function syncZoomConnectionNow(tx: TenantTx, ctx: ServiceCtx) {
-  void ctx;
+export async function syncZoomConnectionNow(tx: TenantTx, _ctx: ServiceCtx) {
   const connection = await zoomInsightsConnectionRepository.getConnection(tx);
   if (!connection || connection.status !== "connected") {
     throw zoomParticipantMatchInvalid("Connect Zoom before syncing.");
@@ -356,7 +354,6 @@ export async function updateZoomConnectionSchedule(
 }
 
 export async function sendZoomWebhookTest(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   const connection = await zoomInsightsConnectionRepository.getConnection(tx);
   if (!connection || connection.status !== "connected") {
     throw zoomParticipantMatchInvalid("Connect Zoom before sending a test webhook.");

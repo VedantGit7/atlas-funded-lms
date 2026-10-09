@@ -9,8 +9,7 @@ export function writePlatformClientDataCache(key: readonly unknown[], value: unk
 }
 
 export function clearPlatformClientDataCache(
-  reason: "logout" | "host_change" | "mfa_downgrade" | "reason_expiry" | "capability_loss",
+  _reason: "logout" | "host_change" | "mfa_downgrade" | "reason_expiry" | "capability_loss",
 ): void {
-  void reason;
   cache.clear();
 }

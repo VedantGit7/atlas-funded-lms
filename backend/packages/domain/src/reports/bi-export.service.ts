@@ -221,7 +221,6 @@ export async function createBiExportJob(tx: TenantTx, ctx: ServiceCtx, rawBody: 
 }
 
 export async function listBiExportJobs(tx: TenantTx, ctx: ServiceCtx, rawQuery: unknown) {
-  void ctx;
   const query: BiExportListQuery = biExportListQuerySchema.parse(rawQuery ?? {});
   const rows = await biExportRepository.listJobs(tx, {
     limit: query.limit,

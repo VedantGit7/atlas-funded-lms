@@ -579,7 +579,6 @@ export async function testDestination(
 }
 
 export async function exportDestinationsList(tx: TenantTx, _ctx: ServiceCtx) {
-  void _ctx;
   const tenantDomains = await destinationsRosterRepository.listTenantEmailDomains(tx);
   const rows = await destinationsRosterRepository.listAllForExport(tx);
   const header = [

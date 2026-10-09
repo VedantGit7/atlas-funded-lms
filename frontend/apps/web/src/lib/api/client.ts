@@ -114,7 +114,6 @@ function notifyMutationSuccess(
 export const clientApi = {
   // Optional unused label kept for call-site ergonomics / future logging
   get: <T>(path: string, _label?: string) => {
-    void _label;
     return request<T>(path, {
       method: "GET",
     });

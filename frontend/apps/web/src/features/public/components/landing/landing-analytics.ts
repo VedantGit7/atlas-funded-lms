@@ -11,9 +11,8 @@ export function captureLandingCtaClick(source: string) {
 }
 
 export function useLandingCtaHandler(source: string) {
-  return (event: MouseEvent<HTMLElement>) => {
+  return (_event: MouseEvent<HTMLElement>) => {
     captureLandingCtaClick(source);
     // Allow navigation to proceed.
-    void event;
   };
 }

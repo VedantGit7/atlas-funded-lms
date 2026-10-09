@@ -326,7 +326,6 @@ export async function listActiveDevicesAlerts(tx: TenantTx, ctx: ServiceCtx, raw
   }
 
   const totalPages = totalCount === 0 ? 0 : Math.ceil(totalCount / query.limit);
-  void ctx;
 
   return activeDevicesAlertsListResponseSchema.parse({
     data: {

@@ -1,9 +1,5 @@
 import { expireDueCertificatesForActiveTenants } from "../../../../../../server/certificates/certificate-expiry.service";
 import { createCronHandler } from "../../../../../../server/internal/cron-auth";
-// Referenced so the route-metadata guard can associate this route.
-import { routeMetadata } from "./route.metadata";
-
-void routeMetadata;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

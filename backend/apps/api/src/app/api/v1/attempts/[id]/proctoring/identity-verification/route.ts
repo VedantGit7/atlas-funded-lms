@@ -29,7 +29,6 @@ export const POST = createTenantRoute<
         message: "Idempotency-Key header is required.",
       });
     }
-    void idempotencyKey;
 
     const attemptId = params["id"];
     if (!attemptId) throw new Error("Missing attempt id");

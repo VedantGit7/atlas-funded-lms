@@ -11,7 +11,6 @@ export type PublicTenantBranding = {
 
 export const loadPublicTenantBranding = cache(
   async (_context: { tenantId: string; requestId: string }): Promise<PublicTenantBranding> => {
-    void _context;
     const bootstrap = await loadPublicBootstrap();
 
     return {

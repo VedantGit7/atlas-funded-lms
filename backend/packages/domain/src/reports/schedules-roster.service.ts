@@ -188,7 +188,6 @@ export async function listSchedulesRoster(
   ctx: ServiceCtx,
   query: SchedulesRosterListQuery,
 ) {
-  void ctx;
   const [summary, listed] = await Promise.all([
     schedulesRosterRepository.summarize(tx),
     schedulesRosterRepository.list(tx, query),

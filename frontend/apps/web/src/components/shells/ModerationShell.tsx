@@ -14,7 +14,6 @@ type ModerationShellProps = {
 };
 
 export function ModerationShell({ children }: ModerationShellProps) {
-  void moderationShellNavigationContract;
   return <ModerationShellGate>{children}</ModerationShellGate>;
 }
 

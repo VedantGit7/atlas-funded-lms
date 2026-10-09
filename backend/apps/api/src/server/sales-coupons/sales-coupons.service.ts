@@ -147,10 +147,9 @@ async function requireCoupon(tx: TenantTx, id: string) {
   return row;
 }
 
-function assertEditableWhileActive(row: CouponRow) {
+function assertEditableWhileActive(_row: CouponRow) {
   // Active coupons can still be edited (Learnyst allows config after create),
   // but code collisions and usage limits are validated on save.
-  void row;
 }
 
 async function assertValidCourseIds(tx: TenantTx, courseIds: string[]) {

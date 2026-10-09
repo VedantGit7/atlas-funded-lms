@@ -3487,7 +3487,6 @@ export const batchesRosterRepository = {
       median_duration_seconds: number | null;
     }>
   > {
-    void _rosterCount;
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       with roster as (
         select bm.membership_id
