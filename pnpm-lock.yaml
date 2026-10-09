@@ -740,18 +740,12 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      ethers:
-        specifier: ^6.17.0
-        version: 6.17.0
       isomorphic-dompurify:
         specifier: ^4.5.0
         version: 4.5.0
       jose:
         specifier: ^6.2.8
         version: 6.2.8
-      jszip:
-        specifier: ^3.10.1
-        version: 3.10.1
       konva:
         specifier: ^10.3.0
         version: 10.3.0
@@ -773,9 +767,6 @@ importers:
       next:
         specifier: ^16.3.8
         version: 16.3.8(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.61.0)(@types/node@24.13.2)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      playwright-core:
-        specifier: ^1.61.0
-        version: 1.61.0
       posthog-js:
         specifier: ^1.438.2
         version: 1.438.2(@types/react@19.2.17)(react@19.2.7)
