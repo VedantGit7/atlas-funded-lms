@@ -424,8 +424,8 @@ importers:
         specifier: workspace:*
         version: link:../storage
       cron-parser:
-        specifier: ^5.8.1
-        version: 5.8.1
+        specifier: ^5.10.1
+        version: 5.10.1
       exceljs:
         specifier: ^4.4.0
         version: 4.4.0
@@ -3083,8 +3083,8 @@ packages:
     resolution: {integrity: sha512-NT7w2JVU7DFroFdYkeq8cywxrgjPHWkdX1wjpRQXPX5Asews3tA+Ght6lddQO5Mkumffp3X7GEqku3epj2toIw==}
     engines: {node: '>= 10'}
 
-  cron-parser@5.8.1:
-    resolution: {integrity: sha512-fVw5nGEkTVmiPKo3fY0j28Thq6jR00VKWyL22llWrsbII4sDHI+8Kx1kcL+QzGQJfCfk64bbMotrgTZRpzYpLQ==}
+  cron-parser@5.10.1:
+    resolution: {integrity: sha512-pKRrRagItwk9rGIStcUyMxFX34x56zoX3KDf9HJ4ttwkXIK1qxK63EvXvEDmlxI9AdPJ+Y7TEKRftRlW5eSS7A==}
     engines: {node: '>=18'}
 
   cross-env@10.1.0:
@@ -7403,7 +7403,7 @@ snapshots:
       crc-32: 1.2.2
       readable-stream: 3.6.2
 
-  cron-parser@5.8.1:
+  cron-parser@5.10.1:
     dependencies:
       luxon: 3.7.2
 

@@ -33,7 +33,7 @@
     "@atlas/membership": "workspace:*",
     "@atlas/security": "workspace:*",
     "@atlas/storage": "workspace:*",
-    "cron-parser": "^5.8.1",
+    "cron-parser": "^5.10.1",
     "exceljs": "^4.4.0",
     "stripe": "^22.5.0",
     "zod": "^4.4.3"
