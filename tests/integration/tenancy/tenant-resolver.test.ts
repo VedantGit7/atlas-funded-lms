@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
-import { resolveTenantFromHost } from "@atlas/tenancy";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { forgetResolvedTenantHosts, resolveTenantFromHost } from "@atlas/tenancy";
 
 function mockDb(rows: unknown[]) {
   return {
@@ -8,6 +8,11 @@ function mockDb(rows: unknown[]) {
 }
 
 describe("resolveTenantFromHost", () => {
+  // Cases reuse hostnames with different answers; each starts with no recent lookups.
+  beforeEach(() => {
+    forgetResolvedTenantHosts();
+  });
+
   it("resolves an ACTIVE tenant from an ACTIVE domain", async () => {
     const db = mockDb([
       {

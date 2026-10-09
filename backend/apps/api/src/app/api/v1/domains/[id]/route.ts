@@ -1,4 +1,7 @@
+import type { NextRequest } from "next/server";
 import type { z } from "zod";
+
+import { forgetResolvedTenantHosts } from "@atlas/tenancy";
 
 import { createTenantRoute } from "@atlas/api/create-tenant-route";
 
@@ -13,7 +16,7 @@ import { routeMetadata } from "./route.metadata";
 
 type DeleteDomainResponse = z.output<typeof DeleteDomainResponseSchema>;
 
-export const DELETE = createTenantRoute<Record<string, never>, DeleteDomainResponse>({
+const deleteDomain = createTenantRoute<Record<string, never>, DeleteDomainResponse>({
   metadata: routeMetadata,
 
   params: DomainParamsSchema,
@@ -38,3 +41,10 @@ export const DELETE = createTenantRoute<Record<string, never>, DeleteDomainRespo
     );
   },
 });
+
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const response = await deleteDomain(req, context);
+  // Committed: this process stops resolving the deleted hostname at once (others within 30 s).
+  if (response.ok) forgetResolvedTenantHosts();
+  return response;
+}

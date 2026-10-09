@@ -18,6 +18,46 @@ type TenantResolverDb = {
 };
 
 /**
+ * Recently resolved hostnames, per process (audit §3.1). An anonymous request
+ * otherwise opens a database transaction only to find its tenant.
+ *
+ * - Only found domains are kept: an unknown hostname always asks the database,
+ *   so a newly added or verified domain works at once.
+ * - The tenant's and domain's state are kept with them, and the active checks
+ *   still run on every request against that state.
+ * - Suspending, resuming or archiving a tenant, or deleting a domain, clears
+ *   this process's copy once committed (forgetResolvedTenantHosts). Other
+ *   processes catch up within TENANT_HOST_TTL_MS.
+ */
+const TENANT_HOST_TTL_MS = 30_000;
+const MAX_TENANT_HOSTS = 10_000;
+const resolvedHosts = new Map<string, { row: TenantResolutionRow; expiresAt: number }>();
+
+function cachedDomain(host: string): TenantResolutionRow | undefined {
+  const entry = resolvedHosts.get(host);
+  if (!entry) return undefined;
+  if (entry.expiresAt <= Date.now()) {
+    resolvedHosts.delete(host);
+    return undefined;
+  }
+  return entry.row;
+}
+
+function rememberDomain(host: string, row: TenantResolutionRow): void {
+  if (resolvedHosts.size >= MAX_TENANT_HOSTS) {
+    // Oldest insertions first.
+    const oldest = resolvedHosts.keys().next().value;
+    if (oldest !== undefined) resolvedHosts.delete(oldest);
+  }
+  resolvedHosts.set(host, { row, expiresAt: Date.now() + TENANT_HOST_TTL_MS });
+}
+
+/** After a committed change to a tenant's state or its domains. */
+export function forgetResolvedTenantHosts(): void {
+  resolvedHosts.clear();
+}
+
+/**
  * The verified domain for exactly this hostname, or nothing.
  *
  * `app.resolve_tenant_host` is the only way the application roles can read
@@ -29,6 +69,9 @@ async function findVerifiedDomain(
   db: TenantResolverDb,
   host: string,
 ): Promise<TenantResolutionRow | null> {
+  const cached = cachedDomain(host);
+  if (cached) return cached;
+
   const rows = await db.$queryRaw<TenantResolutionRow[]>`
     select
       tenant_id::text as tenant_id,
@@ -40,7 +83,9 @@ async function findVerifiedDomain(
     from app.resolve_tenant_host(${host})
   `;
 
-  return rows[0] ?? null;
+  const row = rows[0] ?? null;
+  if (row) rememberDomain(host, row);
+  return row;
 }
 
 function toContext(
@@ -71,6 +116,20 @@ export async function resolveTenantFromRequest(args: {
     requestId,
     db: args.db,
   });
+}
+
+/**
+ * The request's tenant from this process's recent lookups, without a database
+ * connection; null when it has none, so the caller asks the database. Applies
+ * the same state checks as resolveTenantFromHost.
+ */
+export function resolveTenantFromRecentLookup(req: Request): ResolvedTenantContext | null {
+  const host = normalizeHost(resolveRequestHostFromHeaders(req.headers));
+  const row = cachedDomain(host);
+  if (!row) return null;
+  assertTenantDomainActive(row.domain_status);
+  assertTenantActive(row.tenant_state);
+  return toContext(row, host, getOrCreateRequestId(req.headers));
 }
 
 export async function resolveTenantFromHost(args: {

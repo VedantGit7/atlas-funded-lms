@@ -26,6 +26,16 @@ resolver in `backend/packages/tenancy`, or the public bootstrap route.
    condition containing a non-leakproof function such as `lower()` on the
    column is applied only after the policy, which makes every request scan the
    table.
+
+   Each process keeps a found hostname's row, including the tenant's and
+   domain's state, for 30 seconds (`tenant-resolver.ts`), so an anonymous
+   request often needs no connection to find its tenant. The active checks
+   still run on the kept state. Unknown hostnames are never kept, so a new or
+   newly verified domain works at once. Suspending, resuming or archiving a
+   tenant, or deleting a domain, clears the copy in the process that made the
+   change once it commits; **other processes can serve the previous state for
+   up to 30 seconds.**
+
 4. With the tenant known, the request runs in `withTenantTx`, where row-level
    security limits every tenant table to that tenant.
 
