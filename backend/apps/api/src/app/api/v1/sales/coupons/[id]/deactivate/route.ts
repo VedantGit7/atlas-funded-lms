@@ -3,7 +3,7 @@ import { createTenantRoute, noBodySchema } from "@atlas/api";
 import { z as zod } from "zod";
 import { couponResponseSchema } from "../../../../../../../server/sales-coupons/sales-coupons.schemas";
 import { mutateCouponsMetadata } from "../../../../../../../server/sales-coupons/sales-coupons.route-metadata";
-import { deactivateCoupon } from "../../../../../../../server/sales-coupons/sales-coupons.service";
+import { deactivateCoupon } from "../../../../../../../server/sales-coupons/coupons.service";
 
 const paramsSchema = zod.object({ id: zod.uuid() });
 

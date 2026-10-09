@@ -121,7 +121,7 @@ export const UpdateGstRequestSchema = z
 
 /**
  * The invoice-number allocator keeps only these characters and only this many
- * of them (`allocateInvoiceNumber` in sales-coupons.service.ts). The schema
+ * of them (`allocateInvoiceNumber` in order-fulfillment.service.ts). The schema
  * enforces the same limits so that what an admin types is what gets printed —
  * previously a 20-character prefix or one containing a space or a full stop
  * saved happily and was then silently cut down at allocation time.

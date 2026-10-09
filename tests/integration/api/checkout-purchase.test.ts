@@ -24,7 +24,7 @@ import {
 import {
   completeCheckoutPurchase,
   planCheckoutPurchase,
-} from "../../../backend/apps/api/src/server/sales-coupons/sales-coupons.service";
+} from "../../../backend/apps/api/src/server/sales-coupons/checkout-purchase.service";
 
 /**
  * Audit M4 against Postgres: one open checkout per learner, course and price,

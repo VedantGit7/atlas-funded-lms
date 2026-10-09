@@ -132,11 +132,13 @@ vi.mock("../../../backend/apps/api/src/server/sales-coupons/sales-coupons.reposi
 
 import {
   completeCheckoutPurchase,
-  fulfillPaidCourseOrder,
-  fulfillPaidCourseOrderByExternalId,
   planCheckoutPurchase,
   purchaseCheckout,
-} from "../../../backend/apps/api/src/server/sales-coupons/sales-coupons.service";
+} from "../../../backend/apps/api/src/server/sales-coupons/checkout-purchase.service";
+import {
+  fulfillPaidCourseOrder,
+  fulfillPaidCourseOrderByExternalId,
+} from "../../../backend/apps/api/src/server/sales-coupons/order-fulfillment.service";
 import {
   computeRazorpayWebhookSignature,
   createRazorpayPaymentProvider,

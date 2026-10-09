@@ -23,10 +23,10 @@ import {
 } from "../../fixtures/course-authoring-fixture";
 import {
   completeCheckoutPurchase,
-  fulfillPaidCourseOrderByExternalId,
   planCheckoutPurchase,
-  validateCouponForLearner,
-} from "../../../backend/apps/api/src/server/sales-coupons/sales-coupons.service";
+} from "../../../backend/apps/api/src/server/sales-coupons/checkout-purchase.service";
+import { validateCouponForLearner } from "../../../backend/apps/api/src/server/sales-coupons/checkout-pricing";
+import { fulfillPaidCourseOrderByExternalId } from "../../../backend/apps/api/src/server/sales-coupons/order-fulfillment.service";
 
 /**
  * Audit M1 against Postgres: an open checkout holds one use of its coupon, so

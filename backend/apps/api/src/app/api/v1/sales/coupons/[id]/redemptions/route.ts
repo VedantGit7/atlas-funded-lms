@@ -6,7 +6,7 @@ import {
   couponRedemptionsQuerySchema,
 } from "../../../../../../../server/sales-coupons/sales-coupons.schemas";
 import { listCouponsMetadata } from "../../../../../../../server/sales-coupons/sales-coupons.route-metadata";
-import { listCouponRedemptions } from "../../../../../../../server/sales-coupons/sales-coupons.service";
+import { listCouponRedemptions } from "../../../../../../../server/sales-coupons/coupons.service";
 
 const paramsSchema = zod.object({ id: zod.uuid() });
 
