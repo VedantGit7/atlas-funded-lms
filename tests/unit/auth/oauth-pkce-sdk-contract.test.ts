@@ -1,5 +1,14 @@
-import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+/**
+ * RFC 7636 S256: BASE64URL(SHA-256(verifier)), computed with WebCrypto as the
+ * client does. A PKCE verifier is a random one-time value, not a password, so
+ * a plain digest is what the protocol requires.
+ */
+async function s256Challenge(verifier: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+  return Buffer.from(digest).toString("base64url");
+}
 
 const upsertAuthPrincipal = vi.hoisted(() => vi.fn());
 vi.mock("../../../backend/packages/auth/src/auth-principal.repository", () => ({
@@ -46,9 +55,7 @@ describe("OAuth PKCE against the installed supabase-js", () => {
     const authorize = new URL(url);
     expect(authorize.searchParams.get("redirect_to")).toBe(redirectTo);
     expect(authorize.searchParams.get("code_challenge_method")).toBe("s256");
-    expect(authorize.searchParams.get("code_challenge")).toBe(
-      createHash("sha256").update(codeVerifier).digest("base64url"),
-    );
+    expect(authorize.searchParams.get("code_challenge")).toBe(await s256Challenge(codeVerifier));
   });
 
   it("completes a flow by exchanging the code with the verifier from the start", async () => {
