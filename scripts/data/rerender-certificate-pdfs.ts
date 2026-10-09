@@ -7,9 +7,10 @@
  *   ... pnpm data:rerender-certificate-pdfs -- --apply
  *
  * Rendering needs Chromium, so `--apply` runs where the PDF worker does, in
- * the managed-node worker image (which has no pnpm):
+ * the managed-node worker image, which carries this script bundled
+ * (deploy/managed-node/build-worker.mjs):
  *
- *   node --import tsx scripts/data/rerender-certificate-pdfs.ts --apply
+ *   node rerender-certificate-pdfs.mjs --apply
  *
  * Dry run by default: it reads each stored PDF and reports which ones need a
  * re-render. `--apply` re-renders and replaces them; `--tenant <id>`
