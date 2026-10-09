@@ -1,6 +1,6 @@
 import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
+import { resolveTenantFromRecentLookup, resolveTenantFromRequest } from "@atlas/tenancy";
 
 /**
  * The connection discipline of `createTenantRoute`, for routes that cannot use it
@@ -30,9 +30,16 @@ export const globalDbPerStatement = {
   },
 };
 
-/** Phase 2 for anonymous routes: the request host's tenant, on a released connection. */
+/**
+ * Phase 2 for anonymous routes: the request host's tenant, on a released
+ * connection, or with no connection at all when this process resolved the
+ * host in the last few seconds.
+ */
 export async function resolveRequestTenant(req: TenantRequest): Promise<ResolvedRequestTenant> {
-  return await withGlobalDb((db) => resolveTenantFromRequest({ req, db }));
+  return (
+    resolveTenantFromRecentLookup(req) ??
+    (await withGlobalDb((db) => resolveTenantFromRequest({ req, db })))
+  );
 }
 
 /**

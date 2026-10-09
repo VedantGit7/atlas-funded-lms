@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { createPlatformRoute } from "@atlas/api/create-platform-route";
+import { forgetResolvedTenantHosts } from "@atlas/tenancy";
 import {
   PlatformTenantParamsSchema,
   PlatformTenantDetailResponseSchema,
@@ -26,5 +27,8 @@ const suspend = createPlatformRoute({
 });
 
 export async function POST(req: NextRequest, context: { params: Promise<{ id: string }> }) {
-  return suspend(req, context);
+  const response = await suspend(req, context);
+  // Committed: this process stops serving the old state at once (others within 30 s).
+  if (response.ok) forgetResolvedTenantHosts();
+  return response;
 }

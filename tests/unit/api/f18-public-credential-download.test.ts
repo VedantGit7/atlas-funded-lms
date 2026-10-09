@@ -14,7 +14,11 @@ const mocks = vi.hoisted(() => ({
   withGlobalDb: vi.fn(),
   withTenantTx: vi.fn(),
 }));
-vi.mock("@atlas/tenancy", () => ({ resolveTenantFromRequest: mocks.resolveTenant }));
+vi.mock("@atlas/tenancy", () => ({
+  resolveTenantFromRecentLookup: () => null,
+  forgetResolvedTenantHosts: () => undefined,
+  resolveTenantFromRequest: mocks.resolveTenant,
+}));
 vi.mock("@atlas/db/global-db", () => ({ withGlobalDb: mocks.withGlobalDb }));
 vi.mock("@atlas/db/with-tenant-tx", () => ({ withTenantTx: mocks.withTenantTx }));
 vi.mock("../../../backend/apps/api/src/server/certificates/certificate.service", () => ({

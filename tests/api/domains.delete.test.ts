@@ -66,6 +66,9 @@ async function getRealDeleteTenantDomain() {
 }
 
 vi.mock("@atlas/tenancy", () => ({
+  // No recent lookup: resolution goes through the mock below.
+  resolveTenantFromRecentLookup: () => null,
+  forgetResolvedTenantHosts: () => undefined,
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
