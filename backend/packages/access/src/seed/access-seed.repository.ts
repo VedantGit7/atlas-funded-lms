@@ -81,37 +81,49 @@ export async function seedTenantSystemRoles(args: { tx: Db; tenantId: string }):
   }
 }
 
+/**
+ * Grants every system role its permissions from the matrix in one statement,
+ * rather than one insert per role and permission (368 round trips per new
+ * tenant). Same rows as before: stable ids, roles that do not exist (or are
+ * deleted) are skipped, and existing grants are left alone.
+ */
 export async function seedTenantRolePermissions(args: { tx: Db; tenantId: string }): Promise<void> {
-  for (const [roleKey, permissionKeys] of Object.entries(ROLE_PERMISSIONS)) {
-    for (const permissionKey of permissionKeys) {
-      const rolePermissionId = stableAccessSeedId(
-        "role_permission",
-        `${args.tenantId}:${roleKey}:${permissionKey}`,
+  const ids: string[] = [];
+  const roleKeys: string[] = [];
+  const permissionKeys: string[] = [];
+  for (const [roleKey, keys] of Object.entries(ROLE_PERMISSIONS)) {
+    for (const permissionKey of keys) {
+      ids.push(
+        stableAccessSeedId("role_permission", `${args.tenantId}:${roleKey}:${permissionKey}`),
       );
-
-      await args.tx.$queryRaw`
-        insert into role_permissions (
-          id,
-          tenant_id,
-          role_id,
-          permission_key,
-          created_at
-        )
-        select
-          ${rolePermissionId}::uuid,
-          ${args.tenantId}::uuid,
-          r.id,
-          ${permissionKey},
-          now()
-        from roles r
-        where r.tenant_id = ${args.tenantId}::uuid
-          and r.key = ${roleKey}
-          and r.deleted_at is null
-        on conflict (tenant_id, role_id, permission_key)
-        do nothing
-      `;
+      roleKeys.push(roleKey);
+      permissionKeys.push(permissionKey);
     }
   }
+
+  await args.tx.$queryRaw`
+    insert into role_permissions (
+      id,
+      tenant_id,
+      role_id,
+      permission_key,
+      created_at
+    )
+    select
+      seed.id,
+      ${args.tenantId}::uuid,
+      r.id,
+      seed.permission_key,
+      now()
+    from unnest(${ids}::uuid[], ${roleKeys}::text[], ${permissionKeys}::text[])
+      as seed(id, role_key, permission_key)
+    join roles r
+      on r.tenant_id = ${args.tenantId}::uuid
+     and r.key = seed.role_key
+     and r.deleted_at is null
+    on conflict (tenant_id, role_id, permission_key)
+    do nothing
+  `;
 }
 
 export async function assignSystemRoleToMembership(args: {
