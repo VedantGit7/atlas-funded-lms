@@ -154,7 +154,7 @@
     "dotenv": "^17.4.2",
     "dotenv-cli": "^11.0.0",
     "esbuild": "0.28.1",
-    "eslint": "^10.5.0",
+    "eslint": "^10.12.0",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
@@ -164,17 +164,17 @@
     "prisma": "^7.8.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0",
+    "typescript-eslint": "^8.71.1",
     "vitest": "^4.1.11",
     "yaml": "2.9.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "dependencies": {
     "@atlas/access": "workspace:*",
     "@atlas/db": "workspace:*",
     "@atlas/release-readiness": "workspace:*",
     "@atlas/tenant-config": "workspace:*",
-    "@supabase/supabase-js": "^2.108.2",
+    "@supabase/supabase-js": "^2.117.3",
     "uuid": "^14.0.0"
   }
 }
