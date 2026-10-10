@@ -9,7 +9,7 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
 import {
-  createBatchExport,
+  batchesExportsApi,
   isSummaryDataset,
   type BatchExportCadence,
   type BatchExportColumn,
@@ -22,6 +22,7 @@ import {
   type BatchesExportsPayload,
   type CreateBatchExportBody,
 } from "./admin-batches-exports-api";
+import { PolicyToggle } from "./report-exports-kit";
 import {
   dateInputToEndIso,
   dateInputToStartIso,
@@ -46,40 +47,6 @@ const GROUPING_OPTIONS: Array<{ value: BatchExportGrouping; label: string }> = [
   { value: "course", label: "By course" },
   { value: "health", label: "By health" },
 ];
-
-function PolicyToggle({
-  checked,
-  onChange,
-  disabled,
-  label,
-}: {
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  disabled?: boolean;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      disabled={disabled}
-      onClick={() => {
-        onChange(!checked);
-      }}
-      className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
-        checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-[var(--admin-surface)] shadow transition-transform ${
-          checked ? "translate-x-4" : "translate-x-0"
-        }`}
-      />
-    </button>
-  );
-}
 
 export function BatchesNewExportDrawer({
   open,
@@ -317,7 +284,7 @@ export function BatchesNewExportDrawer({
         body.timezone = timezone;
       }
 
-      const response = await createBatchExport(body);
+      const response = await batchesExportsApi.create(body);
       onCreated(response.data.run, response.data.schedule);
       onClose();
     } catch (caught) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { AlertTriangle, Download, Info, Loader2, X } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import {
@@ -9,115 +9,135 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
 import {
-  salesMarketingExportsApi,
-  type CreateSalesMarketingExportBody,
-  type SalesMarketingExportsPayload,
-  type SmExportCadence,
-  type SmExportDataset,
-  type SmExportDelivery,
-  type SmExportFormat,
-  type SmExportGrouping,
-  type SmAttributionPresence,
-  type SmExportHistoryItem,
-  type SmExportScheduleItem,
-} from "./admin-sales-marketing-exports-api";
+  paymentExportsApi,
+  type CreatePaymentExportBody,
+  type PaymentExportCadence,
+  type PaymentExportColumn,
+  type PaymentExportDataset,
+  type PaymentExportDelivery,
+  type PaymentExportFormat,
+  type PaymentExportGrouping,
+  type PaymentExportHistoryItem,
+  type PaymentExportScheduleItem,
+  type PaymentExportsPayload,
+} from "./admin-payments-exports-api";
+import {
+  dateInputToEndIso,
+  dateInputToStartIso,
+  fetchPaymentGateways,
+  type PaymentGatewayItem,
+} from "./admin-payments-roster-api";
 import { PolicyToggle } from "./report-exports-kit";
-import { dateInputToEndIso, dateInputToStartIso } from "./admin-sales-marketing-roster-api";
 
 const selectTriggerClassName =
   "h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
 
-const DATASET_OPTIONS: Array<{ value: SmExportDataset; label: string }> = [
-  { value: "sales", label: "Purchasers" },
-  { value: "coupons", label: "Coupons" },
-  { value: "referral-wallet", label: "Referral & wallet" },
-  { value: "affiliate-products", label: "Affiliate products" },
-  { value: "affiliates", label: "Affiliates" },
-  { value: "attribution", label: "Attribution events" },
+const DATASET_OPTIONS: Array<{ value: PaymentExportDataset; label: string }> = [
+  { value: "transactions", label: "Transactions" },
+  { value: "orders", label: "Orders" },
+  { value: "invoices", label: "Invoices" },
+  { value: "instalments", label: "Instalments" },
+  { value: "refunds", label: "Refunds" },
+  { value: "gateways", label: "Gateway transactions" },
 ];
 
-const ATTRIBUTION_OPTIONS: Array<{ value: SmAttributionPresence; label: string }> = [
-  { value: "any", label: "Any attribution" },
-  { value: "attributed", label: "Has UTM" },
-  { value: "none", label: "No UTM at all" },
-];
-
-const GROUPING_OPTIONS: Array<{ value: SmExportGrouping; label: string }> = [
+const GROUPING_OPTIONS: Array<{ value: PaymentExportGrouping; label: string }> = [
   { value: "none", label: "None" },
+  { value: "gateway", label: "By gateway" },
   { value: "product", label: "By product" },
-  { value: "month", label: "By month" },
   { value: "currency", label: "By currency" },
+  { value: "month", label: "By month" },
 ];
 
-export function SalesMarketingNewExportModal({
+const STATUS_OPTIONS = [
+  { value: "", label: "All statuses" },
+  { value: "paid", label: "Paid" },
+  { value: "pending", label: "Pending" },
+  { value: "failed", label: "Failed" },
+  { value: "refunded", label: "Refunded" },
+];
+
+const SETTLEMENT_OPTIONS = [
+  { value: "", label: "Settled and unsettled" },
+  { value: "settled", label: "Settled only" },
+  { value: "unsettled", label: "Unsettled only" },
+];
+
+const SENSITIVE_COLUMN_KEYS = new Set(["amount_cents", "tax_amount_cents", "coupon_amount_cents"]);
+
+export function PaymentsNewExportModal({
   open,
-  columnsByDataset,
+  columns,
   capabilities,
   initialScheduleEnabled,
   onClose,
   onCreated,
 }: {
   open: boolean;
-  columnsByDataset: SalesMarketingExportsPayload["columnsByDataset"];
-  capabilities: SalesMarketingExportsPayload["capabilities"];
+  columns: PaymentExportColumn[];
+  capabilities: PaymentExportsPayload["capabilities"];
   initialScheduleEnabled: boolean;
   onClose: () => void;
-  onCreated: (run: SmExportHistoryItem, schedule: SmExportScheduleItem | null) => void;
+  onCreated: (run: PaymentExportHistoryItem, schedule: PaymentExportScheduleItem | null) => void;
 }) {
   const titleId = useId();
-  const defaultDataset = capabilities.datasets[0] ?? "sales";
-  const [dataset, setDataset] = useState<SmExportDataset>(defaultDataset);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [attribution, setAttribution] = useState<SmAttributionPresence>("any");
+  const [gateways, setGateways] = useState<PaymentGatewayItem[]>([]);
+  const [gatewaysLoading, setGatewaysLoading] = useState(false);
+  const [dataset, setDataset] = useState<PaymentExportDataset>("transactions");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [format, setFormat] = useState<PaymentExportFormat>("csv");
+  const [paidFrom, setPaidFrom] = useState("");
+  const [paidTo, setPaidTo] = useState("");
+  const [gatewayKey, setGatewayKey] = useState("");
+  const [status, setStatus] = useState("");
+  const [settlement, setSettlement] = useState("");
   const [useCurrentFilters, setUseCurrentFilters] = useState(true);
-  const [grouping, setGrouping] = useState<SmExportGrouping>("none");
+  const [grouping, setGrouping] = useState<PaymentExportGrouping>("none");
   const [includeSubtotals, setIncludeSubtotals] = useState(false);
-  const [format, setFormat] = useState<SmExportFormat>("csv");
-  const [delivery, setDelivery] = useState<SmExportDelivery>("download");
+  const [delivery, setDelivery] = useState<PaymentExportDelivery>("download");
   const [recipientInput, setRecipientInput] = useState("");
   const [recipients, setRecipients] = useState<string[]>([]);
   const [webhookUrl, setWebhookUrl] = useState("");
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
-  const [cadence, setCadence] = useState<SmExportCadence>("monthly");
+  const [cadence, setCadence] = useState<PaymentExportCadence>("monthly");
   const [time, setTime] = useState("06:00");
   const [timezone, setTimezone] = useState("Asia/Kolkata");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const columns = useMemo(() => columnsByDataset[dataset], [columnsByDataset, dataset]);
-
-  const hasSensitiveSelected = useMemo(
-    () => columns.some((column) => selected.has(column.key) && column.sensitive),
-    [columns, selected],
-  );
-
   useEffect(() => {
     if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
+    let cancelled = false;
+    setGatewaysLoading(true);
+    void fetchPaymentGateways()
+      .then((response) => {
+        if (!cancelled) setGateways(response.data.items);
+      })
+      .catch(() => {
+        if (!cancelled) setGateways([]);
+      })
+      .finally(() => {
+        if (!cancelled) setGatewaysLoading(false);
+      });
     return () => {
-      window.removeEventListener("keydown", onKey);
+      cancelled = true;
     };
-  }, [open, onClose]);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    const nextDataset = capabilities.datasets[0] ?? "sales";
-    const nextColumns = columnsByDataset[nextDataset];
-    setDataset(nextDataset);
-    setDateFrom("");
-    setDateTo("");
+    setDataset("transactions");
     setSelected(
-      new Set(nextColumns.filter((column) => column.defaultSelected).map((column) => column.key)),
+      new Set(columns.filter((column) => column.defaultSelected).map((column) => column.key)),
     );
+    setFormat("csv");
+    setPaidFrom("");
+    setPaidTo("");
+    setGatewayKey("");
+    setStatus("");
     setUseCurrentFilters(true);
     setGrouping("none");
     setIncludeSubtotals(false);
-    setFormat("csv");
     setDelivery("download");
     setRecipientInput("");
     setRecipients([]);
@@ -127,35 +147,11 @@ export function SalesMarketingNewExportModal({
     setTime("06:00");
     setTimezone("Asia/Kolkata");
     setError(null);
-  }, [open, columnsByDataset, capabilities.datasets, initialScheduleEnabled]);
-
-  useEffect(() => {
-    if (!open) return;
-    setSelected(
-      new Set(columns.filter((column) => column.defaultSelected).map((column) => column.key)),
-    );
-  }, [open, dataset, columns]);
+  }, [open, columns, initialScheduleEnabled]);
 
   if (!open) return null;
 
-  function activitySummary(): string {
-    if (dateFrom && dateTo) return `${dateFrom} – ${dateTo}`;
-    if (dateFrom) return `From ${dateFrom}`;
-    if (dateTo) return `Until ${dateTo}`;
-    return "All time";
-  }
-
-  function filterSummary(): string {
-    // The attribution dataset is an event stream, not product revenue — a scope
-    // label reading "All products" would describe a file that has no product
-    // column in it.
-    if (dataset === "attribution") {
-      const presence =
-        attribution === "any" ? "All events" : attribution === "attributed" ? "With UTM" : "No UTM";
-      return `${presence} · ${activitySummary()}`;
-    }
-    return `All products · ${activitySummary()}`;
-  }
+  const hasSensitiveSelected = [...selected].some((key) => SENSITIVE_COLUMN_KEYS.has(key));
 
   function toggleColumn(key: string) {
     setSelected((current) => {
@@ -173,9 +169,32 @@ export function SalesMarketingNewExportModal({
     setRecipientInput("");
   }
 
+  function filterSummary(): string {
+    const parts: string[] = [];
+    if (dataset === "gateways" && gatewayKey) {
+      const gateway = gateways.find((item) => item.gatewayKey === gatewayKey);
+      parts.push(gateway?.displayName ?? gatewayKey);
+    } else {
+      parts.push("All sources");
+    }
+    if (status.trim()) parts.push(status.trim());
+    if (dataset === "orders" && settlement) {
+      parts.push(settlement === "settled" ? "Settled only" : "Unsettled only");
+    }
+    if (paidFrom && paidTo) parts.push(`${paidFrom} – ${paidTo}`);
+    else if (paidFrom) parts.push(`From ${paidFrom}`);
+    else if (paidTo) parts.push(`Until ${paidTo}`);
+    else parts.push("All time");
+    return parts.join(" · ");
+  }
+
   async function onSubmit() {
     if (selected.size === 0) {
       setError("Select at least one column.");
+      return;
+    }
+    if (dataset === "gateways" && !gatewayKey.trim()) {
+      setError("Select a gateway for gateway transaction exports.");
       return;
     }
     if (delivery === "recipients" && recipients.length === 0) {
@@ -186,32 +205,30 @@ export function SalesMarketingNewExportModal({
     setSaving(true);
     setError(null);
     try {
-      const body: CreateSalesMarketingExportBody = {
+      const body: CreatePaymentExportBody = {
         dataset,
         columns: [...selected],
         format,
         useCurrentFilters,
+        grouping,
+        includeSubtotals,
         delivery,
         scheduleEnabled,
       };
 
-      const fromIso = dateInputToStartIso(dateFrom);
-      const toIso = dateInputToEndIso(dateTo);
-      if (fromIso) body.purchasedFrom = fromIso;
-      if (toIso) body.purchasedTo = toIso;
-      // Sent only where it is honoured. The server refuses it on the other
-      // datasets rather than dropping it, so sending it anywhere else would
-      // turn an ignored control into a failed export.
-      if (dataset === "attribution" && attribution !== "any") {
-        body.attribution = attribution;
-      }
-      body.filterSummary = filterSummary();
-
-      if (grouping !== "none") {
-        body.grouping = grouping;
-        body.includeSubtotals = includeSubtotals;
-      } else {
-        body.grouping = "none";
+      if (useCurrentFilters) {
+        const fromIso = dateInputToStartIso(paidFrom);
+        const toIso = dateInputToEndIso(paidTo);
+        if (fromIso) body.paidFrom = fromIso;
+        if (toIso) body.paidTo = toIso;
+        if (dataset === "gateways" && gatewayKey.trim()) body.gatewayKey = gatewayKey.trim();
+        if (status.trim()) body.status = status.trim();
+        // Sent only where it is honoured. The server refuses it on the other
+        // datasets rather than dropping it, so sending it anywhere else would
+        // turn an ignored control into a failed export.
+        if (dataset === "orders" && (settlement === "settled" || settlement === "unsettled")) {
+          body.settlement = settlement;
+        }
       }
 
       if (delivery === "recipients") {
@@ -220,15 +237,13 @@ export function SalesMarketingNewExportModal({
       }
 
       if (scheduleEnabled) {
-        const datasetLabel =
-          DATASET_OPTIONS.find((item) => item.value === dataset)?.label ?? "Sales & Marketing";
-        body.scheduleName = `${cadence === "daily" ? "Daily" : cadence === "weekly" ? "Weekly" : "Monthly"} ${datasetLabel} export`;
+        body.scheduleName = `${cadence === "daily" ? "Daily" : cadence === "weekly" ? "Weekly" : "Monthly"} ${DATASET_OPTIONS.find((item) => item.value === dataset)?.label ?? "payment"} export`;
         body.cadence = cadence;
         body.time = time;
         body.timezone = timezone;
       }
 
-      const response = await salesMarketingExportsApi.create(body);
+      const response = await paymentExportsApi.create(body);
       onCreated(response.data.run, response.data.schedule);
       onClose();
     } catch (caught) {
@@ -239,17 +254,17 @@ export function SalesMarketingNewExportModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_40%,transparent)] p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_40%,transparent)] p-4 backdrop-blur-[2px]">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-xl"
+        className="flex max-h-[90vh] w-full max-w-[800px] flex-col rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)]"
       >
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-6">
           <h2
             id={titleId}
-            className="text-xl font-semibold tracking-tight text-[var(--admin-on-surface)]"
+            className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]"
           >
             New export
           </h2>
@@ -275,7 +290,7 @@ export function SalesMarketingNewExportModal({
                     onClick={() => {
                       setDataset(option.value);
                     }}
-                    className={`rounded-sm border px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`rounded-sm border px-4 py-2 text-sm font-medium transition-colors ${
                       dataset === option.value
                         ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
                         : "border-[var(--admin-border)] bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-outline)]"
@@ -285,60 +300,6 @@ export function SalesMarketingNewExportModal({
                   </button>
                 ),
               )}
-            </div>
-          </section>
-
-          <section>
-            <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Scope</h3>
-            <div className="space-y-4">
-              {dataset === "attribution" ? (
-                <label className="flex max-w-xs flex-col gap-2">
-                  <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
-                    Attribution
-                  </span>
-                  <Select
-                    value={attribution}
-                    onValueChange={(value) => {
-                      setAttribution(value as SmAttributionPresence);
-                    }}
-                    options={ATTRIBUTION_OPTIONS}
-                    className={selectTriggerClassName}
-                  />
-                </label>
-              ) : (
-                <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                  Product: <span className="text-[var(--admin-on-surface)]">All products</span>
-                </p>
-              )}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="flex flex-col gap-2">
-                  <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
-                    Date from
-                  </span>
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(event) => {
-                      setDateFrom(event.target.value);
-                    }}
-                    className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
-                  />
-                </label>
-                <label className="flex flex-col gap-2">
-                  <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
-                    Date to
-                  </span>
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(event) => {
-                      setDateTo(event.target.value);
-                    }}
-                    className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
-                  />
-                </label>
-              </div>
-              <p className="text-xs text-[var(--admin-on-surface-variant)]">{activitySummary()}</p>
             </div>
           </section>
 
@@ -358,7 +319,10 @@ export function SalesMarketingNewExportModal({
             {hasSensitiveSelected ? (
               <div className="mb-3 flex items-start gap-2 rounded-sm border border-[color-mix(in_srgb,var(--admin-warning)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_10%,var(--admin-surface))] px-3 py-2 text-sm text-[var(--admin-warning)]">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>Contains learner personal data</span>
+                <span>
+                  Selected columns include billing amounts (amount, tax, coupon). Handle exported
+                  files according to your data retention policy.
+                </span>
               </div>
             ) : null}
             <div className="grid grid-cols-1 gap-x-8 gap-y-3 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 sm:grid-cols-2">
@@ -366,7 +330,6 @@ export function SalesMarketingNewExportModal({
                 <label
                   key={column.key}
                   className="group flex cursor-pointer items-start justify-between gap-3"
-                  title={column.sensitive ? "Contains learner personal data" : undefined}
                 >
                   <span className="flex items-center gap-3">
                     <input
@@ -382,12 +345,9 @@ export function SalesMarketingNewExportModal({
                     </span>
                   </span>
                   {column.sensitive ? (
-                    <span
-                      title="Contains learner personal data"
-                      className="inline-flex items-center gap-1 rounded-sm bg-[color-mix(in_srgb,var(--admin-warning)_14%,var(--admin-surface))] px-2 py-0.5 text-[11px] font-semibold tracking-wide text-[var(--admin-warning)] uppercase"
-                    >
+                    <span className="inline-flex items-center gap-1 rounded-sm bg-[color-mix(in_srgb,var(--admin-danger)_12%,var(--admin-surface))] px-2 py-0.5 text-[11px] font-semibold tracking-wide text-[var(--admin-danger)] uppercase">
                       <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-                      PII
+                      Sensitive
                     </span>
                   ) : null}
                 </label>
@@ -398,29 +358,100 @@ export function SalesMarketingNewExportModal({
           <section>
             <h3 className="mb-4 text-base font-semibold text-[var(--admin-on-surface)]">Filters</h3>
             <div className="flex flex-col gap-4 rounded-sm border border-[var(--admin-border)] p-4 sm:flex-row sm:items-center sm:justify-between">
-              {useCurrentFilters ? (
-                <div className="min-w-0 flex-1 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2">
-                  <p className="font-mono text-[13px] text-[var(--admin-on-surface)]">
-                    {filterSummary()}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-                    Matches the scope and roster filters above.
-                  </p>
+              <div>
+                <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
+                  {filterSummary()}
                 </div>
-              ) : (
-                <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                  Export will include all rows for the selected dataset.
+                <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
+                  Export will be scoped to these filters when enabled.
                 </p>
-              )}
-              <label className="flex shrink-0 items-center gap-3">
+              </div>
+              <label className="flex items-center gap-3">
                 <span className="text-sm text-[var(--admin-on-surface)]">Use current filters</span>
                 <PolicyToggle
                   checked={useCurrentFilters}
                   onChange={setUseCurrentFilters}
-                  label="Use current report filters"
+                  label="Use current filters"
                 />
               </label>
             </div>
+            {useCurrentFilters ? (
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <label className="flex flex-col gap-2">
+                  <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                    {dataset === "orders" ? "Created from" : "Paid from"}
+                  </span>
+                  <input
+                    type="date"
+                    value={paidFrom}
+                    onChange={(event) => {
+                      setPaidFrom(event.target.value);
+                    }}
+                    className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                    {dataset === "orders" ? "Created to" : "Paid to"}
+                  </span>
+                  <input
+                    type="date"
+                    value={paidTo}
+                    onChange={(event) => {
+                      setPaidTo(event.target.value);
+                    }}
+                    className="h-10 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
+                  />
+                </label>
+                {dataset === "orders" ? (
+                  <label className="flex flex-col gap-2 sm:col-span-2">
+                    <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                      Settlement (optional)
+                    </span>
+                    <Select
+                      value={settlement}
+                      onValueChange={setSettlement}
+                      options={SETTLEMENT_OPTIONS}
+                      className={selectTriggerClassName}
+                    />
+                  </label>
+                ) : null}
+                {dataset === "gateways" ? (
+                  <label className="flex flex-col gap-2 sm:col-span-2">
+                    <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                      Gateway <span className="text-[var(--admin-danger)]">*</span>
+                    </span>
+                    <Select
+                      value={gatewayKey}
+                      onValueChange={setGatewayKey}
+                      disabled={gatewaysLoading}
+                      options={[
+                        {
+                          value: "",
+                          label: gatewaysLoading ? "Loading gateways…" : "Select gateway",
+                        },
+                        ...gateways.map((gateway) => ({
+                          value: gateway.gatewayKey,
+                          label: gateway.displayName,
+                        })),
+                      ]}
+                      className={selectTriggerClassName}
+                    />
+                  </label>
+                ) : null}
+                <label className="flex flex-col gap-2 sm:col-span-2">
+                  <span className="text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                    Status (optional)
+                  </span>
+                  <Select
+                    value={status}
+                    onValueChange={setStatus}
+                    options={STATUS_OPTIONS}
+                    className={selectTriggerClassName}
+                  />
+                </label>
+              </div>
+            ) : null}
           </section>
 
           <section>
@@ -435,25 +466,20 @@ export function SalesMarketingNewExportModal({
                 <Select
                   value={grouping}
                   onValueChange={(value) => {
-                    const next = value as SmExportGrouping;
-                    setGrouping(next);
-                    if (next === "none") setIncludeSubtotals(false);
+                    setGrouping(value as PaymentExportGrouping);
                   }}
                   options={GROUPING_OPTIONS}
                   className={selectTriggerClassName}
                 />
               </label>
-              <label
-                className={`flex items-center gap-3 ${grouping === "none" ? "opacity-50" : ""}`}
-              >
+              <label className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   checked={includeSubtotals}
-                  disabled={grouping === "none"}
                   onChange={(event) => {
                     setIncludeSubtotals(event.target.checked);
                   }}
-                  className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)] disabled:cursor-not-allowed"
+                  className="h-4 w-4 rounded-sm border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                 />
                 <span className="text-sm text-[var(--admin-on-surface)]">
                   Include per-group subtotals
@@ -472,7 +498,7 @@ export function SalesMarketingNewExportModal({
                   onClick={() => {
                     setFormat(value);
                   }}
-                  className={`rounded-sm px-5 py-2 text-[12px] font-semibold tracking-[0.06em] uppercase transition-all ${
+                  className={`rounded-sm px-6 py-2 text-[12px] font-semibold tracking-[0.06em] uppercase transition-all ${
                     format === value
                       ? "bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm"
                       : "text-[var(--admin-on-surface-variant)]"
@@ -499,13 +525,12 @@ export function SalesMarketingNewExportModal({
                 <label key={value} className="flex cursor-pointer items-center gap-3">
                   <input
                     type="radio"
-                    name="sm-export-delivery"
+                    name="delivery"
                     checked={delivery === value}
                     onChange={() => {
                       setDelivery(value);
                     }}
-                    disabled={value !== "download" && !capabilities.canEmailDelivery}
-                    className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)] disabled:opacity-50"
+                    className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
                   />
                   <span className="text-sm text-[var(--admin-on-surface)]">{label}</span>
                 </label>
@@ -525,7 +550,6 @@ export function SalesMarketingNewExportModal({
                           {email}
                           <button
                             type="button"
-                            aria-label={`Remove ${email}`}
                             className="ml-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)]"
                             onClick={() => {
                               setRecipients((current) => current.filter((item) => item !== email));
@@ -552,21 +576,19 @@ export function SalesMarketingNewExportModal({
                       />
                     </div>
                   </div>
-                  {capabilities.canWebhookDelivery ? (
-                    <div>
-                      <label className="mb-2 block text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
-                        Webhook URL (optional)
-                      </label>
-                      <input
-                        value={webhookUrl}
-                        onChange={(event) => {
-                          setWebhookUrl(event.target.value);
-                        }}
-                        placeholder="https://"
-                        className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
-                      />
-                    </div>
-                  ) : null}
+                  <div>
+                    <label className="mb-2 block text-[12px] font-semibold tracking-[0.06em] text-[var(--admin-on-surface-variant)] uppercase">
+                      Webhook URL (optional)
+                    </label>
+                    <input
+                      value={webhookUrl}
+                      onChange={(event) => {
+                        setWebhookUrl(event.target.value);
+                      }}
+                      placeholder="https://"
+                      className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 font-mono text-[13px] text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
+                    />
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -596,7 +618,7 @@ export function SalesMarketingNewExportModal({
                     <Select
                       value={cadence}
                       onValueChange={(value) => {
-                        setCadence(value as SmExportCadence);
+                        setCadence(value as PaymentExportCadence);
                       }}
                       options={[
                         { value: "daily", label: "Daily" },
@@ -656,7 +678,7 @@ export function SalesMarketingNewExportModal({
           ) : null}
         </div>
 
-        <footer className="flex shrink-0 items-center justify-end gap-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-4">
+        <footer className="flex h-[72px] shrink-0 items-center justify-end gap-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6">
           <button type="button" onClick={onClose} className={`${ghostButtonClassName} h-10`}>
             Cancel
           </button>

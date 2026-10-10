@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, ChevronLeft, ChevronRight, RefreshCw, Search, Video } from "lucide-react";
 import { ghostButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import { PollsReportTabs } from "./PollsReportTabs";
 import { fetchLiveSessionsWithPolls, type LiveSessionPollListItem } from "./admin-polls-roster-api";
 
 const secondaryButtonClassName =
@@ -123,33 +124,7 @@ export function AdminPollsLiveSessionsPage() {
         </div>
       </div>
 
-      <div className="border-b border-[var(--admin-border)]">
-        <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Polls module">
-          {(
-            [
-              ["polls", "Polls", "/admin/reports/polls"],
-              ["live", "Live Sessions", "/admin/reports/polls/live-sessions"],
-              ["compare", "Compare", "/admin/reports/polls/compare"],
-              ["exports", "Exports", "/admin/reports/polls/exports"],
-            ] as const
-          ).map(([value, label, href]) => (
-            <Link
-              key={value}
-              href={href}
-              role="tab"
-              aria-selected={value === "live"}
-              className={[
-                "inline-flex h-10 items-center whitespace-nowrap px-6 text-sm font-semibold transition-colors",
-                value === "live"
-                  ? "border-b-2 border-[var(--admin-primary)] text-[var(--admin-primary)]"
-                  : "border-b-2 border-transparent text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]",
-              ].join(" ")}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      </div>
+      <PollsReportTabs active="live" />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative min-w-0 flex-1">

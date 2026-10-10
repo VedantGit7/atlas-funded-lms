@@ -1,65 +1,36 @@
 "use client";
 
-import { clientApi } from "../../../lib/client-api";
-import { downloadReportExport } from "./admin-reports-api";
+import {
+  createReportExportsApi,
+  type ReportExportCadence,
+  type ReportExportCapabilities,
+  type ReportExportColumn,
+  type ReportExportDelivery,
+  type ReportExportFormat,
+  type ReportExportHistoryItem,
+  type ReportExportScheduleItem,
+  type ReportExportStatus,
+} from "./admin-report-exports-api";
 
-export type PollExportFormat = "csv" | "xlsx" | "json";
+export type PollExportFormat = ReportExportFormat;
 export type PollExportDataset =
   | "poll_summary"
   | "option_tallies"
   | "respondents"
   | "non_respondents";
-export type PollExportDelivery = "download" | "email_me" | "recipients";
-export type PollExportCadence = "daily" | "weekly" | "monthly";
+export type PollExportDelivery = ReportExportDelivery;
+export type PollExportCadence = ReportExportCadence;
 export type PollExportGrouping = "none" | "poll" | "live_session" | "option";
-export type PollExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+export type PollExportStatus = ReportExportStatus;
 
-export type PollExportColumn = {
-  key: string;
-  label: string;
-  sensitive: boolean;
-  defaultSelected: boolean;
-};
+export type PollExportColumn = ReportExportColumn;
 
-export type PollExportHistoryItem = {
-  id: string;
-  fileName: string;
-  format: "csv" | "xlsx" | "pdf" | "json";
-  dataset: PollExportDataset;
-  datasetLabel: string;
-  scopeLabel: string;
-  rowCount: number | null;
-  sizeLabel: string | null;
+export type PollExportHistoryItem = ReportExportHistoryItem<PollExportDataset> & {
   requestedByLabel: string;
-  status: PollExportStatus;
-  expired: boolean;
-  expiresAt: string | null;
-  createdAt: string;
-  completedAt: string | null;
-  errorCode: string | null;
-  errorMessage: string | null;
-  errorTrace: string[] | null;
-  progressPercent: number | null;
-  downloadAvailable: boolean;
-  columns: string[];
   anonymousExcludedCount: number | null;
 };
 
-export type PollExportScheduleItem = {
-  id: string;
-  name: string;
-  datasetLabel: string;
-  cadenceLabel: string;
-  cronExpression: string;
-  timezone: string;
-  formats: Array<"csv" | "xlsx" | "pdf" | "json">;
-  isActive: boolean;
-  nextRunAt: string;
-  nextRunLabel: string;
-  recipients: string[];
-  webhookLabel: string | null;
-  delivery: Record<string, unknown> | null;
-};
+export type PollExportScheduleItem = ReportExportScheduleItem;
 
 export type PollsExportsPayload = {
   history: PollExportHistoryItem[];
@@ -68,14 +39,7 @@ export type PollsExportsPayload = {
   optionTalliesColumns: PollExportColumn[];
   respondentsColumns: PollExportColumn[];
   nonRespondentsColumns: PollExportColumn[];
-  capabilities: {
-    formats: PollExportFormat[];
-    datasets: PollExportDataset[];
-    canSchedule: boolean;
-    canEmailDelivery: boolean;
-    canWebhookDelivery: boolean;
-    note: string;
-  };
+  capabilities: ReportExportCapabilities<PollExportDataset>;
 };
 
 export type CreatePollExportBody = {
@@ -102,59 +66,18 @@ export type CreatePollExportBody = {
   timezone?: string | undefined;
 };
 
-export async function fetchPollsExports() {
-  return clientApi.get<{ data: PollsExportsPayload }>("/api/v1/reports/polls/exports");
-}
-
-export async function createPollExport(body: CreatePollExportBody) {
-  return clientApi.post<{
-    data: {
-      run: PollExportHistoryItem;
-      schedule: PollExportScheduleItem | null;
-    };
-  }>("/api/v1/reports/polls/exports", body, "polls-export-create", {
-    successMessage: "Export started.",
-  });
-}
-
-export async function fetchPollExportRun(runId: string) {
-  return clientApi.get<{ data: PollExportHistoryItem }>(`/api/v1/reports/polls/exports/${runId}`);
-}
-
-export async function retryPollExport(runId: string) {
-  return clientApi.post<{ data: PollExportHistoryItem }>(
-    `/api/v1/reports/polls/exports/${runId}/retry`,
-    null,
-    "polls-export-retry",
-    { successMessage: "Export retry started." },
-  );
-}
-
-export async function updatePollExportSchedule(
-  scheduleId: string,
-  body: { isActive?: boolean | undefined; name?: string | undefined },
-) {
-  return clientApi.patch<{ data: PollExportScheduleItem }>(
-    `/api/v1/reports/polls/exports/schedules/${scheduleId}`,
-    body,
-    "polls-export-schedule-update",
-    { successMessage: "Schedule updated." },
-  );
-}
-
-export async function deletePollExportSchedule(scheduleId: string) {
-  return clientApi.delete<{ data: { deleted: true; id: string } }>(
-    `/api/v1/reports/polls/exports/schedules/${scheduleId}`,
-    "polls-export-schedule-delete",
-    undefined,
-    { successMessage: "Schedule deleted." },
-  );
-}
-
-export async function downloadPollExport(run: PollExportHistoryItem) {
-  const format = run.format === "pdf" ? "csv" : run.format;
-  await downloadReportExport(run.id, format);
-}
+export const pollsExportsApi = createReportExportsApi<{
+  payload: PollsExportsPayload;
+  createBody: CreatePollExportBody;
+}>(
+  {
+    exports: "/api/v1/reports/polls/exports",
+    run: (runId) => `/api/v1/reports/polls/exports/${runId}`,
+    retry: (runId) => `/api/v1/reports/polls/exports/${runId}/retry`,
+    schedule: (scheduleId) => `/api/v1/reports/polls/exports/schedules/${scheduleId}`,
+  },
+  "polls",
+);
 
 export function columnsForDataset(
   payload: PollsExportsPayload,
