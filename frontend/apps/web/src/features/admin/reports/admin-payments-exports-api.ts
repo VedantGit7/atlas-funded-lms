@@ -1,9 +1,18 @@
 "use client";
 
-import { clientApi } from "../../../lib/client-api";
-import { downloadReportExport } from "./admin-reports-api";
+import {
+  createReportExportsApi,
+  type ReportExportCadence,
+  type ReportExportCapabilities,
+  type ReportExportColumn,
+  type ReportExportDelivery,
+  type ReportExportFormat,
+  type ReportExportHistoryItem,
+  type ReportExportScheduleItem,
+  type ReportExportStatus,
+} from "./admin-report-exports-api";
 
-export type PaymentExportFormat = "csv" | "xlsx" | "json";
+export type PaymentExportFormat = ReportExportFormat;
 export type PaymentExportDataset =
   | "transactions"
   | "orders"
@@ -11,71 +20,24 @@ export type PaymentExportDataset =
   | "instalments"
   | "refunds"
   | "gateways";
-export type PaymentExportDelivery = "download" | "email_me" | "recipients";
-export type PaymentExportCadence = "daily" | "weekly" | "monthly";
+export type PaymentExportDelivery = ReportExportDelivery;
+export type PaymentExportCadence = ReportExportCadence;
 export type PaymentExportGrouping = "none" | "gateway" | "product" | "currency" | "month";
 /** Only meaningful for the `orders` dataset; the server rejects it elsewhere. */
 export type PaymentExportSettlement = "settled" | "unsettled";
-export type PaymentExportStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELLED";
+export type PaymentExportStatus = ReportExportStatus;
 
-export type PaymentExportColumn = {
-  key: string;
-  label: string;
-  sensitive: boolean;
-  defaultSelected: boolean;
-};
+export type PaymentExportColumn = ReportExportColumn;
 
-export type PaymentExportHistoryItem = {
-  id: string;
-  fileName: string;
-  format: "csv" | "xlsx" | "pdf" | "json";
-  dataset: PaymentExportDataset;
-  datasetLabel: string;
-  scopeLabel: string;
-  rowCount: number | null;
-  sizeLabel: string | null;
-  status: PaymentExportStatus;
-  expired: boolean;
-  expiresAt: string | null;
-  createdAt: string;
-  completedAt: string | null;
-  errorCode: string | null;
-  errorMessage: string | null;
-  errorTrace: string[] | null;
-  progressPercent: number | null;
-  downloadAvailable: boolean;
-  columns: string[];
-};
+export type PaymentExportHistoryItem = ReportExportHistoryItem<PaymentExportDataset>;
 
-export type PaymentExportScheduleItem = {
-  id: string;
-  name: string;
-  datasetLabel: string;
-  cadenceLabel: string;
-  cronExpression: string;
-  timezone: string;
-  formats: Array<"csv" | "xlsx" | "pdf" | "json">;
-  isActive: boolean;
-  nextRunAt: string;
-  nextRunLabel: string;
-  recipients: string[];
-  webhookLabel: string | null;
-  delivery: Record<string, unknown> | null;
-};
+export type PaymentExportScheduleItem = ReportExportScheduleItem;
 
 export type PaymentExportsPayload = {
   history: PaymentExportHistoryItem[];
   schedules: PaymentExportScheduleItem[];
   columns: PaymentExportColumn[];
-  capabilities: {
-    formats: PaymentExportFormat[];
-    datasets: PaymentExportDataset[];
-    canSchedule: boolean;
-    canEmailDelivery: boolean;
-    canWebhookDelivery: boolean;
-    groupingApplied: boolean;
-    note: string;
-  };
+  capabilities: ReportExportCapabilities<PaymentExportDataset> & { groupingApplied: boolean };
 };
 
 export type CreatePaymentExportBody = {
@@ -100,55 +62,7 @@ export type CreatePaymentExportBody = {
   timezone?: string | undefined;
 };
 
-export async function fetchPaymentExports() {
-  return clientApi.get<{ data: PaymentExportsPayload }>("/api/v1/reports/payments/exports");
-}
-
-export async function createPaymentExport(body: CreatePaymentExportBody) {
-  return clientApi.post<{
-    data: { run: PaymentExportHistoryItem; schedule: PaymentExportScheduleItem | null };
-  }>("/api/v1/reports/payments/exports", body, "payments-export-create", {
-    successMessage: "Export started.",
-  });
-}
-
-export async function fetchPaymentExportRun(runId: string) {
-  return clientApi.get<{ data: PaymentExportHistoryItem }>(
-    `/api/v1/reports/payments/exports/${runId}`,
-  );
-}
-
-export async function retryPaymentExport(runId: string) {
-  return clientApi.post<{ data: PaymentExportHistoryItem }>(
-    `/api/v1/reports/payments/exports/${runId}/retry`,
-    null,
-    "payments-export-retry",
-    { successMessage: "Export retry started." },
-  );
-}
-
-export async function updatePaymentExportSchedule(
-  scheduleId: string,
-  body: { isActive?: boolean | undefined; name?: string | undefined },
-) {
-  return clientApi.patch<{ data: PaymentExportScheduleItem }>(
-    `/api/v1/reports/payments/exports/schedules/${scheduleId}`,
-    body,
-    "payments-export-schedule-update",
-    { successMessage: "Schedule updated." },
-  );
-}
-
-export async function deletePaymentExportSchedule(scheduleId: string) {
-  return clientApi.delete<{ data: { deleted: true; id: string } }>(
-    `/api/v1/reports/payments/exports/schedules/${scheduleId}`,
-    "payments-export-schedule-delete",
-    undefined,
-    { successMessage: "Schedule deleted." },
-  );
-}
-
-export async function downloadPaymentExport(run: PaymentExportHistoryItem) {
-  const format = run.format === "pdf" ? "csv" : run.format;
-  await downloadReportExport(run.id, format);
-}
+export const paymentExportsApi = createReportExportsApi<{
+  payload: PaymentExportsPayload;
+  createBody: CreatePaymentExportBody;
+}>("payments");

@@ -30,6 +30,7 @@ import {
   type PollListItem,
   type PollsCompareData,
 } from "./admin-polls-roster-api";
+import { PollsReportTabs } from "./PollsReportTabs";
 import { csvEscape } from "@/lib/export/csv";
 
 const MAX_SLOTS = 4;
@@ -500,35 +501,7 @@ export function AdminPollsComparePage() {
 
   const totalResponses = data?.polls.reduce((sum, poll) => sum + poll.responseCount, 0) ?? 0;
 
-  const moduleTabs = (
-    <div className="border-b border-[var(--admin-border)]">
-      <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Polls module">
-        {(
-          [
-            ["polls", "Polls", "/admin/reports/polls"],
-            ["live", "Live Sessions", "/admin/reports/polls/live-sessions"],
-            ["compare", "Compare", "/admin/reports/polls/compare"],
-            ["exports", "Exports", "/admin/reports/polls/exports"],
-          ] as const
-        ).map(([value, label, href]) => (
-          <Link
-            key={value}
-            href={href}
-            role="tab"
-            aria-selected={value === "compare"}
-            className={[
-              "inline-flex h-10 items-center whitespace-nowrap px-6 text-sm font-semibold transition-colors",
-              value === "compare"
-                ? "border-b-2 border-[var(--admin-primary)] text-[var(--admin-primary)]"
-                : "border-b-2 border-transparent text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]",
-            ].join(" ")}
-          >
-            {label}
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
+  const moduleTabs = <PollsReportTabs active="compare" />;
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 p-4 md:p-8">
