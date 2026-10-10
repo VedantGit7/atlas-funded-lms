@@ -1,25 +1,23 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import {
-  paymentExportRunParamsSchema,
-  retryPaymentExportResponseSchema,
-} from "@atlas/domain/reports/payments-exports.dto";
-import { retryPaymentExportMetadata } from "@atlas/domain/reports/payments-exports.route-metadata";
+import { retryPaymentExportResponseSchema } from "@atlas/domain/reports/payments-exports.dto";
 import { retryPaymentExport } from "@atlas/domain/reports/payments-exports.service";
-import { schedulePaymentExportProcessing } from "../../../../../../../../server/reports/payments-exports-async";
+import { scheduleReportExportProcessing } from "../../../../../../../../server/reports/report-exports-async";
+import { reportExportRunParamsSchema } from "@atlas/domain/reports/report-exports.dto";
+import { retryReportExportMetadata } from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const POST = createTenantRoute<
   Record<string, never>,
   z.output<typeof retryPaymentExportResponseSchema>,
-  typeof paymentExportRunParamsSchema
+  typeof reportExportRunParamsSchema
 >({
-  metadata: retryPaymentExportMetadata,
-  params: paymentExportRunParamsSchema,
+  metadata: retryReportExportMetadata,
+  params: reportExportRunParamsSchema,
   input: noBodySchema,
   output: retryPaymentExportResponseSchema,
   handler: async ({ tx, ctx, params }) => {
     const result = await retryPaymentExport(tx, ctx, params["runId"]);
-    schedulePaymentExportProcessing({
+    scheduleReportExportProcessing("payments", {
       tenantId: ctx.tenantId,
       requestId: ctx.requestId,
       actorMembershipId: ctx.actorMembershipId,

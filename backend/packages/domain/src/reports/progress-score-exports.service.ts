@@ -7,11 +7,9 @@ import {
   SCORE_EXPORT_COLUMNS,
   createProgressScoreExportBodySchema,
   createProgressScoreExportResponseSchema,
-  deleteProgressScoreExportScheduleResponseSchema,
   progressScoreExportRunDetailResponseSchema,
   progressScoreExportsResponseSchema,
   retryProgressScoreExportResponseSchema,
-  updateProgressScoreExportScheduleBodySchema,
   updateProgressScoreExportScheduleResponseSchema,
   type CreateProgressScoreExportBody,
 } from "./progress-score-exports.dto";
@@ -32,6 +30,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "progress-score";
 
@@ -139,9 +141,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: progressScoreExportRunDetailResponseSchema,
     retry: retryProgressScoreExportResponseSchema,
-    updateScheduleBody: updateProgressScoreExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateProgressScoreExportScheduleResponseSchema,
-    deleteSchedule: deleteProgressScoreExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

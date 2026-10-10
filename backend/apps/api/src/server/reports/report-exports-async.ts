@@ -11,14 +11,17 @@ import { processReportsOutboxBatch } from "./reports-worker-router";
  * After the create/retry TX commits and the response is sent, generate the
  * artifact (with visible progress) then drain delivery for report.run_succeeded.
  */
-export function schedulePaymentExportProcessing(args: {
-  tenantId: string;
-  requestId: string;
-  actorMembershipId: string;
-  reportRunId: string;
-  format: "csv" | "xlsx" | "pdf" | "json";
-  requestedAt: string;
-}): void {
+export function scheduleReportExportProcessing(
+  reportDefinitionKey: string,
+  args: {
+    tenantId: string;
+    requestId: string;
+    actorMembershipId: string;
+    reportRunId: string;
+    format: "csv" | "xlsx" | "pdf" | "json";
+    requestedAt: string;
+  },
+): void {
   // The request transaction already published the generation event. The managed
   // worker owns deployed processing, so request termination cannot orphan work.
   if (isDeployedRuntime()) return;
@@ -26,7 +29,7 @@ export function schedulePaymentExportProcessing(args: {
     return (async () => {
       const payload = reportGenerateRequestedPayloadSchema.parse({
         reportRunId: args.reportRunId,
-        reportDefinitionKey: "payments",
+        reportDefinitionKey,
         requestedAt: args.requestedAt,
         requestedByMembershipId: args.actorMembershipId,
         format: args.format,
@@ -50,7 +53,7 @@ export function schedulePaymentExportProcessing(args: {
         limit: 10,
       });
     })().catch((error: unknown) => {
-      console.error("[payments-exports] async generate/delivery failed", {
+      console.error(`[${reportDefinitionKey}-exports] async generate/delivery failed`, {
         reportRunId: args.reportRunId,
         requestId: args.requestId,
         message: error instanceof Error ? error.message : "unknown",

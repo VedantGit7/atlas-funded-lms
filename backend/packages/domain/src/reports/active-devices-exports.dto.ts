@@ -1,12 +1,16 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
 import { REPORT_FORMATS } from "./reports.contract";
+import {
+  REPORT_EXPORT_CADENCE,
+  REPORT_EXPORT_FORMATS,
+  exportScheduleDeliveryField,
+  exportScheduleTimingFields,
+  reportExportResponseSchemas,
+} from "./report-exports.dto";
 
 export const DEVICE_EXPORT_WINDOWS = ["24h", "7d", "30d", "all"] as const;
-export const DEVICE_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const DEVICE_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
-export const DEVICE_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
-
 export const DEVICE_EXPORT_COLUMNS = [
   { key: "learner_name", label: "Learner name", sensitive: false, defaultSelected: true },
   { key: "email", label: "Email", sensitive: false, defaultSelected: true },
@@ -60,16 +64,9 @@ export const deviceExportScheduleItemSchema = z
   .object({
     id: z.uuid(),
     name: z.string(),
-    cadenceLabel: z.string(),
-    cronExpression: z.string(),
-    timezone: z.string(),
-    formats: z.array(z.enum(REPORT_FORMATS)),
-    isActive: z.boolean(),
-    nextRunAt: z.iso.datetime(),
-    nextRunLabel: z.string(),
-    recipients: z.array(z.string()),
+    ...exportScheduleTimingFields,
     webhookLabel: z.string().nullable(),
-    delivery: z.record(z.string(), z.unknown()).nullable(),
+    ...exportScheduleDeliveryField,
   })
   .strict();
 
@@ -88,7 +85,7 @@ export const activeDevicesExportsResponseSchema = z.object({
         .strict(),
     ),
     capabilities: z.object({
-      formats: z.array(z.enum(DEVICE_EXPORT_FORMATS)),
+      formats: z.array(z.enum(REPORT_EXPORT_FORMATS)),
       canSchedule: z.boolean(),
       canEmailDelivery: z.boolean(),
       canWebhookDelivery: z.boolean(),
@@ -101,7 +98,7 @@ export const activeDevicesExportsResponseSchema = z.object({
 export const createActiveDevicesExportBodySchema = rejectClientTenantFields
   .extend({
     columns: z.array(deviceExportColumnKeySchema).min(1).max(20),
-    format: z.enum(DEVICE_EXPORT_FORMATS).default("csv"),
+    format: z.enum(REPORT_EXPORT_FORMATS).default("csv"),
     window: z.enum(DEVICE_EXPORT_WINDOWS).default("7d"),
     overLimitOnly: z.boolean().default(false),
     platform: z.string().trim().max(64).optional(),
@@ -111,7 +108,7 @@ export const createActiveDevicesExportBodySchema = rejectClientTenantFields
     webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
-    cadence: z.enum(DEVICE_EXPORT_CADENCE).optional(),
+    cadence: z.enum(REPORT_EXPORT_CADENCE).optional(),
     time: z
       .string()
       .regex(/^\d{2}:\d{2}$/)
@@ -122,47 +119,12 @@ export const createActiveDevicesExportBodySchema = rejectClientTenantFields
 
 export type CreateActiveDevicesExportBody = z.output<typeof createActiveDevicesExportBodySchema>;
 
-export const createActiveDevicesExportResponseSchema = z.object({
-  data: z.object({
-    run: deviceExportHistoryItemSchema,
-    schedule: deviceExportScheduleItemSchema.nullable(),
-  }),
-});
+const exportResponses = reportExportResponseSchemas(
+  deviceExportHistoryItemSchema,
+  deviceExportScheduleItemSchema,
+);
 
-export const deviceExportRunParamsSchema = z
-  .object({
-    runId: z.uuid(),
-  })
-  .strict();
-
-export const deviceExportRunDetailResponseSchema = z.object({
-  data: deviceExportHistoryItemSchema,
-});
-
-export const retryActiveDevicesExportResponseSchema = z.object({
-  data: deviceExportHistoryItemSchema,
-});
-
-export const deviceExportScheduleParamsSchema = z
-  .object({
-    scheduleId: z.uuid(),
-  })
-  .strict();
-
-export const updateDeviceExportScheduleBodySchema = rejectClientTenantFields
-  .extend({
-    isActive: z.boolean().optional(),
-    name: z.string().trim().max(120).optional(),
-  })
-  .strict();
-
-export const updateDeviceExportScheduleResponseSchema = z.object({
-  data: deviceExportScheduleItemSchema,
-});
-
-export const deleteDeviceExportScheduleResponseSchema = z.object({
-  data: z.object({
-    deleted: z.literal(true),
-    id: z.uuid(),
-  }),
-});
+export const createActiveDevicesExportResponseSchema = exportResponses.create;
+export const deviceExportRunDetailResponseSchema = exportResponses.runDetail;
+export const retryActiveDevicesExportResponseSchema = exportResponses.retry;
+export const updateDeviceExportScheduleResponseSchema = exportResponses.updateSchedule;

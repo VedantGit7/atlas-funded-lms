@@ -6,20 +6,20 @@ import {
   paymentExportsResponseSchema,
 } from "@atlas/domain/reports/payments-exports.dto";
 import {
-  createPaymentExportMetadata,
-  getPaymentExportsMetadata,
-} from "@atlas/domain/reports/payments-exports.route-metadata";
-import {
   createPaymentExport,
   getPaymentExports,
 } from "@atlas/domain/reports/payments-exports.service";
-import { schedulePaymentExportProcessing } from "../../../../../../server/reports/payments-exports-async";
+import { scheduleReportExportProcessing } from "../../../../../../server/reports/report-exports-async";
+import {
+  createReportExportMetadata,
+  getReportExportsMetadata,
+} from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const GET = createTenantRoute<
   Record<string, never>,
   z.output<typeof paymentExportsResponseSchema>
 >({
-  metadata: getPaymentExportsMetadata,
+  metadata: getReportExportsMetadata,
   input: noBodySchema,
   output: paymentExportsResponseSchema,
   handler: async ({ tx, ctx }) => getPaymentExports(tx, ctx),
@@ -29,12 +29,12 @@ export const POST = createTenantRoute<
   z.output<typeof createPaymentExportBodySchema>,
   z.output<typeof createPaymentExportResponseSchema>
 >({
-  metadata: createPaymentExportMetadata,
+  metadata: createReportExportMetadata,
   body: createPaymentExportBodySchema,
   output: createPaymentExportResponseSchema,
   handler: async ({ tx, ctx, input }) => {
     const result = await createPaymentExport(tx, ctx, input);
-    schedulePaymentExportProcessing({
+    scheduleReportExportProcessing("payments", {
       tenantId: ctx.tenantId,
       requestId: ctx.requestId,
       actorMembershipId: ctx.actorMembershipId,

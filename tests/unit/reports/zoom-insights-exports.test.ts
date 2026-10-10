@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   ZOOM_EXPORT_DATASETS,
   createZoomExportBodySchema,
-  updateZoomExportScheduleBodySchema,
   zoomInsightsExportsResponseSchema,
 } from "@atlas/domain/reports/zoom-insights-exports.dto";
+import { updateReportExportScheduleBodySchema } from "@atlas/domain/reports/report-exports.dto";
 
 describe("zoom insights exports dto", () => {
   it("lists meetings participants unmatched and connection datasets", () => {
@@ -84,7 +84,7 @@ describe("zoom insights exports dto", () => {
   });
 
   it("accepts schedule toggle updates", () => {
-    const body = updateZoomExportScheduleBodySchema.parse({ isActive: false });
+    const body = updateReportExportScheduleBodySchema.parse({ isActive: false });
     expect(body.isActive).toBe(false);
   });
 });

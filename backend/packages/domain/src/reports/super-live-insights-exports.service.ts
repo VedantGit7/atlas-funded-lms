@@ -6,11 +6,9 @@ import {
   SLI_EXPORT_DATASETS,
   createSuperLiveInsightsExportBodySchema,
   createSuperLiveInsightsExportResponseSchema,
-  deleteSuperLiveInsightsExportScheduleResponseSchema,
   superLiveInsightsExportRunDetailResponseSchema,
   superLiveInsightsExportsResponseSchema,
   retrySuperLiveInsightsExportResponseSchema,
-  updateSuperLiveInsightsExportScheduleBodySchema,
   updateSuperLiveInsightsExportScheduleResponseSchema,
   type CreateSuperLiveInsightsExportBody,
 } from "./super-live-insights-exports.dto";
@@ -31,6 +29,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "super-live-insights";
 
@@ -160,9 +162,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: superLiveInsightsExportRunDetailResponseSchema,
     retry: retrySuperLiveInsightsExportResponseSchema,
-    updateScheduleBody: updateSuperLiveInsightsExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateSuperLiveInsightsExportScheduleResponseSchema,
-    deleteSchedule: deleteSuperLiveInsightsExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

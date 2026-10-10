@@ -2,26 +2,28 @@ import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
 import {
   createSuperLiveInsightsExportResponseSchema,
-  deleteSuperLiveInsightsExportScheduleResponseSchema,
-  superLiveInsightsExportScheduleParamsSchema,
-  updateSuperLiveInsightsExportScheduleBodySchema,
   updateSuperLiveInsightsExportScheduleResponseSchema,
 } from "@atlas/domain/reports/super-live-insights-exports.dto";
-import { mutateSuperLiveInsightsExportScheduleMetadata } from "@atlas/domain/reports/super-live-insights-exports.route-metadata";
 import {
   deleteSuperLiveInsightsExportSchedule,
   runSuperLiveInsightsExportScheduleNow,
   updateSuperLiveInsightsExportSchedule,
 } from "@atlas/domain/reports/super-live-insights-exports.service";
+import {
+  deleteReportExportScheduleResponseSchema,
+  reportExportScheduleParamsSchema,
+  updateReportExportScheduleBodySchema,
+} from "@atlas/domain/reports/report-exports.dto";
+import { mutateReportExportScheduleMetadata } from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const PATCH = createTenantRoute<
-  z.output<typeof updateSuperLiveInsightsExportScheduleBodySchema>,
+  z.output<typeof updateReportExportScheduleBodySchema>,
   z.output<typeof updateSuperLiveInsightsExportScheduleResponseSchema>,
-  typeof superLiveInsightsExportScheduleParamsSchema
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateSuperLiveInsightsExportScheduleMetadata,
-  params: superLiveInsightsExportScheduleParamsSchema,
-  body: updateSuperLiveInsightsExportScheduleBodySchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  body: updateReportExportScheduleBodySchema,
   output: updateSuperLiveInsightsExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateSuperLiveInsightsExportSchedule(tx, ctx, params["scheduleId"], input),
@@ -29,13 +31,13 @@ export const PATCH = createTenantRoute<
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  z.output<typeof deleteSuperLiveInsightsExportScheduleResponseSchema>,
-  typeof superLiveInsightsExportScheduleParamsSchema
+  z.output<typeof deleteReportExportScheduleResponseSchema>,
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateSuperLiveInsightsExportScheduleMetadata,
-  params: superLiveInsightsExportScheduleParamsSchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
   input: noBodySchema,
-  output: deleteSuperLiveInsightsExportScheduleResponseSchema,
+  output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
     deleteSuperLiveInsightsExportSchedule(tx, ctx, params["scheduleId"]),
 });
@@ -43,10 +45,10 @@ export const DELETE = createTenantRoute<
 export const POST = createTenantRoute<
   Record<string, never>,
   z.output<typeof createSuperLiveInsightsExportResponseSchema>,
-  typeof superLiveInsightsExportScheduleParamsSchema
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateSuperLiveInsightsExportScheduleMetadata,
-  params: superLiveInsightsExportScheduleParamsSchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
   input: noBodySchema,
   output: createSuperLiveInsightsExportResponseSchema,
   handler: async ({ tx, ctx, params }) =>

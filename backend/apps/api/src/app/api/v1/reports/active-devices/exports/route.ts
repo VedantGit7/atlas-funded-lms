@@ -6,19 +6,19 @@ import {
   createActiveDevicesExportResponseSchema,
 } from "@atlas/domain/reports/active-devices-exports.dto";
 import {
-  createActiveDevicesExportMetadata,
-  getActiveDevicesExportsMetadata,
-} from "@atlas/domain/reports/active-devices-exports.route-metadata";
-import {
   createActiveDevicesExport,
   getActiveDevicesExports,
 } from "@atlas/domain/reports/active-devices-exports.service";
+import {
+  createReportExportMetadata,
+  getReportExportsMetadata,
+} from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const GET = createTenantRoute<
   Record<string, never>,
   z.output<typeof activeDevicesExportsResponseSchema>
 >({
-  metadata: getActiveDevicesExportsMetadata,
+  metadata: getReportExportsMetadata,
   input: noBodySchema,
   output: activeDevicesExportsResponseSchema,
   handler: async ({ tx, ctx }) => getActiveDevicesExports(tx, ctx),
@@ -28,7 +28,7 @@ export const POST = createTenantRoute<
   z.output<typeof createActiveDevicesExportBodySchema>,
   z.output<typeof createActiveDevicesExportResponseSchema>
 >({
-  metadata: createActiveDevicesExportMetadata,
+  metadata: createReportExportMetadata,
   body: createActiveDevicesExportBodySchema,
   output: createActiveDevicesExportResponseSchema,
   handler: async ({ tx, ctx, input }) => createActiveDevicesExport(tx, ctx, input),

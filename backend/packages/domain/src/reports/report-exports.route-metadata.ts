@@ -6,7 +6,13 @@ type LoaderCtx = {
   actorMembershipId: string;
 };
 
-export const getCustomFieldExportsMetadata = {
+/*
+ * Route settings shared by every report's exports pages: reading the export list
+ * needs report library access; starting, retrying or changing a schedule runs a
+ * report, so it needs MFA, an audit entry and an idempotency key.
+ */
+
+export const getReportExportsMetadata = {
   permission: "reports.library.view",
   audit: "none",
   rateLimit: "authenticatedTenantRead",
@@ -15,7 +21,7 @@ export const getCustomFieldExportsMetadata = {
     loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
 } satisfies RouteMetadata;
 
-export const createCustomFieldExportMetadata = {
+export const createReportExportMetadata = {
   permission: "reports.run",
   mfa: "required",
   audit: "required",
@@ -25,7 +31,7 @@ export const createCustomFieldExportMetadata = {
     loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
 } satisfies RouteMetadata;
 
-export const retryCustomFieldExportMetadata = {
+export const retryReportExportMetadata = {
   permission: "reports.run",
   mfa: "required",
   audit: "required",
@@ -35,7 +41,7 @@ export const retryCustomFieldExportMetadata = {
     loadReportCatalogResourceRef({ tenantId: ctx.tenantId }),
 } satisfies RouteMetadata;
 
-export const mutateCustomFieldExportScheduleMetadata = {
+export const mutateReportExportScheduleMetadata = {
   permission: "reports.run",
   mfa: "required",
   audit: "required",

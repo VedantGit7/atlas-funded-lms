@@ -1,1 +1,1 @@
-export { retryResourceUsageExportMetadata as POST } from "@atlas/domain/reports/resource-usage-exports.route-metadata";
+export { retryReportExportMetadata as POST } from "@atlas/domain/reports/report-exports.route-metadata";

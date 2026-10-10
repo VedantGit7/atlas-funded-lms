@@ -1,25 +1,25 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import {
-  deleteProgressScoreExportScheduleResponseSchema,
-  progressScoreExportScheduleParamsSchema,
-  updateProgressScoreExportScheduleBodySchema,
-  updateProgressScoreExportScheduleResponseSchema,
-} from "@atlas/domain/reports/progress-score-exports.dto";
-import { mutateProgressScoreExportScheduleMetadata } from "@atlas/domain/reports/progress-score-exports.route-metadata";
+import { updateProgressScoreExportScheduleResponseSchema } from "@atlas/domain/reports/progress-score-exports.dto";
 import {
   deleteProgressScoreExportSchedule,
   updateProgressScoreExportSchedule,
 } from "@atlas/domain/reports/progress-score-exports.service";
+import {
+  deleteReportExportScheduleResponseSchema,
+  reportExportScheduleParamsSchema,
+  updateReportExportScheduleBodySchema,
+} from "@atlas/domain/reports/report-exports.dto";
+import { mutateReportExportScheduleMetadata } from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const PATCH = createTenantRoute<
-  z.output<typeof updateProgressScoreExportScheduleBodySchema>,
+  z.output<typeof updateReportExportScheduleBodySchema>,
   z.output<typeof updateProgressScoreExportScheduleResponseSchema>,
-  typeof progressScoreExportScheduleParamsSchema
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateProgressScoreExportScheduleMetadata,
-  params: progressScoreExportScheduleParamsSchema,
-  body: updateProgressScoreExportScheduleBodySchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  body: updateReportExportScheduleBodySchema,
   output: updateProgressScoreExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateProgressScoreExportSchedule(tx, ctx, params["scheduleId"], input),
@@ -27,13 +27,13 @@ export const PATCH = createTenantRoute<
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  z.output<typeof deleteProgressScoreExportScheduleResponseSchema>,
-  typeof progressScoreExportScheduleParamsSchema
+  z.output<typeof deleteReportExportScheduleResponseSchema>,
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateProgressScoreExportScheduleMetadata,
-  params: progressScoreExportScheduleParamsSchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
   input: noBodySchema,
-  output: deleteProgressScoreExportScheduleResponseSchema,
+  output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
     deleteProgressScoreExportSchedule(tx, ctx, params["scheduleId"]),
 });

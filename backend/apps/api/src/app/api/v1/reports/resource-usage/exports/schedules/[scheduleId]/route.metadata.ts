@@ -1,5 +1,5 @@
 export {
-  mutateResourceUsageExportScheduleMetadata as PATCH,
-  mutateResourceUsageExportScheduleMetadata as DELETE,
-  mutateResourceUsageExportScheduleMetadata as POST,
-} from "@atlas/domain/reports/resource-usage-exports.route-metadata";
+  mutateReportExportScheduleMetadata as PATCH,
+  mutateReportExportScheduleMetadata as DELETE,
+  mutateReportExportScheduleMetadata as POST,
+} from "@atlas/domain/reports/report-exports.route-metadata";

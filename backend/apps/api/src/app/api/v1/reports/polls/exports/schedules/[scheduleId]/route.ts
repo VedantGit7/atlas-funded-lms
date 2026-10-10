@@ -1,25 +1,25 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import {
-  deletePollExportScheduleResponseSchema,
-  pollExportScheduleParamsSchema,
-  updatePollExportScheduleBodySchema,
-  updatePollExportScheduleResponseSchema,
-} from "@atlas/domain/reports/polls-exports.dto";
-import { mutatePollsExportScheduleMetadata } from "@atlas/domain/reports/polls-exports.route-metadata";
+import { updatePollExportScheduleResponseSchema } from "@atlas/domain/reports/polls-exports.dto";
 import {
   deletePollExportSchedule,
   updatePollExportSchedule,
 } from "@atlas/domain/reports/polls-exports.service";
+import {
+  deleteReportExportScheduleResponseSchema,
+  reportExportScheduleParamsSchema,
+  updateReportExportScheduleBodySchema,
+} from "@atlas/domain/reports/report-exports.dto";
+import { mutateReportExportScheduleMetadata } from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const PATCH = createTenantRoute<
-  z.output<typeof updatePollExportScheduleBodySchema>,
+  z.output<typeof updateReportExportScheduleBodySchema>,
   z.output<typeof updatePollExportScheduleResponseSchema>,
-  typeof pollExportScheduleParamsSchema
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutatePollsExportScheduleMetadata,
-  params: pollExportScheduleParamsSchema,
-  body: updatePollExportScheduleBodySchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  body: updateReportExportScheduleBodySchema,
   output: updatePollExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updatePollExportSchedule(tx, ctx, params["scheduleId"], input),
@@ -27,12 +27,12 @@ export const PATCH = createTenantRoute<
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  z.output<typeof deletePollExportScheduleResponseSchema>,
-  typeof pollExportScheduleParamsSchema
+  z.output<typeof deleteReportExportScheduleResponseSchema>,
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutatePollsExportScheduleMetadata,
-  params: pollExportScheduleParamsSchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
   input: noBodySchema,
-  output: deletePollExportScheduleResponseSchema,
+  output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) => deletePollExportSchedule(tx, ctx, params["scheduleId"]),
 });

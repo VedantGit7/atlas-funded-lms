@@ -1,19 +1,17 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import {
-  superLiveInsightsExportRunDetailResponseSchema,
-  superLiveInsightsExportRunParamsSchema,
-} from "@atlas/domain/reports/super-live-insights-exports.dto";
-import { getSuperLiveInsightsExportsMetadata } from "@atlas/domain/reports/super-live-insights-exports.route-metadata";
+import { superLiveInsightsExportRunDetailResponseSchema } from "@atlas/domain/reports/super-live-insights-exports.dto";
 import { getSuperLiveInsightsExportRun } from "@atlas/domain/reports/super-live-insights-exports.service";
+import { reportExportRunParamsSchema } from "@atlas/domain/reports/report-exports.dto";
+import { getReportExportsMetadata } from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const GET = createTenantRoute<
   Record<string, never>,
   z.output<typeof superLiveInsightsExportRunDetailResponseSchema>,
-  typeof superLiveInsightsExportRunParamsSchema
+  typeof reportExportRunParamsSchema
 >({
-  metadata: getSuperLiveInsightsExportsMetadata,
-  params: superLiveInsightsExportRunParamsSchema,
+  metadata: getReportExportsMetadata,
+  params: reportExportRunParamsSchema,
   input: noBodySchema,
   output: superLiveInsightsExportRunDetailResponseSchema,
   handler: async ({ tx, ctx, params }) => getSuperLiveInsightsExportRun(tx, ctx, params["runId"]),

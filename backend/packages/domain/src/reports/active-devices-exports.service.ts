@@ -5,10 +5,8 @@ import {
   activeDevicesExportsResponseSchema,
   createActiveDevicesExportBodySchema,
   createActiveDevicesExportResponseSchema,
-  deleteDeviceExportScheduleResponseSchema,
   deviceExportRunDetailResponseSchema,
   retryActiveDevicesExportResponseSchema,
-  updateDeviceExportScheduleBodySchema,
   updateDeviceExportScheduleResponseSchema,
   type CreateActiveDevicesExportBody,
 } from "./active-devices-exports.dto";
@@ -28,6 +26,10 @@ import {
   type ExportRun,
   type ExportScheduleView,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "active-devices";
 
@@ -114,9 +116,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: deviceExportRunDetailResponseSchema,
     retry: retryActiveDevicesExportResponseSchema,
-    updateScheduleBody: updateDeviceExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateDeviceExportScheduleResponseSchema,
-    deleteSchedule: deleteDeviceExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

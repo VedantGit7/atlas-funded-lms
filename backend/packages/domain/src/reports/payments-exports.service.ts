@@ -6,11 +6,9 @@ import {
   PAYMENT_EXPORT_DATASETS,
   createPaymentExportBodySchema,
   createPaymentExportResponseSchema,
-  deletePaymentExportScheduleResponseSchema,
   paymentExportRunDetailResponseSchema,
   paymentExportsResponseSchema,
   retryPaymentExportResponseSchema,
-  updatePaymentExportScheduleBodySchema,
   updatePaymentExportScheduleResponseSchema,
   type CreatePaymentExportBody,
 } from "./payments-exports.dto";
@@ -30,6 +28,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "payments";
 
@@ -149,9 +151,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: paymentExportRunDetailResponseSchema,
     retry: retryPaymentExportResponseSchema,
-    updateScheduleBody: updatePaymentExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updatePaymentExportScheduleResponseSchema,
-    deleteSchedule: deletePaymentExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 
