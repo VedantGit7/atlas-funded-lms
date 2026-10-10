@@ -65,4 +65,12 @@ export type CreateCustomFieldExportBody = {
 export const customFieldExportsApi = createReportExportsApi<{
   payload: CustomFieldExportsPayload;
   createBody: CreateCustomFieldExportBody;
-}>("custom-field");
+}>(
+  {
+    exports: "/api/v1/reports/custom-field/exports",
+    run: (runId) => `/api/v1/reports/custom-field/exports/${runId}`,
+    retry: (runId) => `/api/v1/reports/custom-field/exports/${runId}/retry`,
+    schedule: (scheduleId) => `/api/v1/reports/custom-field/exports/schedules/${scheduleId}`,
+  },
+  "custom-field",
+);

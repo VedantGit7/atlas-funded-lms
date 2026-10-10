@@ -66,7 +66,15 @@ export type CreateProgressScoreExportBody = {
 export const progressScoreExportsApi = createReportExportsApi<{
   payload: ProgressScoreExportsPayload;
   createBody: CreateProgressScoreExportBody;
-}>("progress-score");
+}>(
+  {
+    exports: "/api/v1/reports/progress-score/exports",
+    run: (runId) => `/api/v1/reports/progress-score/exports/${runId}`,
+    retry: (runId) => `/api/v1/reports/progress-score/exports/${runId}/retry`,
+    schedule: (scheduleId) => `/api/v1/reports/progress-score/exports/schedules/${scheduleId}`,
+  },
+  "progress-score",
+);
 
 export function isScoreLikeDataset(dataset: ProgressScoreExportDataset): boolean {
   return dataset === "scores" || dataset === "attempts" || dataset === "item_analysis";

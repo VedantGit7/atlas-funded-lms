@@ -65,4 +65,12 @@ export type CreatePaymentExportBody = {
 export const paymentExportsApi = createReportExportsApi<{
   payload: PaymentExportsPayload;
   createBody: CreatePaymentExportBody;
-}>("payments");
+}>(
+  {
+    exports: "/api/v1/reports/payments/exports",
+    run: (runId) => `/api/v1/reports/payments/exports/${runId}`,
+    retry: (runId) => `/api/v1/reports/payments/exports/${runId}/retry`,
+    schedule: (scheduleId) => `/api/v1/reports/payments/exports/schedules/${scheduleId}`,
+  },
+  "payments",
+);

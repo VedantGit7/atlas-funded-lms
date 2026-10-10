@@ -72,4 +72,12 @@ export type CreateSalesMarketingExportBody = {
 export const salesMarketingExportsApi = createReportExportsApi<{
   payload: SalesMarketingExportsPayload;
   createBody: CreateSalesMarketingExportBody;
-}>("sales-marketing", "sm");
+}>(
+  {
+    exports: "/api/v1/reports/sales-marketing/exports",
+    run: (runId) => `/api/v1/reports/sales-marketing/exports/${runId}`,
+    retry: (runId) => `/api/v1/reports/sales-marketing/exports/${runId}/retry`,
+    schedule: (scheduleId) => `/api/v1/reports/sales-marketing/exports/schedules/${scheduleId}`,
+  },
+  "sm",
+);

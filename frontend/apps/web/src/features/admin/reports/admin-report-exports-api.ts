@@ -96,42 +96,52 @@ export type ReportExportsShape = {
 };
 
 /**
- * The client for one report's exports, at /api/v1/reports/<report>/exports.
- * Mutations send an idempotency key that starts with `<keyPrefix>-export-`.
+ * Where one report's export routes live.
+ *
+ * Each report writes these out in full rather than having them built from its
+ * name: the frontend API closure check only counts a route as called when its
+ * path appears literally in the source.
+ */
+export type ReportExportsPaths = {
+  exports: string;
+  run: (runId: string) => string;
+  retry: (runId: string) => string;
+  schedule: (scheduleId: string) => string;
+};
+
+/**
+ * The client for one report's exports. Mutations send an idempotency key that
+ * starts with `<keyPrefix>-export-`.
  */
 export function createReportExportsApi<TShape extends ReportExportsShape>(
-  report: string,
-  keyPrefix: string = report,
+  paths: ReportExportsPaths,
+  keyPrefix: string,
 ) {
   type Payload = TShape["payload"];
   type HistoryItem = ReportExportHistoryOf<Payload>;
   type ScheduleItem = ReportExportScheduleOf<Payload>;
-  const base = `/api/v1/reports/${report}/exports`;
 
   return {
-    fetchExports: () => clientApi.get<{ data: Payload }>(base),
+    fetchExports: () => clientApi.get<{ data: Payload }>(paths.exports),
 
     create: (body: TShape["createBody"]) =>
       clientApi.post<{ data: { run: HistoryItem; schedule: ScheduleItem | null } }>(
-        base,
+        paths.exports,
         body,
         `${keyPrefix}-export-create`,
         { successMessage: "Export started." },
       ),
 
-    fetchRun: (runId: string) => clientApi.get<{ data: HistoryItem }>(`${base}/${runId}`),
+    fetchRun: (runId: string) => clientApi.get<{ data: HistoryItem }>(paths.run(runId)),
 
     retry: (runId: string) =>
-      clientApi.post<{ data: HistoryItem }>(
-        `${base}/${runId}/retry`,
-        null,
-        `${keyPrefix}-export-retry`,
-        { successMessage: "Export retry started." },
-      ),
+      clientApi.post<{ data: HistoryItem }>(paths.retry(runId), null, `${keyPrefix}-export-retry`, {
+        successMessage: "Export retry started.",
+      }),
 
     updateSchedule: (scheduleId: string, body: UpdateReportExportScheduleBody) =>
       clientApi.patch<{ data: ScheduleItem }>(
-        `${base}/schedules/${scheduleId}`,
+        paths.schedule(scheduleId),
         body,
         `${keyPrefix}-export-schedule-update`,
         { successMessage: "Schedule updated." },
@@ -139,7 +149,7 @@ export function createReportExportsApi<TShape extends ReportExportsShape>(
 
     deleteSchedule: (scheduleId: string) =>
       clientApi.delete<{ data: { deleted: true; id: string } }>(
-        `${base}/schedules/${scheduleId}`,
+        paths.schedule(scheduleId),
         `${keyPrefix}-export-schedule-delete`,
         undefined,
         { successMessage: "Schedule deleted." },

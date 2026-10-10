@@ -69,7 +69,15 @@ export type CreatePollExportBody = {
 export const pollsExportsApi = createReportExportsApi<{
   payload: PollsExportsPayload;
   createBody: CreatePollExportBody;
-}>("polls");
+}>(
+  {
+    exports: "/api/v1/reports/polls/exports",
+    run: (runId) => `/api/v1/reports/polls/exports/${runId}`,
+    retry: (runId) => `/api/v1/reports/polls/exports/${runId}/retry`,
+    schedule: (scheduleId) => `/api/v1/reports/polls/exports/schedules/${scheduleId}`,
+  },
+  "polls",
+);
 
 export function columnsForDataset(
   payload: PollsExportsPayload,

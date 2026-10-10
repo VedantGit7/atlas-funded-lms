@@ -67,7 +67,15 @@ export type CreateBatchExportBody = {
 export const batchesExportsApi = createReportExportsApi<{
   payload: BatchesExportsPayload;
   createBody: CreateBatchExportBody;
-}>("batches");
+}>(
+  {
+    exports: "/api/v1/reports/batches/exports",
+    run: (runId) => `/api/v1/reports/batches/exports/${runId}`,
+    retry: (runId) => `/api/v1/reports/batches/exports/${runId}/retry`,
+    schedule: (scheduleId) => `/api/v1/reports/batches/exports/schedules/${scheduleId}`,
+  },
+  "batches",
+);
 
 export function isSummaryDataset(dataset: BatchExportDataset): boolean {
   return dataset === "batch_summary";
