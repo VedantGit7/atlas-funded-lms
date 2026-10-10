@@ -6,11 +6,9 @@ import {
   LCA_EXPORT_DATASETS,
   createLiveClassAttendanceExportBodySchema,
   createLiveClassAttendanceExportResponseSchema,
-  deleteLiveClassAttendanceExportScheduleResponseSchema,
   liveClassAttendanceExportRunDetailResponseSchema,
   liveClassAttendanceExportsResponseSchema,
   retryLiveClassAttendanceExportResponseSchema,
-  updateLiveClassAttendanceExportScheduleBodySchema,
   updateLiveClassAttendanceExportScheduleResponseSchema,
   type CreateLiveClassAttendanceExportBody,
 } from "./live-class-attendance-exports.dto";
@@ -31,6 +29,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "live-class-attendance";
 
@@ -161,9 +163,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: liveClassAttendanceExportRunDetailResponseSchema,
     retry: retryLiveClassAttendanceExportResponseSchema,
-    updateScheduleBody: updateLiveClassAttendanceExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateLiveClassAttendanceExportScheduleResponseSchema,
-    deleteSchedule: deleteLiveClassAttendanceExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
-import { REPORT_FORMATS } from "./reports.contract";
+import {
+  REPORT_EXPORT_CADENCE,
+  REPORT_EXPORT_FORMATS,
+  exportDatasetFields,
+  exportRunFileFields,
+  exportRunScopeFields,
+  exportRunStateFields,
+  exportScheduleDeliveryField,
+  exportScheduleTimingFields,
+  reportExportResponseSchemas,
+} from "./report-exports.dto";
 
 export const BATCH_EXPORT_DATASETS = [
   "batch_summary",
@@ -10,9 +20,7 @@ export const BATCH_EXPORT_DATASETS = [
   "content",
 ] as const;
 
-export const BATCH_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const BATCH_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
-export const BATCH_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
 export const BATCH_EXPORT_GROUPING = ["none", "batch", "course", "health"] as const;
 
 export const BATCH_SUMMARY_EXPORT_COLUMNS = [
@@ -39,25 +47,11 @@ export const batchExportColumnKeySchema = z.string().min(1).max(64);
 
 export const batchExportHistoryItemSchema = z
   .object({
-    id: z.uuid(),
-    fileName: z.string(),
-    format: z.enum(REPORT_FORMATS),
-    dataset: z.enum(BATCH_EXPORT_DATASETS),
-    datasetLabel: z.string(),
-    scopeLabel: z.string(),
-    rowCount: z.number().int().nullable(),
-    sizeLabel: z.string().nullable(),
+    ...exportRunFileFields,
+    ...exportDatasetFields(BATCH_EXPORT_DATASETS),
+    ...exportRunScopeFields,
     requestedByLabel: z.string(),
-    status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
-    expired: z.boolean(),
-    expiresAt: z.iso.datetime().nullable(),
-    createdAt: z.iso.datetime(),
-    completedAt: z.iso.datetime().nullable(),
-    errorCode: z.string().nullable(),
-    errorMessage: z.string().nullable(),
-    errorTrace: z.array(z.string()).nullable(),
-    progressPercent: z.number().int().min(0).max(100).nullable(),
-    downloadAvailable: z.boolean(),
+    ...exportRunStateFields,
     columns: z.array(z.string()),
   })
   .strict();
@@ -67,16 +61,9 @@ export const batchExportScheduleItemSchema = z
     id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
-    cadenceLabel: z.string(),
-    cronExpression: z.string(),
-    timezone: z.string(),
-    formats: z.array(z.enum(REPORT_FORMATS)),
-    isActive: z.boolean(),
-    nextRunAt: z.iso.datetime(),
-    nextRunLabel: z.string(),
-    recipients: z.array(z.string()),
+    ...exportScheduleTimingFields,
     webhookLabel: z.string().nullable(),
-    delivery: z.record(z.string(), z.unknown()).nullable(),
+    ...exportScheduleDeliveryField,
   })
   .strict();
 
@@ -96,7 +83,7 @@ export const batchesExportsResponseSchema = z.object({
     summaryColumns: z.array(batchExportColumnSchema),
     learnerColumns: z.array(batchExportColumnSchema),
     capabilities: z.object({
-      formats: z.array(z.enum(BATCH_EXPORT_FORMATS)),
+      formats: z.array(z.enum(REPORT_EXPORT_FORMATS)),
       datasets: z.array(z.enum(BATCH_EXPORT_DATASETS)),
       canSchedule: z.boolean(),
       canEmailDelivery: z.boolean(),
@@ -110,7 +97,7 @@ export const createBatchExportBodySchema = rejectClientTenantFields
   .extend({
     dataset: z.enum(BATCH_EXPORT_DATASETS).default("batch_learners"),
     columns: z.array(batchExportColumnKeySchema).min(1).max(30),
-    format: z.enum(BATCH_EXPORT_FORMATS).default("csv"),
+    format: z.enum(REPORT_EXPORT_FORMATS).default("csv"),
     batchIds: z.array(z.uuid()).max(50).optional(),
     allActiveBatches: z.boolean().default(false),
     joinedFrom: z.iso.datetime().optional(),
@@ -126,7 +113,7 @@ export const createBatchExportBodySchema = rejectClientTenantFields
     webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
-    cadence: z.enum(BATCH_EXPORT_CADENCE).optional(),
+    cadence: z.enum(REPORT_EXPORT_CADENCE).optional(),
     time: z
       .string()
       .regex(/^\d{2}:\d{2}$/)
@@ -137,47 +124,12 @@ export const createBatchExportBodySchema = rejectClientTenantFields
 
 export type CreateBatchExportBody = z.output<typeof createBatchExportBodySchema>;
 
-export const createBatchExportResponseSchema = z.object({
-  data: z.object({
-    run: batchExportHistoryItemSchema,
-    schedule: batchExportScheduleItemSchema.nullable(),
-  }),
-});
+const exportResponses = reportExportResponseSchemas(
+  batchExportHistoryItemSchema,
+  batchExportScheduleItemSchema,
+);
 
-export const batchExportRunParamsSchema = z
-  .object({
-    runId: z.uuid(),
-  })
-  .strict();
-
-export const batchExportRunDetailResponseSchema = z.object({
-  data: batchExportHistoryItemSchema,
-});
-
-export const retryBatchExportResponseSchema = z.object({
-  data: batchExportHistoryItemSchema,
-});
-
-export const batchExportScheduleParamsSchema = z
-  .object({
-    scheduleId: z.uuid(),
-  })
-  .strict();
-
-export const updateBatchExportScheduleBodySchema = rejectClientTenantFields
-  .extend({
-    isActive: z.boolean().optional(),
-    name: z.string().trim().max(120).optional(),
-  })
-  .strict();
-
-export const updateBatchExportScheduleResponseSchema = z.object({
-  data: batchExportScheduleItemSchema,
-});
-
-export const deleteBatchExportScheduleResponseSchema = z.object({
-  data: z.object({
-    deleted: z.literal(true),
-    id: z.uuid(),
-  }),
-});
+export const createBatchExportResponseSchema = exportResponses.create;
+export const batchExportRunDetailResponseSchema = exportResponses.runDetail;
+export const retryBatchExportResponseSchema = exportResponses.retry;
+export const updateBatchExportScheduleResponseSchema = exportResponses.updateSchedule;

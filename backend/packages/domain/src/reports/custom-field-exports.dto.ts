@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
-import { REPORT_FORMATS } from "./reports.contract";
+import {
+  REPORT_EXPORT_CADENCE,
+  REPORT_EXPORT_FORMATS,
+  exportDatasetFields,
+  exportRunFileFields,
+  exportRunScopeFields,
+  exportRunStateFields,
+  exportScheduleDeliveryField,
+  exportScheduleTimingFields,
+  reportExportResponseSchemas,
+} from "./report-exports.dto";
 
 export const CUSTOM_FIELD_EXPORT_DATASETS = [
   "learner_roster",
@@ -8,9 +18,7 @@ export const CUSTOM_FIELD_EXPORT_DATASETS = [
   "segment_members",
 ] as const;
 
-export const CUSTOM_FIELD_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const CUSTOM_FIELD_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
-export const CUSTOM_FIELD_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
 export const CUSTOM_FIELD_EXPORT_EMPTY_VALUES = ["blank", "emdash"] as const;
 
 export const LEARNER_CORE_EXPORT_COLUMNS = [
@@ -76,24 +84,10 @@ export const customFieldExportColumnKeySchema = z.string().min(1).max(96);
 
 export const customFieldExportHistoryItemSchema = z
   .object({
-    id: z.uuid(),
-    fileName: z.string(),
-    format: z.enum(REPORT_FORMATS),
-    dataset: z.enum(CUSTOM_FIELD_EXPORT_DATASETS),
-    datasetLabel: z.string(),
-    scopeLabel: z.string(),
-    rowCount: z.number().int().nullable(),
-    sizeLabel: z.string().nullable(),
-    status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
-    expired: z.boolean(),
-    expiresAt: z.iso.datetime().nullable(),
-    createdAt: z.iso.datetime(),
-    completedAt: z.iso.datetime().nullable(),
-    errorCode: z.string().nullable(),
-    errorMessage: z.string().nullable(),
-    errorTrace: z.array(z.string()).nullable(),
-    progressPercent: z.number().int().min(0).max(100).nullable(),
-    downloadAvailable: z.boolean(),
+    ...exportRunFileFields,
+    ...exportDatasetFields(CUSTOM_FIELD_EXPORT_DATASETS),
+    ...exportRunScopeFields,
+    ...exportRunStateFields,
     columns: z.array(z.string()),
   })
   .strict();
@@ -103,16 +97,9 @@ export const customFieldExportScheduleItemSchema = z
     id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
-    cadenceLabel: z.string(),
-    cronExpression: z.string(),
-    timezone: z.string(),
-    formats: z.array(z.enum(REPORT_FORMATS)),
-    isActive: z.boolean(),
-    nextRunAt: z.iso.datetime(),
-    nextRunLabel: z.string(),
-    recipients: z.array(z.string()),
+    ...exportScheduleTimingFields,
     webhookLabel: z.string().nullable(),
-    delivery: z.record(z.string(), z.unknown()).nullable(),
+    ...exportScheduleDeliveryField,
   })
   .strict();
 
@@ -135,7 +122,7 @@ export const customFieldExportsResponseSchema = z.object({
     learnerColumns: z.array(customFieldExportColumnSchema),
     customFieldColumns: z.array(customFieldExportColumnSchema),
     capabilities: z.object({
-      formats: z.array(z.enum(CUSTOM_FIELD_EXPORT_FORMATS)),
+      formats: z.array(z.enum(REPORT_EXPORT_FORMATS)),
       datasets: z.array(z.enum(CUSTOM_FIELD_EXPORT_DATASETS)),
       canSchedule: z.boolean(),
       canEmailDelivery: z.boolean(),
@@ -149,7 +136,7 @@ export const createCustomFieldExportBodySchema = rejectClientTenantFields
   .extend({
     dataset: z.enum(CUSTOM_FIELD_EXPORT_DATASETS).default("learner_roster"),
     columns: z.array(customFieldExportColumnKeySchema).min(1).max(80),
-    format: z.enum(CUSTOM_FIELD_EXPORT_FORMATS).default("csv"),
+    format: z.enum(REPORT_EXPORT_FORMATS).default("csv"),
     emptyValueMode: z.enum(CUSTOM_FIELD_EXPORT_EMPTY_VALUES).default("blank"),
     q: z.string().trim().min(1).max(200).optional(),
     email: z.string().trim().min(1).max(320).optional(),
@@ -166,7 +153,7 @@ export const createCustomFieldExportBodySchema = rejectClientTenantFields
     webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
-    cadence: z.enum(CUSTOM_FIELD_EXPORT_CADENCE).optional(),
+    cadence: z.enum(REPORT_EXPORT_CADENCE).optional(),
     time: z
       .string()
       .regex(/^\d{2}:\d{2}$/)
@@ -177,47 +164,12 @@ export const createCustomFieldExportBodySchema = rejectClientTenantFields
 
 export type CreateCustomFieldExportBody = z.output<typeof createCustomFieldExportBodySchema>;
 
-export const createCustomFieldExportResponseSchema = z.object({
-  data: z.object({
-    run: customFieldExportHistoryItemSchema,
-    schedule: customFieldExportScheduleItemSchema.nullable(),
-  }),
-});
+const exportResponses = reportExportResponseSchemas(
+  customFieldExportHistoryItemSchema,
+  customFieldExportScheduleItemSchema,
+);
 
-export const customFieldExportRunParamsSchema = z
-  .object({
-    runId: z.uuid(),
-  })
-  .strict();
-
-export const customFieldExportRunDetailResponseSchema = z.object({
-  data: customFieldExportHistoryItemSchema,
-});
-
-export const retryCustomFieldExportResponseSchema = z.object({
-  data: customFieldExportHistoryItemSchema,
-});
-
-export const customFieldExportScheduleParamsSchema = z
-  .object({
-    scheduleId: z.uuid(),
-  })
-  .strict();
-
-export const updateCustomFieldExportScheduleBodySchema = rejectClientTenantFields
-  .extend({
-    isActive: z.boolean().optional(),
-    name: z.string().trim().max(120).optional(),
-  })
-  .strict();
-
-export const updateCustomFieldExportScheduleResponseSchema = z.object({
-  data: customFieldExportScheduleItemSchema,
-});
-
-export const deleteCustomFieldExportScheduleResponseSchema = z.object({
-  data: z.object({
-    deleted: z.literal(true),
-    id: z.uuid(),
-  }),
-});
+export const createCustomFieldExportResponseSchema = exportResponses.create;
+export const customFieldExportRunDetailResponseSchema = exportResponses.runDetail;
+export const retryCustomFieldExportResponseSchema = exportResponses.retry;
+export const updateCustomFieldExportScheduleResponseSchema = exportResponses.updateSchedule;

@@ -4,8 +4,8 @@ import {
   SCORE_EXPORT_COLUMNS,
   createProgressScoreExportBodySchema,
   progressScoreExportsResponseSchema,
-  updateProgressScoreExportScheduleBodySchema,
 } from "@atlas/domain/reports/progress-score-exports.dto";
+import { updateReportExportScheduleBodySchema } from "@atlas/domain/reports/report-exports.dto";
 
 describe("progress-score exports dto", () => {
   it("exposes progress and score column catalogs with email PII", () => {
@@ -125,7 +125,7 @@ describe("progress-score exports dto", () => {
   });
 
   it("parses schedule update body", () => {
-    const body = updateProgressScoreExportScheduleBodySchema.parse({
+    const body = updateReportExportScheduleBodySchema.parse({
       isActive: false,
       name: "Paused scores export",
     });

@@ -1,1 +1,1 @@
-export { getResourceUsageExportsMetadata as GET } from "@atlas/domain/reports/resource-usage-exports.route-metadata";
+export { getReportExportsMetadata as GET } from "@atlas/domain/reports/report-exports.route-metadata";

@@ -6,19 +6,19 @@ import {
   superLiveInsightsExportsResponseSchema,
 } from "@atlas/domain/reports/super-live-insights-exports.dto";
 import {
-  createSuperLiveInsightsExportMetadata,
-  getSuperLiveInsightsExportsMetadata,
-} from "@atlas/domain/reports/super-live-insights-exports.route-metadata";
-import {
   createSuperLiveInsightsExport,
   getSuperLiveInsightsExports,
 } from "@atlas/domain/reports/super-live-insights-exports.service";
+import {
+  createReportExportMetadata,
+  getReportExportsMetadata,
+} from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const GET = createTenantRoute<
   Record<string, never>,
   z.output<typeof superLiveInsightsExportsResponseSchema>
 >({
-  metadata: getSuperLiveInsightsExportsMetadata,
+  metadata: getReportExportsMetadata,
   input: noBodySchema,
   output: superLiveInsightsExportsResponseSchema,
   handler: async ({ tx, ctx }) => getSuperLiveInsightsExports(tx, ctx),
@@ -28,7 +28,7 @@ export const POST = createTenantRoute<
   z.output<typeof createSuperLiveInsightsExportBodySchema>,
   z.output<typeof createSuperLiveInsightsExportResponseSchema>
 >({
-  metadata: createSuperLiveInsightsExportMetadata,
+  metadata: createReportExportMetadata,
   body: createSuperLiveInsightsExportBodySchema,
   output: createSuperLiveInsightsExportResponseSchema,
   handler: async ({ tx, ctx, input }) => createSuperLiveInsightsExport(tx, ctx, input),

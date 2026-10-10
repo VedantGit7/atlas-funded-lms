@@ -1,25 +1,25 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import {
-  deleteZoomExportScheduleResponseSchema,
-  updateZoomExportScheduleBodySchema,
-  updateZoomExportScheduleResponseSchema,
-  zoomExportScheduleParamsSchema,
-} from "@atlas/domain/reports/zoom-insights-exports.dto";
-import { mutateZoomInsightsExportScheduleMetadata } from "@atlas/domain/reports/zoom-insights-exports.route-metadata";
+import { updateZoomExportScheduleResponseSchema } from "@atlas/domain/reports/zoom-insights-exports.dto";
 import {
   deleteZoomExportSchedule,
   updateZoomExportSchedule,
 } from "@atlas/domain/reports/zoom-insights-exports.service";
+import {
+  deleteReportExportScheduleResponseSchema,
+  reportExportScheduleParamsSchema,
+  updateReportExportScheduleBodySchema,
+} from "@atlas/domain/reports/report-exports.dto";
+import { mutateReportExportScheduleMetadata } from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const PATCH = createTenantRoute<
-  z.output<typeof updateZoomExportScheduleBodySchema>,
+  z.output<typeof updateReportExportScheduleBodySchema>,
   z.output<typeof updateZoomExportScheduleResponseSchema>,
-  typeof zoomExportScheduleParamsSchema
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateZoomInsightsExportScheduleMetadata,
-  params: zoomExportScheduleParamsSchema,
-  body: updateZoomExportScheduleBodySchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  body: updateReportExportScheduleBodySchema,
   output: updateZoomExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateZoomExportSchedule(tx, ctx, params["scheduleId"], input),
@@ -27,12 +27,12 @@ export const PATCH = createTenantRoute<
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  z.output<typeof deleteZoomExportScheduleResponseSchema>,
-  typeof zoomExportScheduleParamsSchema
+  z.output<typeof deleteReportExportScheduleResponseSchema>,
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateZoomInsightsExportScheduleMetadata,
-  params: zoomExportScheduleParamsSchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
   input: noBodySchema,
-  output: deleteZoomExportScheduleResponseSchema,
+  output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) => deleteZoomExportSchedule(tx, ctx, params["scheduleId"]),
 });

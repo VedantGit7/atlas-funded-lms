@@ -4,9 +4,7 @@ import {
   ZOOM_EXPORT_DATASETS,
   createZoomExportBodySchema,
   createZoomExportResponseSchema,
-  deleteZoomExportScheduleResponseSchema,
   retryZoomExportResponseSchema,
-  updateZoomExportScheduleBodySchema,
   updateZoomExportScheduleResponseSchema,
   zoomExportRunDetailResponseSchema,
   zoomInsightsExportsResponseSchema,
@@ -30,6 +28,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "zoom-insights";
 
@@ -151,9 +153,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: zoomExportRunDetailResponseSchema,
     retry: retryZoomExportResponseSchema,
-    updateScheduleBody: updateZoomExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateZoomExportScheduleResponseSchema,
-    deleteSchedule: deleteZoomExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

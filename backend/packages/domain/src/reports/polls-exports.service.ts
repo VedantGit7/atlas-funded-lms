@@ -9,11 +9,9 @@ import {
   POLL_SUMMARY_EXPORT_COLUMNS,
   createPollExportBodySchema,
   createPollExportResponseSchema,
-  deletePollExportScheduleResponseSchema,
   pollExportRunDetailResponseSchema,
   pollsExportsResponseSchema,
   retryPollExportResponseSchema,
-  updatePollExportScheduleBodySchema,
   updatePollExportScheduleResponseSchema,
   type CreatePollExportBody,
 } from "./polls-exports.dto";
@@ -34,6 +32,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "polls";
 
@@ -148,9 +150,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: pollExportRunDetailResponseSchema,
     retry: retryPollExportResponseSchema,
-    updateScheduleBody: updatePollExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updatePollExportScheduleResponseSchema,
-    deleteSchedule: deletePollExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

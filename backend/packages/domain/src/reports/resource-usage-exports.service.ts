@@ -6,11 +6,9 @@ import {
   RU_EXPORT_DATASETS,
   createResourceUsageExportBodySchema,
   createResourceUsageExportResponseSchema,
-  deleteResourceUsageExportScheduleResponseSchema,
   resourceUsageExportRunDetailResponseSchema,
   resourceUsageExportsResponseSchema,
   retryResourceUsageExportResponseSchema,
-  updateResourceUsageExportScheduleBodySchema,
   updateResourceUsageExportScheduleResponseSchema,
   type CreateResourceUsageExportBody,
 } from "./resource-usage-exports.dto";
@@ -31,6 +29,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "resource-usage";
 
@@ -161,9 +163,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: resourceUsageExportRunDetailResponseSchema,
     retry: retryResourceUsageExportResponseSchema,
-    updateScheduleBody: updateResourceUsageExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateResourceUsageExportScheduleResponseSchema,
-    deleteSchedule: deleteResourceUsageExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

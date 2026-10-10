@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
-import { REPORT_FORMATS } from "./reports.contract";
+import {
+  REPORT_EXPORT_CADENCE,
+  REPORT_EXPORT_FORMATS,
+  exportDatasetFields,
+  exportRunFileFields,
+  exportRunScopeFields,
+  exportRunStateFields,
+  exportScheduleDeliveryField,
+  exportScheduleTimingFields,
+  reportExportResponseSchemas,
+} from "./report-exports.dto";
 
 export const POLL_EXPORT_DATASETS = [
   "poll_summary",
@@ -9,9 +19,7 @@ export const POLL_EXPORT_DATASETS = [
   "non_respondents",
 ] as const;
 
-export const POLL_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const POLL_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
-export const POLL_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
 export const POLL_EXPORT_GROUPING = ["none", "poll", "live_session", "option"] as const;
 
 export const POLL_SUMMARY_EXPORT_COLUMNS = [
@@ -53,25 +61,11 @@ export const pollExportColumnKeySchema = z.string().min(1).max(64);
 
 export const pollExportHistoryItemSchema = z
   .object({
-    id: z.uuid(),
-    fileName: z.string(),
-    format: z.enum(REPORT_FORMATS),
-    dataset: z.enum(POLL_EXPORT_DATASETS),
-    datasetLabel: z.string(),
-    scopeLabel: z.string(),
-    rowCount: z.number().int().nullable(),
-    sizeLabel: z.string().nullable(),
+    ...exportRunFileFields,
+    ...exportDatasetFields(POLL_EXPORT_DATASETS),
+    ...exportRunScopeFields,
     requestedByLabel: z.string(),
-    status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
-    expired: z.boolean(),
-    expiresAt: z.iso.datetime().nullable(),
-    createdAt: z.iso.datetime(),
-    completedAt: z.iso.datetime().nullable(),
-    errorCode: z.string().nullable(),
-    errorMessage: z.string().nullable(),
-    errorTrace: z.array(z.string()).nullable(),
-    progressPercent: z.number().int().min(0).max(100).nullable(),
-    downloadAvailable: z.boolean(),
+    ...exportRunStateFields,
     columns: z.array(z.string()),
     anonymousExcludedCount: z.number().int().nonnegative().nullable(),
   })
@@ -82,16 +76,9 @@ export const pollExportScheduleItemSchema = z
     id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
-    cadenceLabel: z.string(),
-    cronExpression: z.string(),
-    timezone: z.string(),
-    formats: z.array(z.enum(REPORT_FORMATS)),
-    isActive: z.boolean(),
-    nextRunAt: z.iso.datetime(),
-    nextRunLabel: z.string(),
-    recipients: z.array(z.string()),
+    ...exportScheduleTimingFields,
     webhookLabel: z.string().nullable(),
-    delivery: z.record(z.string(), z.unknown()).nullable(),
+    ...exportScheduleDeliveryField,
   })
   .strict();
 
@@ -113,7 +100,7 @@ export const pollsExportsResponseSchema = z.object({
     respondentsColumns: z.array(pollExportColumnSchema),
     nonRespondentsColumns: z.array(pollExportColumnSchema),
     capabilities: z.object({
-      formats: z.array(z.enum(POLL_EXPORT_FORMATS)),
+      formats: z.array(z.enum(REPORT_EXPORT_FORMATS)),
       datasets: z.array(z.enum(POLL_EXPORT_DATASETS)),
       canSchedule: z.boolean(),
       canEmailDelivery: z.boolean(),
@@ -127,7 +114,7 @@ export const createPollExportBodySchema = rejectClientTenantFields
   .extend({
     dataset: z.enum(POLL_EXPORT_DATASETS).default("respondents"),
     columns: z.array(pollExportColumnKeySchema).min(1).max(30),
-    format: z.enum(POLL_EXPORT_FORMATS).default("csv"),
+    format: z.enum(REPORT_EXPORT_FORMATS).default("csv"),
     pollIds: z.array(z.uuid()).max(50).optional(),
     liveSessionId: z.uuid().optional(),
     allPollsInSession: z.boolean().default(false),
@@ -143,7 +130,7 @@ export const createPollExportBodySchema = rejectClientTenantFields
     webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
-    cadence: z.enum(POLL_EXPORT_CADENCE).optional(),
+    cadence: z.enum(REPORT_EXPORT_CADENCE).optional(),
     time: z
       .string()
       .regex(/^\d{2}:\d{2}$/)
@@ -154,47 +141,12 @@ export const createPollExportBodySchema = rejectClientTenantFields
 
 export type CreatePollExportBody = z.output<typeof createPollExportBodySchema>;
 
-export const createPollExportResponseSchema = z.object({
-  data: z.object({
-    run: pollExportHistoryItemSchema,
-    schedule: pollExportScheduleItemSchema.nullable(),
-  }),
-});
+const exportResponses = reportExportResponseSchemas(
+  pollExportHistoryItemSchema,
+  pollExportScheduleItemSchema,
+);
 
-export const pollExportRunParamsSchema = z
-  .object({
-    runId: z.uuid(),
-  })
-  .strict();
-
-export const pollExportRunDetailResponseSchema = z.object({
-  data: pollExportHistoryItemSchema,
-});
-
-export const retryPollExportResponseSchema = z.object({
-  data: pollExportHistoryItemSchema,
-});
-
-export const pollExportScheduleParamsSchema = z
-  .object({
-    scheduleId: z.uuid(),
-  })
-  .strict();
-
-export const updatePollExportScheduleBodySchema = rejectClientTenantFields
-  .extend({
-    isActive: z.boolean().optional(),
-    name: z.string().trim().max(120).optional(),
-  })
-  .strict();
-
-export const updatePollExportScheduleResponseSchema = z.object({
-  data: pollExportScheduleItemSchema,
-});
-
-export const deletePollExportScheduleResponseSchema = z.object({
-  data: z.object({
-    deleted: z.literal(true),
-    id: z.uuid(),
-  }),
-});
+export const createPollExportResponseSchema = exportResponses.create;
+export const pollExportRunDetailResponseSchema = exportResponses.runDetail;
+export const retryPollExportResponseSchema = exportResponses.retry;
+export const updatePollExportScheduleResponseSchema = exportResponses.updateSchedule;

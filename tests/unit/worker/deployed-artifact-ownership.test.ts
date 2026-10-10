@@ -17,8 +17,7 @@ vi.mock("@atlas/domain/reports/reports.worker", () => ({
   processReportGenerateStandalone: mocks.generate,
 }));
 import { scheduleCertificatePdfDrain } from "../../../backend/apps/api/src/server/certificates/certificate-pdf-drain";
-import { schedulePaymentExportProcessing } from "../../../backend/apps/api/src/server/reports/payments-exports-async";
-import { scheduleSalesMarketingExportProcessing } from "../../../backend/apps/api/src/server/reports/sales-marketing-exports-async";
+import { scheduleReportExportProcessing } from "../../../backend/apps/api/src/server/reports/report-exports-async";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -37,12 +36,46 @@ describe("deployed artifact worker ownership", () => {
       requestedAt: new Date().toISOString(),
     };
     scheduleCertificatePdfDrain(args);
-    schedulePaymentExportProcessing(args);
-    scheduleSalesMarketingExportProcessing(args);
+    scheduleReportExportProcessing("payments", args);
+    scheduleReportExportProcessing("sales-marketing", args);
     expect(mocks.after).not.toHaveBeenCalled();
     expect(mocks.certificates).not.toHaveBeenCalled();
     expect(mocks.generate).not.toHaveBeenCalled();
     expect(mocks.reports).not.toHaveBeenCalled();
+  });
+  it("generates a local export for the report it was scheduled for, then drains delivery", async () => {
+    vi.stubEnv("NODE_ENV", "test");
+    vi.stubEnv("APP_ENV", "test");
+    vi.stubEnv("RELEASE_ENV", "");
+    vi.stubEnv("VERCEL", "");
+    vi.stubEnv("VERCEL_ENV", "");
+    mocks.generate.mockResolvedValue(undefined);
+    mocks.reports.mockResolvedValue(undefined);
+    scheduleReportExportProcessing("sales-marketing", {
+      tenantId: "tenant",
+      requestId: "request",
+      actorMembershipId: "11111111-1111-4111-8111-111111111111",
+      reportRunId: "22222222-2222-4222-8222-222222222222",
+      format: "xlsx",
+      requestedAt: "2026-10-10T10:00:00.000Z",
+    });
+    const callback = mocks.after.mock.calls[0]?.[0] as () => Promise<unknown>;
+    await callback();
+    expect(mocks.generate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: "tenant",
+        event: expect.objectContaining({
+          id: "22222222-2222-4222-8222-222222222222",
+          payload: expect.objectContaining({
+            reportDefinitionKey: "sales-marketing",
+            format: "xlsx",
+          }) as unknown,
+        }) as unknown,
+      }),
+    );
+    expect(mocks.reports).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: "tenant", requestId: "request:delivery", limit: 10 }),
+    );
   });
   it("returns the local PDF drain promise to Next after", async () => {
     vi.stubEnv("NODE_ENV", "test");

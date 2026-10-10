@@ -7,11 +7,9 @@ import {
   BATCH_SUMMARY_EXPORT_COLUMNS,
   createBatchExportBodySchema,
   createBatchExportResponseSchema,
-  deleteBatchExportScheduleResponseSchema,
   batchExportRunDetailResponseSchema,
   batchesExportsResponseSchema,
   retryBatchExportResponseSchema,
-  updateBatchExportScheduleBodySchema,
   updateBatchExportScheduleResponseSchema,
   type CreateBatchExportBody,
 } from "./batches-exports.dto";
@@ -32,6 +30,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "batches";
 
@@ -146,9 +148,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: batchExportRunDetailResponseSchema,
     retry: retryBatchExportResponseSchema,
-    updateScheduleBody: updateBatchExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateBatchExportScheduleResponseSchema,
-    deleteSchedule: deleteBatchExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
-import { REPORT_FORMATS } from "./reports.contract";
+import {
+  REPORT_EXPORT_CADENCE,
+  REPORT_EXPORT_FORMATS,
+  exportDatasetFields,
+  exportRunFileFields,
+  exportRunScopeFields,
+  exportRunStateFields,
+  exportScheduleDeliveryField,
+  exportScheduleTimingFields,
+  reportExportResponseSchemas,
+} from "./report-exports.dto";
 
 export const SLI_EXPORT_DATASETS = [
   "session_metrics",
@@ -9,9 +19,7 @@ export const SLI_EXPORT_DATASETS = [
   "outlier_findings",
 ] as const;
 
-export const SLI_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const SLI_EXPORT_DELIVERY = ["download", "email_me", "send_recipients"] as const;
-export const SLI_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
 export const SLI_EXPORT_DATE_PRESETS = ["7d", "30d", "90d", "custom"] as const;
 export const SLI_EXPORT_SCOPE_MODES = ["date_range", "course", "batch", "sessions"] as const;
 export const SLI_EXPORT_SERIES_KINDS = ["course", "batch"] as const;
@@ -38,25 +46,11 @@ export const SLI_EXPORT_COLUMNS = [
 
 export const sliExportHistoryItemSchema = z
   .object({
-    id: z.uuid(),
-    fileName: z.string(),
-    format: z.enum(REPORT_FORMATS),
-    dataset: z.enum(SLI_EXPORT_DATASETS),
-    datasetLabel: z.string(),
-    scopeLabel: z.string(),
-    rowCount: z.number().int().nullable(),
-    sizeLabel: z.string().nullable(),
+    ...exportRunFileFields,
+    ...exportDatasetFields(SLI_EXPORT_DATASETS),
+    ...exportRunScopeFields,
     requestedByLabel: z.string(),
-    status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
-    expired: z.boolean(),
-    expiresAt: z.iso.datetime().nullable(),
-    createdAt: z.iso.datetime(),
-    completedAt: z.iso.datetime().nullable(),
-    errorCode: z.string().nullable(),
-    errorMessage: z.string().nullable(),
-    errorTrace: z.array(z.string()).nullable(),
-    progressPercent: z.number().int().min(0).max(100).nullable(),
-    downloadAvailable: z.boolean(),
+    ...exportRunStateFields,
   })
   .strict();
 
@@ -64,17 +58,9 @@ export const sliExportScheduleItemSchema = z
   .object({
     id: z.uuid(),
     name: z.string(),
-    dataset: z.enum(SLI_EXPORT_DATASETS),
-    datasetLabel: z.string(),
-    cadenceLabel: z.string(),
-    cronExpression: z.string(),
-    timezone: z.string(),
-    formats: z.array(z.enum(REPORT_FORMATS)),
-    isActive: z.boolean(),
-    nextRunAt: z.iso.datetime(),
-    nextRunLabel: z.string(),
-    recipients: z.array(z.string()),
-    delivery: z.record(z.string(), z.unknown()).nullable(),
+    ...exportDatasetFields(SLI_EXPORT_DATASETS),
+    ...exportScheduleTimingFields,
+    ...exportScheduleDeliveryField,
   })
   .strict();
 
@@ -83,7 +69,7 @@ export const superLiveInsightsExportsResponseSchema = z.object({
     history: z.array(sliExportHistoryItemSchema),
     schedules: z.array(sliExportScheduleItemSchema),
     capabilities: z.object({
-      formats: z.array(z.enum(SLI_EXPORT_FORMATS)),
+      formats: z.array(z.enum(REPORT_EXPORT_FORMATS)),
       datasets: z.array(z.enum(SLI_EXPORT_DATASETS)),
       columns: z.array(z.enum(SLI_EXPORT_COLUMNS)),
       canSchedule: z.boolean(),
@@ -100,7 +86,7 @@ export const superLiveInsightsExportsResponseSchema = z.object({
 export const createSuperLiveInsightsExportBodySchema = rejectClientTenantFields
   .extend({
     dataset: z.enum(SLI_EXPORT_DATASETS).default("session_metrics"),
-    format: z.enum(SLI_EXPORT_FORMATS).default("csv"),
+    format: z.enum(REPORT_EXPORT_FORMATS).default("csv"),
     scopeMode: z.enum(SLI_EXPORT_SCOPE_MODES).default("date_range"),
     datePreset: z.enum(SLI_EXPORT_DATE_PRESETS).default("30d"),
     startedFrom: z.iso.datetime().optional(),
@@ -118,7 +104,7 @@ export const createSuperLiveInsightsExportBodySchema = rejectClientTenantFields
     webhookUrl: z.url().max(500).optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
-    cadence: z.enum(SLI_EXPORT_CADENCE).optional(),
+    cadence: z.enum(REPORT_EXPORT_CADENCE).optional(),
     time: z
       .string()
       .regex(/^\d{2}:\d{2}$/)
@@ -131,53 +117,18 @@ export type CreateSuperLiveInsightsExportBody = z.output<
   typeof createSuperLiveInsightsExportBodySchema
 >;
 
-export const createSuperLiveInsightsExportResponseSchema = z.object({
-  data: z.object({
-    run: sliExportHistoryItemSchema,
-    schedule: sliExportScheduleItemSchema.nullable(),
-  }),
-});
+const exportResponses = reportExportResponseSchemas(
+  sliExportHistoryItemSchema,
+  sliExportScheduleItemSchema,
+);
 
-export const superLiveInsightsExportRunParamsSchema = z
-  .object({
-    runId: z.uuid(),
-  })
-  .strict();
-
-export const superLiveInsightsExportRunDetailResponseSchema = z.object({
-  data: sliExportHistoryItemSchema,
-});
-
-export const retrySuperLiveInsightsExportResponseSchema = z.object({
-  data: sliExportHistoryItemSchema,
-});
+export const createSuperLiveInsightsExportResponseSchema = exportResponses.create;
+export const superLiveInsightsExportRunDetailResponseSchema = exportResponses.runDetail;
+export const retrySuperLiveInsightsExportResponseSchema = exportResponses.retry;
+export const updateSuperLiveInsightsExportScheduleResponseSchema = exportResponses.updateSchedule;
 
 export const retrySuperLiveInsightsExportBodySchema = rejectClientTenantFields
   .extend({
-    format: z.enum(SLI_EXPORT_FORMATS).optional(),
+    format: z.enum(REPORT_EXPORT_FORMATS).optional(),
   })
   .strict();
-
-export const superLiveInsightsExportScheduleParamsSchema = z
-  .object({
-    scheduleId: z.uuid(),
-  })
-  .strict();
-
-export const updateSuperLiveInsightsExportScheduleBodySchema = rejectClientTenantFields
-  .extend({
-    isActive: z.boolean().optional(),
-    name: z.string().trim().max(120).optional(),
-  })
-  .strict();
-
-export const updateSuperLiveInsightsExportScheduleResponseSchema = z.object({
-  data: sliExportScheduleItemSchema,
-});
-
-export const deleteSuperLiveInsightsExportScheduleResponseSchema = z.object({
-  data: z.object({
-    deleted: z.literal(true),
-    id: z.uuid(),
-  }),
-});

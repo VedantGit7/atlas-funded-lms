@@ -4,8 +4,8 @@ import {
   BATCH_SUMMARY_EXPORT_COLUMNS,
   createBatchExportBodySchema,
   batchesExportsResponseSchema,
-  updateBatchExportScheduleBodySchema,
 } from "@atlas/domain/reports/batches-exports.dto";
+import { updateReportExportScheduleBodySchema } from "@atlas/domain/reports/report-exports.dto";
 
 describe("batches exports dto", () => {
   it("exposes summary and learner column catalogs with email PII", () => {
@@ -107,7 +107,7 @@ describe("batches exports dto", () => {
   });
 
   it("parses schedule update body", () => {
-    const parsed = updateBatchExportScheduleBodySchema.parse({ isActive: false });
+    const parsed = updateReportExportScheduleBodySchema.parse({ isActive: false });
     expect(parsed.isActive).toBe(false);
   });
 });

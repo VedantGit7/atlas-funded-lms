@@ -9,9 +9,7 @@ import {
   createCustomFieldExportResponseSchema,
   customFieldExportRunDetailResponseSchema,
   customFieldExportsResponseSchema,
-  deleteCustomFieldExportScheduleResponseSchema,
   retryCustomFieldExportResponseSchema,
-  updateCustomFieldExportScheduleBodySchema,
   updateCustomFieldExportScheduleResponseSchema,
   type CreateCustomFieldExportBody,
 } from "./custom-field-exports.dto";
@@ -31,6 +29,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "custom-field";
 
@@ -138,9 +140,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: customFieldExportRunDetailResponseSchema,
     retry: retryCustomFieldExportResponseSchema,
-    updateScheduleBody: updateCustomFieldExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateCustomFieldExportScheduleResponseSchema,
-    deleteSchedule: deleteCustomFieldExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

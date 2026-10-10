@@ -2,26 +2,28 @@ import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
 import {
   createResourceUsageExportResponseSchema,
-  deleteResourceUsageExportScheduleResponseSchema,
-  resourceUsageExportScheduleParamsSchema,
-  updateResourceUsageExportScheduleBodySchema,
   updateResourceUsageExportScheduleResponseSchema,
 } from "@atlas/domain/reports/resource-usage-exports.dto";
-import { mutateResourceUsageExportScheduleMetadata } from "@atlas/domain/reports/resource-usage-exports.route-metadata";
 import {
   deleteResourceUsageExportSchedule,
   runResourceUsageExportScheduleNow,
   updateResourceUsageExportSchedule,
 } from "@atlas/domain/reports/resource-usage-exports.service";
+import {
+  deleteReportExportScheduleResponseSchema,
+  reportExportScheduleParamsSchema,
+  updateReportExportScheduleBodySchema,
+} from "@atlas/domain/reports/report-exports.dto";
+import { mutateReportExportScheduleMetadata } from "@atlas/domain/reports/report-exports.route-metadata";
 
 export const PATCH = createTenantRoute<
-  z.output<typeof updateResourceUsageExportScheduleBodySchema>,
+  z.output<typeof updateReportExportScheduleBodySchema>,
   z.output<typeof updateResourceUsageExportScheduleResponseSchema>,
-  typeof resourceUsageExportScheduleParamsSchema
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateResourceUsageExportScheduleMetadata,
-  params: resourceUsageExportScheduleParamsSchema,
-  body: updateResourceUsageExportScheduleBodySchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  body: updateReportExportScheduleBodySchema,
   output: updateResourceUsageExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateResourceUsageExportSchedule(tx, ctx, params["scheduleId"], input),
@@ -29,13 +31,13 @@ export const PATCH = createTenantRoute<
 
 export const DELETE = createTenantRoute<
   Record<string, never>,
-  z.output<typeof deleteResourceUsageExportScheduleResponseSchema>,
-  typeof resourceUsageExportScheduleParamsSchema
+  z.output<typeof deleteReportExportScheduleResponseSchema>,
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateResourceUsageExportScheduleMetadata,
-  params: resourceUsageExportScheduleParamsSchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
   input: noBodySchema,
-  output: deleteResourceUsageExportScheduleResponseSchema,
+  output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
     deleteResourceUsageExportSchedule(tx, ctx, params["scheduleId"]),
 });
@@ -43,10 +45,10 @@ export const DELETE = createTenantRoute<
 export const POST = createTenantRoute<
   Record<string, never>,
   z.output<typeof createResourceUsageExportResponseSchema>,
-  typeof resourceUsageExportScheduleParamsSchema
+  typeof reportExportScheduleParamsSchema
 >({
-  metadata: mutateResourceUsageExportScheduleMetadata,
-  params: resourceUsageExportScheduleParamsSchema,
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
   input: noBodySchema,
   output: createResourceUsageExportResponseSchema,
   handler: async ({ tx, ctx, params }) =>

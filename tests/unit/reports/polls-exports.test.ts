@@ -4,8 +4,8 @@ import {
   POLL_SUMMARY_EXPORT_COLUMNS,
   createPollExportBodySchema,
   pollsExportsResponseSchema,
-  updatePollExportScheduleBodySchema,
 } from "@atlas/domain/reports/polls-exports.dto";
+import { updateReportExportScheduleBodySchema } from "@atlas/domain/reports/report-exports.dto";
 
 describe("polls exports dto", () => {
   it("marks email as sensitive on respondents columns", () => {
@@ -110,7 +110,7 @@ describe("polls exports dto", () => {
   });
 
   it("parses schedule patch body", () => {
-    const parsed = updatePollExportScheduleBodySchema.parse({ isActive: false });
+    const parsed = updateReportExportScheduleBodySchema.parse({ isActive: false });
     expect(parsed.isActive).toBe(false);
   });
 });

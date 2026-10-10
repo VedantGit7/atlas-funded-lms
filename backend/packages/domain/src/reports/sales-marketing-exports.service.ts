@@ -11,11 +11,9 @@ import {
   SM_SALES_EXPORT_COLUMNS,
   createSalesMarketingExportBodySchema,
   createSalesMarketingExportResponseSchema,
-  deleteSalesMarketingExportScheduleResponseSchema,
   retrySalesMarketingExportResponseSchema,
   salesMarketingExportsResponseSchema,
   smExportRunDetailResponseSchema,
-  updateSalesMarketingExportScheduleBodySchema,
   updateSalesMarketingExportScheduleResponseSchema,
   type CreateSalesMarketingExportBody,
 } from "./sales-marketing-exports.dto";
@@ -36,6 +34,10 @@ import {
   type ExportScheduleView,
   type ExportViewSpec,
 } from "./report-exports.kit";
+import {
+  deleteReportExportScheduleResponseSchema,
+  updateReportExportScheduleBodySchema,
+} from "./report-exports.dto";
 
 const DEFINITION_KEY = "sales-marketing";
 
@@ -159,9 +161,9 @@ const operations = createExportOperations({
   schemas: {
     runDetail: smExportRunDetailResponseSchema,
     retry: retrySalesMarketingExportResponseSchema,
-    updateScheduleBody: updateSalesMarketingExportScheduleBodySchema,
+    updateScheduleBody: updateReportExportScheduleBodySchema,
     updateSchedule: updateSalesMarketingExportScheduleResponseSchema,
-    deleteSchedule: deleteSalesMarketingExportScheduleResponseSchema,
+    deleteSchedule: deleteReportExportScheduleResponseSchema,
   },
 });
 

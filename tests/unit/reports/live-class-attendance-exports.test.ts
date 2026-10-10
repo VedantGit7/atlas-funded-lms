@@ -4,8 +4,8 @@ import {
   LCA_EXPORT_COLUMNS,
   LCA_EXPORT_DATASETS,
   liveClassAttendanceExportsResponseSchema,
-  updateLiveClassAttendanceExportScheduleBodySchema,
 } from "@atlas/domain/reports/live-class-attendance-exports.dto";
+import { updateReportExportScheduleBodySchema } from "@atlas/domain/reports/report-exports.dto";
 
 describe("live class attendance exports dto", () => {
   it("defaults create body to an attendees csv download for the last 30 days", () => {
@@ -41,7 +41,7 @@ describe("live class attendance exports dto", () => {
     ).toThrow();
     expect(() => createLiveClassAttendanceExportBodySchema.parse({ surprise: true })).toThrow();
     expect(() =>
-      updateLiveClassAttendanceExportScheduleBodySchema.parse({ cronExpression: "* * * * *" }),
+      updateReportExportScheduleBodySchema.parse({ cronExpression: "* * * * *" }),
     ).toThrow();
   });
 

@@ -1,6 +1,16 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
-import { REPORT_FORMATS } from "./reports.contract";
+import {
+  REPORT_EXPORT_CADENCE,
+  REPORT_EXPORT_FORMATS,
+  exportDatasetFields,
+  exportRunFileFields,
+  exportRunScopeFields,
+  exportRunStateFields,
+  exportScheduleDeliveryField,
+  exportScheduleTimingFields,
+  reportExportResponseSchemas,
+} from "./report-exports.dto";
 
 export const SM_EXPORT_DATASETS = [
   "sales",
@@ -28,9 +38,7 @@ export const SM_EXPORT_DATASETS = [
  */
 export const SM_ATTRIBUTION_PRESENCE = ["any", "attributed", "none"] as const;
 
-export const SM_EXPORT_FORMATS = ["csv", "xlsx", "json"] as const;
 export const SM_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
-export const SM_EXPORT_CADENCE = ["daily", "weekly", "monthly"] as const;
 export const SM_EXPORT_GROUPING = ["none", "product", "month", "currency"] as const;
 
 export const SM_SALES_EXPORT_COLUMNS = [
@@ -127,25 +135,11 @@ export const smExportColumnKeySchema = z.string().min(1).max(64);
 
 export const smExportHistoryItemSchema = z
   .object({
-    id: z.uuid(),
-    fileName: z.string(),
-    format: z.enum(REPORT_FORMATS),
-    dataset: z.enum(SM_EXPORT_DATASETS),
-    datasetLabel: z.string(),
-    scopeLabel: z.string(),
-    rowCount: z.number().int().nullable(),
-    sizeLabel: z.string().nullable(),
+    ...exportRunFileFields,
+    ...exportDatasetFields(SM_EXPORT_DATASETS),
+    ...exportRunScopeFields,
     requestedByLabel: z.string(),
-    status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
-    expired: z.boolean(),
-    expiresAt: z.iso.datetime().nullable(),
-    createdAt: z.iso.datetime(),
-    completedAt: z.iso.datetime().nullable(),
-    errorCode: z.string().nullable(),
-    errorMessage: z.string().nullable(),
-    errorTrace: z.array(z.string()).nullable(),
-    progressPercent: z.number().int().min(0).max(100).nullable(),
-    downloadAvailable: z.boolean(),
+    ...exportRunStateFields,
     columns: z.array(z.string()),
   })
   .strict();
@@ -155,16 +149,9 @@ export const smExportScheduleItemSchema = z
     id: z.uuid(),
     name: z.string(),
     datasetLabel: z.string(),
-    cadenceLabel: z.string(),
-    cronExpression: z.string(),
-    timezone: z.string(),
-    formats: z.array(z.enum(REPORT_FORMATS)),
-    isActive: z.boolean(),
-    nextRunAt: z.iso.datetime(),
-    nextRunLabel: z.string(),
-    recipients: z.array(z.string()),
+    ...exportScheduleTimingFields,
     webhookLabel: z.string().nullable(),
-    delivery: z.record(z.string(), z.unknown()).nullable(),
+    ...exportScheduleDeliveryField,
   })
   .strict();
 
@@ -190,7 +177,7 @@ export const salesMarketingExportsResponseSchema = z.object({
       attribution: z.array(smExportColumnSchema),
     }),
     capabilities: z.object({
-      formats: z.array(z.enum(SM_EXPORT_FORMATS)),
+      formats: z.array(z.enum(REPORT_EXPORT_FORMATS)),
       datasets: z.array(z.enum(SM_EXPORT_DATASETS)),
       canSchedule: z.boolean(),
       canEmailDelivery: z.boolean(),
@@ -204,7 +191,7 @@ export const createSalesMarketingExportBodySchema = rejectClientTenantFields
   .extend({
     dataset: z.enum(SM_EXPORT_DATASETS).default("sales"),
     columns: z.array(smExportColumnKeySchema).min(1).max(30),
-    format: z.enum(SM_EXPORT_FORMATS).default("csv"),
+    format: z.enum(REPORT_EXPORT_FORMATS).default("csv"),
     courseId: z.uuid().optional(),
     couponId: z.uuid().optional(),
     purchasedFrom: z.iso.datetime().optional(),
@@ -222,7 +209,7 @@ export const createSalesMarketingExportBodySchema = rejectClientTenantFields
     webhookUrl: z.url().max(500).nullable().optional(),
     scheduleEnabled: z.boolean().default(false),
     scheduleName: z.string().trim().max(120).optional(),
-    cadence: z.enum(SM_EXPORT_CADENCE).optional(),
+    cadence: z.enum(REPORT_EXPORT_CADENCE).optional(),
     time: z
       .string()
       .regex(/^\d{2}:\d{2}$/)
@@ -233,47 +220,12 @@ export const createSalesMarketingExportBodySchema = rejectClientTenantFields
 
 export type CreateSalesMarketingExportBody = z.output<typeof createSalesMarketingExportBodySchema>;
 
-export const createSalesMarketingExportResponseSchema = z.object({
-  data: z.object({
-    run: smExportHistoryItemSchema,
-    schedule: smExportScheduleItemSchema.nullable(),
-  }),
-});
+const exportResponses = reportExportResponseSchemas(
+  smExportHistoryItemSchema,
+  smExportScheduleItemSchema,
+);
 
-export const smExportRunParamsSchema = z
-  .object({
-    runId: z.uuid(),
-  })
-  .strict();
-
-export const smExportRunDetailResponseSchema = z.object({
-  data: smExportHistoryItemSchema,
-});
-
-export const retrySalesMarketingExportResponseSchema = z.object({
-  data: smExportHistoryItemSchema,
-});
-
-export const smExportScheduleParamsSchema = z
-  .object({
-    scheduleId: z.uuid(),
-  })
-  .strict();
-
-export const updateSalesMarketingExportScheduleBodySchema = rejectClientTenantFields
-  .extend({
-    isActive: z.boolean().optional(),
-    name: z.string().trim().max(120).optional(),
-  })
-  .strict();
-
-export const updateSalesMarketingExportScheduleResponseSchema = z.object({
-  data: smExportScheduleItemSchema,
-});
-
-export const deleteSalesMarketingExportScheduleResponseSchema = z.object({
-  data: z.object({
-    deleted: z.literal(true),
-    id: z.uuid(),
-  }),
-});
+export const createSalesMarketingExportResponseSchema = exportResponses.create;
+export const smExportRunDetailResponseSchema = exportResponses.runDetail;
+export const retrySalesMarketingExportResponseSchema = exportResponses.retry;
+export const updateSalesMarketingExportScheduleResponseSchema = exportResponses.updateSchedule;
