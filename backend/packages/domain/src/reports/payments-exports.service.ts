@@ -147,7 +147,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun,
   describeSchedule,
-  retryProcessInline: false,
+  rerunProcessInline: false,
   schemas: {
     runDetail: paymentExportRunDetailResponseSchema,
     retry: retryPaymentExportResponseSchema,
@@ -295,3 +295,7 @@ export const getPaymentExportRun = operations.getRun;
 export const retryPaymentExport = operations.retry;
 export const updatePaymentExportSchedule = operations.updateSchedule;
 export const deletePaymentExportSchedule = operations.deleteSchedule;
+
+export function runPaymentExportScheduleNow(tx: TenantTx, ctx: ServiceCtx, scheduleId: string) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createPaymentExportResponseSchema);
+}

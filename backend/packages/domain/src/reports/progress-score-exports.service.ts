@@ -137,7 +137,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: true,
+  rerunProcessInline: true,
   schemas: {
     runDetail: progressScoreExportRunDetailResponseSchema,
     retry: retryProgressScoreExportResponseSchema,
@@ -321,3 +321,11 @@ export const getProgressScoreExportRun = operations.getRun;
 export const retryProgressScoreExport = operations.retry;
 export const updateProgressScoreExportSchedule = operations.updateSchedule;
 export const deleteProgressScoreExportSchedule = operations.deleteSchedule;
+
+export function runProgressScoreExportScheduleNow(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  scheduleId: string,
+) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createProgressScoreExportResponseSchema);
+}

@@ -144,7 +144,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: true,
+  rerunProcessInline: true,
   schemas: {
     runDetail: batchExportRunDetailResponseSchema,
     retry: retryBatchExportResponseSchema,
@@ -350,3 +350,7 @@ export const getBatchExportRun = operations.getRun;
 export const retryBatchExport = operations.retry;
 export const updateBatchExportSchedule = operations.updateSchedule;
 export const deleteBatchExportSchedule = operations.deleteSchedule;
+
+export function runBatchExportScheduleNow(tx: TenantTx, ctx: ServiceCtx, scheduleId: string) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createBatchExportResponseSchema);
+}

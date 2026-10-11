@@ -179,19 +179,21 @@ describe("report export views", () => {
 });
 
 describe("report export operations", () => {
-  const operations = createExportOperations({
-    definitionKey: "sample",
-    describeRun: (item, actor) => ({ id: item.id, format: item.format, actor }),
-    describeSchedule: (item) => ({ id: item.id }),
-    retryProcessInline: false,
-    schemas: {
-      runDetail: passThrough,
-      retry: passThrough,
-      updateScheduleBody: { parse: (value: unknown) => value as Record<string, unknown> },
-      updateSchedule: passThrough,
-      deleteSchedule: passThrough,
-    },
-  });
+  const operationsFor = (rerunProcessInline: boolean) =>
+    createExportOperations({
+      definitionKey: "sample",
+      describeRun: (item, actor) => ({ id: item.id, format: item.format, actor }),
+      describeSchedule: (item) => ({ id: item.id }),
+      rerunProcessInline,
+      schemas: {
+        runDetail: passThrough,
+        retry: passThrough,
+        updateScheduleBody: { parse: (value: unknown) => value as Record<string, unknown> },
+        updateSchedule: passThrough,
+        deleteSchedule: passThrough,
+      },
+    });
+  const operations = operationsFor(false);
 
   it("refuses another report's runs and schedules", async () => {
     reportsService.getReportRun.mockResolvedValue({ data: { ...run(), definitionKey: "other" } });
@@ -231,7 +233,7 @@ describe("report export operations", () => {
     );
   });
 
-  it("runs a schedule now, inline, recording which schedule triggered it", async () => {
+  it("runs a schedule now as it retries, recording which schedule triggered it", async () => {
     reportsService.listReportSchedules.mockResolvedValue({ data: { items: [schedule()] } });
     reportsService.createReportRun.mockResolvedValue({ data: run({ id: "now" }) });
     const result = await operations.runScheduleNow(tx, ctx, schedule().id, passThrough);
@@ -243,10 +245,17 @@ describe("report export operations", () => {
         format: "csv",
         params: { dataset: "orders", triggeredFromScheduleId: schedule().id },
       },
-      { processInline: true },
+      { processInline: false },
     );
     expect(result).toEqual({
       data: { run: { id: "now", format: "csv", actor: ACTOR }, schedule: { id: schedule().id } },
     });
+    await operationsFor(true).runScheduleNow(tx, ctx, schedule().id, passThrough);
+    expect(reportsService.createReportRun).toHaveBeenLastCalledWith(
+      tx,
+      ctx,
+      expect.objectContaining({ definitionKey: "sample" }),
+      { processInline: true },
+    );
   });
 });

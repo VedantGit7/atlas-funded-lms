@@ -158,7 +158,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: true,
+  rerunProcessInline: true,
   schemas: {
     runDetail: superLiveInsightsExportRunDetailResponseSchema,
     retry: retrySuperLiveInsightsExportResponseSchema,

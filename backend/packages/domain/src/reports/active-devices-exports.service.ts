@@ -2,6 +2,7 @@ import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "../shared/domain.types";
 import {
   DEVICE_EXPORT_COLUMNS,
+  type DEVICE_EXPORT_DATASETS,
   activeDevicesExportsResponseSchema,
   createActiveDevicesExportBodySchema,
   createActiveDevicesExportResponseSchema,
@@ -18,13 +19,13 @@ import {
   listReportSchedules,
 } from "./reports.service";
 import {
-  cadenceLabel,
   createExportOperations,
   cronFromCadence,
-  estimateSizeLabel,
-  nextRunLabel,
+  describeExportRun,
+  describeExportSchedule,
   type ExportRun,
   type ExportScheduleView,
+  type ExportViewSpec,
 } from "./report-exports.kit";
 import {
   deleteReportExportScheduleResponseSchema,
@@ -68,51 +69,36 @@ function errorMessageFor(code: string | null): string | null {
   return code.replace(/_/g, " ").toLowerCase();
 }
 
-/** Device exports have no datasets, so their history and schedule rows are their own. */
-function mapHistoryItem(run: ExportRun) {
-  return {
-    id: run.id,
-    fileName: fileNameFor(run.createdAt, run.format),
-    format: run.format as "csv" | "xlsx" | "pdf" | "json",
-    scopeLabel: scopeLabelFromParams(run.params),
-    rowCount: run.rowCount,
-    sizeLabel: estimateSizeLabel(run.rowCount, run.format),
-    status: run.status,
-    createdAt: run.createdAt,
-    completedAt: run.completedAt,
-    errorCode: run.errorCode,
-    errorMessage: errorMessageFor(run.errorCode),
-    downloadAvailable: run.status === "SUCCEEDED",
-  };
+type DeviceExportDataset = (typeof DEVICE_EXPORT_DATASETS)[number];
+
+const view: ExportViewSpec<DeviceExportDataset> = {
+  datasetParams: [],
+  normalizeDataset: () => "device_roster",
+  datasetLabel: () => "Device roster",
+  fileNameFor: (_dataset, createdAt, format) => fileNameFor(createdAt, format),
+  scopeLabel: scopeLabelFromParams,
+  errorMessageFor,
+  requestedBy: true,
+  columns: true,
+  defaultScheduleName: "Device export",
+  cadenceWording: "comma",
+  scheduleDataset: false,
+  webhookLabel: "SIEM Ingest",
+};
+
+function mapHistoryItem(run: ExportRun, actorMembershipId = "") {
+  return describeExportRun(view, run, actorMembershipId);
 }
 
-function mapScheduleItem(schedule: Omit<ExportScheduleView, "params">) {
-  const delivery = schedule.delivery ?? {};
-  const recipients = Array.isArray(delivery["emails"])
-    ? delivery["emails"].filter((item): item is string => typeof item === "string")
-    : [];
-  const webhookUrl = typeof delivery["webhookUrl"] === "string" ? delivery["webhookUrl"] : null;
-  return {
-    id: schedule.id,
-    name: schedule.name?.trim() || schedule.definitionTitle || "Device export",
-    cadenceLabel: cadenceLabel(schedule.cronExpression, schedule.timezone, "comma"),
-    cronExpression: schedule.cronExpression,
-    timezone: schedule.timezone,
-    formats: schedule.formats,
-    isActive: schedule.isActive,
-    nextRunAt: schedule.nextRunAt,
-    nextRunLabel: nextRunLabel(schedule.nextRunAt),
-    recipients,
-    webhookLabel: webhookUrl ? "SIEM Ingest" : null,
-    delivery: schedule.delivery,
-  };
+function mapScheduleItem(schedule: ExportScheduleView) {
+  return describeExportSchedule(view, schedule);
 }
 
 const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: true,
+  rerunProcessInline: true,
   schemas: {
     runDetail: deviceExportRunDetailResponseSchema,
     retry: retryActiveDevicesExportResponseSchema,
@@ -130,16 +116,25 @@ export async function getActiveDevicesExports(tx: TenantTx, ctx: ServiceCtx) {
   ]);
 
   const history = runs.data.items.map((run) =>
-    mapHistoryItem({
-      id: run.id,
-      format: run.format,
-      params: run.params,
-      rowCount: run.rowCount,
-      status: run.status,
-      createdAt: run.createdAt,
-      completedAt: run.completedAt,
-      errorCode: run.errorCode,
-    }),
+    mapHistoryItem(
+      {
+        id: run.id,
+        format: run.format,
+        params: run.params,
+        rowCount: run.rowCount,
+        status: run.status,
+        createdAt: run.createdAt,
+        completedAt: run.completedAt,
+        expiresAt: run.expiresAt,
+        errorCode: run.errorCode,
+        errorMessage: run.errorMessage,
+        errorTrace: run.errorTrace,
+        progressPercent: run.progressPercent,
+        requestedByMembershipId: run.requestedByMembershipId,
+        scheduleId: run.scheduleId,
+      },
+      ctx.actorMembershipId,
+    ),
   );
 
   const deviceSchedules = schedules.data.items
@@ -154,6 +149,7 @@ export async function getActiveDevicesExports(tx: TenantTx, ctx: ServiceCtx) {
         formats: item.formats,
         isActive: item.isActive,
         nextRunAt: item.nextRunAt,
+        params: item.params,
         delivery: item.delivery,
       }),
     );
@@ -227,22 +223,32 @@ export async function createActiveDevicesExport(
       formats: scheduleResult.data.formats,
       isActive: scheduleResult.data.isActive,
       nextRunAt: scheduleResult.data.nextRunAt,
+      params: scheduleResult.data.params,
       delivery: scheduleResult.data.delivery,
     });
   }
 
   return createActiveDevicesExportResponseSchema.parse({
     data: {
-      run: mapHistoryItem({
-        id: runResult.data.id,
-        format: runResult.data.format,
-        params: runResult.data.params,
-        rowCount: runResult.data.rowCount,
-        status: runResult.data.status,
-        createdAt: runResult.data.createdAt,
-        completedAt: runResult.data.completedAt,
-        errorCode: runResult.data.errorCode,
-      }),
+      run: mapHistoryItem(
+        {
+          id: runResult.data.id,
+          format: runResult.data.format,
+          params: runResult.data.params,
+          rowCount: runResult.data.rowCount,
+          status: runResult.data.status,
+          createdAt: runResult.data.createdAt,
+          completedAt: runResult.data.completedAt,
+          expiresAt: runResult.data.expiresAt,
+          errorCode: runResult.data.errorCode,
+          errorMessage: runResult.data.errorMessage,
+          errorTrace: runResult.data.errorTrace,
+          progressPercent: runResult.data.progressPercent,
+          requestedByMembershipId: runResult.data.requestedByMembershipId,
+          scheduleId: runResult.data.scheduleId,
+        },
+        ctx.actorMembershipId,
+      ),
       schedule,
     },
   });
@@ -252,3 +258,11 @@ export const getActiveDevicesExportRun = operations.getRun;
 export const retryActiveDevicesExport = operations.retry;
 export const updateActiveDevicesExportSchedule = operations.updateSchedule;
 export const deleteActiveDevicesExportSchedule = operations.deleteSchedule;
+
+export function runActiveDevicesExportScheduleNow(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  scheduleId: string,
+) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createActiveDevicesExportResponseSchema);
+}

@@ -1,8 +1,12 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import { updatePollExportScheduleResponseSchema } from "@atlas/domain/reports/polls-exports.dto";
+import {
+  createPollExportResponseSchema,
+  updatePollExportScheduleResponseSchema,
+} from "@atlas/domain/reports/polls-exports.dto";
 import {
   deletePollExportSchedule,
+  runPollExportScheduleNow,
   updatePollExportSchedule,
 } from "@atlas/domain/reports/polls-exports.service";
 import {
@@ -35,4 +39,16 @@ export const DELETE = createTenantRoute<
   input: noBodySchema,
   output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) => deletePollExportSchedule(tx, ctx, params["scheduleId"]),
+});
+
+export const POST = createTenantRoute<
+  Record<string, never>,
+  z.output<typeof createPollExportResponseSchema>,
+  typeof reportExportScheduleParamsSchema
+>({
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  input: noBodySchema,
+  output: createPollExportResponseSchema,
+  handler: async ({ tx, ctx, params }) => runPollExportScheduleNow(tx, ctx, params["scheduleId"]),
 });

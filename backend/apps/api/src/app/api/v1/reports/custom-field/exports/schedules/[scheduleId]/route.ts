@@ -1,8 +1,12 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import { updateCustomFieldExportScheduleResponseSchema } from "@atlas/domain/reports/custom-field-exports.dto";
+import {
+  createCustomFieldExportResponseSchema,
+  updateCustomFieldExportScheduleResponseSchema,
+} from "@atlas/domain/reports/custom-field-exports.dto";
 import {
   deleteCustomFieldExportSchedule,
+  runCustomFieldExportScheduleNow,
   updateCustomFieldExportSchedule,
 } from "@atlas/domain/reports/custom-field-exports.service";
 import {
@@ -36,4 +40,17 @@ export const DELETE = createTenantRoute<
   output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
     deleteCustomFieldExportSchedule(tx, ctx, params["scheduleId"]),
+});
+
+export const POST = createTenantRoute<
+  Record<string, never>,
+  z.output<typeof createCustomFieldExportResponseSchema>,
+  typeof reportExportScheduleParamsSchema
+>({
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  input: noBodySchema,
+  output: createCustomFieldExportResponseSchema,
+  handler: async ({ tx, ctx, params }) =>
+    runCustomFieldExportScheduleNow(tx, ctx, params["scheduleId"]),
 });

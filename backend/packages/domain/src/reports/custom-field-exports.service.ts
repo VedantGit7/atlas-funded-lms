@@ -136,7 +136,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: true,
+  rerunProcessInline: true,
   schemas: {
     runDetail: customFieldExportRunDetailResponseSchema,
     retry: retryCustomFieldExportResponseSchema,
@@ -348,3 +348,7 @@ export const getCustomFieldExportRun = operations.getRun;
 export const retryCustomFieldExport = operations.retry;
 export const updateCustomFieldExportSchedule = operations.updateSchedule;
 export const deleteCustomFieldExportSchedule = operations.deleteSchedule;
+
+export function runCustomFieldExportScheduleNow(tx: TenantTx, ctx: ServiceCtx, scheduleId: string) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createCustomFieldExportResponseSchema);
+}
