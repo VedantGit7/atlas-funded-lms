@@ -9,7 +9,7 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
 import {
-  createZoomExport,
+  zoomInsightsExportsApi,
   type CreateZoomExportBody,
   type ZoomExportCadence,
   type ZoomExportDataset,
@@ -20,6 +20,7 @@ import {
   type ZoomExportScheduleItem,
   type ZoomInsightsExportsPayload,
 } from "./admin-zoom-insights-exports-api";
+import { PolicyToggle } from "./report-exports-kit";
 
 const selectTriggerClassName =
   "h-11 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -50,40 +51,6 @@ const DATASET_OPTIONS: Array<{
     description: "Sync run audit trail for the Zoom connection.",
   },
 ];
-
-function PolicyToggle({
-  checked,
-  onChange,
-  disabled,
-  label,
-}: {
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  disabled?: boolean;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      disabled={disabled}
-      onClick={() => {
-        onChange(!checked);
-      }}
-      className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
-        checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-[var(--admin-surface)] shadow transition-transform ${
-          checked ? "translate-x-4" : "translate-x-0"
-        }`}
-      />
-    </button>
-  );
-}
 
 export function ZoomInsightsNewExportModal({
   open,
@@ -165,7 +132,7 @@ export function ZoomInsightsNewExportModal({
         if (startedFrom) body.startedFrom = new Date(`${startedFrom}T00:00:00.000Z`).toISOString();
         if (startedTo) body.startedTo = new Date(`${startedTo}T23:59:59.999Z`).toISOString();
       }
-      const response = await createZoomExport(body);
+      const response = await zoomInsightsExportsApi.create(body);
       onCreated(response.data.run, response.data.schedule);
       onClose();
     } catch (caught) {

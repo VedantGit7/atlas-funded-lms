@@ -149,7 +149,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: true,
+  rerunProcessInline: true,
   schemas: {
     runDetail: zoomExportRunDetailResponseSchema,
     retry: retryZoomExportResponseSchema,
@@ -347,3 +347,7 @@ export const getZoomExportRun = operations.getRun;
 export const retryZoomExport = operations.retry;
 export const updateZoomExportSchedule = operations.updateSchedule;
 export const deleteZoomExportSchedule = operations.deleteSchedule;
+
+export function runZoomExportScheduleNow(tx: TenantTx, ctx: ServiceCtx, scheduleId: string) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createZoomExportResponseSchema);
+}

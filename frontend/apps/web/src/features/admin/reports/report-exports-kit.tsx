@@ -294,12 +294,14 @@ export function ExportFailureDrawer({
                   </dd>
                 </div>
               ) : null}
-              <div>
-                <dt className="mb-1 text-[var(--admin-on-surface-variant)]">Columns</dt>
-                <dd className="font-mono text-[12px] leading-relaxed break-words text-[var(--admin-on-surface)]">
-                  {item.columns.length > 0 ? item.columns.join(", ") : "-"}
-                </dd>
-              </div>
+              {item.columns ? (
+                <div>
+                  <dt className="mb-1 text-[var(--admin-on-surface-variant)]">Columns</dt>
+                  <dd className="font-mono text-[12px] leading-relaxed break-words text-[var(--admin-on-surface)]">
+                    {item.columns.length > 0 ? item.columns.join(", ") : "-"}
+                  </dd>
+                </div>
+              ) : null}
             </dl>
           </div>
         </div>

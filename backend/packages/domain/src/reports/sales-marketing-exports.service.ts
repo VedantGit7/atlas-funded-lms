@@ -157,7 +157,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: false,
+  rerunProcessInline: false,
   schemas: {
     runDetail: smExportRunDetailResponseSchema,
     retry: retrySalesMarketingExportResponseSchema,
@@ -395,3 +395,11 @@ export const getSalesMarketingExportRun = operations.getRun;
 export const retrySalesMarketingExport = operations.retry;
 export const updateSalesMarketingExportSchedule = operations.updateSchedule;
 export const deleteSalesMarketingExportSchedule = operations.deleteSchedule;
+
+export function runSalesMarketingExportScheduleNow(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  scheduleId: string,
+) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createSalesMarketingExportResponseSchema);
+}

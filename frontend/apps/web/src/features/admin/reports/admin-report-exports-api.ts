@@ -44,7 +44,8 @@ export type ReportExportHistoryItem<TDataset extends string = string> = {
   errorTrace: string[] | null;
   progressPercent: number | null;
   downloadAvailable: boolean;
-  columns: string[];
+  /** Sent by the reports whose exports let you pick columns. */
+  columns?: string[];
 };
 
 export type ReportExportScheduleItem = {
@@ -59,7 +60,8 @@ export type ReportExportScheduleItem = {
   nextRunAt: string;
   nextRunLabel: string;
   recipients: string[];
-  webhookLabel: string | null;
+  /** Sent by the reports whose schedules can deliver to a webhook. */
+  webhookLabel?: string | null;
   delivery: Record<string, unknown> | null;
 };
 
@@ -72,17 +74,22 @@ export type ReportExportCapabilities<TDataset extends string = string> = {
   note: string;
 };
 
-/** The part of a report's exports payload the shared page reads. */
+/** The part of a report's exports payload the shared pages read. */
 export type ReportExportsLedger = {
   history: ReportExportHistoryItem[];
   schedules: ReportExportScheduleItem[];
-  capabilities: ReportExportCapabilities;
+  capabilities: { note: string };
 };
 
 export type ReportExportHistoryOf<TPayload extends ReportExportsLedger> =
   TPayload["history"][number];
 export type ReportExportScheduleOf<TPayload extends ReportExportsLedger> =
   TPayload["schedules"][number];
+
+/** A retry runs the export again, in this format when given. */
+export type RetryReportExportBody = {
+  format?: ReportExportFormat;
+};
 
 export type UpdateReportExportScheduleBody = {
   isActive?: boolean | undefined;
@@ -134,10 +141,13 @@ export function createReportExportsApi<TShape extends ReportExportsShape>(
 
     fetchRun: (runId: string) => clientApi.get<{ data: HistoryItem }>(paths.run(runId)),
 
-    retry: (runId: string) =>
-      clientApi.post<{ data: HistoryItem }>(paths.retry(runId), null, `${keyPrefix}-export-retry`, {
-        successMessage: "Export retry started.",
-      }),
+    retry: (runId: string, body?: RetryReportExportBody) =>
+      clientApi.post<{ data: HistoryItem }>(
+        paths.retry(runId),
+        body ?? null,
+        `${keyPrefix}-export-retry`,
+        { successMessage: "Export retry started." },
+      ),
 
     updateSchedule: (scheduleId: string, body: UpdateReportExportScheduleBody) =>
       clientApi.patch<{ data: ScheduleItem }>(
@@ -153,6 +163,14 @@ export function createReportExportsApi<TShape extends ReportExportsShape>(
         `${keyPrefix}-export-schedule-delete`,
         undefined,
         { successMessage: "Schedule deleted." },
+      ),
+
+    runScheduleNow: (scheduleId: string) =>
+      clientApi.post<{ data: { run: HistoryItem; schedule: ScheduleItem | null } }>(
+        paths.schedule(scheduleId),
+        null,
+        `${keyPrefix}-export-schedule-run-now`,
+        { successMessage: "Schedule run started." },
       ),
 
     download: async (run: HistoryItem) => {

@@ -1,13 +1,19 @@
 import { z } from "zod";
 import { rejectClientTenantFields } from "../shared/domain.dto";
-import { REPORT_FORMATS } from "./reports.contract";
 import {
   REPORT_EXPORT_CADENCE,
   REPORT_EXPORT_FORMATS,
+  exportDatasetFields,
+  exportRunFileFields,
+  exportRunScopeFields,
+  exportRunStateFields,
   exportScheduleDeliveryField,
   exportScheduleTimingFields,
   reportExportResponseSchemas,
 } from "./report-exports.dto";
+
+/** Device exports have one dataset, the device roster. */
+export const DEVICE_EXPORT_DATASETS = ["device_roster"] as const;
 
 export const DEVICE_EXPORT_WINDOWS = ["24h", "7d", "30d", "all"] as const;
 export const DEVICE_EXPORT_DELIVERY = ["download", "email_me", "recipients"] as const;
@@ -45,18 +51,12 @@ export const deviceExportColumnKeySchema = z.enum([
 
 export const deviceExportHistoryItemSchema = z
   .object({
-    id: z.uuid(),
-    fileName: z.string(),
-    format: z.enum(REPORT_FORMATS),
-    scopeLabel: z.string(),
-    rowCount: z.number().int().nullable(),
-    sizeLabel: z.string().nullable(),
-    status: z.enum(["QUEUED", "RUNNING", "SUCCEEDED", "FAILED", "CANCELLED"]),
-    createdAt: z.iso.datetime(),
-    completedAt: z.iso.datetime().nullable(),
-    errorCode: z.string().nullable(),
-    errorMessage: z.string().nullable(),
-    downloadAvailable: z.boolean(),
+    ...exportRunFileFields,
+    ...exportDatasetFields(DEVICE_EXPORT_DATASETS),
+    ...exportRunScopeFields,
+    requestedByLabel: z.string(),
+    ...exportRunStateFields,
+    columns: z.array(z.string()),
   })
   .strict();
 
@@ -64,6 +64,7 @@ export const deviceExportScheduleItemSchema = z
   .object({
     id: z.uuid(),
     name: z.string(),
+    datasetLabel: z.string(),
     ...exportScheduleTimingFields,
     webhookLabel: z.string().nullable(),
     ...exportScheduleDeliveryField,

@@ -326,10 +326,11 @@ export function createExportOperations<
   describeRun: (run: ExportRun, actorMembershipId: string) => unknown;
   describeSchedule: (schedule: ExportScheduleView) => unknown;
   /**
-   * Whether a retry generates the file within the request. Reports whose routes
-   * hand new runs to background processing after the response set this false.
+   * Whether a retry or a run-now generates the file within the request.
+   * Reports whose routes hand new runs to background processing after the
+   * response set this false.
    */
-  retryProcessInline: boolean;
+  rerunProcessInline: boolean;
   schemas: {
     runDetail: Parser<TRunDetail>;
     retry: Parser<TRetry>;
@@ -338,7 +339,7 @@ export function createExportOperations<
     deleteSchedule: Parser<TDelete>;
   };
 }) {
-  const { definitionKey, describeRun, describeSchedule, retryProcessInline, schemas } = config;
+  const { definitionKey, describeRun, describeSchedule, rerunProcessInline, schemas } = config;
 
   async function requireOwnRun(tx: TenantTx, ctx: ServiceCtx, runId: string) {
     const result = await getReportRun(tx, ctx, runId);
@@ -373,7 +374,7 @@ export function createExportOperations<
           format: options?.format ?? (existing.format === "pdf" ? "csv" : existing.format),
           params: existing.params,
         },
-        { processInline: retryProcessInline },
+        { processInline: rerunProcessInline },
       );
       return schemas.retry.parse({
         data: describeRun(runResult.data, ctx.actorMembershipId),
@@ -401,7 +402,7 @@ export function createExportOperations<
     },
 
     /**
-     * Runs a schedule's export now, processed inline, and returns the run with
+     * Runs a schedule's export now, processed as retries are, and returns the run with
      * the schedule. The run records which schedule triggered it.
      */
     runScheduleNow: async <TRunNow>(
@@ -420,7 +421,7 @@ export function createExportOperations<
           format,
           params: { ...existing.params, triggeredFromScheduleId: existing.id },
         },
-        { processInline: true },
+        { processInline: rerunProcessInline },
       );
       return response.parse({
         data: {

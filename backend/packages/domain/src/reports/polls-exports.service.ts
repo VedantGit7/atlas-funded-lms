@@ -146,7 +146,7 @@ const operations = createExportOperations({
   definitionKey: DEFINITION_KEY,
   describeRun: mapHistoryItem,
   describeSchedule: mapScheduleItem,
-  retryProcessInline: true,
+  rerunProcessInline: true,
   schemas: {
     runDetail: pollExportRunDetailResponseSchema,
     retry: retryPollExportResponseSchema,
@@ -361,3 +361,7 @@ export const getPollExportRun = operations.getRun;
 export const retryPollExport = operations.retry;
 export const updatePollExportSchedule = operations.updateSchedule;
 export const deletePollExportSchedule = operations.deleteSchedule;
+
+export function runPollExportScheduleNow(tx: TenantTx, ctx: ServiceCtx, scheduleId: string) {
+  return operations.runScheduleNow(tx, ctx, scheduleId, createPollExportResponseSchema);
+}

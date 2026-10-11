@@ -1,8 +1,12 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import { updateZoomExportScheduleResponseSchema } from "@atlas/domain/reports/zoom-insights-exports.dto";
+import {
+  createZoomExportResponseSchema,
+  updateZoomExportScheduleResponseSchema,
+} from "@atlas/domain/reports/zoom-insights-exports.dto";
 import {
   deleteZoomExportSchedule,
+  runZoomExportScheduleNow,
   updateZoomExportSchedule,
 } from "@atlas/domain/reports/zoom-insights-exports.service";
 import {
@@ -35,4 +39,16 @@ export const DELETE = createTenantRoute<
   input: noBodySchema,
   output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) => deleteZoomExportSchedule(tx, ctx, params["scheduleId"]),
+});
+
+export const POST = createTenantRoute<
+  Record<string, never>,
+  z.output<typeof createZoomExportResponseSchema>,
+  typeof reportExportScheduleParamsSchema
+>({
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  input: noBodySchema,
+  output: createZoomExportResponseSchema,
+  handler: async ({ tx, ctx, params }) => runZoomExportScheduleNow(tx, ctx, params["scheduleId"]),
 });

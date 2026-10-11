@@ -10,7 +10,7 @@ import {
   dropdownItemClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import {
-  createSuperLiveInsightsExport,
+  superLiveInsightsExportsApi,
   type CreateSliExportBody,
   type SliExportCadence,
   type SliExportColumn,
@@ -25,6 +25,7 @@ import {
   type SliExportSeriesKind,
   type SuperLiveInsightsExportsPayload,
 } from "./admin-super-live-insights-exports-api";
+import { PolicyToggle } from "./report-exports-kit";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -85,40 +86,6 @@ const ALL_SESSION_COLUMNS: SliExportColumn[] = [
 ];
 
 const DEFAULT_COLUMNS: SliExportColumn[] = [...ALL_SESSION_COLUMNS];
-
-function PolicyToggle({
-  checked,
-  onChange,
-  disabled,
-  label,
-}: {
-  checked: boolean;
-  onChange: (next: boolean) => void;
-  disabled?: boolean;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      disabled={disabled}
-      onClick={() => {
-        onChange(!checked);
-      }}
-      className={`relative h-5 w-9 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50 ${
-        checked ? "bg-[var(--admin-primary)]" : "bg-[var(--admin-outline)]"
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-[var(--admin-surface)] shadow transition-transform ${
-          checked ? "translate-x-4" : "translate-x-0"
-        }`}
-      />
-    </button>
-  );
-}
 
 function formatEstimate(value: number | null): string {
   if (value == null) return "Row count varies";
@@ -321,7 +288,7 @@ export function SuperLiveInsightsNewExportModal({
         if (startedTo) body.startedTo = new Date(startedTo).toISOString();
       }
 
-      const response = await createSuperLiveInsightsExport(body);
+      const response = await superLiveInsightsExportsApi.create(body);
       onCreated(response.data.run, response.data.schedule);
       onClose();
     } catch (caught) {

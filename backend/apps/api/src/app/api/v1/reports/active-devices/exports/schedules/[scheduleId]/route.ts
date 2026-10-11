@@ -1,8 +1,12 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import { updateDeviceExportScheduleResponseSchema } from "@atlas/domain/reports/active-devices-exports.dto";
+import {
+  createActiveDevicesExportResponseSchema,
+  updateDeviceExportScheduleResponseSchema,
+} from "@atlas/domain/reports/active-devices-exports.dto";
 import {
   deleteActiveDevicesExportSchedule,
+  runActiveDevicesExportScheduleNow,
   updateActiveDevicesExportSchedule,
 } from "@atlas/domain/reports/active-devices-exports.service";
 import {
@@ -36,4 +40,17 @@ export const DELETE = createTenantRoute<
   output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
     deleteActiveDevicesExportSchedule(tx, ctx, params["scheduleId"]),
+});
+
+export const POST = createTenantRoute<
+  Record<string, never>,
+  z.output<typeof createActiveDevicesExportResponseSchema>,
+  typeof reportExportScheduleParamsSchema
+>({
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  input: noBodySchema,
+  output: createActiveDevicesExportResponseSchema,
+  handler: async ({ tx, ctx, params }) =>
+    runActiveDevicesExportScheduleNow(tx, ctx, params["scheduleId"]),
 });

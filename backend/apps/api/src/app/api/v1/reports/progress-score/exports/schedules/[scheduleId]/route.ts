@@ -1,8 +1,12 @@
 import type { z } from "zod";
 import { createTenantRoute, noBodySchema } from "@atlas/api";
-import { updateProgressScoreExportScheduleResponseSchema } from "@atlas/domain/reports/progress-score-exports.dto";
+import {
+  createProgressScoreExportResponseSchema,
+  updateProgressScoreExportScheduleResponseSchema,
+} from "@atlas/domain/reports/progress-score-exports.dto";
 import {
   deleteProgressScoreExportSchedule,
+  runProgressScoreExportScheduleNow,
   updateProgressScoreExportSchedule,
 } from "@atlas/domain/reports/progress-score-exports.service";
 import {
@@ -36,4 +40,17 @@ export const DELETE = createTenantRoute<
   output: deleteReportExportScheduleResponseSchema,
   handler: async ({ tx, ctx, params }) =>
     deleteProgressScoreExportSchedule(tx, ctx, params["scheduleId"]),
+});
+
+export const POST = createTenantRoute<
+  Record<string, never>,
+  z.output<typeof createProgressScoreExportResponseSchema>,
+  typeof reportExportScheduleParamsSchema
+>({
+  metadata: mutateReportExportScheduleMetadata,
+  params: reportExportScheduleParamsSchema,
+  input: noBodySchema,
+  output: createProgressScoreExportResponseSchema,
+  handler: async ({ tx, ctx, params }) =>
+    runProgressScoreExportScheduleNow(tx, ctx, params["scheduleId"]),
 });
