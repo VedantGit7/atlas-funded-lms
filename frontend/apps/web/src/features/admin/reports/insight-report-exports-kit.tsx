@@ -12,6 +12,7 @@ import {
 } from "../../studio/courses/admin-form-dropdown-shared";
 import type { ReportExportHistoryItem } from "./admin-report-exports-api";
 import type { ExportHistoryColumn } from "./report-exports-kit";
+import { LocalCount, LocalDateTime, RelativeTime } from "./viewer-time";
 
 /*
  * The pieces of the insights look for exports pages (Live class attendance,
@@ -19,29 +20,18 @@ import type { ExportHistoryColumn } from "./report-exports-kit";
  * failure popover, the schedule menu, the ready toast and the history cells.
  */
 
-export function formatInsightRelative(value: string | null): string {
+/** Render it through RelativeTime, which picks `now` so a server-rendered page hydrates cleanly. */
+export function formatInsightRelative(value: string | null, now: number): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = now - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${mins}m ago`;
   const hours = Math.floor(mins / 60);
   if (hours < 48) return `${hours}h ago`;
   return `${Math.floor(hours / 24)}d ago`;
-}
-
-function formatAbsolute(value: string | null): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function insightStatusLabel(item: ReportExportHistoryItem): string {
@@ -130,7 +120,7 @@ export const INSIGHT_EXPORT_COLUMNS = {
     heading: "Rows",
     align: "right",
     className: "px-4 py-2 text-right font-mono text-[13px] text-[var(--admin-on-surface)]",
-    render: (item) => (item.rowCount == null ? "-" : item.rowCount.toLocaleString()),
+    render: (item) => (item.rowCount == null ? "-" : <LocalCount value={item.rowCount} />),
   },
   size: {
     heading: "Size",
@@ -144,10 +134,10 @@ export const INSIGHT_EXPORT_COLUMNS = {
     render: (item) => (
       <>
         <div className="text-sm text-[var(--admin-on-surface)]">
-          {formatInsightRelative(item.createdAt)}
+          <RelativeTime value={item.createdAt} format={formatInsightRelative} />
         </div>
         <div className="text-[12px] text-[var(--admin-on-surface-variant)]">
-          {formatAbsolute(item.createdAt)}
+          <LocalDateTime value={item.createdAt} />
         </div>
       </>
     ),

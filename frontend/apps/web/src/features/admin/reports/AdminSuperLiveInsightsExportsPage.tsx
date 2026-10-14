@@ -1,10 +1,14 @@
 "use client";
 
-import { superLiveInsightsExportsApi } from "./admin-super-live-insights-exports-api";
+import {
+  superLiveInsightsExportsApi,
+  type SuperLiveInsightsExportsPayload,
+} from "./admin-super-live-insights-exports-api";
 import { INSIGHT_EXPORT_COLUMNS } from "./insight-report-exports-kit";
 import { InsightReportExportsPage } from "./InsightReportExportsPage";
 import { SuperLiveInsightsModuleTabs } from "./SuperLiveInsightsModuleTabs";
 import { SuperLiveInsightsNewExportModal } from "./SuperLiveInsightsNewExportModal";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const COLUMNS = [
   INSIGHT_EXPORT_COLUMNS.file,
@@ -14,10 +18,16 @@ const COLUMNS = [
   INSIGHT_EXPORT_COLUMNS.created,
 ];
 
-export function AdminSuperLiveInsightsExportsPage() {
+export function AdminSuperLiveInsightsExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<SuperLiveInsightsExportsPayload> | null | undefined;
+}) {
   return (
     <InsightReportExportsPage
       api={superLiveInsightsExportsApi}
+      initialExports={initialExports}
       description="Download session metrics or schedule recurring delivery."
       tabs={<SuperLiveInsightsModuleTabs active="exports" />}
       columns={COLUMNS}

@@ -38,9 +38,13 @@ import {
 import { PolicyToggle } from "./report-exports-kit";
 import type { NewExportSlot } from "./ReportExportsPage";
 import { useReportExports } from "./use-report-exports";
+import { LocalCount, RenderedAtProvider } from "./viewer-time";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 export type InsightReportExportsPageProps<TPayload extends ReportExportsLedger> = {
   api: ReportExportsApi<TPayload>;
+  /** The exports the server loaded, if it could; the page loads them itself otherwise. */
+  initialExports?: ReportInitialData<TPayload> | null | undefined;
   /** "panel" sits inside another page's header, one heading level down. */
   layout?: "page" | "panel";
   /** Links before the current "Exports" crumb. */
@@ -72,8 +76,20 @@ const TOAST_DISMISS_MS = 8000;
  * a build line under running rows, schedule cards with a Run now menu, and a
  * ready toast that hides itself.
  */
-export function InsightReportExportsPage<TPayload extends ReportExportsLedger>({
+export function InsightReportExportsPage<TPayload extends ReportExportsLedger>(
+  props: InsightReportExportsPageProps<TPayload>,
+) {
+  // Relative times on a server-rendered page count from when the server rendered it.
+  return (
+    <RenderedAtProvider renderedAt={props.initialExports?.loadedAt ?? null}>
+      <InsightReportExportsPageBody {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function InsightReportExportsPageBody<TPayload extends ReportExportsLedger>({
   api,
+  initialExports,
   layout = "page",
   breadcrumbs,
   description,
@@ -90,7 +106,7 @@ export function InsightReportExportsPage<TPayload extends ReportExportsLedger>({
   type HistoryItem = ReportExportHistoryOf<TPayload>;
   type ScheduleItem = ReportExportScheduleOf<TPayload>;
 
-  const exports = useReportExports(api, { toastDismissMs: TOAST_DISMISS_MS });
+  const exports = useReportExports(api, { toastDismissMs: TOAST_DISMISS_MS, initialExports });
   const { payload, busyId } = exports;
   const [newExportOpen, setNewExportOpen] = useState(false);
   const [schedulePreset, setSchedulePreset] = useState(false);
@@ -371,7 +387,7 @@ export function InsightReportExportsPage<TPayload extends ReportExportsLedger>({
             {pageSize && totalPages > 1 ? (
               <div className="flex items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2">
                 <span className="text-[12px] text-[var(--admin-on-surface-variant)]">
-                  {history.length.toLocaleString()} exports
+                  <LocalCount value={history.length} /> exports
                 </span>
                 <div className="flex items-center gap-2">
                   <button

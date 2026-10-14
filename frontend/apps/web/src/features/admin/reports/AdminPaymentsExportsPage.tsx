@@ -4,11 +4,13 @@ import {
   paymentExportsApi,
   type PaymentExportDataset,
   type PaymentExportHistoryItem,
+  type PaymentExportsPayload,
 } from "./admin-payments-exports-api";
 import { PaymentsNewExportModal } from "./PaymentsNewExportModal";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { ReportExportsPage } from "./ReportExportsPage";
 import { standardExportColumns, type ExportDatasetTone } from "./report-exports-kit";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const DATASET_TONES: Record<PaymentExportDataset, ExportDatasetTone> = {
   transactions: "neutral",
@@ -24,10 +26,16 @@ const COLUMNS = standardExportColumns<PaymentExportHistoryItem>({
   expiredCaption: "Files expire after artifact TTL",
 });
 
-export function AdminPaymentsExportsPage() {
+export function AdminPaymentsExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<PaymentExportsPayload> | null | undefined;
+}) {
   return (
     <ReportExportsPage
       api={paymentExportsApi}
+      initialExports={initialExports}
       breadcrumbs={[
         { label: "Admin", href: "/admin" },
         { label: "Payments", href: "/admin/reports/payments" },

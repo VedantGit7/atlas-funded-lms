@@ -4,6 +4,7 @@ import {
   batchesExportsApi,
   type BatchExportDataset,
   type BatchExportHistoryItem,
+  type BatchesExportsPayload,
 } from "./admin-batches-exports-api";
 import { BatchesNewExportDrawer } from "./BatchesNewExportDrawer";
 import { BatchesReportTabs } from "./BatchesReportTabs";
@@ -13,6 +14,7 @@ import {
   standardExportColumns,
   type ExportDatasetTone,
 } from "./report-exports-kit";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const DATASET_TONES: Record<BatchExportDataset, ExportDatasetTone> = {
   batch_summary: "primary",
@@ -32,10 +34,16 @@ const COLUMNS = standardExportColumns<BatchExportHistoryItem>({
   ),
 });
 
-export function AdminBatchesExportsPage() {
+export function AdminBatchesExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<BatchesExportsPayload> | null | undefined;
+}) {
   return (
     <ReportExportsPage
       api={batchesExportsApi}
+      initialExports={initialExports}
       breadcrumbs={[{ label: "Batches", href: "/admin/reports/batches" }]}
       description="Download batch data or schedule recurring delivery."
       tabs={<BatchesReportTabs active="exports" />}

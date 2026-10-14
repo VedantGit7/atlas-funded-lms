@@ -4,6 +4,7 @@ import {
   salesMarketingExportsApi,
   type SmExportDataset,
   type SmExportHistoryItem,
+  type SalesMarketingExportsPayload,
 } from "./admin-sales-marketing-exports-api";
 import { ReportExportsPage } from "./ReportExportsPage";
 import { SalesMarketingNewExportModal } from "./SalesMarketingNewExportModal";
@@ -11,12 +12,14 @@ import {
   ExportBuildProgress,
   ExportDatasetChip,
   ExportFileName,
-  exportRowCount,
+  ExportRowCount,
   exportRowState,
   formatExportRelative,
   type ExportDatasetTone,
   type ExportHistoryColumn,
 } from "./report-exports-kit";
+import { RelativeTime } from "./viewer-time";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const DATASET_TONES: Record<SmExportDataset, ExportDatasetTone> = {
   sales: "primary",
@@ -54,7 +57,7 @@ const COLUMNS: Array<ExportHistoryColumn<SmExportHistoryItem>> = [
     render: (item) => (
       <>
         <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
-          {exportRowCount(item)}
+          <ExportRowCount item={item} />
         </div>
         {item.sizeLabel ? (
           <div className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -70,7 +73,7 @@ const COLUMNS: Array<ExportHistoryColumn<SmExportHistoryItem>> = [
     render: (item) => (
       <>
         <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
-          {formatExportRelative(item.createdAt)}
+          <RelativeTime value={item.createdAt} format={formatExportRelative} />
         </div>
         <div className="font-mono text-[13px] text-[var(--admin-on-surface-variant)]">
           {item.requestedByLabel || "-"}
@@ -86,10 +89,16 @@ const COLUMNS: Array<ExportHistoryColumn<SmExportHistoryItem>> = [
 ];
 
 /** The Exports tab of the Sales & Marketing report, under that page's header and tabs. */
-export function AdminSalesMarketingExportsPanel() {
+export function AdminSalesMarketingExportsPanel({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<SalesMarketingExportsPayload> | null | undefined;
+}) {
   return (
     <ReportExportsPage
       api={salesMarketingExportsApi}
+      initialExports={initialExports}
       layout="panel"
       description="Download sales & marketing data or schedule recurring delivery."
       columns={COLUMNS}

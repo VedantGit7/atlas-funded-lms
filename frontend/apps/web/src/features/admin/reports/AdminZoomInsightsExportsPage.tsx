@@ -6,12 +6,15 @@ import { ClientApiError } from "../../../lib/client-api";
 import {
   zoomInsightsExportsApi,
   type ZoomExportsConnectionMeta,
+  type ZoomInsightsExportsPayload,
 } from "./admin-zoom-insights-exports-api";
 import { syncZoomConnectionNow } from "./admin-zoom-insights-roster-api";
 import { INSIGHT_EXPORT_COLUMNS, formatInsightRelative } from "./insight-report-exports-kit";
+import { RelativeTime } from "./viewer-time";
 import { InsightReportExportsPage } from "./InsightReportExportsPage";
 import { ZoomInsightsNewExportModal } from "./ZoomInsightsNewExportModal";
 import { ZoomInsightsReportTabs } from "./ZoomInsightsReportTabs";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const COLUMNS = [
   INSIGHT_EXPORT_COLUMNS.file,
@@ -59,7 +62,10 @@ function ZoomConnectionBanner({
           {connected ? "Zoom connected" : "Zoom disconnected"}
         </span>
         <span aria-hidden="true">·</span>
-        <span>last synced {formatInsightRelative(connection.lastSyncedAt)}</span>
+        <span>
+          last synced{" "}
+          <RelativeTime value={connection.lastSyncedAt} format={formatInsightRelative} />
+        </span>
         <span aria-hidden="true">·</span>
         <span>
           {connection.meetingsImportedToday} meeting
@@ -79,10 +85,16 @@ function ZoomConnectionBanner({
   );
 }
 
-export function AdminZoomInsightsExportsPage() {
+export function AdminZoomInsightsExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<ZoomInsightsExportsPayload> | null | undefined;
+}) {
   return (
     <InsightReportExportsPage
       api={zoomInsightsExportsApi}
+      initialExports={initialExports}
       breadcrumbs={[{ label: "Zoom Insights", href: "/admin/reports/zoom-insights" }]}
       description="Download Zoom meeting and participant data, or schedule recurring delivery."
       tabs={<ZoomInsightsReportTabs active="exports" />}

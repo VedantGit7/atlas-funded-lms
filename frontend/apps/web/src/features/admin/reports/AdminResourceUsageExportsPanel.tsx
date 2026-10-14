@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { resourceUsageExportsApi } from "./admin-resource-usage-exports-api";
+import {
+  resourceUsageExportsApi,
+  type ResourceUsageExportsPayload,
+} from "./admin-resource-usage-exports-api";
 import { INSIGHT_EXPORT_COLUMNS } from "./insight-report-exports-kit";
 import { InsightReportExportsPage } from "./InsightReportExportsPage";
 import { ResourceUsageNewExportModal } from "./ResourceUsageNewExportModal";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const MODULE_LINKS: Array<{ label: string; href: string; current?: boolean }> = [
   { label: "Overview", href: "/admin/reports/resource-usage" },
@@ -48,10 +52,16 @@ const COLUMNS = [
 ];
 
 /** The Exports tab of the Resource usage report, under that page's header. */
-export function AdminResourceUsageExportsPanel() {
+export function AdminResourceUsageExportsPanel({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<ResourceUsageExportsPayload> | null | undefined;
+}) {
   return (
     <InsightReportExportsPage
       api={resourceUsageExportsApi}
+      initialExports={initialExports}
       layout="panel"
       description="Download usage data or schedule recurring delivery."
       tabs={<ModuleLinks />}

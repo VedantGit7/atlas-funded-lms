@@ -4,6 +4,7 @@ import {
   pollsExportsApi,
   type PollExportDataset,
   type PollExportHistoryItem,
+  type PollsExportsPayload,
 } from "./admin-polls-exports-api";
 import { PollsNewExportModal } from "./PollsNewExportModal";
 import { PollsReportTabs } from "./PollsReportTabs";
@@ -13,11 +14,13 @@ import {
   ExportBuildProgress,
   ExportDatasetChip,
   ExportFileName,
-  exportRowCount,
+  ExportRowCount,
   formatExportRelative,
   type ExportDatasetTone,
   type ExportHistoryColumn,
 } from "./report-exports-kit";
+import { RelativeTime } from "./viewer-time";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const DATASET_TONES: Record<PollExportDataset, ExportDatasetTone> = {
   poll_summary: "primary",
@@ -42,7 +45,7 @@ const COLUMNS: Array<ExportHistoryColumn<PollExportHistoryItem>> = [
         <ExportFileName item={item} />
         <div className="mt-1 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
           {item.sizeLabel ? `${item.sizeLabel} · ` : ""}
-          {formatExportRelative(item.createdAt)}
+          <RelativeTime value={item.createdAt} format={formatExportRelative} />
         </div>
         <ExportBuildProgress item={item} />
       </>
@@ -70,7 +73,7 @@ const COLUMNS: Array<ExportHistoryColumn<PollExportHistoryItem>> = [
       return (
         <>
           <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
-            {exportRowCount(item)}
+            <ExportRowCount item={item} />
           </div>
           {excluded ? (
             <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -83,10 +86,16 @@ const COLUMNS: Array<ExportHistoryColumn<PollExportHistoryItem>> = [
   },
 ];
 
-export function AdminPollsExportsPage() {
+export function AdminPollsExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<PollsExportsPayload> | null | undefined;
+}) {
   return (
     <ReportExportsPage
       api={pollsExportsApi}
+      initialExports={initialExports}
       breadcrumbs={[{ label: "Polls", href: "/admin/reports/polls" }]}
       description="Download poll results or schedule recurring delivery."
       tabs={<PollsReportTabs active="exports" />}

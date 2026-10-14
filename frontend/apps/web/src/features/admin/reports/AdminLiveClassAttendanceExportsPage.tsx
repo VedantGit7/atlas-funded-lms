@@ -1,10 +1,14 @@
 "use client";
 
-import { liveClassAttendanceExportsApi } from "./admin-live-class-attendance-exports-api";
+import {
+  liveClassAttendanceExportsApi,
+  type LiveClassAttendanceExportsPayload,
+} from "./admin-live-class-attendance-exports-api";
 import { INSIGHT_EXPORT_COLUMNS } from "./insight-report-exports-kit";
 import { InsightReportExportsPage } from "./InsightReportExportsPage";
 import { LiveClassAttendanceNewExportModal } from "./LiveClassAttendanceNewExportModal";
 import { LiveClassAttendanceReportTabs } from "./LiveClassAttendanceReportTabs";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const COLUMNS = [
   INSIGHT_EXPORT_COLUMNS.file,
@@ -15,10 +19,16 @@ const COLUMNS = [
   INSIGHT_EXPORT_COLUMNS.created,
 ];
 
-export function AdminLiveClassAttendanceExportsPage() {
+export function AdminLiveClassAttendanceExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<LiveClassAttendanceExportsPayload> | null | undefined;
+}) {
   return (
     <InsightReportExportsPage
       api={liveClassAttendanceExportsApi}
+      initialExports={initialExports}
       breadcrumbs={[
         { label: "Live class attendance", href: "/admin/reports/live-class-attendance" },
       ]}
