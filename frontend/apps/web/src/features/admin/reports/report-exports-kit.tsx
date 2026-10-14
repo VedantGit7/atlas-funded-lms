@@ -7,6 +7,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import type { ReportExportHistoryItem } from "./admin-report-exports-api";
+import { LocalCount, RelativeTime } from "./viewer-time";
 
 /*
  * The pieces every report's exports page and new-export dialog are built
@@ -18,10 +19,12 @@ import type { ReportExportHistoryItem } from "./admin-report-exports-api";
 export const EXPORT_LINK_EXPIRY_NOTE =
   "Download links expire after the artifact TTL. Re-run an export or use a scheduled delivery to receive a fresh signed URL when files expire.";
 
-export function formatExportRelative(value: string): string {
+/** Render it through RelativeTime, which picks `now` so a server-rendered page hydrates cleanly. */
+export function formatExportRelative(value: string | null, now: number): string {
+  if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = now - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${mins}m ago`;
@@ -39,8 +42,8 @@ export function formatExportUtc(value: string): string {
     .replace(/\.\d{3}Z$/, "Z");
 }
 
-export function exportRowCount(item: ReportExportHistoryItem): string {
-  return item.rowCount == null ? "-" : item.rowCount.toLocaleString();
+export function ExportRowCount({ item }: { item: ReportExportHistoryItem }) {
+  return item.rowCount == null ? "-" : <LocalCount value={item.rowCount} />;
 }
 
 export type ExportRowState = {
@@ -426,12 +429,12 @@ export function standardExportColumns<TItem extends ReportExportHistoryItem>({
       render: (item) => (
         <>
           <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
-            {exportRowCount(item)} rows
+            <ExportRowCount item={item} /> rows
             {item.sizeLabel ? ` · ${item.sizeLabel}` : ""}
           </div>
           {details?.(item)}
           <div className="font-mono text-[13px] text-[var(--admin-on-surface)]">
-            {formatExportRelative(item.createdAt)}
+            <RelativeTime value={item.createdAt} format={formatExportRelative} />
           </div>
           <div className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
             {formatExportUtc(item.createdAt)}

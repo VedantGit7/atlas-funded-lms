@@ -28,6 +28,8 @@ import { AdminResourceUsageStoragePanel } from "./AdminResourceUsageStoragePanel
 import { AdminResourceUsageDormantPanel } from "./AdminResourceUsageDormantPanel";
 import { AdminResourceUsageInactivePanel } from "./AdminResourceUsageInactivePanel";
 import { AdminResourceUsageExportsPanel } from "./AdminResourceUsageExportsPanel";
+import type { ResourceUsageExportsPayload } from "./admin-resource-usage-exports-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 type Tab = "overview" | "history" | "storage" | "dormant" | "inactive" | "exports";
 
@@ -273,7 +275,12 @@ function StorageSparkline({ points }: { points: number[] }) {
   );
 }
 
-export function AdminResourceUsageRosterPage() {
+export function AdminResourceUsageRosterPage({
+  initialExports,
+}: {
+  /** The Exports tab's data, when the server loaded it for the exports route. */
+  initialExports?: ReportInitialData<ResourceUsageExportsPayload> | null | undefined;
+} = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const initialTab: Tab = pathname.endsWith("/resource-usage/history")
@@ -602,7 +609,9 @@ export function AdminResourceUsageRosterPage() {
       {tab === "storage" ? <AdminResourceUsageStoragePanel /> : null}
       {tab === "dormant" ? <AdminResourceUsageDormantPanel /> : null}
       {tab === "inactive" ? <AdminResourceUsageInactivePanel /> : null}
-      {tab === "exports" ? <AdminResourceUsageExportsPanel /> : null}
+      {tab === "exports" ? (
+        <AdminResourceUsageExportsPanel initialExports={initialExports} />
+      ) : null}
 
       {showOverviewChrome ? (
         overviewLoading && !overview ? (

@@ -36,6 +36,8 @@ import {
   type ExportHistoryColumn,
 } from "./report-exports-kit";
 import { useReportExports } from "./use-report-exports";
+import { RenderedAtProvider } from "./viewer-time";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 /** What a report's page hands its new-export dialog. */
 export type NewExportSlot<TPayload extends ReportExportsLedger> = {
@@ -52,6 +54,8 @@ export type NewExportSlot<TPayload extends ReportExportsLedger> = {
 
 export type ReportExportsPageProps<TPayload extends ReportExportsLedger> = {
   api: ReportExportsApi<TPayload>;
+  /** The exports the server loaded, if it could; the page loads them itself otherwise. */
+  initialExports?: ReportInitialData<TPayload> | null | undefined;
   /** "panel" sits inside another page's header and tabs, one heading level down. */
   layout?: "page" | "panel";
   /** Links before the current "Exports" crumb. */
@@ -126,8 +130,20 @@ function healthRailClassName(item: ReportExportHistoryOf<ReportExportsLedger>): 
   return null;
 }
 
-export function ReportExportsPage<TPayload extends ReportExportsLedger>({
+export function ReportExportsPage<TPayload extends ReportExportsLedger>(
+  props: ReportExportsPageProps<TPayload>,
+) {
+  // Relative times on a server-rendered page count from when the server rendered it.
+  return (
+    <RenderedAtProvider renderedAt={props.initialExports?.loadedAt ?? null}>
+      <ReportExportsPageBody {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ReportExportsPageBody<TPayload extends ReportExportsLedger>({
   api,
+  initialExports,
   layout = "page",
   breadcrumbs,
   description,
@@ -142,7 +158,7 @@ export function ReportExportsPage<TPayload extends ReportExportsLedger>({
 }: ReportExportsPageProps<TPayload>) {
   type HistoryItem = ReportExportHistoryOf<TPayload>;
 
-  const exports = useReportExports(api);
+  const exports = useReportExports(api, { initialExports });
   const { payload, busyId } = exports;
   const [newExportOpen, setNewExportOpen] = useState(false);
   const [schedulePreset, setSchedulePreset] = useState(false);

@@ -5,9 +5,11 @@ import { ActiveDevicesReportTabs } from "./ActiveDevicesReportTabs";
 import {
   activeDevicesExportsApi,
   type DeviceExportHistoryItem,
+  type DeviceExportsPayload,
 } from "./admin-active-devices-exports-api";
 import { ReportExportsPage } from "./ReportExportsPage";
 import { standardExportColumns } from "./report-exports-kit";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const COLUMNS = standardExportColumns<DeviceExportHistoryItem>({
   datasetTone: () => "neutral",
@@ -19,10 +21,16 @@ const COLUMNS = standardExportColumns<DeviceExportHistoryItem>({
   ),
 });
 
-export function AdminActiveDevicesExportsPage() {
+export function AdminActiveDevicesExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<DeviceExportsPayload> | null | undefined;
+}) {
   return (
     <ReportExportsPage
       api={activeDevicesExportsApi}
+      initialExports={initialExports}
       breadcrumbs={[
         { label: "Admin", href: "/admin" },
         { label: "Active Devices", href: "/admin/reports/active-devices" },

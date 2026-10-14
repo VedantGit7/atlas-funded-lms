@@ -4,6 +4,7 @@ import {
   customFieldExportsApi,
   type CustomFieldExportDataset,
   type CustomFieldExportHistoryItem,
+  type CustomFieldExportsPayload,
 } from "./admin-custom-field-exports-api";
 import { CustomFieldNewExportModal } from "./CustomFieldNewExportModal";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
@@ -13,6 +14,7 @@ import {
   standardExportColumns,
   type ExportDatasetTone,
 } from "./report-exports-kit";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 const DATASET_TONES: Record<CustomFieldExportDataset, ExportDatasetTone> = {
   learner_roster: "primary",
@@ -25,10 +27,16 @@ const COLUMNS = standardExportColumns<CustomFieldExportHistoryItem>({
   expiredCaption: "File expired",
 });
 
-export function AdminCustomFieldExportsPage() {
+export function AdminCustomFieldExportsPage({
+  initialExports,
+}: {
+  /** The exports the server loaded, if it could. */
+  initialExports?: ReportInitialData<CustomFieldExportsPayload> | null | undefined;
+}) {
   return (
     <ReportExportsPage
       api={customFieldExportsApi}
+      initialExports={initialExports}
       breadcrumbs={[
         { label: "Reports", href: "/admin/reports" },
         { label: "Custom Field", href: "/admin/reports/custom-field" },

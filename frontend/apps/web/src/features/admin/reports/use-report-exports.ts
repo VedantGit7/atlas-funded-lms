@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import type {
   ReportExportHistoryOf,
   ReportExportScheduleOf,
@@ -11,6 +12,8 @@ import type {
 } from "./admin-report-exports-api";
 
 const POLL_INTERVAL_MS = 2500;
+/** Server-loaded exports older than this are refreshed when the page mounts. */
+const SERVER_DATA_FRESH_MS = 10_000;
 
 function message(caught: unknown, fallback: string): string {
   return caught instanceof ClientApiError ? caught.message : fallback;
@@ -25,18 +28,25 @@ export function useReportExports<TPayload extends ReportExportsLedger>(
   options: {
     /** Hides the "file is ready" toast after this long; it stays until dismissed otherwise. */
     toastDismissMs?: number;
+    /** Exports the server already loaded; the first browser load is skipped when present. */
+    initialExports?: ReportInitialData<TPayload> | null | undefined;
   } = {},
 ) {
   type HistoryItem = ReportExportHistoryOf<TPayload>;
   type ScheduleItem = ReportExportScheduleOf<TPayload>;
   const { toastDismissMs } = options;
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialExports] = useState(() => options.initialExports ?? null);
+  const initialPayload = initialExports?.data ?? null;
+  const [loading, setLoading] = useState(initialPayload === null);
   const [error, setError] = useState<string | null>(null);
-  const [payload, setPayload] = useState<TPayload | null>(null);
+  const [payload, setPayload] = useState<TPayload | null>(initialPayload);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [toastRun, setToastRun] = useState<HistoryItem | null>(null);
-  const statusRef = useRef<Map<string, HistoryItem["status"]>>(new Map());
+  const statusRef = useRef<Map<string, HistoryItem["status"]>>(
+    new Map(initialPayload?.history.map((item) => [item.id, item.status])),
+  );
 
   const applyPayload = useCallback((next: TPayload) => {
     setPayload(next);
@@ -66,8 +76,13 @@ export function useReportExports<TPayload extends ReportExportsLedger>(
   );
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (initialExports === null) {
+      void load();
+    } else if (Math.abs(Date.now() - initialExports.loadedAt) > SERVER_DATA_FRESH_MS) {
+      // Back and forward reuse the server data from the first visit; refresh it in place.
+      void load({ soft: true });
+    }
+  }, [load, initialExports]);
 
   const buildingIds = useMemo(
     () =>

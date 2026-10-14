@@ -7,6 +7,7 @@ import { AdminAffiliatesPanel } from "./AdminAffiliatesPanel";
 import { AdminCouponsPanel } from "./AdminCouponsPanel";
 import { AdminReferralWalletPanel } from "./AdminReferralWalletPanel";
 import { AdminSalesMarketingExportsPanel } from "./AdminSalesMarketingExportsPanel";
+import type { SalesMarketingExportsPayload } from "./admin-sales-marketing-exports-api";
 import { AdminSalesMarketingOverviewPanel } from "./AdminSalesMarketingOverviewPanel";
 import { AdminSalesByProductPanel } from "./AdminSalesByProductPanel";
 import {
@@ -14,6 +15,7 @@ import {
   SALES_MARKETING_TAB_HREFS,
   type SalesMarketingReportTab,
 } from "./SalesMarketingReportTabs";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 
 function parseTab(value: string | null): SalesMarketingReportTab {
   if (
@@ -40,7 +42,12 @@ function tabFromPathname(pathname: string | null): SalesMarketingReportTab | nul
   return null;
 }
 
-export function AdminSalesMarketingRosterPage() {
+export function AdminSalesMarketingRosterPage({
+  initialExports,
+}: {
+  /** The Exports tab's data, when the server loaded it for the exports route. */
+  initialExports?: ReportInitialData<SalesMarketingExportsPayload> | null | undefined;
+} = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -91,7 +98,9 @@ export function AdminSalesMarketingRosterPage() {
 
       {showAffiliatesPanel ? <AdminAffiliatesPanel /> : null}
 
-      {showExportsPanel ? <AdminSalesMarketingExportsPanel /> : null}
+      {showExportsPanel ? (
+        <AdminSalesMarketingExportsPanel initialExports={initialExports} />
+      ) : null}
     </div>
   );
 }
