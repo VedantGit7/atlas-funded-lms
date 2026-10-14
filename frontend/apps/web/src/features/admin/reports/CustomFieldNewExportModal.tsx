@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
-import { AlertTriangle, Info, Loader2, Search, X } from "lucide-react";
-import {
-  ghostButtonClassName,
-  primaryButtonClassName,
-} from "../../analytics/analytics-admin-shared";
-import { ClientApiError } from "../../../lib/client-api";
+import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle, Search } from "lucide-react";
+import { Select } from "@atlas/design-system";
 import {
   customFieldExportsApi,
   type CreateCustomFieldExportBody,
@@ -20,17 +16,23 @@ import {
   type CustomFieldExportScheduleItem,
   type CustomFieldExportsPayload,
 } from "./admin-custom-field-exports-api";
-import { PolicyToggle } from "./report-exports-kit";
 import {
   fetchCustomFieldSegments,
   type CustomFieldSegmentItem,
 } from "./admin-custom-field-segments-api";
-
-const fieldClassName =
-  "w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]";
-
-const labelClassName =
-  "font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]";
+import {
+  ExportDatasetPills,
+  ExportDeliverySection,
+  ExportDialogFrame,
+  ExportDialogNote,
+  ExportDialogSection,
+  ExportField,
+  ExportFormatSection,
+  ExportScheduleSection,
+  exportCheckboxClassName,
+  exportSelectTriggerClassName,
+} from "./export-dialog-kit";
+import { useNewExportForm } from "./use-new-export-form";
 
 const DATASET_OPTIONS: Array<{ value: CustomFieldExportDataset; label: string }> = [
   { value: "learner_roster", label: "Learners" },
@@ -46,6 +48,87 @@ function typeBadgeClass(badge: string | null) {
     return "border-[color-mix(in_srgb,var(--admin-warning)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-warning)_10%,transparent)] text-[var(--admin-warning)]";
   }
   return "border-[color-mix(in_srgb,var(--admin-primary)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_10%,transparent)] text-[var(--admin-primary)]";
+}
+
+/** One group of columns with an All switch; learner fields show their PII flag, custom fields their type. */
+function ColumnGroup({
+  title,
+  columns,
+  selected,
+  onToggle,
+  onToggleAll,
+  emptyText,
+}: {
+  title: string;
+  columns: CustomFieldExportColumn[];
+  selected: ReadonlySet<string>;
+  onToggle: (key: string) => void;
+  onToggleAll: (on: boolean) => void;
+  emptyText?: string;
+}) {
+  const allOn = columns.length > 0 && columns.every((column) => selected.has(column.key));
+  return (
+    <div className="border-b border-[var(--admin-border)] last:border-b-0">
+      <div className="flex items-center justify-between bg-[var(--admin-surface-high)] px-3 py-2">
+        <span className="text-sm font-semibold text-[var(--admin-on-surface)]">{title}</span>
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
+          <input
+            type="checkbox"
+            checked={allOn}
+            onChange={(event) => {
+              onToggleAll(event.target.checked);
+            }}
+            className={exportCheckboxClassName}
+          />
+          All
+        </label>
+      </div>
+      {columns.length === 0 && emptyText ? (
+        <p className="px-4 py-6 text-sm text-[var(--admin-on-surface-variant)]">{emptyText}</p>
+      ) : (
+        <div className="max-h-48 overflow-y-auto py-1">
+          {columns.map((column) => (
+            <label
+              key={column.key}
+              className="flex cursor-pointer items-start gap-3 px-4 py-2 hover:bg-[var(--admin-surface-high)]"
+            >
+              <input
+                type="checkbox"
+                className={`mt-0.5 ${exportCheckboxClassName}`}
+                checked={selected.has(column.key)}
+                onChange={() => {
+                  onToggle(column.key);
+                }}
+              />
+              <span className="flex flex-col">
+                <span className="flex items-center gap-2 font-mono text-[13px] text-[var(--admin-on-surface)]">
+                  {column.typeBadge ? (
+                    <span
+                      className={`rounded-sm border px-1.5 py-0.5 font-mono text-[11px] font-semibold uppercase ${typeBadgeClass(column.typeBadge)}`}
+                    >
+                      {column.typeBadge}
+                    </span>
+                  ) : null}
+                  {column.key.replace(/^cf:/, "")}
+                  {column.sensitive ? (
+                    <AlertTriangle
+                      className="h-3.5 w-3.5 text-[var(--admin-warning)]"
+                      aria-label="Contains personal data"
+                    />
+                  ) : null}
+                </span>
+                {column.sensitive ? (
+                  <span className="font-mono text-[10px] text-[var(--admin-warning)]">
+                    Contains learner personal data (PII)
+                  </span>
+                ) : null}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function CustomFieldNewExportModal({
@@ -68,601 +151,266 @@ export function CustomFieldNewExportModal({
     schedule: CustomFieldExportScheduleItem | null,
   ) => void;
 }) {
-  const titleId = useId();
+  const form = useNewExportForm<
+    CustomFieldExportFormat,
+    CustomFieldExportDelivery,
+    CustomFieldExportCadence
+  >({
+    open,
+    onClose,
+    initialScheduleEnabled,
+    defaults: {
+      format: "csv",
+      delivery: "download",
+      cadence: "weekly",
+      time: "07:00",
+      timezone: "Asia/Kolkata",
+    },
+  });
   const [dataset, setDataset] = useState<CustomFieldExportDataset>("learner_roster");
   const [columnQuery, setColumnQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [format, setFormat] = useState<CustomFieldExportFormat>("csv");
   const [emptyValueMode, setEmptyValueMode] = useState<CustomFieldExportEmptyValue>("blank");
-  const [delivery, setDelivery] = useState<CustomFieldExportDelivery>("download");
-  const [recipientInput, setRecipientInput] = useState("");
-  const [recipients, setRecipients] = useState<string[]>([]);
-  const [webhookUrl, setWebhookUrl] = useState("");
-  const [scheduleEnabled, setScheduleEnabled] = useState(false);
-  const [cadence, setCadence] = useState<CustomFieldExportCadence>("weekly");
-  const [time, setTime] = useState("07:00");
-  const [timezone, setTimezone] = useState("Asia/Kolkata");
   const [segments, setSegments] = useState<CustomFieldSegmentItem[]>([]);
   const [segmentId, setSegmentId] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const filteredLearner = useMemo(() => {
+  const matchesQuery = useMemo(() => {
     const q = columnQuery.trim().toLowerCase();
-    if (!q) return learnerColumns;
-    return learnerColumns.filter(
-      (c) => c.key.toLowerCase().includes(q) || c.label.toLowerCase().includes(q),
-    );
-  }, [learnerColumns, columnQuery]);
+    return (column: CustomFieldExportColumn) =>
+      !q || column.key.toLowerCase().includes(q) || column.label.toLowerCase().includes(q);
+  }, [columnQuery]);
+  const filteredLearner = useMemo(
+    () => learnerColumns.filter(matchesQuery),
+    [learnerColumns, matchesQuery],
+  );
+  const filteredCustom = useMemo(
+    () => customFieldColumns.filter(matchesQuery),
+    [customFieldColumns, matchesQuery],
+  );
 
-  const filteredCustom = useMemo(() => {
-    const q = columnQuery.trim().toLowerCase();
-    if (!q) return customFieldColumns;
-    return customFieldColumns.filter(
-      (c) => c.key.toLowerCase().includes(q) || c.label.toLowerCase().includes(q),
-    );
-  }, [customFieldColumns, columnQuery]);
-
-  const selectedSegment = segments.find((s) => s.id === segmentId) ?? null;
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
+  const selectedSegment = segments.find((segment) => segment.id === segmentId) ?? null;
 
   useEffect(() => {
     if (!open) return;
     setDataset("learner_roster");
     setColumnQuery("");
-    setSelected(new Set(learnerColumns.filter((c) => c.defaultSelected).map((c) => c.key)));
-    setFormat("csv");
+    setSelected(
+      new Set(
+        learnerColumns.filter((column) => column.defaultSelected).map((column) => column.key),
+      ),
+    );
     setEmptyValueMode("blank");
-    setDelivery("download");
-    setRecipients([]);
-    setRecipientInput("");
-    setWebhookUrl("");
-    setScheduleEnabled(initialScheduleEnabled);
-    setCadence("weekly");
-    setTime("07:00");
-    setTimezone("Asia/Kolkata");
-    setError(null);
-    setSaving(false);
     void fetchCustomFieldSegments()
-      .then((res) => {
-        setSegments(res.data.items);
-        if (res.data.items[0]) setSegmentId(res.data.items[0].id);
+      .then((response) => {
+        setSegments(response.data.items);
+        if (response.data.items[0]) setSegmentId(response.data.items[0].id);
       })
       .catch(() => {
         setSegments([]);
       });
-  }, [open, learnerColumns, initialScheduleEnabled]);
+  }, [open, learnerColumns]);
+
+  if (!open) return null;
 
   function toggleColumn(key: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
+    setSelected((current) => {
+      const next = new Set(current);
       if (next.has(key)) next.delete(key);
       else next.add(key);
       return next;
     });
   }
 
-  function toggleGroup(columns: CustomFieldExportColumn[], allOn: boolean) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      for (const col of columns) {
-        if (allOn) next.add(col.key);
-        else next.delete(col.key);
+  function toggleGroup(columns: CustomFieldExportColumn[], on: boolean) {
+    setSelected((current) => {
+      const next = new Set(current);
+      for (const column of columns) {
+        if (on) next.add(column.key);
+        else next.delete(column.key);
       }
       return next;
     });
   }
 
-  function addRecipient() {
-    const email = recipientInput.trim().toLowerCase();
-    if (!email || !email.includes("@")) return;
-    setRecipients((prev) => (prev.includes(email) ? prev : [...prev, email]));
-    setRecipientInput("");
-  }
-
-  async function handleSubmit() {
-    if (selected.size === 0) {
-      setError("Select at least one column.");
-      return;
-    }
+  async function onSubmit() {
+    if (selected.size === 0) return form.fail("Select at least one column.");
     if (dataset === "segment_members" && !segmentId) {
-      setError("Select a segment for segment member exports.");
-      return;
+      return form.fail("Select a segment for segment member exports.");
     }
-    if (delivery === "recipients" && recipients.length === 0) {
-      setError("Add at least one recipient email.");
-      return;
+    if (form.delivery === "recipients" && form.recipients.length === 0) {
+      return form.fail("Add at least one recipient email.");
     }
-    setSaving(true);
-    setError(null);
-    try {
-      const body: CreateCustomFieldExportBody = {
-        dataset,
-        columns: [...selected],
-        format,
-        emptyValueMode,
-        useCurrentFilters: true,
-        delivery,
-        scheduleEnabled,
-        ...(dataset === "segment_members" && segmentId
-          ? {
-              segmentId,
-              ...(selectedSegment?.name ? { segmentName: selectedSegment.name } : {}),
-            }
-          : {}),
-        ...(delivery === "recipients" ? { recipients } : {}),
-        ...(webhookUrl.trim() ? { webhookUrl: webhookUrl.trim() } : {}),
-        ...(scheduleEnabled
-          ? {
-              cadence,
-              time,
-              timezone,
-              scheduleName: `${DATASET_OPTIONS.find((d) => d.value === dataset)?.label ?? "Custom field"} export`,
-            }
-          : {}),
-      };
-      const result = await customFieldExportsApi.create(body);
-      onCreated(result.data.run, result.data.schedule);
-      onClose();
-    } catch (err) {
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : "Unable to start export.",
-      );
-    } finally {
-      setSaving(false);
-    }
+
+    const datasetLabel = DATASET_OPTIONS.find((option) => option.value === dataset)?.label;
+    const body: CreateCustomFieldExportBody = {
+      dataset,
+      columns: [...selected],
+      format: form.format,
+      emptyValueMode,
+      useCurrentFilters: true,
+      delivery: form.delivery,
+      scheduleEnabled: form.scheduleEnabled,
+      ...(dataset === "segment_members" && segmentId
+        ? {
+            segmentId,
+            ...(selectedSegment?.name ? { segmentName: selectedSegment.name } : {}),
+          }
+        : {}),
+      ...(form.delivery === "recipients"
+        ? { recipients: form.recipients.map((email) => email.toLowerCase()) }
+        : {}),
+      ...(form.webhookUrl.trim() ? { webhookUrl: form.webhookUrl.trim() } : {}),
+      ...(form.scheduleEnabled
+        ? {
+            cadence: form.cadence,
+            time: form.time,
+            timezone: form.timezone,
+            scheduleName: `${datasetLabel ?? "Custom field"} export`,
+          }
+        : {}),
+    };
+
+    return form.submit(() => customFieldExportsApi.create(body), onCreated);
   }
-
-  if (!open) return null;
-
-  const learnerAllOn =
-    filteredLearner.length > 0 && filteredLearner.every((c) => selected.has(c.key));
-  const customAllOn = filteredCustom.length > 0 && filteredCustom.every((c) => selected.has(c.key));
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_45%,transparent)] p-4 backdrop-blur-sm">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="flex max-h-[90vh] w-full max-w-[960px] flex-col overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-2xl"
+    <ExportDialogFrame
+      submitLabel="Generate export"
+      submitDisabled={selected.size === 0}
+      saving={form.saving}
+      error={form.error}
+      onClose={onClose}
+      onSubmit={() => void onSubmit()}
+    >
+      <ExportDatasetPills
+        options={DATASET_OPTIONS.filter((option) => capabilities.datasets.includes(option.value))}
+        value={dataset}
+        onChange={setDataset}
+      />
+
+      <ExportDialogSection title="Scope">
+        <div className="space-y-4">
+          {dataset === "segment_members" ? (
+            <ExportField label="Segment">
+              <Select
+                value={segmentId}
+                onValueChange={setSegmentId}
+                options={
+                  segments.length === 0
+                    ? [{ value: "", label: "No segments yet" }]
+                    : segments.map((segment) => ({
+                        value: segment.id,
+                        label: `${segment.name} (${(segment.matchedCount ?? 0).toLocaleString()})`,
+                      }))
+                }
+                className={exportSelectTriggerClassName}
+              />
+            </ExportField>
+          ) : null}
+          <div className="rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3 font-mono text-[13px] text-[var(--admin-on-surface)]">
+            <div className="flex gap-2">
+              <span className="text-[var(--admin-primary)]">WHERE</span>
+              <span>
+                {dataset === "segment_members" && selectedSegment
+                  ? `segment = "${selectedSegment.name}"`
+                  : "all matched learners"}
+              </span>
+            </div>
+            <div className="mt-2 border-t border-[var(--admin-border)] pt-2 text-xs text-[var(--admin-on-surface-variant)]">
+              Est. output rows:{" "}
+              {dataset === "segment_members" && selectedSegment
+                ? `~${(selectedSegment.matchedCount ?? 0).toLocaleString()}`
+                : "depends on filters"}
+            </div>
+          </div>
+        </div>
+      </ExportDialogSection>
+
+      <ExportDialogSection
+        title="Columns"
+        action={
+          <span className="font-mono text-[13px] text-[var(--admin-primary)]">
+            {selected.size} selected
+          </span>
+        }
       >
-        <header className="flex items-start justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-6 py-4">
-          <div>
-            <h2
-              id={titleId}
-              className="text-2xl font-semibold tracking-[-0.01em] text-[var(--admin-on-surface)]"
-            >
-              New export
-            </h2>
-            <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-              Configure dataset, columns, and delivery method.
-            </p>
-          </div>
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface)] hover:text-[var(--admin-on-surface)]"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </header>
+        <div className="relative mb-3">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--admin-on-surface-variant)]"
+            aria-hidden="true"
+          />
+          <input
+            value={columnQuery}
+            onChange={(event) => {
+              setColumnQuery(event.target.value);
+            }}
+            aria-label="Search columns"
+            placeholder="Search columns…"
+            className="h-10 w-full rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface-low)] pr-3 pl-9 text-sm text-[var(--admin-on-surface)] outline-none focus:border-[var(--admin-primary)]"
+          />
+        </div>
+        <div className="overflow-hidden rounded-sm border border-[var(--admin-border)]">
+          <ColumnGroup
+            title="Learner core data"
+            columns={filteredLearner}
+            selected={selected}
+            onToggle={toggleColumn}
+            onToggleAll={(on) => {
+              toggleGroup(filteredLearner, on);
+            }}
+          />
+          <ColumnGroup
+            title="Custom fields"
+            columns={filteredCustom}
+            selected={selected}
+            onToggle={toggleColumn}
+            onToggleAll={(on) => {
+              toggleGroup(filteredCustom, on);
+            }}
+            emptyText="No custom fields defined yet."
+          />
+        </div>
+      </ExportDialogSection>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto border-b border-[var(--admin-border)] p-6 lg:border-r lg:border-b-0">
-            <div className="flex flex-col gap-2">
-              <span className={labelClassName}>Dataset context</span>
-              <div className="flex rounded border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-1">
-                {DATASET_OPTIONS.filter((o) => capabilities.datasets.includes(o.value)).map(
-                  (option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      className={[
-                        "flex-1 rounded px-3 py-1.5 text-center text-sm transition-colors",
-                        dataset === option.value
-                          ? "bg-[var(--admin-surface)] font-semibold text-[var(--admin-on-surface)] shadow-sm"
-                          : "text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-on-surface)]",
-                      ].join(" ")}
-                      onClick={() => {
-                        setDataset(option.value);
-                      }}
-                    >
-                      {option.label}
-                    </button>
-                  ),
-                )}
-              </div>
-            </div>
-
-            {dataset === "segment_members" ? (
-              <div className="flex flex-col gap-1.5">
-                <label className={labelClassName} htmlFor="cf-export-segment">
-                  Segment
-                </label>
-                <select
-                  id="cf-export-segment"
-                  className={fieldClassName}
-                  value={segmentId}
-                  onChange={(e) => {
-                    setSegmentId(e.target.value);
-                  }}
-                >
-                  {segments.length === 0 ? (
-                    <option value="">No segments yet</option>
-                  ) : (
-                    segments.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} ({(s.matchedCount ?? 0).toLocaleString()})
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-            ) : null}
-
-            <div className="flex min-h-0 flex-1 flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <span className={labelClassName}>Included columns</span>
-                <span className="font-mono text-[13px] text-[var(--admin-primary)]">
-                  {selected.size} selected
-                </span>
-              </div>
-              <div className="relative">
-                <Search className="pointer-events-none absolute top-2.5 left-3 h-4 w-4 text-[var(--admin-on-surface-variant)]" />
-                <input
-                  className={`${fieldClassName} bg-[var(--admin-surface-high)] pl-10`}
-                  placeholder="Search columns…"
-                  value={columnQuery}
-                  onChange={(e) => {
-                    setColumnQuery(e.target.value);
-                  }}
-                />
-              </div>
-              <div className="flex min-h-[280px] flex-1 flex-col overflow-hidden rounded border border-[var(--admin-border)]">
-                <div className="border-b border-[var(--admin-border)]">
-                  <div className="flex items-center justify-between bg-[var(--admin-surface-high)] px-3 py-2">
-                    <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
-                      Learner core data
-                    </span>
-                    <label className="flex cursor-pointer items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
-                      <input
-                        type="checkbox"
-                        checked={learnerAllOn}
-                        onChange={(e) => {
-                          toggleGroup(filteredLearner, e.target.checked);
-                        }}
-                      />
-                      All
-                    </label>
-                  </div>
-                  <div className="max-h-40 overflow-y-auto py-1">
-                    {filteredLearner.map((col) => (
-                      <label
-                        key={col.key}
-                        className="flex cursor-pointer items-start gap-3 px-4 py-2 hover:bg-[var(--admin-surface-high)]"
-                      >
-                        <input
-                          type="checkbox"
-                          className="mt-1"
-                          checked={selected.has(col.key)}
-                          onChange={() => {
-                            toggleColumn(col.key);
-                          }}
-                        />
-                        <span className="flex flex-col">
-                          <span className="flex items-center gap-2 font-mono text-[13px] text-[var(--admin-on-surface)]">
-                            {col.key}
-                            {col.sensitive ? (
-                              <AlertTriangle
-                                className="h-3.5 w-3.5 text-[var(--admin-warning)]"
-                                aria-label="Contains personal data"
-                              />
-                            ) : null}
-                          </span>
-                          {col.sensitive ? (
-                            <span className="font-mono text-[10px] text-[var(--admin-warning)]">
-                              Contains learner personal data (PII)
-                            </span>
-                          ) : null}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-3 py-2">
-                    <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
-                      Custom fields
-                    </span>
-                    <label className="flex cursor-pointer items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]">
-                      <input
-                        type="checkbox"
-                        checked={customAllOn}
-                        onChange={(e) => {
-                          toggleGroup(filteredCustom, e.target.checked);
-                        }}
-                      />
-                      All
-                    </label>
-                  </div>
-                  {filteredCustom.length === 0 ? (
-                    <p className="px-4 py-6 text-sm text-[var(--admin-on-surface-variant)]">
-                      No custom fields defined yet.
-                    </p>
-                  ) : (
-                    filteredCustom.map((col) => (
-                      <label
-                        key={col.key}
-                        className="flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-[var(--admin-surface-high)]"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selected.has(col.key)}
-                          onChange={() => {
-                            toggleColumn(col.key);
-                          }}
-                        />
-                        <span className="flex items-center gap-2">
-                          {col.typeBadge ? (
-                            <span
-                              className={`rounded border px-1.5 py-0.5 font-mono text-[11px] font-semibold uppercase ${typeBadgeClass(col.typeBadge)}`}
-                            >
-                              {col.typeBadge}
-                            </span>
-                          ) : null}
-                          <span
-                            className={`font-mono text-[13px] ${
-                              selected.has(col.key)
-                                ? "text-[var(--admin-on-surface)]"
-                                : "text-[var(--admin-on-surface-variant)]"
-                            }`}
-                          >
-                            {col.key.replace(/^cf:/, "")}
-                          </span>
-                        </span>
-                      </label>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex w-full flex-col gap-6 overflow-y-auto bg-[var(--admin-surface-low)] p-6 lg:w-[380px]">
-            <div className="flex flex-col gap-2">
-              <span className={labelClassName}>Applied filters context</span>
-              <div className="rounded border border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-3 font-mono text-[13px]">
-                {dataset === "segment_members" && selectedSegment ? (
-                  <div className="flex gap-2">
-                    <span className="text-[var(--admin-primary)]">WHERE</span>
-                    <span>segment = &quot;{selectedSegment.name}&quot;</span>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <span className="text-[var(--admin-primary)]">WHERE</span>
-                    <span>all matched learners</span>
-                  </div>
-                )}
-                <div className="mt-2 border-t border-[var(--admin-border)] pt-2 text-xs text-[var(--admin-on-surface-variant)]">
-                  Est. output rows:{" "}
-                  {dataset === "segment_members" && selectedSegment
-                    ? `~${(selectedSegment.matchedCount ?? 0).toLocaleString()}`
-                    : "depends on filters"}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <span className={labelClassName}>Empty value handling</span>
-              <label className="flex cursor-pointer items-center gap-3">
-                <input
-                  type="radio"
-                  checked={emptyValueMode === "blank"}
-                  onChange={() => {
-                    setEmptyValueMode("blank");
-                  }}
-                />
-                <span className="text-sm">Leave blank (null)</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-3">
-                <input
-                  type="radio"
-                  checked={emptyValueMode === "emdash"}
-                  onChange={() => {
-                    setEmptyValueMode("emdash");
-                  }}
-                />
-                <span className="text-sm">Use literal string &quot;—&quot;</span>
-              </label>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <span className={labelClassName}>Export format</span>
-              <div className="flex gap-3">
-                {capabilities.formats.map((fmt) => (
-                  <button
-                    key={fmt}
-                    type="button"
-                    onClick={() => {
-                      setFormat(fmt);
-                    }}
-                    className={[
-                      "flex flex-1 flex-col items-center rounded border p-3 font-mono text-[13px] font-bold uppercase transition-colors",
-                      format === fmt
-                        ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_10%,transparent)] text-[var(--admin-primary)]"
-                        : "border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
-                    ].join(" ")}
-                  >
-                    .{fmt}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <span className={labelClassName}>Delivery method</span>
-              <select
-                className={fieldClassName}
-                value={delivery}
-                onChange={(e) => {
-                  setDelivery(e.target.value as CustomFieldExportDelivery);
+      <ExportDialogSection title="Empty values">
+        <div className="space-y-3">
+          {(
+            [
+              ["blank", "Leave blank (null)"],
+              ["emdash", 'Use the literal string "—"'],
+            ] as const
+          ).map(([value, label]) => (
+            <label key={value} className="flex cursor-pointer items-center gap-3">
+              <input
+                type="radio"
+                name="custom-field-empty-values"
+                checked={emptyValueMode === value}
+                onChange={() => {
+                  setEmptyValueMode(value);
                 }}
-              >
-                <option value="download">Download now</option>
-                {capabilities.canEmailDelivery ? (
-                  <option value="email_me">Email me when ready</option>
-                ) : null}
-                {capabilities.canEmailDelivery ? (
-                  <option value="recipients">Send to recipients…</option>
-                ) : null}
-              </select>
-              {delivery === "recipients" ? (
-                <div className="flex flex-col gap-2">
-                  <div className="flex gap-2">
-                    <input
-                      className={fieldClassName}
-                      placeholder="ops@company.com"
-                      value={recipientInput}
-                      onChange={(e) => {
-                        setRecipientInput(e.target.value);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addRecipient();
-                        }
-                      }}
-                    />
-                    <button type="button" className={ghostButtonClassName} onClick={addRecipient}>
-                      Add
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {recipients.map((email) => (
-                      <button
-                        key={email}
-                        type="button"
-                        className="rounded border border-[var(--admin-border)] bg-[var(--admin-surface)] px-2 py-0.5 font-mono text-[10px]"
-                        onClick={() => {
-                          setRecipients((prev) => prev.filter((item) => item !== email));
-                        }}
-                      >
-                        {email} ×
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {capabilities.canWebhookDelivery ? (
-                <input
-                  className={fieldClassName}
-                  placeholder="Optional webhook URL"
-                  value={webhookUrl}
-                  onChange={(e) => {
-                    setWebhookUrl(e.target.value);
-                  }}
-                />
-              ) : null}
-            </div>
-
-            <div className="mt-auto flex flex-col gap-3 border-t border-[var(--admin-border)] pt-4">
-              <label className="flex items-center justify-between gap-3">
-                <span className="text-base font-semibold text-[var(--admin-on-surface)]">
-                  Schedule this export
-                </span>
-                <PolicyToggle
-                  checked={scheduleEnabled}
-                  onChange={setScheduleEnabled}
-                  disabled={!capabilities.canSchedule}
-                  label="Schedule this export"
-                />
-              </label>
-              {scheduleEnabled ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <select
-                    className={fieldClassName}
-                    value={cadence}
-                    onChange={(e) => {
-                      setCadence(e.target.value as CustomFieldExportCadence);
-                    }}
-                  >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                  </select>
-                  <input
-                    type="time"
-                    className={fieldClassName}
-                    value={time}
-                    onChange={(e) => {
-                      setTime(e.target.value);
-                    }}
-                  />
-                  <input
-                    className={`${fieldClassName} col-span-2`}
-                    value={timezone}
-                    onChange={(e) => {
-                      setTimezone(e.target.value);
-                    }}
-                    placeholder="Timezone"
-                  />
-                </div>
-              ) : (
-                <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                  Automate this export cadence with a background schedule.
-                </p>
-              )}
-            </div>
-          </div>
+                className="h-4 w-4 border-[var(--admin-outline)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
+              />
+              <span className="text-sm text-[var(--admin-on-surface)]">{label}</span>
+            </label>
+          ))}
         </div>
+      </ExportDialogSection>
 
-        {error ? (
-          <div className="border-t border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] px-6 py-3 text-sm text-[var(--admin-danger)]">
-            {error}
-          </div>
-        ) : null}
+      <ExportFormatSection
+        formats={capabilities.formats}
+        value={form.format}
+        onChange={form.setFormat}
+      />
 
-        <footer className="flex items-center justify-between border-t border-[var(--admin-border)] px-6 py-4">
-          <button
-            type="button"
-            className={ghostButtonClassName}
-            onClick={onClose}
-            disabled={saving}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className={`${primaryButtonClassName} inline-flex items-center gap-2`}
-            disabled={saving || selected.size === 0}
-            onClick={() => void handleSubmit()}
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Generate export
-          </button>
-        </footer>
+      <ExportDeliverySection
+        form={form}
+        emailEnabled={capabilities.canEmailDelivery}
+        webhook={capabilities.canWebhookDelivery}
+      />
 
-        <div className="flex items-start gap-2 border-t border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-6 py-3 text-xs text-[var(--admin-on-surface-variant)]">
-          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--admin-primary)]" />
-          <span>{capabilities.note}</span>
-        </div>
-      </div>
-    </div>
+      {capabilities.canSchedule ? <ExportScheduleSection form={form} /> : null}
+
+      <ExportDialogNote>{capabilities.note}</ExportDialogNote>
+    </ExportDialogFrame>
   );
 }
