@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import Redis, { type RedisOptions } from "ioredis";
 import { validateClientIpConfiguration } from "./client-ip";
 import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 
@@ -241,15 +241,23 @@ export function setRateLimitStore(store: RateLimitStore | null): void {
  * module never opens a connection — local development and the test suite run
  * with no Redis at all.
  */
+export const RATE_LIMIT_REDIS_OPTIONS = {
+  // A rate limiter must never become the reason a request hangs.
+  connectTimeout: 2_000,
+  commandTimeout: 1_000,
+  maxRetriesPerRequest: 1,
+  enableOfflineQueue: false,
+  lazyConnect: false,
+  // ioredis 6 defaults to RESP3, which needs Redis 6+ and HELLO support from
+  // whichever managed Redis is chosen. The limiter gains nothing from it.
+  protocol: 2,
+  // ioredis 6 backs off exponentially to 5 s. Requests fail closed while the
+  // limiter is disconnected, so keep the 50 ms steps capped at 2 s.
+  retryStrategy: (times: number) => Math.min(times * 50, 2_000),
+} satisfies RedisOptions;
+
 function createRedisStore(url: string): RateLimitStore {
-  const client = new Redis(url, {
-    // A rate limiter must never become the reason a request hangs.
-    connectTimeout: 2_000,
-    commandTimeout: 1_000,
-    maxRetriesPerRequest: 1,
-    enableOfflineQueue: false,
-    lazyConnect: false,
-  });
+  const client = new Redis(url, RATE_LIMIT_REDIS_OPTIONS);
 
   // Do not let asynchronous connection events print URL credentials. The
   // limiter reports command failures through a safe, throttled log event.
