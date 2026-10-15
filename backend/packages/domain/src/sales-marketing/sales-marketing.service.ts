@@ -1,3 +1,4 @@
+import { isSystemActor } from "@atlas/core/actor/system-actor";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "../shared/domain.types";
 import { attributionEventNotFound } from "./sales-marketing.errors";
@@ -125,7 +126,11 @@ export async function createAttributionEvent(tx: TenantTx, ctx: ServiceCtx, rawB
   const body = createAttributionEventBodySchema.parse(rawBody);
   const row = await salesMarketingRepository.insertEvent(tx, {
     eventType: body.eventType,
-    membershipId: body.membershipId ?? ctx.actorMembershipId,
+    // An anonymous visit (the public route runs as the system actor) belongs to
+    // no member. The system sentinel is not a membership, and the composite
+    // (tenant_id, membership_id) foreign key rejects it, so record NULL.
+    membershipId:
+      body.membershipId ?? (isSystemActor(ctx.actorMembershipId) ? null : ctx.actorMembershipId),
     utmSource: body.utmSource ?? null,
     utmMedium: body.utmMedium ?? null,
     utmCampaign: body.utmCampaign ?? null,
