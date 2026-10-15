@@ -18,5 +18,28 @@ services:
       timeout: 5s
       retries: 10
 
+  # Disposable test database, kept in its own server as
+  # docs/runbooks/test-database-cleanup.md requires: the privileged cleanup role
+  # never lives beside the development database. Provision it with
+  # `pnpm db:test:setup` (see the runbook for the variables).
+  atlas-postgres-test:
+    image: postgres:16-alpine
+    container_name: atlas-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: atlas
+      POSTGRES_PASSWORD: atlas_dev_password
+      POSTGRES_DB: atlas_lms_test
+    ports:
+      - "15433:5432"
+    volumes:
+      - atlas_postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atlas -d atlas_lms_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
 volumes:
   atlas_postgres_data:
+  atlas_postgres_test_data:
