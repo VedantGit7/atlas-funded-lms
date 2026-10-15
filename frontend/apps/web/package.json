@@ -33,7 +33,7 @@
     "clsx": "^2.1.1",
     "isomorphic-dompurify": "^4.5.0",
     "jose": "^6.2.8",
-    "konva": "^10.3.0",
+    "konva": "^10.7.1",
     "lucide-react": "^1.21.0",
     "mobx": "^6.16.1",
     "mobx-react-lite": "^4.1.1",
