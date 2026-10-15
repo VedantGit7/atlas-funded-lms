@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
+  RATE_LIMIT_REDIS_OPTIONS,
   RedisRateLimitStore,
   setRateLimitStore,
   type RateLimitRedisClient,
@@ -57,13 +58,7 @@ describe.skipIf(!redisUrl)("F04 isolated real Redis", () => {
   });
   it("accepts the first cold hit with the production offline-queue-disabled options", async () => {
     if (!redisUrl) throw new Error("F04_TEST_REDIS_URL is required for this integration suite");
-    const cold = new Redis(redisUrl, {
-      lazyConnect: false,
-      connectTimeout: 2000,
-      commandTimeout: 1000,
-      enableOfflineQueue: false,
-      maxRetriesPerRequest: 1,
-    });
+    const cold = new Redis(redisUrl, RATE_LIMIT_REDIS_OPTIONS);
     cold.on("error", () => {});
     try {
       const store = new RedisRateLimitStore(cold, { prefix: `atlas:f04:cold:${randomUUID()}:` });

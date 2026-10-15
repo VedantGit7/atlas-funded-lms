@@ -260,7 +260,7 @@ const ElementNode = observer(function ElementNode({
   };
 
   const handleTransformEnd = (event: KonvaEventObject<Event>) => {
-    const node = event.target as Konva.Group;
+    const node = event.target;
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
     node.scaleX(1);
