@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const ENROLLMENT_ROSTER_COLUMN_OPTIONS = [
@@ -137,16 +135,29 @@ export function dateInputToEndIso(value: string): string | undefined {
   return `${trimmed}T23:59:59.999Z`;
 }
 
+/** What the roster opens on; the server loads the first page and the overview with it too. */
+export const ENROLLMENT_ROSTER_DEFAULTS = {
+  sortBy: "enrolled_at",
+  sortDir: "desc",
+  columns: ENROLLMENT_ROSTER_COLUMN_OPTIONS.map((column) => column.key),
+  page: 1,
+  limit: 20,
+} as const satisfies EnrollmentRosterFilters;
+
+export function enrollmentRosterPath(filters: EnrollmentRosterFilters): string {
+  return `/api/v1/reports/enrollments/roster${buildRosterQuery(filters)}`;
+}
+
+export function enrollmentOverviewPath(filters: EnrollmentOverviewFilters = {}): string {
+  return `/api/v1/reports/enrollments/overview${buildOverviewQuery(filters)}`;
+}
+
 export async function fetchEnrollmentRoster(filters: EnrollmentRosterFilters) {
-  return clientApi.get<EnrollmentRosterResponse>(
-    `/api/v1/reports/enrollments/roster${buildRosterQuery(filters)}`,
-  );
+  return clientApi.get<EnrollmentRosterResponse>(enrollmentRosterPath(filters));
 }
 
 export async function fetchEnrollmentOverview(filters: EnrollmentOverviewFilters = {}) {
-  return clientApi.get<EnrollmentOverviewResponse>(
-    `/api/v1/reports/enrollments/overview${buildOverviewQuery(filters)}`,
-  );
+  return clientApi.get<EnrollmentOverviewResponse>(enrollmentOverviewPath(filters));
 }
 
 export async function createEnrollmentReportGroup(body: {

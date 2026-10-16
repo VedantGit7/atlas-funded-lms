@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -24,7 +24,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  POLLS_ROSTER_DEFAULTS,
   dateInputToEndIso,
   dateInputToStartIso,
   exportPollReport,
@@ -32,12 +34,15 @@ import {
   type PollListItem,
   type PollsListSummary,
   type PollsListView,
+  type PollsRosterPayload,
 } from "./admin-polls-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 type ModuleTab = "polls" | "live" | "compare" | "exports";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = POLLS_ROSTER_DEFAULTS.limit;
 
 const selectClassName =
   "h-9 min-w-[140px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-xs font-medium text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -66,14 +71,15 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -326,28 +332,36 @@ function ErrorPollsPanel({ message, onRetry }: { message: string; onRetry: () =>
   );
 }
 
-export function AdminPollsRosterPage() {
+export function AdminPollsRosterPage({
+  initialRoster,
+}: {
+  /** The first page of the roster, loaded by the server; the first browser load is skipped when present. */
+  initialRoster?: ReportInitialData<PollsRosterPayload> | null;
+} = {}) {
   const router = useRouter();
   const searchId = useId();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialRoster ?? null);
 
   const [moduleTab, setModuleTab] = useState<ModuleTab>("polls");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
-  const [polls, setPolls] = useState<PollListItem[]>([]);
-  const [summary, setSummary] = useState<PollsListSummary | null>(null);
+  const [polls, setPolls] = useState<PollListItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<PollsListSummary | null>(initial?.data.summary ?? null);
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState<number>(POLLS_ROSTER_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
   const [draftSearch, setDraftSearch] = useState("");
   const [searchQ, setSearchQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [pollType, setPollType] = useState("");
-  const [view, setView] = useState<PollsListView>("all");
+  const [view, setView] = useState<PollsListView>(POLLS_ROSTER_DEFAULTS.view);
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
 
@@ -357,44 +371,46 @@ export function AdminPollsRosterPage() {
     [createdFrom, createdTo, pollType, searchQ, statusFilter, view],
   );
 
-  const loadPolls = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPollsRoster({
-        q: searchQ.trim() || undefined,
-        status: statusFilter || undefined,
-        pollType: pollType || undefined,
-        view,
-        createdFrom: dateInputToStartIso(createdFrom),
-        createdTo: dateInputToEndIso(createdTo),
-        page,
-        limit: PAGE_SIZE,
-      });
-      setPolls(response.data.items);
-      setSummary(response.data.summary);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadPolls = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPollsRoster({
+          q: searchQ.trim() || undefined,
+          status: statusFilter || undefined,
+          pollType: pollType || undefined,
+          view,
+          createdFrom: dateInputToStartIso(createdFrom),
+          createdTo: dateInputToEndIso(createdTo),
+          page,
+          limit: PAGE_SIZE,
+        });
+        setPolls(response.data.items);
+        setSummary(response.data.summary);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load polls.",
-      );
-      setPolls([]);
-      setSummary(null);
-      setTotalCount(0);
-      setTotalPages(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [createdFrom, createdTo, page, pollType, searchQ, statusFilter, view]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load polls.",
+        );
+        setPolls([]);
+        setSummary(null);
+        setTotalCount(0);
+        setTotalPages(0);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [createdFrom, createdTo, page, pollType, searchQ, statusFilter, view],
+  );
 
-  useEffect(() => {
-    void loadPolls();
-  }, [loadPolls]);
+  useReportLoad(loadPolls, initial);
 
   function clearAllFilters() {
     setDraftSearch("");
@@ -561,10 +577,10 @@ export function AdminPollsRosterPage() {
                       Responses Collected
                     </p>
                     <p className="font-mono text-[32px] font-semibold leading-none text-[var(--admin-on-surface)]">
-                      {(summary?.totalResponses ?? 0).toLocaleString()}
+                      {(summary?.totalResponses ?? 0).toLocaleString(viewer.locale)}
                     </p>
                     <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-                      across {(summary?.pollCount ?? 0).toLocaleString()} polls
+                      across {(summary?.pollCount ?? 0).toLocaleString(viewer.locale)} polls
                     </p>
                   </div>
                   <div className="pointer-events-none absolute bottom-0 left-0 z-0 h-1/3 w-full bg-gradient-to-t from-[color-mix(in_srgb,var(--admin-primary)_12%,transparent)] to-transparent opacity-70" />
@@ -606,7 +622,7 @@ export function AdminPollsRosterPage() {
                     Quiz Polls
                   </p>
                   <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
-                    {(summary?.quizPollCount ?? 0).toLocaleString()}
+                    {(summary?.quizPollCount ?? 0).toLocaleString(viewer.locale)}
                   </p>
                   <p className="mt-2 text-xs leading-tight text-[var(--admin-on-surface-variant)]">
                     average {formatPct(summary?.avgQuizCorrectPct)} correct
@@ -626,7 +642,7 @@ export function AdminPollsRosterPage() {
                         Open Now
                       </p>
                       <p className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
-                        {(summary?.openNowCount ?? 0).toLocaleString()}
+                        {(summary?.openNowCount ?? 0).toLocaleString(viewer.locale)}
                       </p>
                     </div>
                     <ArrowRight
@@ -647,7 +663,7 @@ export function AdminPollsRosterPage() {
                         Anonymous
                       </p>
                       <p className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
-                        {(summary?.anonymousCount ?? 0).toLocaleString()}
+                        {(summary?.anonymousCount ?? 0).toLocaleString(viewer.locale)}
                       </p>
                     </div>
                     <EyeOff
@@ -883,7 +899,7 @@ export function AdminPollsRosterPage() {
                               {titleCase(poll.pollType)}
                             </td>
                             <td className="px-4 py-3 text-right font-mono text-[var(--admin-on-surface)]">
-                              {poll.responseCount.toLocaleString()}
+                              {poll.responseCount.toLocaleString(viewer.locale)}
                             </td>
                             <td className="px-4 py-3 text-right font-mono text-[var(--admin-on-surface)]">
                               {formatPct(poll.participationPct)}
@@ -924,7 +940,7 @@ export function AdminPollsRosterPage() {
                               </span>
                             </td>
                             <td className="px-4 py-3 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                              {formatDate(poll.createdAt)}
+                              {formatDate(poll.createdAt, viewer)}
                             </td>
                           </tr>
                         ))
@@ -938,7 +954,7 @@ export function AdminPollsRosterPage() {
                     <p>
                       {totalCount === 0
                         ? "No results"
-                        : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${totalCount.toLocaleString()}`}
+                        : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${totalCount.toLocaleString(viewer.locale)}`}
                     </p>
                     <div className="flex items-center gap-2">
                       <button

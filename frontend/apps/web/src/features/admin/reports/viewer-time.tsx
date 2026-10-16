@@ -44,6 +44,27 @@ function useViewerNow(): number {
   return hydrated || renderedAt === null ? Date.now() : renderedAt;
 }
 
+/**
+ * How to format viewer-dependent text where a component will not do (helpers,
+ * attributes, template strings): pass `locale` and `timeZone` to the `Intl` and
+ * `toLocale*` calls and measure relative times from `now`. Until hydration ends
+ * they are the fixed forms above; afterwards `locale` and `timeZone` are
+ * undefined, which means the viewer's own.
+ */
+export type ViewerLocale = {
+  locale: string | undefined;
+  timeZone: string | undefined;
+  now: number;
+};
+
+export function useViewerLocale(): ViewerLocale {
+  const hydrated = useHydrated();
+  const now = useViewerNow();
+  return hydrated
+    ? { locale: undefined, timeZone: undefined, now }
+    : { locale: "en-US", timeZone: "UTC", now };
+}
+
 /** A relative time such as "5m ago", formatted by the report's own helper. */
 export function RelativeTime({
   value,

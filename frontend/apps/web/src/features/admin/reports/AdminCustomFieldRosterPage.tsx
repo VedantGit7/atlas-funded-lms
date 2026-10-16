@@ -24,7 +24,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  CUSTOM_FIELD_ROSTER_DEFAULTS,
   CUSTOM_FIELD_BASE_COLUMN_OPTIONS,
   createCustomFieldReportGroup,
   dateInputToEndIso,
@@ -37,10 +39,14 @@ import {
   type CustomFieldRosterItem,
   type CustomFieldRosterSummary,
   fetchCustomFieldReportDefinitions,
+  type CustomFieldDefinitionsPayload,
+  type CustomFieldRosterPayload,
 } from "./admin-custom-field-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminCustomFieldLearnerDrawer } from "./AdminCustomFieldLearnerDrawer";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { RenderedAtProvider, useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -91,30 +97,35 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCount(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatPct(value: number | null): string {
+function formatPct(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShort(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: viewer.timeZone,
+  });
 }
 
-function formatRelativeDate(value: string | null): string {
+function formatRelativeDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absDays = Math.round(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
   if (absDays < 1) {
     const absHours = Math.round(Math.abs(diffMs) / (1000 * 60 * 60));
@@ -130,7 +141,7 @@ function formatRelativeDate(value: string | null): string {
       "day",
     );
   }
-  return formatDateShort(value);
+  return formatDateShort(value, viewer);
 }
 
 function moneyToCents(value: string): number | undefined {
@@ -179,6 +190,7 @@ function isTruthyBoolean(value: string): boolean {
 }
 
 function CustomFieldCell({ value, fieldType }: { value: string | null; fieldType: string }) {
+  const viewer = useViewerLocale();
   if (value == null || value.trim() === "") {
     return <span className="text-[var(--admin-on-surface-variant)]">—</span>;
   }
@@ -219,7 +231,7 @@ function CustomFieldCell({ value, fieldType }: { value: string | null; fieldType
   if (type === "date" || type === "dat") {
     return (
       <span className="block text-right font-mono text-[13px] tabular-nums text-[var(--admin-on-surface-variant)]">
-        {formatDateShort(value)}
+        {formatDateShort(value, viewer)}
       </span>
     );
   }
@@ -295,6 +307,7 @@ function RosterSkeleton() {
 }
 
 function SummaryBand({ summary }: { summary: CustomFieldRosterSummary }) {
+  const viewer = useViewerLocale();
   const filledShare =
     summary.learnerCount > 0
       ? (summary.learnersWithAllFieldsFilled / summary.learnerCount) * 100
@@ -305,18 +318,18 @@ function SummaryBand({ summary }: { summary: CustomFieldRosterSummary }) {
       <div className="flex flex-col gap-1 bg-[var(--admin-surface)] p-4 md:col-span-1">
         <span className={labelClassName}>Learners</span>
         <span className="font-mono text-[20px] font-medium tabular-nums text-[var(--admin-on-surface)]">
-          {formatCount(summary.learnerCount)}
+          {formatCount(summary.learnerCount, viewer)}
         </span>
         <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-          {formatCount(summary.activeLearnerCount)} active ·{" "}
-          {formatCount(summary.inactiveLearnerCount)} inactive
+          {formatCount(summary.activeLearnerCount, viewer)} active ·{" "}
+          {formatCount(summary.inactiveLearnerCount, viewer)} inactive
         </span>
       </div>
 
       <div className="flex flex-col gap-1 bg-[var(--admin-surface)] p-4">
         <span className={labelClassName}>Custom fields</span>
         <span className="font-mono text-[20px] font-medium tabular-nums text-[var(--admin-on-surface)]">
-          {formatCount(summary.customFieldCount)}
+          {formatCount(summary.customFieldCount, viewer)}
         </span>
       </div>
 
@@ -324,7 +337,7 @@ function SummaryBand({ summary }: { summary: CustomFieldRosterSummary }) {
         <span className={labelClassName}>Average coverage</span>
         <div className="flex items-end gap-2">
           <span className="font-mono text-[20px] font-medium tabular-nums text-[var(--admin-on-surface)]">
-            {formatPct(summary.averageCoveragePct)}
+            {formatPct(summary.averageCoveragePct, viewer)}
           </span>
           <div className="mb-1.5 h-[3px] w-16 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
             <div
@@ -340,10 +353,10 @@ function SummaryBand({ summary }: { summary: CustomFieldRosterSummary }) {
       <div className="flex flex-col gap-1 bg-[var(--admin-surface)] p-4">
         <span className={labelClassName}>Learners w/ 100% fields</span>
         <span className="font-mono text-[20px] font-medium tabular-nums text-[var(--admin-on-surface)]">
-          {formatCount(summary.learnersWithAllFieldsFilled)}
+          {formatCount(summary.learnersWithAllFieldsFilled, viewer)}
         </span>
         <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-          {formatPct(filledShare)}
+          {formatPct(filledShare, viewer)}
         </span>
       </div>
 
@@ -376,61 +389,118 @@ function SummaryBand({ summary }: { summary: CustomFieldRosterSummary }) {
               : "text-[var(--admin-on-surface)]",
           ].join(" ")}
         >
-          {formatCount(summary.fieldsBelow40Coverage)}
+          {formatCount(summary.fieldsBelow40Coverage, viewer)}
         </span>
       </div>
     </div>
   );
 }
 
-export function AdminCustomFieldRosterPage() {
+/**
+ * The definitions the page starts with: the full list first, then the ones
+ * the roster page reported (which win on conflicts), as the two loads merge
+ * when the browser makes them.
+ */
+function mergeInitialDefinitions(
+  definitions: CustomFieldDefinitionColumn[],
+  rosterDefinitions: CustomFieldDefinitionColumn[],
+): CustomFieldDefinitionColumn[] {
+  const byKey = new Map(definitions.map((definition) => [definition.key, definition]));
+  for (const definition of rosterDefinitions) byKey.set(definition.key, definition);
+  return [...byKey.values()];
+}
+
+/** The first eight custom fields are shown as columns until the operator picks otherwise. */
+function seedCustomColumns(
+  current: string[],
+  definitions: CustomFieldDefinitionColumn[],
+): string[] {
+  if (current.some((column) => column.startsWith("cf:"))) return current;
+  return [...current, ...definitions.slice(0, 8).map((definition) => `cf:${definition.key}`)];
+}
+
+type CustomFieldRosterProps = {
+  /** The first roster page, loaded by the server; the first browser load is skipped when present. */
+  initialRoster?: ReportInitialData<CustomFieldRosterPayload> | null;
+  /** The full custom field definition list, loaded by the server. */
+  initialDefinitions?: ReportInitialData<CustomFieldDefinitionsPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminCustomFieldRosterPage(props: CustomFieldRosterProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialRoster?.loadedAt ?? null}>
+      <CustomFieldRoster {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function CustomFieldRoster({ initialRoster, initialDefinitions }: CustomFieldRosterProps) {
   const router = useRouter();
   const searchId = useId();
   const columnsPanelId = useId();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialRosterData] = useState(() => initialRoster ?? null);
+  const [initialDefinitionsData] = useState(() => initialDefinitions ?? null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initialRosterData === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [items, setItems] = useState<CustomFieldRosterItem[]>([]);
-  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinitionColumn[]>([]);
+  const [items, setItems] = useState<CustomFieldRosterItem[]>(initialRosterData?.data.items ?? []);
+  const [fieldDefinitions, setFieldDefinitions] = useState<CustomFieldDefinitionColumn[]>(() =>
+    mergeInitialDefinitions(
+      initialDefinitionsData?.data.items ?? [],
+      initialRosterData?.data.fieldDefinitions ?? [],
+    ),
+  );
 
-  // The full definition list, loaded once. Without it the column picker can only
-  // offer fields that happen to appear in the current page of roster rows.
-  useEffect(() => {
-    void (async () => {
-      try {
-        const response = await fetchCustomFieldReportDefinitions();
-        setFieldDefinitions((previous) => {
-          const byKey = new Map(previous.map((definition) => [definition.key, definition]));
-          for (const definition of response.data.items) {
-            if (!byKey.has(definition.key)) byKey.set(definition.key, definition);
-          }
-          return [...byKey.values()];
-        });
-      } catch {
-        // Non-fatal: the roster response still supplies the columns it knows
-        // about, so the picker degrades to its previous behaviour.
-      }
-    })();
+  // The full definition list. Without it the column picker can only offer
+  // fields that happen to appear in the current page of roster rows.
+  const loadDefinitions = useCallback(async () => {
+    try {
+      const response = await fetchCustomFieldReportDefinitions();
+      setFieldDefinitions((previous) => {
+        const byKey = new Map(previous.map((definition) => [definition.key, definition]));
+        for (const definition of response.data.items) {
+          if (!byKey.has(definition.key)) byKey.set(definition.key, definition);
+        }
+        return [...byKey.values()];
+      });
+    } catch {
+      // Non-fatal: the roster response still supplies the columns it knows
+      // about, so the picker degrades to its previous behaviour.
+    }
     // No cancellation flag: the merge is idempotent and keyed by field key, so a
     // late resolve after unmount changes nothing.
   }, []);
-  const [summary, setSummary] = useState<CustomFieldRosterSummary | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  useReportLoad(loadDefinitions, initialDefinitionsData);
+
+  const [summary, setSummary] = useState<CustomFieldRosterSummary | null>(
+    initialRosterData?.data.summary ?? null,
+  );
+  const [page, setPage] = useState<number>(CUSTOM_FIELD_ROSTER_DEFAULTS.page);
+  const [pageSize, setPageSize] = useState<number>(CUSTOM_FIELD_ROSTER_DEFAULTS.limit);
+  const [totalPages, setTotalPages] = useState(initialRosterData?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initialRosterData?.data.pageInfo.totalCount ?? 0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState("");
   const [signedUpFrom, setSignedUpFrom] = useState("");
   const [signedUpTo, setSignedUpTo] = useState("");
-  const [sortBy, setSortBy] = useState("signed_up_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const [columns, setColumns] = useState<string[]>(
-    CUSTOM_FIELD_BASE_COLUMN_OPTIONS.map((column) => column.key),
+  const [sortBy, setSortBy] = useState<string>(CUSTOM_FIELD_ROSTER_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(CUSTOM_FIELD_ROSTER_DEFAULTS.sortDir);
+  // Server-loaded definitions seed the custom columns in the first render, so
+  // they are in the server HTML instead of appearing after hydration.
+  const [columns, setColumns] = useState<string[]>(() =>
+    fieldDefinitions.length > 0
+      ? seedCustomColumns([...CUSTOM_FIELD_ROSTER_DEFAULTS.columns], fieldDefinitions)
+      : [...CUSTOM_FIELD_ROSTER_DEFAULTS.columns],
   );
   const [extraFilters, setExtraFilters] = useState<ExtraFilter[]>([]);
   const [columnsOpen, setColumnsOpen] = useState(false);
@@ -442,7 +512,7 @@ export function AdminCustomFieldRosterPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectedMembershipId, setSelectedMembershipId] = useState<string | null>(null);
   const [rowMenuId, setRowMenuId] = useState<string | null>(null);
-  const seededCustomColumnsRef = useRef(false);
+  const seededCustomColumnsRef = useRef(fieldDefinitions.length > 0);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -483,60 +553,56 @@ export function AdminCustomFieldRosterPage() {
     [columns],
   );
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchCustomFieldRoster({
-        ...(debouncedSearch ? { q: debouncedSearch } : {}),
-        signedUpFrom: dateInputToStartIso(signedUpFrom),
-        signedUpTo: dateInputToEndIso(signedUpTo),
-        sortBy,
-        sortDir,
-        columns,
-        page,
-        limit: pageSize,
-        ...filterPayload,
-      });
-      setItems(response.data.items);
-      setFieldDefinitions((previous) => {
-        const byKey = new Map(previous.map((definition) => [definition.key, definition]));
-        for (const definition of response.data.fieldDefinitions)
-          byKey.set(definition.key, definition);
-        return [...byKey.values()];
-      });
-      setSummary(response.data.summary);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchCustomFieldRoster({
+          ...(debouncedSearch ? { q: debouncedSearch } : {}),
+          signedUpFrom: dateInputToStartIso(signedUpFrom),
+          signedUpTo: dateInputToEndIso(signedUpTo),
+          sortBy,
+          sortDir,
+          columns,
+          page,
+          limit: pageSize,
+          ...filterPayload,
+        });
+        setItems(response.data.items);
+        setFieldDefinitions((previous) => {
+          const byKey = new Map(previous.map((definition) => [definition.key, definition]));
+          for (const definition of response.data.fieldDefinitions)
+            byKey.set(definition.key, definition);
+          return [...byKey.values()];
+        });
+        setSummary(response.data.summary);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load the learner roster.",
-      );
-      setItems([]);
-      setSummary(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedSearch, filterPayload, page, pageSize, signedUpFrom, signedUpTo, sortBy, sortDir]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load the learner roster.",
+        );
+        setItems([]);
+        setSummary(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [debouncedSearch, filterPayload, page, pageSize, signedUpFrom, signedUpTo, sortBy, sortDir],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initialRosterData);
 
   useEffect(() => {
     if (seededCustomColumnsRef.current || fieldDefinitions.length === 0) return;
     seededCustomColumnsRef.current = true;
-    setColumns((current) => {
-      if (current.some((column) => column.startsWith("cf:"))) return current;
-      return [
-        ...current,
-        ...fieldDefinitions.slice(0, 8).map((definition) => `cf:${definition.key}`),
-      ];
-    });
+    setColumns((current) => seedCustomColumns(current, fieldDefinitions));
   }, [fieldDefinitions]);
 
   useEffect(() => {
@@ -971,7 +1037,9 @@ export function AdminCustomFieldRosterPage() {
             <p className="text-[12px] text-[var(--admin-on-surface-variant)]">
               Will reach{" "}
               <strong className="font-medium text-[var(--admin-on-surface)]">
-                {selectedIds.size > 0 ? formatCount(selectedIds.size) : formatCount(totalCount)}
+                {selectedIds.size > 0
+                  ? formatCount(selectedIds.size, viewer)
+                  : formatCount(totalCount, viewer)}
               </strong>{" "}
               learner
               {selectedIds.size === 1 || (selectedIds.size === 0 && totalCount === 1) ? "" : "s"}
@@ -1007,7 +1075,9 @@ export function AdminCustomFieldRosterPage() {
             <p className="text-[12px] text-[var(--admin-on-surface-variant)]">
               Creates a batch from{" "}
               <strong className="font-medium text-[var(--admin-on-surface)]">
-                {selectedIds.size > 0 ? formatCount(selectedIds.size) : formatCount(totalCount)}
+                {selectedIds.size > 0
+                  ? formatCount(selectedIds.size, viewer)
+                  : formatCount(totalCount, viewer)}
               </strong>{" "}
               matched learners.
             </p>
@@ -1222,7 +1292,7 @@ export function AdminCustomFieldRosterPage() {
               <span className="mr-1 text-[12px] text-[var(--admin-on-surface-variant)]">
                 Matches{" "}
                 <strong className="font-medium text-[var(--admin-on-surface)]">
-                  {formatCount(totalCount)}
+                  {formatCount(totalCount, viewer)}
                 </strong>{" "}
                 learners
               </span>
@@ -1295,7 +1365,7 @@ export function AdminCustomFieldRosterPage() {
           {selectedIds.size > 0 ? (
             <div className="flex h-10 items-center justify-between border-b border-[color-mix(in_srgb,var(--admin-primary)_20%,var(--admin-border))] bg-[var(--admin-primary-container)] px-4">
               <span className="flex items-center gap-2 text-[13px] font-medium text-[var(--admin-primary)]">
-                {formatCount(selectedIds.size)} learners selected
+                {formatCount(selectedIds.size, viewer)} learners selected
               </span>
               <div className="flex items-center gap-3">
                 <button
@@ -1580,22 +1650,24 @@ export function AdminCustomFieldRosterPage() {
                           ) : null}
                           {columns.includes("total_spent_cents") ? (
                             <td className="px-4 text-right font-mono text-[13px] tabular-nums text-[var(--admin-on-surface-variant)]">
-                              {formatMoney(row.totalSpentCents, row.currency)}
+                              {formatMoney(row.totalSpentCents, row.currency, viewer.locale)}
                             </td>
                           ) : null}
                           {columns.includes("last_active_at") ? (
                             <td className="px-4 text-right font-mono text-[13px] tabular-nums text-[var(--admin-on-surface-variant)]">
-                              <span className="block">{formatRelativeDate(row.lastActiveAt)}</span>
+                              <span className="block">
+                                {formatRelativeDate(row.lastActiveAt, viewer)}
+                              </span>
                               {row.lastActiveAt ? (
                                 <span className="block text-[11px] opacity-70">
-                                  {formatDateShort(row.lastActiveAt)}
+                                  {formatDateShort(row.lastActiveAt, viewer)}
                                 </span>
                               ) : null}
                             </td>
                           ) : null}
                           {columns.includes("signed_up_at") ? (
                             <td className="px-4 text-right font-mono text-[13px] tabular-nums">
-                              {formatDateShort(row.signedUpAt)}
+                              {formatDateShort(row.signedUpAt, viewer)}
                             </td>
                           ) : null}
                           {columns.includes("status") ? (
@@ -1699,7 +1771,7 @@ export function AdminCustomFieldRosterPage() {
             <span className="text-[12px] text-[var(--admin-on-surface-variant)]">
               {totalCount === 0
                 ? "No learners"
-                : `Showing ${formatCount(showingFrom)}–${formatCount(showingTo)} of ${formatCount(totalCount)} learners`}
+                : `Showing ${formatCount(showingFrom, viewer)}–${formatCount(showingTo, viewer)} of ${formatCount(totalCount, viewer)} learners`}
             </span>
             <div className="flex items-center gap-2">
               <Select

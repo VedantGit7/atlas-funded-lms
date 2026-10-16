@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const POLL_RESPONDENT_COLUMN_OPTIONS = [
@@ -338,7 +336,7 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return query ? `?${query}` : "";
 }
 
-export async function fetchPollsRoster(filters?: {
+export type PollsRosterFilters = {
   q?: string | undefined;
   status?: string | undefined;
   pollType?: string | undefined;
@@ -347,25 +345,36 @@ export async function fetchPollsRoster(filters?: {
   createdTo?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: PollListItem[];
-      pageInfo: PageInfo;
-      summary: PollsListSummary;
-    };
-  }>(
-    `/api/v1/reports/polls${buildQuery({
-      q: filters?.q,
-      status: filters?.status,
-      pollType: filters?.pollType,
-      view: filters?.view,
-      createdFrom: filters?.createdFrom,
-      createdTo: filters?.createdTo,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+/** What the roster opens on; the server loads the first page with it too. */
+export const POLLS_ROSTER_DEFAULTS = { view: "all", page: 1, limit: 25 } as const satisfies {
+  view: PollsListView;
+  page: number;
+  limit: number;
+};
+
+export function pollsRosterPath(filters?: PollsRosterFilters): string {
+  return `/api/v1/reports/polls${buildQuery({
+    q: filters?.q,
+    status: filters?.status,
+    pollType: filters?.pollType,
+    view: filters?.view,
+    createdFrom: filters?.createdFrom,
+    createdTo: filters?.createdTo,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
+export type PollsRosterPayload = {
+  items: PollListItem[];
+  pageInfo: PageInfo;
+  summary: PollsListSummary;
+};
+
+export async function fetchPollsRoster(filters?: PollsRosterFilters) {
+  return clientApi.get<{ data: PollsRosterPayload }>(pollsRosterPath(filters));
 }
 
 export async function fetchPollDetail(pollId: string) {

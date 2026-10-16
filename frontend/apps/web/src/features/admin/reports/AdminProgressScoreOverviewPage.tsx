@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import {
   AlertTriangle,
   CalendarDays,
@@ -20,13 +20,17 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  PROGRESS_SCORE_DEFAULT_WINDOW,
   fetchProgressScoreOverview,
   type ProgressScoreCompletionBand,
   type ProgressScoreOverview,
   type ProgressScoreOverviewWindow,
 } from "./admin-progress-score-overview-api";
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 const WINDOW_OPTIONS: Array<{ value: ProgressScoreOverviewWindow; label: string }> = [
   { value: "7d", label: "Last 7 days" },
@@ -50,16 +54,16 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatPct(value: number | null): string {
+function formatPct(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCount(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function bandFill(key: ProgressScoreCompletionBand["key"]): string {
@@ -113,37 +117,49 @@ function OverviewLoadingSkeleton() {
   );
 }
 
-export function AdminProgressScoreOverviewPage() {
+export function AdminProgressScoreOverviewPage({
+  initialOverview,
+}: {
+  /** The overview for the default window, loaded by the server; the first browser load is skipped when present. */
+  initialOverview?: ReportInitialData<ProgressScoreOverview> | null;
+} = {}) {
   const router = useRouter();
   const titleId = useId();
-  const [windowKey, setWindowKey] = useState<ProgressScoreOverviewWindow>("30d");
-  const [payload, setPayload] = useState<ProgressScoreOverview | null>(null);
-  const [loading, setLoading] = useState(true);
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialOverview ?? null);
+  const [windowKey, setWindowKey] = useState<ProgressScoreOverviewWindow>(
+    PROGRESS_SCORE_DEFAULT_WINDOW,
+  );
+  const [payload, setPayload] = useState<ProgressScoreOverview | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchProgressScoreOverview({ window: windowKey });
-      setPayload(response.data);
-    } catch (loadError) {
-      setPayload(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchProgressScoreOverview({ window: windowKey });
+        setPayload(response.data);
+      } catch (loadError) {
+        setPayload(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Failed to load progress overview.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [windowKey]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Failed to load progress overview.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [windowKey],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const summary = payload?.summary;
   const empty = Boolean(payload?.empty);
@@ -269,7 +285,7 @@ export function AdminProgressScoreOverviewPage() {
                   </p>
                   <div>
                     <p className="mb-3 font-mono text-[32px] leading-none font-bold text-[var(--admin-on-surface)]">
-                      {formatPct(summary?.averageCompletionPct ?? null)}
+                      {formatPct(summary?.averageCompletionPct ?? null, viewer)}
                     </p>
                     <div className="mb-3 h-[3px] w-full overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                       <div
@@ -305,7 +321,7 @@ export function AdminProgressScoreOverviewPage() {
                     Active enrolments
                   </p>
                   <p className="font-mono text-[28px] leading-none font-bold text-[var(--admin-on-surface)]">
-                    {formatCount(summary?.activeEnrolmentCount ?? 0)}
+                    {formatCount(summary?.activeEnrolmentCount ?? 0, viewer)}
                   </p>
                 </div>
 
@@ -323,7 +339,7 @@ export function AdminProgressScoreOverviewPage() {
                   </p>
                   <div>
                     <p className="mb-2 font-mono text-[28px] leading-none font-bold text-[var(--admin-warning)]">
-                      {formatCount(summary?.learnersAtRiskCount ?? 0)}
+                      {formatCount(summary?.learnersAtRiskCount ?? 0, viewer)}
                     </p>
                     <p className="font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
                       no activity in {summary?.atRiskIdleDays ?? 14} days
@@ -337,10 +353,10 @@ export function AdminProgressScoreOverviewPage() {
                   </p>
                   <div>
                     <p className="mb-2 font-mono text-[28px] leading-none font-bold text-[var(--admin-on-surface)]">
-                      {formatPct(summary?.assessmentPassRatePct ?? null)}
+                      {formatPct(summary?.assessmentPassRatePct ?? null, viewer)}
                     </p>
                     <p className="font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                      {formatCount(summary?.assessmentAttemptCount ?? 0)} attempts
+                      {formatCount(summary?.assessmentAttemptCount ?? 0, viewer)} attempts
                     </p>
                   </div>
                 </div>
@@ -357,7 +373,7 @@ export function AdminProgressScoreOverviewPage() {
                     Awaiting grading
                   </p>
                   <p className="font-mono text-[28px] leading-none font-bold text-[var(--admin-warning)]">
-                    {formatCount(summary?.awaitingGradingCount ?? 0)}
+                    {formatCount(summary?.awaitingGradingCount ?? 0, viewer)}
                   </p>
                 </button>
               </div>
@@ -403,7 +419,7 @@ export function AdminProgressScoreOverviewPage() {
                         />
                         {band.label}
                         <span className="text-[var(--admin-on-surface)]">
-                          {formatCount(band.count)} · {band.sharePct}%
+                          {formatCount(band.count, viewer)} · {band.sharePct}%
                         </span>
                       </li>
                     ))}

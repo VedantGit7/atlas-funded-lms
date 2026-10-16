@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type ProgressScoreOverviewWindow = "7d" | "30d" | "90d";
@@ -33,17 +31,27 @@ export type ProgressScoreOverview = {
   completionDistribution: ProgressScoreCompletionBand[];
 };
 
-export async function fetchProgressScoreOverview(params?: {
+/** The window the overview opens on. */
+export const PROGRESS_SCORE_DEFAULT_WINDOW: ProgressScoreOverviewWindow = "30d";
+
+/** The overview's API path; the server loads the first one with it too. */
+export function progressScoreOverviewPath(params?: {
   window?: ProgressScoreOverviewWindow | undefined;
   from?: string | undefined;
   to?: string | undefined;
-}) {
+}): string {
   const search = new URLSearchParams();
   if (params?.window) search.set("window", params.window);
   if (params?.from) search.set("from", params.from);
   if (params?.to) search.set("to", params.to);
   const query = search.toString();
-  return clientApi.get<{ data: ProgressScoreOverview }>(
-    `/api/v1/reports/progress-score/overview${query ? `?${query}` : ""}`,
-  );
+  return `/api/v1/reports/progress-score/overview${query ? `?${query}` : ""}`;
+}
+
+export async function fetchProgressScoreOverview(params?: {
+  window?: ProgressScoreOverviewWindow | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
+}) {
+  return clientApi.get<{ data: ProgressScoreOverview }>(progressScoreOverviewPath(params));
 }

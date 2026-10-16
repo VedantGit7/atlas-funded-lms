@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const CUSTOM_FIELD_BASE_COLUMN_OPTIONS = [
@@ -65,9 +63,10 @@ export function dateInputToEndIso(value: string): string | undefined {
   return `${trimmed}T23:59:59.999Z`;
 }
 
-export function formatMoney(cents: number, currency = "INR"): string {
+/** `locale` defaults to the viewer's; server-rendered pages pass a fixed one until hydration ends. */
+export function formatMoney(cents: number, currency = "INR", locale?: string): string {
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
       maximumFractionDigits: 2,
@@ -87,7 +86,7 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return query ? `?${query}` : "";
 }
 
-export async function fetchCustomFieldRoster(filters: {
+export type CustomFieldRosterFilters = {
   q?: string | undefined;
   email?: string | undefined;
   status?: string | undefined;
@@ -100,31 +99,44 @@ export async function fetchCustomFieldRoster(filters: {
   columns?: string[] | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: CustomFieldRosterItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      fieldDefinitions: CustomFieldDefinitionColumn[];
-      summary: CustomFieldRosterSummary;
-    };
-  }>(
-    `/api/v1/reports/custom-field/roster${buildQuery({
-      q: filters.q,
-      email: filters.email,
-      status: filters.status,
-      signedUpFrom: filters.signedUpFrom,
-      signedUpTo: filters.signedUpTo,
-      minTotalSpentCents: filters.minTotalSpentCents,
-      maxTotalSpentCents: filters.maxTotalSpentCents,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      columns: filters.columns?.join(","),
-      page: filters.page ?? 1,
-      limit: filters.limit ?? 25,
-    })}`,
-  );
+};
+
+/** What the roster opens on; the server loads the first page with it too. */
+export const CUSTOM_FIELD_ROSTER_DEFAULTS = {
+  sortBy: "signed_up_at",
+  sortDir: "desc",
+  columns: CUSTOM_FIELD_BASE_COLUMN_OPTIONS.map((column) => column.key),
+  page: 1,
+  limit: 25,
+} as const satisfies CustomFieldRosterFilters;
+
+export function customFieldRosterPath(filters: CustomFieldRosterFilters): string {
+  return `/api/v1/reports/custom-field/roster${buildQuery({
+    q: filters.q,
+    email: filters.email,
+    status: filters.status,
+    signedUpFrom: filters.signedUpFrom,
+    signedUpTo: filters.signedUpTo,
+    minTotalSpentCents: filters.minTotalSpentCents,
+    maxTotalSpentCents: filters.maxTotalSpentCents,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    columns: filters.columns?.join(","),
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 25,
+  })}`;
+}
+
+export type CustomFieldRosterPayload = {
+  items: CustomFieldRosterItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+  fieldDefinitions: CustomFieldDefinitionColumn[];
+  summary: CustomFieldRosterSummary;
+};
+
+export async function fetchCustomFieldRoster(filters: CustomFieldRosterFilters) {
+  return clientApi.get<{ data: CustomFieldRosterPayload }>(customFieldRosterPath(filters));
 }
 
 /**
@@ -137,10 +149,12 @@ export async function fetchCustomFieldRoster(filters: {
  * on this page simply could not be chosen. This endpoint exists precisely to
  * decouple the two and had no caller.
  */
+export const CUSTOM_FIELD_DEFINITIONS_PATH = "/api/v1/reports/custom-field/definitions";
+
+export type CustomFieldDefinitionsPayload = { items: CustomFieldDefinitionColumn[] };
+
 export async function fetchCustomFieldReportDefinitions() {
-  return clientApi.get<{ data: { items: CustomFieldDefinitionColumn[] } }>(
-    "/api/v1/reports/custom-field/definitions",
-  );
+  return clientApi.get<{ data: CustomFieldDefinitionsPayload }>(CUSTOM_FIELD_DEFINITIONS_PATH);
 }
 
 export async function exportCustomFieldReport(body: Record<string, unknown>) {

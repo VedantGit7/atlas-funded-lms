@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useId, useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowDown,
@@ -26,7 +26,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  ZOOM_MEETINGS_DEFAULTS,
   connectZoomAccount,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -36,13 +38,18 @@ import {
   type ZoomMeetingListItem,
   type ZoomMeetingsSummary,
   type ZoomMeetingsView,
+  zoomMeetingsPresetRange,
+  type ZoomMeetingsDatePreset,
+  type ZoomMeetingsRosterPayload,
 } from "./admin-zoom-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { RenderedAtProvider, useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 type ModuleTab = "meetings" | "participants" | "unmatched" | "connection" | "exports";
-type DatePreset = "7d" | "30d" | "90d" | "custom";
+type DatePreset = ZoomMeetingsDatePreset;
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = ZOOM_MEETINGS_DEFAULTS.limit;
 
 const secondaryButtonClassName =
   "inline-flex h-8 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -74,55 +81,46 @@ function formatDuration(seconds: number | null | undefined): string {
   return `${String(secs)}s`;
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTime(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShort(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelative(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "never";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "never";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${String(mins)} minute${mins === 1 ? "" : "s"} ago`;
   const hours = Math.floor(mins / 60);
   if (hours < 48) return `${String(hours)} hour${hours === 1 ? "" : "s"} ago`;
-  return formatDateShort(value);
+  return formatDateShort(value, viewer);
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
-}
-
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  const toIso = to.toISOString().slice(0, 10);
-  const fromIso = from.toISOString().slice(0, 10);
-  return { from: fromIso, to: toIso };
+function formatCount(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function StatusPill({
@@ -221,6 +219,7 @@ function ConnectionBanner({
   onCheck: () => void;
   syncing: boolean;
 }) {
+  const viewer = useViewerLocale();
   if (connection.status === "connected") {
     return (
       <div className="flex h-10 flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4">
@@ -229,11 +228,11 @@ function ConnectionBanner({
           <span className="font-semibold">Zoom connected</span>
           <span className="text-[var(--admin-on-surface-variant)]">·</span>
           <span className="text-[var(--admin-on-surface-variant)]">
-            last synced {formatRelative(connection.lastSyncedAt)}
+            last synced {formatRelative(connection.lastSyncedAt, viewer)}
           </span>
           <span className="text-[var(--admin-on-surface-variant)]">·</span>
           <span>
-            {formatCount(connection.meetingsImportedToday)} meeting
+            {formatCount(connection.meetingsImportedToday, viewer)} meeting
             {connection.meetingsImportedToday === 1 ? "" : "s"} imported today
           </span>
         </div>
@@ -266,7 +265,7 @@ function ConnectionBanner({
               <p className="mt-1 text-sm text-[color-mix(in_srgb,var(--admin-danger)_80%,var(--admin-on-surface))]">
                 The data below was last synced on{" "}
                 <span className="font-mono font-medium">
-                  {formatDateShort(connection.lastSyncedAt)}
+                  {formatDateShort(connection.lastSyncedAt, viewer)}
                 </span>{" "}
                 and will not update.
               </p>
@@ -309,36 +308,70 @@ function ConnectionBanner({
   );
 }
 
-export function AdminZoomInsightsRosterPage() {
+type ZoomInsightsRosterProps = {
+  /**
+   * The first page of meetings, loaded by the server over the date range it
+   * counted; the first browser load is skipped when present.
+   */
+  initialMeetings?: ReportInitialDataInRange<ZoomMeetingsRosterPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminZoomInsightsRosterPage(props: ZoomInsightsRosterProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialMeetings?.loadedAt ?? null}>
+      <ZoomInsightsRoster {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ZoomInsightsRoster({ initialMeetings }: ZoomInsightsRosterProps) {
   const router = useRouter();
   const searchId = useId();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialMeetings ?? null);
   const [moduleTab, setModuleTab] = useState<ModuleTab>("meetings");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [meetings, setMeetings] = useState<ZoomMeetingListItem[]>([]);
-  const [connection, setConnection] = useState<ZoomConnectionMeta | null>(null);
-  const [summary, setSummary] = useState<ZoomMeetingsSummary | null>(null);
+  const [meetings, setMeetings] = useState<ZoomMeetingListItem[]>(initial?.data.items ?? []);
+  const [connection, setConnection] = useState<ZoomConnectionMeta | null>(
+    initial?.data.connection ?? null,
+  );
+  const [summary, setSummary] = useState<ZoomMeetingsSummary | null>(initial?.data.summary ?? null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [rowMenuId, setRowMenuId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const [meetingsPage, setMeetingsPage] = useState(1);
-  const [meetingsTotalPages, setMeetingsTotalPages] = useState(0);
-  const [meetingsTotalCount, setMeetingsTotalCount] = useState(0);
+  const [meetingsPage, setMeetingsPage] = useState<number>(ZOOM_MEETINGS_DEFAULTS.page);
+  const [meetingsTotalPages, setMeetingsTotalPages] = useState(
+    initial?.data.pageInfo.totalPages ?? 0,
+  );
+  const [meetingsTotalCount, setMeetingsTotalCount] = useState(
+    initial?.data.pageInfo.totalCount ?? 0,
+  );
 
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
-  const initialRange = useMemo(() => presetToRange("30d"), []);
+  const [datePreset, setDatePreset] = useState<DatePreset>(ZOOM_MEETINGS_DEFAULTS.datePreset);
+  // The server's range when it loaded the meetings, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const initialRange = useMemo(
+    () => initial?.range ?? zoomMeetingsPresetRange(ZOOM_MEETINGS_DEFAULTS.datePreset),
+    [initial],
+  );
   const [startedFrom, setStartedFrom] = useState(initialRange.from);
   const [startedTo, setStartedTo] = useState(initialRange.to);
   const [draftSearch, setDraftSearch] = useState("");
   const [searchQ, setSearchQ] = useState("");
-  const [view, setView] = useState<ZoomMeetingsView>("all");
+  const [view, setView] = useState<ZoomMeetingsView>(ZOOM_MEETINGS_DEFAULTS.view);
   const [sortBy, setSortBy] = useState<"started_at" | "attendance_count" | "duration_seconds">(
-    "started_at",
+    ZOOM_MEETINGS_DEFAULTS.sortBy,
   );
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(ZOOM_MEETINGS_DEFAULTS.sortDir);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const neverConnected =
@@ -348,51 +381,53 @@ export function AdminZoomInsightsRosterPage() {
     meetingsTotalCount === 0 &&
     !searchQ;
 
-  const loadMeetings = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchZoomMeetingsRoster({
-        q: searchQ.trim() || undefined,
-        startedFrom: dateInputToStartIso(startedFrom),
-        startedTo: dateInputToEndIso(startedTo),
-        view,
-        sortBy,
-        sortDir,
-        page: meetingsPage,
-        limit: PAGE_SIZE,
-      });
-      setMeetings(response.data.items);
-      setConnection(response.data.connection);
-      setSummary(response.data.summary);
-      setMeetingsTotalPages(response.data.pageInfo.totalPages);
-      setMeetingsTotalCount(response.data.pageInfo.totalCount);
-      setSelectedIds((current) =>
-        current.filter((id) => response.data.items.some((item) => item.id === id)),
-      );
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadMeetings = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchZoomMeetingsRoster({
+          q: searchQ.trim() || undefined,
+          startedFrom: dateInputToStartIso(startedFrom),
+          startedTo: dateInputToEndIso(startedTo),
+          view,
+          sortBy,
+          sortDir,
+          page: meetingsPage,
+          limit: PAGE_SIZE,
+        });
+        setMeetings(response.data.items);
+        setConnection(response.data.connection);
+        setSummary(response.data.summary);
+        setMeetingsTotalPages(response.data.pageInfo.totalPages);
+        setMeetingsTotalCount(response.data.pageInfo.totalCount);
+        setSelectedIds((current) =>
+          current.filter((id) => response.data.items.some((item) => item.id === id)),
+        );
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load Zoom meetings.",
-      );
-      setMeetings([]);
-      setSummary(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [meetingsPage, searchQ, sortBy, sortDir, startedFrom, startedTo, view]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load Zoom meetings.",
+        );
+        setMeetings([]);
+        setSummary(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [meetingsPage, searchQ, sortBy, sortDir, startedFrom, startedTo, view],
+  );
 
-  useEffect(() => {
-    void loadMeetings();
-  }, [loadMeetings]);
+  useReportLoad(loadMeetings, initial);
 
   function applyDatePreset(preset: DatePreset) {
     setDatePreset(preset);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = zoomMeetingsPresetRange(preset);
     setStartedFrom(range.from);
     setStartedTo(range.to);
     setMeetingsPage(1);
@@ -649,7 +684,7 @@ export function AdminZoomInsightsRosterPage() {
                 >
                   <SummaryCell
                     label="Meetings"
-                    value={formatCount(summary.meetingCount)}
+                    value={formatCount(summary.meetingCount, viewer)}
                     caption={
                       datePreset === "30d"
                         ? "in the last 30 days"
@@ -663,8 +698,8 @@ export function AdminZoomInsightsRosterPage() {
                   />
                   <SummaryCell
                     label="Participants"
-                    value={formatCount(summary.participantCount)}
-                    caption={`${formatCount(summary.matchedCount)} matched · ${formatCount(summary.unmatchedCount)} unmatched`}
+                    value={formatCount(summary.participantCount, viewer)}
+                    caption={`${formatCount(summary.matchedCount, viewer)} matched · ${formatCount(summary.unmatchedCount, viewer)} unmatched`}
                   />
                   <SummaryCell
                     label="Total attendance"
@@ -858,11 +893,11 @@ export function AdminZoomInsightsRosterPage() {
                     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-2 text-sm">
                       <p className="text-[var(--admin-on-surface)]">
                         <span className="font-mono font-medium">
-                          {formatCount(selectedIds.length)}
+                          {formatCount(selectedIds.length, viewer)}
                         </span>{" "}
                         meetings selected ·{" "}
                         <span className="font-mono font-medium">
-                          {formatCount(selectedParticipantCount)}
+                          {formatCount(selectedParticipantCount, viewer)}
                         </span>{" "}
                         participants
                       </p>
@@ -1029,7 +1064,7 @@ export function AdminZoomInsightsRosterPage() {
                                 </div>
                               </td>
                               <td className="px-4 font-mono text-[13px] text-[var(--admin-on-surface)]">
-                                {formatDateTime(meeting.startedAt)}
+                                {formatDateTime(meeting.startedAt, viewer)}
                               </td>
                               <td className="px-4 text-right font-mono text-[13px] text-[var(--admin-on-surface)]">
                                 {formatDuration(meeting.durationSeconds)}
@@ -1042,11 +1077,11 @@ export function AdminZoomInsightsRosterPage() {
                                 ) : (
                                   <div className="flex items-center gap-2">
                                     <span className="font-mono text-[13px]">
-                                      {formatCount(meeting.attendanceCount)}
+                                      {formatCount(meeting.attendanceCount, viewer)}
                                     </span>
                                     {unmatched ? (
                                       <StatusPill tone="warning">
-                                        {formatCount(meeting.unmatchedCount)} unmatched
+                                        {formatCount(meeting.unmatchedCount, viewer)} unmatched
                                       </StatusPill>
                                     ) : (
                                       <CoverageBar ratio={1} />
@@ -1115,8 +1150,8 @@ export function AdminZoomInsightsRosterPage() {
 
                   <div className="flex h-10 items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 text-xs text-[var(--admin-on-surface-variant)]">
                     <span>
-                      Showing {formatCount(rangeStart)}–{formatCount(rangeEnd)} of{" "}
-                      {formatCount(meetingsTotalCount)} meetings
+                      Showing {formatCount(rangeStart, viewer)}–{formatCount(rangeEnd, viewer)} of{" "}
+                      {formatCount(meetingsTotalCount, viewer)} meetings
                     </span>
                     <div className="flex gap-1">
                       <button
