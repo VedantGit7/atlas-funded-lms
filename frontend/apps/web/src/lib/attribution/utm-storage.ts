@@ -74,25 +74,32 @@ export function clearStoredUtmAttribution(): void {
   window.localStorage.removeItem(UTM_STORAGE_KEY);
 }
 
+export function storedUtmFields() {
+  const stored = readStoredUtmAttribution();
+  return {
+    utmSource: stored?.utmSource,
+    utmMedium: stored?.utmMedium,
+    utmCampaign: stored?.utmCampaign,
+    utmTerm: stored?.utmTerm,
+    utmContent: stored?.utmContent,
+  };
+}
+
+/** Events a visitor who is not signed in can report. */
+export type PublicAttributionEventType = "visited" | "started_diagnostic" | "signup";
+
+/**
+ * Reports an anonymous visitor's event. The server records it against no
+ * member; it never takes a membership from the browser.
+ */
 export async function sendAttributionEvent(args: {
-  eventType: string;
-  membershipId?: string;
+  eventType: PublicAttributionEventType;
   clearAfterSend?: boolean;
 }): Promise<void> {
-  const stored = readStoredUtmAttribution();
-
   await fetch("/api/v1/public/sales/attribution", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      eventType: args.eventType,
-      membershipId: args.membershipId,
-      utmSource: stored?.utmSource,
-      utmMedium: stored?.utmMedium,
-      utmCampaign: stored?.utmCampaign,
-      utmTerm: stored?.utmTerm,
-      utmContent: stored?.utmContent,
-    }),
+    body: JSON.stringify({ eventType: args.eventType, ...storedUtmFields() }),
   });
 
   if (args.clearAfterSend) {
@@ -100,18 +107,10 @@ export async function sendAttributionEvent(args: {
   }
 }
 
-export async function sendSignupAttributionEvent(args?: {
-  eventType?: string;
-  membershipId?: string;
-}): Promise<void> {
-  const stored = readStoredUtmAttribution();
-  if (!stored) {
+export async function sendSignupAttributionEvent(): Promise<void> {
+  if (!readStoredUtmAttribution()) {
     return;
   }
 
-  await sendAttributionEvent({
-    eventType: args?.eventType ?? "signup",
-    ...(args?.membershipId !== undefined ? { membershipId: args.membershipId } : {}),
-    clearAfterSend: true,
-  });
+  await sendAttributionEvent({ eventType: "signup", clearAfterSend: true });
 }

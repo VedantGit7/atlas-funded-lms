@@ -122,22 +122,28 @@ function toDto(row: AttributionEventRow) {
   };
 }
 
+/**
+ * Records an attribution event for the caller. The public route validates its
+ * narrower body (`createPublicAttributionEventBodySchema`) first; both bodies
+ * pass this parse.
+ */
 export async function createAttributionEvent(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
   const body = createAttributionEventBodySchema.parse(rawBody);
   const row = await salesMarketingRepository.insertEvent(tx, {
     eventType: body.eventType,
-    // An anonymous visit (the public route runs as the system actor) belongs to
-    // no member. The system sentinel is not a membership, and the composite
-    // (tenant_id, membership_id) foreign key rejects it, so record NULL.
-    membershipId:
-      body.membershipId ?? (isSystemActor(ctx.actorMembershipId) ? null : ctx.actorMembershipId),
+    // The event is always the caller's own. An anonymous visit (the public
+    // route runs as the system actor) belongs to no member: the system
+    // sentinel is not a membership, and the composite (tenant_id,
+    // membership_id) foreign key rejects it, so record NULL.
+    membershipId: isSystemActor(ctx.actorMembershipId) ? null : ctx.actorMembershipId,
     utmSource: body.utmSource ?? null,
     utmMedium: body.utmMedium ?? null,
     utmCampaign: body.utmCampaign ?? null,
     utmTerm: body.utmTerm ?? null,
     utmContent: body.utmContent ?? null,
-    revenueCents: body.revenueCents ?? null,
-    currency: body.currency ?? null,
+    // Revenue is never taken from the browser.
+    revenueCents: null,
+    currency: null,
     ...(body.metadataJson !== undefined ? { metadataJson: body.metadataJson } : {}),
     ...(body.occurredAt ? { occurredAt: new Date(body.occurredAt) } : {}),
   });

@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ClientApiError, clientApi, createClientUuid } from "../../lib/client-api";
-import { sendAttributionEvent } from "../../lib/attribution/utm-storage";
+import { sendMemberAttributionEvent } from "../../lib/attribution/member-attribution";
 import {
   formatMoney,
   type PriceBreakdown,
@@ -187,7 +187,7 @@ export function EnrollCourseDialog({
     setError(null);
     try {
       await clientApi.post("/api/v1/enrollments", { courseId }, "enrollment-create");
-      void sendAttributionEvent({ eventType: "enrolled", clearAfterSend: true });
+      void sendMemberAttributionEvent({ eventType: "enrolled", clearAfterSend: true });
       setOpen(false);
       router.refresh();
     } catch (err) {
@@ -272,7 +272,7 @@ export function EnrollCourseDialog({
         return;
       }
 
-      void sendAttributionEvent({ eventType: "enrolled", clearAfterSend: true });
+      void sendMemberAttributionEvent({ eventType: "enrolled", clearAfterSend: true });
       setOpen(false);
       router.refresh();
     } catch (err) {

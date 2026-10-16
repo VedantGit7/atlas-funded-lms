@@ -167,7 +167,7 @@ export function SignupForm() {
 
   useEffect(() => {
     if (state.verificationRequired) {
-      void sendSignupAttributionEvent({ eventType: "signup" });
+      void sendSignupAttributionEvent();
       const params = new URLSearchParams({ status: "sent" });
       if (state.email) {
         params.set("email", state.email);

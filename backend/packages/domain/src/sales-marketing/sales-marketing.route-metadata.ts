@@ -135,12 +135,16 @@ export const createAttributionEventMetadata = {
   auditExempt: "client_telemetry",
   rateLimit: "authenticatedTenantWrite",
   idempotency: "none",
+  // A member records events about themselves only, so the caller owns the
+  // resource. Without an owner, profile.update (owner-bound) refused every
+  // learner and only roles that bypass resource checks could post.
   resourceLoader: async ({ ctx }: { ctx: LoaderCtx }) =>
     Promise.resolve(
       createTenantResourceRef({
         type: "membership",
         id: ctx.actorMembershipId,
         tenantId: ctx.tenantId,
+        ownerMembershipId: ctx.actorMembershipId,
       }),
     ),
 } satisfies RouteMetadata;
