@@ -6,19 +6,47 @@ import {
 } from "./attribution-retention";
 import { ATTRIBUTION_ANOMALY_KINDS, ATTRIBUTION_GAP_KINDS } from "./sales-marketing.repository";
 
+const attributionUtmFields = {
+  utmSource: z.string().max(128).optional(),
+  utmMedium: z.string().max(128).optional(),
+  utmCampaign: z.string().max(128).optional(),
+  utmTerm: z.string().max(128).optional(),
+  utmContent: z.string().max(128).optional(),
+};
+
+/*
+ * Attribution events are reported by the browser, so the body never chooses
+ * whose event it is, and never carries revenue: the membership is always the
+ * caller (none for an anonymous visitor), and revenue belongs to payments.
+ */
+
+/** A signed-in member reporting an event about themselves. */
 export const createAttributionEventBodySchema = rejectClientTenantFields
   .extend({
     eventType: z.string().min(1).max(64),
-    membershipId: z.uuid().optional(),
-    utmSource: z.string().max(128).optional(),
-    utmMedium: z.string().max(128).optional(),
-    utmCampaign: z.string().max(128).optional(),
-    utmTerm: z.string().max(128).optional(),
-    utmContent: z.string().max(128).optional(),
-    revenueCents: z.number().int().min(0).optional(),
-    currency: z.string().length(3).optional(),
+    ...attributionUtmFields,
     metadataJson: z.record(z.string(), z.unknown()).optional(),
     occurredAt: z.iso.datetime().optional(),
+  })
+  .strict();
+
+/**
+ * The events the public site reports for visitors who are not signed in.
+ * "enrolled" now goes to the signed-in route; it stays here for pages loaded
+ * before that change, which still post it anonymously.
+ */
+export const PUBLIC_ATTRIBUTION_EVENT_TYPES = [
+  "visited",
+  "started_diagnostic",
+  "signup",
+  "enrolled",
+] as const;
+
+/** An anonymous visitor's event: one of the public event types and its campaign fields. */
+export const createPublicAttributionEventBodySchema = rejectClientTenantFields
+  .extend({
+    eventType: z.enum(PUBLIC_ATTRIBUTION_EVENT_TYPES),
+    ...attributionUtmFields,
   })
   .strict();
 
