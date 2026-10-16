@@ -1,5 +1,5 @@
 import { clientApi } from "../client-api";
-import { clearStoredUtmAttribution, storedUtmFields } from "./utm-storage";
+import { clearStoredUtmAttribution, currentUtmFields } from "./utm-storage";
 
 /**
  * Reports an event for the signed-in member. The server attributes it to the
@@ -14,7 +14,7 @@ export async function sendMemberAttributionEvent(args: {
   try {
     await clientApi.post(
       "/api/v1/sales/attribution",
-      { eventType: args.eventType, ...storedUtmFields() },
+      { eventType: args.eventType, ...currentUtmFields() },
       "attribution-event",
       { silent: true },
     );

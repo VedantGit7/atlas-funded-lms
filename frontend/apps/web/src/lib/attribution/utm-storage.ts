@@ -41,12 +41,20 @@ export function captureUtmFromSearchParams(
   };
 }
 
+// Storage can be blocked (privacy settings, some private windows) and then
+// throws. Attribution is best-effort, so it must never stop the page or the
+// event from going out.
+
 export function persistUtmAttribution(attribution: StoredUtmAttribution): void {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(attribution));
+  try {
+    window.localStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(attribution));
+  } catch {
+    // Storage unavailable: the event still carries the current address's UTM.
+  }
 }
 
 export function readStoredUtmAttribution(): StoredUtmAttribution | null {
@@ -54,13 +62,9 @@ export function readStoredUtmAttribution(): StoredUtmAttribution | null {
     return null;
   }
 
-  const raw = window.localStorage.getItem(UTM_STORAGE_KEY);
-  if (!raw) {
-    return null;
-  }
-
   try {
-    return JSON.parse(raw) as StoredUtmAttribution;
+    const raw = window.localStorage.getItem(UTM_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as StoredUtmAttribution) : null;
   } catch {
     return null;
   }
@@ -71,17 +75,51 @@ export function clearStoredUtmAttribution(): void {
     return;
   }
 
-  window.localStorage.removeItem(UTM_STORAGE_KEY);
+  try {
+    window.localStorage.removeItem(UTM_STORAGE_KEY);
+  } catch {
+    // Storage unavailable: nothing was stored.
+  }
 }
 
-export function storedUtmFields() {
-  const stored = readStoredUtmAttribution();
+/**
+ * The campaign in the current address, if it has one. Every event checks it
+ * before sending, so a visit carries the UTM it arrived with on any page:
+ * pages outside the public layout (such as the home page) have no capture
+ * effect, and inside it the effect may run after the page's own event.
+ */
+function utmFromCurrentUrl(): StoredUtmAttribution | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return captureUtmFromSearchParams(new URLSearchParams(window.location.search));
+}
+
+/**
+ * Saves the current address's campaign, if it has one, so later events
+ * (signup, enrolment) keep it after the visitor navigates on. An address
+ * without UTM keeps the campaign saved earlier.
+ */
+function rememberUtmFromCurrentUrl(): void {
+  const fromUrl = utmFromCurrentUrl();
+  if (fromUrl) {
+    persistUtmAttribution(fromUrl);
+  }
+}
+
+/**
+ * The campaign an event reports: the current address's UTM when it has any,
+ * otherwise the one saved from an earlier page. Saves the current one too.
+ */
+export function currentUtmFields() {
+  rememberUtmFromCurrentUrl();
+  const attribution = utmFromCurrentUrl() ?? readStoredUtmAttribution();
   return {
-    utmSource: stored?.utmSource,
-    utmMedium: stored?.utmMedium,
-    utmCampaign: stored?.utmCampaign,
-    utmTerm: stored?.utmTerm,
-    utmContent: stored?.utmContent,
+    utmSource: attribution?.utmSource,
+    utmMedium: attribution?.utmMedium,
+    utmCampaign: attribution?.utmCampaign,
+    utmTerm: attribution?.utmTerm,
+    utmContent: attribution?.utmContent,
   };
 }
 
@@ -99,7 +137,7 @@ export async function sendAttributionEvent(args: {
   await fetch("/api/v1/public/sales/attribution", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ eventType: args.eventType, ...storedUtmFields() }),
+    body: JSON.stringify({ eventType: args.eventType, ...currentUtmFields() }),
   });
 
   if (args.clearAfterSend) {
@@ -107,8 +145,9 @@ export async function sendAttributionEvent(args: {
   }
 }
 
+/** Reports a signup when the visitor came from a campaign; plain signups send nothing. */
 export async function sendSignupAttributionEvent(): Promise<void> {
-  if (!readStoredUtmAttribution()) {
+  if (!utmFromCurrentUrl() && !readStoredUtmAttribution()) {
     return;
   }
 
