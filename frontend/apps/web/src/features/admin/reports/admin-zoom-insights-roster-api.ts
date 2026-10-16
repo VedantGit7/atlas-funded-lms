@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const ZOOM_PARTICIPANT_COLUMN_OPTIONS = [
@@ -123,7 +121,24 @@ function buildQuery(params: Record<string, string | number | boolean | undefined
   return query ? `?${query}` : "";
 }
 
-export async function fetchZoomMeetingsRoster(filters?: {
+export type ZoomMeetingsDatePreset = "7d" | "30d" | "90d" | "custom";
+
+/** A preset's date inputs (YYYY-MM-DD), counted back from `now` in the local calendar. */
+export function zoomMeetingsPresetRange(
+  preset: ZoomMeetingsDatePreset,
+  now: Date = new Date(),
+): { from: string; to: string } {
+  const to = new Date(now);
+  const from = new Date(now);
+  if (preset === "7d") from.setDate(from.getDate() - 7);
+  else if (preset === "30d") from.setDate(from.getDate() - 30);
+  else if (preset === "90d") from.setDate(from.getDate() - 90);
+  const toIso = to.toISOString().slice(0, 10);
+  const fromIso = from.toISOString().slice(0, 10);
+  return { from: fromIso, to: toIso };
+}
+
+export type ZoomMeetingsRosterFilters = {
   q?: string | undefined;
   startedFrom?: string | undefined;
   startedTo?: string | undefined;
@@ -132,27 +147,46 @@ export async function fetchZoomMeetingsRoster(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: ZoomMeetingListItem[];
-      pageInfo: PageInfo;
-      connectionStatus: ZoomConnectionStatus;
-      connection: ZoomConnectionMeta;
-      summary: ZoomMeetingsSummary;
-    };
-  }>(
-    `/api/v1/reports/zoom-insights${buildQuery({
-      q: filters?.q,
-      startedFrom: filters?.startedFrom,
-      startedTo: filters?.startedTo,
-      view: filters?.view ?? "all",
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 50,
-    })}`,
-  );
+};
+
+/**
+ * What the meetings list opens on, over the last 30 days; the server loads
+ * the first page with it too.
+ */
+export const ZOOM_MEETINGS_DEFAULTS = {
+  datePreset: "30d",
+  view: "all",
+  sortBy: "started_at",
+  sortDir: "desc",
+  page: 1,
+  limit: 50,
+} as const satisfies Omit<ZoomMeetingsRosterFilters, "q" | "startedFrom" | "startedTo"> & {
+  datePreset: ZoomMeetingsDatePreset;
+};
+
+export function zoomMeetingsRosterPath(filters?: ZoomMeetingsRosterFilters): string {
+  return `/api/v1/reports/zoom-insights${buildQuery({
+    q: filters?.q,
+    startedFrom: filters?.startedFrom,
+    startedTo: filters?.startedTo,
+    view: filters?.view ?? "all",
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 50,
+  })}`;
+}
+
+export type ZoomMeetingsRosterPayload = {
+  items: ZoomMeetingListItem[];
+  pageInfo: PageInfo;
+  connectionStatus: ZoomConnectionStatus;
+  connection: ZoomConnectionMeta;
+  summary: ZoomMeetingsSummary;
+};
+
+export async function fetchZoomMeetingsRoster(filters?: ZoomMeetingsRosterFilters) {
+  return clientApi.get<{ data: ZoomMeetingsRosterPayload }>(zoomMeetingsRosterPath(filters));
 }
 
 export async function fetchZoomMeetingDetail(meetingId: string) {

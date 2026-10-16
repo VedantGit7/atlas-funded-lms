@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const EXPORTS_HISTORY_COLUMN_OPTIONS = [
@@ -128,31 +126,63 @@ export type ExportsHistoryFilters = {
   limit?: number | undefined;
 };
 
+export type ExportsHistoryDatePreset = "7d" | "30d" | "90d" | "custom";
+
+/** A preset's date inputs (YYYY-MM-DD): the last 7, 30 or 90 UTC days up to and including `now`'s. */
+export function exportsHistoryPresetRange(
+  preset: Exclude<ExportsHistoryDatePreset, "custom">,
+  now: Date = new Date(),
+): { from: string; to: string } {
+  const to = new Date(now);
+  const from = new Date(now);
+  const days = preset === "7d" ? 7 : preset === "90d" ? 90 : 30;
+  from.setUTCDate(from.getUTCDate() - (days - 1));
+  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
+}
+
+/**
+ * What the history opens on, over the last 30 days; the server loads the
+ * first page with it too.
+ */
+export const EXPORTS_HISTORY_DEFAULTS = {
+  datePreset: "30d",
+  columns: ["status", "created_at", "definition_title", "row_count", "format", "requested_by_name"],
+  page: 1,
+  limit: 50,
+} as const satisfies {
+  datePreset: Exclude<ExportsHistoryDatePreset, "custom">;
+  columns: readonly ExportsHistoryColumnKey[];
+  page: number;
+  limit: number;
+};
+
+export type ExportsHistoryPayload = {
+  items: ExportsHistoryItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+  summary: ExportsHistorySummary;
+};
+
+export function exportsHistoryPath(filters?: ExportsHistoryFilters): string {
+  return `/api/v1/reports/exports${buildQuery({
+    sourceType: filters?.sourceType,
+    status: filters?.status,
+    definitionKey: filters?.definitionKey,
+    format: filters?.format,
+    fileState: filters?.fileState,
+    mine: filters?.mine === true ? true : undefined,
+    pendingOnly: filters?.pendingOnly === true ? true : undefined,
+    createdFrom: filters?.createdFrom,
+    createdTo: filters?.createdTo,
+    q: filters?.q,
+    columns: filters?.columns?.join(","),
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 50,
+  })}`;
+}
+
 export async function fetchExportsHistory(filters?: ExportsHistoryFilters) {
-  return clientApi.get<{
-    data: {
-      items: ExportsHistoryItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      summary: ExportsHistorySummary;
-    };
-  }>(
-    `/api/v1/reports/exports${buildQuery({
-      sourceType: filters?.sourceType,
-      status: filters?.status,
-      definitionKey: filters?.definitionKey,
-      format: filters?.format,
-      fileState: filters?.fileState,
-      mine: filters?.mine === true ? true : undefined,
-      pendingOnly: filters?.pendingOnly === true ? true : undefined,
-      createdFrom: filters?.createdFrom,
-      createdTo: filters?.createdTo,
-      q: filters?.q,
-      columns: filters?.columns?.join(","),
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 50,
-    })}`,
-  );
+  return clientApi.get<{ data: ExportsHistoryPayload }>(exportsHistoryPath(filters));
 }
 
 export async function exportExportsHistoryReport(body: {

@@ -29,7 +29,9 @@ import {
   inlineExpandClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError, createClientUuid } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  ENROLLMENT_ROSTER_DEFAULTS,
   createEnrollmentReportGroup,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -41,8 +43,11 @@ import {
   type EnrollmentOverview,
   type EnrollmentRosterColumnKey,
   type EnrollmentRosterItem,
+  type EnrollmentRosterResponse,
 } from "./admin-enrollments-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -70,7 +75,7 @@ const FILTER_FIELD_OPTIONS = [
 const selectTriggerClassName =
   "w-full border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = ENROLLMENT_ROSTER_DEFAULTS.limit;
 
 const TYPE_COLORS: Record<string, string> = {
   paid: "var(--admin-primary)",
@@ -85,21 +90,22 @@ type ExtraFilter = {
   value: string;
 };
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatDateInputLabel(from: string, to: string): string {
+function formatDateInputLabel(from: string, to: string, viewer: ViewerLocale): string {
   if (!from && !to) return "Last 30 days";
   const fromLabel = from
-    ? new Date(`${from}T00:00:00.000Z`).toLocaleDateString(undefined, {
+    ? new Date(`${from}T00:00:00.000Z`).toLocaleDateString(viewer.locale, {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -107,7 +113,7 @@ function formatDateInputLabel(from: string, to: string): string {
       })
     : "Start";
   const toLabel = to
-    ? new Date(`${to}T00:00:00.000Z`).toLocaleDateString(undefined, {
+    ? new Date(`${to}T00:00:00.000Z`).toLocaleDateString(viewer.locale, {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -259,18 +265,32 @@ function TypeDonut({ items }: { items: EnrollmentOverview["byType"] }) {
   );
 }
 
-export function AdminEnrollmentsRosterPage() {
+export function AdminEnrollmentsRosterPage({
+  initialRoster,
+  initialOverview,
+}: {
+  /** The first roster page, loaded by the server; the first browser load is skipped when present. */
+  initialRoster?: ReportInitialData<EnrollmentRosterResponse["data"]> | null;
+  /** The overview for the same (unfiltered) enrollments, loaded by the server. */
+  initialOverview?: ReportInitialData<EnrollmentOverview> | null;
+} = {}) {
   const router = useRouter();
   const columnsMenuId = useId();
   const columnsRef = useRef<HTMLDivElement>(null);
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialRosterData] = useState(() => initialRoster ?? null);
+  const [initialOverviewData] = useState(() => initialOverview ?? null);
 
-  const [items, setItems] = useState<EnrollmentRosterItem[]>([]);
-  const [overview, setOverview] = useState<EnrollmentOverview | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [overviewLoading, setOverviewLoading] = useState(true);
+  const [items, setItems] = useState<EnrollmentRosterItem[]>(initialRosterData?.data.items ?? []);
+  const [overview, setOverview] = useState<EnrollmentOverview | null>(
+    initialOverviewData?.data ?? null,
+  );
+  const [totalCount, setTotalCount] = useState(initialRosterData?.data.pageInfo.totalCount ?? 0);
+  const [totalPages, setTotalPages] = useState(initialRosterData?.data.pageInfo.totalPages ?? 0);
+  const [page, setPage] = useState<number>(ENROLLMENT_ROSTER_DEFAULTS.page);
+  const [loading, setLoading] = useState(initialRosterData === null);
+  const [overviewLoading, setOverviewLoading] = useState(initialOverviewData === null);
   const [busy, setBusy] = useState(false);
   const [exportProgress, setExportProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -279,12 +299,14 @@ export function AdminEnrollmentsRosterPage() {
 
   const [enrolledFrom, setEnrolledFrom] = useState("");
   const [enrolledTo, setEnrolledTo] = useState("");
-  const [selectedColumns, setSelectedColumns] = useState<EnrollmentRosterColumnKey[]>(
-    ENROLLMENT_ROSTER_COLUMN_OPTIONS.map((column) => column.key),
-  );
+  const [selectedColumns, setSelectedColumns] = useState<EnrollmentRosterColumnKey[]>([
+    ...ENROLLMENT_ROSTER_DEFAULTS.columns,
+  ]);
   const [extraFilters, setExtraFilters] = useState<ExtraFilter[]>([]);
-  const [sortBy, setSortBy] = useState<"enrolled_at" | "expires_at">("enrolled_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<"enrolled_at" | "expires_at">(
+    ENROLLMENT_ROSTER_DEFAULTS.sortBy,
+  );
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(ENROLLMENT_ROSTER_DEFAULTS.sortDir);
 
   const [messageOpen, setMessageOpen] = useState(false);
   const [messageSubject, setMessageSubject] = useState("");
@@ -318,63 +340,66 @@ export function AdminEnrollmentsRosterPage() {
     [activeEmail, activeEnrolledType, activeStatus, enrolledFrom, enrolledTo],
   );
 
-  const loadOverview = useCallback(async () => {
-    setOverviewLoading(true);
-    try {
-      const response = await fetchEnrollmentOverview(filterPayload);
-      setOverview(response.data);
-    } catch (loadError) {
-      setOverview(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadOverview = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setOverviewLoading(true);
+      try {
+        const response = await fetchEnrollmentOverview(filterPayload);
+        setOverview(response.data);
+      } catch (loadError) {
+        setOverview(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load enrollment overview.",
-      );
-    } finally {
-      setOverviewLoading(false);
-    }
-  }, [filterPayload]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load enrollment overview.",
+        );
+      } finally {
+        if (!soft) setOverviewLoading(false);
+      }
+    },
+    [filterPayload],
+  );
 
-  const loadRoster = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchEnrollmentRoster({
-        ...filterPayload,
-        sortBy,
-        sortDir,
-        columns: selectedColumns,
-        page,
-        limit: PAGE_SIZE,
-      });
-      setItems(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadRoster = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchEnrollmentRoster({
+          ...filterPayload,
+          sortBy,
+          sortDir,
+          columns: selectedColumns,
+          page,
+          limit: PAGE_SIZE,
+        });
+        setItems(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load enrollments.",
-      );
-      setItems([]);
-      setTotalCount(0);
-      setTotalPages(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [filterPayload, page, selectedColumns, sortBy, sortDir]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load enrollments.",
+        );
+        setItems([]);
+        setTotalCount(0);
+        setTotalPages(0);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [filterPayload, page, selectedColumns, sortBy, sortDir],
+  );
 
-  useEffect(() => {
-    void loadRoster();
-  }, [loadRoster]);
-
-  useEffect(() => {
-    void loadOverview();
-  }, [loadOverview]);
+  useReportLoad(loadRoster, initialRosterData);
+  useReportLoad(loadOverview, initialOverviewData);
 
   useEffect(() => {
     if (!columnsOpen) return;
@@ -540,6 +565,7 @@ export function AdminEnrollmentsRosterPage() {
   const rangeEnd = Math.min(page * PAGE_SIZE, totalCount);
   const changePercent = overview?.summary.changePercent ?? null;
   const changePositive = changePercent !== null && changePercent >= 0;
+  const activeCountLabel = (overview?.summary.activeCount ?? 0).toLocaleString(viewer.locale);
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-8">
@@ -564,11 +590,13 @@ export function AdminEnrollmentsRosterPage() {
           <h2 className="text-base font-bold text-[var(--admin-on-surface)]">Enrollment KPIs</h2>
           <div className="flex flex-wrap gap-2 text-xs font-semibold text-[var(--admin-on-surface-variant)]">
             <span className="rounded-md bg-[var(--admin-surface-low)] px-2 py-1">
-              Active {overviewLoading ? "-" : (overview?.summary.activeCount ?? 0).toLocaleString()}
+              Active {overviewLoading ? "-" : activeCountLabel}
             </span>
             <span className="rounded-md bg-[color-mix(in_srgb,var(--admin-warning)_12%,var(--admin-surface))] px-2 py-1 text-[var(--admin-warning)]">
               Expiring 7d{" "}
-              {overviewLoading ? "-" : (overview?.summary.expiringSoonCount ?? 0).toLocaleString()}
+              {overviewLoading
+                ? "-"
+                : (overview?.summary.expiringSoonCount ?? 0).toLocaleString(viewer.locale)}
             </span>
           </div>
         </div>
@@ -601,7 +629,7 @@ export function AdminEnrollmentsRosterPage() {
               <div className="h-10 w-40 animate-pulse rounded-lg bg-[var(--admin-surface-high)]" />
             ) : (
               <div className="mb-6 text-[40px] font-black leading-none text-[var(--admin-on-surface)]">
-                {(overview?.summary.totalCount ?? 0).toLocaleString()}
+                {(overview?.summary.totalCount ?? 0).toLocaleString(viewer.locale)}
               </div>
             )}
             {overviewLoading ? (
@@ -659,7 +687,7 @@ export function AdminEnrollmentsRosterPage() {
                 aria-hidden="true"
               />
               <span className="text-[13px] font-semibold text-[var(--admin-on-surface)]">
-                {formatDateInputLabel(enrolledFrom, enrolledTo)}
+                {formatDateInputLabel(enrolledFrom, enrolledTo, viewer)}
               </span>
               <label className="sr-only" htmlFor="enroll-from">
                 Enrolled from
@@ -1025,7 +1053,7 @@ export function AdminEnrollmentsRosterPage() {
                               key={`${item.id}-${column.key}`}
                               className="px-4 py-3 font-mono text-[13px] text-[var(--admin-on-surface-variant)]"
                             >
-                              {formatDate(item.enrolledAt)}
+                              {formatDate(item.enrolledAt, viewer)}
                             </td>
                           );
                         }
@@ -1034,7 +1062,7 @@ export function AdminEnrollmentsRosterPage() {
                             key={`${item.id}-${column.key}`}
                             className="px-4 py-3 font-mono text-[13px] text-[var(--admin-on-surface-variant)]"
                           >
-                            {formatDate(item.expiresAt)}
+                            {formatDate(item.expiresAt, viewer)}
                           </td>
                         );
                       })}
@@ -1049,7 +1077,7 @@ export function AdminEnrollmentsRosterPage() {
           <span className="text-[13px] font-semibold text-[var(--admin-on-surface-variant)]">
             {loading
               ? "Loading enrollments..."
-              : `Showing ${String(rangeStart)} to ${String(rangeEnd)} of ${totalCount.toLocaleString()} entries`}
+              : `Showing ${String(rangeStart)} to ${String(rangeEnd)} of ${totalCount.toLocaleString(viewer.locale)} entries`}
           </span>
           <div className="flex items-center gap-2">
             <button

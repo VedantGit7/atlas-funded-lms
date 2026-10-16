@@ -25,7 +25,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  BATCHES_ROSTER_DEFAULTS,
   BATCH_LEARNER_COLUMN_OPTIONS,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -45,15 +47,18 @@ import {
   type BatchesListSortBy,
   type BatchesListSummary,
   type BatchesListWindow,
+  type BatchesRosterPayload,
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { RenderedAtProvider, useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 type DrillLevel = "batches" | "learners" | "learner_detail";
 type LearnerTab = "live" | "exams" | "course";
 type ModuleTab = "batches" | "compare" | "exports";
 type SavedView = "active" | "at_risk" | "ending_soon" | "archived";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = BATCHES_ROSTER_DEFAULTS.limit;
 
 const selectClassName =
   "h-9 min-w-[140px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-xs font-medium text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -82,35 +87,37 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTime(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelative(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "No activity";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "No activity";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (days < 1) return "Today";
   if (days === 1) return "1 day ago";
@@ -147,8 +154,7 @@ function healthRailClass(health: BatchHealth): string {
   return "bg-transparent";
 }
 
-function windowCaption(batch: BatchListItem): string {
-  const now = Date.now();
+function windowCaption(batch: BatchListItem, now: number): string {
   if (batch.endsAt) {
     const ends = new Date(batch.endsAt).getTime();
     if (!Number.isNaN(ends) && ends < now) {
@@ -177,12 +183,11 @@ function windowCaption(batch: BatchListItem): string {
   return "Open window";
 }
 
-function windowProgress(batch: BatchListItem): number | null {
+function windowProgress(batch: BatchListItem, now: number): number | null {
   if (!batch.startsAt || !batch.endsAt) return null;
   const start = new Date(batch.startsAt).getTime();
   const end = new Date(batch.endsAt).getTime();
   if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return null;
-  const now = Date.now();
   if (now <= start) return 0;
   if (now >= end) return 100;
   return Math.round(((now - start) / (end - start)) * 100);
@@ -336,38 +341,62 @@ function EmptyBatchesState({
   );
 }
 
-export function AdminBatchesRosterPage() {
+type BatchesRosterProps = {
+  /** The first page of the Active view, loaded by the server; the first browser load is skipped when present. */
+  initialRoster?: ReportInitialData<BatchesRosterPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminBatchesRosterPage(props: BatchesRosterProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialRoster?.loadedAt ?? null}>
+      <BatchesRoster {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function BatchesRoster({ initialRoster }: BatchesRosterProps) {
   const router = useRouter();
   const searchId = useId();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialRoster ?? null);
 
   const [level, setLevel] = useState<DrillLevel>("batches");
   const [moduleTab, setModuleTab] = useState<ModuleTab>("batches");
   const [learnerTab, setLearnerTab] = useState<LearnerTab>("live");
   const [savedView, setSavedView] = useState<SavedView>("active");
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [batches, setBatches] = useState<BatchListItem[]>([]);
-  const [summary, setSummary] = useState<BatchesListSummary | null>(null);
+  const [batches, setBatches] = useState<BatchListItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<BatchesListSummary | null>(initial?.data.summary ?? null);
   const [selectedBatch, setSelectedBatch] = useState<BatchListItem | null>(null);
   const [detail, setDetail] = useState<BatchDetail | null>(null);
   const [learners, setLearners] = useState<BatchLearnerItem[]>([]);
   const [learnerDetail, setLearnerDetail] = useState<BatchLearnerDetail | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState<number>(BATCHES_ROSTER_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
   const [searchQ, setSearchQ] = useState("");
   const [draftSearch, setDraftSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("ACTIVE");
-  const [windowFilter, setWindowFilter] = useState<BatchesListWindow>("any");
-  const [healthFilter, setHealthFilter] = useState<BatchesListHealthFilter>("any");
-  const [sortBy, setSortBy] = useState<BatchesListSortBy>("member_count");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [statusFilter, setStatusFilter] = useState<string>(BATCHES_ROSTER_DEFAULTS.status);
+  const [windowFilter, setWindowFilter] = useState<BatchesListWindow>(
+    BATCHES_ROSTER_DEFAULTS.window,
+  );
+  const [healthFilter, setHealthFilter] = useState<BatchesListHealthFilter>(
+    BATCHES_ROSTER_DEFAULTS.health,
+  );
+  const [sortBy, setSortBy] = useState<BatchesListSortBy>(BATCHES_ROSTER_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(BATCHES_ROSTER_DEFAULTS.sortDir);
 
   const [learnerName, setLearnerName] = useState("");
   const [joinedFrom, setJoinedFrom] = useState("");
@@ -448,44 +477,48 @@ export function AdminBatchesRosterPage() {
       .reduce((sum, batch) => sum + batch.memberCount, 0);
   }, [batches, selectedIds]);
 
-  const loadBatches = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const q = searchQ.trim();
-      const response = await fetchBatchesRoster({
-        ...(q ? { q } : {}),
-        ...(statusFilter ? { status: statusFilter } : {}),
-        window: windowFilter,
-        health: healthFilter,
-        sortBy,
-        sortDir,
-        page,
-        limit: PAGE_SIZE,
-      });
-      setBatches(response.data.items);
-      setSummary(response.data.summary);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setSelectedIds((current) =>
-        current.filter((id) => response.data.items.some((item) => item.id === id)),
-      );
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadBatches = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const q = searchQ.trim();
+        const response = await fetchBatchesRoster({
+          ...(q ? { q } : {}),
+          ...(statusFilter ? { status: statusFilter } : {}),
+          window: windowFilter,
+          health: healthFilter,
+          sortBy,
+          sortDir,
+          page,
+          limit: PAGE_SIZE,
+        });
+        setBatches(response.data.items);
+        setSummary(response.data.summary);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setSelectedIds((current) =>
+          current.filter((id) => response.data.items.some((item) => item.id === id)),
+        );
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load batches.",
-      );
-      setBatches([]);
-      setSummary(null);
-      setTotalCount(0);
-      setTotalPages(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [healthFilter, page, searchQ, sortBy, sortDir, statusFilter, windowFilter]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load batches.",
+        );
+        setBatches([]);
+        setSummary(null);
+        setTotalCount(0);
+        setTotalPages(0);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [healthFilter, page, searchQ, sortBy, sortDir, statusFilter, windowFilter],
+  );
 
   const loadLearners = useCallback(async () => {
     if (!selectedBatch) return;
@@ -534,15 +567,20 @@ export function AdminBatchesRosterPage() {
     selectedBatch,
   ]);
 
-  useEffect(() => {
-    if (level === "batches") {
-      void loadBatches();
-      return;
-    }
-    if (level === "learners") {
-      void loadLearners();
-    }
-  }, [level, loadBatches, loadLearners]);
+  const loadLevel = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (level === "batches") {
+        await loadBatches(options);
+        return;
+      }
+      if (level === "learners") {
+        await loadLearners();
+      }
+    },
+    [level, loadBatches, loadLearners],
+  );
+
+  useReportLoad(loadLevel, initial);
 
   useEffect(() => {
     if (level !== "learner_detail" || !selectedBatch || !learnerDetail?.membershipId) {
@@ -764,6 +802,7 @@ export function AdminBatchesRosterPage() {
 
   const rangeStart = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(page * PAGE_SIZE, totalCount);
+  const totalCountLabel = totalCount.toLocaleString(viewer.locale);
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 pb-16">
@@ -1010,10 +1049,11 @@ export function AdminBatchesRosterPage() {
                         Active batches
                       </p>
                       <p className="mt-2 font-mono text-[32px] font-medium leading-none text-[var(--admin-on-surface)]">
-                        {(summary?.activeBatchCount ?? 0).toLocaleString()}
+                        {(summary?.activeBatchCount ?? 0).toLocaleString(viewer.locale)}
                       </p>
                       <p className="mt-2 text-xs text-[var(--admin-on-surface-variant)]">
-                        {(summary?.totalLearners ?? 0).toLocaleString()} learners enrolled
+                        {(summary?.totalLearners ?? 0).toLocaleString(viewer.locale)} learners
+                        enrolled
                       </p>
                       <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
                         <div className="h-full w-2/3 rounded-full bg-[var(--admin-primary)]" />
@@ -1062,7 +1102,7 @@ export function AdminBatchesRosterPage() {
                         Batches at risk
                       </p>
                       <p className="mt-2 font-mono text-2xl font-medium text-[var(--admin-warning)]">
-                        {(summary?.atRiskCount ?? 0).toLocaleString()}
+                        {(summary?.atRiskCount ?? 0).toLocaleString(viewer.locale)}
                       </p>
                     </button>
                     <button
@@ -1076,7 +1116,7 @@ export function AdminBatchesRosterPage() {
                         Ending in 30 days
                       </p>
                       <p className="mt-2 font-mono text-2xl font-medium text-[var(--admin-on-surface)]">
-                        {(summary?.endingSoonCount ?? 0).toLocaleString()}
+                        {(summary?.endingSoonCount ?? 0).toLocaleString(viewer.locale)}
                       </p>
                     </button>
                   </div>
@@ -1244,7 +1284,7 @@ export function AdminBatchesRosterPage() {
                         <span className="font-mono font-medium">{selectedIds.length}</span> batches
                         selected ·{" "}
                         <span className="font-mono font-medium">
-                          {selectedLearnerCount.toLocaleString()}
+                          {selectedLearnerCount.toLocaleString(viewer.locale)}
                         </span>{" "}
                         learners
                       </p>
@@ -1343,7 +1383,7 @@ export function AdminBatchesRosterPage() {
                             </tr>
                           ) : (
                             batches.map((batch, index) => {
-                              const progress = windowProgress(batch);
+                              const progress = windowProgress(batch, viewer.now);
                               const selected = selectedIds.includes(batch.id);
                               return (
                                 <tr
@@ -1406,7 +1446,7 @@ export function AdminBatchesRosterPage() {
                                     </span>
                                   </td>
                                   <td className="px-3 text-right font-mono text-[var(--admin-on-surface)]">
-                                    {batch.memberCount.toLocaleString()}
+                                    {batch.memberCount.toLocaleString(viewer.locale)}
                                   </td>
                                   <td className="px-3">
                                     <TripleMetricCell
@@ -1431,11 +1471,11 @@ export function AdminBatchesRosterPage() {
                                   <td className="px-3">
                                     <p className="font-mono text-[12px] text-[var(--admin-on-surface)]">
                                       {batch.startsAt || batch.endsAt
-                                        ? `${formatDate(batch.startsAt)} → ${formatDate(batch.endsAt)}`
+                                        ? `${formatDate(batch.startsAt, viewer)} → ${formatDate(batch.endsAt, viewer)}`
                                         : "-"}
                                     </p>
                                     <p className="mt-0.5 text-[11px] text-[var(--admin-on-surface-variant)]">
-                                      {windowCaption(batch)}
+                                      {windowCaption(batch, viewer.now)}
                                     </p>
                                     {progress != null ? (
                                       <div className="mt-1 h-[3px] w-28 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
@@ -1448,10 +1488,10 @@ export function AdminBatchesRosterPage() {
                                   </td>
                                   <td className="px-3">
                                     <p className="text-sm text-[var(--admin-on-surface)]">
-                                      {formatRelative(batch.lastActivityAt)}
+                                      {formatRelative(batch.lastActivityAt, viewer)}
                                     </p>
                                     <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                                      {formatDateTime(batch.lastActivityAt)}
+                                      {formatDateTime(batch.lastActivityAt, viewer)}
                                     </p>
                                   </td>
                                   <td
@@ -1511,7 +1551,7 @@ export function AdminBatchesRosterPage() {
                       <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                            Showing {rangeStart}-{rangeEnd} of {totalCount.toLocaleString()} batches
+                            Showing {rangeStart}-{rangeEnd} of {totalCountLabel} batches
                           </p>
                           <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
                             At risk: any metric below 40% or no activity in 14 days. Critical: two
@@ -1882,7 +1922,7 @@ export function AdminBatchesRosterPage() {
                           ) : null}
                           {columns.includes("activity_at") ? (
                             <td className="px-4 py-3 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                              {formatDateTime(learner.activityAt)}
+                              {formatDateTime(learner.activityAt, viewer)}
                             </td>
                           ) : null}
                           {columns.includes("live_attendance_pct") ? (
@@ -1911,7 +1951,7 @@ export function AdminBatchesRosterPage() {
                           ) : null}
                           {columns.includes("joined_at") ? (
                             <td className="px-4 py-3 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                              {formatDateTime(learner.joinedAt)}
+                              {formatDateTime(learner.joinedAt, viewer)}
                             </td>
                           ) : null}
                         </tr>
@@ -1963,8 +2003,8 @@ export function AdminBatchesRosterPage() {
                 {learnerDetail.learnerName ?? learnerDetail.email ?? "Learner"}
               </h2>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                Joined {formatDateTime(learnerDetail.joinedAt)} · Last activity{" "}
-                {formatDateTime(learnerDetail.activityAt)}
+                Joined {formatDateTime(learnerDetail.joinedAt, viewer)} · Last activity{" "}
+                {formatDateTime(learnerDetail.activityAt, viewer)}
               </p>
             </div>
             <button
@@ -2059,13 +2099,13 @@ export function AdminBatchesRosterPage() {
                       >
                         <td className="px-4 py-3 text-[var(--admin-on-surface)]">{row.title}</td>
                         <td className="px-4 py-3 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                          {formatDateTime(row.scheduledAt)}
+                          {formatDateTime(row.scheduledAt, viewer)}
                         </td>
                         <td className="px-4 py-3 text-[var(--admin-on-surface)]">
                           {titleCase(row.status)}
                         </td>
                         <td className="px-4 py-3 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                          {formatDateTime(row.joinedAt)}
+                          {formatDateTime(row.joinedAt, viewer)}
                         </td>
                         <td className="px-4 py-3 font-mono text-[12px] text-[var(--admin-on-surface)]">
                           {row.durationSeconds == null ? "-" : `${String(row.durationSeconds)}s`}
@@ -2110,7 +2150,7 @@ export function AdminBatchesRosterPage() {
                           {formatPct(row.scorePct)}
                         </td>
                         <td className="px-4 py-3 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                          {formatDateTime(row.submittedAt)}
+                          {formatDateTime(row.submittedAt, viewer)}
                         </td>
                       </tr>
                     ))

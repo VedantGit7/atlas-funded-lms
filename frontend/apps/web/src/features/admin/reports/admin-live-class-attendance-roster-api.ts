@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const LIVE_ATTENDANCE_COLUMN_OPTIONS = [
@@ -203,7 +201,28 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return query ? `?${query}` : "";
 }
 
-export async function fetchLiveClassSessionsRoster(filters?: {
+export type LiveSessionsDatePreset = "7d" | "30d" | "90d" | "custom";
+
+/** A preset's date inputs (YYYY-MM-DD), counted back from `now` in the local calendar. */
+export function liveSessionsPresetRange(
+  preset: LiveSessionsDatePreset,
+  now: Date = new Date(),
+): { from: string; to: string } {
+  const to = new Date(now);
+  const from = new Date(now);
+  if (preset === "7d") from.setDate(from.getDate() - 7);
+  else if (preset === "30d") from.setDate(from.getDate() - 30);
+  else if (preset === "90d") from.setDate(from.getDate() - 90);
+  return {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10),
+  };
+}
+
+/** The sessions list opens on the last 30 days; the server loads the first page with it too. */
+export const LIVE_SESSIONS_DEFAULT_DATE_PRESET: LiveSessionsDatePreset = "30d";
+
+export type LiveSessionsRosterFilters = {
   q?: string | undefined;
   status?: string | undefined;
   startedFrom?: string | undefined;
@@ -212,26 +231,30 @@ export async function fetchLiveClassSessionsRoster(filters?: {
   sortBy?: string | undefined;
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: LiveSessionListItem[];
-      pageInfo: PageInfo;
-      summary: LiveSessionsListSummary;
-    };
-  }>(
-    `/api/v1/reports/live-class-attendance${buildQuery({
-      q: filters?.q,
-      status: filters?.status,
-      startedFrom: filters?.startedFrom,
-      startedTo: filters?.startedTo,
-      attendanceRateBand: filters?.attendanceRateBand,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: 50,
-    })}`,
-  );
+};
+
+export function liveSessionsRosterPath(filters?: LiveSessionsRosterFilters): string {
+  return `/api/v1/reports/live-class-attendance${buildQuery({
+    q: filters?.q,
+    status: filters?.status,
+    startedFrom: filters?.startedFrom,
+    startedTo: filters?.startedTo,
+    attendanceRateBand: filters?.attendanceRateBand,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: 50,
+  })}`;
+}
+
+export type LiveSessionsRosterPayload = {
+  items: LiveSessionListItem[];
+  pageInfo: PageInfo;
+  summary: LiveSessionsListSummary;
+};
+
+export async function fetchLiveClassSessionsRoster(filters?: LiveSessionsRosterFilters) {
+  return clientApi.get<{ data: LiveSessionsRosterPayload }>(liveSessionsRosterPath(filters));
 }
 
 export async function fetchLiveClassSessionDetail(sessionId: string) {

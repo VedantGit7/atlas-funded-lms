@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useId, useMemo, useState, type ReactNode } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -22,7 +22,9 @@ import {
   dropdownItemClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  LIVE_SESSIONS_DEFAULT_DATE_PRESET,
   dateInputToEndIso,
   dateInputToStartIso,
   exportLiveClassAttendanceReport,
@@ -30,11 +32,16 @@ import {
   type LiveAttendanceRateBand,
   type LiveSessionListItem,
   type LiveSessionsListSummary,
+  liveSessionsPresetRange,
+  type LiveSessionsDatePreset,
+  type LiveSessionsRosterPayload,
 } from "./admin-live-class-attendance-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 type ModuleTab = "sessions" | "learners" | "series" | "exports";
-type DatePreset = "7d" | "30d" | "90d" | "custom";
+type DatePreset = LiveSessionsDatePreset;
 type SavedView = "all" | "low_turnout" | "upcoming" | "cancelled";
 
 const secondaryButtonClassName =
@@ -70,15 +77,16 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -106,8 +114,8 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(1)}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCount(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function titleCase(value: string): string {
@@ -133,18 +141,6 @@ function coveragePct(
     return null;
   }
   return Math.min(100, (avgCoverageSeconds / durationSeconds) * 100);
-}
-
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
 }
 
 function sessionStatusTone(status: string): "success" | "warning" | "danger" | "muted" | "primary" {
@@ -272,24 +268,45 @@ function SessionsLoadingSkeleton() {
   );
 }
 
-export function AdminLiveClassAttendanceRosterPage() {
+export function AdminLiveClassAttendanceRosterPage({
+  initialSessions,
+}: {
+  /**
+   * The first page of sessions, loaded by the server over the date range it
+   * counted; the first browser load is skipped when present.
+   */
+  initialSessions?: ReportInitialDataInRange<LiveSessionsRosterPayload> | null;
+} = {}) {
   const router = useRouter();
   const datePresetLabelId = useId();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSessions ?? null);
   const [moduleTab, setModuleTab] = useState<ModuleTab>("sessions");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [sessions, setSessions] = useState<LiveSessionListItem[]>([]);
-  const [summary, setSummary] = useState<LiveSessionsListSummary>(EMPTY_SUMMARY);
+  const [sessions, setSessions] = useState<LiveSessionListItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<LiveSessionsListSummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const [sessionsPage, setSessionsPage] = useState(1);
-  const [sessionsTotalPages, setSessionsTotalPages] = useState(0);
-  const [sessionsTotalCount, setSessionsTotalCount] = useState(0);
+  const [sessionsTotalPages, setSessionsTotalPages] = useState(
+    initial?.data.pageInfo.totalPages ?? 0,
+  );
+  const [sessionsTotalCount, setSessionsTotalCount] = useState(
+    initial?.data.pageInfo.totalCount ?? 0,
+  );
 
-  const initialRange = presetToRange("30d");
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  // The server's range when it loaded the sessions, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const [initialRange] = useState(
+    () => initial?.range ?? liveSessionsPresetRange(LIVE_SESSIONS_DEFAULT_DATE_PRESET),
+  );
+  const [datePreset, setDatePreset] = useState<DatePreset>(LIVE_SESSIONS_DEFAULT_DATE_PRESET);
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [startedFrom, setStartedFrom] = useState(initialRange.from);
   const [startedTo, setStartedTo] = useState(initialRange.to);
@@ -298,6 +315,9 @@ export function AdminLiveClassAttendanceRosterPage() {
   const [searchQ, setSearchQ] = useState("");
   const [sessionStatus, setSessionStatus] = useState("");
   const [attendanceRateBand, setAttendanceRateBand] = useState<LiveAttendanceRateBand | "">("");
+
+  const sessionsTotalLabel = formatCount(sessionsTotalCount, viewer);
+  const selectedCountLabel = formatCount(selectedIds.size, viewer);
 
   const datePresetLabel =
     datePreset === "7d"
@@ -311,7 +331,7 @@ export function AdminLiveClassAttendanceRosterPage() {
   const applyDatePreset = useCallback((preset: DatePreset) => {
     setDatePreset(preset);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = liveSessionsPresetRange(preset);
     setStartedFrom(range.from);
     setStartedTo(range.to);
     setSessionsPage(1);
@@ -340,42 +360,49 @@ export function AdminLiveClassAttendanceRosterPage() {
     setAttendanceRateBand("");
   }, []);
 
-  const loadSessions = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveClassSessionsRoster({
-        q: searchQ.trim() || undefined,
-        status: sessionStatus || undefined,
-        startedFrom: dateInputToStartIso(startedFrom),
-        startedTo: dateInputToEndIso(startedTo),
-        attendanceRateBand: attendanceRateBand || undefined,
-        page: sessionsPage,
-      });
-      setSessions(response.data.items);
-      setSummary(response.data.summary);
-      setSessionsTotalPages(response.data.pageInfo.totalPages);
-      setSessionsTotalCount(response.data.pageInfo.totalCount);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadSessions = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveClassSessionsRoster({
+          q: searchQ.trim() || undefined,
+          status: sessionStatus || undefined,
+          startedFrom: dateInputToStartIso(startedFrom),
+          startedTo: dateInputToEndIso(startedTo),
+          attendanceRateBand: attendanceRateBand || undefined,
+          page: sessionsPage,
+        });
+        setSessions(response.data.items);
+        setSummary(response.data.summary);
+        setSessionsTotalPages(response.data.pageInfo.totalPages);
+        setSessionsTotalCount(response.data.pageInfo.totalCount);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load live sessions.",
-      );
-      setSessions([]);
-      setSummary(EMPTY_SUMMARY);
-    } finally {
-      setLoading(false);
-    }
-  }, [attendanceRateBand, searchQ, sessionStatus, sessionsPage, startedFrom, startedTo]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load live sessions.",
+        );
+        setSessions([]);
+        setSummary(EMPTY_SUMMARY);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [attendanceRateBand, searchQ, sessionStatus, sessionsPage, startedFrom, startedTo],
+  );
 
-  useEffect(() => {
-    if (moduleTab === "sessions") {
-      void loadSessions();
-    }
-  }, [loadSessions, moduleTab]);
+  const loadActiveTab = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (moduleTab === "sessions") await loadSessions(options);
+    },
+    [loadSessions, moduleTab],
+  );
+
+  useReportLoad(loadActiveTab, initial);
 
   function openSession(session: LiveSessionListItem, options?: { messageAbsentees?: boolean }) {
     const query = options?.messageAbsentees ? "?message=absentees" : "";
@@ -701,12 +728,12 @@ export function AdminLiveClassAttendanceRosterPage() {
                       Sessions held
                     </h3>
                     <div className="font-mono text-3xl font-semibold text-[var(--admin-on-surface)]">
-                      {formatCount(summary.sessionsHeld)}
+                      {formatCount(summary.sessionsHeld, viewer)}
                     </div>
                   </div>
                   <p className="mt-4 text-sm text-[var(--admin-on-surface-variant)]">
-                    {formatCount(summary.cancelledCount)} cancelled ·{" "}
-                    {formatCount(summary.scheduledAheadCount)} scheduled ahead
+                    {formatCount(summary.cancelledCount, viewer)} cancelled ·{" "}
+                    {formatCount(summary.scheduledAheadCount, viewer)} scheduled ahead
                   </p>
                 </div>
 
@@ -722,8 +749,8 @@ export function AdminLiveClassAttendanceRosterPage() {
                   <div className="mt-3">
                     <MetricBar pct={summary.avgAttendancePct} />
                     <p className="mt-2 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                      {formatCount(summary.totalAttendedCount)} of{" "}
-                      {formatCount(summary.totalRegisteredCount)} reg.
+                      {formatCount(summary.totalAttendedCount, viewer)} of{" "}
+                      {formatCount(summary.totalRegisteredCount, viewer)} reg.
                     </p>
                   </div>
                 </div>
@@ -778,7 +805,7 @@ export function AdminLiveClassAttendanceRosterPage() {
                       Low turnout
                     </h3>
                     <div className="font-mono text-2xl font-semibold text-[var(--admin-warning)]">
-                      {formatCount(summary.lowTurnoutCount)}
+                      {formatCount(summary.lowTurnoutCount, viewer)}
                     </div>
                   </div>
                   <p className="mt-auto text-xs leading-tight text-[var(--admin-warning)]">
@@ -794,9 +821,11 @@ export function AdminLiveClassAttendanceRosterPage() {
               {selectedIds.size > 0 ? (
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-3">
                   <p className="text-sm text-[var(--admin-on-surface)]">
-                    <span className="font-semibold">{formatCount(selectedIds.size)}</span> session
+                    <span className="font-semibold">{selectedCountLabel}</span> session
                     {selectedIds.size === 1 ? "" : "s"} selected ·{" "}
-                    <span className="font-mono">{formatCount(selectedRegistrationCount)}</span>{" "}
+                    <span className="font-mono">
+                      {formatCount(selectedRegistrationCount, viewer)}
+                    </span>{" "}
                     registrations
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -997,13 +1026,13 @@ export function AdminLiveClassAttendanceRosterPage() {
                               </StatusPill>
                             </td>
                             <td className="px-4 py-3 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                              {formatDate(session.startedAt ?? session.scheduledAt)}
+                              {formatDate(session.startedAt ?? session.scheduledAt, viewer)}
                             </td>
                             <td className="px-4 py-3 font-mono text-[13px] text-[var(--admin-on-surface)]">
                               {cancelled ? "-" : formatDuration(session.durationSeconds)}
                             </td>
                             <td className="px-4 py-3 font-mono text-[13px]">
-                              {formatCount(session.registeredCount)}
+                              {formatCount(session.registeredCount, viewer)}
                             </td>
                             <td className="px-4 py-3">
                               {cancelled ? (
@@ -1012,7 +1041,7 @@ export function AdminLiveClassAttendanceRosterPage() {
                                 </span>
                               ) : session.registeredCount === 0 ? (
                                 <span className="font-mono text-[13px]">
-                                  {formatCount(session.attendanceCount)}
+                                  {formatCount(session.attendanceCount, viewer)}
                                   <span className="ml-1 text-[11px] text-[var(--admin-on-surface-variant)]">
                                     No registrations recorded
                                   </span>
@@ -1027,8 +1056,8 @@ export function AdminLiveClassAttendanceRosterPage() {
                                         : "text-[var(--admin-on-surface)]",
                                     ].join(" ")}
                                   >
-                                    {formatCount(session.attendanceCount)} of{" "}
-                                    {formatCount(session.registeredCount)}
+                                    {formatCount(session.attendanceCount, viewer)} of{" "}
+                                    {formatCount(session.registeredCount, viewer)}
                                     <span className="ml-1 text-[11px] text-[var(--admin-on-surface-variant)]">
                                       {formatPct(rate)}
                                     </span>
@@ -1071,7 +1100,7 @@ export function AdminLiveClassAttendanceRosterPage() {
                         ? "0"
                         : `${String((sessionsPage - 1) * 50 + 1)}-${String((sessionsPage - 1) * 50 + sessions.length)}`}
                     </span>{" "}
-                    of <span className="font-mono">{formatCount(sessionsTotalCount)}</span> sessions
+                    of <span className="font-mono">{sessionsTotalLabel}</span> sessions
                   </p>
                   {sessionsTotalPages > 1 ? (
                     <div className="flex items-center gap-2">

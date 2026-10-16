@@ -10,10 +10,9 @@ import type {
   ReportExportsLedger,
   RetryReportExportBody,
 } from "./admin-report-exports-api";
+import { useReportLoad } from "./use-report-load";
 
 const POLL_INTERVAL_MS = 2500;
-/** Server-loaded exports older than this are refreshed when the page mounts. */
-const SERVER_DATA_FRESH_MS = 10_000;
 
 function message(caught: unknown, fallback: string): string {
   return caught instanceof ClientApiError ? caught.message : fallback;
@@ -75,14 +74,7 @@ export function useReportExports<TPayload extends ReportExportsLedger>(
     [api, applyPayload],
   );
 
-  useEffect(() => {
-    if (initialExports === null) {
-      void load();
-    } else if (Math.abs(Date.now() - initialExports.loadedAt) > SERVER_DATA_FRESH_MS) {
-      // Back and forward reuse the server data from the first visit; refresh it in place.
-      void load({ soft: true });
-    }
-  }, [load, initialExports]);
+  useReportLoad(load, initialExports);
 
   const buildingIds = useMemo(
     () =>

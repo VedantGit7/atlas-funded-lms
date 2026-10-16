@@ -30,25 +30,32 @@ import {
   inlineExpandClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import { fetchExportJob } from "../../data-rights/api";
 import {
   EXPORTS_HISTORY_COLUMN_OPTIONS,
+  EXPORTS_HISTORY_DEFAULTS,
   EXPORTS_REPORT_DEFINITIONS,
   PII_DEFINITION_KEYS,
   dateInputToEndIso,
   dateInputToStartIso,
   exportExportsHistoryReport,
+  exportsHistoryPresetRange,
   fetchExportsHistory,
   type ExportsFileState,
   type ExportsHistoryColumnKey,
+  type ExportsHistoryDatePreset,
   type ExportsHistoryItem,
+  type ExportsHistoryPayload,
   type ExportsHistorySummary,
 } from "./admin-exports-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { RenderedAtProvider, useViewerLocale, type ViewerLocale } from "./viewer-time";
 import { BiExportPanel } from "./BiExportPanel";
 import { CustomReportBuilder } from "./CustomReportBuilder";
 
-type DatePreset = "7d" | "30d" | "90d" | "custom";
+type DatePreset = ExportsHistoryDatePreset;
 type SavedView = "all" | "failed" | "running" | "expiring" | "mine";
 type ModuleTab = "history" | "new" | "schedules" | "destinations" | "settings";
 
@@ -58,14 +65,7 @@ const secondaryButtonClassName =
 const fieldClassName =
   "h-9 w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[13px] text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] focus-visible:border-[var(--admin-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--admin-primary)]";
 
-const DEFAULT_COLUMNS: ExportsHistoryColumnKey[] = [
-  "status",
-  "created_at",
-  "definition_title",
-  "row_count",
-  "format",
-  "requested_by_name",
-];
+const DEFAULT_COLUMNS: ExportsHistoryColumnKey[] = [...EXPORTS_HISTORY_DEFAULTS.columns];
 
 const EMPTY_SUMMARY: ExportsHistorySummary = {
   totalCount: 0,
@@ -77,39 +77,29 @@ const EMPTY_SUMMARY: ExportsHistorySummary = {
   oldestPendingTitle: null,
 };
 
-function toDateInput(date: Date): string {
-  return date.toISOString().slice(0, 10);
+function formatCount(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function presetToRange(preset: Exclude<DatePreset, "custom">): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  const days = preset === "7d" ? 7 : preset === "90d" ? 90 : 30;
-  from.setUTCDate(from.getUTCDate() - (days - 1));
-  return { from: toDateInput(from), to: toDateInput(to) };
-}
-
-function formatCount(value: number): string {
-  return value.toLocaleString();
-}
-
-function formatAbsolute(value: string | null): string {
+function formatAbsolute(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
+  // The viewer's local time, or UTC until hydration ends (see viewer-time).
+  const utc = viewer.timeZone === "UTC";
+  const y = utc ? date.getUTCFullYear() : date.getFullYear();
+  const m = String((utc ? date.getUTCMonth() : date.getMonth()) + 1).padStart(2, "0");
+  const d = String(utc ? date.getUTCDate() : date.getDate()).padStart(2, "0");
+  const hh = String(utc ? date.getUTCHours() : date.getHours()).padStart(2, "0");
+  const mm = String(utc ? date.getUTCMinutes() : date.getMinutes()).padStart(2, "0");
   return `${y}-${m}-${d} ${hh}:${mm}`;
 }
 
-function formatRelative(value: string | null): string {
+function formatRelative(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 0) {
     const ahead = Math.abs(diffMs);
     if (ahead < 60_000) return "in under a minute";
@@ -161,17 +151,17 @@ function sourceLabel(sourceType: ExportsHistoryItem["sourceType"]): string {
   return sourceType === "report_run" ? "Report run" : "Export job";
 }
 
-function isExpired(expiresAt: string | null): boolean {
+function isExpired(expiresAt: string | null, now: number): boolean {
   if (!expiresAt) return false;
   const date = new Date(expiresAt);
-  return !Number.isNaN(date.getTime()) && date.getTime() <= Date.now();
+  return !Number.isNaN(date.getTime()) && date.getTime() <= now;
 }
 
-function isExpiringSoon(expiresAt: string | null): boolean {
+function isExpiringSoon(expiresAt: string | null, now: number): boolean {
   if (!expiresAt) return false;
   const date = new Date(expiresAt);
   if (Number.isNaN(date.getTime())) return false;
-  const ms = date.getTime() - Date.now();
+  const ms = date.getTime() - now;
   return ms > 0 && ms <= 48 * 60 * 60 * 1000;
 }
 
@@ -289,6 +279,7 @@ function FileAffordance({
   downloading: boolean;
   onDownload: () => void;
 }) {
+  const viewer = useViewerLocale();
   const detailHref = `/admin/reports/exports/${item.id}?source=${item.sourceType}`;
 
   if (item.status === "QUEUED" || item.status === "RUNNING") {
@@ -366,7 +357,7 @@ function FileAffordance({
     return (
       <div className="flex items-center justify-end gap-3">
         <span className="text-xs text-[var(--admin-on-surface-variant)]">
-          Removed{item.expiresAt ? ` ${formatAbsolute(item.expiresAt).slice(0, 10)}` : ""}
+          Removed{item.expiresAt ? ` ${formatAbsolute(item.expiresAt, viewer).slice(0, 10)}` : ""}
         </span>
         <Link
           href={rerunHref}
@@ -382,7 +373,30 @@ function FileAffordance({
   return <span className="text-sm text-[var(--admin-on-surface-variant)]">-</span>;
 }
 
-export function AdminExportsRosterPage() {
+type ExportsRosterProps = {
+  /**
+   * The first page of exports, loaded by the server over the date range it
+   * counted; the first browser load is skipped when present.
+   */
+  initialHistory?: ReportInitialDataInRange<ExportsHistoryPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminExportsRosterPage(props: ExportsRosterProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialHistory?.loadedAt ?? null}>
+      <ExportsRoster {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ExportsRoster({ initialHistory }: ExportsRosterProps) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialHistory ?? null);
   const datePresetLabelId = useId();
   const sourceLabelId = useId();
   const statusLabelId = useId();
@@ -393,20 +407,28 @@ export function AdminExportsRosterPage() {
   const columnsAnchorRef = useRef<HTMLButtonElement>(null);
   const columnsPanelRef = useRef<HTMLDivElement>(null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [items, setItems] = useState<ExportsHistoryItem[]>([]);
-  const [summary, setSummary] = useState<ExportsHistorySummary>(EMPTY_SUMMARY);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
-  const [pageSize, setPageSize] = useState(50);
+  const [items, setItems] = useState<ExportsHistoryItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<ExportsHistorySummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
+  const [page, setPage] = useState<number>(EXPORTS_HISTORY_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [pageSize, setPageSize] = useState<number>(
+    initial?.data.pageInfo.pageSize ?? EXPORTS_HISTORY_DEFAULTS.limit,
+  );
 
-  const initialRange = presetToRange("30d");
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  // The server's range when it loaded the history, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const [initialRange] = useState(
+    () => initial?.range ?? exportsHistoryPresetRange(EXPORTS_HISTORY_DEFAULTS.datePreset),
+  );
+  const [datePreset, setDatePreset] = useState<DatePreset>(EXPORTS_HISTORY_DEFAULTS.datePreset);
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [createdFrom, setCreatedFrom] = useState(initialRange.from);
   const [createdTo, setCreatedTo] = useState(initialRange.to);
@@ -474,7 +496,7 @@ export function AdminExportsRosterPage() {
     setDatePreset(preset);
     setDateMenuOpen(false);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = exportsHistoryPresetRange(preset);
     setCreatedFrom(range.from);
     setCreatedTo(range.to);
     setPage(1);
@@ -518,66 +540,68 @@ export function AdminExportsRosterPage() {
     setPendingOnly(false);
   }, []);
 
-  const loadHistory = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const from = dateInputToStartIso(createdFrom);
-      const to = dateInputToEndIso(createdTo);
-      const response = await fetchExportsHistory({
-        ...(debouncedQ ? { q: debouncedQ } : {}),
-        ...(sourceType ? { sourceType } : {}),
-        ...(status ? { status } : {}),
-        ...(definitionKey ? { definitionKey } : {}),
-        ...(format ? { format } : {}),
-        ...(fileState ? { fileState } : {}),
-        ...(mine ? { mine: true } : {}),
-        ...(pendingOnly ? { pendingOnly: true } : {}),
-        ...(from ? { createdFrom: from } : {}),
-        ...(to ? { createdTo: to } : {}),
-        columns,
-        page,
-        limit: pageSize,
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setPageSize(response.data.pageInfo.pageSize);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadHistory = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const from = dateInputToStartIso(createdFrom);
+        const to = dateInputToEndIso(createdTo);
+        const response = await fetchExportsHistory({
+          ...(debouncedQ ? { q: debouncedQ } : {}),
+          ...(sourceType ? { sourceType } : {}),
+          ...(status ? { status } : {}),
+          ...(definitionKey ? { definitionKey } : {}),
+          ...(format ? { format } : {}),
+          ...(fileState ? { fileState } : {}),
+          ...(mine ? { mine: true } : {}),
+          ...(pendingOnly ? { pendingOnly: true } : {}),
+          ...(from ? { createdFrom: from } : {}),
+          ...(to ? { createdTo: to } : {}),
+          columns,
+          page,
+          limit: pageSize,
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setPageSize(response.data.pageInfo.pageSize);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load export history.",
-      );
-      setItems([]);
-      setSummary(EMPTY_SUMMARY);
-      setTotalPages(0);
-      setTotalCount(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    columns,
-    createdFrom,
-    createdTo,
-    debouncedQ,
-    definitionKey,
-    fileState,
-    format,
-    mine,
-    page,
-    pageSize,
-    pendingOnly,
-    sourceType,
-    status,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load export history.",
+        );
+        setItems([]);
+        setSummary(EMPTY_SUMMARY);
+        setTotalPages(0);
+        setTotalCount(0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      columns,
+      createdFrom,
+      createdTo,
+      debouncedQ,
+      definitionKey,
+      fileState,
+      format,
+      mine,
+      page,
+      pageSize,
+      pendingOnly,
+      sourceType,
+      status,
+    ],
+  );
 
-  useEffect(() => {
-    void loadHistory();
-  }, [loadHistory]);
+  useReportLoad(loadHistory, initial);
 
   useEffect(() => {
     setSelectedIds((current) => {
@@ -1127,7 +1151,7 @@ export function AdminExportsRosterPage() {
                   Total exports
                 </p>
                 <div className="font-mono text-[32px] leading-tight font-medium text-[var(--admin-on-surface)]">
-                  {formatCount(summary.totalCount)}
+                  {formatCount(summary.totalCount, viewer)}
                 </div>
               </div>
               <p className="mt-2 text-[12px] text-[var(--admin-on-surface-variant)]">
@@ -1147,7 +1171,7 @@ export function AdminExportsRosterPage() {
                   Succeeded
                 </p>
                 <div className="font-mono text-2xl font-medium text-[var(--admin-success)]">
-                  {formatCount(summary.succeededCount)}
+                  {formatCount(summary.succeededCount, viewer)}
                 </div>
               </div>
               <p className="mt-2 text-[12px] text-[var(--admin-on-surface-variant)]">
@@ -1167,7 +1191,7 @@ export function AdminExportsRosterPage() {
                   Failed
                 </p>
                 <div className="font-mono text-2xl font-medium text-[var(--admin-danger)]">
-                  {formatCount(summary.failedCount)}
+                  {formatCount(summary.failedCount, viewer)}
                 </div>
               </div>
               <p className="mt-2 text-[12px] text-[color-mix(in_srgb,var(--admin-danger)_70%,var(--admin-on-surface-variant))]">
@@ -1187,7 +1211,7 @@ export function AdminExportsRosterPage() {
                   Queued / Running
                 </p>
                 <div className="font-mono text-2xl font-medium text-[var(--admin-warning)]">
-                  {formatCount(summary.pendingCount)}
+                  {formatCount(summary.pendingCount, viewer)}
                 </div>
               </div>
               <p
@@ -1212,11 +1236,11 @@ export function AdminExportsRosterPage() {
                   Files available
                 </p>
                 <div className="font-mono text-2xl font-medium text-[var(--admin-on-surface)]">
-                  {formatCount(summary.filesAvailableCount)}
+                  {formatCount(summary.filesAvailableCount, viewer)}
                 </div>
               </div>
               <p className="mt-2 text-[12px] text-[var(--admin-warning)]">
-                {formatCount(summary.expiringSoonCount)} expiring in &lt; 48h
+                {formatCount(summary.expiringSoonCount, viewer)} expiring in &lt; 48h
               </p>
             </button>
           </div>
@@ -1645,8 +1669,8 @@ export function AdminExportsRosterPage() {
                       const failed = item.status === "FAILED";
                       const containsPii =
                         item.definitionKey != null && PII_DEFINITION_KEYS.has(item.definitionKey);
-                      const expired = isExpired(item.expiresAt);
-                      const expiringSoon = isExpiringSoon(item.expiresAt);
+                      const expired = isExpired(item.expiresAt, viewer.now);
+                      const expiringSoon = isExpiringSoon(item.expiresAt, viewer.now);
 
                       return (
                         <tr
@@ -1682,9 +1706,9 @@ export function AdminExportsRosterPage() {
                           ) : null}
                           {show("created_at") ? (
                             <td className="px-4 py-2 font-mono text-[13px] text-[var(--admin-on-surface)]">
-                              <div>{formatRelative(item.createdAt)}</div>
+                              <div>{formatRelative(item.createdAt, viewer)}</div>
                               <div className="text-[11px] text-[var(--admin-on-surface-variant)]">
-                                {formatAbsolute(item.createdAt)}
+                                {formatAbsolute(item.createdAt, viewer)}
                               </div>
                             </td>
                           ) : null}
@@ -1731,7 +1755,7 @@ export function AdminExportsRosterPage() {
                           ) : null}
                           {show("row_count") ? (
                             <td className="px-4 py-2 text-right font-mono text-[13px] text-[var(--admin-on-surface)]">
-                              {item.rowCount == null ? "-" : formatCount(item.rowCount)}
+                              {item.rowCount == null ? "-" : formatCount(item.rowCount, viewer)}
                             </td>
                           ) : null}
                           {show("format") ? (
@@ -1746,7 +1770,7 @@ export function AdminExportsRosterPage() {
                           ) : null}
                           {show("completed_at") ? (
                             <td className="px-4 py-2 font-mono text-[13px] text-[var(--admin-on-surface-variant)]">
-                              {formatAbsolute(item.completedAt)}
+                              {formatAbsolute(item.completedAt, viewer)}
                             </td>
                           ) : null}
                           {show("expires_at") ? (
@@ -1759,7 +1783,7 @@ export function AdminExportsRosterPage() {
                                     : "text-[var(--admin-on-surface)]"
                               }`}
                             >
-                              {expired ? "Expired" : formatAbsolute(item.expiresAt)}
+                              {expired ? "Expired" : formatAbsolute(item.expiresAt, viewer)}
                             </td>
                           ) : null}
                           {show("has_file") ? (
@@ -1783,8 +1807,8 @@ export function AdminExportsRosterPage() {
 
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
                 <span className="text-[12px] text-[var(--admin-on-surface-variant)]">
-                  Showing {formatCount(showingFrom)}-{formatCount(showingTo)} of{" "}
-                  {formatCount(totalCount)} exports
+                  Showing {formatCount(showingFrom, viewer)}-{formatCount(showingTo, viewer)} of{" "}
+                  {formatCount(totalCount, viewer)} exports
                 </span>
                 <div className="flex items-center gap-2">
                   <button

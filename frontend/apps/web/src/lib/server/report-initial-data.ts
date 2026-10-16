@@ -9,6 +9,12 @@ export type ReportInitialData<T> = {
   loadedAt: number;
 };
 
+/** Server data for a page whose default date range is counted from today. */
+export type ReportInitialDataInRange<T> = ReportInitialData<T> & {
+  /** The date inputs (YYYY-MM-DD) the server counted, which the page starts on. */
+  range: { from: string; to: string };
+};
+
 /**
  * Loads the data a report page shows first, on the server, so the page arrives
  * filled in instead of loading in the browser after hydration. Resolves null

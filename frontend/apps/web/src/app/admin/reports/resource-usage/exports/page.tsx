@@ -5,11 +5,13 @@ import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate"
 import { AdminResourceUsageRosterPage } from "../../../../../features/admin/reports/AdminResourceUsageRosterPage";
 import type { ResourceUsageExportsPayload } from "../../../../../features/admin/reports/admin-resource-usage-exports-api";
 import { loadReportInitialData } from "../../../../../lib/server/report-initial-data";
+import { loadResourceUsageLandingData } from "../../../../../lib/server/report-landing-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminResourceUsageExportsRoutePage() {
-  const [gate, initialExports] = await Promise.all([
+  const [gate, initialOverview, initialExports] = await Promise.all([
     runTenantStateGate(),
+    loadResourceUsageLandingData(),
     loadReportInitialData<ResourceUsageExportsPayload>("/api/v1/reports/resource-usage/exports"),
   ]);
   if (gate.kind !== "ok") {
@@ -28,7 +30,10 @@ export default async function AdminResourceUsageExportsRoutePage() {
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading...</p>}
       >
-        <AdminResourceUsageRosterPage initialExports={initialExports} />
+        <AdminResourceUsageRosterPage
+          initialOverview={initialOverview}
+          initialExports={initialExports}
+        />
       </Suspense>
     </AdminPageGate>
   );

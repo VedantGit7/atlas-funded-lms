@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const BATCH_LEARNER_COLUMN_OPTIONS = [
@@ -246,7 +244,7 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return query ? `?${query}` : "";
 }
 
-export async function fetchBatchesRoster(filters?: {
+export type BatchesRosterFilters = {
   q?: string | undefined;
   status?: string | undefined;
   window?: BatchesListWindow | undefined;
@@ -255,25 +253,40 @@ export async function fetchBatchesRoster(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: BatchListItem[];
-      pageInfo: PageInfo;
-      summary: BatchesListSummary;
-    };
-  }>(
-    `/api/v1/reports/batches${buildQuery({
-      q: filters?.q,
-      status: filters?.status,
-      window: filters?.window,
-      health: filters?.health,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+/** What the roster opens on (the Active view); the server loads the first page with it too. */
+export const BATCHES_ROSTER_DEFAULTS = {
+  status: "ACTIVE",
+  window: "any",
+  health: "any",
+  sortBy: "member_count",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const satisfies Required<Omit<BatchesRosterFilters, "q">>;
+
+export function batchesRosterPath(filters?: BatchesRosterFilters): string {
+  return `/api/v1/reports/batches${buildQuery({
+    q: filters?.q,
+    status: filters?.status,
+    window: filters?.window,
+    health: filters?.health,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
+export type BatchesRosterPayload = {
+  items: BatchListItem[];
+  pageInfo: PageInfo;
+  summary: BatchesListSummary;
+};
+
+export async function fetchBatchesRoster(filters?: BatchesRosterFilters) {
+  return clientApi.get<{ data: BatchesRosterPayload }>(batchesRosterPath(filters));
 }
 
 export async function fetchBatchDetail(batchId: string) {

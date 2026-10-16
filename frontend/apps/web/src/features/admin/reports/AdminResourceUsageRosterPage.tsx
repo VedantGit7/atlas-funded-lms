@@ -18,6 +18,7 @@ import {
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
 import {
+  RESOURCE_USAGE_DEFAULT_PERIOD,
   RESOURCE_USAGE_PERIOD_OPTIONS,
   fetchResourceUsageOverview,
   type ResourceUsageOverview,
@@ -30,6 +31,8 @@ import { AdminResourceUsageInactivePanel } from "./AdminResourceUsageInactivePan
 import { AdminResourceUsageExportsPanel } from "./AdminResourceUsageExportsPanel";
 import type { ResourceUsageExportsPayload } from "./admin-resource-usage-exports-api";
 import type { ReportInitialData } from "../../../lib/server/report-initial-data";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 type Tab = "overview" | "history" | "storage" | "dormant" | "inactive" | "exports";
 
@@ -57,24 +60,24 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatGb(value: number): string {
+function formatGb(value: number, viewer: ViewerLocale): string {
   if (!Number.isFinite(value)) return "-";
   if (value < 0.01 && value > 0) return "<0.01";
-  return value.toLocaleString(undefined, {
+  return value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value >= 100 ? 0 : 1,
     maximumFractionDigits: 2,
   });
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCount(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatCompact(value: number): string {
+function formatCompact(value: number, viewer: ViewerLocale): string {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 10_000) return `${Math.round(value / 1000)}k`;
   if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
-  return formatCount(value);
+  return formatCount(value, viewer);
 }
 
 function sparklinePath(points: number[]): string {
@@ -276,13 +279,19 @@ function StorageSparkline({ points }: { points: number[] }) {
 }
 
 export function AdminResourceUsageRosterPage({
+  initialOverview,
   initialExports,
 }: {
+  /** The overview for the default period, loaded by the server; the first browser load is skipped when present. */
+  initialOverview?: ReportInitialData<ResourceUsageOverview> | null | undefined;
   /** The Exports tab's data, when the server loaded it for the exports route. */
   initialExports?: ReportInitialData<ResourceUsageExportsPayload> | null | undefined;
 } = {}) {
   const router = useRouter();
   const pathname = usePathname();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialOverview ?? null);
   const initialTab: Tab = pathname.endsWith("/resource-usage/history")
     ? "history"
     : pathname.endsWith("/resource-usage/storage")
@@ -295,42 +304,46 @@ export function AdminResourceUsageRosterPage({
             ? "exports"
             : "overview";
   const [tab, setTab] = useState<Tab>(initialTab);
-  const [period, setPeriod] = useState<ResourceUsagePeriod>("this_month");
-  const [overviewLoading, setOverviewLoading] = useState(true);
+  const [period, setPeriod] = useState<ResourceUsagePeriod>(RESOURCE_USAGE_DEFAULT_PERIOD);
+  const [overviewLoading, setOverviewLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [staleHint, setStaleHint] = useState(false);
 
-  const [overview, setOverview] = useState<ResourceUsageOverview | null>(null);
-  const overviewRef = useRef<ResourceUsageOverview | null>(null);
+  const [overview, setOverview] = useState<ResourceUsageOverview | null>(initial?.data ?? null);
+  const overviewRef = useRef<ResourceUsageOverview | null>(initial?.data ?? null);
 
   useEffect(() => {
     overviewRef.current = overview;
   }, [overview]);
 
-  const loadOverview = useCallback(async () => {
-    setOverviewLoading(true);
-    setError(null);
-    setStaleHint(false);
-    try {
-      const response = await fetchResourceUsageOverview(period);
-      setOverview(response.data);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadOverview = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setOverviewLoading(true);
+      setError(null);
+      setStaleHint(false);
+      try {
+        const response = await fetchResourceUsageOverview(period);
+        setOverview(response.data);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Could not load usage meters. The service might be temporarily unavailable.",
-      );
-      if (overviewRef.current) {
-        setStaleHint(true);
-      } else {
-        setOverview(null);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Could not load usage meters. The service might be temporarily unavailable.",
+        );
+        if (overviewRef.current) {
+          setStaleHint(true);
+        } else {
+          setOverview(null);
+        }
+      } finally {
+        if (!soft) setOverviewLoading(false);
       }
-    } finally {
-      setOverviewLoading(false);
-    }
-  }, [period]);
+    },
+    [period],
+  );
 
   useEffect(() => {
     if (pathname.endsWith("/resource-usage/history")) {
@@ -356,9 +369,7 @@ export function AdminResourceUsageRosterPage({
     }
   }, [pathname]);
 
-  useEffect(() => {
-    void loadOverview();
-  }, [loadOverview]);
+  useReportLoad(loadOverview, initial);
 
   function switchTab(next: Tab) {
     setTab(next);
@@ -383,6 +394,8 @@ export function AdminResourceUsageRosterPage({
   const limits = overview?.limits;
   const trends = overview?.trends;
   const storageQuota = limits?.storageGb ?? null;
+  const storageQuotaLabel =
+    storageQuota == null ? "Unlimited" : `${formatGb(storageQuota, viewer)} GB`;
   const storagePct =
     storageQuota != null && storageQuota > 0 && meters
       ? Math.min(100, (meters.storageGb / storageQuota) * 100)
@@ -596,7 +609,7 @@ export function AdminResourceUsageRosterPage({
                 {item.label}
                 {typeof item.badge === "number" ? (
                   <span className="rounded bg-[var(--admin-surface-high)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--admin-on-surface)]">
-                    {formatCount(item.badge)}
+                    {formatCount(item.badge, viewer)}
                   </span>
                 ) : null}
               </button>
@@ -636,7 +649,7 @@ export function AdminResourceUsageRosterPage({
                       Total storage
                     </h3>
                     <p className="font-mono text-[32px] leading-none font-bold text-[var(--admin-on-surface)]">
-                      {formatGb(meters.storageGb)}{" "}
+                      {formatGb(meters.storageGb, viewer)}{" "}
                       <span className="text-base font-normal text-[var(--admin-on-surface-variant)]">
                         GB
                       </span>
@@ -644,7 +657,7 @@ export function AdminResourceUsageRosterPage({
                     <div className="mt-2 flex items-center gap-1.5 font-mono text-[12px] text-[var(--admin-primary)]">
                       <TrendingUp className="h-3.5 w-3.5" aria-hidden />
                       {trends.storageDeltaGb >= 0 ? "+" : ""}
-                      {formatGb(trends.storageDeltaGb)} GB delta
+                      {formatGb(trends.storageDeltaGb, viewer)} GB delta
                     </div>
                   </Link>
                   <div className="absolute right-6 bottom-6">
@@ -662,11 +675,11 @@ export function AdminResourceUsageRosterPage({
                       Total learners
                     </h3>
                     <p className="font-mono text-[32px] leading-none font-bold text-[var(--admin-on-surface)]">
-                      {formatCount(meters.totalLearners)}
+                      {formatCount(meters.totalLearners, viewer)}
                     </p>
                     <p className="mt-2 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
                       <span className="font-medium text-[var(--admin-success)]">
-                        {formatCount(meters.activeUsers30d)}
+                        {formatCount(meters.activeUsers30d, viewer)}
                       </span>{" "}
                       active currently
                     </p>
@@ -684,12 +697,12 @@ export function AdminResourceUsageRosterPage({
                     ) : null}
                   </h3>
                   <p className="font-mono text-[32px] leading-none font-bold text-[var(--admin-warning)]">
-                    {formatGb(optimization.dormantStorageGb)}{" "}
+                    {formatGb(optimization.dormantStorageGb, viewer)}{" "}
                     <span className="text-base font-normal opacity-80">GB</span>
                   </p>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <span className="font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
-                      across {formatCount(optimization.dormantContentCount)} dormant courses
+                      across {formatCount(optimization.dormantContentCount, viewer)} dormant courses
                     </span>
                     <button
                       type="button"
@@ -718,9 +731,9 @@ export function AdminResourceUsageRosterPage({
                 </div>
                 <div className="mb-2 flex items-end justify-between font-mono">
                   <span className="text-2xl leading-none text-[var(--admin-on-surface)]">
-                    {formatGb(meters.storageGb)}{" "}
+                    {formatGb(meters.storageGb, viewer)}{" "}
                     <span className="text-sm text-[var(--admin-on-surface-variant)]">
-                      / {storageQuota == null ? "Unlimited" : `${formatGb(storageQuota)} GB`}
+                      / {storageQuotaLabel}
                     </span>
                   </span>
                   <span className="text-sm text-[var(--admin-on-surface)]">
@@ -756,7 +769,7 @@ export function AdminResourceUsageRosterPage({
                       Storage dormant
                     </div>
                     <span className="font-mono text-[var(--admin-warning)]">
-                      {formatGb(optimization.dormantStorageGb)} GB
+                      {formatGb(optimization.dormantStorageGb, viewer)} GB
                     </span>
                   </div>
                   <div className="flex items-center justify-between border-b border-[color-mix(in_srgb,var(--admin-border)_70%,transparent)] pb-2">
@@ -768,7 +781,7 @@ export function AdminResourceUsageRosterPage({
                       Inactive learners
                     </div>
                     <span className="font-mono text-[var(--admin-warning)]">
-                      {formatCount(optimization.inactiveLearnerCount)}
+                      {formatCount(optimization.inactiveLearnerCount, viewer)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -780,7 +793,7 @@ export function AdminResourceUsageRosterPage({
                       Dormant courses
                     </div>
                     <span className="font-mono text-[var(--admin-warning)]">
-                      {formatCount(optimization.dormantContentCount)}
+                      {formatCount(optimization.dormantContentCount, viewer)}
                     </span>
                   </div>
                 </div>
@@ -789,22 +802,22 @@ export function AdminResourceUsageRosterPage({
               {[
                 {
                   label: "Active users (30d)",
-                  value: formatCount(meters.activeUsers30d),
+                  value: formatCount(meters.activeUsers30d, viewer),
                   href: "/admin/reports/resource-usage/metrics/usage.active_users_30d",
                 },
                 {
                   label: "Current MAU",
-                  value: formatCount(meters.currentMau),
+                  value: formatCount(meters.currentMau, viewer),
                   href: "/admin/reports/resource-usage/metrics/usage.current_mau",
                 },
                 {
                   label: "Tests taken",
-                  value: formatCount(meters.testSubmits),
+                  value: formatCount(meters.testSubmits, viewer),
                   href: "/admin/reports/resource-usage/metrics/usage.test_submits",
                 },
                 {
                   label: "Message sends",
-                  value: formatCompact(meters.messageSends),
+                  value: formatCompact(meters.messageSends, viewer),
                   href: "/admin/reports/resource-usage/metrics/usage.message_sends",
                 },
               ].map((card) => (
@@ -831,13 +844,13 @@ export function AdminResourceUsageRosterPage({
                 {
                   label: "Bandwidth",
                   metered: overview.notes.bandwidthMetered,
-                  value: `${formatGb(meters.bandwidthGb)} GB`,
+                  value: `${formatGb(meters.bandwidthGb, viewer)} GB`,
                   href: "/admin/reports/resource-usage/metrics/usage.bandwidth_gb",
                 },
                 {
                   label: "DRM tokens",
                   metered: overview.notes.drmMetered,
-                  value: formatCount(meters.drmTokens),
+                  value: formatCount(meters.drmTokens, viewer),
                   href: "/admin/reports/resource-usage/metrics/usage.drm_tokens",
                 },
                 {

@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type ResourceUsagePeriod = "this_month" | "last_month" | "ytd";
@@ -320,10 +318,15 @@ function buildQuery(params: Record<string, string | number | boolean | undefined
   return query ? `?${query}` : "";
 }
 
+/** The period the overview opens on; the server loads the first overview with it too. */
+export const RESOURCE_USAGE_DEFAULT_PERIOD: ResourceUsagePeriod = "this_month";
+
+export function resourceUsageOverviewPath(period?: ResourceUsagePeriod): string {
+  return `/api/v1/reports/resource-usage${buildQuery({ period: period ?? "this_month" })}`;
+}
+
 export async function fetchResourceUsageOverview(period?: ResourceUsagePeriod) {
-  return clientApi.get<{ data: ResourceUsageOverview }>(
-    `/api/v1/reports/resource-usage${buildQuery({ period: period ?? "this_month" })}`,
-  );
+  return clientApi.get<{ data: ResourceUsageOverview }>(resourceUsageOverviewPath(period));
 }
 
 export async function fetchResourceUsageHistory(filters?: {
