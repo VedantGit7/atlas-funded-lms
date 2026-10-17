@@ -15,15 +15,20 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  SALES_MARKETING_OVERVIEW_DEFAULTS,
   dateInputToEndIso,
   dateInputToStartIso,
   exportSalesMarketingReport,
   fetchSalesMarketingOverview,
+  salesMarketingOverviewDefaultRange,
   type SalesMarketingOverview,
   type SalesMarketingOverviewGrain,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -34,6 +39,11 @@ function defined<T>(value: T, message = "Expected value to be defined"): NonNull
 
 type Props = {
   onNavigateTab: (tab: "sales" | "coupons" | "referral-wallet" | "affiliates" | "exports") => void;
+  /**
+   * The overview for the default range, loaded by the server over the range
+   * it counted; the first browser load is skipped when present.
+   */
+  initialOverview?: ReportInitialDataInRange<SalesMarketingOverview> | null | undefined;
 };
 
 const GRAIN_OPTIONS: Array<{ value: SalesMarketingOverviewGrain; label: string }> = [
@@ -69,21 +79,25 @@ const CHANNEL_STACK = [
   },
 ];
 
-function formatCompact(cents: number): string {
+function formatCompact(cents: number, viewer: ViewerLocale): string {
   const value = cents / 100;
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}k`;
-  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  return value.toLocaleString(viewer.locale, { maximumFractionDigits: 0 });
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDate(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    month: "short",
+    day: "numeric",
+    timeZone: viewer.timeZone,
+  });
 }
 
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmount(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -103,12 +117,6 @@ function initials(name: string): string {
   if (parts.length === 0) return "?";
   if (parts.length === 1) return defined(parts[0]).slice(0, 2).toUpperCase();
   return `${defined(parts[0])[0] ?? ""}${defined(parts[1])[0] ?? ""}`.toUpperCase();
-}
-
-function defaultDateRange(): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - 36 * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
 }
 
 function sparklinePath(points: number[]): string {
@@ -244,6 +252,7 @@ function AttributionChart({
   grain: SalesMarketingOverviewGrain;
   onGrainChange: (grain: SalesMarketingOverviewGrain) => void;
 }) {
+  const viewer = useViewerLocale();
   const maxTotal = Math.max(1, ...points.map((point) => point.totalCents));
 
   return (
@@ -278,8 +287,8 @@ function AttributionChart({
 
       <div className="relative mt-2 flex h-48 items-end justify-between border-b border-[var(--admin-border)] px-2 pb-2">
         <div className="pointer-events-none absolute inset-y-0 left-0 flex flex-col justify-between font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
-          <span>{formatCompact(maxTotal)}</span>
-          <span>{formatCompact(maxTotal / 2)}</span>
+          <span>{formatCompact(maxTotal, viewer)}</span>
+          <span>{formatCompact(maxTotal / 2, viewer)}</span>
           <span>0</span>
         </div>
         <div className="pointer-events-none absolute left-6 right-0 top-0 h-px border-t border-dashed border-[var(--admin-border)]" />
@@ -297,13 +306,13 @@ function AttributionChart({
               index === 0 ||
               index === points.length - 1 ||
               index === Math.floor(points.length / 2)
-                ? formatShortDate(point.date)
+                ? formatShortDate(point.date, viewer)
                 : "";
             return (
               <div
                 key={point.date}
                 className="group ml-1 flex h-full min-w-0 flex-1 flex-col justify-end first:ml-8"
-                title={`${formatShortDate(point.date)}: ${formatCompact(point.totalCents)} (${String(point.orderCount)} orders)`}
+                title={`${formatShortDate(point.date, viewer)}: ${formatCompact(point.totalCents, viewer)} (${String(point.orderCount)} orders)`}
               >
                 <div
                   className="flex w-full max-w-8 flex-col justify-end self-center overflow-hidden transition-opacity group-hover:opacity-80"
@@ -336,47 +345,56 @@ function AttributionChart({
   );
 }
 
-export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
-  const defaults = useMemo(() => defaultDateRange(), []);
+export function AdminSalesMarketingOverviewPanel({ onNavigateTab, initialOverview }: Props) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialOverview ?? null);
+  // The server's range when it loaded the overview, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const defaults = useMemo(() => initial?.range ?? salesMarketingOverviewDefaultRange(), [initial]);
   const [paidFrom, setPaidFrom] = useState(defaults.from);
   const [paidTo, setPaidTo] = useState(defaults.to);
-  const [currency, setCurrency] = useState("");
-  const [grain, setGrain] = useState<SalesMarketingOverviewGrain>("week");
-  const [overview, setOverview] = useState<SalesMarketingOverview | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [currency, setCurrency] = useState<string>(SALES_MARKETING_OVERVIEW_DEFAULTS.currency);
+  const [grain, setGrain] = useState<SalesMarketingOverviewGrain>(
+    SALES_MARKETING_OVERVIEW_DEFAULTS.grain,
+  );
+  const [overview, setOverview] = useState<SalesMarketingOverview | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionsOpen, setActionsOpen] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
 
-  const loadOverview = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchSalesMarketingOverview({
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
-        currency: currency || undefined,
-        grain,
-      });
-      setOverview(response.data);
-    } catch (loadError) {
-      setOverview(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadOverview = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchSalesMarketingOverview({
+          paidFrom: dateInputToStartIso(paidFrom),
+          paidTo: dateInputToEndIso(paidTo),
+          currency: currency || undefined,
+          grain,
+        });
+        setOverview(response.data);
+      } catch (loadError) {
+        setOverview(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load sales and marketing data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [currency, grain, paidFrom, paidTo]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load sales and marketing data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [currency, grain, paidFrom, paidTo],
+  );
 
-  useEffect(() => {
-    void loadOverview();
-  }, [loadOverview]);
+  useReportLoad(loadOverview, initial);
 
   useEffect(() => {
     if (!actionsOpen) return;
@@ -421,7 +439,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
   }
 
   function resetDateRange() {
-    const next = defaultDateRange();
+    const next = salesMarketingOverviewDefaultRange();
     setPaidFrom(next.from);
     setPaidTo(next.to);
     setCurrency("");
@@ -604,8 +622,8 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                     className="h-4 w-4 text-[var(--admin-on-surface-variant)]"
                     aria-hidden="true"
                   />
-                  {formatShortDate(`${paidFrom}T00:00:00.000Z`)} –{" "}
-                  {formatShortDate(`${paidTo}T00:00:00.000Z`)}
+                  {formatShortDate(`${paidFrom}T00:00:00.000Z`, viewer)} –{" "}
+                  {formatShortDate(`${paidTo}T00:00:00.000Z`, viewer)}
                 </span>
               </div>
             </div>
@@ -681,7 +699,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
               </div>
               <div className="relative z-10 mt-auto flex items-baseline">
                 <span className="mr-2 font-mono text-[32px] leading-none text-[var(--admin-on-surface)]">
-                  {formatMoneyAmount(summary.attributedRevenueCents)}
+                  {formatMoneyAmount(summary.attributedRevenueCents, viewer)}
                 </span>
                 <span className="text-xs text-[var(--admin-on-surface-variant)]">
                   {summary.currency}
@@ -696,7 +714,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                 </span>
                 <div className="mt-auto flex items-baseline">
                   <span className="mr-1 font-mono text-sm text-[var(--admin-warning)]">
-                    {formatMoneyAmount(summary.discountGivenCents)}
+                    {formatMoneyAmount(summary.discountGivenCents, viewer)}
                   </span>
                   <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
                     {summary.currency}
@@ -709,7 +727,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                 </span>
                 <div className="mt-auto flex items-baseline">
                   <span className="mr-1 font-mono text-sm text-[var(--admin-warning)]">
-                    {formatMoneyAmount(summary.commissionEarnedCents)}
+                    {formatMoneyAmount(summary.commissionEarnedCents, viewer)}
                   </span>
                   <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
                     {summary.currency}
@@ -722,7 +740,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                 </span>
                 <div className="mt-auto flex items-baseline">
                   <span className="mr-1 font-mono text-sm text-[var(--admin-on-surface)]">
-                    {summary.referralCredit.toLocaleString()}
+                    {summary.referralCredit.toLocaleString(viewer.locale)}
                   </span>
                   <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
                     credits
@@ -735,7 +753,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                 </span>
                 <div className="mt-auto flex items-baseline">
                   <span className="mr-1 font-mono text-lg text-[var(--admin-success)]">
-                    {formatMoneyAmount(summary.netToTenantCents)}
+                    {formatMoneyAmount(summary.netToTenantCents, viewer)}
                   </span>
                   <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
                     {summary.currency}
@@ -849,16 +867,16 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                               </div>
                             </td>
                             <td className="h-11 px-4 py-2 text-right font-mono text-sm text-[var(--admin-on-surface)]">
-                              {product.purchaserCount.toLocaleString()}
+                              {product.purchaserCount.toLocaleString(viewer.locale)}
                             </td>
                             <td className="h-11 px-4 py-2 text-right font-mono text-sm text-[var(--admin-on-surface)]">
-                              {formatMoneyAmount(product.revenueCents)}
+                              {formatMoneyAmount(product.revenueCents, viewer)}
                               <span className="ml-1 text-[10px] text-[var(--admin-on-surface-variant)]">
                                 {summary.currency}
                               </span>
                             </td>
                             <td className="h-11 px-4 py-2 text-right font-mono text-sm text-[var(--admin-warning)]">
-                              {formatMoneyAmount(product.discountCents)}
+                              {formatMoneyAmount(product.discountCents, viewer)}
                               <span className="ml-1 text-[10px] text-[var(--admin-on-surface-variant)]">
                                 {summary.currency}
                               </span>
@@ -873,7 +891,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                                       : "text-[var(--admin-on-surface)]",
                                   ].join(" ")}
                                 >
-                                  {formatMoneyAmount(product.netCents)}
+                                  {formatMoneyAmount(product.netCents, viewer)}
                                   <span className="ml-1 text-[10px] text-[var(--admin-on-surface-variant)]">
                                     {summary.currency}
                                   </span>
@@ -941,10 +959,10 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                           {coupon.code}
                         </td>
                         <td className="h-11 px-4 py-1.5 text-right font-mono text-sm text-[var(--admin-on-surface)]">
-                          {coupon.uses.toLocaleString()}
+                          {coupon.uses.toLocaleString(viewer.locale)}
                         </td>
                         <td className="h-11 px-4 py-1.5 text-right font-mono text-sm text-[var(--admin-on-surface)]">
-                          {formatMoneyAmount(coupon.generatedCents)}
+                          {formatMoneyAmount(coupon.generatedCents, viewer)}
                           <span className="ml-1 text-[10px] text-[var(--admin-on-surface-variant)]">
                             {summary.currency}
                           </span>
@@ -1010,7 +1028,7 @@ export function AdminSalesMarketingOverviewPanel({ onNavigateTab }: Props) {
                         <td className="h-11 px-4 py-2 text-right">
                           <div className="flex flex-col items-end">
                             <span className="font-mono text-sm text-[var(--admin-on-surface)]">
-                              {formatMoneyAmount(affiliate.commissionCents)}
+                              {formatMoneyAmount(affiliate.commissionCents, viewer)}
                               <span className="ml-1 text-[10px] text-[var(--admin-on-surface-variant)]">
                                 {summary.currency}
                               </span>

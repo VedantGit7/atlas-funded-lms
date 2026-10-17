@@ -46,6 +46,19 @@ const BROWSER_FIRST_LOADS = {
   exports: [
     "/api/v1/reports/exports?createdFrom=2026-09-17T00%3A00%3A00.000Z&createdTo=2026-10-16T23%3A59%3A59.999Z&columns=status%2Ccreated_at%2Cdefinition_title%2Crow_count%2Cformat%2Crequested_by_name&page=1&limit=50",
   ],
+  payments: [
+    "/api/v1/reports/payments/overview?paidFrom=2026-09-12T00%3A00%3A00.000Z&paidTo=2026-10-16T23%3A59%3A59.999Z&grain=day",
+  ],
+  superLiveInsights: [
+    "/api/v1/reports/super-live-insights?startedFrom=2026-09-16T00%3A00%3A00.000Z&startedTo=2026-10-16T23%3A59%3A59.999Z&sortBy=scheduled_at&sortDir=desc&columns=title%2Cstatus%2Ccourse_title%2Cscheduled_at%2Cstarted_at%2Cduration_seconds%2Cattended_count%2Cregistered_count%2Cavg_duration_seconds%2Cattendance_rate&page=1&limit=50",
+  ],
+  activeDevices: [
+    "/api/v1/reports/active-devices/roster?window=7d&view=all&page=1&limit=50",
+    "/api/v1/reports/active-devices/overview?window=7d",
+  ],
+  salesMarketing: [
+    "/api/v1/reports/sales-marketing/overview?paidFrom=2026-09-10T00%3A00%3A00.000Z&paidTo=2026-10-16T23%3A59%3A59.999Z&grain=week",
+  ],
 } as const;
 
 const LOADERS: Record<keyof typeof BROWSER_FIRST_LOADS, () => Promise<unknown>> = {
@@ -58,6 +71,10 @@ const LOADERS: Record<keyof typeof BROWSER_FIRST_LOADS, () => Promise<unknown>> 
   liveClassAttendance: landing.loadLiveClassAttendanceLandingData,
   resourceUsage: landing.loadResourceUsageLandingData,
   exports: landing.loadExportsLandingData,
+  payments: () => landing.loadPaymentsLandingData({}),
+  superLiveInsights: () => landing.loadSuperLiveInsightsLandingData({}),
+  activeDevices: landing.loadActiveDevicesLandingData,
+  salesMarketing: () => landing.loadSalesMarketingLandingData({}),
 };
 
 beforeEach(() => {
@@ -93,6 +110,52 @@ describe("report landing initial data", () => {
     await expect(landing.loadExportsLandingData()).resolves.toMatchObject({
       range: { from: "2026-09-17", to: "2026-10-16" },
     });
+    await expect(landing.loadPaymentsLandingData({})).resolves.toMatchObject({
+      range: { from: "2026-09-12", to: "2026-10-16" },
+    });
+    await expect(landing.loadSuperLiveInsightsLandingData({})).resolves.toMatchObject({
+      range: { from: "2026-09-16", to: "2026-10-16" },
+    });
+    await expect(landing.loadSalesMarketingLandingData({})).resolves.toMatchObject({
+      range: { from: "2026-09-10", to: "2026-10-16" },
+    });
+  });
+
+  it("reads the address the way the page does: first value, trimmed, blank as absent", async () => {
+    await landing.loadSuperLiveInsightsLandingData({
+      courseId: " course-1 ",
+      batchId: ["batch-1", "batch-2"],
+      tab: "sessions",
+    });
+    await landing.loadSuperLiveInsightsLandingData({ courseId: "  ", batchId: "" });
+    expect(state.paths).toEqual([
+      BROWSER_FIRST_LOADS.superLiveInsights[0].replace("?", "?courseId=course-1&batchId=batch-1&"),
+      BROWSER_FIRST_LOADS.superLiveInsights[0],
+    ]);
+  });
+
+  it("loads nothing for a tab that opens another view, and the overview for any other", async () => {
+    const skipped = [
+      landing.loadPaymentsLandingData({ tab: "transactions" }),
+      landing.loadPaymentsLandingData({ tab: "gateways" }),
+      landing.loadSuperLiveInsightsLandingData({ tab: "trends" }),
+      landing.loadSuperLiveInsightsLandingData({ tab: ["exports", "sessions"] }),
+      landing.loadSalesMarketingLandingData({ tab: "coupons" }),
+      landing.loadSalesMarketingLandingData({ tab: "exports" }),
+    ];
+    for (const load of skipped) await expect(load).resolves.toBeNull();
+    expect(state.paths).toEqual([]);
+
+    await landing.loadPaymentsLandingData({ tab: "overview" });
+    await landing.loadPaymentsLandingData({ tab: "unknown" });
+    await landing.loadSalesMarketingLandingData({ tab: "overview" });
+    await landing.loadSalesMarketingLandingData({ tab: "unknown" });
+    expect(state.paths).toEqual([
+      ...BROWSER_FIRST_LOADS.payments,
+      ...BROWSER_FIRST_LOADS.payments,
+      ...BROWSER_FIRST_LOADS.salesMarketing,
+      ...BROWSER_FIRST_LOADS.salesMarketing,
+    ]);
   });
 
   it("resolves null when a load fails, so the page loads in the browser instead", async () => {
@@ -103,5 +166,10 @@ describe("report landing initial data", () => {
       roster: null,
       overview: null,
     });
+    await expect(landing.loadActiveDevicesLandingData()).resolves.toEqual({
+      roster: null,
+      overview: null,
+    });
+    await expect(landing.loadPaymentsLandingData({})).resolves.toBeNull();
   });
 });

@@ -8,6 +8,10 @@ import { AdminCouponsPanel } from "./AdminCouponsPanel";
 import { AdminReferralWalletPanel } from "./AdminReferralWalletPanel";
 import { AdminSalesMarketingExportsPanel } from "./AdminSalesMarketingExportsPanel";
 import type { SalesMarketingExportsPayload } from "./admin-sales-marketing-exports-api";
+import {
+  SALES_MARKETING_PANEL_TABS,
+  type SalesMarketingOverview,
+} from "./admin-sales-marketing-roster-api";
 import { AdminSalesMarketingOverviewPanel } from "./AdminSalesMarketingOverviewPanel";
 import { AdminSalesByProductPanel } from "./AdminSalesByProductPanel";
 import {
@@ -15,21 +19,13 @@ import {
   SALES_MARKETING_TAB_HREFS,
   type SalesMarketingReportTab,
 } from "./SalesMarketingReportTabs";
-import type { ReportInitialData } from "../../../lib/server/report-initial-data";
+import type {
+  ReportInitialData,
+  ReportInitialDataInRange,
+} from "../../../lib/server/report-initial-data";
 
 function parseTab(value: string | null): SalesMarketingReportTab {
-  if (
-    value === "overview" ||
-    value === "sales" ||
-    value === "coupons" ||
-    value === "referral-wallet" ||
-    value === "affiliate-products" ||
-    value === "affiliates" ||
-    value === "exports"
-  ) {
-    return value;
-  }
-  return "overview";
+  return SALES_MARKETING_PANEL_TABS.find((tab) => tab === value) ?? "overview";
 }
 
 function tabFromPathname(pathname: string | null): SalesMarketingReportTab | null {
@@ -43,8 +39,11 @@ function tabFromPathname(pathname: string | null): SalesMarketingReportTab | nul
 }
 
 export function AdminSalesMarketingRosterPage({
+  initialOverview,
   initialExports,
 }: {
+  /** The Overview tab's data, when the server loaded it for the page opening on it. */
+  initialOverview?: ReportInitialDataInRange<SalesMarketingOverview> | null | undefined;
   /** The Exports tab's data, when the server loaded it for the exports route. */
   initialExports?: ReportInitialData<SalesMarketingExportsPayload> | null | undefined;
 } = {}) {
@@ -82,6 +81,7 @@ export function AdminSalesMarketingRosterPage({
 
       {tab === "overview" ? (
         <AdminSalesMarketingOverviewPanel
+          initialOverview={initialOverview}
           onNavigateTab={(next) => {
             navigateTab(next);
           }}

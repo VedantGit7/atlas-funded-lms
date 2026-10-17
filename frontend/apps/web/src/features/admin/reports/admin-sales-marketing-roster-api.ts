@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const SALES_PURCHASER_COLUMN_OPTIONS = [
@@ -520,20 +518,52 @@ export function formatMoney(cents: number, currency = "INR"): string {
   }
 }
 
-export async function fetchSalesMarketingOverview(filters: {
+/** The `?tab=` values that open a panel other than the overview (any other value opens it). */
+export const SALES_MARKETING_PANEL_TABS = [
+  "sales",
+  "coupons",
+  "referral-wallet",
+  "affiliate-products",
+  "affiliates",
+  "exports",
+] as const;
+
+export type SalesMarketingOverviewFilters = {
   paidFrom?: string | undefined;
   paidTo?: string | undefined;
   currency?: string | undefined;
   grain?: SalesMarketingOverviewGrain | undefined;
-}) {
-  return clientApi.get<{ data: SalesMarketingOverview }>(
-    `/api/v1/reports/sales-marketing/overview${buildQuery({
-      paidFrom: filters.paidFrom,
-      paidTo: filters.paidTo,
-      currency: filters.currency,
-      grain: filters.grain,
-    })}`,
-  );
+};
+
+/** The overview's default date inputs (YYYY-MM-DD): the 36 days up to `now`, in UTC. */
+export function salesMarketingOverviewDefaultRange(now: Date = new Date()): {
+  from: string;
+  to: string;
+} {
+  const from = new Date(now.getTime() - 36 * 24 * 60 * 60 * 1000);
+  return { from: from.toISOString().slice(0, 10), to: now.toISOString().slice(0, 10) };
+}
+
+/** What the overview opens on, besides its range; the server loads the first one with it too. */
+export const SALES_MARKETING_OVERVIEW_DEFAULTS = {
+  currency: "",
+  grain: "week",
+} as const satisfies {
+  currency: string;
+  grain: SalesMarketingOverviewGrain;
+};
+
+export function salesMarketingOverviewPath(filters: SalesMarketingOverviewFilters): string {
+  return `/api/v1/reports/sales-marketing/overview${buildQuery({
+    paidFrom: filters.paidFrom,
+    paidTo: filters.paidTo,
+    currency: filters.currency,
+    grain: filters.grain,
+  })}`;
+}
+
+export async function fetchSalesMarketingOverview(filters: SalesMarketingOverviewFilters) {
+  return clientApi.get<{ data: SalesMarketingOverview }>(salesMarketingOverviewPath(filters));
 }
 
 export async function fetchSalesProducts(filters?: {
