@@ -24,6 +24,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   closePollLive,
   exportPollReport,
@@ -35,6 +36,8 @@ import {
   type PollTimelinePoint,
 } from "./admin-polls-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 const POLL_INTERVAL_MS = 2500;
 
@@ -76,15 +79,16 @@ function formatCountdown(totalSeconds: number | null): string {
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
-function formatClock(value: string | null | undefined): string {
+function formatClock(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString(viewer.locale, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -238,6 +242,7 @@ function OptionBars({
   dense?: boolean;
   present?: boolean;
 }) {
+  const viewer = useViewerLocale();
   const sorted = useMemo(
     () => [...options].sort((a, b) => b.count - a.count || a.sortOrder - b.sortOrder),
     [options],
@@ -302,7 +307,7 @@ function OptionBars({
                   : "flex w-32 items-baseline justify-end gap-3 text-sm",
               ].join(" ")}
             >
-              <span>{option.count.toLocaleString()}</span>
+              <span>{option.count.toLocaleString(viewer.locale)}</span>
               <span className="w-12 text-[var(--admin-on-surface-variant)]">
                 {formatPct(option.percent)}
               </span>
@@ -315,6 +320,7 @@ function OptionBars({
 }
 
 function EventLog({ events, closed }: { events: PollTimelineEvent[]; closed: boolean }) {
+  const viewer = useViewerLocale();
   return (
     <div className="flex h-64 flex-col overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-3">
@@ -337,7 +343,7 @@ function EventLog({ events, closed }: { events: PollTimelineEvent[]; closed: boo
               className="flex items-start gap-3 rounded-sm px-2 py-1.5 hover:bg-[var(--admin-surface-high)]"
             >
               <span className="pt-0.5 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
-                {formatClock(event.at)}
+                {formatClock(event.at, viewer)}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-[var(--admin-on-surface-variant)]">{event.label}</p>
@@ -371,6 +377,7 @@ function PresentModeView({
   showCorrect: boolean;
   onExit: () => void;
 }) {
+  const viewer = useViewerLocale();
   return (
     <div className="fixed inset-0 z-[80] flex flex-col bg-[var(--admin-bg)] text-[var(--admin-on-surface)]">
       <div className="flex items-center justify-between px-6 py-4">
@@ -413,11 +420,11 @@ function PresentModeView({
         <div className="flex w-full max-w-2xl flex-col items-center gap-6">
           <div className="flex items-end justify-center gap-6">
             <span className="font-mono text-6xl font-medium leading-none text-[var(--admin-primary)] md:text-7xl">
-              {data.totalResponses.toLocaleString()}
+              {data.totalResponses.toLocaleString(viewer.locale)}
             </span>
             <span className="pb-2 text-2xl text-[var(--admin-on-surface-variant)]">
               {data.eligibleCount != null
-                ? `of ${data.eligibleCount.toLocaleString()} answered`
+                ? `of ${data.eligibleCount.toLocaleString(viewer.locale)} answered`
                 : "answered"}
             </span>
           </div>
@@ -441,18 +448,40 @@ function PresentModeView({
   );
 }
 
-export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
+/** The snapshot's server clock, in epoch milliseconds, or null when it cannot be read. */
+function snapshotServerMs(snapshot: PollLiveMonitor): number | null {
+  const serverMs = new Date(snapshot.serverNow).getTime();
+  return Number.isNaN(serverMs) ? null : serverMs;
+}
+
+export function AdminPollLiveMonitorPage({
+  pollId,
+  initialSnapshot,
+}: {
+  pollId: string;
+  /** The monitor's first snapshot, loaded by the server; it keeps polling from there. */
+  initialSnapshot?: ReportInitialData<PollLiveMonitor> | null;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const present = searchParams.get("present") === "1";
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSnapshot ?? null);
 
-  const [data, setData] = useState<PollLiveMonitor | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<PollLiveMonitor | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [revealCorrect, setRevealCorrect] = useState(false);
-  const [nowMs, setNowMs] = useState(() => Date.now());
-  const [localRemaining, setLocalRemaining] = useState<number | null>(null);
+  // A server-loaded snapshot starts the clock at its own time, so the server
+  // and the browser render the same "ago" text; the ticker takes over after.
+  const [nowMs, setNowMs] = useState(
+    () => (initial ? snapshotServerMs(initial.data) : null) ?? Date.now(),
+  );
+  const [localRemaining, setLocalRemaining] = useState<number | null>(
+    initial?.data.secondsRemaining ?? null,
+  );
   const skewRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -472,20 +501,22 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
 
   const applySnapshot = useCallback((snapshot: PollLiveMonitor) => {
     setData(snapshot);
-    const serverMs = new Date(snapshot.serverNow).getTime();
-    if (!Number.isNaN(serverMs)) {
+    const serverMs = snapshotServerMs(snapshot);
+    if (serverMs !== null) {
       skewRef.current = serverMs - Date.now();
     }
     setLocalRemaining(snapshot.secondsRemaining);
     setError(null);
   }, []);
 
+  // A quiet (or soft) load refreshes in place instead of showing the loading state.
   const load = useCallback(
-    async (opts?: { quiet?: boolean }) => {
+    async (opts?: { quiet?: boolean; soft?: boolean }) => {
+      const quiet = opts?.quiet === true || opts?.soft === true;
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
-      if (!opts?.quiet) setLoading(true);
+      if (!quiet) setLoading(true);
       try {
         const response = await fetchPollLiveMonitor(pollId);
         if (controller.signal.aborted) return;
@@ -500,16 +531,23 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
               : "Failed to load live poll monitor.";
         setError(message);
       } finally {
-        if (!controller.signal.aborted && !opts?.quiet) setLoading(false);
+        if (!controller.signal.aborted && !quiet) setLoading(false);
       }
     },
     [applySnapshot, pollId],
   );
 
+  useReportLoad(load, initial);
+
   useEffect(() => {
-    void load();
+    // The server's snapshot is measured against this browser's clock once it
+    // is here, as a snapshot fetched in the browser is when it arrives.
+    if (initial) {
+      const serverMs = snapshotServerMs(initial.data);
+      if (serverMs !== null) skewRef.current = serverMs - Date.now();
+    }
     return () => abortRef.current?.abort();
-  }, [load]);
+  }, [initial]);
 
   useEffect(() => {
     if (!data?.isOpen) return;
@@ -751,7 +789,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
             )}
             {!isOpen && data.closedAt ? (
               <span className="text-xs text-[var(--admin-on-surface-variant)]">
-                Closed {formatClock(data.closedAt)}
+                Closed {formatClock(data.closedAt, viewer)}
                 {data.ranForSeconds != null
                   ? ` · ran for ${formatSeconds(data.ranForSeconds)}`
                   : ""}
@@ -858,11 +896,11 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
           <div className="mb-4 flex items-baseline justify-between gap-4">
             <div className="flex flex-wrap items-baseline gap-2">
               <span className="font-mono text-[44px] font-medium leading-none text-[var(--admin-on-surface)]">
-                {data.totalResponses.toLocaleString()}
+                {data.totalResponses.toLocaleString(viewer.locale)}
               </span>
               <span className="text-base font-semibold text-[var(--admin-on-surface-variant)]">
                 {data.eligibleCount != null
-                  ? `of ${data.eligibleCount.toLocaleString()} answered`
+                  ? `of ${data.eligibleCount.toLocaleString(viewer.locale)} answered`
                   : "answered"}
               </span>
             </div>
@@ -907,7 +945,7 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
               {isOpen ? "Live results" : "Final results"}
             </h2>
             <span className="text-xs text-[var(--admin-on-surface-variant)]">
-              Total respondents: {data.totalResponses.toLocaleString()}
+              Total respondents: {data.totalResponses.toLocaleString(viewer.locale)}
             </span>
           </div>
           <div className="flex flex-col gap-4 p-5">
@@ -956,11 +994,11 @@ export function AdminPollLiveMonitorPage({ pollId }: { pollId: string }) {
               </span>
               <div className="flex flex-wrap items-baseline gap-2">
                 <span className="font-mono text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]">
-                  {data.totalResponses.toLocaleString()}
+                  {data.totalResponses.toLocaleString(viewer.locale)}
                 </span>
                 {data.eligibleCount != null ? (
                   <span className="text-sm text-[var(--admin-on-surface-variant)]">
-                    / {data.eligibleCount.toLocaleString()} eligible
+                    / {data.eligibleCount.toLocaleString(viewer.locale)} eligible
                   </span>
                 ) : null}
               </div>

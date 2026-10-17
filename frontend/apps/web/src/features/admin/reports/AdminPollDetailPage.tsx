@@ -26,7 +26,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  POLL_RESPONDENTS_DEFAULTS,
   POLL_RESPONDENT_COLUMN_OPTIONS,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -38,9 +40,13 @@ import {
   type PollRespondentItem,
   type PollTimelineEvent,
   type PollTimelinePoint,
+  type PollRespondentsPayload,
+  pollShowsRespondents,
 } from "./admin-polls-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminPollOptionDetailDrawer } from "./AdminPollOptionDetailPage";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -82,16 +88,17 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDateTime(value: string | null | undefined): string {
+function formatDateTime(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -226,6 +233,7 @@ function ResponseTimelineChart({
 }
 
 function TimelineEventsList({ events }: { events: PollTimelineEvent[] }) {
+  const viewer = useViewerLocale();
   if (events.length === 0) {
     return (
       <p className="text-xs text-[var(--admin-on-surface-variant)]">No timeline events recorded.</p>
@@ -239,7 +247,7 @@ function TimelineEventsList({ events }: { events: PollTimelineEvent[] }) {
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-[var(--admin-on-surface)]">{event.label}</p>
             <p className="mt-0.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-              {formatDateTime(event.at)}
+              {formatDateTime(event.at, viewer)}
             </p>
             {event.detail ? (
               <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -350,22 +358,42 @@ function EmptyResponsesPanel() {
   );
 }
 
-export function AdminPollDetailPage({ pollId }: { pollId: string }) {
+export function AdminPollDetailPage({
+  pollId,
+  initialDetail,
+  initialRespondents,
+}: {
+  pollId: string;
+  /** The poll, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<PollDetail> | null;
+  /** Its first page of respondents, loaded by the server when the poll shows them. */
+  initialRespondents?: ReportInitialData<PollRespondentsPayload> | null;
+}) {
   const router = useRouter();
   const searchId = useId();
   const columnsPanelId = useId();
   const columnsRef = useRef<HTMLDivElement>(null);
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialDetailData] = useState(() => initialDetail ?? null);
+  const [initialRespondentsData] = useState(() => initialRespondents ?? null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initialDetailData === null);
   const [respondentsLoading, setRespondentsLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [detail, setDetail] = useState<PollDetail | null>(null);
-  const [respondents, setRespondents] = useState<PollRespondentItem[]>([]);
-  const [respondentPage, setRespondentPage] = useState(1);
-  const [respondentTotalPages, setRespondentTotalPages] = useState(0);
-  const [respondentTotalCount, setRespondentTotalCount] = useState(0);
+  const [detail, setDetail] = useState<PollDetail | null>(initialDetailData?.data ?? null);
+  const [respondents, setRespondents] = useState<PollRespondentItem[]>(
+    initialRespondentsData?.data.items ?? [],
+  );
+  const [respondentPage, setRespondentPage] = useState<number>(POLL_RESPONDENTS_DEFAULTS.page);
+  const [respondentTotalPages, setRespondentTotalPages] = useState(
+    initialRespondentsData?.data.pageInfo.totalPages ?? 0,
+  );
+  const [respondentTotalCount, setRespondentTotalCount] = useState(
+    initialRespondentsData?.data.pageInfo.totalCount ?? 0,
+  );
 
   const [learnerName, setLearnerName] = useState("");
   const [draftLearnerName, setDraftLearnerName] = useState("");
@@ -374,8 +402,8 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
   const [isCorrect, setIsCorrect] = useState<"any" | "correct" | "incorrect">("any");
   const [respondedFrom, setRespondedFrom] = useState("");
   const [respondedTo, setRespondedTo] = useState("");
-  const [sortBy, setSortBy] = useState("responded_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<string>(POLL_RESPONDENTS_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(POLL_RESPONDENTS_DEFAULTS.sortDir);
 
   const [columns, setColumns] = useState<PollRespondentColumnKey[]>(DEFAULT_COLUMNS);
   const [draftColumns, setDraftColumns] = useState<PollRespondentColumnKey[]>(DEFAULT_COLUMNS);
@@ -403,28 +431,32 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
     return detail?.participationPct ?? null;
   }, [detail]);
 
-  const loadDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPollDetail(pollId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadDetail = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPollDetail(pollId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load poll report.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [pollId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load poll report.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [pollId],
+  );
 
   const loadRespondents = useCallback(async () => {
-    if (!detail || detail.respondentsHidden || detail.anonymousVote) {
+    if (!detail || !pollShowsRespondents(detail)) {
       setRespondents([]);
       setRespondentTotalCount(0);
       setRespondentTotalPages(0);
@@ -475,14 +507,14 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
     sortDir,
   ]);
 
-  useEffect(() => {
-    void loadDetail();
-  }, [loadDetail]);
+  useReportLoad(loadDetail, initialDetailData);
 
-  useEffect(() => {
+  // Respondents follow the poll: they reload whenever it (or their filters) change.
+  const loadRespondentsOnceReady = useCallback(async () => {
     if (!detail || loading) return;
-    void loadRespondents();
-  }, [detail, loadDetail, loadRespondents, loading]);
+    await loadRespondents();
+  }, [detail, loadRespondents, loading]);
+  useReportLoad(loadRespondentsOnceReady, initialRespondentsData);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -880,11 +912,11 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               Responses
             </p>
             <p className="font-mono text-[32px] font-semibold leading-none text-[var(--admin-on-surface)]">
-              {detail.totalResponses.toLocaleString()}
+              {detail.totalResponses.toLocaleString(viewer.locale)}
             </p>
             <p className="text-xs text-[var(--admin-on-surface-variant)]">
               {detail.eligibleCount != null
-                ? `of ${detail.eligibleCount.toLocaleString()} eligible · ${formatPct(participationPct)}`
+                ? `of ${detail.eligibleCount.toLocaleString(viewer.locale)} eligible · ${formatPct(participationPct)}`
                 : "Audience size unknown for standalone polls"}
             </p>
             {participationPct != null ? (
@@ -909,7 +941,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               </p>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">
                 {detail.correctCount != null
-                  ? `${detail.correctCount.toLocaleString()} of ${detail.totalResponses.toLocaleString()} answered correctly`
+                  ? `${detail.correctCount.toLocaleString(viewer.locale)} of ${detail.totalResponses.toLocaleString(viewer.locale)} answered correctly`
                   : "Quiz correctness"}
               </p>
               {detail.correctPct != null ? (
@@ -952,10 +984,10 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
             )}
             <p className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
               {detail.isOpen
-                ? `Opened ${formatDateTime(detail.openedAt)}`
+                ? `Opened ${formatDateTime(detail.openedAt, viewer)}`
                 : detail.closedAt
-                  ? `Closed ${formatDateTime(detail.closedAt)}`
-                  : `Opened ${formatDateTime(detail.openedAt)}`}
+                  ? `Closed ${formatDateTime(detail.closedAt, viewer)}`
+                  : `Opened ${formatDateTime(detail.openedAt, viewer)}`}
             </p>
           </div>
         </div>
@@ -1009,7 +1041,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                         ) : null}
                       </div>
                       <div className="font-mono text-xs text-[var(--admin-on-surface)]">
-                        {option.count.toLocaleString()}{" "}
+                        {option.count.toLocaleString(viewer.locale)}{" "}
                         <span className="text-[var(--admin-on-surface-variant)]">
                           · {option.percent.toFixed(1)}%
                         </span>
@@ -1026,8 +1058,8 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
               })}
             </div>
             <div className="border-t border-[var(--admin-border)] px-4 py-3 text-xs text-[var(--admin-on-surface-variant)]">
-              {detail.totalResponses.toLocaleString()} responses ·{" "}
-              {detail.uniqueLearnerCount.toLocaleString()} learners ·{" "}
+              {detail.totalResponses.toLocaleString(viewer.locale)} responses ·{" "}
+              {detail.uniqueLearnerCount.toLocaleString(viewer.locale)} learners ·{" "}
               {detail.allowMultipleAnswers ? "Multi-answer" : "Single answer"}
             </div>
           </section>
@@ -1077,9 +1109,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                 {isAnonymous
                   ? "Individual voter rows are not available for anonymous polls."
                   : hasResponses
-                    ? `${respondentTotalCount.toLocaleString()} response${respondentTotalCount === 1 ? "" : "s"}`
+                    ? `${respondentTotalCount.toLocaleString(viewer.locale)} response${respondentTotalCount === 1 ? "" : "s"}`
                     : detail.eligibleCount != null
-                      ? `0 / ${detail.eligibleCount.toLocaleString()} eligible`
+                      ? `0 / ${detail.eligibleCount.toLocaleString(viewer.locale)} eligible`
                       : "0 responses"}
               </p>
             </div>
@@ -1412,7 +1444,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                           className="px-4 py-8 text-center text-sm text-[var(--admin-on-surface-variant)]"
                         >
                           {detail.eligibleCount != null
-                            ? `0 / ${detail.eligibleCount.toLocaleString()} eligible`
+                            ? `0 / ${detail.eligibleCount.toLocaleString(viewer.locale)} eligible`
                             : "No responses recorded yet."}
                         </td>
                       </tr>
@@ -1501,7 +1533,7 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                             </td>
                             {showRespondedColumn ? (
                               <td className="px-4 py-3 text-right font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                                {formatDateTime(row.respondedAt)}
+                                {formatDateTime(row.respondedAt, viewer)}
                               </td>
                             ) : null}
                           </tr>
@@ -1517,9 +1549,9 @@ export function AdminPollDetailPage({ pollId }: { pollId: string }) {
                   <p>
                     {respondentTotalCount === 0
                       ? detail.eligibleCount != null
-                        ? `0 / ${detail.eligibleCount.toLocaleString()} eligible`
+                        ? `0 / ${detail.eligibleCount.toLocaleString(viewer.locale)} eligible`
                         : "No results"
-                      : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${respondentTotalCount.toLocaleString()}`}
+                      : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${respondentTotalCount.toLocaleString(viewer.locale)}`}
                   </p>
                   <div className="flex items-center gap-2">
                     <button

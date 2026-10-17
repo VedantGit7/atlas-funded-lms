@@ -19,6 +19,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   exportPollReport,
   fetchLiveSessionPollReport,
@@ -26,6 +27,8 @@ import {
   type LiveSessionPollReport,
 } from "./admin-polls-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -57,27 +60,33 @@ function formatDuration(seconds: number | null | undefined): string {
   return rem > 0 ? `${hours}h ${rem}m` : `${hours}h`;
 }
 
-function formatSessionWhen(iso: string | null, timezoneLabel: string | null): string {
+function formatSessionWhen(
+  iso: string | null,
+  timezoneLabel: string | null,
+  viewer: ViewerLocale,
+): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const formatted = date.toLocaleString(undefined, {
+  const formatted = date.toLocaleString(viewer.locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
   return timezoneLabel ? `${formatted} ${timezoneLabel}` : formatted;
 }
 
-function formatClock(iso: string): string {
+function formatClock(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString(viewer.locale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -325,37 +334,49 @@ function LoadingSkeleton() {
   );
 }
 
-export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionId: string }) {
-  const [data, setData] = useState<LiveSessionPollReport | null>(null);
-  const [loading, setLoading] = useState(true);
+export function AdminLiveSessionPollReportPage({
+  liveSessionId,
+  initialReport,
+}: {
+  liveSessionId: string;
+  /** The session's poll report, loaded by the server; the first browser load is skipped when present. */
+  initialReport?: ReportInitialData<LiveSessionPollReport> | null;
+}) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialReport ?? null);
+  const [data, setData] = useState<LiveSessionPollReport | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [messageHint, setMessageHint] = useState<string | null>(null);
   const pollRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveSessionPollReport(liveSessionId);
-      setData(response.data);
-    } catch (err) {
-      setData(null);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveSessionPollReport(liveSessionId);
+        setData(response.data);
+      } catch (err) {
+        setData(null);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load session analytics.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [liveSessionId]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load session analytics.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [liveSessionId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const scrollToPoll = (pollId: string) => {
     pollRefs.current[pollId]?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -535,11 +556,11 @@ export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionI
             {data.session.title}
           </h1>
           <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]">
-            <span>{formatSessionWhen(whenIso, data.session.timezoneLabel)}</span>
+            <span>{formatSessionWhen(whenIso, data.session.timezoneLabel, viewer)}</span>
             <span className="h-1 w-1 rounded-full bg-[var(--admin-outline)]" />
             <span>{formatDuration(data.session.durationSeconds)}</span>
             <span className="h-1 w-1 rounded-full bg-[var(--admin-outline)]" />
-            <span>{data.session.attendanceCount.toLocaleString()} attendees</span>
+            <span>{data.session.attendanceCount.toLocaleString(viewer.locale)} attendees</span>
             {data.session.hostLabel ? (
               <>
                 <span className="h-1 w-1 rounded-full bg-[var(--admin-outline)]" />
@@ -631,7 +652,7 @@ export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionI
                   {data.summary.mostAnswered.title}
                 </Link>
                 <span className="shrink-0 font-mono text-sm text-[var(--admin-on-surface)]">
-                  {data.summary.mostAnswered.responseCount.toLocaleString()}
+                  {data.summary.mostAnswered.responseCount.toLocaleString(viewer.locale)}
                 </span>
               </div>
             </div>
@@ -653,7 +674,7 @@ export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionI
                   {data.summary.leastAnswered.title}
                 </Link>
                 <span className="shrink-0 font-mono text-sm text-[var(--admin-warning)]">
-                  {data.summary.leastAnswered.responseCount.toLocaleString()}
+                  {data.summary.leastAnswered.responseCount.toLocaleString(viewer.locale)}
                 </span>
               </div>
             </div>
@@ -667,7 +688,7 @@ export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionI
               </span>
             </div>
             <span className="font-mono text-sm text-[var(--admin-on-surface)]">
-              {data.summary.answeredEveryPollCount.toLocaleString()} learners
+              {data.summary.answeredEveryPollCount.toLocaleString(viewer.locale)} learners
             </span>
           </div>
         </div>
@@ -720,9 +741,9 @@ export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionI
                           : "text-[var(--admin-on-surface)]",
                       ].join(" ")}
                     >
-                      {poll.responseCount.toLocaleString()}
+                      {poll.responseCount.toLocaleString(viewer.locale)}
                       {poll.eligibleCount != null
-                        ? ` of ${poll.eligibleCount.toLocaleString()}`
+                        ? ` of ${poll.eligibleCount.toLocaleString(viewer.locale)}`
                         : ""}
                     </div>
                     <div className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -900,7 +921,7 @@ export function AdminLiveSessionPollReportPage({ liveSessionId }: { liveSessionI
                         {poll.anonymousVote ? "Anonymous" : poll.title}
                       </div>
                       <div className="mt-0.5 font-mono text-[10px] font-normal lowercase">
-                        {poll.anonymousVote ? "not tracked" : formatClock(poll.openedAt)}
+                        {poll.anonymousVote ? "not tracked" : formatClock(poll.openedAt, viewer)}
                       </div>
                     </th>
                   ))}

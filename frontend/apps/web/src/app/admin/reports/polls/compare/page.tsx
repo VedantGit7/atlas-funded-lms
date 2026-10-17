@@ -3,10 +3,19 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminPollsComparePage } from "../../../../../features/admin/reports/AdminPollsComparePage";
+import { loadPollsCompareData } from "../../../../../lib/server/report-polls-initial-data";
+import type { ReportSearchParams } from "../../../../../lib/server/report-landing-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
-export default async function AdminPollsCompareRoutePage() {
-  const gate = await runTenantStateGate();
+export default async function AdminPollsCompareRoutePage({
+  searchParams,
+}: {
+  searchParams: Promise<ReportSearchParams>;
+}) {
+  const [gate, initialCompare] = await Promise.all([
+    runTenantStateGate(),
+    searchParams.then(loadPollsCompareData),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +34,7 @@ export default async function AdminPollsCompareRoutePage() {
           <p className="p-8 text-sm text-[var(--admin-on-surface-variant)]">Loading comparison…</p>
         }
       >
-        <AdminPollsComparePage />
+        <AdminPollsComparePage initialCompare={initialCompare} />
       </Suspense>
     </AdminPageGate>
   );

@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminPollNonRespondentsPage } from "../../../../../../features/admin/reports/AdminPollNonRespondentsPage";
+import { loadPollNonRespondentsData } from "../../../../../../lib/server/report-polls-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -11,7 +12,10 @@ type PageProps = {
 
 export default async function AdminPollNonRespondentsRoutePage({ params }: PageProps) {
   const { pollId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initialNonRespondents] = await Promise.all([
+    runTenantStateGate(),
+    loadPollNonRespondentsData(pollId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -30,7 +34,10 @@ export default async function AdminPollNonRespondentsRoutePage({ params }: PageP
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading non-respondents…</p>
         }
       >
-        <AdminPollNonRespondentsPage pollId={pollId} />
+        <AdminPollNonRespondentsPage
+          pollId={pollId}
+          initialNonRespondents={initialNonRespondents}
+        />
       </Suspense>
     </AdminPageGate>
   );
