@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type ActiveDevicesWindow = "24h" | "7d" | "30d" | "all";
@@ -179,26 +177,45 @@ function buildOverviewQuery(filters: ActiveDevicesOverviewFilters): string {
   return query ? `?${query}` : "";
 }
 
+/** What the roster and overview open on; the server loads the first of each with it too. */
+export const ACTIVE_DEVICES_DEFAULTS = {
+  window: "7d",
+  view: "all",
+  page: 1,
+  limit: 50,
+} as const satisfies {
+  window: ActiveDevicesWindow;
+  view: ActiveDevicesView;
+  page: number;
+  limit: number;
+};
+
+export type ActiveDevicesRosterPayload = {
+  items: ActiveDevicesLearner[];
+  pageInfo: {
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+};
+
+export function activeDevicesRosterPath(filters: ActiveDevicesRosterFilters = {}): string {
+  return `/api/v1/reports/active-devices/roster${buildQuery(filters)}`;
+}
+
+export function activeDevicesOverviewPath(filters: ActiveDevicesOverviewFilters = {}): string {
+  return `/api/v1/reports/active-devices/overview${buildOverviewQuery(filters)}`;
+}
+
 export async function fetchActiveDevicesRoster(filters: ActiveDevicesRosterFilters = {}) {
-  return clientApi.get<{
-    data: {
-      items: ActiveDevicesLearner[];
-      pageInfo: {
-        page: number;
-        pageSize: number;
-        totalCount: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-      };
-    };
-  }>(`/api/v1/reports/active-devices/roster${buildQuery(filters)}`);
+  return clientApi.get<{ data: ActiveDevicesRosterPayload }>(activeDevicesRosterPath(filters));
 }
 
 export async function fetchActiveDevicesOverview(filters: ActiveDevicesOverviewFilters = {}) {
-  return clientApi.get<{ data: ActiveDevicesOverview }>(
-    `/api/v1/reports/active-devices/overview${buildOverviewQuery(filters)}`,
-  );
+  return clientApi.get<{ data: ActiveDevicesOverview }>(activeDevicesOverviewPath(filters));
 }
 
 export async function fetchActiveDevicesLearnerDetail(membershipId: string) {

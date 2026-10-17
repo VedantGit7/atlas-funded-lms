@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export const SUPER_LIVE_INSIGHT_COLUMN_OPTIONS = [
@@ -82,7 +80,57 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return query ? `?${query}` : "";
 }
 
-export async function fetchSuperLiveInsightsRoster(filters?: {
+export type SuperLiveInsightsDatePreset = "7d" | "30d" | "90d" | "custom";
+
+/** A preset's date inputs (YYYY-MM-DD), counted back from `now` in the local calendar. */
+export function superLiveInsightsPresetRange(
+  preset: SuperLiveInsightsDatePreset,
+  now: Date = new Date(),
+): { from: string; to: string } {
+  const to = new Date(now);
+  const from = new Date(now);
+  if (preset === "7d") from.setDate(from.getDate() - 7);
+  else if (preset === "30d") from.setDate(from.getDate() - 30);
+  else if (preset === "90d") from.setDate(from.getDate() - 90);
+  return {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10),
+  };
+}
+
+/**
+ * What the sessions list opens on, over the last 30 days, besides the course
+ * and batch the address may name; the server loads the first page with it too.
+ */
+export const SUPER_LIVE_INSIGHTS_DEFAULTS = {
+  datePreset: "30d",
+  sortBy: "scheduled_at",
+  sortDir: "desc",
+  columns: [
+    "title",
+    "status",
+    "course_title",
+    "scheduled_at",
+    "started_at",
+    "duration_seconds",
+    "attended_count",
+    "registered_count",
+    "avg_duration_seconds",
+    "attendance_rate",
+  ],
+  page: 1,
+} as const satisfies {
+  datePreset: SuperLiveInsightsDatePreset;
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  columns: readonly SuperLiveInsightColumnKey[];
+  page: number;
+};
+
+/** The tabs a `?tab=` sends to their own route; the sessions list is not loaded for them. */
+export const SUPER_LIVE_INSIGHTS_REDIRECT_TABS = ["trends", "compare", "outliers", "exports"];
+
+export type SuperLiveInsightsRosterFilters = {
   q?: string | undefined;
   status?: string | undefined;
   courseId?: string | undefined;
@@ -95,31 +143,37 @@ export async function fetchSuperLiveInsightsRoster(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   columns?: SuperLiveInsightColumnKey[] | undefined;
   page?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: SuperLiveInsightItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      summary: SuperLiveInsightsSummary;
-    };
-  }>(
-    `/api/v1/reports/super-live-insights${buildQuery({
-      q: filters?.q,
-      status: filters?.status,
-      courseId: filters?.courseId,
-      batchId: filters?.batchId,
-      startedFrom: filters?.startedFrom,
-      startedTo: filters?.startedTo,
-      minAttended: filters?.minAttended,
-      hasUnresolved: filters?.hasUnresolved === true ? "true" : undefined,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      columns: filters?.columns?.join(","),
-      page: filters?.page ?? 1,
-      limit: 50,
-    })}`,
+};
+
+export type SuperLiveInsightsRosterPayload = {
+  items: SuperLiveInsightItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+  summary: SuperLiveInsightsSummary;
+};
+
+export async function fetchSuperLiveInsightsRoster(filters?: SuperLiveInsightsRosterFilters) {
+  return clientApi.get<{ data: SuperLiveInsightsRosterPayload }>(
+    superLiveInsightsRosterPath(filters),
   );
+}
+
+export function superLiveInsightsRosterPath(filters?: SuperLiveInsightsRosterFilters): string {
+  return `/api/v1/reports/super-live-insights${buildQuery({
+    q: filters?.q,
+    status: filters?.status,
+    courseId: filters?.courseId,
+    batchId: filters?.batchId,
+    startedFrom: filters?.startedFrom,
+    startedTo: filters?.startedTo,
+    minAttended: filters?.minAttended,
+    hasUnresolved: filters?.hasUnresolved === true ? "true" : undefined,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    columns: filters?.columns?.join(","),
+    page: filters?.page ?? 1,
+    limit: 50,
+  })}`;
 }
 
 export type SuperLiveInsightContext = {

@@ -17,20 +17,26 @@ import { AdminExportsRosterPage } from "../../../../features/admin/reports/Admin
 import { AdminReportSectionPage } from "../../../../features/admin/reports/AdminReportSectionPage";
 import { getAdminReportSection } from "../../../../features/admin/reports/admin-reports-catalog";
 import {
+  loadActiveDevicesLandingData,
   loadBatchesLandingData,
   loadCustomFieldLandingData,
   loadEnrollmentsLandingData,
   loadExportsLandingData,
   loadLiveClassAttendanceLandingData,
+  loadPaymentsLandingData,
   loadPollsLandingData,
   loadProgressScoreLandingData,
   loadResourceUsageLandingData,
+  loadSalesMarketingLandingData,
+  loadSuperLiveInsightsLandingData,
   loadZoomInsightsLandingData,
+  type ReportSearchParams,
 } from "../../../../lib/server/report-landing-initial-data";
 import { runTenantStateGate } from "../../../../lib/server/tenant-state-gate";
 
 type AdminReportPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<ReportSearchParams>;
 };
 
 function SuspenseLoading({ children }: { children: ReactNode }) {
@@ -42,24 +48,32 @@ function SuspenseLoading({ children }: { children: ReactNode }) {
 }
 
 /**
- * The report's landing page. Reports whose first view is a single default
- * load arrive with that data from the server (see report-landing-initial-data);
- * the rest still load in the browser.
+ * The report's landing page, arriving with its first data from the server
+ * (see report-landing-initial-data). `search` is the page's address query,
+ * which some reports read their opening filters or tab from.
  */
-async function renderReport(slug: string, title: string): Promise<ReactNode> {
+async function renderReport(
+  slug: string,
+  title: string,
+  search: ReportSearchParams,
+): Promise<ReactNode> {
   switch (slug) {
     case "enrollments": {
       const { roster, overview } = await loadEnrollmentsLandingData();
       return <AdminEnrollmentsRosterPage initialRoster={roster} initialOverview={overview} />;
     }
-    case "active-devices":
-      return <AdminActiveDevicesRosterPage />;
-    case "payments":
+    case "active-devices": {
+      const { roster, overview } = await loadActiveDevicesLandingData();
+      return <AdminActiveDevicesRosterPage initialRoster={roster} initialOverview={overview} />;
+    }
+    case "payments": {
+      const initialOverview = await loadPaymentsLandingData(search);
       return (
         <SuspenseLoading>
-          <AdminPaymentsRosterPage />
+          <AdminPaymentsRosterPage initialOverview={initialOverview} />
         </SuspenseLoading>
       );
+    }
     case "progress-score":
       return (
         <AdminProgressScoreOverviewPage initialOverview={await loadProgressScoreLandingData()} />
@@ -68,12 +82,14 @@ async function renderReport(slug: string, title: string): Promise<ReactNode> {
       return <AdminBatchesRosterPage initialRoster={await loadBatchesLandingData()} />;
     case "polls":
       return <AdminPollsRosterPage initialRoster={await loadPollsLandingData()} />;
-    case "sales-marketing":
+    case "sales-marketing": {
+      const initialOverview = await loadSalesMarketingLandingData(search);
       return (
         <SuspenseLoading>
-          <AdminSalesMarketingRosterPage />
+          <AdminSalesMarketingRosterPage initialOverview={initialOverview} />
         </SuspenseLoading>
       );
+    }
     case "custom-field": {
       const { roster, definitions } = await loadCustomFieldLandingData();
       return <AdminCustomFieldRosterPage initialRoster={roster} initialDefinitions={definitions} />;
@@ -86,12 +102,14 @@ async function renderReport(slug: string, title: string): Promise<ReactNode> {
           initialSessions={await loadLiveClassAttendanceLandingData()}
         />
       );
-    case "super-live-insights":
+    case "super-live-insights": {
+      const initialSessions = await loadSuperLiveInsightsLandingData(search);
       return (
         <SuspenseLoading>
-          <AdminSuperLiveInsightsRosterPage />
+          <AdminSuperLiveInsightsRosterPage initialSessions={initialSessions} />
         </SuspenseLoading>
       );
+    }
     case "resource-usage":
       return (
         <AdminResourceUsageRosterPage initialOverview={await loadResourceUsageLandingData()} />
@@ -103,8 +121,8 @@ async function renderReport(slug: string, title: string): Promise<ReactNode> {
   }
 }
 
-export default async function AdminReportSlugPage({ params }: AdminReportPageProps) {
-  const { slug } = await params;
+export default async function AdminReportSlugPage({ params, searchParams }: AdminReportPageProps) {
+  const [{ slug }, search] = await Promise.all([params, searchParams]);
   const section = getAdminReportSection(slug);
   if (!section) {
     notFound();
@@ -112,7 +130,7 @@ export default async function AdminReportSlugPage({ params }: AdminReportPagePro
 
   const [gate, content] = await Promise.all([
     runTenantStateGate(),
-    renderReport(slug, section.title),
+    renderReport(slug, section.title, search),
   ]);
   if (gate.kind !== "ok") {
     return (

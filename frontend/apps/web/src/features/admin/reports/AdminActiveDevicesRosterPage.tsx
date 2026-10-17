@@ -35,7 +35,9 @@ import {
   inlineExpandClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  ACTIVE_DEVICES_DEFAULTS,
   deleteActiveDevices,
   fetchActiveDevicesLearnerDetail,
   fetchActiveDevicesOverview,
@@ -44,12 +46,15 @@ import {
   type ActiveDevicesDetailDevice,
   type ActiveDevicesLearner,
   type ActiveDevicesOverview,
+  type ActiveDevicesRosterPayload,
   type ActiveDevicesView,
   type ActiveDevicesWindow,
 } from "./admin-active-devices-roster-api";
 import { ActiveDevicesReportTabs } from "./ActiveDevicesReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { RenderedAtProvider, useViewerLocale } from "./viewer-time";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = ACTIVE_DEVICES_DEFAULTS.limit;
 
 const WINDOW_OPTIONS: Array<{ value: ActiveDevicesWindow; label: string }> = [
   { value: "24h", label: "24h" },
@@ -105,11 +110,11 @@ function formatAbsolute(value: string | null): string {
     .replace(/\.\d{3}Z$/, "Z");
 }
 
-function formatRelative(value: string | null): string {
+function formatRelative(value: string | null, now: number): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = now - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"} ago`;
@@ -198,27 +203,56 @@ function EmptyIllustration() {
   );
 }
 
-export function AdminActiveDevicesRosterPage() {
+type ActiveDevicesRosterProps = {
+  /** The first roster page, loaded by the server; the first browser load is skipped when present. */
+  initialRoster?: ReportInitialData<ActiveDevicesRosterPayload> | null;
+  /** The overview for the same (unfiltered) devices, loaded by the server. */
+  initialOverview?: ReportInitialData<ActiveDevicesOverview> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminActiveDevicesRosterPage(props: ActiveDevicesRosterProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialRoster?.loadedAt ?? null}>
+      <ActiveDevicesRoster {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ActiveDevicesRoster({ initialRoster, initialOverview }: ActiveDevicesRosterProps) {
   const router = useRouter();
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement>(null);
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialRosterData] = useState(() => initialRoster ?? null);
+  const [initialOverviewData] = useState(() => initialOverview ?? null);
 
-  const [learners, setLearners] = useState<ActiveDevicesLearner[]>([]);
-  const [overview, setOverview] = useState<ActiveDevicesOverview | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [page, setPage] = useState(1);
-  const [windowKey, setWindowKey] = useState<ActiveDevicesWindow>("7d");
-  const [view, setView] = useState<ActiveDevicesView>("all");
+  const [learners, setLearners] = useState<ActiveDevicesLearner[]>(
+    initialRosterData?.data.items ?? [],
+  );
+  const [overview, setOverview] = useState<ActiveDevicesOverview | null>(
+    initialOverviewData?.data ?? null,
+  );
+  const [totalCount, setTotalCount] = useState(initialRosterData?.data.pageInfo.totalCount ?? 0);
+  const [totalPages, setTotalPages] = useState(initialRosterData?.data.pageInfo.totalPages ?? 0);
+  const [page, setPage] = useState<number>(ACTIVE_DEVICES_DEFAULTS.page);
+  const [windowKey, setWindowKey] = useState<ActiveDevicesWindow>(ACTIVE_DEVICES_DEFAULTS.window);
+  const [view, setView] = useState<ActiveDevicesView>(ACTIVE_DEVICES_DEFAULTS.view);
   const [search, setSearch] = useState("");
   const [platform, setPlatform] = useState("");
   const [lastSeenFilter, setLastSeenFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [overviewLoading, setOverviewLoading] = useState(true);
+  const [loading, setLoading] = useState(initialRosterData === null);
+  const [overviewLoading, setOverviewLoading] = useState(initialOverviewData === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
+  const [refreshedAt, setRefreshedAt] = useState<Date | null>(() =>
+    initialRosterData === null ? null : new Date(initialRosterData.loadedAt),
+  );
 
   const [selectedLearnerIds, setSelectedLearnerIds] = useState<Set<string>>(new Set());
   const [menuLearnerId, setMenuLearnerId] = useState<string | null>(null);
@@ -241,58 +275,61 @@ export function AdminActiveDevicesRosterPage() {
     [platform, search, view, windowKey],
   );
 
-  const loadOverview = useCallback(async () => {
-    setOverviewLoading(true);
-    try {
-      const response = await fetchActiveDevicesOverview({
-        window: windowKey,
-        ...(search.trim() ? { email: search.trim() } : {}),
-        ...(platform ? { platform } : {}),
-      });
-      setOverview(response.data);
-    } catch {
-      setOverview(null);
-    } finally {
-      setOverviewLoading(false);
-    }
-  }, [platform, search, windowKey]);
+  const loadOverview = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setOverviewLoading(true);
+      try {
+        const response = await fetchActiveDevicesOverview({
+          window: windowKey,
+          ...(search.trim() ? { email: search.trim() } : {}),
+          ...(platform ? { platform } : {}),
+        });
+        setOverview(response.data);
+      } catch {
+        setOverview(null);
+      } finally {
+        if (!soft) setOverviewLoading(false);
+      }
+    },
+    [platform, search, windowKey],
+  );
 
-  const loadRoster = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchActiveDevicesRoster({
-        ...filterPayload,
-        page,
-        limit: PAGE_SIZE,
-      });
-      setLearners(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setRefreshedAt(new Date());
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadRoster = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchActiveDevicesRoster({
+          ...filterPayload,
+          page,
+          limit: PAGE_SIZE,
+        });
+        setLearners(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setRefreshedAt(new Date());
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load the device roster.",
-      );
-      setLearners([]);
-      setTotalCount(0);
-      setTotalPages(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [filterPayload, page]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load the device roster.",
+        );
+        setLearners([]);
+        setTotalCount(0);
+        setTotalPages(0);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [filterPayload, page],
+  );
 
-  useEffect(() => {
-    void loadRoster();
-  }, [loadRoster]);
-
-  useEffect(() => {
-    void loadOverview();
-  }, [loadOverview]);
+  useReportLoad(loadRoster, initialRosterData);
+  useReportLoad(loadOverview, initialOverviewData);
 
   useEffect(() => {
     if (!menuLearnerId) return;
@@ -680,7 +717,7 @@ export function AdminActiveDevicesRosterPage() {
               <div className="h-8 w-24 animate-pulse rounded bg-[var(--admin-surface-high)]" />
             ) : (
               <span className="font-mono text-3xl font-medium leading-none text-[var(--admin-on-surface)]">
-                {(overview?.summary.activeDevicesCount ?? 0).toLocaleString()}
+                {(overview?.summary.activeDevicesCount ?? 0).toLocaleString(viewer.locale)}
               </span>
             )}
             <DeviceSparkline points={overview?.trend ?? []} />
@@ -695,7 +732,7 @@ export function AdminActiveDevicesRosterPage() {
             <div className="h-8 w-16 animate-pulse rounded bg-[var(--admin-surface-high)]" />
           ) : (
             <span className="font-mono text-3xl font-medium leading-none text-[var(--admin-on-surface)]">
-              {(overview?.summary.learnersSignedIn ?? 0).toLocaleString()}
+              {(overview?.summary.learnersSignedIn ?? 0).toLocaleString(viewer.locale)}
             </span>
           )}
         </div>
@@ -709,7 +746,7 @@ export function AdminActiveDevicesRosterPage() {
               <div className="h-8 w-12 animate-pulse rounded bg-[var(--admin-surface-high)]" />
             ) : (
               <span className="font-mono text-3xl font-medium leading-none text-[var(--admin-on-surface)]">
-                {overLimitCount.toLocaleString()}
+                {overLimitCount.toLocaleString(viewer.locale)}
               </span>
             )}
             <TriangleAlert
@@ -725,7 +762,7 @@ export function AdminActiveDevicesRosterPage() {
           </span>
           <div className="flex items-end gap-2">
             <span className="font-mono text-3xl font-medium leading-none text-[var(--admin-on-surface)]">
-              {(overview?.summary.flaggedSessions ?? 0).toLocaleString()}
+              {(overview?.summary.flaggedSessions ?? 0).toLocaleString(viewer.locale)}
             </span>
             <AlertTriangle
               className="mb-0.5 h-5 w-5 text-[var(--admin-danger)]"
@@ -1008,7 +1045,7 @@ export function AdminActiveDevicesRosterPage() {
                         </td>
                         <td className="px-4 py-2">
                           <div className="flex flex-col">
-                            <span>{formatRelative(learner.lastSeenAt)}</span>
+                            <span>{formatRelative(learner.lastSeenAt, viewer.now)}</span>
                             <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
                               {formatAbsolute(learner.lastSeenAt)}
                             </span>
@@ -1120,14 +1157,14 @@ export function AdminActiveDevicesRosterPage() {
         <div className="absolute bottom-0 left-0 right-0 flex h-11 items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface)] px-4">
           <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
             {refreshedAt
-              ? `Data refreshed ${formatRelative(refreshedAt.toISOString()).toLowerCase()}`
+              ? `Data refreshed ${formatRelative(refreshedAt.toISOString(), viewer.now).toLowerCase()}`
               : "Waiting for first refresh"}
           </span>
           <div className="flex items-center gap-4 text-sm text-[var(--admin-on-surface)]">
             <span className="font-mono text-[var(--admin-on-surface-variant)]">
               {loading
                 ? "Loading..."
-                : `${rangeStart}-${rangeEnd} of ${totalCount.toLocaleString()}`}
+                : `${rangeStart}-${rangeEnd} of ${totalCount.toLocaleString(viewer.locale)}`}
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -1310,7 +1347,9 @@ export function AdminActiveDevicesRosterPage() {
                           <td className="px-4 py-3">
                             {device.osLabel ?? titleCase(device.platform)}
                           </td>
-                          <td className="px-4 py-3">{formatRelative(device.lastSeenAt)}</td>
+                          <td className="px-4 py-3">
+                            {formatRelative(device.lastSeenAt, viewer.now)}
+                          </td>
                           <td className="px-4 py-3 font-mono text-xs">{device.ipAddress ?? "-"}</td>
                         </tr>
                       );

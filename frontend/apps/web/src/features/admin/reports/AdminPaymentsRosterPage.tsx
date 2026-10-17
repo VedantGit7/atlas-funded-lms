@@ -19,6 +19,7 @@ import {
   generalSettingsPageTitleClassName,
 } from "../general-settings/general-settings-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
   createPaymentInstalmentPlan,
   dateInputToEndIso,
@@ -44,6 +45,7 @@ import {
   type PaymentInstalmentScheduleItem,
   type PaymentInvoiceColumnKey,
   type PaymentInvoiceItem,
+  type PaymentOverview,
   type PaymentTransactionColumnKey,
   type PaymentTransactionItem,
 } from "./admin-payments-roster-api";
@@ -88,7 +90,12 @@ function downloadHtmlFile(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminPaymentsRosterPage() {
+export function AdminPaymentsRosterPage({
+  initialOverview,
+}: {
+  /** The overview tab's data, loaded by the server when the page opens on it. */
+  initialOverview?: ReportInitialDataInRange<PaymentOverview> | null | undefined;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -481,6 +488,7 @@ export function AdminPaymentsRosterPage() {
 
       {tab === "overview" ? (
         <AdminPaymentsOverviewPanel
+          initialOverview={initialOverview}
           onNavigateTab={(next) => {
             if (next === "transactions") {
               router.push("/admin/reports/payments/transactions");

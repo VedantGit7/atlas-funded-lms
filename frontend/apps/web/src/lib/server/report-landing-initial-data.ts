@@ -1,5 +1,12 @@
 import "server-only";
 import {
+  ACTIVE_DEVICES_DEFAULTS,
+  activeDevicesOverviewPath,
+  activeDevicesRosterPath,
+  type ActiveDevicesOverview,
+  type ActiveDevicesRosterPayload,
+} from "../../features/admin/reports/admin-active-devices-roster-api";
+import {
   BATCHES_ROSTER_DEFAULTS,
   batchesRosterPath,
   type BatchesRosterPayload,
@@ -35,6 +42,15 @@ import {
   type LiveSessionsRosterPayload,
 } from "../../features/admin/reports/admin-live-class-attendance-roster-api";
 import {
+  PAYMENTS_REDIRECT_TABS,
+  PAYMENT_OVERVIEW_DEFAULTS,
+  dateInputToEndIso as paymentsDateToEndIso,
+  dateInputToStartIso as paymentsDateToStartIso,
+  paymentOverviewDefaultRange,
+  paymentOverviewPath,
+  type PaymentOverview,
+} from "../../features/admin/reports/admin-payments-roster-api";
+import {
   POLLS_ROSTER_DEFAULTS,
   pollsRosterPath,
   type PollsRosterPayload,
@@ -49,6 +65,24 @@ import {
   resourceUsageOverviewPath,
   type ResourceUsageOverview,
 } from "../../features/admin/reports/admin-resource-usage-roster-api";
+import {
+  SALES_MARKETING_OVERVIEW_DEFAULTS,
+  SALES_MARKETING_PANEL_TABS,
+  dateInputToEndIso as salesDateToEndIso,
+  dateInputToStartIso as salesDateToStartIso,
+  salesMarketingOverviewDefaultRange,
+  salesMarketingOverviewPath,
+  type SalesMarketingOverview,
+} from "../../features/admin/reports/admin-sales-marketing-roster-api";
+import {
+  SUPER_LIVE_INSIGHTS_DEFAULTS,
+  SUPER_LIVE_INSIGHTS_REDIRECT_TABS,
+  dateInputToEndIso as superLiveDateToEndIso,
+  dateInputToStartIso as superLiveDateToStartIso,
+  superLiveInsightsPresetRange,
+  superLiveInsightsRosterPath,
+  type SuperLiveInsightsRosterPayload,
+} from "../../features/admin/reports/admin-super-live-insights-roster-api";
 import {
   ZOOM_MEETINGS_DEFAULTS,
   dateInputToEndIso as zoomDateToEndIso,
@@ -66,6 +100,15 @@ import { loadReportInitialData, type ReportInitialDataInRange } from "./report-i
  * the page can skip that load. Each resolves null on failure and the page then
  * loads in the browser as before.
  */
+
+/** The page's search parameters, as a route receives them. */
+export type ReportSearchParams = Record<string, string | string[] | undefined>;
+
+/** A parameter as the page's `useSearchParams().get()` reads it: the first value, or null. */
+function searchParam(params: ReportSearchParams, name: string): string | null {
+  const value = params[name];
+  return (Array.isArray(value) ? value[0] : value) ?? null;
+}
 
 async function loadInRange<T>(
   range: { from: string; to: string },
@@ -156,6 +199,76 @@ export function loadExportsLandingData() {
       columns: [...EXPORTS_HISTORY_DEFAULTS.columns],
       page: EXPORTS_HISTORY_DEFAULTS.page,
       limit: EXPORTS_HISTORY_DEFAULTS.limit,
+    }),
+  );
+}
+
+export function loadPaymentsLandingData(params: ReportSearchParams) {
+  // These tabs send the page to their own route; any other opens the overview.
+  const tab = searchParam(params, "tab");
+  if (tab !== null && PAYMENTS_REDIRECT_TABS.includes(tab)) return Promise.resolve(null);
+  const range = paymentOverviewDefaultRange();
+  return loadInRange<PaymentOverview>(
+    range,
+    paymentOverviewPath({
+      paidFrom: paymentsDateToStartIso(range.from),
+      paidTo: paymentsDateToEndIso(range.to),
+      // The default currency is "all", which the page sends as no currency.
+      grain: PAYMENT_OVERVIEW_DEFAULTS.grain,
+    }),
+  );
+}
+
+export function loadSuperLiveInsightsLandingData(params: ReportSearchParams) {
+  const tab = searchParam(params, "tab");
+  if (tab !== null && SUPER_LIVE_INSIGHTS_REDIRECT_TABS.includes(tab)) {
+    return Promise.resolve(null);
+  }
+  const range = superLiveInsightsPresetRange(SUPER_LIVE_INSIGHTS_DEFAULTS.datePreset);
+  return loadInRange<SuperLiveInsightsRosterPayload>(
+    range,
+    superLiveInsightsRosterPath({
+      // Read the way the page reads them, so both name the same sessions.
+      courseId: searchParam(params, "courseId")?.trim() || undefined,
+      batchId: searchParam(params, "batchId")?.trim() || undefined,
+      startedFrom: superLiveDateToStartIso(range.from),
+      startedTo: superLiveDateToEndIso(range.to),
+      sortBy: SUPER_LIVE_INSIGHTS_DEFAULTS.sortBy,
+      sortDir: SUPER_LIVE_INSIGHTS_DEFAULTS.sortDir,
+      columns: [...SUPER_LIVE_INSIGHTS_DEFAULTS.columns],
+      page: SUPER_LIVE_INSIGHTS_DEFAULTS.page,
+    }),
+  );
+}
+
+export async function loadActiveDevicesLandingData() {
+  const [roster, overview] = await Promise.all([
+    loadReportInitialData<ActiveDevicesRosterPayload>(
+      activeDevicesRosterPath({
+        window: ACTIVE_DEVICES_DEFAULTS.window,
+        view: ACTIVE_DEVICES_DEFAULTS.view,
+        page: ACTIVE_DEVICES_DEFAULTS.page,
+        limit: ACTIVE_DEVICES_DEFAULTS.limit,
+      }),
+    ),
+    loadReportInitialData<ActiveDevicesOverview>(
+      activeDevicesOverviewPath({ window: ACTIVE_DEVICES_DEFAULTS.window }),
+    ),
+  ]);
+  return { roster, overview };
+}
+
+export function loadSalesMarketingLandingData(params: ReportSearchParams) {
+  const tab = searchParam(params, "tab");
+  if (SALES_MARKETING_PANEL_TABS.some((panel) => panel === tab)) return Promise.resolve(null);
+  const range = salesMarketingOverviewDefaultRange();
+  return loadInRange<SalesMarketingOverview>(
+    range,
+    salesMarketingOverviewPath({
+      paidFrom: salesDateToStartIso(range.from),
+      paidTo: salesDateToEndIso(range.to),
+      // The default currency is "all", which the page sends as no currency.
+      grain: SALES_MARKETING_OVERVIEW_DEFAULTS.grain,
     }),
   );
 }

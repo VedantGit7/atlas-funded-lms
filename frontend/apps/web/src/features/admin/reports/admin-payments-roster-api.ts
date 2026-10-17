@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 import type { RefundStatus } from "./refund-submission";
 
@@ -388,20 +386,39 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return query ? `?${query}` : "";
 }
 
-export async function fetchPaymentOverview(filters: {
+/** The `?tab=` values the payments page sends to their own route instead of the overview. */
+export const PAYMENTS_REDIRECT_TABS = ["transactions", "invoices", "instalment", "gateways"];
+
+export type PaymentOverviewFilters = {
   paidFrom?: string | undefined;
   paidTo?: string | undefined;
   currency?: string | undefined;
   grain?: PaymentOverviewGrain | undefined;
-}) {
-  return clientApi.get<{ data: PaymentOverview }>(
-    `/api/v1/reports/payments/overview${buildQuery({
-      paidFrom: filters.paidFrom,
-      paidTo: filters.paidTo,
-      currency: filters.currency,
-      grain: filters.grain,
-    })}`,
-  );
+};
+
+/** The overview's default date inputs (YYYY-MM-DD): the 34 days up to `now`, in UTC. */
+export function paymentOverviewDefaultRange(now: Date = new Date()): { from: string; to: string } {
+  const from = new Date(now.getTime() - 34 * 24 * 60 * 60 * 1000);
+  return { from: from.toISOString().slice(0, 10), to: now.toISOString().slice(0, 10) };
+}
+
+/** What the overview opens on, besides its range; the server loads the first one with it too. */
+export const PAYMENT_OVERVIEW_DEFAULTS = { currency: "", grain: "day" } as const satisfies {
+  currency: string;
+  grain: PaymentOverviewGrain;
+};
+
+export function paymentOverviewPath(filters: PaymentOverviewFilters): string {
+  return `/api/v1/reports/payments/overview${buildQuery({
+    paidFrom: filters.paidFrom,
+    paidTo: filters.paidTo,
+    currency: filters.currency,
+    grain: filters.grain,
+  })}`;
+}
+
+export async function fetchPaymentOverview(filters: PaymentOverviewFilters) {
+  return clientApi.get<{ data: PaymentOverview }>(paymentOverviewPath(filters));
 }
 
 export async function fetchPaymentTransactions(filters: {

@@ -11,19 +11,24 @@ import {
   TrendingUp,
   TriangleAlert,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  PAYMENT_OVERVIEW_DEFAULTS,
   dateInputToEndIso,
   dateInputToStartIso,
   exportPaymentTransactions,
   fetchPaymentOverview,
+  paymentOverviewDefaultRange,
   type PaymentOverview,
   type PaymentOverviewGrain,
   type PaymentTransactionItem,
 } from "./admin-payments-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -37,6 +42,11 @@ type OverviewTabAction = "transactions" | "instalment" | "invoices";
 type Props = {
   onNavigateTab: (tab: OverviewTabAction) => void;
   onRecordPayment: () => void;
+  /**
+   * The overview for the default range, loaded by the server over the range
+   * it counted; the first browser load is skipped when present.
+   */
+  initialOverview?: ReportInitialDataInRange<PaymentOverview> | null | undefined;
 };
 
 const GRAIN_OPTIONS: Array<{ value: PaymentOverviewGrain; label: string }> = [
@@ -60,35 +70,40 @@ const PRODUCT_STACK = [
   },
 ];
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoney(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatCompact(cents: number): string {
+function formatCompact(cents: number, viewer: ViewerLocale): string {
   const value = cents / 100;
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}k`;
-  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  return value.toLocaleString(viewer.locale, { maximumFractionDigits: 0 });
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDate(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    month: "short",
+    day: "numeric",
+    timeZone: viewer.timeZone,
+  });
 }
 
-function formatTxDate(value: string | null): string {
+function formatTxDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -120,14 +135,6 @@ function statusTone(status: string): {
     icon: "alert",
     title: status,
   };
-}
-
-function defaultDateRange(): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - 34 * 24 * 60 * 60 * 1000);
-  const toIso = to.toISOString().slice(0, 10);
-  const fromIso = from.toISOString().slice(0, 10);
-  return { from: fromIso, to: toIso };
 }
 
 function Shimmer({ className }: { className?: string }) {
@@ -234,6 +241,7 @@ function RevenueChart({
   grain: PaymentOverviewGrain;
   onGrainChange: (grain: PaymentOverviewGrain) => void;
 }) {
+  const viewer = useViewerLocale();
   const maxTotal = Math.max(1, ...points.map((point) => point.totalCents));
   const maxOrders = Math.max(1, ...points.map((point) => point.orderCount));
 
@@ -310,7 +318,7 @@ function RevenueChart({
               <div
                 key={point.date}
                 className="group relative flex h-full min-w-0 flex-1 flex-col justify-end"
-                title={`${formatShortDate(point.date)}: ${formatCompact(point.totalCents)} (${String(point.orderCount)} orders)`}
+                title={`${formatShortDate(point.date, viewer)}: ${formatCompact(point.totalCents, viewer)} (${String(point.orderCount)} orders)`}
               >
                 <div
                   className="absolute left-1/2 z-10 h-1.5 w-1.5 -translate-x-1/2 rounded-full border-2 border-[var(--admin-outline)] bg-[var(--admin-surface)]"
@@ -339,11 +347,15 @@ function RevenueChart({
 
       <div className="mt-2 flex justify-between px-2 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
         {points.length <= 8
-          ? points.map((point) => <span key={point.date}>{formatShortDate(point.date)}</span>)
+          ? points.map((point) => (
+              <span key={point.date}>{formatShortDate(point.date, viewer)}</span>
+            ))
           : [points[0], points[Math.floor(points.length / 2)], points[points.length - 1]]
               .filter(Boolean)
               .map((point) => (
-                <span key={defined(point).date}>{formatShortDate(defined(point).date)}</span>
+                <span key={defined(point).date}>
+                  {formatShortDate(defined(point).date, viewer)}
+                </span>
               ))}
       </div>
     </div>
@@ -359,6 +371,7 @@ function RecentTransactionsTable({
   currency: string;
   onViewAll: () => void;
 }) {
+  const viewer = useViewerLocale();
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-high)] p-4">
@@ -410,7 +423,7 @@ function RecentTransactionsTable({
                     </span>
                   </td>
                   <td className="p-4 text-right font-mono text-[var(--admin-on-surface)]">
-                    {(item.amountCents / 100).toLocaleString(undefined, {
+                    {(item.amountCents / 100).toLocaleString(viewer.locale, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -430,7 +443,7 @@ function RecentTransactionsTable({
                     </span>
                   </td>
                   <td className="p-4 text-right font-mono text-sm text-[var(--admin-on-surface-variant)]">
-                    {formatTxDate(item.paidAt ?? item.createdAt)}
+                    {formatTxDate(item.paidAt ?? item.createdAt, viewer)}
                   </td>
                 </tr>
               );
@@ -452,45 +465,56 @@ function RecentTransactionsTable({
   );
 }
 
-export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: Props) {
-  const defaults = useMemo(() => defaultDateRange(), []);
+export function AdminPaymentsOverviewPanel({
+  onNavigateTab,
+  onRecordPayment,
+  initialOverview,
+}: Props) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialOverview ?? null);
+  // The server's range when it loaded the overview, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const defaults = useMemo(() => initial?.range ?? paymentOverviewDefaultRange(), [initial]);
   const [paidFrom, setPaidFrom] = useState(defaults.from);
   const [paidTo, setPaidTo] = useState(defaults.to);
-  const [currency, setCurrency] = useState<string>("");
-  const [grain, setGrain] = useState<PaymentOverviewGrain>("day");
-  const [overview, setOverview] = useState<PaymentOverview | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [currency, setCurrency] = useState<string>(PAYMENT_OVERVIEW_DEFAULTS.currency);
+  const [grain, setGrain] = useState<PaymentOverviewGrain>(PAYMENT_OVERVIEW_DEFAULTS.grain);
+  const [overview, setOverview] = useState<PaymentOverview | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadOverview = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentOverview({
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
-        currency: currency || undefined,
-        grain,
-      });
-      setOverview(response.data);
-    } catch (loadError) {
-      setOverview(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadOverview = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentOverview({
+          paidFrom: dateInputToStartIso(paidFrom),
+          paidTo: dateInputToEndIso(paidTo),
+          currency: currency || undefined,
+          grain,
+        });
+        setOverview(response.data);
+      } catch (loadError) {
+        setOverview(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load payment data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [currency, grain, paidFrom, paidTo]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load payment data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [currency, grain, paidFrom, paidTo],
+  );
 
-  useEffect(() => {
-    void loadOverview();
-  }, [loadOverview]);
+  useReportLoad(loadOverview, initial);
 
   async function handleExport() {
     setBusy(true);
@@ -520,7 +544,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
   }
 
   function resetDateRange() {
-    const next = defaultDateRange();
+    const next = paymentOverviewDefaultRange();
     setPaidFrom(next.from);
     setPaidTo(next.to);
     setCurrency("");
@@ -535,7 +559,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
     overview.summary.collectedCents === 0;
   const dateLabel =
     paidFrom && paidTo
-      ? `${formatShortDate(`${paidFrom}T00:00:00.000Z`)} – ${formatShortDate(`${paidTo}T00:00:00.000Z`)}`
+      ? `${formatShortDate(`${paidFrom}T00:00:00.000Z`, viewer)} – ${formatShortDate(`${paidTo}T00:00:00.000Z`, viewer)}`
       : (summary?.windowLabel ?? "Selected range");
 
   const currencyOptions = useMemo(() => {
@@ -747,7 +771,11 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                     Collected this period
                   </h2>
                   <div className="mb-2 font-mono text-3xl font-bold text-[var(--admin-on-surface)]">
-                    {formatMoney(defined(summary).collectedCents, defined(summary).currency)}
+                    {formatMoney(
+                      defined(summary).collectedCents,
+                      defined(summary).currency,
+                      viewer,
+                    )}
                   </div>
                   {defined(summary).changePercent != null ? (
                     <div className="inline-flex items-center gap-1 rounded bg-[color-mix(in_srgb,var(--admin-primary)_10%,transparent)] px-2 py-1 font-mono text-xs text-[var(--admin-primary)]">
@@ -772,7 +800,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                     Transactions
                   </h3>
                   <div className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
-                    {defined(summary).transactionCount.toLocaleString()}
+                    {defined(summary).transactionCount.toLocaleString(viewer.locale)}
                   </div>
                 </div>
                 <div className="flex flex-col justify-between border-b border-[var(--admin-border)] p-6 lg:border-b-0 lg:border-r">
@@ -780,7 +808,11 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                     Average order
                   </h3>
                   <div className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
-                    {formatMoney(defined(summary).averageOrderCents, defined(summary).currency)}
+                    {formatMoney(
+                      defined(summary).averageOrderCents,
+                      defined(summary).currency,
+                      viewer,
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col justify-between border-b border-[var(--admin-border)] bg-[color-mix(in_srgb,var(--admin-warning)_5%,transparent)] p-6 md:border-r md:border-b-0">
@@ -792,6 +824,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                       {formatMoney(
                         defined(summary).outstandingInstalmentCents,
                         defined(summary).currency,
+                        viewer,
                       )}
                     </div>
                     <div className="font-mono text-xs text-[color-mix(in_srgb,var(--admin-warning)_70%,transparent)]">
@@ -856,7 +889,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                           />
                         </div>
                         <div className="w-20 text-right font-mono text-sm font-medium text-[var(--admin-on-surface)]">
-                          {formatCompact(gateway.amountCents)}
+                          {formatCompact(gateway.amountCents, viewer)}
                         </div>
                       </div>
                     ))
@@ -895,7 +928,7 @@ export function AdminPaymentsOverviewPanel({ onNavigateTab, onRecordPayment }: P
                           </span>
                         </div>
                         <span className="font-mono text-sm text-[var(--admin-on-surface-variant)]">
-                          {formatCompact(product.amountCents)}
+                          {formatCompact(product.amountCents, viewer)}
                         </span>
                       </div>
                     ))

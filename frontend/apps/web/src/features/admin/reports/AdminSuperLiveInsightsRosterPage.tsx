@@ -35,24 +35,31 @@ import {
   dropdownPanelSurfaceClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  SUPER_LIVE_INSIGHTS_DEFAULTS,
   SUPER_LIVE_INSIGHT_COLUMN_OPTIONS,
   dateInputToEndIso,
   dateInputToStartIso,
   exportSuperLiveInsightsReport,
   fetchSuperLiveInsightsRoster,
+  superLiveInsightsPresetRange,
   type SuperLiveInsightColumnKey,
   type SuperLiveInsightItem,
+  type SuperLiveInsightsDatePreset,
+  type SuperLiveInsightsRosterPayload,
   type SuperLiveInsightsSummary,
 } from "./admin-super-live-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 import {
   SuperLiveInsightsModuleTabs,
   type SuperLiveInsightsTabId,
 } from "./SuperLiveInsightsModuleTabs";
 
 type ModuleTab = SuperLiveInsightsTabId;
-type DatePreset = "7d" | "30d" | "90d" | "custom";
+type DatePreset = SuperLiveInsightsDatePreset;
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -60,18 +67,7 @@ const secondaryButtonClassName =
 const fieldClassName =
   "h-9 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[13px] text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] focus-visible:border-[var(--admin-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--admin-primary)]";
 
-const DEFAULT_COLUMNS: SuperLiveInsightColumnKey[] = [
-  "title",
-  "status",
-  "course_title",
-  "scheduled_at",
-  "started_at",
-  "duration_seconds",
-  "attended_count",
-  "registered_count",
-  "avg_duration_seconds",
-  "attendance_rate",
-];
+const DEFAULT_COLUMNS: SuperLiveInsightColumnKey[] = [...SUPER_LIVE_INSIGHTS_DEFAULTS.columns];
 
 const SESSION_COLUMN_KEYS: SuperLiveInsightColumnKey[] = [
   "title",
@@ -118,15 +114,16 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -146,8 +143,8 @@ function formatRate(value: number | null | undefined): string {
   return `${value.toFixed(1)}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCount(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function titleCase(value: string): string {
@@ -157,18 +154,6 @@ function titleCase(value: string): string {
 function sharePct(part: number, total: number): number {
   if (total <= 0) return 0;
   return Math.round((part / total) * 1000) / 10;
-}
-
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
 }
 
 function columnLabel(key: SuperLiveInsightColumnKey): string {
@@ -419,9 +404,21 @@ function ColumnsPopover({
   );
 }
 
-export function AdminSuperLiveInsightsRosterPage() {
+export function AdminSuperLiveInsightsRosterPage({
+  initialSessions,
+}: {
+  /**
+   * The first page of sessions for the course and batch in the address,
+   * loaded by the server over the date range it counted; the first browser
+   * load is skipped when present.
+   */
+  initialSessions?: ReportInitialDataInRange<SuperLiveInsightsRosterPayload> | null;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSessions ?? null);
   const datePresetLabelId = useId();
   const columnsButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -452,20 +449,26 @@ export function AdminSuperLiveInsightsRosterPage() {
     }
   }, [initialTab, router]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [sessions, setSessions] = useState<SuperLiveInsightItem[]>([]);
-  const [summary, setSummary] = useState<SuperLiveInsightsSummary>(EMPTY_SUMMARY);
+  const [sessions, setSessions] = useState<SuperLiveInsightItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<SuperLiveInsightsSummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState<number>(SUPER_LIVE_INSIGHTS_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
-  const initialRange = presetToRange("30d");
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  // The server's range when it loaded the sessions, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const [initialRange] = useState(
+    () => initial?.range ?? superLiveInsightsPresetRange(SUPER_LIVE_INSIGHTS_DEFAULTS.datePreset),
+  );
+  const [datePreset, setDatePreset] = useState<DatePreset>(SUPER_LIVE_INSIGHTS_DEFAULTS.datePreset);
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [startedFrom, setStartedFrom] = useState(initialRange.from);
@@ -475,8 +478,8 @@ export function AdminSuperLiveInsightsRosterPage() {
   const [sessionStatus, setSessionStatus] = useState("");
   const [minAttended, setMinAttended] = useState("");
   const [hasUnresolved, setHasUnresolved] = useState(false);
-  const [sortBy, setSortBy] = useState("scheduled_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<string>(SUPER_LIVE_INSIGHTS_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(SUPER_LIVE_INSIGHTS_DEFAULTS.sortDir);
   const [columns, setColumns] = useState<SuperLiveInsightColumnKey[]>(DEFAULT_COLUMNS);
 
   const datePresetLabel =
@@ -491,63 +494,67 @@ export function AdminSuperLiveInsightsRosterPage() {
   const applyDatePreset = useCallback((preset: DatePreset) => {
     setDatePreset(preset);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = superLiveInsightsPresetRange(preset);
     setStartedFrom(range.from);
     setStartedTo(range.to);
     setPage(1);
   }, []);
 
-  const loadSessions = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const min =
-        minAttended.trim().length > 0 && Number.isFinite(Number(minAttended))
-          ? Number(minAttended)
-          : undefined;
-      const response = await fetchSuperLiveInsightsRoster({
-        q: searchQ.trim() || undefined,
-        status: sessionStatus || undefined,
-        courseId: courseIdFilter,
-        batchId: batchIdFilter,
-        startedFrom: dateInputToStartIso(startedFrom),
-        startedTo: dateInputToEndIso(startedTo),
-        minAttended: min,
-        hasUnresolved: hasUnresolved || undefined,
-        sortBy,
-        sortDir,
-        columns,
-        page,
-      });
-      setSessions(response.data.items);
-      setSummary(response.data.summary);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadSessions = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const min =
+          minAttended.trim().length > 0 && Number.isFinite(Number(minAttended))
+            ? Number(minAttended)
+            : undefined;
+        const response = await fetchSuperLiveInsightsRoster({
+          q: searchQ.trim() || undefined,
+          status: sessionStatus || undefined,
+          courseId: courseIdFilter,
+          batchId: batchIdFilter,
+          startedFrom: dateInputToStartIso(startedFrom),
+          startedTo: dateInputToEndIso(startedTo),
+          minAttended: min,
+          hasUnresolved: hasUnresolved || undefined,
+          sortBy,
+          sortDir,
+          columns,
+          page,
+        });
+        setSessions(response.data.items);
+        setSummary(response.data.summary);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load live session insights.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    batchIdFilter,
-    columns,
-    courseIdFilter,
-    hasUnresolved,
-    minAttended,
-    page,
-    searchQ,
-    sessionStatus,
-    sortBy,
-    sortDir,
-    startedFrom,
-    startedTo,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load live session insights.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      batchIdFilter,
+      columns,
+      courseIdFilter,
+      hasUnresolved,
+      minAttended,
+      page,
+      searchQ,
+      sessionStatus,
+      sortBy,
+      sortDir,
+      startedFrom,
+      startedTo,
+    ],
+  );
 
   useEffect(() => {
     if (tabFromUrl === "compare" || tabFromUrl === "outliers" || tabFromUrl === "exports") {
@@ -557,9 +564,7 @@ export function AdminSuperLiveInsightsRosterPage() {
     }
   }, [tabFromUrl]);
 
-  useEffect(() => {
-    void loadSessions();
-  }, [loadSessions]);
+  useReportLoad(loadSessions, initial);
 
   function openSession(session: SuperLiveInsightItem) {
     router.push(`/admin/reports/super-live-insights/${session.id}`);
@@ -860,7 +865,7 @@ export function AdminSuperLiveInsightsRosterPage() {
                           {formatRate(session.attendanceRate)}
                         </td>
                         <td className="px-4 py-3 text-right font-mono">
-                          {formatCount(session.attendedCount)}
+                          {formatCount(session.attendedCount, viewer)}
                         </td>
                         <td className="px-4 py-3 text-right font-mono">
                           {formatDuration(session.avgDurationSeconds)}
@@ -920,7 +925,7 @@ export function AdminSuperLiveInsightsRosterPage() {
                           Sessions
                         </span>
                         <div className="mb-2 font-mono text-[32px] font-semibold leading-none text-[var(--admin-on-surface)]">
-                          {formatCount(summary.sessionCount)}
+                          {formatCount(summary.sessionCount, viewer)}
                         </div>
                         <div className="h-2 w-full max-w-[120px] overflow-hidden rounded-full bg-[var(--admin-surface-low)]">
                           <div className="h-full w-full rounded-full bg-[var(--admin-primary)]" />
@@ -937,8 +942,8 @@ export function AdminSuperLiveInsightsRosterPage() {
                           <MetricBar pct={summary.avgAttendanceRate} tone={rateTone} />
                         </div>
                         <span className="block text-xs text-[var(--admin-on-surface-variant)]">
-                          {formatCount(summary.totalAttended)} attended of{" "}
-                          {formatCount(summary.totalRecords)} records
+                          {formatCount(summary.totalAttended, viewer)} attended of{" "}
+                          {formatCount(summary.totalRecords, viewer)} records
                         </span>
                       </div>
                       <div className="flex flex-1 flex-col justify-between gap-4">
@@ -948,7 +953,7 @@ export function AdminSuperLiveInsightsRosterPage() {
                               Total attended
                             </span>
                             <span className="font-mono text-sm text-[var(--admin-on-surface)]">
-                              {formatCount(summary.totalAttended)}
+                              {formatCount(summary.totalAttended, viewer)}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
@@ -956,7 +961,7 @@ export function AdminSuperLiveInsightsRosterPage() {
                               Total records
                             </span>
                             <span className="font-mono text-sm text-[var(--admin-on-surface)]">
-                              {formatCount(summary.totalRecords)}
+                              {formatCount(summary.totalRecords, viewer)}
                             </span>
                           </div>
                         </div>
@@ -1010,17 +1015,17 @@ export function AdminSuperLiveInsightsRosterPage() {
                       <div
                         className="h-full bg-[var(--admin-success)]"
                         style={{ width: `${String(composition.attendedPct)}%` }}
-                        title={`Attended (${formatCount(composition.attended)})`}
+                        title={`Attended (${formatCount(composition.attended, viewer)})`}
                       />
                       <div
                         className="h-full bg-[var(--admin-warning)]"
                         style={{ width: `${String(composition.registeredPct)}%` }}
-                        title={`Registered (${formatCount(composition.registered)})`}
+                        title={`Registered (${formatCount(composition.registered, viewer)})`}
                       />
                       <div
                         className="h-full bg-[var(--admin-danger)]"
                         style={{ width: `${String(composition.absentPct)}%` }}
-                        title={`Absent (${formatCount(composition.absent)})`}
+                        title={`Absent (${formatCount(composition.absent, viewer)})`}
                       />
                     </div>
                     <div className="mb-6 flex justify-between gap-2 border-b border-[var(--admin-border)] pb-4 text-xs">
@@ -1032,7 +1037,7 @@ export function AdminSuperLiveInsightsRosterPage() {
                           </span>
                         </div>
                         <span className="font-mono text-[var(--admin-on-surface-variant)]">
-                          {formatCount(composition.attended)} ({composition.attendedPct}%)
+                          {formatCount(composition.attended, viewer)} ({composition.attendedPct}%)
                         </span>
                       </div>
                       <div>
@@ -1043,7 +1048,8 @@ export function AdminSuperLiveInsightsRosterPage() {
                           </span>
                         </div>
                         <span className="font-mono text-[var(--admin-on-surface-variant)]">
-                          {formatCount(composition.registered)} ({composition.registeredPct}%)
+                          {formatCount(composition.registered, viewer)} ({composition.registeredPct}
+                          %)
                         </span>
                       </div>
                       <div>
@@ -1052,13 +1058,13 @@ export function AdminSuperLiveInsightsRosterPage() {
                           <span className="font-medium text-[var(--admin-on-surface)]">Absent</span>
                         </div>
                         <span className="font-mono text-[var(--admin-on-surface-variant)]">
-                          {formatCount(composition.absent)} ({composition.absentPct}%)
+                          {formatCount(composition.absent, viewer)} ({composition.absentPct}%)
                         </span>
                       </div>
                     </div>
                     <div className="mt-auto">
                       <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">
-                        {formatCount(composition.registered)} records were never resolved to
+                        {formatCount(composition.registered, viewer)} records were never resolved to
                         attended or absent.
                       </p>
                       <button
@@ -1319,17 +1325,17 @@ export function AdminSuperLiveInsightsRosterPage() {
                                 ) : null}
                                 {columns.includes("scheduled_at") ? (
                                   <td className="px-4 py-2 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                                    {formatDate(session.scheduledAt)}
+                                    {formatDate(session.scheduledAt, viewer)}
                                   </td>
                                 ) : null}
                                 {columns.includes("started_at") ? (
                                   <td className="px-4 py-2 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                                    {formatDate(session.startedAt)}
+                                    {formatDate(session.startedAt, viewer)}
                                   </td>
                                 ) : null}
                                 {columns.includes("ended_at") ? (
                                   <td className="px-4 py-2 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                                    {formatDate(session.endedAt)}
+                                    {formatDate(session.endedAt, viewer)}
                                   </td>
                                 ) : null}
                                 {columns.includes("duration_seconds") ? (
@@ -1339,22 +1345,22 @@ export function AdminSuperLiveInsightsRosterPage() {
                                 ) : null}
                                 {columns.includes("attended_count") ? (
                                   <td className="px-4 py-2 text-right font-mono">
-                                    {cancelled ? "-" : formatCount(session.attendedCount)}
+                                    {cancelled ? "-" : formatCount(session.attendedCount, viewer)}
                                   </td>
                                 ) : null}
                                 {columns.includes("registered_count") ? (
                                   <td className="px-4 py-2 text-right font-mono">
-                                    {formatCount(session.registeredCount)}
+                                    {formatCount(session.registeredCount, viewer)}
                                   </td>
                                 ) : null}
                                 {columns.includes("absent_count") ? (
                                   <td className="px-4 py-2 text-right font-mono">
-                                    {cancelled ? "-" : formatCount(session.absentCount)}
+                                    {cancelled ? "-" : formatCount(session.absentCount, viewer)}
                                   </td>
                                 ) : null}
                                 {columns.includes("total_count") ? (
                                   <td className="px-4 py-2 text-right font-mono">
-                                    {formatCount(session.totalCount)}
+                                    {formatCount(session.totalCount, viewer)}
                                   </td>
                                 ) : null}
                                 {columns.includes("avg_duration_seconds") ? (
@@ -1398,8 +1404,8 @@ export function AdminSuperLiveInsightsRosterPage() {
 
                   <div className="flex h-10 items-center justify-between border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 text-xs text-[var(--admin-on-surface-variant)]">
                     <span>
-                      Showing {formatCount(pageStart)}-{formatCount(pageEnd)} of{" "}
-                      {formatCount(totalCount)} sessions
+                      Showing {formatCount(pageStart, viewer)}-{formatCount(pageEnd, viewer)} of{" "}
+                      {formatCount(totalCount, viewer)} sessions
                     </span>
                     <div className="flex gap-1">
                       <button
