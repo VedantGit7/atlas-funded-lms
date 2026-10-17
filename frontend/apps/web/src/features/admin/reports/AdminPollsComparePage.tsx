@@ -21,9 +21,12 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  POLLS_COMPARE_MAX_SLOTS,
   fetchPollsCompare,
   fetchPollsRoster,
+  parsePollsCompareIds,
   type PollCompareAlignBy,
   type PollCompareItem,
   type PollCompareOptionRow,
@@ -31,9 +34,11 @@ import {
   type PollsCompareData,
 } from "./admin-polls-roster-api";
 import { PollsReportTabs } from "./PollsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
 
-const MAX_SLOTS = 4;
+const MAX_SLOTS = POLLS_COMPARE_MAX_SLOTS;
 const SAVE_KEY = "atlas.admin.polls.compare.saved";
 const SWATCH_OPACITIES = [1, 0.72, 0.48, 0.28] as const;
 
@@ -83,38 +88,28 @@ const METRICS: MetricDef[] = [
   },
 ];
 
-function parseIdsParam(raw: string | null): string[] {
-  if (!raw) return [];
-  const seen = new Set<string>();
-  const ids: string[] = [];
-  for (const part of raw.split(",")) {
-    const id = part.trim();
-    if (!id || seen.has(id)) continue;
-    seen.add(id);
-    ids.push(id);
-    if (ids.length >= MAX_SLOTS) break;
-  }
-  return ids;
-}
+const parseIdsParam = parsePollsCompareIds;
 
 function metricValue(poll: PollCompareItem, key: MetricKey): number | null {
   const value = poll[key];
   return typeof value === "number" ? value : null;
 }
 
-function formatMetric(value: number | null, format: MetricDef["format"]): string {
+/** `locale` defaults to the viewer's (the CSV); the page passes its own while hydrating. */
+function formatMetric(value: number | null, format: MetricDef["format"], locale?: string): string {
   if (value == null || Number.isNaN(value)) return "—";
   if (format === "pct") return `${Math.round(value * 10) / 10}%`;
   if (format === "seconds") return `${Math.round(value * 10) / 10}s`;
-  return Math.round(value).toLocaleString();
+  return Math.round(value).toLocaleString(locale);
 }
 
-function formatShortDate(iso: string | null): string {
+function formatShortDate(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -124,7 +119,11 @@ function deltaTone(delta: number | null, higherIsBetter: boolean): "up" | "down"
   return improved ? "up" : "down";
 }
 
-function formatDelta(delta: number | null, format: MetricDef["format"] | "pts"): string | null {
+function formatDelta(
+  delta: number | null,
+  format: MetricDef["format"] | "pts",
+  viewer: ViewerLocale,
+): string | null {
   if (delta == null || Math.abs(delta) < 0.05) return null;
   const sign = delta > 0 ? "+" : "−";
   const abs = Math.abs(delta);
@@ -132,7 +131,7 @@ function formatDelta(delta: number | null, format: MetricDef["format"] | "pts"):
     return `${sign}${Math.round(abs * 10) / 10} pts`;
   }
   if (format === "seconds") return `${sign}${Math.round(abs * 10) / 10}s`;
-  return `${sign}${Math.round(abs).toLocaleString()}`;
+  return `${sign}${Math.round(abs).toLocaleString(viewer.locale)}`;
 }
 
 function downloadCsv(data: PollsCompareData) {
@@ -316,16 +315,24 @@ function TrendStrip({
   );
 }
 
-export function AdminPollsComparePage() {
+export function AdminPollsComparePage({
+  initialCompare,
+}: {
+  /** The comparison of the polls in the address, loaded by the server; the first browser load is skipped when present. */
+  initialCompare?: ReportInitialData<PollsCompareData> | null;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pickerId = useId();
   const pickerRef = useRef<HTMLDivElement>(null);
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialCompare ?? null);
 
   const selectedIds = useMemo(() => parseIdsParam(searchParams.get("pollIds")), [searchParams]);
   const alignBy = (searchParams.get("alignBy") as PollCompareAlignBy | null) ?? "label";
 
-  const [data, setData] = useState<PollsCompareData | null>(null);
+  const [data, setData] = useState<PollsCompareData | null>(initial?.data ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFields, setShowFields] = useState<ShowField[]>(["shares", "counts"]);
@@ -351,29 +358,37 @@ export function AdminPollsComparePage() {
     [alignBy, router],
   );
 
-  const loadCompare = useCallback(async (ids: string[], nextAlign: PollCompareAlignBy) => {
-    if (ids.length < 2) {
-      setData(null);
-      setLoading(false);
+  const loadCompare = useCallback(
+    async (ids: string[], nextAlign: PollCompareAlignBy, soft = false) => {
+      if (ids.length < 2) {
+        setData(null);
+        setLoading(false);
+        setError(null);
+        return;
+      }
+      if (!soft) setLoading(true);
       setError(null);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPollsCompare(ids, nextAlign);
-      setData(response.data);
-    } catch (err) {
-      setData(null);
-      setError(err instanceof ClientApiError ? err.message : "Could not load poll comparison.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      try {
+        const response = await fetchPollsCompare(ids, nextAlign);
+        setData(response.data);
+      } catch (err) {
+        setData(null);
+        setError(err instanceof ClientApiError ? err.message : "Could not load poll comparison.");
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [],
+  );
 
-  useEffect(() => {
-    void loadCompare(selectedIds, alignBy === "order" ? "order" : "label");
-  }, [selectedIds, alignBy, loadCompare]);
+  // The comparison follows the polls and alignment in the address.
+  const loadSelected = useCallback(
+    async (options?: { soft?: boolean }) => {
+      await loadCompare(selectedIds, alignBy === "order" ? "order" : "label", options?.soft);
+    },
+    [alignBy, loadCompare, selectedIds],
+  );
+  useReportLoad(loadSelected, initial);
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -500,6 +515,7 @@ export function AdminPollsComparePage() {
   );
 
   const totalResponses = data?.polls.reduce((sum, poll) => sum + poll.responseCount, 0) ?? 0;
+  const totalResponsesLabel = totalResponses.toLocaleString(viewer.locale);
 
   const moduleTabs = <PollsReportTabs active="compare" />;
 
@@ -668,13 +684,13 @@ export function AdminPollsComparePage() {
                 <div className="flex justify-between gap-2">
                   <span>Date</span>
                   <span className="font-mono text-[var(--admin-on-surface)]">
-                    {formatShortDate(poll.openedAt)}
+                    {formatShortDate(poll.openedAt, viewer)}
                   </span>
                 </div>
                 <div className="flex justify-between gap-2">
                   <span>Count</span>
                   <span className="font-mono text-[var(--admin-on-surface)]">
-                    {poll.responseCount.toLocaleString()}
+                    {poll.responseCount.toLocaleString(viewer.locale)}
                   </span>
                 </div>
               </div>
@@ -788,9 +804,9 @@ export function AdminPollsComparePage() {
                         <span className="text-[11px] text-[var(--admin-on-surface-variant)]">
                           {(item.liveSessionTitle ?? "Standalone") +
                             " · " +
-                            formatShortDate(item.createdAt) +
+                            formatShortDate(item.createdAt, viewer) +
                             " · " +
-                            item.responseCount.toLocaleString() +
+                            item.responseCount.toLocaleString(viewer.locale) +
                             " responses"}
                         </span>
                       </button>
@@ -891,7 +907,9 @@ export function AdminPollsComparePage() {
                                   ) : null}
                                   {showFields.includes("counts") ? (
                                     <span className="w-12 text-right font-mono text-xs tabular-nums text-[var(--admin-on-surface-variant)]">
-                                      {cell.count == null ? "—" : cell.count.toLocaleString()}
+                                      {cell.count == null
+                                        ? "—"
+                                        : cell.count.toLocaleString(viewer.locale)}
                                     </span>
                                   ) : null}
                                   <span
@@ -906,7 +924,7 @@ export function AdminPollsComparePage() {
                                   >
                                     {cellIndex === 0
                                       ? ""
-                                      : (formatDelta(cell.deltaPctVsLeft, "pts") ?? "")}
+                                      : (formatDelta(cell.deltaPctVsLeft, "pts", viewer) ?? "")}
                                   </span>
                                 </div>
                               </div>
@@ -916,7 +934,7 @@ export function AdminPollsComparePage() {
                       ))}
                     </div>
                     <div className="border-t border-[var(--admin-border)] bg-[var(--admin-bg)] px-5 py-3 text-center text-xs text-[var(--admin-on-surface-variant)]">
-                      Comparison includes {totalResponses.toLocaleString()} total responses across{" "}
+                      Comparison includes {totalResponsesLabel} total responses across{" "}
                       {data.polls.length} polls.
                     </div>
                   </>
@@ -1037,7 +1055,7 @@ export function AdminPollsComparePage() {
                                 <td key={poll.id} className="px-4 py-3 text-right align-middle">
                                   <div className="flex flex-col items-end gap-1">
                                     <span className="font-mono text-sm tabular-nums text-[var(--admin-on-surface)]">
-                                      {formatMetric(value, metric.format)}
+                                      {formatMetric(value, metric.format, viewer.locale)}
                                     </span>
                                     {metric.format === "pct" && value != null ? (
                                       <span className="block h-0.5 w-16 overflow-hidden rounded bg-[var(--admin-surface-variant)]">
@@ -1061,7 +1079,7 @@ export function AdminPollsComparePage() {
                                               : "text-[var(--admin-on-surface-variant)]",
                                         ].join(" ")}
                                       >
-                                        {formatDelta(delta, metric.format) ?? ""}
+                                        {formatDelta(delta, metric.format, viewer) ?? ""}
                                       </span>
                                     ) : null}
                                   </div>
@@ -1087,7 +1105,7 @@ export function AdminPollsComparePage() {
                                             : "text-[var(--admin-on-surface-variant)]",
                                       ].join(" ")}
                                     >
-                                      {formatDelta(delta, metric.format) ?? "—"}
+                                      {formatDelta(delta, metric.format, viewer) ?? "—"}
                                     </span>
                                   );
                                 })()}

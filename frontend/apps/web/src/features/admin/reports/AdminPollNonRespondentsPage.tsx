@@ -24,11 +24,16 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  POLL_NON_RESPONDENTS_DEFAULTS,
   fetchPollNonRespondents,
   type PollNonRespondentItem,
+  type PollNonRespondentsPayload,
   type PollNonRespondentsSummary,
 } from "./admin-polls-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
@@ -38,7 +43,7 @@ function defined<T>(value: T, message = "Expected value to be defined"): NonNull
   return value;
 }
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = POLL_NON_RESPONDENTS_DEFAULTS.limit;
 const EXPORT_PAGE_SIZE = 100;
 
 const selectClassName =
@@ -80,16 +85,17 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatDateTime(value: string | null | undefined): string {
+function formatDateTime(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -354,6 +360,7 @@ function MessageNonRespondentsDrawer({
   onSend: () => void;
   onTestSend: () => void;
 }) {
+  const viewer = useViewerLocale();
   const titleId = useId();
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -436,7 +443,8 @@ function MessageNonRespondentsDrawer({
         <div className="flex items-start justify-between border-b border-[var(--admin-border)] px-6 py-4">
           <div className="min-w-0 pr-4">
             <h2 id={titleId} className="text-base font-semibold text-[var(--admin-on-surface)]">
-              {sendCount.toLocaleString()} learner{sendCount === 1 ? "" : "s"} did not answer
+              {sendCount.toLocaleString(viewer.locale)} learner{sendCount === 1 ? "" : "s"} did not
+              answer
             </h2>
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
               Compose a follow-up message to collect responses.
@@ -579,7 +587,7 @@ function MessageNonRespondentsDrawer({
                 Exclude learners who were not present when the poll ran
               </span>
               <span className="mt-1 block text-xs text-[var(--admin-on-surface-variant)]">
-                Updates count to {presentNonRespondentCount.toLocaleString()} learner
+                Updates count to {presentNonRespondentCount.toLocaleString(viewer.locale)} learner
                 {presentNonRespondentCount === 1 ? "" : "s"}
               </span>
             </span>
@@ -596,7 +604,7 @@ function MessageNonRespondentsDrawer({
           <p className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-3 text-sm text-[var(--admin-on-surface-variant)]">
             You are about to send a message to{" "}
             <span className="font-semibold text-[var(--admin-on-surface)]">
-              {sendCount.toLocaleString()} learner{sendCount === 1 ? "" : "s"}
+              {sendCount.toLocaleString(viewer.locale)} learner{sendCount === 1 ? "" : "s"}
             </span>
             . Review the subject and body before sending.
           </p>
@@ -615,7 +623,7 @@ function MessageNonRespondentsDrawer({
             onClick={onSend}
           >
             <Mail className="h-4 w-4" aria-hidden="true" />
-            Send to {sendCount.toLocaleString()} learner{sendCount === 1 ? "" : "s"}
+            Send to {sendCount.toLocaleString(viewer.locale)} learner{sendCount === 1 ? "" : "s"}
           </button>
         </div>
       </aside>
@@ -623,25 +631,37 @@ function MessageNonRespondentsDrawer({
   );
 }
 
-export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
+export function AdminPollNonRespondentsPage({
+  pollId,
+  initialNonRespondents,
+}: {
+  pollId: string;
+  /** The first page of non-respondents, loaded by the server; the first browser load is skipped when present. */
+  initialNonRespondents?: ReportInitialData<PollNonRespondentsPayload> | null;
+}) {
   const searchId = useId();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialNonRespondents ?? null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const [summary, setSummary] = useState<PollNonRespondentsSummary | null>(null);
-  const [items, setItems] = useState<PollNonRespondentItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [summary, setSummary] = useState<PollNonRespondentsSummary | null>(
+    initial?.data.summary ?? null,
+  );
+  const [items, setItems] = useState<PollNonRespondentItem[]>(initial?.data.items ?? []);
+  const [page, setPage] = useState<number>(POLL_NON_RESPONDENTS_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
   const [q, setQ] = useState("");
   const [draftQ, setDraftQ] = useState("");
-  const [presence, setPresence] = useState<PresenceFilter>("any");
-  const [sortBy, setSortBy] = useState<SortBy>("learner_name");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [presence, setPresence] = useState<PresenceFilter>(POLL_NON_RESPONDENTS_DEFAULTS.presence);
+  const [sortBy, setSortBy] = useState<SortBy>(POLL_NON_RESPONDENTS_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<SortDir>(POLL_NON_RESPONDENTS_DEFAULTS.sortDir);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -654,42 +674,44 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
 
   const hasFilters = Boolean(q.trim() || presence !== "any");
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPollNonRespondents(pollId, {
-        q: q.trim() || undefined,
-        presence,
-        sortBy,
-        sortDir,
-        page,
-        limit: PAGE_SIZE,
-      });
-      setSummary(response.data.summary);
-      setItems(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (loadError) {
-      setSummary(null);
-      setItems([]);
-      setTotalCount(0);
-      setTotalPages(0);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPollNonRespondents(pollId, {
+          q: q.trim() || undefined,
+          presence,
+          sortBy,
+          sortDir,
+          page,
+          limit: PAGE_SIZE,
+        });
+        setSummary(response.data.summary);
+        setItems(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (loadError) {
+        setSummary(null);
+        setItems([]);
+        setTotalCount(0);
+        setTotalPages(0);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load non-respondents.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [page, pollId, presence, q, sortBy, sortDir]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load non-respondents.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [page, pollId, presence, q, sortBy, sortDir],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     setSelectedIds([]);
@@ -704,13 +726,13 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
     if (!summary) return null;
     if (summary.audienceSource === "live_session") {
       const title = summary.liveSessionTitle ?? "Live session";
-      return `${title} · ${summary.eligibleCount.toLocaleString()} eligible`;
+      return `${title} · ${summary.eligibleCount.toLocaleString(viewer.locale)} eligible`;
     }
     if (summary.audienceSource === "batch") {
       return summary.batchName ?? "Batch audience";
     }
     return null;
-  }, [summary]);
+  }, [summary, viewer.locale]);
 
   const sendCount = useMemo(() => {
     if (!summary) return 0;
@@ -785,7 +807,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
 
       downloadCsvBlob(`poll-${pollId}-non-respondents.csv`, buildCsv(filtered));
       setNotice(
-        `Exported ${filtered.length.toLocaleString()} non-respondent${filtered.length === 1 ? "" : "s"}.`,
+        `Exported ${filtered.length.toLocaleString(viewer.locale)} non-respondent${filtered.length === 1 ? "" : "s"}.`,
       );
     } catch (exportError) {
       setError(
@@ -958,7 +980,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                 Eligible
               </p>
               <p className="font-mono text-[32px] font-semibold leading-none text-[var(--admin-on-surface)]">
-                {summary.eligibleCount.toLocaleString()}
+                {summary.eligibleCount.toLocaleString(viewer.locale)}
               </p>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">Known audience size</p>
             </div>
@@ -967,7 +989,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                 Responded
               </p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-success)]">
-                {summary.respondentCount.toLocaleString()}
+                {summary.respondentCount.toLocaleString(viewer.locale)}
               </p>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">Submitted an answer</p>
             </div>
@@ -976,7 +998,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                 Non-respondents
               </p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-warning)]">
-                {summary.nonRespondentCount.toLocaleString()}
+                {summary.nonRespondentCount.toLocaleString(viewer.locale)}
               </p>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">
                 Eligible and unanswered
@@ -987,10 +1009,10 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                 Present non-respondents
               </p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
-                {summary.presentNonRespondentCount.toLocaleString()}
+                {summary.presentNonRespondentCount.toLocaleString(viewer.locale)}
               </p>
               <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                {summary.absentNonRespondentCount.toLocaleString()} absent
+                {summary.absentNonRespondentCount.toLocaleString(viewer.locale)} absent
               </p>
             </div>
           </div>
@@ -1235,10 +1257,10 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
                             {formatWatchSeconds(row.watchSeconds)}
                           </td>
                           <td className="px-4 py-3 text-right font-mono text-xs text-[var(--admin-on-surface)]">
-                            {row.pollsAnswered.toLocaleString()}
+                            {row.pollsAnswered.toLocaleString(viewer.locale)}
                           </td>
                           <td className="px-4 py-3 text-right font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                            {formatDateTime(row.lastResponseAt)}
+                            {formatDateTime(row.lastResponseAt, viewer)}
                           </td>
                         </tr>
                       );
@@ -1252,7 +1274,7 @@ export function AdminPollNonRespondentsPage({ pollId }: { pollId: string }) {
               <p>
                 {totalCount === 0
                   ? emptyMessage
-                  : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${totalCount.toLocaleString()}`}
+                  : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${totalCount.toLocaleString(viewer.locale)}`}
               </p>
               <div className="flex items-center gap-2">
                 <button

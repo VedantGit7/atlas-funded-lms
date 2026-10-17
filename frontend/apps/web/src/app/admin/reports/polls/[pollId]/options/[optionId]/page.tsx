@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../../components/patterns/AdminPageGate";
 import { AdminPollOptionDetailPage } from "../../../../../../../features/admin/reports/AdminPollOptionDetailPage";
+import { loadPollOptionDetailData } from "../../../../../../../lib/server/report-polls-initial-data";
 import { runTenantStateGate } from "../../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -11,7 +12,10 @@ type PageProps = {
 
 export default async function AdminPollOptionReportRoutePage({ params }: PageProps) {
   const { pollId, optionId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initial] = await Promise.all([
+    runTenantStateGate(),
+    loadPollOptionDetailData(pollId, optionId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -30,7 +34,12 @@ export default async function AdminPollOptionReportRoutePage({ params }: PagePro
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading option report…</p>
         }
       >
-        <AdminPollOptionDetailPage pollId={pollId} optionId={optionId} />
+        <AdminPollOptionDetailPage
+          pollId={pollId}
+          optionId={optionId}
+          initialDetail={initial.detail}
+          initialRespondents={initial.respondents}
+        />
       </Suspense>
     </AdminPageGate>
   );

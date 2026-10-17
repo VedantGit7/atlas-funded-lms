@@ -23,15 +23,21 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  POLL_RESPONDENTS_DEFAULTS,
   exportPollReport,
   fetchPollOptionDetail,
   fetchPollRespondents,
+  pollShowsRespondents,
   type PollOptionDetail,
   type PollOptionTimingBucket,
   type PollRespondentItem,
+  type PollRespondentsPayload,
 } from "./admin-polls-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { RenderedAtProvider, useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -67,25 +73,26 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDateTime(value: string | null | undefined): string {
+function formatDateTime(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatRelative(value: string | null | undefined): string {
+function formatRelative(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
-  if (diffMs < 0) return formatDateTime(value);
+  const diffMs = viewer.now - date.getTime();
+  if (diffMs < 0) return formatDateTime(value, viewer);
   const mins = Math.floor(diffMs / 60000);
   if (mins < 1) return "just now";
   if (mins < 60) return `${String(mins)}m ago`;
@@ -115,13 +122,13 @@ function withoutEmDash(value: string): string {
   return value.replace(/\u2014|\u2013/g, "-");
 }
 
-function rankCopy(detail: PollOptionDetail): string {
+function rankCopy(detail: PollOptionDetail, viewer: ViewerLocale): string {
   const base = `Ranked ${String(detail.rank)} of ${String(detail.optionCount)} options`;
   if (detail.votesAheadOfNext == null) return base;
   if (detail.votesAheadOfNext === 0) {
     return `${base} · Tied with the next option`;
   }
-  return `${base} · ${detail.votesAheadOfNext.toLocaleString()} vote${
+  return `${base} · ${detail.votesAheadOfNext.toLocaleString(viewer.locale)} vote${
     detail.votesAheadOfNext === 1 ? "" : "s"
   } ahead of the next option`;
 }
@@ -233,6 +240,7 @@ function AnonymousPanel({ compact }: { compact?: boolean }) {
 }
 
 function SummaryBand({ detail }: { detail: PollOptionDetail }) {
+  const viewer = useViewerLocale();
   const option = detail.option;
   return (
     <div className="space-y-3 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
@@ -242,9 +250,9 @@ function SummaryBand({ detail }: { detail: PollOptionDetail }) {
             Option selection
           </p>
           <p className="mt-1 font-mono text-[28px] font-semibold leading-none text-[var(--admin-on-surface)]">
-            {option.count.toLocaleString()}
+            {option.count.toLocaleString(viewer.locale)}
             <span className="ml-2 text-sm font-medium text-[var(--admin-on-surface-variant)]">
-              of {detail.totalResponses.toLocaleString()} total
+              of {detail.totalResponses.toLocaleString(viewer.locale)} total
             </span>
           </p>
         </div>
@@ -265,13 +273,14 @@ function SummaryBand({ detail }: { detail: PollOptionDetail }) {
       </div>
       <p className="flex items-start gap-1.5 text-xs text-[var(--admin-on-surface-variant)]">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        <span>{rankCopy(detail)}</span>
+        <span>{rankCopy(detail, viewer)}</span>
       </p>
     </div>
   );
 }
 
 function AudienceSegments({ detail, compact }: { detail: PollOptionDetail; compact?: boolean }) {
+  const viewer = useViewerLocale();
   const segments = detail.segments;
   return (
     <section>
@@ -296,7 +305,7 @@ function AudienceSegments({ detail, compact }: { detail: PollOptionDetail; compa
                   {segment.label}
                 </p>
                 <span className="shrink-0 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                  {segment.count.toLocaleString()}
+                  {segment.count.toLocaleString(viewer.locale)}
                 </span>
               </div>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
@@ -397,6 +406,7 @@ function VelocityChart({
 }
 
 function PerformanceBars({ detail }: { detail: PollOptionDetail }) {
+  const viewer = useViewerLocale();
   const rows = useMemo(() => {
     const all = [detail.option, ...detail.siblings];
     return [...all].sort((a, b) => {
@@ -464,7 +474,7 @@ function PerformanceBars({ detail }: { detail: PollOptionDetail }) {
                 />
               </div>
               <div className="shrink-0 text-right font-mono text-xs text-[var(--admin-on-surface)]">
-                {row.count.toLocaleString()}
+                {row.count.toLocaleString(viewer.locale)}
                 <span className="text-[var(--admin-on-surface-variant)]">
                   {" "}
                   · {row.percent.toFixed(1)}%
@@ -499,6 +509,7 @@ function RespondentsTable({
   onToggleRow?: (membershipId: string) => void;
   onToggleAll?: () => void;
 }) {
+  const viewer = useViewerLocale();
   const selected = selectedIds ?? [];
   const pageIds = respondents
     .map((row) => row.membershipId)
@@ -610,8 +621,8 @@ function RespondentsTable({
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-xs text-[var(--admin-on-surface-variant)]">
                     {timeMode === "relative"
-                      ? formatRelative(row.respondedAt)
-                      : formatDateTime(row.respondedAt)}
+                      ? formatRelative(row.respondedAt, viewer)
+                      : formatDateTime(row.respondedAt, viewer)}
                   </td>
                 </tr>
               );
@@ -632,6 +643,7 @@ function MessageNoticeDialog({
   onClose: () => void;
   count: number;
 }) {
+  const viewer = useViewerLocale();
   useEffect(() => {
     if (!open) return;
     function onKey(event: KeyboardEvent) {
@@ -676,7 +688,7 @@ function MessageNoticeDialog({
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
             Messaging from poll option reports is not available yet
             {count > 0
-              ? ` (${count.toLocaleString()} respondent${count === 1 ? "" : "s"} would be targeted).`
+              ? ` (${count.toLocaleString(viewer.locale)} respondent${count === 1 ? "" : "s"} would be targeted).`
               : "."}{" "}
             Export the respondent list to follow up outside the report.
           </p>
@@ -814,6 +826,7 @@ function useOptionActions(pollId: string, optionId: string) {
 }
 
 function OptionHeaderMeta({ detail }: { detail: PollOptionDetail }) {
+  const viewer = useViewerLocale();
   return (
     <div className="mt-2 flex flex-wrap gap-2">
       {detail.quizMode ? (
@@ -826,10 +839,10 @@ function OptionHeaderMeta({ detail }: { detail: PollOptionDetail }) {
       </span>
       <span className="inline-flex rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-2 py-0.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
         {detail.isOpen
-          ? `Opened ${formatDateTime(detail.openedAt)}`
+          ? `Opened ${formatDateTime(detail.openedAt, viewer)}`
           : detail.closedAt
-            ? `Closed ${formatDateTime(detail.closedAt)}`
-            : `Opened ${formatDateTime(detail.openedAt)}`}
+            ? `Closed ${formatDateTime(detail.closedAt, viewer)}`
+            : `Opened ${formatDateTime(detail.openedAt, viewer)}`}
       </span>
       {detail.medianResponseSeconds != null ? (
         <span className="inline-flex rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-2 py-0.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -852,6 +865,7 @@ export function AdminPollOptionDetailDrawer({
   optionId: string | null;
   onClose: () => void;
 }) {
+  const viewer = useViewerLocale();
   const open = Boolean(optionId);
   const titleId = useId();
   const router = useRouter();
@@ -862,6 +876,7 @@ export function AdminPollOptionDetailDrawer({
   const [detail, setDetail] = useState<PollOptionDetail | null>(null);
   const [respondents, setRespondents] = useState<PollRespondentItem[]>([]);
   const [respondentTotalCount, setRespondentTotalCount] = useState(0);
+  const respondentTotalLabel = respondentTotalCount.toLocaleString(viewer.locale);
 
   const actions = useOptionActions(pollId, optionId ?? "");
 
@@ -884,7 +899,7 @@ export function AdminPollOptionDetailDrawer({
   }, [optionId, pollId]);
 
   const loadRespondents = useCallback(async () => {
-    if (!optionId || !detail || detail.respondentsHidden || detail.anonymousVote) {
+    if (!optionId || !detail || !pollShowsRespondents(detail)) {
       setRespondents([]);
       setRespondentTotalCount(0);
       return;
@@ -1035,7 +1050,7 @@ export function AdminPollOptionDetailDrawer({
                           <p className="text-xs text-[var(--admin-on-surface-variant)]">
                             {isAnonymous
                               ? "Identity hidden for anonymous polls"
-                              : `${respondentTotalCount.toLocaleString()} response${
+                              : `${respondentTotalCount.toLocaleString(viewer.locale)} response${
                                   respondentTotalCount === 1 ? "" : "s"
                                 }`}
                           </p>
@@ -1065,7 +1080,7 @@ export function AdminPollOptionDetailDrawer({
                                   onClose();
                                 }}
                               >
-                                View all {respondentTotalCount.toLocaleString()} respondents
+                                View all {respondentTotalLabel} respondents
                               </button>
                             </div>
                           ) : null}
@@ -1106,23 +1121,53 @@ export function AdminPollOptionDetailDrawer({
   );
 }
 
-export function AdminPollOptionDetailPage({
-  pollId,
-  optionId,
-}: {
+type PollOptionDetailPageProps = {
   pollId: string;
   optionId: string;
-}) {
+  /** The option's report, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<PollOptionDetail> | null;
+  /** Its first page of respondents, loaded by the server when the poll shows them. */
+  initialRespondents?: ReportInitialData<PollRespondentsPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminPollOptionDetailPage(props: PollOptionDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <PollOptionReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function PollOptionReport({
+  pollId,
+  optionId,
+  initialDetail,
+  initialRespondents,
+}: PollOptionDetailPageProps) {
   const searchId = useId();
-  const [loading, setLoading] = useState(true);
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialDetailData] = useState(() => initialDetail ?? null);
+  const [initialRespondentsData] = useState(() => initialRespondents ?? null);
+  const [loading, setLoading] = useState(initialDetailData === null);
   const [respondentsLoading, setRespondentsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [detail, setDetail] = useState<PollOptionDetail | null>(null);
-  const [respondents, setRespondents] = useState<PollRespondentItem[]>([]);
-  const [respondentPage, setRespondentPage] = useState(1);
-  const [respondentTotalPages, setRespondentTotalPages] = useState(0);
-  const [respondentTotalCount, setRespondentTotalCount] = useState(0);
+  const [detail, setDetail] = useState<PollOptionDetail | null>(initialDetailData?.data ?? null);
+  const [respondents, setRespondents] = useState<PollRespondentItem[]>(
+    initialRespondentsData?.data.items ?? [],
+  );
+  const [respondentPage, setRespondentPage] = useState<number>(POLL_RESPONDENTS_DEFAULTS.page);
+  const [respondentTotalPages, setRespondentTotalPages] = useState(
+    initialRespondentsData?.data.pageInfo.totalPages ?? 0,
+  );
+  const [respondentTotalCount, setRespondentTotalCount] = useState(
+    initialRespondentsData?.data.pageInfo.totalCount ?? 0,
+  );
 
   const [learnerName, setLearnerName] = useState("");
   const [draftLearnerName, setDraftLearnerName] = useState("");
@@ -1133,22 +1178,26 @@ export function AdminPollOptionDetailPage({
   const isAnonymous = Boolean(detail?.anonymousVote || detail?.respondentsHidden);
   const hasVotes = (detail?.option.count ?? 0) > 0;
 
-  const loadDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPollOptionDetail(pollId, optionId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setError(errorMessage(loadError, "Unable to load option report."));
-    } finally {
-      setLoading(false);
-    }
-  }, [optionId, pollId]);
+  const loadDetail = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPollOptionDetail(pollId, optionId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setError(errorMessage(loadError, "Unable to load option report."));
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [optionId, pollId],
+  );
 
   const loadRespondents = useCallback(async () => {
-    if (!detail || detail.respondentsHidden || detail.anonymousVote) {
+    if (!detail || !pollShowsRespondents(detail)) {
       setRespondents([]);
       setRespondentTotalCount(0);
       setRespondentTotalPages(0);
@@ -1160,8 +1209,8 @@ export function AdminPollOptionDetailPage({
       const response = await fetchPollRespondents(pollId, {
         learnerName: learnerName.trim() || undefined,
         optionId,
-        sortBy: "responded_at",
-        sortDir: "desc",
+        sortBy: POLL_RESPONDENTS_DEFAULTS.sortBy,
+        sortDir: POLL_RESPONDENTS_DEFAULTS.sortDir,
         page: respondentPage,
       });
       setRespondents(response.data.items);
@@ -1177,14 +1226,14 @@ export function AdminPollOptionDetailPage({
     }
   }, [detail, learnerName, optionId, pollId, respondentPage]);
 
-  useEffect(() => {
-    void loadDetail();
-  }, [loadDetail]);
+  useReportLoad(loadDetail, initialDetailData);
 
-  useEffect(() => {
+  // Respondents follow the option: they reload whenever it (or the search) changes.
+  const loadRespondentsOnceReady = useCallback(async () => {
     if (!detail || loading) return;
-    void loadRespondents();
+    await loadRespondents();
   }, [detail, loadRespondents, loading]);
+  useReportLoad(loadRespondentsOnceReady, initialRespondentsData);
 
   function applySearch() {
     setLearnerName(draftLearnerName.trim());
@@ -1349,7 +1398,7 @@ export function AdminPollOptionDetailPage({
                     <p className="text-xs text-[var(--admin-on-surface-variant)]">
                       {isAnonymous
                         ? "Individual voter rows are not available for anonymous polls."
-                        : `${respondentTotalCount.toLocaleString()} response${
+                        : `${respondentTotalCount.toLocaleString(viewer.locale)} response${
                             respondentTotalCount === 1 ? "" : "s"
                           } for this option`}
                     </p>
@@ -1457,7 +1506,7 @@ export function AdminPollOptionDetailPage({
                       <p>
                         {respondentTotalCount === 0
                           ? "No results"
-                          : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${respondentTotalCount.toLocaleString()}`}
+                          : `Showing ${String(rangeStart)}-${String(rangeEnd)} of ${respondentTotalCount.toLocaleString(viewer.locale)}`}
                       </p>
                       <div className="flex items-center gap-2">
                         <button

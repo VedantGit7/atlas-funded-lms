@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminLiveSessionPollReportPage } from "../../../../../../features/admin/reports/AdminLiveSessionPollReportPage";
+import { loadLiveSessionPollReportData } from "../../../../../../lib/server/report-polls-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -11,7 +12,10 @@ type PageProps = {
 
 export default async function AdminLiveSessionPollReportRoutePage({ params }: PageProps) {
   const { liveSessionId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initialReport] = await Promise.all([
+    runTenantStateGate(),
+    loadLiveSessionPollReportData(liveSessionId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -32,7 +36,10 @@ export default async function AdminLiveSessionPollReportRoutePage({ params }: Pa
           </p>
         }
       >
-        <AdminLiveSessionPollReportPage liveSessionId={liveSessionId} />
+        <AdminLiveSessionPollReportPage
+          liveSessionId={liveSessionId}
+          initialReport={initialReport}
+        />
       </Suspense>
     </AdminPageGate>
   );

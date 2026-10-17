@@ -105,7 +105,7 @@ import { loadReportInitialData, type ReportInitialDataInRange } from "./report-i
 export type ReportSearchParams = Record<string, string | string[] | undefined>;
 
 /** A parameter as the page's `useSearchParams().get()` reads it: the first value, or null. */
-function searchParam(params: ReportSearchParams, name: string): string | null {
+export function searchParam(params: ReportSearchParams, name: string): string | null {
   const value = params[name];
   return (Array.isArray(value) ? value[0] : value) ?? null;
 }

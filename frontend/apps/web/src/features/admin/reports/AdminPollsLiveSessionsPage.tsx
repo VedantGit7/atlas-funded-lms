@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { AlertTriangle, ChevronLeft, ChevronRight, RefreshCw, Search, Video } from "lucide-react";
 import { ghostButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { PollsReportTabs } from "./PollsReportTabs";
-import { fetchLiveSessionsWithPolls, type LiveSessionPollListItem } from "./admin-polls-roster-api";
+import {
+  LIVE_SESSIONS_WITH_POLLS_DEFAULTS,
+  fetchLiveSessionsWithPolls,
+  type LiveSessionPollListItem,
+  type LiveSessionsWithPollsPayload,
+} from "./admin-polls-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -20,16 +28,17 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatWhen(iso: string | null): string {
+function formatWhen(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -50,46 +59,56 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-export function AdminPollsLiveSessionsPage() {
+export function AdminPollsLiveSessionsPage({
+  initialSessions,
+}: {
+  /** The first page of sessions, loaded by the server; the first browser load is skipped when present. */
+  initialSessions?: ReportInitialData<LiveSessionsWithPollsPayload> | null;
+} = {}) {
   const router = useRouter();
-  const [items, setItems] = useState<LiveSessionPollListItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSessions ?? null);
+  const [items, setItems] = useState<LiveSessionPollListItem[]>(initial?.data.items ?? []);
+  const [page, setPage] = useState<number>(LIVE_SESSIONS_WITH_POLLS_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
   const [q, setQ] = useState("");
   const [draftQ, setDraftQ] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveSessionsWithPolls({
-        q: q || undefined,
-        page,
-        limit: 25,
-      });
-      setItems(response.data.items);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-    } catch (err) {
-      setItems([]);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveSessionsWithPolls({
+          q: q || undefined,
+          page,
+          limit: LIVE_SESSIONS_WITH_POLLS_DEFAULTS.limit,
+        });
+        setItems(response.data.items);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+      } catch (err) {
+        setItems([]);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load live sessions.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [page, q]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load live sessions.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [page, q],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 pb-16">
@@ -255,10 +274,10 @@ export function AdminPollsLiveSessionsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-[var(--admin-on-surface)]">
-                      {formatWhen(item.startedAt ?? item.scheduledAt)}
+                      {formatWhen(item.startedAt ?? item.scheduledAt, viewer)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-[var(--admin-on-surface)]">
-                      {item.attendanceCount.toLocaleString()}
+                      {item.attendanceCount.toLocaleString(viewer.locale)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-[var(--admin-on-surface)]">
                       {item.pollCount}
@@ -269,7 +288,7 @@ export function AdminPollsLiveSessionsPage() {
                       ) : null}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-[var(--admin-on-surface)]">
-                      {item.totalResponses.toLocaleString()}
+                      {item.totalResponses.toLocaleString(viewer.locale)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-[var(--admin-on-surface)]">
                       {formatPct(item.avgParticipationPct)}
@@ -290,8 +309,8 @@ export function AdminPollsLiveSessionsPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] px-4 py-3 text-xs text-[var(--admin-on-surface-variant)]">
             <span>
               Showing page {page}
-              {totalPages > 0 ? ` of ${String(totalPages)}` : ""} · {totalCount.toLocaleString()}{" "}
-              sessions
+              {totalPages > 0 ? ` of ${String(totalPages)}` : ""} ·{" "}
+              {totalCount.toLocaleString(viewer.locale)} sessions
             </span>
             <div className="flex items-center gap-2">
               <button

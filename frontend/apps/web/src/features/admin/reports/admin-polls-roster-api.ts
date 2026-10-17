@@ -377,18 +377,28 @@ export async function fetchPollsRoster(filters?: PollsRosterFilters) {
   return clientApi.get<{ data: PollsRosterPayload }>(pollsRosterPath(filters));
 }
 
+export function pollDetailPath(pollId: string): string {
+  return `/api/v1/reports/polls/${encodeURIComponent(pollId)}`;
+}
+
 export async function fetchPollDetail(pollId: string) {
-  return clientApi.get<{ data: PollDetail }>(`/api/v1/reports/polls/${pollId}`);
+  return clientApi.get<{ data: PollDetail }>(pollDetailPath(pollId));
+}
+
+export function pollLiveMonitorPath(pollId: string): string {
+  return `/api/v1/reports/polls/${encodeURIComponent(pollId)}/live`;
 }
 
 export async function fetchPollLiveMonitor(pollId: string) {
-  return clientApi.get<{ data: PollLiveMonitor }>(`/api/v1/reports/polls/${pollId}/live`);
+  return clientApi.get<{ data: PollLiveMonitor }>(pollLiveMonitorPath(pollId));
+}
+
+export function liveSessionPollReportPath(liveSessionId: string): string {
+  return `/api/v1/reports/polls/live-sessions/${encodeURIComponent(liveSessionId)}`;
 }
 
 export async function fetchLiveSessionPollReport(liveSessionId: string) {
-  return clientApi.get<{ data: LiveSessionPollReport }>(
-    `/api/v1/reports/polls/live-sessions/${liveSessionId}`,
-  );
+  return clientApi.get<{ data: LiveSessionPollReport }>(liveSessionPollReportPath(liveSessionId));
 }
 
 export type LiveSessionPollListItem = {
@@ -409,23 +419,30 @@ export type LiveSessionPollListItem = {
   courseTitle: string | null;
 };
 
-export async function fetchLiveSessionsWithPolls(filters?: {
+export type LiveSessionsWithPollsFilters = {
   q?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: LiveSessionPollListItem[];
-      pageInfo: PageInfo;
-    };
-  }>(
-    `/api/v1/reports/polls/live-sessions${buildQuery({
-      q: filters?.q,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+/** What the live sessions list opens on; the server loads the first page with it too. */
+export const LIVE_SESSIONS_WITH_POLLS_DEFAULTS = { page: 1, limit: 25 } as const;
+
+export type LiveSessionsWithPollsPayload = {
+  items: LiveSessionPollListItem[];
+  pageInfo: PageInfo;
+};
+
+export function liveSessionsWithPollsPath(filters?: LiveSessionsWithPollsFilters): string {
+  return `/api/v1/reports/polls/live-sessions${buildQuery({
+    q: filters?.q,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
+export async function fetchLiveSessionsWithPolls(filters?: LiveSessionsWithPollsFilters) {
+  return clientApi.get<{ data: LiveSessionsWithPollsPayload }>(liveSessionsWithPollsPath(filters));
 }
 
 export async function closePollLive(pollId: string) {
@@ -446,82 +463,115 @@ export async function extendPollLive(pollId: string, seconds = 30) {
   );
 }
 
+export function pollOptionDetailPath(pollId: string, optionId: string): string {
+  return `/api/v1/reports/polls/${encodeURIComponent(pollId)}/options/${encodeURIComponent(optionId)}`;
+}
+
 export async function fetchPollOptionDetail(pollId: string, optionId: string) {
-  return clientApi.get<{ data: PollOptionDetail }>(
-    `/api/v1/reports/polls/${pollId}/options/${optionId}`,
+  return clientApi.get<{ data: PollOptionDetail }>(pollOptionDetailPath(pollId, optionId));
+}
+
+export type PollNonRespondentsFilters = {
+  q?: string | undefined;
+  presence?: "any" | "present" | "absent" | undefined;
+  excludeAbsent?: boolean | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+/** How a poll's non-respondents open; the server loads the first page with it too. */
+export const POLL_NON_RESPONDENTS_DEFAULTS = {
+  presence: "any",
+  sortBy: "learner_name",
+  sortDir: "asc",
+  page: 1,
+  limit: 25,
+} as const satisfies PollNonRespondentsFilters;
+
+export type PollNonRespondentsPayload = {
+  pollId: string;
+  summary: PollNonRespondentsSummary;
+  items: PollNonRespondentItem[];
+  pageInfo: PageInfo;
+};
+
+export function pollNonRespondentsPath(
+  pollId: string,
+  filters?: PollNonRespondentsFilters,
+): string {
+  return `/api/v1/reports/polls/${encodeURIComponent(pollId)}/non-respondents${buildQuery({
+    q: filters?.q,
+    presence: filters?.presence,
+    excludeAbsent: filters?.excludeAbsent ? "true" : undefined,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
+export async function fetchPollNonRespondents(pollId: string, filters?: PollNonRespondentsFilters) {
+  return clientApi.get<{ data: PollNonRespondentsPayload }>(
+    pollNonRespondentsPath(pollId, filters),
   );
 }
 
-export async function fetchPollNonRespondents(
-  pollId: string,
-  filters?: {
-    q?: string | undefined;
-    presence?: "any" | "present" | "absent" | undefined;
-    excludeAbsent?: boolean | undefined;
-    sortBy?: string | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  },
-) {
-  return clientApi.get<{
-    data: {
-      pollId: string;
-      summary: PollNonRespondentsSummary;
-      items: PollNonRespondentItem[];
-      pageInfo: PageInfo;
-    };
-  }>(
-    `/api/v1/reports/polls/${pollId}/non-respondents${buildQuery({
-      q: filters?.q,
-      presence: filters?.presence,
-      excludeAbsent: filters?.excludeAbsent ? "true" : undefined,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+export type PollRespondentsFilters = {
+  learnerName?: string | undefined;
+  optionId?: string | undefined;
+  isCorrect?: "any" | "correct" | "incorrect" | undefined;
+  respondedFrom?: string | undefined;
+  respondedTo?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: PollRespondentColumnKey[] | undefined;
+  page?: number | undefined;
+};
+
+export type PollRespondentsPayload = {
+  pollId: string;
+  pollTitle: string;
+  anonymousVote: boolean;
+  respondentsHidden: boolean;
+  items: PollRespondentItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+};
+
+/** How a poll's respondents open; the server loads the first page with it too. */
+export const POLL_RESPONDENTS_DEFAULTS = {
+  sortBy: "responded_at",
+  sortDir: "desc",
+  page: 1,
+} as const satisfies PollRespondentsFilters;
+
+export function pollRespondentsPath(pollId: string, filters: PollRespondentsFilters): string {
+  return `/api/v1/reports/polls/${encodeURIComponent(pollId)}/respondents${buildQuery({
+    learnerName: filters.learnerName,
+    optionId: filters.optionId,
+    isCorrect: filters.isCorrect,
+    respondedFrom: filters.respondedFrom,
+    respondedTo: filters.respondedTo,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    columns: filters.columns?.join(","),
+    page: filters.page ?? 1,
+    limit: 25,
+  })}`;
 }
 
-export async function fetchPollRespondents(
-  pollId: string,
-  filters: {
-    learnerName?: string | undefined;
-    optionId?: string | undefined;
-    isCorrect?: "any" | "correct" | "incorrect" | undefined;
-    respondedFrom?: string | undefined;
-    respondedTo?: string | undefined;
-    sortBy?: string | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    columns?: PollRespondentColumnKey[] | undefined;
-    page?: number | undefined;
-  },
-) {
-  return clientApi.get<{
-    data: {
-      pollId: string;
-      pollTitle: string;
-      anonymousVote: boolean;
-      respondentsHidden: boolean;
-      items: PollRespondentItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-    };
-  }>(
-    `/api/v1/reports/polls/${pollId}/respondents${buildQuery({
-      learnerName: filters.learnerName,
-      optionId: filters.optionId,
-      isCorrect: filters.isCorrect,
-      respondedFrom: filters.respondedFrom,
-      respondedTo: filters.respondedTo,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      columns: filters.columns?.join(","),
-      page: filters.page ?? 1,
-      limit: 25,
-    })}`,
-  );
+/** Respondents are listed only when the poll shows who answered. */
+export function pollShowsRespondents(detail: {
+  respondentsHidden: boolean;
+  anonymousVote: boolean;
+}): boolean {
+  return !detail.respondentsHidden && !detail.anonymousVote;
+}
+
+export async function fetchPollRespondents(pollId: string, filters: PollRespondentsFilters) {
+  return clientApi.get<{ data: PollRespondentsPayload }>(pollRespondentsPath(pollId, filters));
 }
 
 export async function exportPollReport(body: Record<string, unknown>) {
@@ -580,11 +630,36 @@ export type PollsCompareData = {
   trendInsight: string | null;
 };
 
-export async function fetchPollsCompare(pollIds: string[], alignBy: PollCompareAlignBy = "label") {
+/** At most this many polls are compared side by side. */
+export const POLLS_COMPARE_MAX_SLOTS = 4;
+
+/** The polls named by the compare page's `pollIds` parameter: trimmed, unique, at most four. */
+export function parsePollsCompareIds(raw: string | null): string[] {
+  if (!raw) return [];
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const part of raw.split(",")) {
+    const id = part.trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+    if (ids.length >= POLLS_COMPARE_MAX_SLOTS) break;
+  }
+  return ids;
+}
+
+/** The compare page's `alignBy` parameter; anything but "order" aligns by label. */
+export function parsePollsCompareAlignBy(raw: string | null): PollCompareAlignBy {
+  return raw === "order" ? "order" : "label";
+}
+
+export function pollsComparePath(pollIds: string[], alignBy: PollCompareAlignBy = "label"): string {
   const params = new URLSearchParams();
   params.set("pollIds", pollIds.join(","));
   params.set("alignBy", alignBy);
-  return clientApi.get<{ data: PollsCompareData }>(
-    `/api/v1/reports/polls/compare?${params.toString()}`,
-  );
+  return `/api/v1/reports/polls/compare?${params.toString()}`;
+}
+
+export async function fetchPollsCompare(pollIds: string[], alignBy: PollCompareAlignBy = "label") {
+  return clientApi.get<{ data: PollsCompareData }>(pollsComparePath(pollIds, alignBy));
 }
