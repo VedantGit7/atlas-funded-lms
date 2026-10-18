@@ -29,8 +29,13 @@ import {
   dropdownPanelSurfaceClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
   DEFAULT_OUTLIER_THRESHOLDS,
+  SUPER_LIVE_INSIGHTS_OUTLIERS_DEFAULTS,
+  sameOutlierThresholds,
+  superLiveInsightsPresetRange,
+  type SuperLiveInsightsDatePreset,
   dateInputToEndIso,
   dateInputToStartIso,
   fetchSuperLiveInsightsOutliers,
@@ -41,8 +46,10 @@ import {
   type SuperLiveInsightsOutliersData,
 } from "./admin-super-live-insights-roster-api";
 import { SuperLiveInsightsModuleTabs } from "./SuperLiveInsightsModuleTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
-type DatePreset = "7d" | "30d" | "90d" | "custom";
+type DatePreset = SuperLiveInsightsDatePreset;
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -92,26 +99,15 @@ function Shimmer({ className, style }: { className?: string; style?: CSSProperti
   );
 }
 
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
-}
-
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: viewer.timeZone,
   });
 }
 
@@ -396,6 +392,7 @@ function DetectionSettingsDrawer({
   onReset: () => void;
   onSave: () => void;
 }) {
+  const viewer = useViewerLocale();
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [previewBusy, setPreviewBusy] = useState(false);
 
@@ -620,7 +617,7 @@ function DetectionSettingsDrawer({
                 ? "Calculating…"
                 : previewCount == null
                   ? "Preview unavailable"
-                  : `Current thresholds would produce ${previewCount.toLocaleString()} findings.`}
+                  : `Current thresholds would produce ${previewCount.toLocaleString(viewer.locale)} findings.`}
             </span>
             <button type="button" className={primaryButtonClassName} onClick={onSave}>
               Save thresholds
@@ -632,16 +629,37 @@ function DetectionSettingsDrawer({
   );
 }
 
-export function AdminSuperLiveInsightsOutliersPage() {
+export function AdminSuperLiveInsightsOutliersPage({
+  initialOutliers,
+}: {
+  /**
+   * The findings for the default view, loaded by the server over the date
+   * range it counted; the first browser load is skipped when present.
+   */
+  initialOutliers?: ReportInitialDataInRange<SuperLiveInsightsOutliersData> | null;
+} = {}) {
   const router = useRouter();
   const datePresetLabelId = useId();
-  const initial = presetToRange("30d");
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialData] = useState(() => initialOutliers ?? null);
+  // The server's range when it loaded the findings, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const [initial] = useState(
+    () =>
+      initialData?.range ??
+      superLiveInsightsPresetRange(SUPER_LIVE_INSIGHTS_OUTLIERS_DEFAULTS.datePreset),
+  );
 
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  const [datePreset, setDatePreset] = useState<DatePreset>(
+    SUPER_LIVE_INSIGHTS_OUTLIERS_DEFAULTS.datePreset,
+  );
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [startedFrom, setStartedFrom] = useState(initial.from);
   const [startedTo, setStartedTo] = useState(initial.to);
-  const [category, setCategory] = useState<SuperLiveInsightsOutlierCategory>("all");
+  const [category, setCategory] = useState<SuperLiveInsightsOutlierCategory>(
+    SUPER_LIVE_INSIGHTS_OUTLIERS_DEFAULTS.category,
+  );
   const [thresholds, setThresholds] = useState<SuperLiveInsightsOutlierThresholds>(
     DEFAULT_OUTLIER_THRESHOLDS,
   );
@@ -649,9 +667,9 @@ export function AdminSuperLiveInsightsOutliersPage() {
     DEFAULT_OUTLIER_THRESHOLDS,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initialData === null);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<SuperLiveInsightsOutliersData | null>(null);
+  const [data, setData] = useState<SuperLiveInsightsOutliersData | null>(initialData?.data ?? null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [snoozed, setSnoozed] = useState<Record<string, number>>({});
@@ -659,7 +677,9 @@ export function AdminSuperLiveInsightsOutliersPage() {
   useEffect(() => {
     const stored = readJson<Partial<SuperLiveInsightsOutlierThresholds>>(THRESHOLDS_KEY, {});
     const next = { ...DEFAULT_OUTLIER_THRESHOLDS, ...stored };
-    setThresholds(next);
+    // Keep the same thresholds when none were saved, so the findings are only
+    // loaded again for thresholds that differ from the ones already shown.
+    setThresholds((current) => (sameOutlierThresholds(current, next) ? current : next));
     setDraftThresholds(next);
     setDismissed(readJson<string[]>(DISMISS_KEY, []));
     setSnoozed(readJson<Record<string, number>>(SNOOZE_KEY, {}));
@@ -668,42 +688,44 @@ export function AdminSuperLiveInsightsOutliersPage() {
   const applyPreset = useCallback((preset: DatePreset) => {
     setDatePreset(preset);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = superLiveInsightsPresetRange(preset);
     setStartedFrom(range.from);
     setStartedTo(range.to);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const fromIso = dateInputToStartIso(startedFrom);
-      const toIso = dateInputToEndIso(startedTo);
-      if (!fromIso || !toIso) throw new Error("Select a valid date range.");
-      const response = await fetchSuperLiveInsightsOutliers({
-        startedFrom: fromIso,
-        startedTo: toIso,
-        category,
-        thresholds,
-      });
-      setData(response.data);
-    } catch (err) {
-      const message =
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const fromIso = dateInputToStartIso(startedFrom);
+        const toIso = dateInputToEndIso(startedTo);
+        if (!fromIso || !toIso) throw new Error("Select a valid date range.");
+        const response = await fetchSuperLiveInsightsOutliers({
+          startedFrom: fromIso,
+          startedTo: toIso,
+          category,
+          thresholds,
+        });
+        setData(response.data);
+      } catch (err) {
+        const message =
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load outlier findings.";
-      setError(message);
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [category, startedFrom, startedTo, thresholds]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load outlier findings.";
+        setError(message);
+        setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [category, startedFrom, startedTo, thresholds],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initialData);
 
   const visibleFindings = useMemo(() => {
     if (!data) return [];
@@ -957,8 +979,8 @@ export function AdminSuperLiveInsightsOutliersPage() {
               <div className="flex items-start gap-2 text-[var(--admin-warning)]">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                 <p className="text-xs leading-relaxed">
-                  {data.dataQualityRecordsAffected.toLocaleString()} attendance records affected by
-                  data-quality findings
+                  {data.dataQualityRecordsAffected.toLocaleString(viewer.locale)} attendance records
+                  affected by data-quality findings
                 </p>
               </div>
             </div>
@@ -1065,7 +1087,7 @@ export function AdminSuperLiveInsightsOutliersPage() {
                         <div className="flex shrink-0 flex-col items-end gap-3 pt-0.5">
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-[var(--admin-on-surface-variant)]">
-                              {formatDate(finding.scheduledAt)}
+                              {formatDate(finding.scheduledAt, viewer)}
                             </span>
                             <FindingMenu
                               finding={finding}

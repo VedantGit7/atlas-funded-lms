@@ -205,13 +205,17 @@ export type SuperLiveInsightContext = {
   trendDeltaPoints: number | null;
 };
 
+export type SuperLiveInsightDetail = {
+  session: SuperLiveInsightItem;
+  context: SuperLiveInsightContext;
+};
+
+export function superLiveInsightDetailPath(sessionId: string): string {
+  return `/api/v1/reports/super-live-insights/${encodeURIComponent(sessionId)}`;
+}
+
 export async function fetchSuperLiveInsightDetail(sessionId: string) {
-  return clientApi.get<{
-    data: {
-      session: SuperLiveInsightItem;
-      context: SuperLiveInsightContext;
-    };
-  }>(`/api/v1/reports/super-live-insights/${sessionId}`);
+  return clientApi.get<{ data: SuperLiveInsightDetail }>(superLiveInsightDetailPath(sessionId));
 }
 
 export async function exportSuperLiveInsightsReport(body: Record<string, unknown>) {
@@ -320,20 +324,35 @@ export type SuperLiveInsightsTrendsData = {
   }>;
 };
 
-export async function fetchSuperLiveInsightsTrends(filters: {
+export type SuperLiveInsightsTrendsFilters = {
   startedFrom: string;
   startedTo: string;
   granularity?: SuperLiveInsightsGranularity;
   breakDownBy?: SuperLiveInsightsBreakDownBy;
-}) {
-  return clientApi.get<{ data: SuperLiveInsightsTrendsData }>(
-    `/api/v1/reports/super-live-insights/trends${buildQuery({
-      startedFrom: filters.startedFrom,
-      startedTo: filters.startedTo,
-      granularity: filters.granularity ?? "week",
-      breakDownBy: filters.breakDownBy ?? "none",
-    })}`,
-  );
+};
+
+/** What the trends open on, over the last 30 days; the server loads the first view with it too. */
+export const SUPER_LIVE_INSIGHTS_TRENDS_DEFAULTS = {
+  datePreset: "30d",
+  granularity: "week",
+  breakDownBy: "none",
+} as const satisfies {
+  datePreset: SuperLiveInsightsDatePreset;
+  granularity: SuperLiveInsightsGranularity;
+  breakDownBy: SuperLiveInsightsBreakDownBy;
+};
+
+export function superLiveInsightsTrendsPath(filters: SuperLiveInsightsTrendsFilters): string {
+  return `/api/v1/reports/super-live-insights/trends${buildQuery({
+    startedFrom: filters.startedFrom,
+    startedTo: filters.startedTo,
+    granularity: filters.granularity ?? "week",
+    breakDownBy: filters.breakDownBy ?? "none",
+  })}`;
+}
+
+export async function fetchSuperLiveInsightsTrends(filters: SuperLiveInsightsTrendsFilters) {
+  return clientApi.get<{ data: SuperLiveInsightsTrendsData }>(superLiveInsightsTrendsPath(filters));
 }
 
 export type SuperLiveInsightsCompareMode = "sessions" | "series";
@@ -395,17 +414,47 @@ export type SuperLiveInsightsCompareCandidate = {
   sessionCount: number | null;
 };
 
-export async function fetchSuperLiveInsightsCompare(filters: {
+export type SuperLiveInsightsCompareFilters = {
   mode: SuperLiveInsightsCompareMode;
   ids: string[];
   seriesKind?: SuperLiveInsightsSeriesKind;
-}) {
+};
+
+/** The compare page's address, read the way the page reads it. */
+export function parseSuperLiveInsightsCompareAddress(get: (name: string) => string | null): {
+  mode: SuperLiveInsightsCompareMode;
+  seriesKind: SuperLiveInsightsSeriesKind;
+  ids: string[];
+} {
+  const raw = get("ids");
+  const ids = raw
+    ? [
+        ...new Set(
+          raw
+            .split(",")
+            .map((part) => part.trim())
+            .filter(Boolean),
+        ),
+      ].slice(0, 4)
+    : [];
+  return {
+    mode: get("mode") === "series" ? "series" : "sessions",
+    seriesKind: get("seriesKind") === "batch" ? "batch" : "course",
+    ids,
+  };
+}
+
+export function superLiveInsightsComparePath(filters: SuperLiveInsightsCompareFilters): string {
+  return `/api/v1/reports/super-live-insights/compare${buildQuery({
+    mode: filters.mode,
+    ids: filters.ids.join(","),
+    seriesKind: filters.seriesKind,
+  })}`;
+}
+
+export async function fetchSuperLiveInsightsCompare(filters: SuperLiveInsightsCompareFilters) {
   return clientApi.get<{ data: SuperLiveInsightsCompareData }>(
-    `/api/v1/reports/super-live-insights/compare${buildQuery({
-      mode: filters.mode,
-      ids: filters.ids.join(","),
-      seriesKind: filters.seriesKind,
-    })}`,
+    superLiveInsightsComparePath(filters),
   );
 }
 
@@ -492,26 +541,59 @@ export const DEFAULT_OUTLIER_THRESHOLDS: SuperLiveInsightsOutlierThresholds = {
   minRecords: 5,
 };
 
-export async function fetchSuperLiveInsightsOutliers(filters: {
+export type SuperLiveInsightsOutliersFilters = {
   startedFrom: string;
   startedTo: string;
   category?: SuperLiveInsightsOutlierCategory;
   thresholds?: Partial<SuperLiveInsightsOutlierThresholds>;
-}) {
+};
+
+/**
+ * What the outliers open on, over the last 30 days with the default
+ * thresholds; the server loads the first view with it too. Thresholds the
+ * viewer saved in this browser are applied after it opens.
+ */
+export const SUPER_LIVE_INSIGHTS_OUTLIERS_DEFAULTS = {
+  datePreset: "30d",
+  category: "all",
+} as const satisfies {
+  datePreset: SuperLiveInsightsDatePreset;
+  category: SuperLiveInsightsOutlierCategory;
+};
+
+export function sameOutlierThresholds(
+  a: SuperLiveInsightsOutlierThresholds,
+  b: SuperLiveInsightsOutlierThresholds,
+): boolean {
+  return (
+    a.rateDeltaPts === b.rateDeltaPts &&
+    a.unresolvedPct === b.unresolvedPct &&
+    a.shortDurationPct === b.shortDurationPct &&
+    a.lateStartMinutes === b.lateStartMinutes &&
+    a.ignoreSmallSessions === b.ignoreSmallSessions &&
+    a.minRecords === b.minRecords
+  );
+}
+
+export function superLiveInsightsOutliersPath(filters: SuperLiveInsightsOutliersFilters): string {
   const t = filters.thresholds ?? {};
+  return `/api/v1/reports/super-live-insights/outliers${buildQuery({
+    startedFrom: filters.startedFrom,
+    startedTo: filters.startedTo,
+    category: filters.category ?? "all",
+    rateDeltaPts: t.rateDeltaPts,
+    unresolvedPct: t.unresolvedPct,
+    shortDurationPct: t.shortDurationPct,
+    lateStartMinutes: t.lateStartMinutes,
+    ignoreSmallSessions:
+      t.ignoreSmallSessions === undefined ? undefined : t.ignoreSmallSessions ? "true" : "false",
+    minRecords: t.minRecords,
+  })}`;
+}
+
+export async function fetchSuperLiveInsightsOutliers(filters: SuperLiveInsightsOutliersFilters) {
   return clientApi.get<{ data: SuperLiveInsightsOutliersData }>(
-    `/api/v1/reports/super-live-insights/outliers${buildQuery({
-      startedFrom: filters.startedFrom,
-      startedTo: filters.startedTo,
-      category: filters.category ?? "all",
-      rateDeltaPts: t.rateDeltaPts,
-      unresolvedPct: t.unresolvedPct,
-      shortDurationPct: t.shortDurationPct,
-      lateStartMinutes: t.lateStartMinutes,
-      ignoreSmallSessions:
-        t.ignoreSmallSessions === undefined ? undefined : t.ignoreSmallSessions ? "true" : "false",
-      minRecords: t.minRecords,
-    })}`,
+    superLiveInsightsOutliersPath(filters),
   );
 }
 

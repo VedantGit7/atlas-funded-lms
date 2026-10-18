@@ -3,10 +3,14 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminSuperLiveInsightsOutliersPage } from "../../../../../features/admin/reports/AdminSuperLiveInsightsOutliersPage";
+import { loadSuperLiveInsightsOutliersData } from "../../../../../lib/server/report-super-live-insights-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminSuperLiveInsightsOutliersRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialOutliers] = await Promise.all([
+    runTenantStateGate(),
+    loadSuperLiveInsightsOutliersData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +29,7 @@ export default async function AdminSuperLiveInsightsOutliersRoutePage() {
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading outliers…</p>
         }
       >
-        <AdminSuperLiveInsightsOutliersPage />
+        <AdminSuperLiveInsightsOutliersPage initialOutliers={initialOutliers} />
       </Suspense>
     </AdminPageGate>
   );
