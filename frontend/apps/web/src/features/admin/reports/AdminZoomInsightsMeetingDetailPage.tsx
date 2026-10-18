@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useId, useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -28,8 +28,11 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DEFAULT_ZOOM_PARTICIPANT_COLUMNS,
+  ZOOM_MEETING_PARTICIPANTS_DEFAULTS,
+  type ZoomMeetingParticipantsPayload,
   ZOOM_PARTICIPANT_COLUMN_OPTIONS,
   connectZoomAccount,
   dateInputToEndIso,
@@ -45,8 +48,10 @@ import {
   type ZoomTimelinePoint,
 } from "./admin-zoom-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = ZOOM_MEETING_PARTICIPANTS_DEFAULTS.limit;
 
 const secondaryButtonClassName =
   "inline-flex h-8 items-center justify-center gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -104,11 +109,12 @@ function formatDurationParts(seconds: number | null | undefined): ReactNode {
   );
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -117,28 +123,32 @@ function formatDateTime(value: string | null): string {
   });
 }
 
-function formatTime(value: string | null): string {
+function formatTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "never";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "never";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${String(mins)}m ago`;
   const hours = Math.floor(mins / 60);
   if (hours < 48) return `${String(hours)}h ago`;
-  return formatDateTime(value);
+  return formatDateTimeFor(value, viewer);
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function StatusPill({
@@ -213,6 +223,8 @@ function AttendanceTimelineChart({
   peakAt: string | null;
   peakConcurrent: number;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const chart = useMemo(() => {
     if (timeline.length === 0) return null;
     const max = Math.max(peakConcurrent, ...timeline.map((point) => point.concurrent), 1);
@@ -243,10 +255,10 @@ function AttendanceTimelineChart({
           );
     const labels = [0, 0.25, 0.5, 0.75, 1].map((t) => {
       const index = Math.min(timeline.length - 1, Math.round(t * (timeline.length - 1)));
-      return formatTime(timeline[index]?.at ?? null);
+      return formatTimeFor(timeline[index]?.at ?? null, viewer);
     });
     return { line, area, peakPoint, labels, width, height };
-  }, [peakAt, peakConcurrent, timeline]);
+  }, [peakAt, peakConcurrent, timeline, viewer]);
 
   if (!chart) {
     return (
@@ -390,6 +402,8 @@ function ConnectionBanner({
   onCheck: () => void;
   syncing: boolean;
 }) {
+  const viewer = useViewerLocale();
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   if (connection.status === "connected") {
     return (
       <div className="flex h-10 flex-wrap items-center justify-between gap-2 rounded border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4">
@@ -462,36 +476,79 @@ function ConnectionBanner({
   );
 }
 
-export function AdminZoomInsightsMeetingDetailPage({ meetingId }: { meetingId: string }) {
+type ZoomMeetingDetailPageProps = {
+  meetingId: string;
+  /** The meeting, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<ZoomMeetingDetail> | null;
+  /** Its first page of participants, loaded by the server. */
+  initialParticipants?: ReportInitialData<ZoomMeetingParticipantsPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminZoomInsightsMeetingDetailPage(props: ZoomMeetingDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <ZoomMeetingDetailReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ZoomMeetingDetailReport({
+  meetingId,
+  initialDetail,
+  initialParticipants,
+}: ZoomMeetingDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatTime = withViewer(formatTimeFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   const searchId = useId();
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialDetailData] = useState(() => initialDetail ?? null);
+  const [initialParticipantsData] = useState(() => initialParticipants ?? null);
+  const [loading, setLoading] = useState(initialDetailData === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [participantError, setParticipantError] = useState<string | null>(null);
 
-  const [detail, setDetail] = useState<ZoomMeetingDetail | null>(null);
-  const [participants, setParticipants] = useState<ZoomParticipantItem[]>([]);
+  const [detail, setDetail] = useState<ZoomMeetingDetail | null>(initialDetailData?.data ?? null);
+  const [participants, setParticipants] = useState<ZoomParticipantItem[]>(
+    initialParticipantsData?.data.items ?? [],
+  );
   const [participantSummary, setParticipantSummary] = useState<{
     matchedCount: number;
     unmatchedCount: number;
     guestCount: number;
-  } | null>(null);
-  const [meetingDurationSeconds, setMeetingDurationSeconds] = useState<number | null>(null);
+  } | null>(initialParticipantsData?.data.summary ?? null);
+  const [meetingDurationSeconds, setMeetingDurationSeconds] = useState<number | null>(
+    initialParticipantsData?.data.meetingDurationSeconds ?? null,
+  );
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState<number>(ZOOM_MEETING_PARTICIPANTS_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(
+    initialParticipantsData?.data.pageInfo.totalPages ?? 0,
+  );
+  const [totalCount, setTotalCount] = useState(
+    initialParticipantsData?.data.pageInfo.totalCount ?? 0,
+  );
 
   const [draftSearch, setDraftSearch] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [joinedFrom, setJoinedFrom] = useState("");
   const [joinedTo, setJoinedTo] = useState("");
-  const [matchState, setMatchState] = useState<"all" | ZoomMatchState>("all");
-  const [durationBucket, setDurationBucket] = useState<"any" | "under_10" | "10_to_30" | "over_30">(
-    "any",
+  const [matchState, setMatchState] = useState<"all" | ZoomMatchState>(
+    ZOOM_MEETING_PARTICIPANTS_DEFAULTS.matchState,
   );
-  const [rejoinedOnly, setRejoinedOnly] = useState(false);
+  const [durationBucket, setDurationBucket] = useState<"any" | "under_10" | "10_to_30" | "over_30">(
+    ZOOM_MEETING_PARTICIPANTS_DEFAULTS.durationBucket,
+  );
+  const [rejoinedOnly, setRejoinedOnly] = useState<boolean>(
+    ZOOM_MEETING_PARTICIPANTS_DEFAULTS.rejoinedOnly,
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [columns, setColumns] = useState<ZoomParticipantColumnKey[]>([
@@ -503,25 +560,29 @@ export function AdminZoomInsightsMeetingDetailPage({ meetingId }: { meetingId: s
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const loadDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchZoomMeetingDetail(meetingId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadDetail = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchZoomMeetingDetail(meetingId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load meeting details.",
-      );
-      setDetail(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [meetingId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load meeting details.",
+        );
+        setDetail(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [meetingId],
+  );
 
   const loadParticipants = useCallback(async () => {
     setParticipantError(null);
@@ -569,14 +630,14 @@ export function AdminZoomInsightsMeetingDetailPage({ meetingId }: { meetingId: s
     rejoinedOnly,
   ]);
 
-  useEffect(() => {
-    void loadDetail();
-  }, [loadDetail]);
+  useReportLoad(loadDetail, initialDetailData);
 
-  useEffect(() => {
+  // Participants follow the meeting: they reload whenever it (or their filters) change.
+  const loadParticipantsOnceReady = useCallback(async () => {
     if (!detail) return;
-    void loadParticipants();
+    await loadParticipants();
   }, [detail, loadParticipants]);
+  useReportLoad(loadParticipantsOnceReady, initialParticipantsData);
 
   async function handleExport() {
     setBusy(true);

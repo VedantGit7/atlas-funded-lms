@@ -189,57 +189,79 @@ export async function fetchZoomMeetingsRoster(filters?: ZoomMeetingsRosterFilter
   return clientApi.get<{ data: ZoomMeetingsRosterPayload }>(zoomMeetingsRosterPath(filters));
 }
 
-export async function fetchZoomMeetingDetail(meetingId: string) {
-  return clientApi.get<{ data: ZoomMeetingDetail }>(`/api/v1/reports/zoom-insights/${meetingId}`);
+export function zoomMeetingDetailPath(meetingId: string): string {
+  return `/api/v1/reports/zoom-insights/${encodeURIComponent(meetingId)}`;
 }
+
+export async function fetchZoomMeetingDetail(meetingId: string) {
+  return clientApi.get<{ data: ZoomMeetingDetail }>(zoomMeetingDetailPath(meetingId));
+}
+
+export type ZoomMeetingParticipantsFilters = {
+  displayName?: string | undefined;
+  email?: string | undefined;
+  joinedFrom?: string | undefined;
+  joinedTo?: string | undefined;
+  matchState?: "all" | ZoomMatchState | undefined;
+  durationBucket?: "any" | "under_10" | "10_to_30" | "over_30" | undefined;
+  rejoinedOnly?: boolean | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: ZoomParticipantColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+/** How a meeting's participants open; the server loads the first page with it too. */
+export const ZOOM_MEETING_PARTICIPANTS_DEFAULTS = {
+  matchState: "all",
+  durationBucket: "any",
+  rejoinedOnly: false,
+  page: 1,
+  limit: 25,
+} as const satisfies ZoomMeetingParticipantsFilters;
+
+export type ZoomMeetingParticipantsPayload = {
+  meetingId: string;
+  topic: string | null;
+  meetingDurationSeconds: number | null;
+  items: ZoomParticipantItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+  summary: {
+    matchedCount: number;
+    unmatchedCount: number;
+    guestCount: number;
+  };
+};
 
 export async function fetchZoomMeetingParticipants(
   meetingId: string,
-  filters: {
-    displayName?: string | undefined;
-    email?: string | undefined;
-    joinedFrom?: string | undefined;
-    joinedTo?: string | undefined;
-    matchState?: "all" | ZoomMatchState | undefined;
-    durationBucket?: "any" | "under_10" | "10_to_30" | "over_30" | undefined;
-    rejoinedOnly?: boolean | undefined;
-    sortBy?: string | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    columns?: ZoomParticipantColumnKey[] | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  },
+  filters: ZoomMeetingParticipantsFilters,
 ) {
-  return clientApi.get<{
-    data: {
-      meetingId: string;
-      topic: string | null;
-      meetingDurationSeconds: number | null;
-      items: ZoomParticipantItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      summary: {
-        matchedCount: number;
-        unmatchedCount: number;
-        guestCount: number;
-      };
-    };
-  }>(
-    `/api/v1/reports/zoom-insights/${meetingId}/participants${buildQuery({
-      displayName: filters.displayName,
-      email: filters.email,
-      joinedFrom: filters.joinedFrom,
-      joinedTo: filters.joinedTo,
-      matchState: filters.matchState ?? "all",
-      durationBucket: filters.durationBucket ?? "any",
-      rejoinedOnly: filters.rejoinedOnly ?? false,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      columns: filters.columns?.join(","),
-      page: filters.page ?? 1,
-      limit: filters.limit ?? 25,
-    })}`,
+  return clientApi.get<{ data: ZoomMeetingParticipantsPayload }>(
+    zoomMeetingParticipantsPath(meetingId, filters),
   );
+}
+
+export function zoomMeetingParticipantsPath(
+  meetingId: string,
+  filters: ZoomMeetingParticipantsFilters,
+): string {
+  return `/api/v1/reports/zoom-insights/${encodeURIComponent(meetingId)}/participants${buildQuery({
+    displayName: filters.displayName,
+    email: filters.email,
+    joinedFrom: filters.joinedFrom,
+    joinedTo: filters.joinedTo,
+    matchState: filters.matchState ?? "all",
+    durationBucket: filters.durationBucket ?? "any",
+    rejoinedOnly: filters.rejoinedOnly ?? false,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    columns: filters.columns?.join(","),
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 25,
+  })}`;
 }
 
 export async function exportZoomInsightsReport(body: Record<string, unknown>) {
@@ -321,9 +343,13 @@ export type ZoomParticipantDetail = {
   otherUnmatchedMeetingCount: number;
 };
 
+export function zoomParticipantDetailPath(meetingId: string, participantId: string): string {
+  return `/api/v1/reports/zoom-insights/${encodeURIComponent(meetingId)}/participants/${encodeURIComponent(participantId)}`;
+}
+
 export async function fetchZoomParticipantDetail(meetingId: string, participantId: string) {
   return clientApi.get<{ data: ZoomParticipantDetail }>(
-    `/api/v1/reports/zoom-insights/${meetingId}/participants/${participantId}`,
+    zoomParticipantDetailPath(meetingId, participantId),
   );
 }
 
@@ -423,7 +449,7 @@ export type ZoomPersonMeetingsDetail = {
   representativeParticipantId: string | null;
 };
 
-export async function fetchZoomPeopleRoster(filters?: {
+export type ZoomPeopleRosterFilters = {
   q?: string | undefined;
   attendedFrom?: string | undefined;
   attendedTo?: string | undefined;
@@ -436,35 +462,58 @@ export async function fetchZoomPeopleRoster(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: ZoomPersonListItem[];
-      pageInfo: PageInfo;
-      connectionStatus: ZoomConnectionStatus;
-      connection: ZoomConnectionMeta;
-      summary: ZoomPeopleSummary;
-      range: {
-        attendedFrom: string | null;
-        attendedTo: string | null;
-      };
-    };
-  }>(
-    `/api/v1/reports/zoom-insights/participants${buildQuery({
-      q: filters?.q,
-      attendedFrom: filters?.attendedFrom,
-      attendedTo: filters?.attendedTo,
-      matchState: filters?.matchState ?? "all",
-      meetingsMin: filters?.meetingsMin,
-      meetingsMax: filters?.meetingsMax,
-      coverageMin: filters?.coverageMin,
-      coverageMax: filters?.coverageMax,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+export type ZoomPeopleRosterPayload = {
+  items: ZoomPersonListItem[];
+  pageInfo: PageInfo;
+  connectionStatus: ZoomConnectionStatus;
+  connection: ZoomConnectionMeta;
+  summary: ZoomPeopleSummary;
+  range: {
+    attendedFrom: string | null;
+    attendedTo: string | null;
+  };
+};
+
+/**
+ * What the participants list opens on, over the last 30 days, besides the
+ * match state the address may name; the server loads the first page with it too.
+ */
+export const ZOOM_PEOPLE_DEFAULTS = {
+  datePreset: "30d",
+  sortBy: "meetings_attended",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const satisfies Omit<ZoomPeopleRosterFilters, "q" | "attendedFrom" | "attendedTo"> & {
+  datePreset: ZoomMeetingsDatePreset;
+};
+
+/** The participants page's `matchState` parameter; anything unknown shows everyone. */
+export function parseZoomPeopleMatchState(raw: string | null): "all" | ZoomMatchState {
+  return raw === "matched" || raw === "unmatched" || raw === "guest" ? raw : "all";
+}
+
+export async function fetchZoomPeopleRoster(filters?: ZoomPeopleRosterFilters) {
+  return clientApi.get<{ data: ZoomPeopleRosterPayload }>(zoomPeopleRosterPath(filters));
+}
+
+export function zoomPeopleRosterPath(filters?: ZoomPeopleRosterFilters): string {
+  return `/api/v1/reports/zoom-insights/participants${buildQuery({
+    q: filters?.q,
+    attendedFrom: filters?.attendedFrom,
+    attendedTo: filters?.attendedTo,
+    matchState: filters?.matchState ?? "all",
+    meetingsMin: filters?.meetingsMin,
+    meetingsMax: filters?.meetingsMax,
+    coverageMin: filters?.coverageMin,
+    coverageMax: filters?.coverageMax,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
 }
 
 export async function fetchZoomPersonMeetings(filters: {
@@ -525,42 +574,55 @@ export type ZoomMatchingRules = {
   guestEmailDomains: string[];
 };
 
-export async function fetchZoomUnmatchedIdentities(filters?: {
+export type ZoomUnmatchedFilters = {
   q?: string | undefined;
   attendedFrom?: string | undefined;
   attendedTo?: string | undefined;
   group?: "all" | "high" | "medium" | "guest" | "none" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: ZoomUnmatchedIdentity[];
-      groups: {
-        high: ZoomUnmatchedIdentity[];
-        medium: ZoomUnmatchedIdentity[];
-        guest: ZoomUnmatchedIdentity[];
-        none: ZoomUnmatchedIdentity[];
-      };
-      pageInfo: PageInfo;
-      connectionStatus: ZoomConnectionStatus;
-      connection: ZoomConnectionMeta;
-      summary: ZoomUnmatchedSummary;
-    };
-  }>(
-    `/api/v1/reports/zoom-insights/unmatched${buildQuery({
-      q: filters?.q,
-      attendedFrom: filters?.attendedFrom,
-      attendedTo: filters?.attendedTo,
-      group: filters?.group ?? "all",
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 50,
-    })}`,
-  );
+};
+
+/** What the unmatched identities open on; the server loads the first page with it too. */
+export const ZOOM_UNMATCHED_DEFAULTS = {
+  group: "all",
+  page: 1,
+  limit: 50,
+} as const satisfies ZoomUnmatchedFilters;
+
+export type ZoomUnmatchedPayload = {
+  items: ZoomUnmatchedIdentity[];
+  groups: {
+    high: ZoomUnmatchedIdentity[];
+    medium: ZoomUnmatchedIdentity[];
+    guest: ZoomUnmatchedIdentity[];
+    none: ZoomUnmatchedIdentity[];
+  };
+  pageInfo: PageInfo;
+  connectionStatus: ZoomConnectionStatus;
+  connection: ZoomConnectionMeta;
+  summary: ZoomUnmatchedSummary;
+};
+
+export function zoomUnmatchedPath(filters?: ZoomUnmatchedFilters): string {
+  return `/api/v1/reports/zoom-insights/unmatched${buildQuery({
+    q: filters?.q,
+    attendedFrom: filters?.attendedFrom,
+    attendedTo: filters?.attendedTo,
+    group: filters?.group ?? "all",
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 50,
+  })}`;
 }
 
+export async function fetchZoomUnmatchedIdentities(filters?: ZoomUnmatchedFilters) {
+  return clientApi.get<{ data: ZoomUnmatchedPayload }>(zoomUnmatchedPath(filters));
+}
+
+export const ZOOM_MATCHING_RULES_PATH = "/api/v1/reports/zoom-insights/matching-rules";
+
 export async function fetchZoomMatchingRules() {
-  return clientApi.get<{ data: ZoomMatchingRules }>("/api/v1/reports/zoom-insights/matching-rules");
+  return clientApi.get<{ data: ZoomMatchingRules }>(ZOOM_MATCHING_RULES_PATH);
 }
 
 export async function updateZoomMatchingRules(body: ZoomMatchingRules) {
@@ -651,16 +713,18 @@ export type ZoomConnectionDetail = ZoomConnectionMeta & {
   hasWebhookSecret: boolean;
 };
 
+export type ZoomConnectionPayload = {
+  connection: ZoomConnectionDetail;
+  syncPulse: ZoomSyncPulseCell[];
+  syncRuns: ZoomSyncRun[];
+  webhookEvents: ZoomWebhookEvent[];
+  lastWebhookAt: string | null;
+};
+
+export const ZOOM_CONNECTION_PATH = "/api/v1/reports/zoom-insights/connection";
+
 export async function fetchZoomConnectionDetail() {
-  return clientApi.get<{
-    data: {
-      connection: ZoomConnectionDetail;
-      syncPulse: ZoomSyncPulseCell[];
-      syncRuns: ZoomSyncRun[];
-      webhookEvents: ZoomWebhookEvent[];
-      lastWebhookAt: string | null;
-    };
-  }>("/api/v1/reports/zoom-insights/connection");
+  return clientApi.get<{ data: ZoomConnectionPayload }>(ZOOM_CONNECTION_PATH);
 }
 
 export async function syncZoomConnectionNow() {

@@ -23,7 +23,10 @@ import {
 import { Select } from "@atlas/design-system";
 import { primaryButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  ZOOM_UNMATCHED_DEFAULTS,
+  type ZoomUnmatchedPayload,
   bulkMatchZoomUnmatched,
   connectZoomAccount,
   exportZoomInsightsReport,
@@ -37,6 +40,8 @@ import {
   type ZoomUnmatchedSummary,
 } from "./admin-zoom-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type ModuleTab = "meetings" | "participants" | "unmatched" | "connection" | "exports";
 type GroupFilter = "all" | "high" | "medium" | "guest" | "none";
@@ -47,7 +52,7 @@ type MemberSearchResult = {
   email: string | null;
 };
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = ZOOM_UNMATCHED_DEFAULTS.limit;
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -81,15 +86,16 @@ function formatDuration(seconds: number | null | undefined): string {
   return `${String(total % 60)}s`;
 }
 
-function formatCount(value: number): string {
-  return new Intl.NumberFormat().format(value);
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return new Intl.NumberFormat(viewer.locale).format(value);
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -485,6 +491,9 @@ function IdentityCard({
   onMarkGuest: (item: ZoomUnmatchedIdentity) => void;
   onChooseElse: (item: ZoomUnmatchedIdentity) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
   const top = item.suggestions[0] ?? null;
   const [applyToOther, setApplyToOther] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -749,6 +758,8 @@ function CompactReviewCard({
   onMatch: (item: ZoomUnmatchedIdentity, membershipId: string, applyToOther: boolean) => void;
   onMarkGuest: (item: ZoomUnmatchedIdentity) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const top = item.suggestions[0];
   if (!top) {
     return (
@@ -823,6 +834,8 @@ function CompactReviewCard({
 }
 
 function SummaryBand({ summary }: { summary: ZoomUnmatchedSummary }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
       <div className="flex flex-col justify-between rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 md:col-span-2">
@@ -892,6 +905,8 @@ function GroupSection({
   action?: ReactNode;
   children: ReactNode;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   if (count === 0) return null;
   return (
     <section className="space-y-4">
@@ -909,55 +924,74 @@ function GroupSection({
   );
 }
 
-export function AdminZoomInsightsUnmatchedPage() {
+export function AdminZoomInsightsUnmatchedPage({
+  initialUnmatched,
+  initialRules,
+}: {
+  /** The first page of unmatched identities, loaded by the server; the first browser load is skipped when present. */
+  initialUnmatched?: ReportInitialData<ZoomUnmatchedPayload> | null;
+  /** The tenant's matching rules, loaded by the server. */
+  initialRules?: ReportInitialData<ZoomMatchingRules> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const searchId = useId();
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialUnmatched ?? null);
+  const [initialRulesData] = useState(() => initialRules ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<ZoomUnmatchedIdentity[]>([]);
+  const [items, setItems] = useState<ZoomUnmatchedIdentity[]>(initial?.data.items ?? []);
   const [groups, setGroups] = useState<{
     high: ZoomUnmatchedIdentity[];
     medium: ZoomUnmatchedIdentity[];
     guest: ZoomUnmatchedIdentity[];
     none: ZoomUnmatchedIdentity[];
-  }>({ high: [], medium: [], guest: [], none: [] });
-  const [summary, setSummary] = useState<ZoomUnmatchedSummary | null>(null);
-  const [connection, setConnection] = useState<ZoomConnectionMeta | null>(null);
+  }>(initial?.data.groups ?? { high: [], medium: [], guest: [], none: [] });
+  const [summary, setSummary] = useState<ZoomUnmatchedSummary | null>(
+    initial?.data.summary ?? null,
+  );
+  const [connection, setConnection] = useState<ZoomConnectionMeta | null>(
+    initial?.data.connection ?? null,
+  );
   const [draftSearch, setDraftSearch] = useState("");
   const [searchQ, setSearchQ] = useState("");
-  const [group, setGroup] = useState<GroupFilter>("all");
-  const [page, setPage] = useState(1);
+  const [group, setGroup] = useState<GroupFilter>(ZOOM_UNMATCHED_DEFAULTS.group);
+  const [page, setPage] = useState<number>(ZOOM_UNMATCHED_DEFAULTS.page);
   const [rulesOpen, setRulesOpen] = useState(false);
-  const [rules, setRules] = useState<ZoomMatchingRules | null>(null);
+  const [rules, setRules] = useState<ZoomMatchingRules | null>(initialRulesData?.data ?? null);
   const [rulesSaving, setRulesSaving] = useState(false);
   const [chooseKey, setChooseKey] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchZoomUnmatchedIdentities({
-        q: searchQ.trim() || undefined,
-        group,
-        page,
-        limit: PAGE_SIZE,
-      });
-      setItems(response.data.items);
-      setGroups(response.data.groups);
-      setSummary(response.data.summary);
-      setConnection(response.data.connection);
-    } catch (err) {
-      setError(
-        err instanceof ClientApiError ? err.message : "Unable to load unmatched identities.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [group, page, searchQ]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchZoomUnmatchedIdentities({
+          q: searchQ.trim() || undefined,
+          group,
+          page,
+          limit: PAGE_SIZE,
+        });
+        setItems(response.data.items);
+        setGroups(response.data.groups);
+        setSummary(response.data.summary);
+        setConnection(response.data.connection);
+      } catch (err) {
+        setError(
+          err instanceof ClientApiError ? err.message : "Unable to load unmatched identities.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [group, page, searchQ],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -973,15 +1007,15 @@ export function AdminZoomInsightsUnmatchedPage() {
     };
   }, [draftSearch]);
 
-  useEffect(() => {
-    void fetchZoomMatchingRules()
-      .then((response) => {
-        setRules(response.data);
-      })
-      .catch(() => {
-        setRules(null);
-      });
+  const loadRules = useCallback(async () => {
+    try {
+      const response = await fetchZoomMatchingRules();
+      setRules(response.data);
+    } catch {
+      setRules(null);
+    }
   }, []);
+  useReportLoad(loadRules, initialRulesData);
 
   const displayGroups = useMemo(() => {
     if (group === "all") return groups;

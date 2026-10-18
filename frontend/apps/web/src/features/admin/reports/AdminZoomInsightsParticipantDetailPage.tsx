@@ -24,6 +24,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchZoomParticipantDetail,
   mutateZoomParticipantMatch,
@@ -31,6 +32,8 @@ import {
   type ZoomParticipantDetail,
   type ZoomParticipantSession,
 } from "./admin-zoom-insights-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type MemberSearchResult = {
   id: string;
@@ -111,11 +114,12 @@ function formatDurationParts(seconds: number | null | undefined): ReactNode {
   );
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -124,11 +128,15 @@ function formatDateTime(value: string | null): string {
   });
 }
 
-function formatTime(value: string | null): string {
+function formatTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function formatPct(value: number | null | undefined): string {
@@ -193,7 +201,10 @@ function matchMethodLabel(method: ZoomParticipantDetail["lmsCrossCheck"]["matchM
   return "None";
 }
 
-function buildPresenceTimeline(detail: ZoomParticipantDetail): {
+function buildPresenceTimelineFor(
+  detail: ZoomParticipantDetail,
+  viewer: ViewerLocale,
+): {
   segments: TimelineSegment[];
   axisLabels: [string, string, string];
   meetingStartMs: number;
@@ -265,9 +276,9 @@ function buildPresenceTimeline(detail: ZoomParticipantDetail): {
 
   const midMs = meetingStartMs + meetingDurationMs / 2;
   const axisLabels: [string, string, string] = [
-    formatTime(detail.meetingStartedAt ?? firstSession.joinTime),
-    formatTime(new Date(midMs).toISOString()),
-    formatTime(detail.meetingEndedAt ?? lastSession.leaveTime),
+    formatTimeFor(detail.meetingStartedAt ?? firstSession.joinTime, viewer),
+    formatTimeFor(new Date(midMs).toISOString(), viewer),
+    formatTimeFor(detail.meetingEndedAt ?? lastSession.leaveTime, viewer),
   ];
 
   return { segments, axisLabels, meetingStartMs, meetingDurationMs };
@@ -648,7 +659,9 @@ function MatchDrawer({
 }
 
 function PresenceTimeline({ detail }: { detail: ZoomParticipantDetail }) {
-  const timeline = useMemo(() => buildPresenceTimeline(detail), [detail]);
+  const viewer = useViewerLocale();
+  const formatTime = withViewer(formatTimeFor, viewer);
+  const timeline = useMemo(() => buildPresenceTimelineFor(detail, viewer), [detail, viewer]);
   const showGaps = detail.sessionCount > 1;
 
   if (!timeline || timeline.segments.length === 0) {
@@ -719,40 +732,49 @@ function PresenceTimeline({ detail }: { detail: ZoomParticipantDetail }) {
 export function AdminZoomInsightsParticipantDetailPage({
   meetingId,
   participantId,
+  initialDetail,
 }: {
   meetingId: string;
   participantId: string;
+  /** The participant, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<ZoomParticipantDetail> | null;
 }) {
-  const [detail, setDetail] = useState<ZoomParticipantDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const viewer = useViewerLocale();
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<ZoomParticipantDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [matchOpen, setMatchOpen] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchZoomParticipantDetail(meetingId, participantId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchZoomParticipantDetail(meetingId, participantId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load participant details.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [meetingId, participantId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load participant details.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [meetingId, participantId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleMutate(
     action: "match" | "unlink" | "mark_guest",
