@@ -65,6 +65,25 @@ export function useViewerLocale(): ViewerLocale {
     : { locale: "en-US", timeZone: "UTC", now };
 }
 
+/**
+ * Binds a formatter that takes the viewer last, so a component calls it the
+ * way it did before the viewer was needed: `formatDate(value)`.
+ */
+export function withViewer<A extends unknown[], R>(
+  format: (...args: [...A, ViewerLocale]) => R,
+  viewer: ViewerLocale,
+): (...args: A) => R {
+  return (...args) => format(...args, viewer);
+}
+
+/**
+ * The viewer's own settings, for code that only runs after hydration, such as
+ * a click handler or a CSV export.
+ */
+export function ownViewerLocale(): ViewerLocale {
+  return { locale: undefined, timeZone: undefined, now: Date.now() };
+}
+
 /** A relative time such as "5m ago", formatted by the report's own helper. */
 export function RelativeTime({
   value,

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useId, useMemo, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -18,7 +18,13 @@ import {
 import { DropdownMenu, Select } from "@atlas/design-system";
 import { primaryButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  ZOOM_PEOPLE_DEFAULTS,
+  parseZoomPeopleMatchState,
+  zoomMeetingsPresetRange,
+  type ZoomMeetingsDatePreset,
+  type ZoomPeopleRosterPayload,
   connectZoomAccount,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -32,9 +38,11 @@ import {
   type ZoomPersonMeetingsDetail,
 } from "./admin-zoom-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type ModuleTab = "meetings" | "participants" | "unmatched" | "connection" | "exports";
-type DatePreset = "7d" | "30d" | "90d" | "custom";
+type DatePreset = ZoomMeetingsDatePreset;
 type SortBy =
   | "display_name"
   | "meetings_attended"
@@ -44,7 +52,7 @@ type SortBy =
   | "first_seen"
   | "last_seen";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = ZOOM_PEOPLE_DEFAULTS.limit;
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -78,22 +86,24 @@ function formatDuration(seconds: number | null | undefined): string {
   return `${String(total % 60)}s`;
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-function formatDateTimeShort(value: string | null): string {
+function formatDateTimeShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -101,11 +111,11 @@ function formatDateTimeShort(value: string | null): string {
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "never";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "never";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${String(mins)} minute${mins === 1 ? "" : "s"} ago`;
@@ -114,33 +124,24 @@ function formatRelative(value: string | null): string {
   const days = Math.floor(hours / 24);
   if (days < 30) return `${String(days)} day${days === 1 ? "" : "s"} ago`;
   if (days >= 30) return `>${String(Math.floor(days / 30) * 30)}d ago`;
-  return formatDateShort(value);
+  return formatDateShortFor(value, viewer);
 }
 
-function isStale(value: string | null): boolean {
+function isStaleFor(value: string | null, viewer: ViewerLocale): boolean {
   if (!value) return true;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return true;
-  return Date.now() - date.getTime() > 30 * 24 * 60 * 60 * 1000;
+  return viewer.now - date.getTime() > 30 * 24 * 60 * 60 * 1000;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function initials(name: string | null): string {
   if (!name?.trim()) return "?";
   const parts = name.trim().split(/\s+/).slice(0, 2);
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "?";
-}
-
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
 }
 
 function StatusPill({
@@ -253,6 +254,9 @@ function ConnectionBanner({
   onReconnect: () => void;
   syncing: boolean;
 }) {
+  const viewer = useViewerLocale();
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   if (connection.status === "connected") {
     return (
       <div className="flex min-h-10 flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5">
@@ -393,6 +397,10 @@ function MeetingsAttendedDrawer({
   attendedFrom: string;
   attendedTo: string;
 }) {
+  const viewer = useViewerLocale();
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatDateTimeShort = withViewer(formatDateTimeShortFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   if (!open) return null;
 
   return (
@@ -677,38 +685,73 @@ function MeetingsAttendedDrawer({
   );
 }
 
-export function AdminZoomInsightsParticipantsPage() {
+type ZoomParticipantsPageProps = {
+  /**
+   * The first page of participants for the match state in the address, loaded
+   * by the server over the date range it counted; the first browser load is
+   * skipped when present.
+   */
+  initialPeople?: ReportInitialDataInRange<ZoomPeopleRosterPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminZoomInsightsParticipantsPage(props: ZoomParticipantsPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialPeople?.loadedAt ?? null}>
+      <ZoomParticipantsReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ZoomParticipantsReport({ initialPeople }: ZoomParticipantsPageProps) {
+  const viewer = useViewerLocale();
+  const searchParams = useSearchParams();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialPeople ?? null);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const isStale = withViewer(isStaleFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   const router = useRouter();
   const searchId = useId();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [people, setPeople] = useState<ZoomPersonListItem[]>([]);
-  const [connection, setConnection] = useState<ZoomConnectionMeta | null>(null);
-  const [summary, setSummary] = useState<ZoomPeopleSummary | null>(null);
+  const [people, setPeople] = useState<ZoomPersonListItem[]>(initial?.data.items ?? []);
+  const [connection, setConnection] = useState<ZoomConnectionMeta | null>(
+    initial?.data.connection ?? null,
+  );
+  const [summary, setSummary] = useState<ZoomPeopleSummary | null>(initial?.data.summary ?? null);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
-  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [page, setPage] = useState<number>(ZOOM_PEOPLE_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
 
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
-  const initialRange = useMemo(() => presetToRange("30d"), []);
+  const [datePreset, setDatePreset] = useState<DatePreset>(ZOOM_PEOPLE_DEFAULTS.datePreset);
+  // The server's range when it loaded the participants, so both render the
+  // same dates even if the clocks disagree or the day turned in between.
+  const initialRange = useMemo(
+    () => initial?.range ?? zoomMeetingsPresetRange(ZOOM_PEOPLE_DEFAULTS.datePreset),
+    [initial],
+  );
   const [attendedFrom, setAttendedFrom] = useState(initialRange.from);
   const [attendedTo, setAttendedTo] = useState(initialRange.to);
   const [draftSearch, setDraftSearch] = useState("");
   const [searchQ, setSearchQ] = useState("");
-  const [matchState, setMatchState] = useState<"all" | ZoomMatchState>(() => {
-    if (typeof window === "undefined") return "all";
-    const param = new URLSearchParams(window.location.search).get("matchState");
-    return param === "matched" || param === "unmatched" || param === "guest" ? param : "all";
-  });
+  // Read from the address the same way on the server and in the browser.
+  const [matchState, setMatchState] = useState<"all" | ZoomMatchState>(() =>
+    parseZoomPeopleMatchState(searchParams.get("matchState")),
+  );
   const [meetingsFilter, setMeetingsFilter] = useState<"any" | "once" | "multi">("any");
   const [coverageFilter, setCoverageFilter] = useState<"any" | "low" | "mid" | "high">("any");
-  const [sortBy, setSortBy] = useState<SortBy>("meetings_attended");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<SortBy>(ZOOM_PEOPLE_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(ZOOM_PEOPLE_DEFAULTS.sortDir);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerKey, setDrawerKey] = useState<string | null>(null);
@@ -729,59 +772,61 @@ export function AdminZoomInsightsParticipantsPage() {
   const coverageMax =
     coverageFilter === "low" ? 39.999 : coverageFilter === "mid" ? 79.999 : undefined;
 
-  const loadPeople = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchZoomPeopleRoster({
-        q: searchQ || undefined,
-        attendedFrom: dateInputToStartIso(attendedFrom),
-        attendedTo: dateInputToEndIso(attendedTo),
-        matchState,
-        meetingsMin,
-        meetingsMax,
-        coverageMin,
-        coverageMax,
-        sortBy,
-        sortDir,
-        page,
-        limit: pageSize,
-      });
-      setPeople(response.data.items);
-      setConnection(response.data.connection);
-      setSummary(response.data.summary);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setSelectedKeys([]);
-    } catch (err) {
-      const message =
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const loadPeople = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchZoomPeopleRoster({
+          q: searchQ || undefined,
+          attendedFrom: dateInputToStartIso(attendedFrom),
+          attendedTo: dateInputToEndIso(attendedTo),
+          matchState,
+          meetingsMin,
+          meetingsMax,
+          coverageMin,
+          coverageMax,
+          sortBy,
+          sortDir,
+          page,
+          limit: pageSize,
+        });
+        setPeople(response.data.items);
+        setConnection(response.data.connection);
+        setSummary(response.data.summary);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setSelectedKeys([]);
+      } catch (err) {
+        const message =
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load participant data.";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    attendedFrom,
-    attendedTo,
-    coverageMax,
-    coverageMin,
-    matchState,
-    meetingsMax,
-    meetingsMin,
-    page,
-    pageSize,
-    searchQ,
-    sortBy,
-    sortDir,
-  ]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load participant data.";
+        setError(message);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      attendedFrom,
+      attendedTo,
+      coverageMax,
+      coverageMin,
+      matchState,
+      meetingsMax,
+      meetingsMin,
+      page,
+      pageSize,
+      searchQ,
+      sortBy,
+      sortDir,
+    ],
+  );
 
-  useEffect(() => {
-    void loadPeople();
-  }, [loadPeople]);
+  useReportLoad(loadPeople, initial);
 
   const loadDrawer = useCallback(
     async (identityKey: string) => {
@@ -820,7 +865,7 @@ export function AdminZoomInsightsParticipantsPage() {
   const applyDatePreset = (preset: DatePreset) => {
     setDatePreset(preset);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = zoomMeetingsPresetRange(preset);
     setAttendedFrom(range.from);
     setAttendedTo(range.to);
     setPage(1);

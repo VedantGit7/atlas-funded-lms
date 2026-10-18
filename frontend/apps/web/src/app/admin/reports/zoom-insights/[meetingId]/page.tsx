@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminZoomInsightsMeetingDetailPage } from "../../../../../features/admin/reports/AdminZoomInsightsMeetingDetailPage";
+import { loadZoomMeetingDetailData } from "../../../../../lib/server/report-zoom-insights-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -11,7 +12,10 @@ type PageProps = {
 
 export default async function AdminZoomInsightsMeetingDetailRoutePage({ params }: PageProps) {
   const { meetingId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initial] = await Promise.all([
+    runTenantStateGate(),
+    loadZoomMeetingDetailData(meetingId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -30,7 +34,11 @@ export default async function AdminZoomInsightsMeetingDetailRoutePage({ params }
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading meeting…</p>
         }
       >
-        <AdminZoomInsightsMeetingDetailPage meetingId={meetingId} />
+        <AdminZoomInsightsMeetingDetailPage
+          meetingId={meetingId}
+          initialDetail={initial.detail}
+          initialParticipants={initial.participants}
+        />
       </Suspense>
     </AdminPageGate>
   );

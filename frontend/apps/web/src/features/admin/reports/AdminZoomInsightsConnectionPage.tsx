@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { primaryButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   backfillZoomConnection,
   connectZoomAccount,
@@ -34,9 +35,12 @@ import {
   type ZoomSyncRunStatus,
   type ZoomSyncTrigger,
   type ZoomWebhookEvent,
+  type ZoomConnectionPayload,
 } from "./admin-zoom-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { ZoomMeetingsPanel } from "./ZoomMeetingsPanel";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type ModuleTab = "meetings" | "participants" | "unmatched" | "connection" | "exports";
 
@@ -67,26 +71,28 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return new Intl.NumberFormat().format(value);
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return new Intl.NumberFormat(viewer.locale).format(value);
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -95,11 +101,11 @@ function formatDateTime(value: string | null): string {
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "never";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "never";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${String(mins)} minute${mins === 1 ? "" : "s"} ago`;
@@ -107,7 +113,7 @@ function formatRelative(value: string | null): string {
   if (hours < 48) return `${String(hours)} hour${hours === 1 ? "" : "s"} ago`;
   const days = Math.floor(hours / 24);
   if (days < 30) return `${String(days)} day${days === 1 ? "" : "s"} ago`;
-  return formatDateShort(value);
+  return formatDateShortFor(value, viewer);
 }
 
 function formatDurationBetween(startedAt: string, finishedAt: string | null): string {
@@ -124,7 +130,7 @@ function formatDurationBetween(startedAt: string, finishedAt: string | null): st
   return `${String(hours)}h ${String(mins % 60).padStart(2, "0")}m`;
 }
 
-function formatNextRun(seconds: number | null, at: string | null): string {
+function formatNextRunFor(seconds: number | null, at: string | null, viewer: ViewerLocale): string {
   if (seconds == null && !at) return "—";
   if (seconds != null) {
     if (seconds < 60) return "in under a minute";
@@ -133,7 +139,7 @@ function formatNextRun(seconds: number | null, at: string | null): string {
     const hours = Math.floor(mins / 60);
     if (hours < 48) return `in ${String(hours)} hour${hours === 1 ? "" : "s"}`;
   }
-  return at ? formatDateTime(at) : "—";
+  return at ? formatDateTimeFor(at, viewer) : "—";
 }
 
 function formatInterval(minutes: number): string {
@@ -150,12 +156,12 @@ function truncateAppId(appId: string | null): string {
   return `••••${appId.slice(-4)}`;
 }
 
-function tokenExpiresSoon(tokenExpiresAt: string | null): boolean {
+function tokenExpiresSoonFor(tokenExpiresAt: string | null, viewer: ViewerLocale): boolean {
   if (!tokenExpiresAt) return false;
   const expires = new Date(tokenExpiresAt).getTime();
   if (Number.isNaN(expires)) return false;
   const sevenDays = 7 * 24 * 60 * 60 * 1000;
-  return expires - Date.now() < sevenDays;
+  return expires - viewer.now < sevenDays;
 }
 
 function StatusPill({
@@ -274,6 +280,8 @@ function ScheduleToggle({
 }
 
 function SyncPulseStrip({ cells }: { cells: ZoomSyncPulseCell[] }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const failedCount = cells.filter((cell) => cell.status === "failed").length;
   return (
     <div className="space-y-2">
@@ -415,6 +423,8 @@ function BackfillModal({
     skipAlreadyImported: boolean;
   }) => Promise<void>;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const titleId = useId();
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const defaultFrom = useMemo(() => {
@@ -665,6 +675,8 @@ function SyncLogModal({
   onClose: () => void;
   run: ZoomSyncRun | null;
 }) {
+  const viewer = useViewerLocale();
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const titleId = useId();
   return (
     <ModalShell open={open && run != null} title="Sync log" titleId={titleId} onClose={onClose}>
@@ -750,6 +762,10 @@ function AccountDetailsPanel({
   onCopyAccountId: () => void;
   copied: boolean;
 }) {
+  const viewer = useViewerLocale();
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const tokenExpiresSoon = withViewer(tokenExpiresSoonFor, viewer);
   const scopes = connection.scopes.length > 0 ? connection.scopes : [...REQUESTED_SCOPES];
   const expirySoon = tokenExpiresSoon(connection.tokenExpiresAt);
 
@@ -874,23 +890,54 @@ function AccountDetailsPanel({
   );
 }
 
-export function AdminZoomInsightsConnectionPage() {
-  const [loading, setLoading] = useState(true);
+type ZoomConnectionPageProps = {
+  /** The connection and its sync history, loaded by the server; the first browser load is skipped when present. */
+  initialConnection?: ReportInitialData<ZoomConnectionPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminZoomInsightsConnectionPage(props: ZoomConnectionPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialConnection?.loadedAt ?? null}>
+      <ZoomConnectionReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ZoomConnectionReport({ initialConnection }: ZoomConnectionPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatNextRun = withViewer(formatNextRunFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialConnection ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connection, setConnection] = useState<ZoomConnectionDetail | null>(null);
-  const [syncPulse, setSyncPulse] = useState<ZoomSyncPulseCell[]>([]);
-  const [syncRuns, setSyncRuns] = useState<ZoomSyncRun[]>([]);
-  const [webhookEvents, setWebhookEvents] = useState<ZoomWebhookEvent[]>([]);
-  const [lastWebhookAt, setLastWebhookAt] = useState<string | null>(null);
+  const [connection, setConnection] = useState<ZoomConnectionDetail | null>(
+    initial?.data.connection ?? null,
+  );
+  const [syncPulse, setSyncPulse] = useState<ZoomSyncPulseCell[]>(initial?.data.syncPulse ?? []);
+  const [syncRuns, setSyncRuns] = useState<ZoomSyncRun[]>(initial?.data.syncRuns ?? []);
+  const [webhookEvents, setWebhookEvents] = useState<ZoomWebhookEvent[]>(
+    initial?.data.webhookEvents ?? [],
+  );
+  const [lastWebhookAt, setLastWebhookAt] = useState<string | null>(
+    initial?.data.lastWebhookAt ?? null,
+  );
 
   const [backfillOpen, setBackfillOpen] = useState(false);
   const [disconnectOpen, setDisconnectOpen] = useState(false);
   const [logRun, setLogRun] = useState<ZoomSyncRun | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (options?: { soft?: boolean }) => {
+    const soft = options?.soft === true;
+    if (!soft) setLoading(true);
     setError(null);
     try {
       const response = await fetchZoomConnectionDetail();
@@ -909,13 +956,11 @@ export function AdminZoomInsightsConnectionPage() {
       );
       setConnection(null);
     } finally {
-      setLoading(false);
+      if (!soft) setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const neverConnected =
     connection != null &&

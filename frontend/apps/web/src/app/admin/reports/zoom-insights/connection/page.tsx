@@ -3,10 +3,14 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminZoomInsightsConnectionPage } from "../../../../../features/admin/reports/AdminZoomInsightsConnectionPage";
+import { loadZoomConnectionData } from "../../../../../lib/server/report-zoom-insights-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminZoomInsightsConnectionRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialConnection] = await Promise.all([
+    runTenantStateGate(),
+    loadZoomConnectionData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +29,7 @@ export default async function AdminZoomInsightsConnectionRoutePage() {
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading connection…</p>
         }
       >
-        <AdminZoomInsightsConnectionPage />
+        <AdminZoomInsightsConnectionPage initialConnection={initialConnection} />
       </Suspense>
     </AdminPageGate>
   );
