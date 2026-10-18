@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useId, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useId, useMemo, useState, type CSSProperties } from "react";
 import {
   AlertCircle,
   ArrowLeftRight,
@@ -16,19 +16,25 @@ import {
   dropdownItemClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
   dateInputToEndIso,
   dateInputToStartIso,
+  SUPER_LIVE_INSIGHTS_TRENDS_DEFAULTS,
   exportSuperLiveInsightsReport,
   fetchSuperLiveInsightsTrends,
+  superLiveInsightsPresetRange,
   type SuperLiveInsightsBreakDownBy,
+  type SuperLiveInsightsDatePreset,
   type SuperLiveInsightsGranularity,
   type SuperLiveInsightsTrendsData,
 } from "./admin-super-live-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { SuperLiveInsightsModuleTabs } from "./SuperLiveInsightsModuleTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
-type DatePreset = "7d" | "30d" | "90d" | "custom";
+type DatePreset = SuperLiveInsightsDatePreset;
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -50,18 +56,6 @@ function Shimmer({ className, style }: { className?: string; style?: CSSProperti
       ].join(" ")}
     />
   );
-}
-
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
 }
 
 function formatDuration(seconds: number | null | undefined): string {
@@ -86,10 +80,10 @@ function formatSignedPts(value: number | null | undefined): string {
   return `${sign}${value.toFixed(1)} pts`;
 }
 
-function formatSignedInt(value: number | null | undefined): string {
+function formatSignedInt(value: number | null | undefined, viewer: ViewerLocale): string {
   if (value == null || Number.isNaN(value)) return "";
   const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toLocaleString()}`;
+  return `${sign}${value.toLocaleString(viewer.locale)}`;
 }
 
 function formatSignedDuration(seconds: number | null | undefined): string {
@@ -117,6 +111,7 @@ function DeltaBadge({
   value: number | null | undefined;
   format: "pts" | "int" | "duration";
 }) {
+  const viewer = useViewerLocale();
   if (value == null) return null;
   const tone = deltaTone(value);
   const text =
@@ -124,7 +119,7 @@ function DeltaBadge({
       ? formatSignedPts(value)
       : format === "duration"
         ? formatSignedDuration(value)
-        : formatSignedInt(value);
+        : formatSignedInt(value, viewer);
   const color =
     tone === "success"
       ? "text-[var(--admin-success)]"
@@ -168,61 +163,86 @@ function MiniSparkline({ values }: { values: Array<number | null> }) {
   );
 }
 
-export function AdminSuperLiveInsightsTrendsPage() {
+export function AdminSuperLiveInsightsTrendsPage({
+  initialTrends,
+}: {
+  /**
+   * The trends for the default view, loaded by the server over the date range
+   * it counted; the first browser load is skipped when present.
+   */
+  initialTrends?: ReportInitialDataInRange<SuperLiveInsightsTrendsData> | null;
+} = {}) {
   const datePresetLabelId = useId();
   const breakDownLabelId = useId();
-  const initial = presetToRange("30d");
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialData] = useState(() => initialTrends ?? null);
+  // The server's range when it loaded the trends, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const [initial] = useState(
+    () =>
+      initialData?.range ??
+      superLiveInsightsPresetRange(SUPER_LIVE_INSIGHTS_TRENDS_DEFAULTS.datePreset),
+  );
+  const [datePreset, setDatePreset] = useState<DatePreset>(
+    SUPER_LIVE_INSIGHTS_TRENDS_DEFAULTS.datePreset,
+  );
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [breakDownOpen, setBreakDownOpen] = useState(false);
   const [startedFrom, setStartedFrom] = useState(initial.from);
   const [startedTo, setStartedTo] = useState(initial.to);
-  const [granularity, setGranularity] = useState<SuperLiveInsightsGranularity>("week");
-  const [breakDownBy, setBreakDownBy] = useState<SuperLiveInsightsBreakDownBy>("none");
-  const [loading, setLoading] = useState(true);
+  const [granularity, setGranularity] = useState<SuperLiveInsightsGranularity>(
+    SUPER_LIVE_INSIGHTS_TRENDS_DEFAULTS.granularity,
+  );
+  const [breakDownBy, setBreakDownBy] = useState<SuperLiveInsightsBreakDownBy>(
+    SUPER_LIVE_INSIGHTS_TRENDS_DEFAULTS.breakDownBy,
+  );
+  const [loading, setLoading] = useState(initialData === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<SuperLiveInsightsTrendsData | null>(null);
+  const [data, setData] = useState<SuperLiveInsightsTrendsData | null>(initialData?.data ?? null);
 
   const applyPreset = useCallback((preset: DatePreset) => {
     setDatePreset(preset);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = superLiveInsightsPresetRange(preset);
     setStartedFrom(range.from);
     setStartedTo(range.to);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const fromIso = dateInputToStartIso(startedFrom);
-      const toIso = dateInputToEndIso(startedTo);
-      if (!fromIso || !toIso) throw new Error("Select a valid date range.");
-      const response = await fetchSuperLiveInsightsTrends({
-        startedFrom: fromIso,
-        startedTo: toIso,
-        granularity,
-        breakDownBy,
-      });
-      setData(response.data);
-    } catch (err) {
-      const message =
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const fromIso = dateInputToStartIso(startedFrom);
+        const toIso = dateInputToEndIso(startedTo);
+        if (!fromIso || !toIso) throw new Error("Select a valid date range.");
+        const response = await fetchSuperLiveInsightsTrends({
+          startedFrom: fromIso,
+          startedTo: toIso,
+          granularity,
+          breakDownBy,
+        });
+        setData(response.data);
+      } catch (err) {
+        const message =
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load live session insights.";
-      setError(message);
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [breakDownBy, granularity, startedFrom, startedTo]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load live session insights.";
+        setError(message);
+        setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [breakDownBy, granularity, startedFrom, startedTo],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initialData);
 
   const handleExport = useCallback(async () => {
     setBusy(true);
@@ -526,7 +546,7 @@ export function AdminSuperLiveInsightsTrendsPage() {
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="font-mono text-2xl leading-tight text-[var(--admin-on-surface)]">
-                  {data.summary.sessionCount.toLocaleString()}
+                  {data.summary.sessionCount.toLocaleString(viewer.locale)}
                 </span>
                 <DeltaBadge value={data.summary.sessionCountDelta} format="int" />
               </div>
@@ -537,7 +557,7 @@ export function AdminSuperLiveInsightsTrendsPage() {
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="font-mono text-2xl leading-tight text-[var(--admin-on-surface)]">
-                  {data.summary.totalAttended.toLocaleString()}
+                  {data.summary.totalAttended.toLocaleString(viewer.locale)}
                 </span>
                 <DeltaBadge value={data.summary.totalAttendedDelta} format="int" />
               </div>

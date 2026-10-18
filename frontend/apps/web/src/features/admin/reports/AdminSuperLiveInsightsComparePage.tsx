@@ -19,9 +19,11 @@ import {
   dropdownItemClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchSuperLiveInsightsCompare,
   fetchSuperLiveInsightsCompareCandidates,
+  parseSuperLiveInsightsCompareAddress,
   type SuperLiveInsightsCompareCandidate,
   type SuperLiveInsightsCompareData,
   type SuperLiveInsightsCompareItem,
@@ -29,6 +31,8 @@ import {
   type SuperLiveInsightsSeriesKind,
 } from "./admin-super-live-insights-roster-api";
 import { SuperLiveInsightsModuleTabs } from "./SuperLiveInsightsModuleTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
 
 const secondaryButtonClassName =
@@ -105,16 +109,22 @@ function formatRate(value: number | null | undefined): string {
   return `${value.toFixed(1)}%`;
 }
 
-function formatCount(value: number | null | undefined): string {
+/** `locale` defaults to the viewer's (the CSV); the page passes its own while hydrating. */
+function formatCount(value: number | null | undefined, locale?: string): string {
   if (value == null || Number.isNaN(value)) return "-";
-  return value.toLocaleString();
+  return value.toLocaleString(locale);
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: viewer.timeZone,
+  });
 }
 
 function swatch(colorIndex: number): string {
@@ -153,7 +163,7 @@ function metricValue(item: SuperLiveInsightsCompareItem, key: MetricKey): number
   }
 }
 
-function formatMetric(key: MetricKey, value: number | string | null): string {
+function formatMetric(key: MetricKey, value: number | string | null, locale?: string): string {
   if (value == null) return "-";
   if (typeof value === "string") return value;
   if (key === "attendanceRate" || key === "coveragePct") {
@@ -166,7 +176,7 @@ function formatMetric(key: MetricKey, value: number | string | null): string {
   ) {
     return formatDuration(value);
   }
-  return formatCount(value);
+  return formatCount(value, locale);
 }
 
 function numericForBest(key: MetricKey, value: number | string | null): number | null {
@@ -176,34 +186,45 @@ function numericForBest(key: MetricKey, value: number | string | null): number |
   return value;
 }
 
-function parseIds(raw: string | null): string[] {
-  if (!raw) return [];
-  return [
-    ...new Set(
-      raw
-        .split(",")
-        .map((part) => part.trim())
-        .filter(Boolean),
-    ),
-  ].slice(0, 4);
+function sameIds(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
 }
 
-export function AdminSuperLiveInsightsComparePage() {
+type SelectedMeta = Record<
+  string,
+  { title: string; subtitle: string | null; scheduledAt: string | null }
+>;
+
+function metaFromItems(items: SuperLiveInsightsCompareItem[]): SelectedMeta {
+  const meta: SelectedMeta = {};
+  for (const item of items) {
+    meta[item.id] = { title: item.title, subtitle: item.subtitle, scheduledAt: item.scheduledAt };
+  }
+  return meta;
+}
+
+export function AdminSuperLiveInsightsComparePage({
+  initialCompare,
+}: {
+  /** The comparison the address names, loaded by the server; the first browser load is skipped when present. */
+  initialCompare?: ReportInitialData<SuperLiveInsightsCompareData> | null;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const metricsLabelId = useId();
   const addLabelId = useId();
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialCompare ?? null);
 
-  const initialMode = searchParams.get("mode") === "series" ? "series" : "sessions";
-  const initialKind = searchParams.get("seriesKind") === "batch" ? "batch" : "course";
-  const initialIds = parseIds(searchParams.get("ids"));
+  const address = parseSuperLiveInsightsCompareAddress((name) => searchParams.get(name));
 
-  const [mode, setMode] = useState<SuperLiveInsightsCompareMode>(initialMode);
-  const [seriesKind, setSeriesKind] = useState<SuperLiveInsightsSeriesKind>(initialKind);
-  const [selectedIds, setSelectedIds] = useState<string[]>(initialIds);
-  const [selectedMeta, setSelectedMeta] = useState<
-    Record<string, { title: string; subtitle: string | null; scheduledAt: string | null }>
-  >({});
+  const [mode, setMode] = useState<SuperLiveInsightsCompareMode>(address.mode);
+  const [seriesKind, setSeriesKind] = useState<SuperLiveInsightsSeriesKind>(address.seriesKind);
+  const [selectedIds, setSelectedIds] = useState<string[]>(address.ids);
+  const [selectedMeta, setSelectedMeta] = useState<SelectedMeta>(() =>
+    initial ? metaFromItems(initial.data.items) : {},
+  );
   const [visibleMetrics, setVisibleMetrics] = useState<Set<MetricKey>>(
     () => new Set(METRIC_OPTIONS.map((m) => m.key)),
   );
@@ -214,7 +235,7 @@ export function AdminSuperLiveInsightsComparePage() {
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<SuperLiveInsightsCompareData | null>(null);
+  const [data, setData] = useState<SuperLiveInsightsCompareData | null>(initial?.data ?? null);
   const [savedFlash, setSavedFlash] = useState(false);
 
   const syncUrl = useCallback(
@@ -233,58 +254,50 @@ export function AdminSuperLiveInsightsComparePage() {
   );
 
   useEffect(() => {
-    const ids = parseIds(searchParams.get("ids"));
-    const nextMode = searchParams.get("mode") === "series" ? "series" : "sessions";
-    const nextKind = searchParams.get("seriesKind") === "batch" ? "batch" : "course";
-    setSelectedIds(ids);
-    setMode(nextMode);
-    setSeriesKind(nextKind);
+    const next = parseSuperLiveInsightsCompareAddress((name) => searchParams.get(name));
+    // Keep the same list when the ids did not change, so the comparison is not
+    // loaded again for an address that names the same sessions.
+    setSelectedIds((current) => (sameIds(current, next.ids) ? current : next.ids));
+    setMode(next.mode);
+    setSeriesKind(next.seriesKind);
   }, [searchParams]);
 
-  const loadCompare = useCallback(async () => {
-    if (selectedIds.length < 2) {
-      setData(null);
-      setLoading(false);
+  const loadCompare = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (selectedIds.length < 2) {
+        setData(null);
+        setLoading(false);
+        setError(null);
+        return;
+      }
+      if (!soft) setLoading(true);
       setError(null);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchSuperLiveInsightsCompare({
-        mode,
-        ids: selectedIds,
-        ...(mode === "series" ? { seriesKind } : {}),
-      });
-      setData(response.data);
-      setSelectedMeta((prev) => {
-        const next = { ...prev };
-        for (const item of response.data.items) {
-          next[item.id] = {
-            title: item.title,
-            subtitle: item.subtitle,
-            scheduledAt: item.scheduledAt,
-          };
-        }
-        return next;
-      });
-    } catch (err) {
-      setData(null);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+      try {
+        const response = await fetchSuperLiveInsightsCompare({
+          mode,
+          ids: selectedIds,
+          ...(mode === "series" ? { seriesKind } : {}),
+        });
+        setData(response.data);
+        setSelectedMeta((prev) => ({ ...prev, ...metaFromItems(response.data.items) }));
+      } catch (err) {
+        setData(null);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load comparison.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [mode, selectedIds, seriesKind]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load comparison.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [mode, selectedIds, seriesKind],
+  );
 
-  useEffect(() => {
-    void loadCompare();
-  }, [loadCompare]);
+  useReportLoad(loadCompare, initial);
 
   const loadCandidates = useCallback(async () => {
     setLoadingCandidates(true);
@@ -529,13 +542,13 @@ export function AdminSuperLiveInsightsComparePage() {
                   {meta.title}
                 </span>
                 <span className="truncate text-[10px] text-[var(--admin-on-surface-variant)]">
-                  {meta.subtitle ?? formatDate(meta.scheduledAt)}
+                  {meta.subtitle ?? formatDate(meta.scheduledAt, viewer)}
                 </span>
               </div>
               <div className="flex items-center gap-1 px-2">
                 {mode === "sessions" ? (
                   <span className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                    {formatDate(meta.scheduledAt)}
+                    {formatDate(meta.scheduledAt, viewer)}
                   </span>
                 ) : null}
                 <button
@@ -617,7 +630,7 @@ export function AdminSuperLiveInsightsComparePage() {
                                 {candidate.subtitle ??
                                   (candidate.sessionCount != null
                                     ? `${candidate.sessionCount} sessions`
-                                    : formatDate(candidate.scheduledAt))}
+                                    : formatDate(candidate.scheduledAt, viewer))}
                               </span>
                             </span>
                             <span className="shrink-0 font-mono text-xs text-[var(--admin-on-surface-variant)]">
@@ -822,7 +835,9 @@ export function AdminSuperLiveInsightsComparePage() {
                               </div>
                               <div className="mt-1 flex justify-between font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                                 <span>{formatRate(item.metrics.attendanceRate)}</span>
-                                <span>{formatCount(item.composition.totalCount)} total</span>
+                                <span>
+                                  {formatCount(item.composition.totalCount, viewer.locale)} total
+                                </span>
                               </div>
                             </div>
                           );
@@ -936,7 +951,7 @@ export function AdminSuperLiveInsightsComparePage() {
                               {item.title}
                             </p>
                             <span className="font-mono text-xl text-[var(--admin-on-surface)]">
-                              {formatMetric(option.key, value)}
+                              {formatMetric(option.key, value, viewer.locale)}
                             </span>
                             {mode === "series" && item.metrics.sessionsHeld != null ? (
                               <span className="mt-0.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -958,7 +973,7 @@ export function AdminSuperLiveInsightsComparePage() {
                                   ? formatDuration(delta)
                                   : option.key === "attendanceRate" || option.key === "coveragePct"
                                     ? `${delta.toFixed(1)} pts`
-                                    : delta.toLocaleString()}{" "}
+                                    : delta.toLocaleString(viewer.locale)}{" "}
                                 vs left
                               </span>
                             ) : null}

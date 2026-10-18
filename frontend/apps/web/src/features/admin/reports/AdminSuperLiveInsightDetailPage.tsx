@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import {
   AlertCircle,
   AlertTriangle,
@@ -18,13 +18,17 @@ import {
 } from "lucide-react";
 import { primaryButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   exportSuperLiveInsightsReport,
   fetchSuperLiveInsightDetail,
   type SuperLiveInsightContext,
+  type SuperLiveInsightDetail,
   type SuperLiveInsightItem,
 } from "./admin-super-live-insights-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -44,44 +48,48 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatDate(value: string | null): string {
+function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShort(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: viewer.timeZone,
   });
 }
 
-function formatTimeRange(start: string | null, end: string | null): string {
+function formatTimeRange(start: string | null, end: string | null, viewer: ViewerLocale): string {
   if (!start) return "-";
   const startDate = new Date(start);
   if (Number.isNaN(startDate.getTime())) return "-";
-  const startLabel = startDate.toLocaleTimeString(undefined, {
+  const startLabel = startDate.toLocaleTimeString(viewer.locale, {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   });
   if (!end) return startLabel;
   const endDate = new Date(end);
   if (Number.isNaN(endDate.getTime())) return startLabel;
-  return `${startLabel} - ${endDate.toLocaleTimeString(undefined, {
+  return `${startLabel} - ${endDate.toLocaleTimeString(viewer.locale, {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: viewer.timeZone,
   })}`;
 }
 
@@ -101,8 +109,8 @@ function formatRate(value: number | null | undefined): string {
   return `${value.toFixed(1)}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function sharePct(part: number, total: number): number {
@@ -285,37 +293,54 @@ function ComparisonAxis({
   );
 }
 
-export function AdminSuperLiveInsightDetailPage({ sessionId }: { sessionId: string }) {
+export function AdminSuperLiveInsightDetailPage({
+  sessionId,
+  initialDetail,
+}: {
+  sessionId: string;
+  /** The session and its context, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<SuperLiveInsightDetail> | null;
+}) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const viewer = useViewerLocale();
+  const formatCount = (value: number) => formatCountFor(value, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [session, setSession] = useState<SuperLiveInsightItem | null>(null);
-  const [context, setContext] = useState<SuperLiveInsightContext | null>(null);
+  const [session, setSession] = useState<SuperLiveInsightItem | null>(
+    initial?.data.session ?? null,
+  );
+  const [context, setContext] = useState<SuperLiveInsightContext | null>(
+    initial?.data.context ?? null,
+  );
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchSuperLiveInsightDetail(sessionId);
-      setSession(response.data.session);
-      setContext(response.data.context);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchSuperLiveInsightDetail(sessionId);
+        setSession(response.data.session);
+        setContext(response.data.context);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load session details.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [sessionId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load session details.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [sessionId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleExport() {
     setBusy(true);
@@ -433,7 +458,7 @@ export function AdminSuperLiveInsightDetailPage({ sessionId }: { sessionId: stri
               <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>
                 This session was cancelled
-                {context.cancelledAt ? ` on ${formatDateShort(context.cancelledAt)}` : ""}
+                {context.cancelledAt ? ` on ${formatDateShort(context.cancelledAt, viewer)}` : ""}
               </span>
             </div>
           ) : null}
@@ -460,7 +485,7 @@ export function AdminSuperLiveInsightDetailPage({ sessionId }: { sessionId: stri
                 {session.scheduledAt ? (
                   <span className="inline-flex items-center gap-1 rounded-md bg-[var(--admin-surface-high)] px-2 py-1">
                     <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-                    {formatDate(session.scheduledAt)}
+                    {formatDate(session.scheduledAt, viewer)}
                   </span>
                 ) : null}
               </div>
@@ -852,10 +877,11 @@ export function AdminSuperLiveInsightDetailPage({ sessionId }: { sessionId: stri
                           {formatTimeRange(
                             session.scheduledAt,
                             session.endedAt ?? session.startedAt,
+                            viewer,
                           )}
                         </div>
                         <div className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-                          {formatDateShort(session.scheduledAt)}
+                          {formatDateShort(session.scheduledAt, viewer)}
                         </div>
                         {startDelayMinutes != null && startDelayMinutes > 5 ? (
                           <p className="mt-2 text-xs text-[var(--admin-warning)]">
@@ -868,7 +894,7 @@ export function AdminSuperLiveInsightDetailPage({ sessionId }: { sessionId: stri
                           Actual
                         </h3>
                         <div className="font-mono text-sm text-[var(--admin-on-surface)]">
-                          {formatTimeRange(session.startedAt, session.endedAt)}
+                          {formatTimeRange(session.startedAt, session.endedAt, viewer)}
                         </div>
                         <div className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                           {formatDuration(session.durationSeconds)} elapsed
