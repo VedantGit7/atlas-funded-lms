@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type DevicePolicyOnLimit = "block" | "sign_out_oldest" | "allow_and_alert";
@@ -59,13 +57,15 @@ export type DevicePolicyTarget = {
   secondary: string | null;
 };
 
+export const DEVICE_POLICIES_PATH = "/api/v1/reports/active-devices/policies";
+
 export async function fetchDevicePolicies() {
-  return clientApi.get<{ data: DevicePoliciesPayload }>("/api/v1/reports/active-devices/policies");
+  return clientApi.get<{ data: DevicePoliciesPayload }>(DEVICE_POLICIES_PATH);
 }
 
 export async function updateDevicePolicies(body: DevicePolicyTenantDefaults) {
   return clientApi.patch<{ data: DevicePoliciesPayload }>(
-    "/api/v1/reports/active-devices/policies",
+    DEVICE_POLICIES_PATH,
     body,
     "active-devices-policies-update",
     { successMessage: "Device policies saved." },

@@ -218,15 +218,23 @@ export async function fetchActiveDevicesOverview(filters: ActiveDevicesOverviewF
   return clientApi.get<{ data: ActiveDevicesOverview }>(activeDevicesOverviewPath(filters));
 }
 
+export function activeDevicesLearnerDetailPath(membershipId: string): string {
+  return `/api/v1/reports/active-devices/roster/${encodeURIComponent(membershipId)}`;
+}
+
+export function activeDevicesSessionDetailPath(membershipId: string, deviceId: string): string {
+  return `/api/v1/reports/active-devices/roster/${encodeURIComponent(membershipId)}/${encodeURIComponent(deviceId)}`;
+}
+
 export async function fetchActiveDevicesLearnerDetail(membershipId: string) {
   return clientApi.get<{ data: ActiveDevicesLearnerDetail }>(
-    `/api/v1/reports/active-devices/roster/${membershipId}`,
+    activeDevicesLearnerDetailPath(membershipId),
   );
 }
 
 export async function fetchActiveDevicesSessionDetail(membershipId: string, deviceId: string) {
   return clientApi.get<{ data: ActiveDevicesSessionDetail }>(
-    `/api/v1/reports/active-devices/roster/${membershipId}/${deviceId}`,
+    activeDevicesSessionDetailPath(membershipId, deviceId),
   );
 }
 

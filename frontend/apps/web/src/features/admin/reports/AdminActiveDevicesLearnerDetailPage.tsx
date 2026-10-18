@@ -25,6 +25,7 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import { dropdownItemClassName } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   deleteActiveDevices,
   fetchActiveDevicesLearnerDetail,
@@ -35,9 +36,13 @@ import {
 } from "./admin-active-devices-roster-api";
 import { AdminActiveDevicesSessionDetailPage } from "./AdminActiveDevicesSessionDetailPage";
 import { RevokeDeviceModal } from "./RevokeDeviceModal";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type AdminActiveDevicesLearnerDetailPageProps = {
   membershipId: string;
+  /** The learner's devices, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<ActiveDevicesLearnerDetail> | null;
 };
 
 function learnerInitials(name: string | null, email: string | null): string {
@@ -47,22 +52,23 @@ function learnerInitials(name: string | null, email: string | null): string {
   return `${source[0]?.[0] ?? ""}${source[1]?.[0] ?? ""}`.toUpperCase();
 }
 
-function formatAbsolute(value: string | null): string {
+function formatAbsoluteFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"} ago`;
@@ -254,14 +260,34 @@ function DetailLoadingSkeleton() {
   );
 }
 
-export function AdminActiveDevicesLearnerDetailPage({
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminActiveDevicesLearnerDetailPage(
+  props: AdminActiveDevicesLearnerDetailPageProps,
+) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <LearnerDevicesReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function LearnerDevicesReport({
   membershipId,
+  initialDetail,
 }: AdminActiveDevicesLearnerDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const menuBaseId = useId();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  const [detail, setDetail] = useState<ActiveDevicesLearnerDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<ActiveDevicesLearnerDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -272,26 +298,28 @@ export function AdminActiveDevicesLearnerDetailPage({
   const [drawerDeviceId, setDrawerDeviceId] = useState<string | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<ActiveDevicesDetailDevice | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchActiveDevicesLearnerDetail(membershipId);
-      setDetail(response.data);
-      setSelectedIds(new Set());
-    } catch (err) {
-      const message =
-        err instanceof ClientApiError ? err.message : "Unable to load learner device detail.";
-      setError(message);
-      setDetail(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [membershipId]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchActiveDevicesLearnerDetail(membershipId);
+        setDetail(response.data);
+        setSelectedIds(new Set());
+      } catch (err) {
+        const message =
+          err instanceof ClientApiError ? err.message : "Unable to load learner device detail.";
+        setError(message);
+        setDetail(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [membershipId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (!menuDeviceId) return;

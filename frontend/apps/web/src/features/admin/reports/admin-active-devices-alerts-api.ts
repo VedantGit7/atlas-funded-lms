@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type DeviceAlertType =
@@ -94,21 +92,32 @@ function buildQuery(filters: DeviceAlertsFilters): string {
   return query ? `?${query}` : "";
 }
 
+export type DeviceAlertsPayload = {
+  items: DeviceAlertListItem[];
+  summary: DeviceAlertsSummary;
+  pageInfo: {
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+};
+
+/** What the alerts page opens on; the server loads the first page with it too. */
+export const DEVICE_ALERTS_DEFAULTS = {
+  status: "open",
+  page: 1,
+  limit: 50,
+} as const satisfies DeviceAlertsFilters;
+
+export function deviceAlertsPath(filters: DeviceAlertsFilters = {}): string {
+  return `/api/v1/reports/active-devices/alerts${buildQuery(filters)}`;
+}
+
 export async function fetchDeviceAlerts(filters: DeviceAlertsFilters = {}) {
-  return clientApi.get<{
-    data: {
-      items: DeviceAlertListItem[];
-      summary: DeviceAlertsSummary;
-      pageInfo: {
-        page: number;
-        pageSize: number;
-        totalCount: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-      };
-    };
-  }>(`/api/v1/reports/active-devices/alerts${buildQuery(filters)}`);
+  return clientApi.get<{ data: DeviceAlertsPayload }>(deviceAlertsPath(filters));
 }
 
 export async function fetchDeviceAlertDetail(alertId: string) {

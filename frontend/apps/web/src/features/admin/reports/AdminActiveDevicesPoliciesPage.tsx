@@ -24,7 +24,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { ActiveDevicesReportTabs } from "./ActiveDevicesReportTabs";
+import { useReportLoad } from "./use-report-load";
 import {
   createBlockedFingerprint,
   createDevicePolicyOverride,
@@ -662,15 +664,30 @@ function AddBlockModal({
   );
 }
 
-export function AdminActiveDevicesPoliciesPage() {
-  const [loading, setLoading] = useState(true);
+export function AdminActiveDevicesPoliciesPage({
+  initialPolicies,
+}: {
+  /** The policies, loaded by the server; the first browser load is skipped when present. */
+  initialPolicies?: ReportInitialData<DevicePoliciesPayload> | null;
+} = {}) {
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialPolicies ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [capabilitiesNote, setCapabilitiesNote] = useState("");
-  const [draft, setDraft] = useState<DevicePolicyTenantDefaults | null>(null);
-  const [saved, setSaved] = useState<DevicePolicyTenantDefaults | null>(null);
-  const [overrides, setOverrides] = useState<DevicePolicyOverride[]>([]);
-  const [blocked, setBlocked] = useState<DeviceBlockedFingerprint[]>([]);
+  const [capabilitiesNote, setCapabilitiesNote] = useState(
+    initial?.data.capabilities.enforcementNote ?? "",
+  );
+  const [draft, setDraft] = useState<DevicePolicyTenantDefaults | null>(() =>
+    initial ? cloneDefaults(initial.data.tenantDefaults) : null,
+  );
+  const [saved, setSaved] = useState<DevicePolicyTenantDefaults | null>(() =>
+    initial ? cloneDefaults(initial.data.tenantDefaults) : null,
+  );
+  const [overrides, setOverrides] = useState<DevicePolicyOverride[]>(initial?.data.overrides ?? []);
+  const [blocked, setBlocked] = useState<DeviceBlockedFingerprint[]>(
+    initial?.data.blockedFingerprints ?? [],
+  );
   const [blockFilter, setBlockFilter] = useState("");
   const [showBlockFilter, setShowBlockFilter] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -694,24 +711,26 @@ export function AdminActiveDevicesPoliciesPage() {
     setCapabilitiesNote(payload.capabilities.enforcementNote);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchDevicePolicies();
-      applyPayload(response.data);
-    } catch (caught) {
-      setError(
-        caught instanceof ClientApiError ? caught.message : "Could not load device policies.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [applyPayload]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchDevicePolicies();
+        applyPayload(response.data);
+      } catch (caught) {
+        setError(
+          caught instanceof ClientApiError ? caught.message : "Could not load device policies.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [applyPayload],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     function onBeforeUnload(event: BeforeUnloadEvent) {
