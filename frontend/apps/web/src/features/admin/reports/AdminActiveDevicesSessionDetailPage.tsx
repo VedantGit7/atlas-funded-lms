@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ChevronRight,
@@ -25,12 +25,15 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import { inlineExpandClassName } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   deleteActiveDevices,
   fetchActiveDevicesSessionDetail,
   type ActiveDevicesSessionDetail,
 } from "./admin-active-devices-roster-api";
 import { RevokeDeviceModal } from "./RevokeDeviceModal";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type AdminActiveDevicesSessionDetailPageProps = {
   membershipId: string;
@@ -38,6 +41,8 @@ type AdminActiveDevicesSessionDetailPageProps = {
   /** When true, render as a slide-over drawer (used from learner detail). */
   asDrawer?: boolean;
   onCloseDrawer?: () => void;
+  /** The session, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<ActiveDevicesSessionDetail> | null;
 };
 
 function formatUtc(value: string | null): string {
@@ -50,11 +55,11 @@ function formatUtc(value: string | null): string {
     .replace(/\.\d{3}Z$/, "Z");
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${mins} min${mins === 1 ? "" : "s"} ago`;
@@ -132,39 +137,60 @@ function SessionLoadingSkeleton({ asDrawer }: { asDrawer?: boolean }) {
   );
 }
 
-export function AdminActiveDevicesSessionDetailPage({
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminActiveDevicesSessionDetailPage(
+  props: AdminActiveDevicesSessionDetailPageProps,
+) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <DeviceSessionReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function DeviceSessionReport({
   membershipId,
   deviceId,
   asDrawer = false,
   onCloseDrawer,
+  initialDetail,
 }: AdminActiveDevicesSessionDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const router = useRouter();
-  const [detail, setDetail] = useState<ActiveDevicesSessionDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<ActiveDevicesSessionDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [copied, setCopied] = useState<"id" | "hash" | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchActiveDevicesSessionDetail(membershipId, deviceId);
-      setDetail(response.data);
-    } catch (err) {
-      setDetail(null);
-      setError(
-        err instanceof ClientApiError ? err.message : "Unable to load device session detail.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [deviceId, membershipId]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchActiveDevicesSessionDetail(membershipId, deviceId);
+        setDetail(response.data);
+      } catch (err) {
+        setDetail(null);
+        setError(
+          err instanceof ClientApiError ? err.message : "Unable to load device session detail.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [deviceId, membershipId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const learnerLabel = useMemo(() => detail?.learnerName ?? detail?.email ?? "Learner", [detail]);
 

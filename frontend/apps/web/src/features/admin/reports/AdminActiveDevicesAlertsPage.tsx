@@ -30,32 +30,37 @@ import {
   inlineExpandClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { deleteActiveDevices } from "./admin-active-devices-roster-api";
 import {
   addDeviceAlertNote,
   dismissDeviceAlerts,
   fetchDeviceAlertDetail,
+  DEVICE_ALERTS_DEFAULTS,
   fetchDeviceAlerts,
   resolveDeviceAlerts,
   type DeviceAlertDetail,
   type DeviceAlertListItem,
+  type DeviceAlertsPayload,
   type DeviceAlertStatus,
   type DeviceAlertType,
   type DeviceAlertsSummary,
 } from "./admin-active-devices-alerts-api";
 import { ActiveDevicesReportTabs } from "./ActiveDevicesReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = DEVICE_ALERTS_DEFAULTS.limit;
 
 type TriageFilter =
   | { kind: "status"; status: DeviceAlertStatus }
   | { kind: "type"; type: DeviceAlertType; status: "open" };
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${mins}m ago`;
@@ -102,17 +107,41 @@ function typeLabel(type: DeviceAlertType): string {
   return "Shared fingerprint";
 }
 
-export function AdminActiveDevicesAlertsPage() {
+type DeviceAlertsPageProps = {
+  /** The first page of open alerts, loaded by the server; the first browser load is skipped when present. */
+  initialAlerts?: ReportInitialData<DeviceAlertsPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminActiveDevicesAlertsPage(props: DeviceAlertsPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialAlerts?.loadedAt ?? null}>
+      <DeviceAlertsReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function DeviceAlertsReport({ initialAlerts }: DeviceAlertsPageProps) {
+  const viewer = useViewerLocale();
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const menuBaseId = useId();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  const [triage, setTriage] = useState<TriageFilter>({ kind: "status", status: "open" });
-  const [page, setPage] = useState(1);
-  const [items, setItems] = useState<DeviceAlertListItem[]>([]);
-  const [summary, setSummary] = useState<DeviceAlertsSummary | null>(null);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialAlerts ?? null);
+  const [triage, setTriage] = useState<TriageFilter>({
+    kind: "status",
+    status: DEVICE_ALERTS_DEFAULTS.status,
+  });
+  const [page, setPage] = useState<number>(DEVICE_ALERTS_DEFAULTS.page);
+  const [items, setItems] = useState<DeviceAlertListItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<DeviceAlertsSummary | null>(initial?.data.summary ?? null);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -129,27 +158,29 @@ export function AdminActiveDevicesAlertsPage() {
     return { status: triage.status, page, limit: PAGE_SIZE };
   }, [page, triage]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchDeviceAlerts(filters);
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setSelectedIds(new Set());
-    } catch (err) {
-      setItems([]);
-      setError(err instanceof ClientApiError ? err.message : "Unable to load device alerts.");
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchDeviceAlerts(filters);
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setSelectedIds(new Set());
+      } catch (err) {
+        setItems([]);
+        setError(err instanceof ClientApiError ? err.message : "Unable to load device alerts.");
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [filters],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (!drawerAlertId) {

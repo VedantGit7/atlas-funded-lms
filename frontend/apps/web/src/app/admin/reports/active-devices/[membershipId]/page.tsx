@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminActiveDevicesLearnerDetailPage } from "../../../../../features/admin/reports/AdminActiveDevicesLearnerDetailPage";
+import { loadActiveDevicesLearnerData } from "../../../../../lib/server/report-active-devices-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -10,7 +11,10 @@ type PageProps = {
 
 export default async function AdminActiveDevicesLearnerPage({ params }: PageProps) {
   const { membershipId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initialDetail] = await Promise.all([
+    runTenantStateGate(),
+    loadActiveDevicesLearnerData(membershipId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -24,7 +28,10 @@ export default async function AdminActiveDevicesLearnerPage({ params }: PageProp
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Learner devices">
-      <AdminActiveDevicesLearnerDetailPage membershipId={membershipId} />
+      <AdminActiveDevicesLearnerDetailPage
+        membershipId={membershipId}
+        initialDetail={initialDetail}
+      />
     </AdminPageGate>
   );
 }
