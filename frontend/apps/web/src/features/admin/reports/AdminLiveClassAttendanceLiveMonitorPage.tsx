@@ -25,11 +25,14 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchLiveClassSessionLiveMonitor,
   sendLiveClassAttendanceMessage,
   type LiveClassSessionLiveMonitor,
 } from "./admin-live-class-attendance-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 const POLL_INTERVAL_MS = 2500;
 
@@ -65,11 +68,16 @@ function formatDuration(seconds: number | null | undefined): string {
   return `${String(secs)}s`;
 }
 
-function formatClock(value: string | null | undefined): string {
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
+}
+
+function formatClockFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -638,6 +646,9 @@ function PresentModeView({
   elapsedDisplay: number | null;
   onExit: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatClock = withViewer(formatClockFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   const live = !data.frozen && isLiveStatus(data.status);
   const chartClipId = useId();
 
@@ -708,10 +719,10 @@ function PresentModeView({
             </span>
             <div className="flex items-baseline gap-3">
               <span className="font-mono text-5xl font-bold leading-none text-[var(--admin-primary)] md:text-[64px]">
-                {data.turnout.joinedCount.toLocaleString()}
+                {formatCount(data.turnout.joinedCount)}
               </span>
               <span className="font-mono text-sm text-[var(--admin-on-surface-variant)]">
-                / {data.turnout.registeredCount.toLocaleString()}
+                / {formatCount(data.turnout.registeredCount)}
               </span>
             </div>
             {data.turnout.ratePct != null ? (
@@ -770,18 +781,36 @@ function PresentModeView({
   );
 }
 
-export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { sessionId: string }) {
+export function AdminLiveClassAttendanceLiveMonitorPage({
+  sessionId,
+  initialSnapshot,
+}: {
+  sessionId: string;
+  /** The first snapshot, loaded by the server; the first browser load is skipped when present. */
+  initialSnapshot?: ReportInitialData<LiveClassSessionLiveMonitor> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatClock = withViewer(formatClockFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const presentMode = searchParams.get("present") === "1";
 
-  const [data, setData] = useState<LiveClassSessionLiveMonitor | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSnapshot ?? null);
+  const [data, setData] = useState<LiveClassSessionLiveMonitor | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedMembershipIds, setSelectedMembershipIds] = useState<Set<string>>(new Set());
   const [presenceSearch, setPresenceSearch] = useState("");
-  const [tickNow, setTickNow] = useState(() => Date.now());
+  // A server snapshot's own "now" until the clock ticks, so both renders count
+  // "… ago" from the same moment.
+  const [tickNow, setTickNow] = useState(() => {
+    if (!initial) return Date.now();
+    const serverMs = new Date(initial.data.serverNow).getTime();
+    return Number.isNaN(serverMs) ? initial.loadedAt : serverMs;
+  });
   const [remindOpen, setRemindOpen] = useState(false);
   const [remindIds, setRemindIds] = useState<string[]>([]);
   const [remindSubject, setRemindSubject] = useState("");
@@ -822,11 +851,12 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
   }, []);
 
   const load = useCallback(
-    async (opts?: { quiet?: boolean }) => {
+    async (opts?: { quiet?: boolean; soft?: boolean }) => {
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
-      if (!opts?.quiet) setLoading(true);
+      const quiet = opts?.quiet === true || opts?.soft === true;
+      if (!quiet) setLoading(true);
       else setRefreshing(true);
       try {
         const response = await fetchLiveClassSessionLiveMonitor(sessionId);
@@ -843,7 +873,7 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
         setError(message);
       } finally {
         if (!controller.signal.aborted) {
-          if (!opts?.quiet) setLoading(false);
+          if (!quiet) setLoading(false);
           else setRefreshing(false);
         }
       }
@@ -851,10 +881,19 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
     [applySnapshot, sessionId],
   );
 
+  // The server's snapshot sets the clock the elapsed time and "… ago" count
+  // from, as a browser load does: measured against when the server loaded it.
   useEffect(() => {
-    void load();
-    return () => abortRef.current?.abort();
-  }, [load]);
+    if (!initial) return;
+    const serverMs = new Date(initial.data.serverNow).getTime();
+    if (!Number.isNaN(serverMs)) skewRef.current = serverMs - initial.loadedAt;
+    baseElapsedRef.current = initial.data.elapsedSeconds;
+    loadedAtRef.current = initial.loadedAt;
+  }, [initial]);
+
+  useReportLoad(load, initial);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   useEffect(() => {
     if (!data || data.frozen) return;
@@ -1111,10 +1150,10 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
               Total attended
             </p>
             <p className="font-mono text-3xl font-medium text-[var(--admin-on-surface)]">
-              {data.turnout.joinedCount.toLocaleString()}
+              {formatCount(data.turnout.joinedCount)}
             </p>
             <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-              of {data.turnout.registeredCount.toLocaleString()} registered
+              of {formatCount(data.turnout.registeredCount)} registered
             </p>
           </div>
           <div className="bg-[var(--admin-surface)] p-5">
@@ -1122,7 +1161,7 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
               Peak concurrency
             </p>
             <p className="font-mono text-3xl font-medium text-[var(--admin-on-surface)]">
-              {data.timeline.peakConcurrent?.toLocaleString() ?? "-"}
+              {data.timeline.peakConcurrent?.toLocaleString(viewer.locale) ?? "-"}
             </p>
             <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
               {data.timeline.peakConcurrentAt
@@ -1137,7 +1176,7 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
               No shows
             </p>
             <p className="font-mono text-3xl font-medium text-[var(--admin-danger)]">
-              {data.turnout.notJoinedCount.toLocaleString()}
+              {formatCount(data.turnout.notJoinedCount)}
             </p>
           </div>
         </section>
@@ -1386,10 +1425,10 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
         <div className="mb-4 flex items-baseline justify-between gap-4">
           <div className="flex flex-wrap items-baseline gap-2">
             <span className="font-mono text-[44px] font-medium leading-none text-[var(--admin-on-surface)]">
-              {data.turnout.joinedCount.toLocaleString()}
+              {formatCount(data.turnout.joinedCount)}
             </span>
             <span className="text-base font-semibold text-[var(--admin-on-surface-variant)]">
-              of {data.turnout.registeredCount.toLocaleString()} joined
+              of {formatCount(data.turnout.registeredCount)} joined
             </span>
           </div>
           <div className="text-right">
@@ -1454,7 +1493,7 @@ export function AdminLiveClassAttendanceLiveMonitorPage({ sessionId }: { session
               Not yet joined
             </h2>
             <p className="text-xs text-[var(--admin-on-surface-variant)]">
-              {data.notYetJoined.length.toLocaleString()} learner
+              {formatCount(data.notYetJoined.length)} learner
               {data.notYetJoined.length === 1 ? "" : "s"} still absent
             </p>
           </div>

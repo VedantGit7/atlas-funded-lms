@@ -30,12 +30,15 @@ import {
   memberInitials,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
   dateInputToEndIso,
   dateInputToStartIso,
   fetchLiveClassAttendanceLearners,
   fetchLiveClassAttendanceLearnersMatrix,
   LIVE_LEARNER_ATTENDANCE_COLUMN_OPTIONS,
+  LIVE_LEARNERS_DEFAULTS,
+  liveSessionsPresetRange,
   sendLiveClassAttendanceMessage,
   type LiveLearnerAttendanceColumnKey,
   type LiveLearnerAttendanceRateBand,
@@ -44,9 +47,12 @@ import {
   type LiveLearnerSessionsRegisteredBand,
   type LiveLearnerSortBy,
   type LiveLearnersListSummary,
+  type LiveLearnersPayload,
   type LiveLearnersMatrix,
   type LiveLearnersMatrixCell,
 } from "./admin-live-class-attendance-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
 
 type ModuleTab = "sessions" | "learners" | "series" | "exports";
@@ -59,16 +65,7 @@ const secondaryButtonClassName =
 const fieldClassName =
   "h-9 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 text-[13px] text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] focus-visible:border-[var(--admin-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--admin-primary)]";
 
-const DEFAULT_COLUMNS: LiveLearnerAttendanceColumnKey[] = [
-  "learner_name",
-  "batch",
-  "registered_count",
-  "attendance_rate",
-  "absent_count",
-  "avg_coverage",
-  "last_attended",
-  "streak",
-];
+const DEFAULT_COLUMNS: LiveLearnerAttendanceColumnKey[] = [...LIVE_LEARNERS_DEFAULTS.columns];
 
 const EMPTY_SUMMARY: LiveLearnersListSummary = {
   learnersRegistered: 0,
@@ -140,15 +137,16 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(1)}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatDate(value: string | null): string {
+function formatDateFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -164,18 +162,6 @@ function formatDuration(seconds: number | null | undefined): string {
   if (hours > 0) return `${String(hours)}h ${String(minutes).padStart(2, "0")}m`;
   if (minutes > 0) return `${String(minutes)}m`;
   return `${String(total)}s`;
-}
-
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
 }
 
 function MetricBar({
@@ -579,6 +565,8 @@ function AttendanceMatrix({
   matrix: LiveLearnersMatrix | null;
   loading: boolean;
 }) {
+  const viewer = useViewerLocale();
+  const formatDate = withViewer(formatDateFor, viewer);
   if (loading) {
     return (
       <div className="hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 lg:block">
@@ -715,7 +703,15 @@ function AttendanceMatrix({
   );
 }
 
-export function AdminLiveClassAttendanceLearnersPage() {
+export function AdminLiveClassAttendanceLearnersPage({
+  initialLearners,
+}: {
+  /** The first page over the last 30 days, loaded by the server; the first browser load is skipped when present. */
+  initialLearners?: ReportInitialDataInRange<LiveLearnersPayload> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDate = withViewer(formatDateFor, viewer);
   const router = useRouter();
   const datePresetLabelId = useId();
   const columnsLabelId = useId();
@@ -724,22 +720,29 @@ export function AdminLiveClassAttendanceLearnersPage() {
   const lastAttendedLabelId = useId();
   const sortLabelId = useId();
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialLearners ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [matrixLoading, setMatrixLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [learners, setLearners] = useState<LiveLearnerListItem[]>([]);
-  const [summary, setSummary] = useState<LiveLearnersListSummary>(EMPTY_SUMMARY);
+  const [learners, setLearners] = useState<LiveLearnerListItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<LiveLearnersListSummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
   const [matrix, setMatrix] = useState<LiveLearnersMatrix | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [menuLearnerId, setMenuLearnerId] = useState<string | null>(null);
 
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState<number>(LIVE_LEARNERS_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
-  const initialRange = presetToRange("30d");
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  // The server's range when it loaded the first page, so both renders agree.
+  const [initialRange] = useState(
+    () => initial?.range ?? liveSessionsPresetRange(LIVE_LEARNERS_DEFAULTS.datePreset),
+  );
+  const [datePreset, setDatePreset] = useState<DatePreset>(LIVE_LEARNERS_DEFAULTS.datePreset);
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [scheduledFrom, setScheduledFrom] = useState(initialRange.from);
   const [scheduledTo, setScheduledTo] = useState(initialRange.to);
@@ -752,8 +755,8 @@ export function AdminLiveClassAttendanceLearnersPage() {
     LiveLearnerSessionsRegisteredBand | ""
   >("");
   const [lastAttended, setLastAttended] = useState<LiveLearnerLastAttendedFilter | "">("");
-  const [sortBy, setSortBy] = useState<LiveLearnerSortBy>("attendance_rate");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState<LiveLearnerSortBy>(LIVE_LEARNERS_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(LIVE_LEARNERS_DEFAULTS.sortDir);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [columns, setColumns] = useState<LiveLearnerAttendanceColumnKey[]>(DEFAULT_COLUMNS);
 
@@ -865,38 +868,42 @@ export function AdminLiveClassAttendanceLearnersPage() {
   const applyDatePreset = useCallback((preset: DatePreset) => {
     setDatePreset(preset);
     if (preset === "custom") return;
-    const range = presetToRange(preset);
+    const range = liveSessionsPresetRange(preset);
     setScheduledFrom(range.from);
     setScheduledTo(range.to);
     setPage(1);
   }, []);
 
-  const loadLearners = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveClassAttendanceLearners({
-        ...filterPayload,
-        page,
-      });
-      setLearners(response.data.items);
-      setSummary(response.data.summary);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadLearners = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveClassAttendanceLearners({
+          ...filterPayload,
+          page,
+        });
+        setLearners(response.data.items);
+        setSummary(response.data.summary);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load learners.",
-      );
-      setLearners([]);
-      setSummary(EMPTY_SUMMARY);
-    } finally {
-      setLoading(false);
-    }
-  }, [filterPayload, page]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load learners.",
+        );
+        setLearners([]);
+        setSummary(EMPTY_SUMMARY);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [filterPayload, page],
+  );
 
   const loadMatrix = useCallback(async () => {
     setMatrixLoading(true);
@@ -910,9 +917,7 @@ export function AdminLiveClassAttendanceLearnersPage() {
     }
   }, [matrixFilterPayload]);
 
-  useEffect(() => {
-    void loadLearners();
-  }, [loadLearners]);
+  useReportLoad(loadLearners, initial);
 
   useEffect(() => {
     if (viewMode === "matrix") {

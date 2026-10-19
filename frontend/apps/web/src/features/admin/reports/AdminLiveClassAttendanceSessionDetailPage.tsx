@@ -33,8 +33,10 @@ import {
   dropdownItemClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   LIVE_ATTENDANCE_COLUMN_OPTIONS,
+  LIVE_SESSION_ATTENDEES_DEFAULTS,
   dateInputToEndIso,
   dateInputToStartIso,
   exportLiveClassAttendanceReport,
@@ -43,9 +45,12 @@ import {
   sendLiveClassAttendanceMessage,
   type LiveAttendanceColumnKey,
   type LiveAttendeeItem,
+  type LiveSessionAttendeesPayload,
   type LiveSessionDetail,
 } from "./admin-live-class-attendance-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type MessageAudience = "absentees" | "selected" | "registrants";
 type SortBy = "status" | "learner_name" | "email" | "joined_at" | "left_at" | "duration_seconds";
@@ -102,11 +107,12 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatDate(value: string | null | undefined): string {
+function formatDateFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -115,11 +121,19 @@ function formatDate(value: string | null | undefined): string {
   });
 }
 
-function formatTimeOnly(value: string | null | undefined): string {
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
+}
+
+function formatTimeOnlyFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function formatDuration(seconds: number | null | undefined): string {
@@ -835,7 +849,21 @@ function MessageDrawer({
   return createPortal(drawer, document.body);
 }
 
-export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessionId: string }) {
+export function AdminLiveClassAttendanceSessionDetailPage({
+  sessionId,
+  initialDetail,
+  initialAttendees,
+}: {
+  sessionId: string;
+  /** The session, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<LiveSessionDetail> | null;
+  /** The first page of attendees, loaded by the server alongside the session. */
+  initialAttendees?: ReportInitialData<LiveSessionAttendeesPayload> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatDate = withViewer(formatDateFor, viewer);
+  const formatTimeOnly = withViewer(formatTimeOnlyFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const columnsLabelId = useId();
@@ -843,13 +871,20 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
   const sortLabelId = useId();
   const autoMessageHandled = useRef(false);
 
-  const [detail, setDetail] = useState<LiveSessionDetail | null>(null);
-  const [attendees, setAttendees] = useState<LiveAttendeeItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => ({
+    detail: initialDetail ?? null,
+    attendees: initialAttendees ?? null,
+  }));
+  const [detail, setDetail] = useState<LiveSessionDetail | null>(initial.detail?.data ?? null);
+  const [attendees, setAttendees] = useState<LiveAttendeeItem[]>(
+    initial.attendees?.data.items ?? [],
+  );
+  const [page, setPage] = useState<number>(LIVE_SESSION_ATTENDEES_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial.attendees?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial.attendees?.data.pageInfo.totalCount ?? 0);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial.detail === null);
   const [attendeesLoading, setAttendeesLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -867,8 +902,8 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
   const [attendeeStatus, setAttendeeStatus] = useState("");
   const [joinedFrom, setJoinedFrom] = useState("");
   const [joinedTo, setJoinedTo] = useState("");
-  const [sortBy, setSortBy] = useState<SortBy>("status");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [sortBy, setSortBy] = useState<SortBy>(LIVE_SESSION_ATTENDEES_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<SortDir>(LIVE_SESSION_ATTENDEES_DEFAULTS.sortDir);
 
   const [columns, setColumns] = useState<LiveAttendanceColumnKey[]>(
     LIVE_ATTENDANCE_COLUMN_OPTIONS.map((column) => column.key),
@@ -899,69 +934,72 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
     sortDir !== "asc",
   );
 
-  const loadDetail = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveClassSessionDetail(sessionId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setError(errMsg(loadError, "Couldn't load session attendance."));
-    } finally {
-      setLoading(false);
-    }
-  }, [sessionId]);
+  const loadDetail = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveClassSessionDetail(sessionId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setError(errMsg(loadError, "Couldn't load session attendance."));
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [sessionId],
+  );
 
-  const loadAttendees = useCallback(async () => {
-    setAttendeesLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveClassSessionAttendees(sessionId, {
-        learnerName: learnerName.trim() || undefined,
-        email: email.trim() || undefined,
-        status: attendeeStatus || undefined,
-        joinedFrom: dateInputToStartIso(joinedFrom),
-        joinedTo: dateInputToEndIso(joinedTo),
-        sortBy,
-        sortDir,
-        columns,
-        page,
-      });
-      setAttendees(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setSelectedIds((current) =>
-        current.filter((id) => response.data.items.some((row) => row.membershipId === id)),
-      );
-    } catch (loadError) {
-      setAttendees([]);
-      setTotalCount(0);
-      setTotalPages(0);
-      setError(errMsg(loadError, "Couldn't load attendees."));
-    } finally {
-      setAttendeesLoading(false);
-    }
-  }, [
-    attendeeStatus,
-    columns,
-    email,
-    joinedFrom,
-    joinedTo,
-    learnerName,
-    page,
-    sessionId,
-    sortBy,
-    sortDir,
-  ]);
+  const loadAttendees = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setAttendeesLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveClassSessionAttendees(sessionId, {
+          learnerName: learnerName.trim() || undefined,
+          email: email.trim() || undefined,
+          status: attendeeStatus || undefined,
+          joinedFrom: dateInputToStartIso(joinedFrom),
+          joinedTo: dateInputToEndIso(joinedTo),
+          sortBy,
+          sortDir,
+          columns,
+          page,
+        });
+        setAttendees(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setSelectedIds((current) =>
+          current.filter((id) => response.data.items.some((row) => row.membershipId === id)),
+        );
+      } catch (loadError) {
+        setAttendees([]);
+        setTotalCount(0);
+        setTotalPages(0);
+        setError(errMsg(loadError, "Couldn't load attendees."));
+      } finally {
+        if (!soft) setAttendeesLoading(false);
+      }
+    },
+    [
+      attendeeStatus,
+      columns,
+      email,
+      joinedFrom,
+      joinedTo,
+      learnerName,
+      page,
+      sessionId,
+      sortBy,
+      sortDir,
+    ],
+  );
 
-  useEffect(() => {
-    void loadDetail();
-  }, [loadDetail]);
-
-  useEffect(() => {
-    void loadAttendees();
-  }, [loadAttendees]);
+  useReportLoad(loadDetail, initial.detail);
+  useReportLoad(loadAttendees, initial.attendees);
 
   const cancelled = detail ? isCancelledStatus(detail.status) : false;
   const scheduled = detail ? isScheduledStatus(detail.status) : false;
@@ -1401,10 +1439,10 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
               "-"
             ) : (
               <>
-                {detail.attendanceCount.toLocaleString()}
+                {formatCount(detail.attendanceCount)}
                 <span className="text-sm font-normal text-[var(--admin-on-surface-variant)]">
                   {" "}
-                  of {detail.registeredCount.toLocaleString()}
+                  of {formatCount(detail.registeredCount)}
                 </span>
               </>
             )}
@@ -1433,7 +1471,7 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
               className="w-fit font-mono text-2xl font-medium leading-none text-[var(--admin-danger)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
               onClick={filterAbsentees}
             >
-              {detail.absentCount.toLocaleString()}
+              {formatCount(detail.absentCount)}
             </button>
           )}
           <p className="mt-2 flex items-center gap-1 text-xs text-[var(--admin-danger)]">
@@ -1529,7 +1567,7 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
               <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">
                 Expected turnout{" "}
                 {detail.expectedTurnoutCount != null
-                  ? detail.expectedTurnoutCount.toLocaleString()
+                  ? formatCount(detail.expectedTurnoutCount)
                   : "-"}
                 {detail.expectedTurnoutPct != null
                   ? ` (${formatPct(detail.expectedTurnoutPct)})`
@@ -1606,7 +1644,7 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
         <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
           <h2 className="text-base font-semibold text-[var(--admin-on-surface)]">Attendees</h2>
           <p className="text-xs text-[var(--admin-on-surface-variant)]">
-            {totalCount.toLocaleString()} record{totalCount === 1 ? "" : "s"}
+            {formatCount(totalCount)} record{totalCount === 1 ? "" : "s"}
           </p>
         </div>
 
@@ -1989,8 +2027,10 @@ export function AdminLiveClassAttendanceSessionDetailPage({ sessionId }: { sessi
 
         <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-[var(--admin-on-surface-variant)]">
-            Showing {rangeStart.toLocaleString()}-{rangeEnd.toLocaleString()} of{" "}
-            {totalCount.toLocaleString()} · Attendance rate is attendees divided by registrations.
+            {/* " of" and the space after it are separate text, as before the counts were formatted. */}
+            Showing {formatCount(rangeStart)}-{formatCount(rangeEnd)}
+            {" of"} {formatCount(totalCount)} · Attendance rate is attendees divided by
+            registrations.
           </p>
           {totalPages > 1 ? (
             <div className="flex items-center gap-2">

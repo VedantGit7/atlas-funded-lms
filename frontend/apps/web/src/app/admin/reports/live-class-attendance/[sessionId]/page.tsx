@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminLiveClassAttendanceSessionDetailPage } from "../../../../../features/admin/reports/AdminLiveClassAttendanceSessionDetailPage";
+import { loadLiveSessionDetailData } from "../../../../../lib/server/report-live-class-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -13,7 +14,10 @@ export default async function AdminLiveClassAttendanceSessionDetailRoutePage({
   params,
 }: PageProps) {
   const { sessionId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initial] = await Promise.all([
+    runTenantStateGate(),
+    loadLiveSessionDetailData(sessionId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -32,7 +36,11 @@ export default async function AdminLiveClassAttendanceSessionDetailRoutePage({
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading session…</p>
         }
       >
-        <AdminLiveClassAttendanceSessionDetailPage sessionId={sessionId} />
+        <AdminLiveClassAttendanceSessionDetailPage
+          sessionId={sessionId}
+          initialDetail={initial.detail}
+          initialAttendees={initial.attendees}
+        />
       </Suspense>
     </AdminPageGate>
   );

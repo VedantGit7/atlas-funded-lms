@@ -257,36 +257,47 @@ export async function fetchLiveClassSessionsRoster(filters?: LiveSessionsRosterF
   return clientApi.get<{ data: LiveSessionsRosterPayload }>(liveSessionsRosterPath(filters));
 }
 
-export async function fetchLiveClassSessionDetail(sessionId: string) {
-  return clientApi.get<{ data: LiveSessionDetail }>(
-    `/api/v1/reports/live-class-attendance/${sessionId}`,
-  );
+export function liveSessionDetailPath(sessionId: string): string {
+  return `/api/v1/reports/live-class-attendance/${encodeURIComponent(sessionId)}`;
 }
 
-export async function fetchLiveClassSessionAttendees(
+export async function fetchLiveClassSessionDetail(sessionId: string) {
+  return clientApi.get<{ data: LiveSessionDetail }>(liveSessionDetailPath(sessionId));
+}
+
+export type LiveSessionAttendeesFilters = {
+  learnerName?: string | undefined;
+  email?: string | undefined;
+  status?: string | undefined;
+  joinedFrom?: string | undefined;
+  joinedTo?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: LiveAttendanceColumnKey[] | undefined;
+  page?: number | undefined;
+};
+
+export type LiveSessionAttendeesPayload = {
+  sessionId: string;
+  sessionTitle: string;
+  items: LiveAttendeeItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+};
+
+/** What a session's attendee list opens on (every column); the server loads the first page with it too. */
+export const LIVE_SESSION_ATTENDEES_DEFAULTS = {
+  sortBy: "status",
+  sortDir: "asc",
+  page: 1,
+} as const;
+
+export function liveSessionAttendeesPath(
   sessionId: string,
-  filters: {
-    learnerName?: string | undefined;
-    email?: string | undefined;
-    status?: string | undefined;
-    joinedFrom?: string | undefined;
-    joinedTo?: string | undefined;
-    sortBy?: string | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    columns?: LiveAttendanceColumnKey[] | undefined;
-    page?: number | undefined;
-  },
-) {
-  return clientApi.get<{
-    data: {
-      sessionId: string;
-      sessionTitle: string;
-      items: LiveAttendeeItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-    };
-  }>(
-    `/api/v1/reports/live-class-attendance/${sessionId}/attendees${buildQuery({
+  filters: LiveSessionAttendeesFilters,
+): string {
+  return `/api/v1/reports/live-class-attendance/${encodeURIComponent(sessionId)}/attendees${buildQuery(
+    {
       learnerName: filters.learnerName,
       email: filters.email,
       status: filters.status,
@@ -297,7 +308,16 @@ export async function fetchLiveClassSessionAttendees(
       columns: filters.columns?.join(","),
       page: filters.page ?? 1,
       limit: 25,
-    })}`,
+    },
+  )}`;
+}
+
+export async function fetchLiveClassSessionAttendees(
+  sessionId: string,
+  filters: LiveSessionAttendeesFilters,
+) {
+  return clientApi.get<{ data: LiveSessionAttendeesPayload }>(
+    liveSessionAttendeesPath(sessionId, filters),
   );
 }
 
@@ -337,7 +357,7 @@ export async function sendLiveClassAttendanceMessage(body: {
   );
 }
 
-export async function fetchLiveClassAttendanceLearners(filters?: {
+export type LiveLearnersFilters = {
   q?: string | undefined;
   courseId?: string | undefined;
   batchId?: string | undefined;
@@ -351,31 +371,62 @@ export async function fetchLiveClassAttendanceLearners(filters?: {
   columns?: LiveLearnerAttendanceColumnKey[] | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: LiveLearnerListItem[];
-      pageInfo: PageInfo;
-      summary: LiveLearnersListSummary;
-      columns: string[];
-    };
-  }>(
-    `/api/v1/reports/live-class-attendance/learners${buildQuery({
-      q: filters?.q,
-      courseId: filters?.courseId,
-      batchId: filters?.batchId,
-      scheduledFrom: filters?.scheduledFrom,
-      scheduledTo: filters?.scheduledTo,
-      attendanceRateBand: filters?.attendanceRateBand,
-      sessionsRegisteredBand: filters?.sessionsRegisteredBand,
-      lastAttended: filters?.lastAttended,
-      sortBy: filters?.sortBy ?? "attendance_rate",
-      sortDir: filters?.sortDir ?? "asc",
-      columns: filters?.columns?.join(","),
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+export type LiveLearnersPayload = {
+  items: LiveLearnerListItem[];
+  pageInfo: PageInfo;
+  summary: LiveLearnersListSummary;
+  columns: string[];
+};
+
+/**
+ * What the learners list opens on, over the last 30 days; the server loads
+ * the first page with it too.
+ */
+export const LIVE_LEARNERS_DEFAULTS = {
+  datePreset: "30d",
+  sortBy: "attendance_rate",
+  sortDir: "asc",
+  columns: [
+    "learner_name",
+    "batch",
+    "registered_count",
+    "attendance_rate",
+    "absent_count",
+    "avg_coverage",
+    "last_attended",
+    "streak",
+  ],
+  page: 1,
+} as const satisfies {
+  datePreset: LiveSessionsDatePreset;
+  sortBy: LiveLearnerSortBy;
+  sortDir: "asc" | "desc";
+  columns: readonly LiveLearnerAttendanceColumnKey[];
+  page: number;
+};
+
+export async function fetchLiveClassAttendanceLearners(filters?: LiveLearnersFilters) {
+  return clientApi.get<{ data: LiveLearnersPayload }>(liveLearnersPath(filters));
+}
+
+export function liveLearnersPath(filters?: LiveLearnersFilters): string {
+  return `/api/v1/reports/live-class-attendance/learners${buildQuery({
+    q: filters?.q,
+    courseId: filters?.courseId,
+    batchId: filters?.batchId,
+    scheduledFrom: filters?.scheduledFrom,
+    scheduledTo: filters?.scheduledTo,
+    attendanceRateBand: filters?.attendanceRateBand,
+    sessionsRegisteredBand: filters?.sessionsRegisteredBand,
+    lastAttended: filters?.lastAttended,
+    sortBy: filters?.sortBy ?? "attendance_rate",
+    sortDir: filters?.sortDir ?? "asc",
+    columns: filters?.columns?.join(","),
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
 }
 
 export async function fetchLiveClassAttendanceLearnersMatrix(filters?: {
@@ -493,14 +544,26 @@ export async function fetchLiveClassLearnerAttendanceDetail(
     batchId?: string | undefined;
   },
 ) {
-  return clientApi.get<{ data: LiveLearnerDetail }>(
-    `/api/v1/reports/live-class-attendance/learners/${membershipId}${buildQuery({
+  return clientApi.get<{ data: LiveLearnerDetail }>(liveLearnerDetailPath(membershipId, filters));
+}
+
+export function liveLearnerDetailPath(
+  membershipId: string,
+  filters?: {
+    scheduledFrom?: string | undefined;
+    scheduledTo?: string | undefined;
+    courseId?: string | undefined;
+    batchId?: string | undefined;
+  },
+): string {
+  return `/api/v1/reports/live-class-attendance/learners/${encodeURIComponent(membershipId)}${buildQuery(
+    {
       scheduledFrom: filters?.scheduledFrom,
       scheduledTo: filters?.scheduledTo,
       courseId: filters?.courseId,
       batchId: filters?.batchId,
-    })}`,
-  );
+    },
+  )}`;
 }
 
 export type LiveAttendeeDetail = {
@@ -568,10 +631,12 @@ export type LiveAttendeeDetail = {
   }>;
 };
 
+export function liveAttendeeDetailPath(sessionId: string, attendeeId: string): string {
+  return `/api/v1/reports/live-class-attendance/${encodeURIComponent(sessionId)}/attendees/${encodeURIComponent(attendeeId)}`;
+}
+
 export async function fetchLiveClassAttendeeDetail(sessionId: string, attendeeId: string) {
-  return clientApi.get<{ data: LiveAttendeeDetail }>(
-    `/api/v1/reports/live-class-attendance/${sessionId}/attendees/${attendeeId}`,
-  );
+  return clientApi.get<{ data: LiveAttendeeDetail }>(liveAttendeeDetailPath(sessionId, attendeeId));
 }
 
 export async function updateLiveClassAttendeeStatus(
@@ -661,9 +726,13 @@ export type LiveClassSessionLiveMonitor = {
   }>;
 };
 
+export function liveSessionLiveMonitorPath(sessionId: string): string {
+  return `/api/v1/reports/live-class-attendance/${encodeURIComponent(sessionId)}/live`;
+}
+
 export async function fetchLiveClassSessionLiveMonitor(sessionId: string) {
   return clientApi.get<{ data: LiveClassSessionLiveMonitor }>(
-    `/api/v1/reports/live-class-attendance/${sessionId}/live`,
+    liveSessionLiveMonitorPath(sessionId),
   );
 }
 
@@ -745,7 +814,7 @@ export type LiveSeriesDetail = {
   }>;
 };
 
-export async function fetchLiveClassAttendanceSeries(filters?: {
+export type LiveSeriesFilters = {
   groupBy?: LiveSeriesGroupBy | undefined;
   scheduledFrom?: string | undefined;
   scheduledTo?: string | undefined;
@@ -754,27 +823,51 @@ export async function fetchLiveClassAttendanceSeries(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      groupBy: LiveSeriesGroupBy;
-      items: LiveSeriesListItem[];
-      pageInfo: PageInfo;
-      summary: LiveSeriesListSummary;
-      dropOff: LiveSeriesDropOff;
-    };
-  }>(
-    `/api/v1/reports/live-class-attendance/series${buildQuery({
-      groupBy: filters?.groupBy ?? "course",
-      scheduledFrom: filters?.scheduledFrom,
-      scheduledTo: filters?.scheduledTo,
-      q: filters?.q,
-      sortBy: filters?.sortBy ?? "avg_turnout",
-      sortDir: filters?.sortDir ?? "asc",
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+export type LiveSeriesPayload = {
+  groupBy: LiveSeriesGroupBy;
+  items: LiveSeriesListItem[];
+  pageInfo: PageInfo;
+  summary: LiveSeriesListSummary;
+  dropOff: LiveSeriesDropOff;
+};
+
+/**
+ * What the series rollup opens on, over the last 90 days; the server loads
+ * the first page with it too.
+ */
+export const LIVE_SERIES_DEFAULTS = {
+  datePreset: "90d",
+  groupBy: "course",
+  sortBy: "avg_turnout",
+  sortDir: "asc",
+  page: 1,
+  limit: 25,
+} as const satisfies {
+  datePreset: LiveSessionsDatePreset;
+  groupBy: LiveSeriesGroupBy;
+  sortBy: LiveSeriesSortBy;
+  sortDir: "asc" | "desc";
+  page: number;
+  limit: number;
+};
+
+export function liveSeriesPath(filters?: LiveSeriesFilters): string {
+  return `/api/v1/reports/live-class-attendance/series${buildQuery({
+    groupBy: filters?.groupBy ?? "course",
+    scheduledFrom: filters?.scheduledFrom,
+    scheduledTo: filters?.scheduledTo,
+    q: filters?.q,
+    sortBy: filters?.sortBy ?? "avg_turnout",
+    sortDir: filters?.sortDir ?? "asc",
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
+export async function fetchLiveClassAttendanceSeries(filters?: LiveSeriesFilters) {
+  return clientApi.get<{ data: LiveSeriesPayload }>(liveSeriesPath(filters));
 }
 
 export async function fetchLiveClassAttendanceSeriesDetail(
