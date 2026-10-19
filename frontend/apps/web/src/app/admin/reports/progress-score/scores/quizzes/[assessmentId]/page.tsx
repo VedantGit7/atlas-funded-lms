@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "@/components/patterns/AdminPageGate";
 import { AdminScoreQuizLearnersPage } from "@/features/admin/reports/AdminScoreQuizLearnersPage";
+import { loadScoreLearnersData } from "@/lib/server/report-progress-score-initial-data";
 import { runTenantStateGate } from "@/lib/server/tenant-state-gate";
 
 export default async function AdminScoreQuizLearnersRoutePage({
@@ -15,7 +16,10 @@ export default async function AdminScoreQuizLearnersRoutePage({
     notFound();
   }
 
-  const gate = await runTenantStateGate();
+  const [gate, initialLearners] = await Promise.all([
+    runTenantStateGate(),
+    loadScoreLearnersData(assessmentId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -29,7 +33,7 @@ export default async function AdminScoreQuizLearnersRoutePage({
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Assessment learners">
-      <AdminScoreQuizLearnersPage assessmentId={assessmentId} />
+      <AdminScoreQuizLearnersPage assessmentId={assessmentId} initialLearners={initialLearners} />
     </AdminPageGate>
   );
 }

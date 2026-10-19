@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "@/components/patterns/AdminPageGate";
 import { AdminScoresAssessmentListPage } from "@/features/admin/reports/AdminScoresAssessmentListPage";
+import { loadScoreQuizzesData } from "@/lib/server/report-progress-score-initial-data";
 import { runTenantStateGate } from "@/lib/server/tenant-state-gate";
 
 const PRODUCT_TYPES = new Set(["course", "test_series", "bundle", "mock_test"]);
@@ -17,7 +18,13 @@ export default async function AdminScoresAssessmentListRoutePage({
     notFound();
   }
 
-  const gate = await runTenantStateGate();
+  const [gate, initialQuizzes] = await Promise.all([
+    runTenantStateGate(),
+    loadScoreQuizzesData(
+      productType as "course" | "test_series" | "bundle" | "mock_test",
+      productId,
+    ),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -34,6 +41,7 @@ export default async function AdminScoresAssessmentListRoutePage({
       <AdminScoresAssessmentListPage
         productType={productType as "course" | "test_series" | "bundle" | "mock_test"}
         productId={productId}
+        initialQuizzes={initialQuizzes}
       />
     </AdminPageGate>
   );

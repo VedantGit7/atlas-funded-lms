@@ -20,7 +20,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  type ScoreQuizzesPayload,
   createScoreGroup,
   exportScoreReport,
   fetchScoreQuizzes,
@@ -34,6 +36,8 @@ import {
 } from "./admin-progress-score-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const PRODUCT_TYPE_LABEL: Record<ScoreProductType, string> = {
   course: "Course",
@@ -83,23 +87,23 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatPct(value: number | null): string {
+function formatPctFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absMinutes = Math.round(Math.abs(diffMs) / (1000 * 60));
   if (absMinutes < 60) {
     return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
@@ -121,7 +125,12 @@ function formatRelative(iso: string | null): string {
       "day",
     );
   }
-  return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function humanizeType(value: string): string {
@@ -136,6 +145,8 @@ function openProductHref(productType: ScoreProductType): string {
 }
 
 function ScoreBar({ value, passMark }: { value: number | null; passMark: number | null }) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
   const pct = value == null ? 0 : Math.max(0, Math.min(100, value));
   return (
     <div className="relative h-[3px] w-full max-w-[120px] overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
@@ -155,6 +166,8 @@ function ScoreBar({ value, passMark }: { value: number | null; passMark: number 
 }
 
 function ScoreSpreadRow({ item }: { item: ScoreQuizItem }) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
   const spread = item.scoreSpread;
   if (!spread) {
     return (
@@ -251,30 +264,55 @@ type PageInfo = {
   hasPreviousPage: boolean;
 };
 
-export function AdminScoresAssessmentListPage({
-  productType,
-  productId,
-}: {
+type ScoresAssessmentListPageProps = {
   productType: ScoreProductType;
   productId: string;
-}) {
+  /** The first page of assessments, loaded by the server; the first browser load is skipped when present. */
+  initialQuizzes?: ReportInitialData<ScoreQuizzesPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminScoresAssessmentListPage(props: ScoresAssessmentListPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialQuizzes?.loadedAt ?? null}>
+      <ScoresAssessmentListReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ScoresAssessmentListReport({
+  productType,
+  productId,
+  initialQuizzes,
+}: ScoresAssessmentListPageProps) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const router = useRouter();
   const searchId = useId();
   const ungradedId = useId();
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialQuizzes ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<ScoreQuizItem[]>([]);
-  const [product, setProduct] = useState<ScoreQuizzesProduct | null>(null);
-  const [summary, setSummary] = useState<ScoreQuizzesSummary | null>(null);
-  const [pageInfo, setPageInfo] = useState<PageInfo>({
-    page: 1,
-    pageSize: 25,
-    totalCount: 0,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
-  });
+  const [items, setItems] = useState<ScoreQuizItem[]>(initial?.data.items ?? []);
+  const [product, setProduct] = useState<ScoreQuizzesProduct | null>(initial?.data.product ?? null);
+  const [summary, setSummary] = useState<ScoreQuizzesSummary | null>(initial?.data.summary ?? null);
+  const [pageInfo, setPageInfo] = useState<PageInfo>(
+    initial?.data.pageInfo ?? {
+      page: 1,
+      pageSize: 25,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  );
   const [searchInput, setSearchInput] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [assessmentType, setAssessmentType] = useState("");
@@ -297,53 +335,46 @@ export function AdminScoresAssessmentListPage({
     };
   }, [searchInput]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const [sortByRaw, sortDirRaw] = sortKey.split(":");
-    const sortBy = (sortByRaw ?? "title") as ScoreQuizSortBy;
-    const sortDir = sortDirRaw === "desc" ? "desc" : "asc";
-    try {
-      const response = await fetchScoreQuizzes(productType, productId, {
-        q: debouncedQ || undefined,
-        assessmentType: assessmentType || undefined,
-        passRateBand,
-        hasUngraded: hasUngraded || undefined,
-        sortBy,
-        sortDir,
-        page,
-        limit: 25,
-      });
-      setItems(response.data.items);
-      setProduct(response.data.product);
-      setSummary(response.data.summary);
-      setPageInfo(response.data.pageInfo);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      const [sortByRaw, sortDirRaw] = sortKey.split(":");
+      const sortBy = (sortByRaw ?? "title") as ScoreQuizSortBy;
+      const sortDir = sortDirRaw === "desc" ? "desc" : "asc";
+      try {
+        const response = await fetchScoreQuizzes(productType, productId, {
+          q: debouncedQ || undefined,
+          assessmentType: assessmentType || undefined,
+          passRateBand,
+          hasUngraded: hasUngraded || undefined,
+          sortBy,
+          sortDir,
+          page,
+          limit: 25,
+        });
+        setItems(response.data.items);
+        setProduct(response.data.product);
+        setSummary(response.data.summary);
+        setPageInfo(response.data.pageInfo);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Failed to load assessment data.",
-      );
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    assessmentType,
-    debouncedQ,
-    hasUngraded,
-    page,
-    passRateBand,
-    productId,
-    productType,
-    sortKey,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Failed to load assessment data.",
+        );
+        setItems([]);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [assessmentType, debouncedQ, hasUngraded, page, passRateBand, productId, productType, sortKey],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const hasActiveFilters = Boolean(debouncedQ || assessmentType || passRateBand || hasUngraded);
   const empty = !loading && !error && items.length === 0;

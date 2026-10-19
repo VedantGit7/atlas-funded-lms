@@ -17,7 +17,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  type ProgressProductsPayload,
   fetchProgressProducts,
   type ProductPublishStatus,
   type ProgressCompletionBands,
@@ -26,6 +28,8 @@ import {
   type ProgressProductType,
   type ProgressProductsSummary,
 } from "./admin-progress-score-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const PRODUCT_TABS: Array<{ key: ProgressProductType; label: string }> = [
   { key: "course", label: "Course" },
@@ -96,23 +100,23 @@ function bandFill(key: keyof ProgressCompletionBands): string {
   return "var(--admin-outline)";
 }
 
-function formatPct(value: number | null): string {
+function formatPctFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelativeActivity(iso: string | null): string {
+function formatRelativeActivityFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "Never";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "Never";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absMinutes = Math.round(Math.abs(diffMs) / (1000 * 60));
   if (absMinutes < 60) {
     return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
@@ -134,7 +138,7 @@ function formatRelativeActivity(iso: string | null): string {
       "day",
     );
   }
-  return date.toLocaleDateString();
+  return date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone });
 }
 
 function statusChipClass(status: ProductPublishStatus): string {
@@ -259,31 +263,58 @@ type PageInfo = {
   hasPreviousPage: boolean;
 };
 
-export function AdminProgressProductPicker({
-  productType,
-  onProductTypeChange,
-  onSelectProduct,
-}: {
+type AdminProgressProductPickerProps = {
   productType: ProgressProductType;
   onProductTypeChange: (type: ProgressProductType) => void;
   onSelectProduct: (product: ProgressProductItem) => void;
-}) {
+  /** The first page for the default product type, loaded by the server; the first browser load is skipped when present. */
+  initialProducts?: ReportInitialData<ProgressProductsPayload> | null;
+};
+
+/**
+ * Relative times count from when the server rendered the page until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminProgressProductPicker(props: AdminProgressProductPickerProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialProducts?.loadedAt ?? null}>
+      <ProgressProductPickerReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ProgressProductPickerReport({
+  productType,
+  onProductTypeChange,
+  onSelectProduct,
+  initialProducts,
+}: AdminProgressProductPickerProps) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelativeActivity = withViewer(formatRelativeActivityFor, viewer);
   const searchId = useId();
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the picker has changed since.
+  const [initial] = useState(() => initialProducts ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<ProgressProductItem[]>([]);
-  const [summary, setSummary] = useState<ProgressProductsSummary>({
-    productCount: 0,
-    enrolmentCount: 0,
-  });
-  const [pageInfo, setPageInfo] = useState<PageInfo>({
-    page: 1,
-    pageSize: 25,
-    totalCount: 0,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
-  });
+  const [items, setItems] = useState<ProgressProductItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<ProgressProductsSummary>(
+    initial?.data.summary ?? {
+      productCount: 0,
+      enrolmentCount: 0,
+    },
+  );
+  const [pageInfo, setPageInfo] = useState<PageInfo>(
+    initial?.data.pageInfo ?? {
+      page: 1,
+      pageSize: 25,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  );
   const [searchInput, setSearchInput] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [status, setStatus] = useState<ProductPublishStatus | "">("");
@@ -300,42 +331,44 @@ export function AdminProgressProductPicker({
     };
   }, [searchInput]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const [sortByRaw, sortDirRaw] = sortKey.split(":");
-    const sortBy = (sortByRaw ?? "enrolled_count") as ProgressProductSortBy;
-    const sortDir = sortDirRaw === "asc" ? "asc" : "desc";
-    try {
-      const response = await fetchProgressProducts(productType, {
-        q: debouncedQ || undefined,
-        page,
-        limit: 25,
-        status,
-        sortBy,
-        sortDir,
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setPageInfo(response.data.pageInfo);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      const [sortByRaw, sortDirRaw] = sortKey.split(":");
+      const sortBy = (sortByRaw ?? "enrolled_count") as ProgressProductSortBy;
+      const sortDir = sortDirRaw === "asc" ? "asc" : "desc";
+      try {
+        const response = await fetchProgressProducts(productType, {
+          q: debouncedQ || undefined,
+          page,
+          limit: 25,
+          status,
+          sortBy,
+          sortDir,
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setPageInfo(response.data.pageInfo);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Failed to load product data.",
-      );
-      setItems([]);
-      setSummary({ productCount: 0, enrolmentCount: 0 });
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedQ, page, productType, sortKey, status]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Failed to load product data.",
+        );
+        setItems([]);
+        setSummary({ productCount: 0, enrolmentCount: 0 });
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [debouncedQ, page, productType, sortKey, status],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   function clearFilters() {
     setSearchInput("");

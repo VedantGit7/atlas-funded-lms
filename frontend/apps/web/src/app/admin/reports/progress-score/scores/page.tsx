@@ -2,10 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminProgressScoreRosterPage } from "../../../../../features/admin/reports/AdminProgressScoreRosterPage";
+import { loadScoreProductsData } from "../../../../../lib/server/report-progress-score-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminProgressScoreScoresRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialScoreProducts] = await Promise.all([
+    runTenantStateGate(),
+    loadScoreProductsData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -19,7 +23,10 @@ export default async function AdminProgressScoreScoresRoutePage() {
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Scores">
-      <AdminProgressScoreRosterPage initialMainTab="scores" />
+      <AdminProgressScoreRosterPage
+        initialMainTab="scores"
+        initialScoreProducts={initialScoreProducts}
+      />
     </AdminPageGate>
   );
 }

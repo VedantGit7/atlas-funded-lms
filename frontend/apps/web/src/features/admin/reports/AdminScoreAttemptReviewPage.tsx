@@ -27,6 +27,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchScoreAttemptReview,
   grantExtraScoreAttempt,
@@ -38,6 +39,8 @@ import {
   type ScoreQuestionOutcome,
 } from "./admin-progress-score-roster-api";
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type GradeDraft = {
   pointsAwarded: string;
@@ -57,9 +60,9 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatPct(value: number | null | undefined): string {
+function formatPctFor(value: number | null | undefined, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
@@ -77,11 +80,12 @@ function formatDuration(seconds: number | null): string {
   return `${mins}m ${String(secs).padStart(2, "0")}s`;
 }
 
-function formatSubmitted(iso: string | null): string {
+function formatSubmittedFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -219,6 +223,8 @@ function VoidModal({
   onClose: () => void;
   onConfirm: (reason: string) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
   const titleId = useId();
   const [reason, setReason] = useState("");
 
@@ -318,57 +324,74 @@ function VoidModal({
  * Screen 8 — Attempt Review.
  * Reading this as: admin LMS operator console for single-attempt grading & integrity.
  */
+/** Grading drafts for an attempt's manually graded questions, from what is saved. */
+function gradeDraftsFrom(data: ScoreAttemptReviewData): Record<string, GradeDraft> {
+  const drafts: Record<string, GradeDraft> = {};
+  for (const question of data.questions) {
+    if (question.isManual) {
+      drafts[question.assessmentItemId] = {
+        pointsAwarded: question.pointsAwarded == null ? "" : String(question.pointsAwarded),
+        feedback: question.feedback ?? "",
+      };
+    }
+  }
+  return drafts;
+}
+
 export function AdminScoreAttemptReviewPage({
   assessmentId,
   attemptId,
+  initialReview,
 }: {
   assessmentId: string;
   attemptId: string;
+  /** The attempt, loaded by the server; the first browser load is skipped when present. */
+  initialReview?: ReportInitialData<ScoreAttemptReviewData> | null;
 }) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatSubmitted = withViewer(formatSubmittedFor, viewer);
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialReview ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [data, setData] = useState<ScoreAttemptReviewData | null>(null);
-  const [drafts, setDrafts] = useState<Record<string, GradeDraft>>({});
+  const [data, setData] = useState<ScoreAttemptReviewData | null>(initial?.data ?? null);
+  const [drafts, setDrafts] = useState<Record<string, GradeDraft>>(() =>
+    initial ? gradeDraftsFrom(initial.data) : {},
+  );
   const [voidOpen, setVoidOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   const [messageSubject, setMessageSubject] = useState("");
   const [messageBody, setMessageBody] = useState("");
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchScoreAttemptReview(assessmentId, attemptId);
-      setData(response.data);
-      const nextDrafts: Record<string, GradeDraft> = {};
-      for (const question of response.data.questions) {
-        if (question.isManual) {
-          nextDrafts[question.assessmentItemId] = {
-            pointsAwarded: question.pointsAwarded == null ? "" : String(question.pointsAwarded),
-            feedback: question.feedback ?? "",
-          };
-        }
-      }
-      setDrafts(nextDrafts);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchScoreAttemptReview(assessmentId, attemptId);
+        setData(response.data);
+        setDrafts(gradeDraftsFrom(response.data));
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load attempt review.",
-      );
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [assessmentId, attemptId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load attempt review.",
+        );
+        setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [assessmentId, attemptId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const dirtyItems = useMemo(() => {
     if (!data) return [];

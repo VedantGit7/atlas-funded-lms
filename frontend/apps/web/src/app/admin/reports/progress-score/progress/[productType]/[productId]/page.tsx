@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "@/components/patterns/AdminPageGate";
 import { AdminProgressLearnerRosterPage } from "@/features/admin/reports/AdminProgressLearnerRosterPage";
+import { loadProgressLearnersData } from "@/lib/server/report-progress-score-initial-data";
 import { runTenantStateGate } from "@/lib/server/tenant-state-gate";
 
 const PRODUCT_TYPES = new Set(["course", "test_series", "bundle", "subscription"]);
@@ -17,7 +18,13 @@ export default async function AdminProgressLearnerRosterRoutePage({
     notFound();
   }
 
-  const gate = await runTenantStateGate();
+  const [gate, initialLearners] = await Promise.all([
+    runTenantStateGate(),
+    loadProgressLearnersData(
+      productType as "course" | "test_series" | "bundle" | "subscription",
+      productId,
+    ),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -34,6 +41,7 @@ export default async function AdminProgressLearnerRosterRoutePage({
       <AdminProgressLearnerRosterPage
         productType={productType as "course" | "test_series" | "bundle" | "subscription"}
         productId={productId}
+        initialLearners={initialLearners}
       />
     </AdminPageGate>
   );

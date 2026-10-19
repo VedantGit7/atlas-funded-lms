@@ -27,7 +27,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  SCORE_LEARNERS_DEFAULTS,
+  type ScoreLearnersPayload,
   SCORE_LEARNER_COLUMN_OPTIONS,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -50,6 +53,8 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { CohortActionsDrawer, type CohortDrawerMode } from "./CohortActionsDrawer";
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -100,16 +105,16 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatPct(value: number | null | undefined): string {
+function formatPctFor(value: number | null | undefined, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
 function formatDuration(seconds: number | null): string {
@@ -124,11 +129,16 @@ function formatDuration(seconds: number | null): string {
   return `${String(mins).padStart(2, "0")}m ${String(secs).padStart(2, "0")}s`;
 }
 
-function formatSubmitted(iso: string | null, startedAt: string | null): string {
+function formatSubmittedFor(
+  iso: string | null,
+  startedAt: string | null,
+  viewer: ViewerLocale,
+): string {
   if (iso) {
     const date = new Date(iso);
     if (Number.isNaN(date.getTime())) return "—";
-    return date.toLocaleString(undefined, {
+    return date.toLocaleString(viewer.locale, {
+      timeZone: viewer.timeZone,
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -138,16 +148,20 @@ function formatSubmitted(iso: string | null, startedAt: string | null): string {
   if (startedAt) {
     const date = new Date(startedAt);
     if (Number.isNaN(date.getTime())) return "—";
-    return `Started ${date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+    return `Started ${date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone, month: "short", day: "numeric" })}`;
   }
   return "—";
 }
 
-function formatClock(iso: string | null): string {
+function formatClockFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function humanizeType(value: string): string {
@@ -451,28 +465,48 @@ function RegradeModal({
  * Screen 7 — Learner Score Roster / Item Analysis / Attempt History.
  * Reading this as: admin LMS operator console for assessment scoring, industrial green tokens via --admin-*.
  */
-export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: string }) {
+export function AdminScoreQuizLearnersPage({
+  assessmentId,
+  initialLearners,
+}: {
+  assessmentId: string;
+  /** The first page of learners, loaded by the server; the first browser load is skipped when present. */
+  initialLearners?: ReportInitialData<ScoreLearnersPayload> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatSubmitted = withViewer(formatSubmittedFor, viewer);
+  const formatClock = withViewer(formatClockFor, viewer);
   const [tab, setTab] = useState<DetailTab>("learners");
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialLearners ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const [assessment, setAssessment] = useState<ScoreLearnersAssessment | null>(null);
-  const [courseId, setCourseId] = useState<string | null>(null);
-  const [courseTitle, setCourseTitle] = useState<string | null>(null);
-  const [summary, setSummary] = useState<ScoreLearnersSummary | null>(null);
-  const [learners, setLearners] = useState<ScoreLearnerItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [assessment, setAssessment] = useState<ScoreLearnersAssessment | null>(
+    initial?.data.assessment ?? null,
+  );
+  const [courseId, setCourseId] = useState<string | null>(initial?.data.courseId ?? null);
+  const [courseTitle, setCourseTitle] = useState<string | null>(initial?.data.courseTitle ?? null);
+  const [summary, setSummary] = useState<ScoreLearnersSummary | null>(
+    initial?.data.summary ?? null,
+  );
+  const [learners, setLearners] = useState<ScoreLearnerItem[]>(initial?.data.items ?? []);
+  const [page, setPage] = useState<number>(SCORE_LEARNERS_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [resultStatus, setResultStatus] = useState<"" | ScoreLearnerResultStatus>("");
   const [minScore, setMinScore] = useState("");
   const [maxScore, setMaxScore] = useState("");
-  const [attemptsFilter, setAttemptsFilter] = useState<ScoreAttemptsFilter>("any");
-  const [view, setView] = useState<ScoreLearnerView>("all");
+  const [attemptsFilter, setAttemptsFilter] = useState<ScoreAttemptsFilter>(
+    SCORE_LEARNERS_DEFAULTS.attemptsFilter,
+  );
+  const [view, setView] = useState<ScoreLearnerView>(SCORE_LEARNERS_DEFAULTS.view);
   const [submittedFrom, setSubmittedFrom] = useState("");
   const [submittedTo, setSubmittedTo] = useState("");
   const [columnsOpen, setColumnsOpen] = useState(false);
@@ -539,58 +573,64 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
     Boolean(submittedFrom) ||
     Boolean(submittedTo);
 
-  const loadLearners = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchScoreLearners(assessmentId, {
-        ...(debouncedSearch ? { learnerName: debouncedSearch } : {}),
-        ...(resultStatus ? { resultStatus } : {}),
-        ...(parsedMinScore != null ? { minScore: parsedMinScore } : {}),
-        ...(parsedMaxScore != null ? { maxScore: parsedMaxScore } : {}),
-        attemptsFilter,
-        view,
-        ...(dateInputToStartIso(submittedFrom)
-          ? { submittedFrom: dateInputToStartIso(submittedFrom) }
-          : {}),
-        ...(dateInputToEndIso(submittedTo) ? { submittedTo: dateInputToEndIso(submittedTo) } : {}),
-        sortBy: "submitted_at",
-        sortDir: "desc",
-        columns,
-        page,
-      });
-      setAssessment(response.data.assessment);
-      setCourseId(response.data.courseId);
-      setCourseTitle(response.data.courseTitle);
-      setSummary(response.data.summary);
-      setLearners(response.data.items);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadLearners = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchScoreLearners(assessmentId, {
+          ...(debouncedSearch ? { learnerName: debouncedSearch } : {}),
+          ...(resultStatus ? { resultStatus } : {}),
+          ...(parsedMinScore != null ? { minScore: parsedMinScore } : {}),
+          ...(parsedMaxScore != null ? { maxScore: parsedMaxScore } : {}),
+          attemptsFilter,
+          view,
+          ...(dateInputToStartIso(submittedFrom)
+            ? { submittedFrom: dateInputToStartIso(submittedFrom) }
+            : {}),
+          ...(dateInputToEndIso(submittedTo)
+            ? { submittedTo: dateInputToEndIso(submittedTo) }
+            : {}),
+          sortBy: SCORE_LEARNERS_DEFAULTS.sortBy,
+          sortDir: SCORE_LEARNERS_DEFAULTS.sortDir,
+          columns,
+          page,
+        });
+        setAssessment(response.data.assessment);
+        setCourseId(response.data.courseId);
+        setCourseTitle(response.data.courseTitle);
+        setSummary(response.data.summary);
+        setLearners(response.data.items);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load learners.",
-      );
-      setLearners([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    assessmentId,
-    attemptsFilter,
-    columns,
-    debouncedSearch,
-    page,
-    parsedMaxScore,
-    parsedMinScore,
-    resultStatus,
-    submittedFrom,
-    submittedTo,
-    view,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load learners.",
+        );
+        setLearners([]);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      assessmentId,
+      attemptsFilter,
+      columns,
+      debouncedSearch,
+      page,
+      parsedMaxScore,
+      parsedMinScore,
+      resultStatus,
+      submittedFrom,
+      submittedTo,
+      view,
+    ],
+  );
 
   const loadItems = useCallback(async () => {
     setItemsLoading(true);
@@ -638,9 +678,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
     }
   }, [assessmentId, attemptsPage, debouncedAttemptSearch]);
 
-  useEffect(() => {
-    void loadLearners();
-  }, [loadLearners]);
+  useReportLoad(loadLearners, initial);
 
   useEffect(() => {
     if (tab === "items") void loadItems();
@@ -806,6 +844,7 @@ export function AdminScoreQuizLearnersPage({ assessmentId }: { assessmentId: str
     submittedTo,
     title,
     view,
+    viewer,
   ]);
 
   function openCohortDrawer(mode: CohortDrawerMode) {

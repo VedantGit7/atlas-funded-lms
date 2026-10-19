@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -20,6 +20,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   extendProgressLearnerAccess,
   fetchProgressLearnerDetail,
@@ -29,11 +30,15 @@ import {
   type ProgressProductType,
 } from "./admin-progress-score-roster-api";
 import { ResetProgressModal } from "./ResetProgressModal";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type AdminProgressLearnerDetailPageProps = {
   productType: ProgressProductType;
   productId: string;
   enrollmentId: string;
+  /** The learner, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<ProgressLearnerDetail> | null;
 };
 
 function Shimmer({ className }: { className?: string }) {
@@ -56,11 +61,11 @@ function learnerInitials(name: string, email: string | null): string {
   return `${source[0]?.[0] ?? ""}${source[1]?.[0] ?? ""}`.toUpperCase();
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 0) return "Just now";
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
@@ -71,11 +76,12 @@ function formatRelative(value: string | null): string {
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 
-function formatAbsolute(value: string | null): string {
+function formatAbsoluteFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -84,11 +90,12 @@ function formatAbsolute(value: string | null): string {
   });
 }
 
-function formatExpiryChip(value: string | null): string | null {
+function formatExpiryChipFor(value: string | null, viewer: ViewerLocale): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return `Expires ${date.toLocaleDateString(undefined, {
+  return `Expires ${date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -148,12 +155,18 @@ function chunkWeeks(
   return weeks;
 }
 
-function monthLabels(days: ProgressLearnerDetail["activity"]["days"]): string[] {
+function monthLabelsFor(
+  days: ProgressLearnerDetail["activity"]["days"],
+  viewer: ViewerLocale,
+): string[] {
   if (days.length === 0) return [];
   const labels: string[] = [];
   let lastMonth = "";
   for (const day of days) {
-    const month = new Date(`${day.date}T00:00:00`).toLocaleString(undefined, { month: "short" });
+    const month = new Date(`${day.date}T00:00:00Z`).toLocaleString(viewer.locale, {
+      timeZone: "UTC",
+      month: "short",
+    });
     if (month !== lastMonth) {
       labels.push(month);
       lastMonth = month;
@@ -203,18 +216,39 @@ function LoadingSkeleton() {
   );
 }
 
-export function AdminProgressLearnerDetailPage({
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminProgressLearnerDetailPage(props: AdminProgressLearnerDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <ProgressLearnerDetailReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ProgressLearnerDetailReport({
   productType,
   productId,
   enrollmentId,
+  initialDetail,
 }: AdminProgressLearnerDetailPageProps) {
-  const [detail, setDetail] = useState<ProgressLearnerDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  const viewer = useViewerLocale();
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
+  const formatExpiryChip = withViewer(formatExpiryChipFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<ProgressLearnerDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
   const [extendOpen, setExtendOpen] = useState(false);
-  const [extendDate, setExtendDate] = useState("");
+  const [extendDate, setExtendDate] = useState(() =>
+    initial ? defaultExtendDate(initial.data.learner.expiresAt) : "",
+  );
   const [extendBusy, setExtendBusy] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   const [messageSubject, setMessageSubject] = useState("");
@@ -223,33 +257,38 @@ export function AdminProgressLearnerDetailPage({
 
   const rosterHref = `/admin/reports/progress-score/progress/${productType}/${productId}`;
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchProgressLearnerDetail(productType, productId, enrollmentId);
-      setDetail(response.data);
-      setExtendDate(defaultExtendDate(response.data.learner.expiresAt));
-    } catch (err) {
-      setDetail(null);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchProgressLearnerDetail(productType, productId, enrollmentId);
+        setDetail(response.data);
+        setExtendDate(defaultExtendDate(response.data.learner.expiresAt));
+      } catch (err) {
+        setDetail(null);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Unable to load learner progress.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [enrollmentId, productId, productType]);
+            : err instanceof Error
+              ? err.message
+              : "Unable to load learner progress.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [enrollmentId, productId, productType],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const weeks = useMemo(() => (detail ? chunkWeeks(detail.activity.days) : []), [detail]);
-  const months = useMemo(() => (detail ? monthLabels(detail.activity.days) : []), [detail]);
+  const months = useMemo(
+    () => (detail ? monthLabelsFor(detail.activity.days, viewer) : []),
+    [detail, viewer],
+  );
 
   async function handleReset(payload: { clearAssessmentAttempts: boolean; reason: string }) {
     setResetBusy(true);
@@ -848,7 +887,8 @@ export function AdminProgressLearnerDetailPage({
                       <div className="mt-3 flex items-center justify-between border-t border-[var(--admin-border)] pt-3">
                         <span className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                           {assessment.submittedAt
-                            ? new Date(assessment.submittedAt).toLocaleDateString(undefined, {
+                            ? new Date(assessment.submittedAt).toLocaleDateString(viewer.locale, {
+                                timeZone: viewer.timeZone,
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",

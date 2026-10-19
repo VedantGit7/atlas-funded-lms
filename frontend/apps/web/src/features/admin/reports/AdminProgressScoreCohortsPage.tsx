@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ArrowRight,
   ChevronLeft,
@@ -21,7 +21,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  COHORTS_PAGE_SIZE,
+  type CohortsInitial,
   fetchCohortGroups,
   fetchCohortMessages,
   retryCohortMessage,
@@ -30,14 +33,17 @@ import {
 } from "./admin-progress-score-roster-api";
 import { CohortActionsDrawer, type CohortDrawerMode } from "./CohortActionsDrawer";
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
-function formatCount(n: number) {
-  return new Intl.NumberFormat().format(n);
+function formatCountFor(n: number, viewer: ViewerLocale) {
+  return new Intl.NumberFormat(viewer.locale).format(n);
 }
 
-function formatWhen(iso: string) {
+function formatWhenFor(iso: string, viewer: ViewerLocale) {
   try {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(viewer.locale, {
+      timeZone: viewer.timeZone,
       dateStyle: "medium",
       timeStyle: "short",
     }).format(new Date(iso));
@@ -119,16 +125,29 @@ function statusPill(status: CohortMessageItem["status"]) {
   return "border-[var(--admin-border)] bg-[var(--admin-surface-high)] text-[var(--admin-on-surface)]";
 }
 
-export function AdminProgressScoreCohortsPage() {
-  const [loading, setLoading] = useState(true);
+export function AdminProgressScoreCohortsPage({
+  initialCohorts,
+}: {
+  /** The first page of groups and of messages, loaded by the server; the first browser load is skipped when present. */
+  initialCohorts?: ReportInitialData<CohortsInitial> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialCohorts ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
-  const [groups, setGroups] = useState<CohortGroupItem[]>([]);
-  const [messages, setMessages] = useState<CohortMessageItem[]>([]);
+  const [groups, setGroups] = useState<CohortGroupItem[]>(initial?.data.groups.items ?? []);
+  const [messages, setMessages] = useState<CohortMessageItem[]>(initial?.data.messages.items ?? []);
   const [groupsPage, setGroupsPage] = useState(1);
   const [messagesPage, setMessagesPage] = useState(1);
-  const [groupsTotal, setGroupsTotal] = useState(0);
-  const [groupsHasPrev, setGroupsHasPrev] = useState(false);
-  const [groupsHasNext, setGroupsHasNext] = useState(false);
+  const [groupsTotal, setGroupsTotal] = useState(initial?.data.groups.pageInfo.totalCount ?? 0);
+  const [groupsHasPrev, setGroupsHasPrev] = useState(
+    initial?.data.groups.pageInfo.hasPreviousPage ?? false,
+  );
+  const [groupsHasNext, setGroupsHasNext] = useState(
+    initial?.data.groups.pageInfo.hasNextPage ?? false,
+  );
   const [q, setQ] = useState("");
   const [qDraft, setQDraft] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -136,35 +155,37 @@ export function AdminProgressScoreCohortsPage() {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [retryBusy, setRetryBusy] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [groupsRes, messagesRes] = await Promise.all([
-        fetchCohortGroups({ ...(q ? { q } : {}), page: groupsPage, limit: 10 }),
-        fetchCohortMessages({ page: messagesPage, limit: 10 }),
-      ]);
-      setGroups(groupsRes.data.items);
-      setGroupsTotal(groupsRes.data.pageInfo.totalCount);
-      setGroupsHasPrev(groupsRes.data.pageInfo.hasPreviousPage);
-      setGroupsHasNext(groupsRes.data.pageInfo.hasNextPage);
-      setMessages(messagesRes.data.items);
-    } catch (err) {
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const [groupsRes, messagesRes] = await Promise.all([
+          fetchCohortGroups({ ...(q ? { q } : {}), page: groupsPage, limit: COHORTS_PAGE_SIZE }),
+          fetchCohortMessages({ page: messagesPage, limit: COHORTS_PAGE_SIZE }),
+        ]);
+        setGroups(groupsRes.data.items);
+        setGroupsTotal(groupsRes.data.pageInfo.totalCount);
+        setGroupsHasPrev(groupsRes.data.pageInfo.hasPreviousPage);
+        setGroupsHasNext(groupsRes.data.pageInfo.hasNextPage);
+        setMessages(messagesRes.data.items);
+      } catch (err) {
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Unable to load cohorts.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [groupsPage, messagesPage, q]);
+            : err instanceof Error
+              ? err.message
+              : "Unable to load cohorts.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [groupsPage, messagesPage, q],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleRetry(campaignId: string) {
     setRetryBusy(campaignId);
@@ -578,7 +599,7 @@ export function AdminProgressScoreCohortsPage() {
                             {msg.sentByLabel ?? "Admin"}
                           </span>
                           <br />
-                          {formatWhen(msg.sentAt)}
+                          {formatWhenFor(msg.sentAt, viewer)}
                         </div>
                         {msg.failedCount > 0 ? (
                           <button
