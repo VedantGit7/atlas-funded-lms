@@ -1,6 +1,7 @@
 import type { PaymentTransactionDetail } from "./admin-payments-roster-api";
-import { formatAbsolute, formatMoney } from "./payment-transaction-ui";
+import { formatAbsoluteFor, formatMoneyFor } from "./payment-transaction-ui";
 import { refundOutcomeTitle } from "./refund-submission";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 export function PaymentRefundHistory({
   refunds,
@@ -9,6 +10,9 @@ export function PaymentRefundHistory({
   refunds: PaymentTransactionDetail["refunds"];
   currency: string;
 }) {
+  const viewer = useViewerLocale();
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
+  const formatMoney = withViewer(formatMoneyFor, viewer);
   return (
     <section>
       <h3 className="mb-2 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]">

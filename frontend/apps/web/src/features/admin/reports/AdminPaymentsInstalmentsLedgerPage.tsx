@@ -17,7 +17,10 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  PAYMENT_INSTALMENTS_DEFAULTS,
+  type PaymentInstalmentsPayload,
   exportPaymentInstalments,
   fetchPaymentInstalmentDetail,
   fetchPaymentInstalments,
@@ -30,6 +33,8 @@ import {
 } from "./admin-payments-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 const PAGE_SIZE_OPTIONS = [
   { value: "12", label: "12" },
@@ -52,16 +57,7 @@ const NEXT_DUE_OPTIONS = [
   { value: "30days", label: "Next 30 days" },
 ];
 
-const DEFAULT_COLUMNS: PaymentInstalmentColumnKey[] = [
-  "learner_name",
-  "email",
-  "product_title",
-  "pricing_plan_label",
-  "remaining_amount_cents",
-  "total_amount_cents",
-  "status",
-  "next_due_at",
-];
+const DEFAULT_COLUMNS: PaymentInstalmentColumnKey[] = [...PAYMENT_INSTALMENTS_DEFAULTS.columns];
 
 const EMPTY_SUMMARY: PaymentInstalmentSummary = {
   currency: "USD",
@@ -73,18 +69,19 @@ const EMPTY_SUMMARY: PaymentInstalmentSummary = {
   completedThisMonthCount: 0,
 };
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatDate(iso: string | null): string {
+function formatDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -133,7 +130,17 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-export function AdminPaymentsInstalmentsLedgerPage() {
+export function AdminPaymentsInstalmentsLedgerPage({
+  initialPlans,
+}: {
+  /** The first page of plans, loaded by the server; the first browser load is skipped when present. */
+  initialPlans?: ReportInitialData<PaymentInstalmentsPayload> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatDate = withViewer(formatDateFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialPlans ?? null);
   const [search, setSearch] = useState("");
   const [searchApplied, setSearchApplied] = useState("");
   const [status, setStatus] = useState("");
@@ -142,20 +149,22 @@ export function AdminPaymentsInstalmentsLedgerPage() {
   const [pricingPlanLabel, setPricingPlanLabel] = useState("");
   const [pricingPlanLabelApplied, setPricingPlanLabelApplied] = useState("");
   const [nextDue, setNextDue] = useState<"" | "overdue" | "7days" | "30days">("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
-  const [sortBy, setSortBy] = useState("created_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState<number>(PAYMENT_INSTALMENTS_DEFAULTS.page);
+  const [pageSize, setPageSize] = useState<number>(PAYMENT_INSTALMENTS_DEFAULTS.limit);
+  const [sortBy, setSortBy] = useState<string>(PAYMENT_INSTALMENTS_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(PAYMENT_INSTALMENTS_DEFAULTS.sortDir);
   const [columns, setColumns] = useState<PaymentInstalmentColumnKey[]>(DEFAULT_COLUMNS);
   const [draftColumns, setDraftColumns] = useState<PaymentInstalmentColumnKey[]>(DEFAULT_COLUMNS);
   const [columnsOpen, setColumnsOpen] = useState(false);
-  const [items, setItems] = useState<PaymentInstalmentPlanItem[]>([]);
-  const [summary, setSummary] = useState<PaymentInstalmentSummary>(EMPTY_SUMMARY);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [items, setItems] = useState<PaymentInstalmentPlanItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<PaymentInstalmentSummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<PaymentInstalmentScheduleItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -226,57 +235,59 @@ export function AdminPaymentsInstalmentsLedgerPage() {
     setPage(1);
   }
 
-  const loadPlans = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentInstalments({
-        q: searchApplied || undefined,
-        status: status || undefined,
-        productTitle: productTitleApplied || undefined,
-        pricingPlanLabel: pricingPlanLabelApplied || undefined,
-        nextDue: nextDue || undefined,
-        sortBy,
-        sortDir,
-        columns,
-        page,
-        limit: pageSize,
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (loadError) {
-      setItems([]);
-      setSummary(EMPTY_SUMMARY);
-      setTotalCount(0);
-      setTotalPages(0);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadPlans = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentInstalments({
+          q: searchApplied || undefined,
+          status: status || undefined,
+          productTitle: productTitleApplied || undefined,
+          pricingPlanLabel: pricingPlanLabelApplied || undefined,
+          nextDue: nextDue || undefined,
+          sortBy,
+          sortDir,
+          columns,
+          page,
+          limit: pageSize,
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (loadError) {
+        setItems([]);
+        setSummary(EMPTY_SUMMARY);
+        setTotalCount(0);
+        setTotalPages(0);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load instalment plans.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    columns,
-    nextDue,
-    page,
-    pageSize,
-    pricingPlanLabelApplied,
-    productTitleApplied,
-    searchApplied,
-    sortBy,
-    sortDir,
-    status,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load instalment plans.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      columns,
+      nextDue,
+      page,
+      pageSize,
+      pricingPlanLabelApplied,
+      productTitleApplied,
+      searchApplied,
+      sortBy,
+      sortDir,
+      status,
+    ],
+  );
 
-  useEffect(() => {
-    void loadPlans();
-  }, [loadPlans]);
+  useReportLoad(loadPlans, initial);
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {

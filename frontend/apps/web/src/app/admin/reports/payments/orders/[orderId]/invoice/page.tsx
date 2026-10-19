@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "../../../../../../../components/patterns/AdminPageGate";
 import { AdminPaymentsInvoicePreviewPage } from "../../../../../../../features/admin/reports/AdminPaymentsInvoicePreviewPage";
+import { loadPaymentInvoiceData } from "../../../../../../../lib/server/report-payments-initial-data";
 import { runTenantStateGate } from "../../../../../../../lib/server/tenant-state-gate";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -26,7 +27,10 @@ export default async function AdminOrderInvoiceRoute({ params }: AdminOrderInvoi
     notFound();
   }
 
-  const gate = await runTenantStateGate();
+  const [gate, initialInvoice] = await Promise.all([
+    runTenantStateGate(),
+    loadPaymentInvoiceData(orderId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -40,7 +44,7 @@ export default async function AdminOrderInvoiceRoute({ params }: AdminOrderInvoi
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Invoice">
-      <AdminPaymentsInvoicePreviewPage orderId={orderId} />
+      <AdminPaymentsInvoicePreviewPage orderId={orderId} initialInvoice={initialInvoice} />
     </AdminPageGate>
   );
 }

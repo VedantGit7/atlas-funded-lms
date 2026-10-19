@@ -1,22 +1,25 @@
-export function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+import type { ViewerLocale } from "./viewer-time";
+
+export function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency.toUpperCase()}`;
 }
 
-export function formatAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+export function formatAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-export function formatAbsolute(iso: string | null): string {
+export function formatAbsoluteFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -25,24 +28,33 @@ export function formatAbsolute(iso: string | null): string {
   });
 }
 
-export function formatClock(iso: string | null): string {
+export function formatClockFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
   });
 }
 
-export function formatDayClock(iso: string | null): { day: string; time: string } {
+export function formatDayClockFor(
+  iso: string | null,
+  viewer: ViewerLocale,
+): { day: string; time: string } {
   if (!iso) return { day: "—", time: "" };
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return { day: "—", time: "" };
   return {
-    day: date.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
-    time: date.toLocaleTimeString(undefined, {
+    day: date.toLocaleDateString(viewer.locale, {
+      timeZone: viewer.timeZone,
+      month: "short",
+      day: "numeric",
+    }),
+    time: date.toLocaleTimeString(viewer.locale, {
+      timeZone: viewer.timeZone,
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",

@@ -164,6 +164,28 @@ type PageInfo = {
   hasPreviousPage: boolean;
 };
 
+/** A page of transactions, for the ledger and a gateway's transactions tab. */
+export type PaymentTransactionsPayload = {
+  items: PaymentTransactionItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+  totals: {
+    pageAmountCents: number;
+    filteredAmountCents: number;
+    currency: string;
+  };
+};
+
+export type PaymentInvoicesPayload = {
+  items: PaymentInvoiceItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+  totals: {
+    pageByCurrency: Array<{ currency: string; amountCents: number }>;
+    filteredByCurrency: Array<{ currency: string; amountCents: number }>;
+  };
+};
+
 export type PaymentRefundsList = {
   summary: {
     refundableCount: number;
@@ -299,6 +321,13 @@ export type PaymentInstalmentCancelInfo = {
   accessNote: string | null;
 };
 
+export type PaymentInstalmentsPayload = {
+  items: PaymentInstalmentPlanItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+  summary: PaymentInstalmentSummary;
+};
+
 export type PaymentInstalmentPlanDetail = {
   plan: PaymentInstalmentPlanItem;
   instalments: PaymentInstalmentScheduleItem[];
@@ -396,10 +425,18 @@ export type PaymentOverviewFilters = {
   grain?: PaymentOverviewGrain | undefined;
 };
 
+/** Date inputs (YYYY-MM-DD) from `days` days before `now` to `now`, in UTC. */
+export function paymentsRangeBefore(
+  days: number,
+  now: Date = new Date(),
+): { from: string; to: string } {
+  const from = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  return { from: from.toISOString().slice(0, 10), to: now.toISOString().slice(0, 10) };
+}
+
 /** The overview's default date inputs (YYYY-MM-DD): the 34 days up to `now`, in UTC. */
 export function paymentOverviewDefaultRange(now: Date = new Date()): { from: string; to: string } {
-  const from = new Date(now.getTime() - 34 * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: now.toISOString().slice(0, 10) };
+  return paymentsRangeBefore(34, now);
 }
 
 /** What the overview opens on, besides its range; the server loads the first one with it too. */
@@ -421,7 +458,135 @@ export async function fetchPaymentOverview(filters: PaymentOverviewFilters) {
   return clientApi.get<{ data: PaymentOverview }>(paymentOverviewPath(filters));
 }
 
-export async function fetchPaymentTransactions(filters: {
+/*
+ * What each Payments page opens on. The server loads the first page with the
+ * same values, so the page can skip its first browser load.
+ */
+
+/** The transactions ledger: the 34 days up to today, newest payment first. */
+export const PAYMENT_TRANSACTIONS_DEFAULTS = {
+  rangeDays: 34,
+  dateField: "paid_at",
+  sortBy: "paid_at",
+  sortDir: "desc",
+  columns: [
+    "learner_name",
+    "email",
+    "product_title",
+    "product_type",
+    "gateway_key",
+    "coupon_amount_cents",
+    "amount_cents",
+    "currency",
+    "status",
+    "invoice_number",
+    "paid_at",
+  ],
+  page: 1,
+  limit: 12,
+} as const satisfies {
+  rangeDays: number;
+  dateField: "paid_at" | "created_at";
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  columns: readonly PaymentTransactionColumnKey[];
+  page: number;
+  limit: number;
+};
+
+/** The invoices ledger: the 29 days up to today, newest payment first. */
+export const PAYMENT_INVOICES_DEFAULTS = {
+  rangeDays: 29,
+  sortBy: "paid_at",
+  sortDir: "desc",
+  columns: [
+    "invoice_number",
+    "learner_name",
+    "email",
+    "billing_name",
+    "product_title",
+    "amount_cents",
+    "tax_amount_cents",
+    "currency",
+    "paid_at",
+  ],
+  page: 1,
+  limit: 12,
+} as const satisfies {
+  rangeDays: number;
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  columns: readonly PaymentInvoiceColumnKey[];
+  page: number;
+  limit: number;
+};
+
+/** The instalment plans ledger: newest plan first. */
+export const PAYMENT_INSTALMENTS_DEFAULTS = {
+  sortBy: "created_at",
+  sortDir: "desc",
+  columns: [
+    "learner_name",
+    "email",
+    "product_title",
+    "pricing_plan_label",
+    "remaining_amount_cents",
+    "total_amount_cents",
+    "status",
+    "next_due_at",
+  ],
+  page: 1,
+  limit: 12,
+} as const satisfies {
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  columns: readonly PaymentInstalmentColumnKey[];
+  page: number;
+  limit: number;
+};
+
+/** The refunds ledger: the refundable queue, newest payment first. */
+export const PAYMENT_REFUNDS_DEFAULTS = {
+  queue: "refundable",
+  sortBy: "paid_at",
+  sortDir: "desc",
+  page: 1,
+  limit: 20,
+} as const satisfies {
+  queue: PaymentRefundsQueue;
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  page: number;
+  limit: number;
+};
+
+/** The gateways list and a gateway's page cover the 29 days up to today. */
+export const PAYMENT_GATEWAYS_RANGE_DAYS = 29;
+
+/** A gateway's transactions tab, which its page opens on. */
+export const PAYMENT_GATEWAY_TRANSACTIONS_DEFAULTS = {
+  sortBy: "paid_at",
+  sortDir: "desc",
+  columns: [
+    "learner_name",
+    "email",
+    "product_title",
+    "amount_cents",
+    "currency",
+    "status",
+    "paid_at",
+  ],
+  page: 1,
+  limit: 12,
+} as const satisfies {
+  sortBy: string;
+  sortDir: "asc" | "desc";
+  columns: readonly PaymentTransactionColumnKey[];
+  page: number;
+  limit: number;
+};
+
+export type PaymentTransactionsFilters = {
   paidFrom?: string | undefined;
   paidTo?: string | undefined;
   learnerName?: string | undefined;
@@ -432,65 +597,63 @@ export async function fetchPaymentTransactions(filters: {
   dateField?: "paid_at" | "created_at" | undefined;
   sortBy?: string | undefined;
   sortDir?: "asc" | "desc" | undefined;
-  columns?: PaymentTransactionColumnKey[] | undefined;
+  columns?: readonly PaymentTransactionColumnKey[] | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: PaymentTransactionItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      totals: {
-        pageAmountCents: number;
-        filteredAmountCents: number;
-        currency: string;
-      };
-    };
-  }>(
-    `/api/v1/reports/payments/transactions${buildQuery({
-      paidFrom: filters.paidFrom,
-      paidTo: filters.paidTo,
-      learnerName: filters.learnerName,
-      productType: filters.productType,
-      gatewayKey: filters.gatewayKey,
-      status: filters.status,
-      amountMinCents: filters.amountMinCents,
-      dateField: filters.dateField,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      columns: filters.columns?.join(","),
-      page: filters.page,
-      limit: filters.limit,
-    })}`,
-  );
+};
+
+export function paymentTransactionsPath(filters: PaymentTransactionsFilters): string {
+  return `/api/v1/reports/payments/transactions${buildQuery({
+    paidFrom: filters.paidFrom,
+    paidTo: filters.paidTo,
+    learnerName: filters.learnerName,
+    productType: filters.productType,
+    gatewayKey: filters.gatewayKey,
+    status: filters.status,
+    amountMinCents: filters.amountMinCents,
+    dateField: filters.dateField,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    columns: filters.columns?.join(","),
+    page: filters.page,
+    limit: filters.limit,
+  })}`;
 }
 
-export async function fetchPaymentGateways(filters?: {
-  paidFrom?: string | undefined;
-  paidTo?: string | undefined;
-}) {
-  return clientApi.get<{ data: PaymentGatewaysList }>(
-    `/api/v1/reports/payments/gateways${buildQuery({
-      paidFrom: filters?.paidFrom,
-      paidTo: filters?.paidTo,
-    })}`,
-  );
+export async function fetchPaymentTransactions(filters: PaymentTransactionsFilters) {
+  return clientApi.get<{ data: PaymentTransactionsPayload }>(paymentTransactionsPath(filters));
 }
 
-export async function fetchPaymentGatewayDetail(
+type PaymentRangeFilters = { paidFrom?: string | undefined; paidTo?: string | undefined };
+
+export function paymentGatewaysPath(filters?: PaymentRangeFilters): string {
+  return `/api/v1/reports/payments/gateways${buildQuery({
+    paidFrom: filters?.paidFrom,
+    paidTo: filters?.paidTo,
+  })}`;
+}
+
+export async function fetchPaymentGateways(filters?: PaymentRangeFilters) {
+  return clientApi.get<{ data: PaymentGatewaysList }>(paymentGatewaysPath(filters));
+}
+
+export function paymentGatewayDetailPath(
   gatewayKey: string,
-  filters?: { paidFrom?: string | undefined; paidTo?: string | undefined },
-) {
+  filters?: PaymentRangeFilters,
+): string {
+  return `/api/v1/reports/payments/gateways/${encodeURIComponent(gatewayKey)}${buildQuery({
+    paidFrom: filters?.paidFrom,
+    paidTo: filters?.paidTo,
+  })}`;
+}
+
+export async function fetchPaymentGatewayDetail(gatewayKey: string, filters?: PaymentRangeFilters) {
   return clientApi.get<{ data: PaymentGatewayDetail }>(
-    `/api/v1/reports/payments/gateways/${encodeURIComponent(gatewayKey)}${buildQuery({
-      paidFrom: filters?.paidFrom,
-      paidTo: filters?.paidTo,
-    })}`,
+    paymentGatewayDetailPath(gatewayKey, filters),
   );
 }
 
-export async function fetchPaymentRefunds(filters: {
+export type PaymentRefundsFilters = {
   queue?: PaymentRefundsQueue | undefined;
   paidFrom?: string | undefined;
   paidTo?: string | undefined;
@@ -500,50 +663,45 @@ export async function fetchPaymentRefunds(filters: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: PaymentRefundsList }>(
-    `/api/v1/reports/payments/refunds${buildQuery({
-      queue: filters.queue,
-      paidFrom: filters.paidFrom,
-      paidTo: filters.paidTo,
-      q: filters.q,
-      gatewayKey: filters.gatewayKey,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      page: filters.page,
-      limit: filters.limit,
-    })}`,
-  );
+};
+
+export function paymentRefundsPath(filters: PaymentRefundsFilters): string {
+  return `/api/v1/reports/payments/refunds${buildQuery({
+    queue: filters.queue,
+    paidFrom: filters.paidFrom,
+    paidTo: filters.paidTo,
+    q: filters.q,
+    gatewayKey: filters.gatewayKey,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    page: filters.page,
+    limit: filters.limit,
+  })}`;
 }
 
-export async function fetchGatewayTransactions(
+export async function fetchPaymentRefunds(filters: PaymentRefundsFilters) {
+  return clientApi.get<{ data: PaymentRefundsList }>(paymentRefundsPath(filters));
+}
+
+export type PaymentGatewayTransactionsFilters = {
+  paidFrom?: string | undefined;
+  paidTo?: string | undefined;
+  learnerName?: string | undefined;
+  productType?: string | undefined;
+  status?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: readonly PaymentTransactionColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+export function paymentGatewayTransactionsPath(
   gatewayKey: string,
-  filters: {
-    paidFrom?: string | undefined;
-    paidTo?: string | undefined;
-    learnerName?: string | undefined;
-    productType?: string | undefined;
-    status?: string | undefined;
-    sortBy?: string | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    columns?: PaymentTransactionColumnKey[] | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  },
-) {
-  return clientApi.get<{
-    data: {
-      items: PaymentTransactionItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      totals: {
-        pageAmountCents: number;
-        filteredAmountCents: number;
-        currency: string;
-      };
-    };
-  }>(
-    `/api/v1/reports/payments/gateways/${encodeURIComponent(gatewayKey)}/transactions${buildQuery({
+  filters: PaymentGatewayTransactionsFilters,
+): string {
+  return `/api/v1/reports/payments/gateways/${encodeURIComponent(gatewayKey)}/transactions${buildQuery(
+    {
       paidFrom: filters.paidFrom,
       paidTo: filters.paidTo,
       learnerName: filters.learnerName,
@@ -554,7 +712,16 @@ export async function fetchGatewayTransactions(
       columns: filters.columns?.join(","),
       page: filters.page,
       limit: filters.limit,
-    })}`,
+    },
+  )}`;
+}
+
+export async function fetchGatewayTransactions(
+  gatewayKey: string,
+  filters: PaymentGatewayTransactionsFilters,
+) {
+  return clientApi.get<{ data: PaymentTransactionsPayload }>(
+    paymentGatewayTransactionsPath(gatewayKey, filters),
   );
 }
 
@@ -576,7 +743,7 @@ export async function setPaymentGatewayPublished(gatewayId: string, published: b
   );
 }
 
-export async function fetchPaymentInvoices(filters: {
+export type PaymentInvoicesFilters = {
   paidFrom?: string | undefined;
   paidTo?: string | undefined;
   learnerName?: string | undefined;
@@ -585,41 +752,37 @@ export async function fetchPaymentInvoices(filters: {
   currency?: string | undefined;
   sortBy?: string | undefined;
   sortDir?: "asc" | "desc" | undefined;
-  columns?: PaymentInvoiceColumnKey[] | undefined;
+  columns?: readonly PaymentInvoiceColumnKey[] | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: PaymentInvoiceItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      totals: {
-        pageByCurrency: Array<{ currency: string; amountCents: number }>;
-        filteredByCurrency: Array<{ currency: string; amountCents: number }>;
-      };
-    };
-  }>(
-    `/api/v1/reports/payments/invoices${buildQuery({
-      paidFrom: filters.paidFrom,
-      paidTo: filters.paidTo,
-      learnerName: filters.learnerName,
-      email: filters.email,
-      q: filters.q,
-      currency: filters.currency,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      columns: filters.columns?.join(","),
-      page: filters.page,
-      limit: filters.limit,
-    })}`,
-  );
+};
+
+export function paymentInvoicesPath(filters: PaymentInvoicesFilters): string {
+  return `/api/v1/reports/payments/invoices${buildQuery({
+    paidFrom: filters.paidFrom,
+    paidTo: filters.paidTo,
+    learnerName: filters.learnerName,
+    email: filters.email,
+    q: filters.q,
+    currency: filters.currency,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    columns: filters.columns?.join(","),
+    page: filters.page,
+    limit: filters.limit,
+  })}`;
+}
+
+export async function fetchPaymentInvoices(filters: PaymentInvoicesFilters) {
+  return clientApi.get<{ data: PaymentInvoicesPayload }>(paymentInvoicesPath(filters));
+}
+
+export function paymentInvoiceDetailPath(orderId: string): string {
+  return `/api/v1/reports/payments/invoices/${encodeURIComponent(orderId)}`;
 }
 
 export async function downloadPaymentInvoice(orderId: string) {
-  return clientApi.get<{ data: PaymentInvoiceDetail }>(
-    `/api/v1/reports/payments/invoices/${orderId}`,
-  );
+  return clientApi.get<{ data: PaymentInvoiceDetail }>(paymentInvoiceDetailPath(orderId));
 }
 
 export async function fetchPaymentInvoiceDetail(orderId: string) {
@@ -730,10 +893,12 @@ export type PaymentTransactionDetail = {
   metadata: Record<string, unknown> | null;
 };
 
+export function paymentTransactionDetailPath(orderId: string): string {
+  return `/api/v1/reports/payments/transactions/${encodeURIComponent(orderId)}`;
+}
+
 export async function fetchPaymentTransactionDetail(orderId: string) {
-  return clientApi.get<{ data: PaymentTransactionDetail }>(
-    `/api/v1/reports/payments/transactions/${orderId}`,
-  );
+  return clientApi.get<{ data: PaymentTransactionDetail }>(paymentTransactionDetailPath(orderId));
 }
 
 export async function refundPaymentTransaction(
@@ -769,7 +934,7 @@ export async function refundPaymentTransaction(
   );
 }
 
-export async function fetchPaymentInstalments(filters: {
+export type PaymentInstalmentsFilters = {
   learnerName?: string | undefined;
   email?: string | undefined;
   q?: string | undefined;
@@ -779,38 +944,55 @@ export async function fetchPaymentInstalments(filters: {
   nextDue?: "overdue" | "7days" | "30days" | undefined;
   sortBy?: string | undefined;
   sortDir?: "asc" | "desc" | undefined;
-  columns?: PaymentInstalmentColumnKey[] | undefined;
+  columns?: readonly PaymentInstalmentColumnKey[] | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: PaymentInstalmentPlanItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-      summary: PaymentInstalmentSummary;
-    };
-  }>(
-    `/api/v1/reports/payments/instalments${buildQuery({
-      learnerName: filters.learnerName,
-      email: filters.email,
-      q: filters.q,
-      status: filters.status,
-      productTitle: filters.productTitle,
-      pricingPlanLabel: filters.pricingPlanLabel,
-      nextDue: filters.nextDue,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      columns: filters.columns?.join(","),
-      page: filters.page,
-      limit: filters.limit,
-    })}`,
-  );
+};
+
+export function paymentInstalmentsPath(filters: PaymentInstalmentsFilters): string {
+  return `/api/v1/reports/payments/instalments${buildQuery({
+    learnerName: filters.learnerName,
+    email: filters.email,
+    q: filters.q,
+    status: filters.status,
+    productTitle: filters.productTitle,
+    pricingPlanLabel: filters.pricingPlanLabel,
+    nextDue: filters.nextDue,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    columns: filters.columns?.join(","),
+    page: filters.page,
+    limit: filters.limit,
+  })}`;
+}
+
+export async function fetchPaymentInstalments(filters: PaymentInstalmentsFilters) {
+  return clientApi.get<{ data: PaymentInstalmentsPayload }>(paymentInstalmentsPath(filters));
+}
+
+export function paymentInstalmentDetailPath(planId: string): string {
+  return `/api/v1/reports/payments/instalments/${encodeURIComponent(planId)}`;
 }
 
 export async function fetchPaymentInstalmentDetail(planId: string) {
-  return clientApi.get<{ data: PaymentInstalmentPlanDetail }>(
-    `/api/v1/reports/payments/instalments/${planId}`,
+  return clientApi.get<{ data: PaymentInstalmentPlanDetail }>(paymentInstalmentDetailPath(planId));
+}
+
+/** A course the new-plan form offers as the plan's product. */
+export type PaymentInstalmentCourseOption = {
+  id: string;
+  title: string;
+  priceCents: number | null;
+  currency: string | null;
+  status?: string;
+};
+
+/** The courses the new-plan form lists. */
+export const PAYMENT_INSTALMENT_COURSES_PATH = "/api/v1/courses?view=studio&limit=100";
+
+export async function fetchPaymentInstalmentCourses() {
+  return clientApi.get<{ data: { items: PaymentInstalmentCourseOption[] } }>(
+    PAYMENT_INSTALMENT_COURSES_PATH,
   );
 }
 

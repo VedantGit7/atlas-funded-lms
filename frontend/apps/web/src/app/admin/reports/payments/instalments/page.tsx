@@ -2,10 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminPaymentsInstalmentsLedgerPage } from "../../../../../features/admin/reports/AdminPaymentsInstalmentsLedgerPage";
+import { loadPaymentInstalmentsData } from "../../../../../lib/server/report-payments-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminPaymentsInstalmentsRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialPlans] = await Promise.all([
+    runTenantStateGate(),
+    loadPaymentInstalmentsData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -19,7 +23,7 @@ export default async function AdminPaymentsInstalmentsRoutePage() {
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Instalments">
-      <AdminPaymentsInstalmentsLedgerPage />
+      <AdminPaymentsInstalmentsLedgerPage initialPlans={initialPlans} />
     </AdminPageGate>
   );
 }

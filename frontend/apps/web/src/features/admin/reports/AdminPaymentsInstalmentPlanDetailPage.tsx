@@ -17,8 +17,9 @@ import {
   User,
   Wallet,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchPaymentInstalmentDetail,
   type PaymentInstalmentPlanDetail,
@@ -27,34 +28,40 @@ import {
 import { AdminPaymentInstalmentCancelModal } from "./AdminPaymentInstalmentCancelModal";
 import { AdminPaymentInstalmentRecordModal } from "./AdminPaymentInstalmentRecordModal";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type Props = {
   planId: string;
+  /** The plan, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<PaymentInstalmentPlanDetail> | null;
 };
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatDate(iso: string | null): string {
+function formatDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-function formatDateTime(iso: string | null): string {
+function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -71,27 +78,27 @@ function shortOrderId(id: string): string {
   return id.replace(/-/g, "").slice(0, 8).toUpperCase();
 }
 
-function relativeDueLabel(iso: string, now = new Date()): string | null {
+function relativeDueLabel(iso: string, now: number): string | null {
   const due = new Date(iso);
   if (Number.isNaN(due.getTime())) return null;
-  const days = Math.round((due.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+  const days = Math.round((due.getTime() - now) / (24 * 60 * 60 * 1000));
   if (days < 0) return `${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} ago`;
   if (days === 0) return "Due today";
   return `In ${days} day${days === 1 ? "" : "s"}`;
 }
 
-function overdueDays(iso: string | null, now = new Date()): number | null {
+function overdueDays(iso: string | null, now: number): number | null {
   if (!iso) return null;
   const due = new Date(iso);
   if (Number.isNaN(due.getTime())) return null;
-  const days = Math.floor((now.getTime() - due.getTime()) / (24 * 60 * 60 * 1000));
+  const days = Math.floor((now - due.getTime()) / (24 * 60 * 60 * 1000));
   return days > 0 ? days : null;
 }
 
-function isOverdueRow(item: PaymentInstalmentScheduleItem, now = new Date()): boolean {
+function isOverdueRow(item: PaymentInstalmentScheduleItem, now: number): boolean {
   if (item.status === "overdue") return true;
   if (item.status !== "scheduled" && item.status !== "overdue") return false;
-  return new Date(item.dueAt).getTime() < now.getTime();
+  return new Date(item.dueAt).getTime() < now;
 }
 
 function statusPill(status: string): { label: string; className: string } {
@@ -130,38 +137,58 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
-  const [detail, setDetail] = useState<PaymentInstalmentPlanDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+/**
+ * Due labels on the page count days from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminPaymentsInstalmentPlanDetailPage(props: Props) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <InstalmentPlanDetail {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function InstalmentPlanDetail({ planId, initialDetail }: Props) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatDate = withViewer(formatDateFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<PaymentInstalmentPlanDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
   const [recordTarget, setRecordTarget] = useState<PaymentInstalmentScheduleItem | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentInstalmentDetail(planId);
-      setDetail(response.data);
-    } catch (err) {
-      setDetail(null);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentInstalmentDetail(planId);
+        setDetail(response.data);
+      } catch (err) {
+        setDetail(null);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load instalment plan.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [planId]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load instalment plan.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [planId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const plan = detail?.plan ?? null;
   const instalments = detail?.instalments ?? [];
@@ -169,9 +196,12 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
   const nextPayable = useMemo(
     () =>
       instalments.find(
-        (item) => item.status === "scheduled" || item.status === "overdue" || isOverdueRow(item),
+        (item) =>
+          item.status === "scheduled" ||
+          item.status === "overdue" ||
+          isOverdueRow(item, viewer.now),
       ) ?? null,
-    [instalments],
+    [instalments, viewer.now],
   );
 
   const collectedCents = plan ? Math.max(0, plan.totalAmountCents - plan.remainingAmountCents) : 0;
@@ -181,7 +211,10 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
       : 0;
 
   const daysOverdue = plan?.overdueCount
-    ? overdueDays(instalments.find((item) => isOverdueRow(item))?.dueAt ?? plan.nextDueAt)
+    ? overdueDays(
+        instalments.find((item) => isOverdueRow(item, viewer.now))?.dueAt ?? plan.nextDueAt,
+        viewer.now,
+      )
     : null;
 
   const canMutate = plan ? plan.status !== "cancelled" && plan.status !== "completed" : false;
@@ -433,13 +466,13 @@ export function AdminPaymentsInstalmentPlanDetailPage({ planId }: Props) {
                     </thead>
                     <tbody>
                       {instalments.map((item) => {
-                        const overdue = isOverdueRow(item);
+                        const overdue = isOverdueRow(item, viewer.now);
                         const isNext = nextPayable?.id === item.id;
                         const pill = statusPill(
                           overdue && item.status !== "paid" ? "overdue" : item.status,
                         );
                         const dueHint =
-                          item.status === "paid" ? null : relativeDueLabel(item.dueAt);
+                          item.status === "paid" ? null : relativeDueLabel(item.dueAt, viewer.now);
                         return (
                           <tr
                             key={item.id}

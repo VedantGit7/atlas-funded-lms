@@ -21,12 +21,13 @@ import { useMemo, useState, type ReactNode } from "react";
 import type { PaymentTransactionDetail } from "./admin-payments-roster-api";
 import { PaymentRefundHistory } from "./PaymentRefundHistory";
 import {
-  formatAbsolute,
-  formatClock,
-  formatDayClock,
-  formatMoney,
+  formatAbsoluteFor,
+  formatClockFor,
+  formatDayClockFor,
+  formatMoneyFor,
   statusBadge,
 } from "./payment-transaction-ui";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 type Variant = "page" | "drawer";
 
@@ -60,6 +61,11 @@ export function AdminPaymentTransactionDetailBody({
   onRefund,
   onOpenFull,
 }: Props) {
+  const viewer = useViewerLocale();
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
+  const formatClock = withViewer(formatClockFor, viewer);
+  const formatDayClock = withViewer(formatDayClockFor, viewer);
+  const formatMoney = withViewer(formatMoneyFor, viewer);
   const [metaOpen, setMetaOpen] = useState(false);
   const badge = statusBadge(detail.status);
   const isDrawer = variant === "drawer";

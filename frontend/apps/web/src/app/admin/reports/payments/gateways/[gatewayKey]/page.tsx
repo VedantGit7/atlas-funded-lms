@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminPaymentsGatewayDetailPage } from "../../../../../../features/admin/reports/AdminPaymentsGatewayDetailPage";
+import { loadPaymentGatewayData } from "../../../../../../lib/server/report-payments-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type Props = {
@@ -11,7 +12,10 @@ type Props = {
 export default async function AdminPaymentsGatewayDetailRoutePage({ params }: Props) {
   const { gatewayKey } = await params;
   const decoded = decodeURIComponent(gatewayKey);
-  const gate = await runTenantStateGate();
+  const [gate, initial] = await Promise.all([
+    runTenantStateGate(),
+    loadPaymentGatewayData(decoded),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +29,11 @@ export default async function AdminPaymentsGatewayDetailRoutePage({ params }: Pr
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Gateway details">
-      <AdminPaymentsGatewayDetailPage gatewayKey={decoded} />
+      <AdminPaymentsGatewayDetailPage
+        gatewayKey={decoded}
+        initialDetail={initial.detail}
+        initialTransactions={initial.transactions}
+      />
     </AdminPageGate>
   );
 }

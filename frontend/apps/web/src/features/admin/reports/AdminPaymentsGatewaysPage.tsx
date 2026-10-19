@@ -13,9 +13,13 @@ import {
   Terminal,
   Unplug,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  PAYMENT_GATEWAYS_RANGE_DAYS,
+  paymentsRangeBefore,
+  type PaymentGatewaysList,
   dateInputToEndIso,
   dateInputToStartIso,
   fetchPaymentGateways,
@@ -23,26 +27,21 @@ import {
   type PaymentGatewaysSummary,
 } from "./admin-payments-roster-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
-function defaultDateRange(): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - 29 * 24 * 60 * 60 * 1000);
-  const toIso = to.toISOString().slice(0, 10);
-  const fromIso = from.toISOString().slice(0, 10);
-  return { from: fromIso, to: toIso };
-}
-
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -150,43 +149,65 @@ function GatewaysLoadingSkeleton() {
   );
 }
 
-export function AdminPaymentsGatewaysPage() {
-  const defaults = useMemo(() => defaultDateRange(), []);
+export function AdminPaymentsGatewaysPage({
+  initialGateways,
+}: {
+  /**
+   * The gateways over the default range, loaded by the server with the range
+   * it counted; the first browser load is skipped when present.
+   */
+  initialGateways?: ReportInitialDataInRange<PaymentGatewaysList> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialGateways ?? null);
+  // The server's range when it loaded the list, so both render the same dates
+  // even if the clocks disagree or the day turned in between.
+  const defaults = useMemo(
+    () => initial?.range ?? paymentsRangeBefore(PAYMENT_GATEWAYS_RANGE_DAYS),
+    [initial],
+  );
   const [paidFrom, setPaidFrom] = useState(defaults.from);
   const [paidTo, setPaidTo] = useState(defaults.to);
-  const [items, setItems] = useState<PaymentGatewayItem[]>([]);
-  const [summary, setSummary] = useState<PaymentGatewaysSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<PaymentGatewayItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<PaymentGatewaysSummary | null>(
+    initial?.data.summary ?? null,
+  );
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentGateways({
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-    } catch (loadError) {
-      setItems([]);
-      setSummary(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentGateways({
+          paidFrom: dateInputToStartIso(paidFrom),
+          paidTo: dateInputToEndIso(paidTo),
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+      } catch (loadError) {
+        setItems([]);
+        setSummary(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load payment gateways.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [paidFrom, paidTo]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load payment gateways.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [paidFrom, paidTo],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const activeShareItems = useMemo(() => items.filter((item) => item.paidAmountCents > 0), [items]);
 
@@ -458,7 +479,7 @@ export function AdminPaymentsGatewaysPage() {
                             Txns
                           </span>
                           <span className="font-mono text-xs text-[var(--admin-on-surface)]">
-                            {gateway.paidTransactionCount.toLocaleString()}
+                            {gateway.paidTransactionCount.toLocaleString(viewer.locale)}
                           </span>
                         </div>
                         <div className="flex flex-col">
