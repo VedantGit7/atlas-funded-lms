@@ -2,10 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminCustomFieldSegmentsPage } from "../../../../../features/admin/reports/AdminCustomFieldSegmentsPage";
+import { loadCustomFieldSegmentsData } from "../../../../../lib/server/report-custom-field-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminCustomFieldSegmentsRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialSegments] = await Promise.all([
+    runTenantStateGate(),
+    loadCustomFieldSegmentsData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -19,7 +23,7 @@ export default async function AdminCustomFieldSegmentsRoutePage() {
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Segments">
-      <AdminCustomFieldSegmentsPage />
+      <AdminCustomFieldSegmentsPage initialSegments={initialSegments} />
     </AdminPageGate>
   );
 }

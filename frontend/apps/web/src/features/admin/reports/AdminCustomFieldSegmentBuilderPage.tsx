@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import {
   ghostButtonClassName,
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  segmentFieldOptionsFrom,
+  type SegmentBuilderInitial,
   createCustomFieldSegment,
   emptyConditionsTree,
   fetchCustomFieldSegment,
@@ -26,6 +29,8 @@ import {
   type SegmentFieldOption,
   type SegmentPreviewLearner,
 } from "./admin-custom-field-segments-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale } from "./viewer-time";
 
 function isAborted(signal: AbortSignal): boolean {
   return signal.aborted;
@@ -305,6 +310,7 @@ function ResultsRail({
   learners: SegmentPreviewLearner[];
   loading: boolean;
 }) {
+  const viewer = useViewerLocale();
   return (
     <aside className="hidden w-[300px] shrink-0 flex-col overflow-hidden rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] lg:flex">
       <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 text-center">
@@ -319,7 +325,7 @@ function ResultsRail({
         ) : (
           <>
             <div className="font-mono text-2xl font-semibold leading-tight text-[var(--admin-on-surface)]">
-              {loading ? "…" : matchedCount.toLocaleString()}
+              {loading ? "…" : matchedCount.toLocaleString(viewer.locale)}
             </div>
             <div className="text-xs text-[var(--admin-on-surface-variant)]">learners match</div>
           </>
@@ -379,16 +385,35 @@ function ResultsRail({
   );
 }
 
-export function AdminCustomFieldSegmentBuilderPage({ segmentId }: { segmentId?: string }) {
+export function AdminCustomFieldSegmentBuilderPage({
+  segmentId,
+  initialBuilder,
+}: {
+  segmentId?: string;
+  /** The field catalogue and, when editing, the segment, loaded by the server; the first browser load is skipped when present. */
+  initialBuilder?: ReportInitialData<SegmentBuilderInitial> | null;
+}) {
+  const viewer = useViewerLocale();
   const router = useRouter();
   const isEdit = Boolean(segmentId);
-  const [fields, setFields] = useState<SegmentFieldOption[]>([]);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [visibility, setVisibility] = useState<"shared" | "private">("shared");
-  const [refreshMode, setRefreshMode] = useState<"live" | "snapshot">("live");
-  const [conditions, setConditions] = useState<SegmentConditionsTree>(emptyConditionsTree);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the form has changed since.
+  const [initial] = useState(() => initialBuilder ?? null);
+  const initialSegment = initial?.data.segment ?? null;
+  const [fields, setFields] = useState<SegmentFieldOption[]>(() =>
+    initial ? segmentFieldOptionsFrom(initial.data.catalogue) : [],
+  );
+  const [name, setName] = useState(initialSegment?.name ?? "");
+  const [description, setDescription] = useState(initialSegment?.description ?? "");
+  const [visibility, setVisibility] = useState<"shared" | "private">(
+    initialSegment?.visibility ?? "shared",
+  );
+  const [refreshMode, setRefreshMode] = useState<"live" | "snapshot">(
+    initialSegment?.refreshMode ?? "live",
+  );
+  const [conditions, setConditions] = useState<SegmentConditionsTree>(
+    initialSegment?.conditions ?? emptyConditionsTree,
+  );
+  const [loading, setLoading] = useState(initial === null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [matchedCount, setMatchedCount] = useState(0);
@@ -398,10 +423,15 @@ export function AdminCustomFieldSegmentBuilderPage({ segmentId }: { segmentId?: 
   const [learners, setLearners] = useState<SegmentPreviewLearner[]>([]);
   const [previewLoading, setPreviewLoading] = useState(false);
 
-  useEffect(() => {
-    const ac = new AbortController();
-    async function boot() {
-      setLoading(true);
+  const bootAbortRef = useRef<AbortController | null>(null);
+
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      bootAbortRef.current?.abort();
+      const ac = new AbortController();
+      bootAbortRef.current = ac;
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
       setError(null);
       try {
         const fieldOptions = await fetchSegmentFieldOptions();
@@ -421,14 +451,15 @@ export function AdminCustomFieldSegmentBuilderPage({ segmentId }: { segmentId?: 
           setError(err instanceof ClientApiError ? err.message : "Failed to load builder.");
         }
       } finally {
-        if (!isAborted(ac.signal)) setLoading(false);
+        if (!isAborted(ac.signal) && !soft) setLoading(false);
       }
-    }
-    void boot();
-    return () => {
-      ac.abort();
-    };
-  }, [segmentId]);
+    },
+    [segmentId],
+  );
+
+  useReportLoad(load, initial);
+
+  useEffect(() => () => bootAbortRef.current?.abort(), []);
 
   const canSave = useMemo(() => {
     if (!name.trim()) return false;
@@ -983,7 +1014,7 @@ export function AdminCustomFieldSegmentBuilderPage({ segmentId }: { segmentId?: 
               Learners match
             </div>
             <div className="font-mono text-lg font-semibold text-[var(--admin-on-surface)]">
-              {incomplete ? "—" : matchedCount.toLocaleString()}
+              {incomplete ? "—" : matchedCount.toLocaleString(viewer.locale)}
             </div>
           </div>
           {incomplete ? (

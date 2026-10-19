@@ -21,6 +21,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchCustomFieldLearnerDetail,
   formatMoney,
@@ -30,6 +31,8 @@ import {
   type CustomFieldLearnerField,
   type CustomFieldLearnerHistoryItem,
 } from "./admin-custom-field-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const filterInputClassName =
   "h-9 w-full rounded-sm border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-[13px] text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)]/70 focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]";
@@ -45,6 +48,8 @@ type Props = {
   variant?: Variant;
   onClose?: () => void;
   initialMode?: Mode;
+  /** The learner's values, loaded by the server for the page; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<CustomFieldLearnerDetailData> | null;
 };
 
 type DraftMap = Record<string, string>;
@@ -71,30 +76,36 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatPct(value: number | null): string {
+function formatPctFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
-function formatDateTime(value: string | null): string {
+function formatDateTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -103,11 +114,11 @@ function formatDateTime(value: string | null): string {
   });
 }
 
-function formatRelativeDate(value: string | null): string {
+function formatRelativeDateFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absDays = Math.round(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
   if (absDays < 1) {
     const absHours = Math.round(Math.abs(diffMs) / (1000 * 60 * 60));
@@ -130,7 +141,7 @@ function formatRelativeDate(value: string | null): string {
       "week",
     );
   }
-  return formatDateShort(value);
+  return formatDateShortFor(value, viewer);
 }
 
 function fieldTypeMarker(fieldType: string): string {
@@ -240,18 +251,24 @@ function draftToValueJson(draft: string, fieldType: string): unknown {
   return trimmed;
 }
 
-function displayValueForDraft(draft: string, fieldType: string): string | null {
+function displayValueForDraft(
+  draft: string,
+  fieldType: string,
+  viewer: ViewerLocale,
+): string | null {
   const trimmed = draft.trim();
   if (!trimmed) return null;
   const type = fieldType.toLowerCase();
   if (type === "boolean" || type === "bool" || type === "boo") {
     return isTruthyBoolean(trimmed) ? "Yes" : "No";
   }
-  if (type === "date" || type === "dat") return formatDateShort(trimmed);
+  if (type === "date" || type === "dat") return formatDateShortFor(trimmed, viewer);
   return trimmed;
 }
 
 function FieldValueDisplay({ value, fieldType }: { value: string | null; fieldType: string }) {
+  const viewer = useViewerLocale();
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
   if (value == null || value.trim() === "") {
     return <span className="text-[var(--admin-on-surface-variant)]">—</span>;
   }
@@ -375,6 +392,9 @@ function HistoryPanel({
   defaultOpen?: boolean;
   sticky?: boolean;
 }) {
+  const viewer = useViewerLocale();
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatRelativeDate = withViewer(formatRelativeDateFor, viewer);
   const [open, setOpen] = useState(Boolean(defaultOpen));
 
   return (
@@ -722,49 +742,79 @@ function FieldEditControl({
   );
 }
 
-export function AdminCustomFieldLearnerValuesView({
+/**
+ * Relative times count from when the server rendered the page until hydration
+ * ends (see viewer-time), so both renders read the same.
+ */
+export function AdminCustomFieldLearnerValuesView(props: Props) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <CustomFieldLearnerValuesReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function CustomFieldLearnerValuesReport({
   membershipId,
   variant = "page",
   onClose,
   initialMode = "view",
+  initialDetail,
 }: Props) {
-  const [loading, setLoading] = useState(true);
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatRelativeDate = withViewer(formatRelativeDateFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [detail, setDetail] = useState<CustomFieldLearnerDetailData | null>(null);
+  const [detail, setDetail] = useState<CustomFieldLearnerDetailData | null>(initial?.data ?? null);
   const [mode, setMode] = useState<Mode>(initialMode);
-  const [drafts, setDrafts] = useState<DraftMap>({});
-  const [baseline, setBaseline] = useState<DraftMap>({});
+  const [drafts, setDrafts] = useState<DraftMap>(() =>
+    initial ? buildDrafts(initial.data.fields) : {},
+  );
+  const [baseline, setBaseline] = useState<DraftMap>(() =>
+    initial ? buildDrafts(initial.data.fields) : {},
+  );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   const [messageSubject, setMessageSubject] = useState("");
   const [messageBody, setMessageBody] = useState("");
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchCustomFieldLearnerDetail(membershipId);
-      setDetail(response.data);
-      const nextDrafts = buildDrafts(response.data.fields);
-      setDrafts(nextDrafts);
-      setBaseline(nextDrafts);
-    } catch (loadError) {
-      setDetail(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchCustomFieldLearnerDetail(membershipId);
+        setDetail(response.data);
+        const nextDrafts = buildDrafts(response.data.fields);
+        setDrafts(nextDrafts);
+        setBaseline(nextDrafts);
+      } catch (loadError) {
+        setDetail(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load learner field values.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [membershipId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load learner field values.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [membershipId],
+  );
+
+  useReportLoad(load, initial);
 
   useEffect(() => {
-    void load();
     setMode(initialMode);
     setConfirmOpen(false);
     setMessageOpen(false);
@@ -798,13 +848,13 @@ export function AdminCustomFieldLearnerValuesView({
         definitionId: field.definitionId,
         label: field.label,
         fieldType: field.fieldType,
-        before: displayValueForDraft(original, field.fieldType),
-        after: displayValueForDraft(draft, field.fieldType),
+        before: displayValueForDraft(original, field.fieldType, viewer),
+        after: displayValueForDraft(draft, field.fieldType, viewer),
         valueJson: draftToValueJson(draft, field.fieldType),
       });
     }
     return result;
-  }, [baseline, detail, drafts]);
+  }, [baseline, detail, drafts, viewer]);
 
   function enterEdit() {
     if (!detail) return;
@@ -1162,7 +1212,7 @@ export function AdminCustomFieldLearnerValuesView({
                 <div className="flex flex-col gap-1 bg-[var(--admin-surface)] p-4">
                   <span className={labelClassName}>Total spent</span>
                   <span className="font-mono text-[18px] leading-none font-medium tabular-nums text-[var(--admin-on-surface)]">
-                    {formatMoney(learner.totalSpentCents, learner.currency)}
+                    {formatMoney(learner.totalSpentCents, learner.currency, viewer.locale)}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1 bg-[var(--admin-surface)] p-4">
@@ -1335,7 +1385,7 @@ export function AdminCustomFieldLearnerValuesView({
                             {changed ? (
                               <p className="mt-1.5 text-[11px] text-[var(--admin-warning)]">
                                 Changed from{" "}
-                                {displayValueForDraft(original, field.fieldType) ?? "—"}
+                                {displayValueForDraft(original, field.fieldType, viewer) ?? "—"}
                               </p>
                             ) : null}
                           </li>

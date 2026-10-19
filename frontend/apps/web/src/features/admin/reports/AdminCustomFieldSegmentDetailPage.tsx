@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowUp,
@@ -22,8 +22,12 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { formatMoney } from "./admin-custom-field-roster-api";
 import {
+  CUSTOM_FIELD_SEGMENT_LEARNERS_PAGE_SIZE,
+  type CustomFieldSegmentLearnersPayload,
+  type CustomFieldSegmentViewPayload,
   createGroupFromSegment,
   downloadCsv,
   duplicateCustomFieldSegment,
@@ -36,6 +40,8 @@ import {
   type SegmentLearnerRow,
 } from "./admin-custom-field-segments-api";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 function operatorLabel(operator: string): string {
   switch (operator) {
@@ -115,31 +121,35 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number | null | undefined): string {
+function formatCountFor(value: number | null | undefined, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return value.toLocaleString();
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatPct(value: number | null | undefined): string {
+function formatPctFor(value: number | null | undefined, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    day: "numeric",
+    month: "short",
+  });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absHours = Math.round(Math.abs(diffMs) / (1000 * 60 * 60));
   if (absHours < 1) return "Just now";
   if (absHours < 24) {
@@ -226,17 +236,57 @@ function LoadingSkeleton() {
   );
 }
 
-export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: string }) {
-  const [segment, setSegment] = useState<CustomFieldSegmentItem | null>(null);
-  const [analytics, setAnalytics] = useState<SegmentAnalytics | null>(null);
-  const [zeroMatch, setZeroMatch] = useState(false);
-  const [loading, setLoading] = useState(true);
+type CustomFieldSegmentDetailPageProps = {
+  segmentId: string;
+  /** The segment and its analytics, loaded by the server; the first browser load is skipped when present. */
+  initialView?: ReportInitialData<CustomFieldSegmentViewPayload> | null;
+  /** The first page of matched learners, loaded by the server once the view loaded. */
+  initialLearners?: ReportInitialData<CustomFieldSegmentLearnersPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminCustomFieldSegmentDetailPage(props: CustomFieldSegmentDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialView?.loadedAt ?? null}>
+      <CustomFieldSegmentDetailReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function CustomFieldSegmentDetailReport({
+  segmentId,
+  initialView,
+  initialLearners,
+}: CustomFieldSegmentDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => ({
+    view: initialView ?? null,
+    learners: initialLearners ?? null,
+  }));
+  const [segment, setSegment] = useState<CustomFieldSegmentItem | null>(
+    initial.view?.data.segment ?? null,
+  );
+  const [analytics, setAnalytics] = useState<SegmentAnalytics | null>(
+    initial.view?.data.analytics ?? null,
+  );
+  const [zeroMatch, setZeroMatch] = useState(initial.view?.data.zeroMatch ?? false);
+  const [loading, setLoading] = useState(initial.view === null);
   const [error, setError] = useState<string | null>(null);
-  const [learners, setLearners] = useState<SegmentLearnerRow[]>([]);
+  const [learners, setLearners] = useState<SegmentLearnerRow[]>(initial.learners?.data.items ?? []);
   const [fieldDefinitions, setFieldDefinitions] = useState<
     Array<{ id: string; key: string; label: string; fieldType: string }>
-  >([]);
-  const [learnersTotal, setLearnersTotal] = useState(0);
+  >(initial.learners?.data.fieldDefinitions ?? []);
+  const [learnersTotal, setLearnersTotal] = useState(
+    initial.learners?.data.pageInfo.totalCount ?? 0,
+  );
   const [learnersPage, setLearnersPage] = useState(1);
   const [learnersLoading, setLearnersLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -245,55 +295,68 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
   const [cohortOpen, setCohortOpen] = useState(false);
   const [busyAction, setBusyAction] = useState(false);
 
-  const loadView = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchCustomFieldSegmentView(segmentId);
-      setSegment(response.data.segment);
-      setAnalytics(response.data.analytics);
-      setZeroMatch(response.data.zeroMatch);
-    } catch (err) {
-      setError(err instanceof ClientApiError ? err.message : "Couldn't load segment analytics.");
-      setSegment(null);
-      setAnalytics(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [segmentId]);
-
-  const loadLearners = useCallback(async () => {
-    setLearnersLoading(true);
-    try {
-      const response = await fetchCustomFieldSegmentLearners(segmentId, {
-        ...(search ? { q: search } : {}),
-        page: learnersPage,
-        limit: 25,
-      });
-      setLearners(response.data.items);
-      setFieldDefinitions(response.data.fieldDefinitions);
-      setLearnersTotal(response.data.pageInfo.totalCount);
-      if (
-        !response.data.pageInfo.hasNextPage &&
-        learnersPage > 1 &&
-        response.data.items.length === 0
-      ) {
-        setLearnersPage(1);
+  const loadView = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchCustomFieldSegmentView(segmentId);
+        setSegment(response.data.segment);
+        setAnalytics(response.data.analytics);
+        setZeroMatch(response.data.zeroMatch);
+      } catch (err) {
+        setError(err instanceof ClientApiError ? err.message : "Couldn't load segment analytics.");
+        setSegment(null);
+        setAnalytics(null);
+      } finally {
+        if (!soft) setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof ClientApiError ? err.message : "Couldn't load matched learners.");
-    } finally {
-      setLearnersLoading(false);
-    }
-  }, [segmentId, search, learnersPage]);
+    },
+    [segmentId],
+  );
 
-  useEffect(() => {
-    void loadView();
-  }, [loadView]);
+  const loadLearners = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLearnersLoading(true);
+      try {
+        const response = await fetchCustomFieldSegmentLearners(segmentId, {
+          ...(search ? { q: search } : {}),
+          page: learnersPage,
+          limit: CUSTOM_FIELD_SEGMENT_LEARNERS_PAGE_SIZE,
+        });
+        setLearners(response.data.items);
+        setFieldDefinitions(response.data.fieldDefinitions);
+        setLearnersTotal(response.data.pageInfo.totalCount);
+        if (
+          !response.data.pageInfo.hasNextPage &&
+          learnersPage > 1 &&
+          response.data.items.length === 0
+        ) {
+          setLearnersPage(1);
+        }
+      } catch (err) {
+        setError(err instanceof ClientApiError ? err.message : "Couldn't load matched learners.");
+      } finally {
+        if (!soft) setLearnersLoading(false);
+      }
+    },
+    [segmentId, search, learnersPage],
+  );
 
-  useEffect(() => {
-    if (!loading && !error) void loadLearners();
-  }, [loading, error, loadLearners]);
+  useReportLoad(loadView, initial.view);
+
+  // Learners load once the view did.
+  const loadLearnersOnceReady = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (loading || error) return;
+      await loadLearners(options);
+    },
+    [loading, error, loadLearners],
+  );
+
+  useReportLoad(loadLearnersOnceReady, initial.learners);
 
   const visibleCustomFields = useMemo(() => fieldDefinitions.slice(0, 6), [fieldDefinitions]);
 
@@ -572,7 +635,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
           <div className="font-mono text-2xl text-[var(--admin-on-surface)]">
             {analytics.averageTotalSpentCents == null
               ? "—"
-              : formatMoney(analytics.averageTotalSpentCents, analytics.currency)}
+              : formatMoney(analytics.averageTotalSpentCents, analytics.currency, viewer.locale)}
           </div>
         </div>
         <div className="flex h-28 flex-col justify-between rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
@@ -582,7 +645,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
           <div className="font-mono text-2xl text-[var(--admin-on-surface)]">
             {analytics.averageEnrollmentCount == null
               ? "—"
-              : analytics.averageEnrollmentCount.toLocaleString(undefined, {
+              : analytics.averageEnrollmentCount.toLocaleString(viewer.locale, {
                   maximumFractionDigits: 1,
                 })}
           </div>
@@ -1102,7 +1165,7 @@ export function AdminCustomFieldSegmentDetailPage({ segmentId }: { segmentId: st
                             </td>
                           ))}
                           <td className="px-4 text-right font-mono text-sm">
-                            {formatMoney(row.totalSpentCents, row.currency)}
+                            {formatMoney(row.totalSpentCents, row.currency, viewer.locale)}
                           </td>
                           <td className="px-4 text-sm text-[var(--admin-on-surface-variant)]">
                             {formatRelative(row.lastActiveAt)}

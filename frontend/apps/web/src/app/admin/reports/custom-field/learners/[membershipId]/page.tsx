@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminCustomFieldLearnerPage } from "../../../../../../features/admin/reports/AdminCustomFieldLearnerPage";
+import { loadCustomFieldLearnerData } from "../../../../../../lib/server/report-custom-field-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type Props = {
@@ -11,7 +12,10 @@ type Props = {
 export default async function AdminCustomFieldLearnerRoutePage({ params }: Props) {
   const { membershipId } = await params;
   const decoded = decodeURIComponent(membershipId);
-  const gate = await runTenantStateGate();
+  const [gate, initialDetail] = await Promise.all([
+    runTenantStateGate(),
+    loadCustomFieldLearnerData(decoded),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +29,7 @@ export default async function AdminCustomFieldLearnerRoutePage({ params }: Props
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Learner field values">
-      <AdminCustomFieldLearnerPage membershipId={decoded} />
+      <AdminCustomFieldLearnerPage membershipId={decoded} initialDetail={initialDetail} />
     </AdminPageGate>
   );
 }

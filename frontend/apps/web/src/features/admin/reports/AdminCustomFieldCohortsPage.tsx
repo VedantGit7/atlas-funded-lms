@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ArrowRight,
   ChevronLeft,
@@ -21,7 +21,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  CUSTOM_FIELD_COHORTS_PAGE_SIZE,
+  type CustomFieldCohortsInitial,
   fetchCustomFieldCohortGroups,
   fetchCustomFieldCohortMessages,
   retryCustomFieldCohortMessage,
@@ -33,14 +36,17 @@ import {
   type CustomFieldCohortDrawerMode,
 } from "./CustomFieldCohortActionsDrawer";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
-function formatCount(n: number) {
-  return new Intl.NumberFormat().format(n);
+function formatCountFor(n: number, viewer: ViewerLocale) {
+  return new Intl.NumberFormat(viewer.locale).format(n);
 }
 
-function formatWhen(iso: string) {
+function formatWhenFor(iso: string, viewer: ViewerLocale) {
   try {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(viewer.locale, {
+      timeZone: viewer.timeZone,
       dateStyle: "medium",
       timeStyle: "short",
     }).format(new Date(iso));
@@ -49,9 +55,10 @@ function formatWhen(iso: string) {
   }
 }
 
-function formatCreatedShort(iso: string) {
+function formatCreatedShortFor(iso: string, viewer: ViewerLocale) {
   try {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(viewer.locale, {
+      timeZone: viewer.timeZone,
       month: "short",
       day: "numeric",
     }).format(new Date(iso));
@@ -140,17 +147,36 @@ function DeliveryBar({ msg }: { msg: CustomFieldCohortMessageItem }) {
   );
 }
 
-export function AdminCustomFieldCohortsPage() {
-  const [loading, setLoading] = useState(true);
+export function AdminCustomFieldCohortsPage({
+  initialCohorts,
+}: {
+  /** The first page of groups and of messages, loaded by the server; the first browser load is skipped when present. */
+  initialCohorts?: ReportInitialData<CustomFieldCohortsInitial> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialCohorts ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
-  const [groups, setGroups] = useState<CustomFieldCohortGroupItem[]>([]);
-  const [messages, setMessages] = useState<CustomFieldCohortMessageItem[]>([]);
+  const [groups, setGroups] = useState<CustomFieldCohortGroupItem[]>(
+    initial?.data.groups.items ?? [],
+  );
+  const [messages, setMessages] = useState<CustomFieldCohortMessageItem[]>(
+    initial?.data.messages.items ?? [],
+  );
   const [groupsPage, setGroupsPage] = useState(1);
   const [messagesPage, setMessagesPage] = useState(1);
-  const [groupsTotal, setGroupsTotal] = useState(0);
-  const [groupsHasPrev, setGroupsHasPrev] = useState(false);
-  const [groupsHasNext, setGroupsHasNext] = useState(false);
-  const [messagesHasNext, setMessagesHasNext] = useState(false);
+  const [groupsTotal, setGroupsTotal] = useState(initial?.data.groups.pageInfo.totalCount ?? 0);
+  const [groupsHasPrev, setGroupsHasPrev] = useState(
+    initial?.data.groups.pageInfo.hasPreviousPage ?? false,
+  );
+  const [groupsHasNext, setGroupsHasNext] = useState(
+    initial?.data.groups.pageInfo.hasNextPage ?? false,
+  );
+  const [messagesHasNext, setMessagesHasNext] = useState(
+    initial?.data.messages.pageInfo.hasNextPage ?? false,
+  );
   const [q, setQ] = useState("");
   const [qDraft, setQDraft] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -159,36 +185,45 @@ export function AdminCustomFieldCohortsPage() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [retryBusy, setRetryBusy] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [groupsRes, messagesRes] = await Promise.all([
-        fetchCustomFieldCohortGroups({ q: q || undefined, page: groupsPage, limit: 10 }),
-        fetchCustomFieldCohortMessages({ page: messagesPage, limit: 10 }),
-      ]);
-      setGroups(groupsRes.data.items);
-      setGroupsTotal(groupsRes.data.pageInfo.totalCount);
-      setGroupsHasPrev(groupsRes.data.pageInfo.hasPreviousPage);
-      setGroupsHasNext(groupsRes.data.pageInfo.hasNextPage);
-      setMessages(messagesRes.data.items);
-      setMessagesHasNext(messagesRes.data.pageInfo.hasNextPage);
-    } catch (err) {
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const [groupsRes, messagesRes] = await Promise.all([
+          fetchCustomFieldCohortGroups({
+            q: q || undefined,
+            page: groupsPage,
+            limit: CUSTOM_FIELD_COHORTS_PAGE_SIZE,
+          }),
+          fetchCustomFieldCohortMessages({
+            page: messagesPage,
+            limit: CUSTOM_FIELD_COHORTS_PAGE_SIZE,
+          }),
+        ]);
+        setGroups(groupsRes.data.items);
+        setGroupsTotal(groupsRes.data.pageInfo.totalCount);
+        setGroupsHasPrev(groupsRes.data.pageInfo.hasPreviousPage);
+        setGroupsHasNext(groupsRes.data.pageInfo.hasNextPage);
+        setMessages(messagesRes.data.items);
+        setMessagesHasNext(messagesRes.data.pageInfo.hasNextPage);
+      } catch (err) {
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Unable to load cohorts.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [groupsPage, messagesPage, q]);
+            : err instanceof Error
+              ? err.message
+              : "Unable to load cohorts.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [groupsPage, messagesPage, q],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleRetry(campaignId: string) {
     setRetryBusy(campaignId);
@@ -388,7 +423,7 @@ export function AdminCustomFieldCohortsPage() {
                             </td>
                             <td className="px-4 text-xs text-[var(--admin-on-surface-variant)]">
                               <div>{group.createdByLabel ?? "System"}</div>
-                              <div>{formatCreatedShort(group.createdAt)}</div>
+                              <div>{formatCreatedShortFor(group.createdAt, viewer)}</div>
                             </td>
                             <td className="relative px-2 text-center">
                               <button
@@ -577,7 +612,7 @@ export function AdminCustomFieldCohortsPage() {
 
                     <div className="mt-3 flex items-center justify-between gap-2 border-t border-[var(--admin-border)] pt-3 pl-1 text-xs text-[var(--admin-on-surface-variant)]">
                       <span>
-                        Sent by {msg.sentByLabel ?? "System"} · {formatWhen(msg.sentAt)}
+                        Sent by {msg.sentByLabel ?? "System"} · {formatWhenFor(msg.sentAt, viewer)}
                       </span>
                       {msg.status === "partially_failed" || msg.status === "failed" ? (
                         <button

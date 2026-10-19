@@ -23,7 +23,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  CUSTOM_FIELD_DETAIL_PAGE_SIZE,
   createCustomFieldReportGroup,
   exportCustomFieldReport,
   fetchCustomFieldDetail,
@@ -39,8 +41,10 @@ import {
 } from "./admin-custom-field-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = CUSTOM_FIELD_DETAIL_PAGE_SIZE;
 
 const selectClassName =
   "h-9 min-w-[160px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-xs font-medium text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -64,30 +68,35 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatPct(value: number | null): string {
+function formatPctFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
-function formatRelativeDate(value: string | null): string {
+function formatRelativeDateFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absDays = Math.round(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
   if (absDays < 1) {
     const absHours = Math.round(Math.abs(diffMs) / (1000 * 60 * 60));
@@ -110,12 +119,12 @@ function formatRelativeDate(value: string | null): string {
       "week",
     );
   }
-  return formatDateShort(value);
+  return formatDateShortFor(value, viewer);
 }
 
-function formatStatNumber(value: number | null): string {
+function formatStatNumberFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  return value.toLocaleString(viewer.locale, { maximumFractionDigits: 2 });
 }
 
 function fieldTypeMarker(fieldType: string): string {
@@ -159,6 +168,8 @@ function isTruthyBoolean(value: string): boolean {
 }
 
 function FieldValueCell({ value, fieldType }: { value: string | null; fieldType: string }) {
+  const viewer = useViewerLocale();
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
   if (value == null || value.trim() === "") {
     return <span className="text-[var(--admin-on-surface-variant)]">—</span>;
   }
@@ -333,6 +344,9 @@ function DistributionBar({
   onClick?: () => void;
   active?: boolean;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
   const width = Math.min(100, Math.max(0, sharePct ?? 0));
   const content = (
     <>
@@ -394,6 +408,8 @@ function SelectDistribution({
   onFilterValue: (value: string | null) => void;
   valueFilter: string;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const maxCount = Math.max(0, ...data.options.map((option) => option.count));
   const used = data.options.filter((option) => !option.unused);
   const unused = data.options.filter((option) => option.unused);
@@ -477,6 +493,8 @@ function CrossTabulationPanel({
   onCompareChange: (value: string) => void;
   crossTab: CustomFieldDetailCrossTab | null;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   if (compareFields.length === 0) return null;
 
   const maxCell = crossTab
@@ -595,6 +613,9 @@ function CrossTabulationPanel({
 }
 
 function NumberDistribution({ data }: { data: CustomFieldDetailNumber }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatStatNumber = withViewer(formatStatNumberFor, viewer);
   const maxCount = Math.max(1, ...data.buckets.map((bucket) => bucket.count));
   const { stats } = data;
   const rangeMin = stats.min ?? data.buckets[0]?.min ?? 0;
@@ -771,6 +792,9 @@ function BooleanSparkline({ points }: { points: CustomFieldDetailBoolean["trend"
 }
 
 function BooleanDistribution({ data }: { data: CustomFieldDetailBoolean }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
   const total = Math.max(1, data.yesCount + data.noCount + data.missingCount);
   const yesPct = (data.yesCount / total) * 100;
   const noPct = (data.noCount / total) * 100;
@@ -910,14 +934,39 @@ function downloadLearnersCsv(learners: CustomFieldDetailLearner[], fieldKey: str
   URL.revokeObjectURL(url);
 }
 
-export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
+type CustomFieldDetailPageProps = {
+  fieldKey: string;
+  /** The field and its first page of learners, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<CustomFieldDetailData> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminCustomFieldDetailPage(props: CustomFieldDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <CustomFieldDetailReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function CustomFieldDetailReport({ fieldKey, initialDetail }: CustomFieldDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatRelativeDate = withViewer(formatRelativeDateFor, viewer);
   const router = useRouter();
   const searchId = useId();
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [detail, setDetail] = useState<CustomFieldDetailData | null>(null);
+  const [detail, setDetail] = useState<CustomFieldDetailData | null>(initial?.data ?? null);
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -962,37 +1011,39 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
     setSelectedIds(new Set());
   }, [debouncedSearch, valueFilter, appliedMinValue, appliedMaxValue]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchCustomFieldDetail(fieldKey, {
-        ...(debouncedSearch ? { q: debouncedSearch } : {}),
-        ...(valueFilter ? { valueFilter } : {}),
-        ...(appliedMinValue != null ? { minValue: appliedMinValue } : {}),
-        ...(appliedMaxValue != null ? { maxValue: appliedMaxValue } : {}),
-        ...(compareWith ? { compareWith } : {}),
-        page,
-        limit: PAGE_SIZE,
-      });
-      setDetail(response.data);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchCustomFieldDetail(fieldKey, {
+          ...(debouncedSearch ? { q: debouncedSearch } : {}),
+          ...(valueFilter ? { valueFilter } : {}),
+          ...(appliedMinValue != null ? { minValue: appliedMinValue } : {}),
+          ...(appliedMaxValue != null ? { maxValue: appliedMaxValue } : {}),
+          ...(compareWith ? { compareWith } : {}),
+          page,
+          limit: PAGE_SIZE,
+        });
+        setDetail(response.data);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load field detail.",
-      );
-      setDetail(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [appliedMaxValue, appliedMinValue, compareWith, debouncedSearch, fieldKey, page, valueFilter]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load field detail.",
+        );
+        setDetail(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [appliedMaxValue, appliedMinValue, compareWith, debouncedSearch, fieldKey, page, valueFilter],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const learners = detail?.learners.items ?? [];
   const pageInfo = detail?.learners.pageInfo;
@@ -1783,7 +1834,7 @@ export function AdminCustomFieldDetailPage({ fieldKey }: { fieldKey: string }) {
                         {formatCount(row.enrollmentCount)}
                       </td>
                       <td className="px-4 py-2 text-right font-mono text-[13px] tabular-nums text-[var(--admin-on-surface)]">
-                        {formatMoney(row.totalSpentCents, row.currency)}
+                        {formatMoney(row.totalSpentCents, row.currency, viewer.locale)}
                       </td>
                       <td className="px-4 py-2 text-right">
                         <div className="text-[13px] text-[var(--admin-on-surface)]">

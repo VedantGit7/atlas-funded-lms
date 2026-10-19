@@ -19,7 +19,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  type CustomFieldSegmentsPayload,
   createGroupFromSegment,
   deleteCustomFieldSegment,
   downloadCsv,
@@ -30,6 +32,8 @@ import {
   type CustomFieldSegmentSummary,
 } from "./admin-custom-field-segments-api";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const selectClassName =
   "h-9 min-w-[140px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-xs font-medium text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -47,23 +51,28 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number | null | undefined): string {
+function formatCountFor(value: number | null | undefined, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return value.toLocaleString();
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
-function formatRelativeDate(value: string | null): string {
+function formatRelativeDateFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absDays = Math.round(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
   if (absDays < 1) {
     const absHours = Math.round(Math.abs(diffMs) / (1000 * 60 * 60));
@@ -79,7 +88,7 @@ function formatRelativeDate(value: string | null): string {
       "day",
     );
   }
-  return formatDateShort(value);
+  return formatDateShortFor(value, viewer);
 }
 
 function LoadingSkeleton() {
@@ -123,6 +132,8 @@ function DeleteModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_40%,transparent)] p-4 backdrop-blur-sm">
       <div
@@ -188,10 +199,35 @@ function DeleteModal({
   );
 }
 
-export function AdminCustomFieldSegmentsPage() {
-  const [items, setItems] = useState<CustomFieldSegmentItem[]>([]);
-  const [summary, setSummary] = useState<CustomFieldSegmentSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+type CustomFieldSegmentsPageProps = {
+  /** The segments, loaded by the server; the first browser load is skipped when present. */
+  initialSegments?: ReportInitialData<CustomFieldSegmentsPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminCustomFieldSegmentsPage(props: CustomFieldSegmentsPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialSegments?.loadedAt ?? null}>
+      <CustomFieldSegmentsReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function CustomFieldSegmentsReport({ initialSegments }: CustomFieldSegmentsPageProps = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatRelativeDate = withViewer(formatRelativeDateFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSegments ?? null);
+  const [items, setItems] = useState<CustomFieldSegmentItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<CustomFieldSegmentSummary | null>(
+    initial?.data.summary ?? null,
+  );
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
@@ -200,8 +236,9 @@ export function AdminCustomFieldSegmentsPage() {
   const [exporting, setExporting] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (options?: { soft?: boolean }) => {
+    const soft = options?.soft === true;
+    if (!soft) setLoading(true);
     setError(null);
     try {
       const response = await fetchCustomFieldSegments();
@@ -215,13 +252,11 @@ export function AdminCustomFieldSegmentsPage() {
       setItems([]);
       setSummary(null);
     } finally {
-      setLoading(false);
+      if (!soft) setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {

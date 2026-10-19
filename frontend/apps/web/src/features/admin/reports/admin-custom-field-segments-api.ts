@@ -1,9 +1,8 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 import {
   fetchCustomFieldCatalogue,
   type CustomFieldCatalogueItem,
+  type CustomFieldCataloguePayload,
 } from "./admin-custom-field-roster-api";
 
 export type SegmentConditionOperator =
@@ -235,19 +234,23 @@ export function emptyConditionsTree(): SegmentConditionsTree {
   };
 }
 
+export type CustomFieldSegmentsPayload = {
+  items: CustomFieldSegmentItem[];
+  summary: CustomFieldSegmentSummary;
+};
+
+export const CUSTOM_FIELD_SEGMENTS_PATH = "/api/v1/reports/custom-field/segments";
+
 export async function fetchCustomFieldSegments() {
-  return clientApi.get<{
-    data: {
-      items: CustomFieldSegmentItem[];
-      summary: CustomFieldSegmentSummary;
-    };
-  }>("/api/v1/reports/custom-field/segments");
+  return clientApi.get<{ data: CustomFieldSegmentsPayload }>(CUSTOM_FIELD_SEGMENTS_PATH);
+}
+
+export function customFieldSegmentPath(segmentId: string): string {
+  return `/api/v1/reports/custom-field/segments/${encodeURIComponent(segmentId)}`;
 }
 
 export async function fetchCustomFieldSegment(segmentId: string) {
-  return clientApi.get<{ data: CustomFieldSegmentItem }>(
-    `/api/v1/reports/custom-field/segments/${segmentId}`,
-  );
+  return clientApi.get<{ data: CustomFieldSegmentItem }>(customFieldSegmentPath(segmentId));
 }
 
 export type SegmentFieldDivergence = {
@@ -298,44 +301,62 @@ export type SegmentLearnerRow = {
   customFields: Record<string, string | null>;
 };
 
+export type CustomFieldSegmentViewPayload = {
+  segment: CustomFieldSegmentItem;
+  analytics: SegmentAnalytics;
+  zeroMatch: boolean;
+};
+
+export function customFieldSegmentViewPath(segmentId: string): string {
+  return `/api/v1/reports/custom-field/segments/${encodeURIComponent(segmentId)}/view`;
+}
+
 export async function fetchCustomFieldSegmentView(segmentId: string) {
-  return clientApi.get<{
-    data: {
-      segment: CustomFieldSegmentItem;
-      analytics: SegmentAnalytics;
-      zeroMatch: boolean;
-    };
-  }>(`/api/v1/reports/custom-field/segments/${segmentId}/view`);
+  return clientApi.get<{ data: CustomFieldSegmentViewPayload }>(
+    customFieldSegmentViewPath(segmentId),
+  );
+}
+
+export type CustomFieldSegmentLearnersPayload = {
+  items: SegmentLearnerRow[];
+  pageInfo: {
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+  fieldDefinitions: Array<{
+    id: string;
+    key: string;
+    label: string;
+    fieldType: string;
+  }>;
+};
+
+/** A segment's matched learners show 25 a page. */
+export const CUSTOM_FIELD_SEGMENT_LEARNERS_PAGE_SIZE = 25;
+
+export function customFieldSegmentLearnersPath(
+  segmentId: string,
+  filters: { q?: string | undefined; page?: number | undefined; limit?: number | undefined },
+): string {
+  const search = new URLSearchParams();
+  if (filters.q) search.set("q", filters.q);
+  if (filters.page) search.set("page", String(filters.page));
+  if (filters.limit) search.set("limit", String(filters.limit));
+  const query = search.toString();
+  return `/api/v1/reports/custom-field/segments/${encodeURIComponent(segmentId)}/learners${query ? `?${query}` : ""}`;
 }
 
 export async function fetchCustomFieldSegmentLearners(
   segmentId: string,
   filters: { q?: string | undefined; page?: number | undefined; limit?: number | undefined },
 ) {
-  const search = new URLSearchParams();
-  if (filters.q) search.set("q", filters.q);
-  if (filters.page) search.set("page", String(filters.page));
-  if (filters.limit) search.set("limit", String(filters.limit));
-  const query = search.toString();
-  return clientApi.get<{
-    data: {
-      items: SegmentLearnerRow[];
-      pageInfo: {
-        page: number;
-        pageSize: number;
-        totalCount: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-      };
-      fieldDefinitions: Array<{
-        id: string;
-        key: string;
-        label: string;
-        fieldType: string;
-      }>;
-    };
-  }>(`/api/v1/reports/custom-field/segments/${segmentId}/learners${query ? `?${query}` : ""}`);
+  return clientApi.get<{ data: CustomFieldSegmentLearnersPayload }>(
+    customFieldSegmentLearnersPath(segmentId, filters),
+  );
 }
 
 export async function exportCustomFieldSegmentLearnersCsv(segmentId: string) {
@@ -438,22 +459,33 @@ export async function createGroupFromSegment(
   );
 }
 
-export async function fetchSegmentFieldOptions(): Promise<SegmentFieldOption[]> {
-  const catalogue = await fetchCustomFieldCatalogue({
-    status: "ACTIVE",
-    sortBy: "label_asc",
-  });
-  const custom: SegmentFieldOption[] = catalogue.data.items.map(
-    (item: CustomFieldCatalogueItem) => ({
-      source: "custom" as const,
-      key: item.key,
-      label: item.label,
-      fieldType: item.fieldType,
-      options: item.options,
-    }),
-  );
+/** The catalogue the segment builder takes its fields from: active fields, by label. */
+export const SEGMENT_FIELD_CATALOGUE_FILTERS = { status: "ACTIVE", sortBy: "label_asc" } as const;
+
+/** The builder's field options: the learner fields, then the catalogue's custom fields. */
+export function segmentFieldOptionsFrom(
+  catalogue: CustomFieldCataloguePayload,
+): SegmentFieldOption[] {
+  const custom: SegmentFieldOption[] = catalogue.items.map((item: CustomFieldCatalogueItem) => ({
+    source: "custom" as const,
+    key: item.key,
+    label: item.label,
+    fieldType: item.fieldType,
+    options: item.options,
+  }));
   return [...LEARNER_SEGMENT_FIELDS, ...custom];
 }
+
+export async function fetchSegmentFieldOptions(): Promise<SegmentFieldOption[]> {
+  const catalogue = await fetchCustomFieldCatalogue(SEGMENT_FIELD_CATALOGUE_FILTERS);
+  return segmentFieldOptionsFrom(catalogue.data);
+}
+
+/** The segment builder's first data: its field catalogue and, when editing, the segment. */
+export type SegmentBuilderInitial = {
+  catalogue: CustomFieldCataloguePayload;
+  segment: CustomFieldSegmentItem | null;
+};
 
 export function downloadCsv(csv: string, filename: string) {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
