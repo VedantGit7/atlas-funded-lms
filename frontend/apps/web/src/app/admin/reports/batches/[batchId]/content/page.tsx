@@ -3,15 +3,21 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminBatchContentPage } from "../../../../../../features/admin/reports/AdminBatchContentPage";
+import type { ReportSearchParams } from "../../../../../../lib/server/report-landing-initial-data";
+import { loadBatchContentData } from "../../../../../../lib/server/report-batches-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
   params: Promise<{ batchId: string }>;
+  searchParams: Promise<ReportSearchParams>;
 };
 
-export default async function AdminBatchContentRoutePage({ params }: PageProps) {
+export default async function AdminBatchContentRoutePage({ params, searchParams }: PageProps) {
   const { batchId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initial] = await Promise.all([
+    runTenantStateGate(),
+    searchParams.then((search) => loadBatchContentData(batchId, search)),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -32,7 +38,11 @@ export default async function AdminBatchContentRoutePage({ params }: PageProps) 
           </p>
         }
       >
-        <AdminBatchContentPage batchId={batchId} />
+        <AdminBatchContentPage
+          batchId={batchId}
+          initialReport={initial.report}
+          initialLearners={initial.learners}
+        />
       </Suspense>
     </AdminPageGate>
   );

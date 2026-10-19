@@ -20,7 +20,12 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  BATCH_CONTENT_LEARNERS_DEFAULTS,
+  readBatchContentAddress,
+  type BatchContentView,
+  type BatchContentLearnersPayload,
   exportBatchReport,
   fetchBatchContent,
   fetchBatchContentLearners,
@@ -31,8 +36,10 @@ import {
   type BatchContentReportData,
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
-type ContentView = "any" | "stalled" | "never_started" | "finished" | "in_progress";
+type ContentView = BatchContentView;
 type MessageMode = "stalled" | "selected";
 type PageInfoShape = {
   page: number;
@@ -98,11 +105,12 @@ function formatPct(v: number | null | undefined) {
   return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDateTime(v: string | null | undefined) {
+function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -118,13 +126,6 @@ function errMsg(e: unknown, fallback: string) {
 
 function clampPct(v: number) {
   return Math.max(0, Math.min(100, v));
-}
-
-function parseView(raw: string | null): ContentView {
-  if (raw === "stalled" || raw === "never_started" || raw === "finished" || raw === "in_progress") {
-    return raw;
-  }
-  return "any";
 }
 
 function healthRailClass(
@@ -608,22 +609,40 @@ function MessageDrawer({
   );
 }
 
-export function AdminBatchContentPage({ batchId }: { batchId: string }) {
+export function AdminBatchContentPage({
+  batchId,
+  initialReport,
+  initialLearners,
+}: {
+  batchId: string;
+  /** The completion report, loaded by the server; the first browser load is skipped when present. */
+  initialReport?: ReportInitialData<BatchContentReportData> | null;
+  /** The learners the address asks for, loaded by the server once the report named a course. */
+  initialLearners?: ReportInitialData<BatchContentLearnersPayload> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchId = useId();
 
-  const q = searchParams.get("q") ?? "";
-  const view = parseView(searchParams.get("view"));
-  const pageRaw = Number(searchParams.get("page"));
-  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
+  const { q, view, page } = readBatchContentAddress((name) => searchParams.get(name));
 
   const [draftQ, setDraftQ] = useState(q);
-  const [report, setReport] = useState<BatchContentReportData | null>(null);
-  const [learners, setLearners] = useState<BatchContentLearnerItem[]>([]);
-  const [pageInfo, setPageInfo] = useState<PageInfoShape | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [learnersLoading, setLearnersLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => ({
+    report: initialReport ?? null,
+    learners: initialLearners ?? null,
+  }));
+  const [report, setReport] = useState<BatchContentReportData | null>(initial.report?.data ?? null);
+  const [learners, setLearners] = useState<BatchContentLearnerItem[]>(
+    initial.learners?.data.items ?? [],
+  );
+  const [pageInfo, setPageInfo] = useState<PageInfoShape | null>(
+    initial.learners?.data.pageInfo ?? null,
+  );
+  const [loading, setLoading] = useState(initial.report === null);
+  const [learnersLoading, setLearnersLoading] = useState(initial.learners === null);
   const [error, setError] = useState<string | null>(null);
   const [learnersError, setLearnersError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -636,7 +655,9 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
   const [messageSubject, setMessageSubject] = useState("");
   const [messageBody, setMessageBody] = useState("");
   const [messageBusy, setMessageBusy] = useState(false);
-  const [stalledDays, setStalledDays] = useState(14);
+  const [stalledDays, setStalledDays] = useState(
+    initial.report?.data.summary.stalledDaysThreshold || 14,
+  );
 
   const basePath = `/admin/reports/batches/${batchId}/content`;
 
@@ -689,58 +710,71 @@ export function AdminBatchContentPage({ batchId }: { batchId: string }) {
     };
   }, []);
 
-  const loadReport = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchBatchContent(batchId);
-      setReport(response.data);
-      setStalledDays(response.data.summary.stalledDaysThreshold || 14);
-    } catch (e) {
-      setError(errMsg(e, "Couldn't load content completion."));
-      setReport(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [batchId]);
+  const loadReport = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchBatchContent(batchId);
+        setReport(response.data);
+        setStalledDays(response.data.summary.stalledDaysThreshold || 14);
+      } catch (e) {
+        setError(errMsg(e, "Couldn't load content completion."));
+        setReport(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [batchId],
+  );
 
-  const loadLearners = useCallback(async () => {
-    setLearnersLoading(true);
-    setLearnersError(null);
-    try {
-      const response = await fetchBatchContentLearners(batchId, {
-        q: q.trim() || undefined,
-        view,
-        sortBy: "days_since",
-        sortDir: "desc",
-        page,
-        limit: PAGE_SIZE,
-      });
-      setLearners(response.data.items);
-      setPageInfo(response.data.pageInfo);
-    } catch (e) {
-      setLearnersError(errMsg(e, "Couldn't load learners."));
-      setLearners([]);
-      setPageInfo(null);
-    } finally {
-      setLearnersLoading(false);
-    }
-  }, [batchId, page, q, view]);
-
-  useEffect(() => {
-    void loadReport();
-  }, [loadReport]);
-
-  useEffect(() => {
-    if (!report?.courseId) {
-      setLearners([]);
-      setPageInfo(null);
-      setLearnersLoading(false);
+  const loadLearners = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLearnersLoading(true);
       setLearnersError(null);
-      return;
-    }
-    void loadLearners();
-  }, [loadLearners, report?.courseId]);
+      try {
+        const response = await fetchBatchContentLearners(batchId, {
+          q: q.trim() || undefined,
+          view,
+          sortBy: BATCH_CONTENT_LEARNERS_DEFAULTS.sortBy,
+          sortDir: BATCH_CONTENT_LEARNERS_DEFAULTS.sortDir,
+          page,
+          limit: BATCH_CONTENT_LEARNERS_DEFAULTS.limit,
+        });
+        setLearners(response.data.items);
+        setPageInfo(response.data.pageInfo);
+      } catch (e) {
+        setLearnersError(errMsg(e, "Couldn't load learners."));
+        setLearners([]);
+        setPageInfo(null);
+      } finally {
+        if (!soft) setLearnersLoading(false);
+      }
+    },
+    [batchId, page, q, view],
+  );
+
+  useReportLoad(loadReport, initial.report);
+
+  // Learners load once the report names a course; a batch without one has none.
+  const reportCourseId = report?.courseId;
+  const loadLearnersOnceReady = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (!reportCourseId) {
+        setLearners([]);
+        setPageInfo(null);
+        setLearnersLoading(false);
+        setLearnersError(null);
+        return;
+      }
+      await loadLearners(options);
+    },
+    [loadLearners, reportCourseId],
+  );
+
+  useReportLoad(loadLearnersOnceReady, initial.learners);
 
   async function handleExport() {
     setBusy(true);

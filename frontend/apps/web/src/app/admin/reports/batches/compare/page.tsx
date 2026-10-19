@@ -3,10 +3,19 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminBatchesComparePage } from "../../../../../features/admin/reports/AdminBatchesComparePage";
+import type { ReportSearchParams } from "../../../../../lib/server/report-landing-initial-data";
+import { loadBatchesCompareData } from "../../../../../lib/server/report-batches-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
-export default async function AdminBatchesCompareRoutePage() {
-  const gate = await runTenantStateGate();
+export default async function AdminBatchesCompareRoutePage({
+  searchParams,
+}: {
+  searchParams: Promise<ReportSearchParams>;
+}) {
+  const [gate, initialCompare] = await Promise.all([
+    runTenantStateGate(),
+    searchParams.then(loadBatchesCompareData),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +34,7 @@ export default async function AdminBatchesCompareRoutePage() {
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading comparison…</p>
         }
       >
-        <AdminBatchesComparePage />
+        <AdminBatchesComparePage initialCompare={initialCompare} />
       </Suspense>
     </AdminPageGate>
   );

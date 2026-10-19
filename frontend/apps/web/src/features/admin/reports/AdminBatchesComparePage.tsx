@@ -21,7 +21,11 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  BATCHES_COMPARE_MAX,
+  parseBatchesCompareIds,
+  type BatchesCompareData,
   fetchBatchesCompare,
   fetchBatchesRoster,
   type BatchCompareItem,
@@ -29,9 +33,11 @@ import {
   type BatchesCompareNormalize,
   type BatchListItem,
 } from "./admin-batches-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, ownViewerLocale, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
 
-const MAX_SLOTS = 4;
+const MAX_SLOTS = BATCHES_COMPARE_MAX;
 const SAVE_KEY = "atlas.admin.batches.compare.saved";
 
 const secondaryButtonClassName =
@@ -145,31 +151,37 @@ const SPREAD_BANDS = [
   },
 ];
 
-function parseIdsParam(raw: string | null): string[] {
-  if (!raw) return [];
-  const seen = new Set<string>();
-  const ids: string[] = [];
-  for (const part of raw.split(",")) {
-    const id = part.trim();
-    if (!id || seen.has(id)) continue;
-    seen.add(id);
-    ids.push(id);
-    if (ids.length >= MAX_SLOTS) break;
-  }
-  return ids;
+function sameIds(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
 }
 
-function formatMetricValue(value: number | null | undefined, format: MetricDef["format"]): string {
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
+}
+
+function formatMetricValueFor(
+  value: number | null | undefined,
+  format: MetricDef["format"],
+  viewer: ViewerLocale,
+): string {
   if (value == null || Number.isNaN(value)) return "-";
   if (format === "pct") return `${Math.round(value * 10) / 10}%`;
   if (format === "minutes") return `${Math.round(value)}m`;
   if (format === "days") return `${Math.round(value)}d`;
-  return Math.round(value).toLocaleString();
+  return Math.round(value).toLocaleString(viewer.locale);
 }
 
-function formatDateRange(startsAt: string | null, endsAt: string | null): string {
+function formatDateRangeFor(
+  startsAt: string | null,
+  endsAt: string | null,
+  viewer: ViewerLocale,
+): string {
   const fmt = (iso: string) =>
-    new Date(iso).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+    new Date(iso).toLocaleDateString("en-GB", {
+      timeZone: viewer.timeZone,
+      month: "short",
+      year: "numeric",
+    });
   if (startsAt && endsAt) return `${fmt(startsAt)} - ${fmt(endsAt)}`;
   if (startsAt) return `${fmt(startsAt)} - Active`;
   if (endsAt) return `Through ${fmt(endsAt)}`;
@@ -220,7 +232,9 @@ function downloadCsv(items: BatchCompareItem[]) {
   for (const metric of METRICS) {
     const row = [
       metric.label,
-      ...items.map((item) => formatMetricValue(item.metrics[metric.key], metric.format)),
+      ...items.map((item) =>
+        formatMetricValueFor(item.metrics[metric.key], metric.format, ownViewerLocale()),
+      ),
     ];
     lines.push(row.map(csvEscape).join(","));
   }
@@ -452,6 +466,8 @@ function MetricCell({
   showBar: boolean;
   barPct: number;
 }) {
+  const viewer = useViewerLocale();
+  const formatMetricValue = withViewer(formatMetricValueFor, viewer);
   return (
     <div
       className={[
@@ -517,17 +533,27 @@ function FragmentSection({
   );
 }
 
-export function AdminBatchesComparePage() {
+export function AdminBatchesComparePage({
+  initialCompare,
+}: {
+  /** The comparison the address names, loaded by the server; the first browser load is skipped when present. */
+  initialCompare?: ReportInitialData<BatchesCompareData> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatMetricValue = withViewer(formatMetricValueFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pickerId = useId();
   const pickerRef = useRef<HTMLDivElement | null>(null);
 
-  const idsFromUrl = useMemo(() => parseIdsParam(searchParams.get("ids")), [searchParams]);
+  const idsFromUrl = useMemo(() => parseBatchesCompareIds(searchParams.get("ids")), [searchParams]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>(idsFromUrl);
   const [normalize, setNormalize] = useState<BatchesCompareNormalize>("week_of_batch");
-  const [items, setItems] = useState<BatchCompareItem[]>([]);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialCompare ?? null);
+  const [items, setItems] = useState<BatchCompareItem[]>(initial?.data.items ?? []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -536,8 +562,10 @@ export function AdminBatchesComparePage() {
   const [pickerLoading, setPickerLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  // Keeps the selection when the address names the same batches, so the
+  // comparison is not loaded again for them.
   useEffect(() => {
-    setSelectedIds(idsFromUrl);
+    setSelectedIds((current) => (sameIds(current, idsFromUrl) ? current : idsFromUrl));
   }, [idsFromUrl]);
 
   const syncUrl = useCallback(
@@ -552,29 +580,36 @@ export function AdminBatchesComparePage() {
     [router],
   );
 
-  const loadCompare = useCallback(async (ids: string[], mode: BatchesCompareNormalize) => {
-    if (ids.length < 2) {
-      setItems([]);
-      setLoading(false);
+  const loadCompare = useCallback(
+    async (ids: string[], mode: BatchesCompareNormalize, options?: { soft?: boolean }) => {
+      if (ids.length < 2) {
+        setItems([]);
+        setLoading(false);
+        setError(null);
+        return;
+      }
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
       setError(null);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchBatchesCompare(ids, mode);
-      setItems(response.data.items);
-    } catch (err) {
-      setItems([]);
-      setError(err instanceof ClientApiError ? err.message : "Could not load batch comparison.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      try {
+        const response = await fetchBatchesCompare(ids, mode);
+        setItems(response.data.items);
+      } catch (err) {
+        setItems([]);
+        setError(err instanceof ClientApiError ? err.message : "Could not load batch comparison.");
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [],
+  );
 
-  useEffect(() => {
-    void loadCompare(selectedIds, normalize);
-  }, [selectedIds, normalize, loadCompare]);
+  const load = useCallback(
+    (options?: { soft?: boolean }) => loadCompare(selectedIds, normalize, options),
+    [loadCompare, normalize, selectedIds],
+  );
+
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (!pickerOpen) return;
@@ -1038,11 +1073,11 @@ export function AdminBatchesComparePage() {
                   {item.key}
                 </span>
                 <span className="font-mono text-sm text-[var(--admin-on-surface)]">
-                  {item.metrics.learners.toLocaleString()} learners
+                  {formatCount(item.metrics.learners)} learners
                 </span>
               </div>
               <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
-                {formatDateRange(item.startsAt, item.endsAt)}
+                {formatDateRangeFor(item.startsAt, item.endsAt, viewer)}
                 {index === 0 && items.length >= 2 ? " · Baseline" : null}
               </p>
             </div>

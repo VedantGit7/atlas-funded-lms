@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminBatchMessagesPage } from "../../../../../../features/admin/reports/AdminBatchMessagesPage";
+import { loadBatchMessagesData } from "../../../../../../lib/server/report-batches-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -11,7 +12,10 @@ type PageProps = {
 
 export default async function AdminBatchMessagesRoutePage({ params }: PageProps) {
   const { batchId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initialMessages] = await Promise.all([
+    runTenantStateGate(),
+    loadBatchMessagesData(batchId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -30,7 +34,7 @@ export default async function AdminBatchMessagesRoutePage({ params }: PageProps)
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading messages…</p>
         }
       >
-        <AdminBatchMessagesPage batchId={batchId} />
+        <AdminBatchMessagesPage batchId={batchId} initialMessages={initialMessages} />
       </Suspense>
     </AdminPageGate>
   );

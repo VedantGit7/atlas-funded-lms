@@ -19,7 +19,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  readBatchExamsAddress,
+  type BatchExamsInitial,
   exportBatchReport,
   fetchBatchExams,
   fetchBatchExamsBelowPass,
@@ -31,8 +34,8 @@ import {
   type BatchExamsMatrixData,
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
-
-type ViewMode = "assessments" | "matrix";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 const thClass =
   "px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]";
@@ -68,11 +71,12 @@ function formatPct(v: number | null | undefined) {
   return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDate(v: string | null | undefined) {
+function formatDateFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString(undefined, {
+  return d.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -481,18 +485,30 @@ function MessageDrawer({
   );
 }
 
-export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
+export function AdminBatchExamsPage({
+  batchId,
+  initialExams,
+}: {
+  batchId: string;
+  /** The exams the address asks for, loaded by the server; the first browser load is skipped when present. */
+  initialExams?: ReportInitialData<BatchExamsInitial> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatDate = withViewer(formatDateFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchId = useId();
 
-  const view: ViewMode = searchParams.get("view") === "matrix" ? "matrix" : "assessments";
-  const q = searchParams.get("q") ?? "";
+  const { view, q } = readBatchExamsAddress((name) => searchParams.get(name));
 
   const [draftQ, setDraftQ] = useState(q);
-  const [listData, setListData] = useState<BatchExamsListData | null>(null);
-  const [matrixData, setMatrixData] = useState<BatchExamsMatrixData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialExams ?? null);
+  const [listData, setListData] = useState<BatchExamsListData | null>(initial?.data.list ?? null);
+  const [matrixData, setMatrixData] = useState<BatchExamsMatrixData | null>(
+    initial?.data.matrix ?? null,
+  );
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -535,35 +551,37 @@ export function AdminBatchExamsPage({ batchId }: { batchId: string }) {
     };
   }, [draftQ, q, replaceParams]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (view === "matrix") {
-        const [matrixRes, listRes] = await Promise.all([
-          fetchBatchExamsMatrix(batchId, { q: q.trim() || undefined }),
-          fetchBatchExams(batchId),
-        ]);
-        setMatrixData(matrixRes.data);
-        setListData(listRes.data);
-      } else {
-        const response = await fetchBatchExams(batchId, {
-          q: q.trim() || undefined,
-        });
-        setListData(response.data);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        if (view === "matrix") {
+          const [matrixRes, listRes] = await Promise.all([
+            fetchBatchExamsMatrix(batchId, { q: q.trim() || undefined }),
+            fetchBatchExams(batchId),
+          ]);
+          setMatrixData(matrixRes.data);
+          setListData(listRes.data);
+        } else {
+          const response = await fetchBatchExams(batchId, {
+            q: q.trim() || undefined,
+          });
+          setListData(response.data);
+        }
+      } catch (e) {
+        setError(errMsg(e, "Couldn't load exams."));
+        if (view === "matrix") setMatrixData(null);
+        else setListData(null);
+      } finally {
+        if (!soft) setLoading(false);
       }
-    } catch (e) {
-      setError(errMsg(e, "Couldn't load exams."));
-      if (view === "matrix") setMatrixData(null);
-      else setListData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [batchId, q, view]);
+    },
+    [batchId, q, view],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const batchName = listData?.batchName ?? matrixData?.batchName ?? "Batch";
   const summary = listData?.summary;
