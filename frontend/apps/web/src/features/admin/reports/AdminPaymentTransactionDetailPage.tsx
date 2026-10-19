@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   downloadPaymentInvoice,
   fetchPaymentTransactionDetail,
@@ -13,43 +14,50 @@ import {
 import { AdminPaymentRefundModal } from "./AdminPaymentRefundModal";
 import { AdminPaymentTransactionDetailBody } from "./AdminPaymentTransactionDetailBody";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
 
 type Props = {
   orderId: string;
+  /** The transaction, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<PaymentTransactionDetail> | null;
 };
 
-export function AdminPaymentTransactionDetailPage({ orderId }: Props) {
+export function AdminPaymentTransactionDetailPage({ orderId, initialDetail }: Props) {
   const router = useRouter();
-  const [detail, setDetail] = useState<PaymentTransactionDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<PaymentTransactionDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentTransactionDetail(orderId);
-      setDetail(response.data);
-    } catch (err) {
-      setDetail(null);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentTransactionDetail(orderId);
+        setDetail(response.data);
+      } catch (err) {
+        setDetail(null);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Failed to load transaction.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [orderId]);
+            : err instanceof Error
+              ? err.message
+              : "Failed to load transaction.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [orderId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleDownloadInvoice() {
     if (!detail?.canDownloadInvoice) return;

@@ -14,14 +14,19 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  fetchPaymentInstalmentCourses,
+  type PaymentInstalmentCourseOption,
   createPaymentInstalmentPlan,
   fetchPaymentInstalments,
   type PaymentInstalmentPlanItem,
 } from "./admin-payments-roster-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type MemberOption = {
   id: string;
@@ -29,13 +34,7 @@ type MemberOption = {
   email: string | null;
 };
 
-type CourseOption = {
-  id: string;
-  title: string;
-  priceCents: number | null;
-  currency: string | null;
-  status?: string;
-};
+type CourseOption = PaymentInstalmentCourseOption;
 
 type ScheduleRow = {
   key: string;
@@ -45,8 +44,8 @@ type ScheduleRow = {
 
 type CountPreset = 2 | 3 | 6 | "custom";
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
@@ -60,8 +59,8 @@ function parseMajorToCents(value: string): number | null {
   return Math.round(num * 100);
 }
 
-function centsToMajorInput(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function centsToMajorInputFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -76,8 +75,8 @@ function addMonthsIsoDate(base: Date, months: number): string {
   return `${String(y)}-${m}-${day}`;
 }
 
-function todayIsoDate(): string {
-  return addMonthsIsoDate(new Date(), 0);
+function todayIsoDate(now: number = Date.now()): string {
+  return addMonthsIsoDate(new Date(now), 0);
 }
 
 function dateInputToIso(value: string): string {
@@ -102,12 +101,17 @@ function newRowKey(): string {
   return `row-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function buildSchedule(count: number, totalCents: number, startDate: string): ScheduleRow[] {
+function buildScheduleFor(
+  count: number,
+  totalCents: number,
+  startDate: string,
+  viewer: ViewerLocale,
+): ScheduleRow[] {
   const amounts = splitEvenly(totalCents, count);
   const start = startDate ? new Date(`${startDate}T00:00:00.000Z`) : new Date();
   return amounts.map((cents, index) => ({
     key: newRowKey(),
-    amountMajor: centsToMajorInput(cents),
+    amountMajor: centsToMajorInputFor(cents, viewer),
     dueDate: addMonthsIsoDate(start, index),
   }));
 }
@@ -159,16 +163,27 @@ function Toggle({
   );
 }
 
-export function AdminPaymentsInstalmentPlanCreatePage() {
+export function AdminPaymentsInstalmentPlanCreatePage({
+  initialCourses,
+}: {
+  /** The courses the product picker lists, loaded by the server; the first browser load is skipped when present. */
+  initialCourses?: ReportInitialData<{ items: CourseOption[] }> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const centsToMajorInput = withViewer(centsToMajorInputFor, viewer);
+  const buildSchedule = withViewer(buildScheduleFor, viewer);
   const router = useRouter();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialCourses ?? null);
   const [memberQuery, setMemberQuery] = useState("");
   const [memberResults, setMemberResults] = useState<MemberOption[]>([]);
   const [memberSearching, setMemberSearching] = useState(false);
   const [learner, setLearner] = useState<MemberOption | null>(null);
   const [existingPlanCount, setExistingPlanCount] = useState<number | null>(null);
 
-  const [courses, setCourses] = useState<CourseOption[]>([]);
-  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [courses, setCourses] = useState<CourseOption[]>(initial?.data.items ?? []);
+  const [coursesLoading, setCoursesLoading] = useState(initial === null);
   const [productId, setProductId] = useState("");
   const [productTitle, setProductTitle] = useState("");
   const [productType, setProductType] = useState("course");
@@ -177,8 +192,9 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
   const [listPriceCents, setListPriceCents] = useState<number | null>(null);
 
   const [countPreset, setCountPreset] = useState<CountPreset>(3);
+  // Dated from when the server loaded the page, so both renders start on the same day.
   const [schedule, setSchedule] = useState<ScheduleRow[]>(() =>
-    buildSchedule(3, 0, todayIsoDate()),
+    buildSchedule(3, 0, todayIsoDate(initial?.loadedAt)),
   );
 
   const [accessPolicy, setAccessPolicy] = useState<"immediate" | "after_first_payment">(
@@ -207,25 +223,28 @@ export function AdminPaymentsInstalmentPlanCreatePage() {
   const canSubmit =
     Boolean(learner) && Boolean(productTitle.trim()) && scheduleValid && datesValid && !busy;
 
-  useEffect(() => {
-    let cancelled = false;
-    setCoursesLoading(true);
-    void clientApi
-      .get<{ data: { items: CourseOption[] } }>("/api/v1/courses?view=studio&limit=100")
-      .then((response) => {
-        if (cancelled) return;
-        setCourses(response.data.items);
-      })
-      .catch(() => {
-        if (!cancelled) setCourses([]);
-      })
-      .finally(() => {
-        if (!cancelled) setCoursesLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+  const coursesAbortRef = useRef<AbortController | null>(null);
+
+  const loadCourses = useCallback(async (options?: { soft?: boolean }) => {
+    coursesAbortRef.current?.abort();
+    const controller = new AbortController();
+    coursesAbortRef.current = controller;
+    const soft = options?.soft === true;
+    if (!soft) setCoursesLoading(true);
+    try {
+      const response = await fetchPaymentInstalmentCourses();
+      if (controller.signal.aborted) return;
+      setCourses(response.data.items);
+    } catch {
+      if (!controller.signal.aborted) setCourses([]);
+    } finally {
+      if (!controller.signal.aborted && !soft) setCoursesLoading(false);
+    }
   }, []);
+
+  useReportLoad(loadCourses, initial);
+
+  useEffect(() => () => coursesAbortRef.current?.abort(), []);
 
   useEffect(() => {
     if (!learner) {

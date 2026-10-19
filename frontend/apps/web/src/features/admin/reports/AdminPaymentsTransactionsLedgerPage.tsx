@@ -20,7 +20,15 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type {
+  ReportInitialData,
+  ReportInitialDataInRange,
+} from "../../../lib/server/report-initial-data";
 import {
+  PAYMENT_TRANSACTIONS_DEFAULTS,
+  paymentsRangeBefore,
+  type PaymentGatewaysList,
+  type PaymentTransactionsPayload,
   dateInputToEndIso,
   dateInputToStartIso,
   downloadPaymentInvoice,
@@ -35,6 +43,8 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { AdminPaymentTransactionDrawer } from "./AdminPaymentTransactionDrawer";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type SavedView = "all" | "failed_today" | "refund_candidates" | "high_value";
 type DateField = "paid_at" | "created_at";
@@ -58,41 +68,29 @@ const DATE_FIELD_OPTIONS = [
   { value: "created_at", label: "Creation date" },
 ];
 
-const DEFAULT_COLUMNS: PaymentTransactionColumnKey[] = [
-  "learner_name",
-  "email",
-  "product_title",
-  "product_type",
-  "gateway_key",
-  "coupon_amount_cents",
-  "amount_cents",
-  "currency",
-  "status",
-  "invoice_number",
-  "paid_at",
-];
+const DEFAULT_COLUMNS: PaymentTransactionColumnKey[] = [...PAYMENT_TRANSACTIONS_DEFAULTS.columns];
 
 const HIGH_VALUE_CENTS = 50_000;
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 1) return "Just now";
   if (mins < 60) return `${String(mins)} min${mins === 1 ? "" : "s"} ago`;
@@ -101,14 +99,19 @@ function formatRelative(iso: string | null): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "Yesterday";
   if (days < 7) return `${String(days)} days ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+  });
 }
 
-function formatAbsolute(iso: string | null): string {
+function formatAbsoluteFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -168,12 +171,6 @@ function todayRange(): { from: string; to: string } {
   return { from: iso, to: iso };
 }
 
-function defaultRange(): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - 34 * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
-}
-
 function Shimmer({ className }: { className?: string }) {
   return (
     <div
@@ -197,13 +194,49 @@ function downloadHtmlFile(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminPaymentsTransactionsLedgerPage() {
+type TransactionsLedgerPageProps = {
+  /**
+   * The first page of transactions over the default range, loaded by the
+   * server with the range it counted; the first browser load is skipped when
+   * present.
+   */
+  initialTransactions?: ReportInitialDataInRange<PaymentTransactionsPayload> | null;
+  /** The gateway filter's options, loaded by the server. */
+  initialGateways?: ReportInitialData<PaymentGatewaysList> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminPaymentsTransactionsLedgerPage(props: TransactionsLedgerPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialTransactions?.loadedAt ?? null}>
+      <TransactionsLedger {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function TransactionsLedger({ initialTransactions, initialGateways }: TransactionsLedgerPageProps) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatAmount = withViewer(formatAmountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaults = useMemo(() => defaultRange(), []);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialTransactions ?? null);
+  const [initialGatewayList] = useState(() => initialGateways ?? null);
+  // The server's range when it loaded the ledger, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const defaults = useMemo(
+    () => initial?.range ?? paymentsRangeBefore(PAYMENT_TRANSACTIONS_DEFAULTS.rangeDays),
+    [initial],
+  );
   const [paidFrom, setPaidFrom] = useState(defaults.from);
   const [paidTo, setPaidTo] = useState(defaults.to);
-  const [dateField, setDateField] = useState<DateField>("paid_at");
+  const [dateField, setDateField] = useState<DateField>(PAYMENT_TRANSACTIONS_DEFAULTS.dateField);
   const [search, setSearch] = useState("");
   const [searchApplied, setSearchApplied] = useState("");
   const [status, setStatus] = useState("");
@@ -211,25 +244,29 @@ export function AdminPaymentsTransactionsLedgerPage() {
   const [amountMinCents, setAmountMinCents] = useState<number | undefined>();
   const [view, setView] = useState<SavedView>("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
-  const [sortBy, setSortBy] = useState("paid_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [pageSize, setPageSize] = useState<number>(PAYMENT_TRANSACTIONS_DEFAULTS.limit);
+  const [sortBy, setSortBy] = useState<string>(PAYMENT_TRANSACTIONS_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(PAYMENT_TRANSACTIONS_DEFAULTS.sortDir);
   const [columns, setColumns] = useState<PaymentTransactionColumnKey[]>(DEFAULT_COLUMNS);
   const [draftColumns, setDraftColumns] = useState<PaymentTransactionColumnKey[]>(DEFAULT_COLUMNS);
   const [columnsOpen, setColumnsOpen] = useState(false);
-  const [gateways, setGateways] = useState<PaymentGatewayItem[]>([]);
-  const [items, setItems] = useState<PaymentTransactionItem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totals, setTotals] = useState({
-    pageAmountCents: 0,
-    filteredAmountCents: 0,
-    currency: "USD",
-  });
+  const [gateways, setGateways] = useState<PaymentGatewayItem[]>(
+    initialGatewayList?.data.items ?? [],
+  );
+  const [items, setItems] = useState<PaymentTransactionItem[]>(initial?.data.items ?? []);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totals, setTotals] = useState(
+    initial?.data.totals ?? {
+      pageAmountCents: 0,
+      filteredAmountCents: 0,
+      currency: "USD",
+    },
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [rowMenuId, setRowMenuId] = useState<string | null>(null);
   const [drawerOrderId, setDrawerOrderId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const columnsRef = useRef<HTMLDivElement>(null);
@@ -291,7 +328,7 @@ export function AdminPaymentsTransactionsLedgerPage() {
       });
     }
     return chips;
-  }, [amountMinCents, gatewayKey, gateways, searchApplied, status]);
+  }, [amountMinCents, gatewayKey, gateways, searchApplied, status, viewer]);
 
   const loadGateways = useCallback(async () => {
     try {
@@ -302,65 +339,65 @@ export function AdminPaymentsTransactionsLedgerPage() {
     }
   }, []);
 
-  const loadTransactions = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentTransactions({
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
-        learnerName: searchApplied || undefined,
-        gatewayKey: gatewayKey || undefined,
-        status: status || undefined,
-        amountMinCents,
-        dateField,
-        sortBy,
-        sortDir,
-        columns,
-        page,
-        limit: pageSize,
-      });
-      setItems(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotals(response.data.totals);
-      setSelectedIds(new Set());
-    } catch (loadError) {
-      setItems([]);
-      setTotalCount(0);
-      setTotalPages(0);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadTransactions = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentTransactions({
+          paidFrom: dateInputToStartIso(paidFrom),
+          paidTo: dateInputToEndIso(paidTo),
+          learnerName: searchApplied || undefined,
+          gatewayKey: gatewayKey || undefined,
+          status: status || undefined,
+          amountMinCents,
+          dateField,
+          sortBy,
+          sortDir,
+          columns,
+          page,
+          limit: pageSize,
+        });
+        setItems(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotals(response.data.totals);
+        setSelectedIds(new Set());
+      } catch (loadError) {
+        setItems([]);
+        setTotalCount(0);
+        setTotalPages(0);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load transaction data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    amountMinCents,
-    columns,
-    dateField,
-    gatewayKey,
-    page,
-    pageSize,
-    paidFrom,
-    paidTo,
-    searchApplied,
-    sortBy,
-    sortDir,
-    status,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load transaction data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      amountMinCents,
+      columns,
+      dateField,
+      gatewayKey,
+      page,
+      pageSize,
+      paidFrom,
+      paidTo,
+      searchApplied,
+      sortBy,
+      sortDir,
+      status,
+    ],
+  );
 
-  useEffect(() => {
-    void loadGateways();
-  }, [loadGateways]);
+  useReportLoad(loadGateways, initialGatewayList);
 
-  useEffect(() => {
-    void loadTransactions();
-  }, [loadTransactions]);
+  useReportLoad(loadTransactions, initial);
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {

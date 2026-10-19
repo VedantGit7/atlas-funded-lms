@@ -34,7 +34,7 @@ import {
 } from "./payment-orders-shared";
 // The input holds a bare number the operator edits and this file re-parses, so
 // it cannot use the currency-formatted display helper above.
-import { formatAmount as formatAmountInput } from "./payment-transaction-ui";
+import { formatAmountFor as formatAmountInputFor } from "./payment-transaction-ui";
 import {
   isRefundAmountValid,
   isRefundNoteValid,
@@ -49,6 +49,7 @@ import {
   type RefundRequestIdentity,
   type RefundStatus,
 } from "./refund-submission";
+import { ownViewerLocale } from "./viewer-time";
 
 const ORDERS_HREF = "/admin/reports/payments/orders";
 
@@ -114,7 +115,7 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
     try {
       const response = await fetchPaymentTransactionDetail(orderId);
       setDetail(response.data);
-      setAmountInput(formatAmountInput(response.data.refundableAmountCents));
+      setAmountInput(formatAmountInputFor(response.data.refundableAmountCents, ownViewerLocale()));
     } catch (caught) {
       if (caught instanceof ClientApiError && caught.status === 404) {
         setNotFound(true);
@@ -445,7 +446,7 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
                       onClick={() => {
                         setMode(value);
                         if (value === "full") {
-                          setAmountInput(formatAmountInput(refundableCents));
+                          setAmountInput(formatAmountInputFor(refundableCents, ownViewerLocale()));
                         }
                       }}
                     >

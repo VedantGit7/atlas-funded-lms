@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  PAYMENT_REFUNDS_DEFAULTS,
   exportPaymentTransactions,
   fetchPaymentRefunds,
   fetchPaymentTransactionDetail,
@@ -29,8 +31,10 @@ import { AdminPaymentRefundModal } from "./AdminPaymentRefundModal";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { PaymentRefundHistory } from "./PaymentRefundHistory";
 import { refundBalanceLabel, refundOutcomeTitle } from "./refund-submission";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = PAYMENT_REFUNDS_DEFAULTS.limit;
 
 const QUEUES: Array<{
   key: PaymentRefundsQueue | "disputes";
@@ -44,18 +48,18 @@ const QUEUES: Array<{
   { key: "disputes", label: "Disputes / CBKs" },
 ];
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  const deltaMs = Date.now() - date.getTime();
+  const deltaMs = viewer.now - date.getTime();
   const hours = Math.floor(deltaMs / (60 * 60 * 1000));
   if (hours < 1) return "just now";
   if (hours < 48) return `${String(hours)}h ago`;
@@ -63,11 +67,12 @@ function formatRelative(iso: string | null): string {
   return `${String(days)}d ago`;
 }
 
-function formatDateTime(iso: string | null): string {
+function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -111,6 +116,9 @@ function RefundDetailDrawer({
   onClose: () => void;
   onIssueRefund: (detail: PaymentTransactionDetail) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
   const [detail, setDetail] = useState<PaymentTransactionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -338,13 +346,36 @@ function RefundDetailDrawer({
   );
 }
 
-export function AdminPaymentsRefundsLedgerPage() {
-  const [queue, setQueue] = useState<PaymentRefundsQueue | "disputes">("refundable");
+type RefundsLedgerPageProps = {
+  /** The refundable queue's first page, loaded by the server; the first browser load is skipped when present. */
+  initialRefunds?: ReportInitialData<PaymentRefundsList> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminPaymentsRefundsLedgerPage(props: RefundsLedgerPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialRefunds?.loadedAt ?? null}>
+      <RefundsLedger {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function RefundsLedger({ initialRefunds }: RefundsLedgerPageProps) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialRefunds ?? null);
+  const [queue, setQueue] = useState<PaymentRefundsQueue | "disputes">(
+    PAYMENT_REFUNDS_DEFAULTS.queue,
+  );
   const [search, setSearch] = useState("");
   const [searchApplied, setSearchApplied] = useState("");
-  const [page, setPage] = useState(1);
-  const [data, setData] = useState<PaymentRefundsList | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState<number>(PAYMENT_REFUNDS_DEFAULTS.page);
+  const [data, setData] = useState<PaymentRefundsList | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -353,59 +384,61 @@ export function AdminPaymentsRefundsLedgerPage() {
 
   const activeQueue: PaymentRefundsQueue = queue === "disputes" ? "all" : queue;
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (queue === "disputes") {
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        if (queue === "disputes") {
+          const response = await fetchPaymentRefunds({
+            queue: "all",
+            page: 1,
+            limit: 1,
+            sortBy: "paid_at",
+            sortDir: "desc",
+          });
+          setData({
+            ...response.data,
+            items: [],
+            pageInfo: {
+              ...response.data.pageInfo,
+              totalCount: 0,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false,
+            },
+          });
+          setSelectedIds(new Set());
+          return;
+        }
         const response = await fetchPaymentRefunds({
-          queue: "all",
-          page: 1,
-          limit: 1,
-          sortBy: "paid_at",
-          sortDir: "desc",
+          queue: activeQueue,
+          q: searchApplied || undefined,
+          page,
+          limit: PAGE_SIZE,
+          sortBy: PAYMENT_REFUNDS_DEFAULTS.sortBy,
+          sortDir: PAYMENT_REFUNDS_DEFAULTS.sortDir,
         });
-        setData({
-          ...response.data,
-          items: [],
-          pageInfo: {
-            ...response.data.pageInfo,
-            totalCount: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPreviousPage: false,
-          },
-        });
+        setData(response.data);
         setSelectedIds(new Set());
-        return;
-      }
-      const response = await fetchPaymentRefunds({
-        queue: activeQueue,
-        q: searchApplied || undefined,
-        page,
-        limit: PAGE_SIZE,
-        sortBy: "paid_at",
-        sortDir: "desc",
-      });
-      setData(response.data);
-      setSelectedIds(new Set());
-    } catch (err) {
-      setData(null);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+      } catch (err) {
+        setData(null);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Unable to load refunds.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [activeQueue, page, queue, searchApplied]);
+            : err instanceof Error
+              ? err.message
+              : "Unable to load refunds.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [activeQueue, page, queue, searchApplied],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const summary = data?.summary;
   const items = data?.items ?? [];
@@ -744,7 +777,7 @@ export function AdminPaymentsRefundsLedgerPage() {
 
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
                 <span className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                  {totalCount.toLocaleString()} rows
+                  {totalCount.toLocaleString(viewer.locale)} rows
                   {selectedIds.size > 0 ? ` · ${String(selectedIds.size)} selected` : ""}
                 </span>
                 <div className="flex items-center gap-2">
@@ -824,6 +857,9 @@ function RefundRow({
   onOpen: () => void;
   onIssue: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const balanceLabel = refundBalanceLabel(item);
   const isFullyRefunded = balanceLabel === "Fully refunded";
   const isPartial = balanceLabel === "Partially refunded";

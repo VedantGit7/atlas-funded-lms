@@ -19,7 +19,11 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  PAYMENT_INVOICES_DEFAULTS,
+  paymentsRangeBefore,
+  type PaymentInvoicesPayload,
   dateInputToEndIso,
   dateInputToStartIso,
   downloadPaymentInvoice,
@@ -31,6 +35,8 @@ import {
 } from "./admin-payments-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 const PAGE_SIZE_OPTIONS = [
   { value: "12", label: "12" },
@@ -38,49 +44,34 @@ const PAGE_SIZE_OPTIONS = [
   { value: "48", label: "48" },
 ];
 
-const DEFAULT_COLUMNS: PaymentInvoiceColumnKey[] = [
-  "invoice_number",
-  "learner_name",
-  "email",
-  "billing_name",
-  "product_title",
-  "amount_cents",
-  "tax_amount_cents",
-  "currency",
-  "paid_at",
-];
+const DEFAULT_COLUMNS: PaymentInvoiceColumnKey[] = [...PAYMENT_INVOICES_DEFAULTS.columns];
 
 type CurrencyTotal = { currency: string; amountCents: number };
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatDate(iso: string | null): string {
+function formatDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
     day: "numeric",
   });
-}
-
-function defaultRange(): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - 29 * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
 }
 
 function Shimmer({ className }: { className?: string }) {
@@ -106,29 +97,52 @@ function downloadHtmlFile(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminPaymentsInvoicesLedgerPage() {
+export function AdminPaymentsInvoicesLedgerPage({
+  initialInvoices,
+}: {
+  /**
+   * The first page of invoices over the default range, loaded by the server
+   * with the range it counted; the first browser load is skipped when present.
+   */
+  initialInvoices?: ReportInitialDataInRange<PaymentInvoicesPayload> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatAmount = withViewer(formatAmountFor, viewer);
+  const formatDate = withViewer(formatDateFor, viewer);
   const router = useRouter();
-  const defaults = useMemo(() => defaultRange(), []);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialInvoices ?? null);
+  // The server's range when it loaded the ledger, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const defaults = useMemo(
+    () => initial?.range ?? paymentsRangeBefore(PAYMENT_INVOICES_DEFAULTS.rangeDays),
+    [initial],
+  );
   const [paidFrom, setPaidFrom] = useState(defaults.from);
   const [paidTo, setPaidTo] = useState(defaults.to);
   const [search, setSearch] = useState("");
   const [searchApplied, setSearchApplied] = useState("");
   const [currency, setCurrency] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
-  const [sortBy, setSortBy] = useState("paid_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState<number>(PAYMENT_INVOICES_DEFAULTS.page);
+  const [pageSize, setPageSize] = useState<number>(PAYMENT_INVOICES_DEFAULTS.limit);
+  const [sortBy, setSortBy] = useState<string>(PAYMENT_INVOICES_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(PAYMENT_INVOICES_DEFAULTS.sortDir);
   const [columns, setColumns] = useState<PaymentInvoiceColumnKey[]>(DEFAULT_COLUMNS);
   const [draftColumns, setDraftColumns] = useState<PaymentInvoiceColumnKey[]>(DEFAULT_COLUMNS);
   const [columnsOpen, setColumnsOpen] = useState(false);
-  const [items, setItems] = useState<PaymentInvoiceItem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [pageByCurrency, setPageByCurrency] = useState<CurrencyTotal[]>([]);
-  const [filteredByCurrency, setFilteredByCurrency] = useState<CurrencyTotal[]>([]);
+  const [items, setItems] = useState<PaymentInvoiceItem[]>(initial?.data.items ?? []);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [pageByCurrency, setPageByCurrency] = useState<CurrencyTotal[]>(
+    initial?.data.totals.pageByCurrency ?? [],
+  );
+  const [filteredByCurrency, setFilteredByCurrency] = useState<CurrencyTotal[]>(
+    initial?.data.totals.filteredByCurrency ?? [],
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [rowMenuId, setRowMenuId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const columnsRef = useRef<HTMLDivElement>(null);
@@ -185,48 +199,50 @@ export function AdminPaymentsInvoicesLedgerPage() {
     return chips;
   }, [currency, defaults.from, defaults.to, paidFrom, paidTo, searchApplied]);
 
-  const loadInvoices = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentInvoices({
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
-        q: searchApplied || undefined,
-        currency: currency || undefined,
-        sortBy,
-        sortDir,
-        columns,
-        page,
-        limit: pageSize,
-      });
-      setItems(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setPageByCurrency(response.data.totals.pageByCurrency);
-      setFilteredByCurrency(response.data.totals.filteredByCurrency);
-      setSelectedIds(new Set());
-    } catch (loadError) {
-      setItems([]);
-      setTotalCount(0);
-      setTotalPages(0);
-      setPageByCurrency([]);
-      setFilteredByCurrency([]);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadInvoices = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentInvoices({
+          paidFrom: dateInputToStartIso(paidFrom),
+          paidTo: dateInputToEndIso(paidTo),
+          q: searchApplied || undefined,
+          currency: currency || undefined,
+          sortBy,
+          sortDir,
+          columns,
+          page,
+          limit: pageSize,
+        });
+        setItems(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setPageByCurrency(response.data.totals.pageByCurrency);
+        setFilteredByCurrency(response.data.totals.filteredByCurrency);
+        setSelectedIds(new Set());
+      } catch (loadError) {
+        setItems([]);
+        setTotalCount(0);
+        setTotalPages(0);
+        setPageByCurrency([]);
+        setFilteredByCurrency([]);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load invoice data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [columns, currency, page, pageSize, paidFrom, paidTo, searchApplied, sortBy, sortDir]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load invoice data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [columns, currency, page, pageSize, paidFrom, paidTo, searchApplied, sortBy, sortDir],
+  );
 
-  useEffect(() => {
-    void loadInvoices();
-  }, [loadInvoices]);
+  useReportLoad(loadInvoices, initial);
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {

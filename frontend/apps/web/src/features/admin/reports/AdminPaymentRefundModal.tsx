@@ -7,7 +7,7 @@ import {
   refundPaymentTransaction,
   type PaymentTransactionDetail,
 } from "./admin-payments-roster-api";
-import { formatAmount, formatMoney } from "./payment-transaction-ui";
+import { formatAmountFor, formatMoneyFor } from "./payment-transaction-ui";
 import {
   isRefundAmountValid,
   isRefundNoteValid,
@@ -20,6 +20,7 @@ import {
   type RefundRequestIdentity,
   type RefundStatus,
 } from "./refund-submission";
+import { useViewerLocale, withViewer, ownViewerLocale } from "./viewer-time";
 
 type RefundReason = "duplicate" | "fraudulent" | "customer_requested" | "other";
 
@@ -38,6 +39,8 @@ type Props = {
 };
 
 export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: Props) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
   const titleId = useId();
   const [mode, setMode] = useState<"full" | "partial">("full");
   const [amountInput, setAmountInput] = useState("");
@@ -59,7 +62,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
   useEffect(() => {
     if (!open) return;
     setMode("full");
-    setAmountInput(formatAmount(detail.refundableAmountCents));
+    setAmountInput(formatAmountFor(detail.refundableAmountCents, ownViewerLocale()));
     setReason("customer_requested");
     setNote("");
     setRevokeAccess(false);
@@ -367,7 +370,7 @@ export function AdminPaymentRefundModal({ open, detail, onClose, onRefunded }: P
                     onClick={() => {
                       setMode(value);
                       if (value === "full") {
-                        setAmountInput(formatAmount(refundableCents));
+                        setAmountInput(formatAmountFor(refundableCents, ownViewerLocale()));
                       }
                     }}
                   >

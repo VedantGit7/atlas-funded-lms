@@ -24,10 +24,15 @@ import {
   Landmark,
   Wrench,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  PAYMENT_GATEWAYS_RANGE_DAYS,
+  PAYMENT_GATEWAY_TRANSACTIONS_DEFAULTS,
+  paymentsRangeBefore,
+  type PaymentTransactionsPayload,
   dateInputToEndIso,
   dateInputToStartIso,
   exportGatewayTransactions,
@@ -39,6 +44,8 @@ import {
 } from "./admin-payments-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type DetailTab = "transactions" | "payouts" | "webhooks" | "configuration";
 
@@ -50,26 +57,25 @@ const STATUS_OPTIONS = [
   { value: "refunded", label: "Refunded" },
 ];
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = PAYMENT_GATEWAY_TRANSACTIONS_DEFAULTS.limit;
 
 function defaultDateRange(): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - 29 * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
+  return paymentsRangeBefore(PAYMENT_GATEWAYS_RANGE_DAYS);
 }
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatDateTime(iso: string | null): string {
+function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "2-digit",
     month: "short",
     day: "numeric",
@@ -78,10 +84,11 @@ function formatDateTime(iso: string | null): string {
   });
 }
 
-function formatDate(iso: string): string {
+function formatDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -234,25 +241,52 @@ function DisableGatewayModal({
   );
 }
 
-export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: string }) {
+export function AdminPaymentsGatewayDetailPage({
+  gatewayKey,
+  initialDetail,
+  initialTransactions,
+}: {
+  gatewayKey: string;
+  /**
+   * The gateway's summary over the default range, loaded by the server with
+   * the range it counted; the first browser load is skipped when present.
+   */
+  initialDetail?: ReportInitialDataInRange<PaymentGatewayDetail> | null;
+  /** The transactions tab's first page over the same range, loaded by the server. */
+  initialTransactions?: ReportInitialDataInRange<PaymentTransactionsPayload> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatDate = withViewer(formatDateFor, viewer);
   const router = useRouter();
-  const defaults = useMemo(() => defaultDateRange(), []);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [initialTx] = useState(() => initialTransactions ?? null);
+  // The server's range when it loaded the page, so both render the same dates
+  // even if the clocks disagree or the day turned in between.
+  const defaults = useMemo(
+    () => initial?.range ?? initialTx?.range ?? defaultDateRange(),
+    [initial, initialTx],
+  );
   const [paidFrom, setPaidFrom] = useState(defaults.from);
   const [paidTo, setPaidTo] = useState(defaults.to);
   const [tab, setTab] = useState<DetailTab>("transactions");
-  const [detail, setDetail] = useState<PaymentGatewayDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(true);
+  const [detail, setDetail] = useState<PaymentGatewayDetail | null>(initial?.data ?? null);
+  const [detailLoading, setDetailLoading] = useState(initial === null);
   const [detailError, setDetailError] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [searchApplied, setSearchApplied] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
-  const [items, setItems] = useState<PaymentTransactionItem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [pageAmountCents, setPageAmountCents] = useState(0);
-  const [txCurrency, setTxCurrency] = useState("USD");
+  const [items, setItems] = useState<PaymentTransactionItem[]>(initialTx?.data.items ?? []);
+  const [totalCount, setTotalCount] = useState(initialTx?.data.pageInfo.totalCount ?? 0);
+  const [totalPages, setTotalPages] = useState(initialTx?.data.pageInfo.totalPages ?? 0);
+  const [pageAmountCents, setPageAmountCents] = useState(
+    initialTx?.data.totals.pageAmountCents ?? 0,
+  );
+  const [txCurrency, setTxCurrency] = useState(initialTx?.data.totals.currency ?? "USD");
   const [txLoading, setTxLoading] = useState(false);
   const [txError, setTxError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -261,82 +295,78 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
   const [disableError, setDisableError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const loadDetail = useCallback(async () => {
-    setDetailLoading(true);
-    setDetailError(null);
-    try {
-      const response = await fetchPaymentGatewayDetail(gatewayKey, {
-        ...(dateInputToStartIso(paidFrom) !== undefined
-          ? { paidFrom: dateInputToStartIso(paidFrom) }
-          : {}),
-        ...(dateInputToEndIso(paidTo) !== undefined ? { paidTo: dateInputToEndIso(paidTo) } : {}),
-      });
-      setDetail(response.data);
-    } catch (error) {
-      setDetail(null);
-      setDetailError(
-        error instanceof ClientApiError
-          ? error.message
-          : error instanceof Error
+  const loadDetail = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setDetailLoading(true);
+      setDetailError(null);
+      try {
+        const response = await fetchPaymentGatewayDetail(gatewayKey, {
+          ...(dateInputToStartIso(paidFrom) !== undefined
+            ? { paidFrom: dateInputToStartIso(paidFrom) }
+            : {}),
+          ...(dateInputToEndIso(paidTo) !== undefined ? { paidTo: dateInputToEndIso(paidTo) } : {}),
+        });
+        setDetail(response.data);
+      } catch (error) {
+        setDetail(null);
+        setDetailError(
+          error instanceof ClientApiError
             ? error.message
-            : "Unable to load gateway details.",
-      );
-    } finally {
-      setDetailLoading(false);
-    }
-  }, [gatewayKey, paidFrom, paidTo]);
+            : error instanceof Error
+              ? error.message
+              : "Unable to load gateway details.",
+        );
+      } finally {
+        if (!soft) setDetailLoading(false);
+      }
+    },
+    [gatewayKey, paidFrom, paidTo],
+  );
 
-  const loadTransactions = useCallback(async () => {
-    if (tab !== "transactions") return;
-    setTxLoading(true);
-    setTxError(null);
-    try {
-      const response = await fetchGatewayTransactions(gatewayKey, {
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
-        learnerName: searchApplied || undefined,
-        status: status || undefined,
-        sortBy: "paid_at",
-        sortDir: "desc",
-        columns: [
-          "learner_name",
-          "email",
-          "product_title",
-          "amount_cents",
-          "currency",
-          "status",
-          "paid_at",
-        ],
-        page,
-        limit: PAGE_SIZE,
-      });
-      setItems(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setPageAmountCents(response.data.totals.pageAmountCents);
-      setTxCurrency(response.data.totals.currency);
-      setSelectedIds(new Set());
-    } catch (error) {
-      setItems([]);
-      setTxError(
-        error instanceof ClientApiError
-          ? error.message
-          : error instanceof Error
+  const loadTransactions = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (tab !== "transactions") return;
+      const soft = options?.soft === true;
+      if (!soft) setTxLoading(true);
+      setTxError(null);
+      try {
+        const response = await fetchGatewayTransactions(gatewayKey, {
+          paidFrom: dateInputToStartIso(paidFrom),
+          paidTo: dateInputToEndIso(paidTo),
+          learnerName: searchApplied || undefined,
+          status: status || undefined,
+          sortBy: PAYMENT_GATEWAY_TRANSACTIONS_DEFAULTS.sortBy,
+          sortDir: PAYMENT_GATEWAY_TRANSACTIONS_DEFAULTS.sortDir,
+          columns: PAYMENT_GATEWAY_TRANSACTIONS_DEFAULTS.columns,
+          page,
+          limit: PAGE_SIZE,
+        });
+        setItems(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setPageAmountCents(response.data.totals.pageAmountCents);
+        setTxCurrency(response.data.totals.currency);
+        setSelectedIds(new Set());
+      } catch (error) {
+        setItems([]);
+        setTxError(
+          error instanceof ClientApiError
             ? error.message
-            : "Unable to load gateway transactions.",
-      );
-    } finally {
-      setTxLoading(false);
-    }
-  }, [gatewayKey, page, paidFrom, paidTo, searchApplied, status, tab]);
+            : error instanceof Error
+              ? error.message
+              : "Unable to load gateway transactions.",
+        );
+      } finally {
+        if (!soft) setTxLoading(false);
+      }
+    },
+    [gatewayKey, page, paidFrom, paidTo, searchApplied, status, tab],
+  );
 
-  useEffect(() => {
-    void loadDetail();
-  }, [loadDetail]);
+  useReportLoad(loadDetail, initial);
 
-  useEffect(() => {
-    void loadTransactions();
-  }, [loadTransactions]);
+  useReportLoad(loadTransactions, initialTx);
 
   async function handleExport() {
     if (!detail) return;
@@ -634,7 +664,7 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="font-mono text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-3xl">
-                  {(summary.paidAmountCents / 100).toLocaleString(undefined, {
+                  {(summary.paidAmountCents / 100).toLocaleString(viewer.locale, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
@@ -652,10 +682,10 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
                 Transactions
               </span>
               <span className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
-                {summary.paidTransactionCount.toLocaleString()}
+                {summary.paidTransactionCount.toLocaleString(viewer.locale)}
               </span>
               <span className="mt-1 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
-                {summary.transactionCount.toLocaleString()} attempts
+                {summary.transactionCount.toLocaleString(viewer.locale)} attempts
               </span>
             </div>
             <div className="flex flex-col justify-between border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4">
@@ -929,7 +959,7 @@ export function AdminPaymentsGatewayDetailPage({ gatewayKey }: { gatewayKey: str
 
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-3">
                 <span className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                  {totalCount.toLocaleString()} transactions
+                  {totalCount.toLocaleString(viewer.locale)} transactions
                 </span>
                 <div className="flex items-center gap-2">
                   <button

@@ -17,36 +17,42 @@ import {
   Send,
   Ban,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { fetchPaymentInvoiceDetail, type PaymentInvoiceDetail } from "./admin-payments-roster-api";
 import { AdminPaymentInvoiceVoidModal } from "./AdminPaymentInvoiceVoidModal";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type Props = {
   /** The order's id — invoices are keyed by order, not by invoice number. */
   orderId: string;
+  /** The invoice, loaded by the server; the first browser load is skipped when present. */
+  initialInvoice?: ReportInitialData<PaymentInvoiceDetail> | null;
 };
 
-function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
+  return `${(cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;
 }
 
-function formatAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatDateTime(iso: string | null): string {
+function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -55,11 +61,12 @@ function formatDateTime(iso: string | null): string {
   });
 }
 
-function formatDate(iso: string | null): string {
+function formatDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -98,9 +105,16 @@ function downloadHtmlFile(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminPaymentsInvoicePreviewPage({ orderId }: Props) {
-  const [detail, setDetail] = useState<PaymentInvoiceDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+export function AdminPaymentsInvoicePreviewPage({ orderId, initialInvoice }: Props) {
+  const viewer = useViewerLocale();
+  const formatMoney = withViewer(formatMoneyFor, viewer);
+  const formatAmount = withViewer(formatAmountFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatDate = withViewer(formatDateFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialInvoice ?? null);
+  const [detail, setDetail] = useState<PaymentInvoiceDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [voidOpen, setVoidOpen] = useState(false);
@@ -108,29 +122,31 @@ export function AdminPaymentsInvoicePreviewPage({ orderId }: Props) {
   const [copiedLink, setCopiedLink] = useState(false);
   const paperRef = useRef<HTMLDivElement>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchPaymentInvoiceDetail(orderId);
-      setDetail(response.data);
-    } catch (err) {
-      setDetail(null);
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPaymentInvoiceDetail(orderId);
+        setDetail(response.data);
+      } catch (err) {
+        setDetail(null);
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Couldn't load invoice.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [orderId]);
+            : err instanceof Error
+              ? err.message
+              : "Couldn't load invoice.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [orderId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   function handleDownloadHtml() {
     if (!detail?.canDownload) return;
