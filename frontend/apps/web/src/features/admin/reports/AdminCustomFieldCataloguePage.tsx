@@ -20,12 +20,17 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  CUSTOM_FIELD_CATALOGUE_DEFAULTS,
+  type CustomFieldCataloguePayload,
   fetchCustomFieldCatalogue,
   type CustomFieldCatalogueItem,
   type CustomFieldCatalogueSummary,
 } from "./admin-custom-field-roster-api";
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const TYPE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "", label: "All types" },
@@ -80,30 +85,35 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatPct(value: number | null): string {
+function formatPctFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
-function formatRelativeDate(value: string | null): string {
+function formatRelativeDateFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absDays = Math.round(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
   if (absDays < 1) {
     const absHours = Math.round(Math.abs(diffMs) / (1000 * 60 * 60));
@@ -126,7 +136,7 @@ function formatRelativeDate(value: string | null): string {
       "week",
     );
   }
-  return formatDateShort(value);
+  return formatDateShortFor(value, viewer);
 }
 
 function fieldTypeMarker(fieldType: string): string {
@@ -232,6 +242,9 @@ function SummaryBand({
   onBelow40Click: () => void;
   onNeverUsedClick: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
   return (
     <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-border)] md:grid-cols-4">
       <div className="flex flex-col gap-1 bg-[var(--admin-surface)] p-4 md:col-span-1">
@@ -304,6 +317,9 @@ function SummaryBand({
 }
 
 function CoverageOverview({ items }: { items: CustomFieldCatalogueItem[] }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
   const ordered = useMemo(
     () =>
       [...items]
@@ -440,20 +456,46 @@ function downloadCatalogueCsv(items: CustomFieldCatalogueItem[]) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminCustomFieldCataloguePage() {
+type CustomFieldCataloguePageProps = {
+  /** The catalogue, loaded by the server; the first browser load is skipped when present. */
+  initialCatalogue?: ReportInitialData<CustomFieldCataloguePayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminCustomFieldCataloguePage(props: CustomFieldCataloguePageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialCatalogue?.loadedAt ?? null}>
+      <CustomFieldCatalogueReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function CustomFieldCatalogueReport({ initialCatalogue }: CustomFieldCataloguePageProps = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatRelativeDate = withViewer(formatRelativeDateFor, viewer);
   const searchId = useId();
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialCatalogue ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<CustomFieldCatalogueItem[]>([]);
-  const [summary, setSummary] = useState<CustomFieldCatalogueSummary | null>(null);
+  const [items, setItems] = useState<CustomFieldCatalogueItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<CustomFieldCatalogueSummary | null>(
+    initial?.data.summary ?? null,
+  );
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [fieldType, setFieldType] = useState("");
-  const [status, setStatus] = useState("ALL");
-  const [coverage, setCoverage] = useState("any");
-  const [sortBy, setSortBy] = useState("coverage_asc");
+  const [status, setStatus] = useState<string>(CUSTOM_FIELD_CATALOGUE_DEFAULTS.status);
+  const [coverage, setCoverage] = useState<string>(CUSTOM_FIELD_CATALOGUE_DEFAULTS.coverage);
+  const [sortBy, setSortBy] = useState<string>(CUSTOM_FIELD_CATALOGUE_DEFAULTS.sortBy);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -464,37 +506,39 @@ export function AdminCustomFieldCataloguePage() {
     };
   }, [searchInput]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchCustomFieldCatalogue({
-        ...(debouncedSearch ? { q: debouncedSearch } : {}),
-        ...(fieldType ? { fieldType } : {}),
-        status,
-        coverage,
-        sortBy,
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchCustomFieldCatalogue({
+          ...(debouncedSearch ? { q: debouncedSearch } : {}),
+          ...(fieldType ? { fieldType } : {}),
+          status,
+          coverage,
+          sortBy,
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load the field catalogue.",
-      );
-      setItems([]);
-      setSummary(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [coverage, debouncedSearch, fieldType, sortBy, status]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load the field catalogue.",
+        );
+        setItems([]);
+        setSummary(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [coverage, debouncedSearch, fieldType, sortBy, status],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const hasActiveFilters = Boolean(
     debouncedSearch || fieldType || status !== "ALL" || coverage !== "any",

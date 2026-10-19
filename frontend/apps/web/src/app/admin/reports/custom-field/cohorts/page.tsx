@@ -2,10 +2,14 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminCustomFieldCohortsPage } from "../../../../../features/admin/reports/AdminCustomFieldCohortsPage";
+import { loadCustomFieldCohortsData } from "../../../../../lib/server/report-custom-field-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminCustomFieldCohortsRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialCohorts] = await Promise.all([
+    runTenantStateGate(),
+    loadCustomFieldCohortsData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -19,7 +23,7 @@ export default async function AdminCustomFieldCohortsRoutePage() {
 
   return (
     <AdminPageGate screenId="T51" state="ready" title="Cohorts">
-      <AdminCustomFieldCohortsPage />
+      <AdminCustomFieldCohortsPage initialCohorts={initialCohorts} />
     </AdminPageGate>
   );
 }

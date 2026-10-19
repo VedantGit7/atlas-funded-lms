@@ -234,53 +234,72 @@ function buildCohortQuery(filters: Record<string, string | number | undefined>) 
   return qs ? `?${qs}` : "";
 }
 
+type CohortPageInfo = {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
+export type CustomFieldCohortGroupsPayload = {
+  items: CustomFieldCohortGroupItem[];
+  pageInfo: CohortPageInfo;
+};
+
+export type CustomFieldCohortMessagesPayload = {
+  items: CustomFieldCohortMessageItem[];
+  pageInfo: CohortPageInfo;
+};
+
+/** The cohorts page shows ten groups and ten messages a page. */
+export const CUSTOM_FIELD_COHORTS_PAGE_SIZE = 10;
+
+/** The cohorts page's first data: its groups and its messages. */
+export type CustomFieldCohortsInitial = {
+  groups: CustomFieldCohortGroupsPayload;
+  messages: CustomFieldCohortMessagesPayload;
+};
+
+export function customFieldCohortGroupsPath(filters?: {
+  q?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+}): string {
+  return `/api/v1/reports/custom-field/cohorts/groups${buildCohortQuery({
+    q: filters?.q,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
 export async function fetchCustomFieldCohortGroups(filters?: {
   q?: string | undefined;
   page?: number | undefined;
   limit?: number | undefined;
 }) {
-  return clientApi.get<{
-    data: {
-      items: CustomFieldCohortGroupItem[];
-      pageInfo: {
-        page: number;
-        pageSize: number;
-        totalCount: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-      };
-    };
-  }>(
-    `/api/v1/reports/custom-field/cohorts/groups${buildCohortQuery({
-      q: filters?.q,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
+  return clientApi.get<{ data: CustomFieldCohortGroupsPayload }>(
+    customFieldCohortGroupsPath(filters),
   );
+}
+
+export function customFieldCohortMessagesPath(filters?: {
+  page?: number | undefined;
+  limit?: number | undefined;
+}): string {
+  return `/api/v1/reports/custom-field/cohorts/messages${buildCohortQuery({
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
 }
 
 export async function fetchCustomFieldCohortMessages(filters?: {
   page?: number | undefined;
   limit?: number | undefined;
 }) {
-  return clientApi.get<{
-    data: {
-      items: CustomFieldCohortMessageItem[];
-      pageInfo: {
-        page: number;
-        pageSize: number;
-        totalCount: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-      };
-    };
-  }>(
-    `/api/v1/reports/custom-field/cohorts/messages${buildCohortQuery({
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
+  return clientApi.get<{ data: CustomFieldCohortMessagesPayload }>(
+    customFieldCohortMessagesPath(filters),
   );
 }
 
@@ -331,27 +350,38 @@ export type CustomFieldCatalogueSummary = {
   learnerCount: number;
 };
 
-export async function fetchCustomFieldCatalogue(filters: {
+export type CustomFieldCatalogueFilters = {
   q?: string | undefined;
   fieldType?: string | undefined;
   status?: string | undefined;
   coverage?: string | undefined;
   sortBy?: string | undefined;
-}) {
-  return clientApi.get<{
-    data: {
-      items: CustomFieldCatalogueItem[];
-      summary: CustomFieldCatalogueSummary;
-    };
-  }>(
-    `/api/v1/reports/custom-field/catalogue${buildQuery({
-      q: filters.q,
-      fieldType: filters.fieldType,
-      status: filters.status,
-      coverage: filters.coverage,
-      sortBy: filters.sortBy,
-    })}`,
-  );
+};
+
+export type CustomFieldCataloguePayload = {
+  items: CustomFieldCatalogueItem[];
+  summary: CustomFieldCatalogueSummary;
+};
+
+/** What the field catalogue opens on: every status, any coverage, lowest coverage first. */
+export const CUSTOM_FIELD_CATALOGUE_DEFAULTS = {
+  status: "ALL",
+  coverage: "any",
+  sortBy: "coverage_asc",
+} as const;
+
+export function customFieldCataloguePath(filters: CustomFieldCatalogueFilters): string {
+  return `/api/v1/reports/custom-field/catalogue${buildQuery({
+    q: filters.q,
+    fieldType: filters.fieldType,
+    status: filters.status,
+    coverage: filters.coverage,
+    sortBy: filters.sortBy,
+  })}`;
+}
+
+export async function fetchCustomFieldCatalogue(filters: CustomFieldCatalogueFilters) {
+  return clientApi.get<{ data: CustomFieldCataloguePayload }>(customFieldCataloguePath(filters));
 }
 
 export type CustomFieldDetailField = {
@@ -512,17 +542,33 @@ export async function fetchCustomFieldDetail(
     limit?: number | undefined;
   },
 ) {
-  return clientApi.get<{ data: CustomFieldDetailData }>(
-    `/api/v1/reports/custom-field/catalogue/${encodeURIComponent(fieldKey)}${buildQuery({
-      q: filters.q,
-      valueFilter: filters.valueFilter,
-      minValue: filters.minValue,
-      maxValue: filters.maxValue,
-      compareWith: filters.compareWith,
-      page: filters.page ?? 1,
-      limit: filters.limit ?? 10,
-    })}`,
-  );
+  return clientApi.get<{ data: CustomFieldDetailData }>(customFieldDetailPath(fieldKey, filters));
+}
+
+/** A field's learner list shows ten a page. */
+export const CUSTOM_FIELD_DETAIL_PAGE_SIZE = 10;
+
+export function customFieldDetailPath(
+  fieldKey: string,
+  filters: {
+    q?: string | undefined;
+    valueFilter?: string | undefined;
+    minValue?: number | undefined;
+    maxValue?: number | undefined;
+    compareWith?: string | undefined;
+    page?: number | undefined;
+    limit?: number | undefined;
+  },
+): string {
+  return `/api/v1/reports/custom-field/catalogue/${encodeURIComponent(fieldKey)}${buildQuery({
+    q: filters.q,
+    valueFilter: filters.valueFilter,
+    minValue: filters.minValue,
+    maxValue: filters.maxValue,
+    compareWith: filters.compareWith,
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 10,
+  })}`;
 }
 
 export type CustomFieldLearnerSummary = {
@@ -588,9 +634,13 @@ export type UpdateCustomFieldLearnerValuesBody = {
   }>;
 };
 
+export function customFieldLearnerDetailPath(membershipId: string): string {
+  return `/api/v1/reports/custom-field/learners/${encodeURIComponent(membershipId)}`;
+}
+
 export async function fetchCustomFieldLearnerDetail(membershipId: string) {
   return clientApi.get<{ data: CustomFieldLearnerDetailData }>(
-    `/api/v1/reports/custom-field/learners/${encodeURIComponent(membershipId)}`,
+    customFieldLearnerDetailPath(membershipId),
   );
 }
 

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminCustomFieldDetailPage } from "../../../../../../features/admin/reports/AdminCustomFieldDetailPage";
+import { loadCustomFieldDetailData } from "../../../../../../lib/server/report-custom-field-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type Props = {
@@ -11,7 +12,10 @@ type Props = {
 export default async function AdminCustomFieldDetailRoutePage({ params }: Props) {
   const { fieldKey } = await params;
   const decoded = decodeURIComponent(fieldKey);
-  const gate = await runTenantStateGate();
+  const [gate, initialDetail] = await Promise.all([
+    runTenantStateGate(),
+    loadCustomFieldDetailData(decoded),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +29,7 @@ export default async function AdminCustomFieldDetailRoutePage({ params }: Props)
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Field detail">
-      <AdminCustomFieldDetailPage fieldKey={decoded} />
+      <AdminCustomFieldDetailPage fieldKey={decoded} initialDetail={initialDetail} />
     </AdminPageGate>
   );
 }

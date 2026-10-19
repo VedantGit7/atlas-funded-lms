@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../../components/patterns/AdminPageGate";
 import { AdminCustomFieldSegmentBuilderPage } from "../../../../../../../features/admin/reports/AdminCustomFieldSegmentBuilderPage";
+import { loadSegmentBuilderData } from "../../../../../../../lib/server/report-custom-field-initial-data";
 import { runTenantStateGate } from "../../../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminCustomFieldSegmentEditPage({
@@ -10,7 +11,10 @@ export default async function AdminCustomFieldSegmentEditPage({
   params: Promise<{ segmentId: string }>;
 }) {
   const { segmentId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initialBuilder] = await Promise.all([
+    runTenantStateGate(),
+    loadSegmentBuilderData(segmentId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -24,7 +28,7 @@ export default async function AdminCustomFieldSegmentEditPage({
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Edit segment">
-      <AdminCustomFieldSegmentBuilderPage segmentId={segmentId} />
+      <AdminCustomFieldSegmentBuilderPage segmentId={segmentId} initialBuilder={initialBuilder} />
     </AdminPageGate>
   );
 }

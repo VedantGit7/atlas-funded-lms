@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminCustomFieldSegmentDetailPage } from "../../../../../../features/admin/reports/AdminCustomFieldSegmentDetailPage";
+import { loadCustomFieldSegmentDetailData } from "../../../../../../lib/server/report-custom-field-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminCustomFieldSegmentDetailRoutePage({
@@ -10,7 +11,10 @@ export default async function AdminCustomFieldSegmentDetailRoutePage({
   params: Promise<{ segmentId: string }>;
 }) {
   const { segmentId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initial] = await Promise.all([
+    runTenantStateGate(),
+    loadCustomFieldSegmentDetailData(segmentId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -24,7 +28,11 @@ export default async function AdminCustomFieldSegmentDetailRoutePage({
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Segment">
-      <AdminCustomFieldSegmentDetailPage segmentId={segmentId} />
+      <AdminCustomFieldSegmentDetailPage
+        segmentId={segmentId}
+        initialView={initial.view}
+        initialLearners={initial.learners}
+      />
     </AdminPageGate>
   );
 }
