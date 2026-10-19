@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminLiveClassAttendanceLiveMonitorPage } from "../../../../../../features/admin/reports/AdminLiveClassAttendanceLiveMonitorPage";
+import { loadLiveMonitorData } from "../../../../../../lib/server/report-live-class-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -11,7 +12,10 @@ type PageProps = {
 
 export default async function AdminLiveClassAttendanceLiveMonitorRoutePage({ params }: PageProps) {
   const { sessionId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initialSnapshot] = await Promise.all([
+    runTenantStateGate(),
+    loadLiveMonitorData(sessionId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -32,7 +36,10 @@ export default async function AdminLiveClassAttendanceLiveMonitorRoutePage({ par
           </p>
         }
       >
-        <AdminLiveClassAttendanceLiveMonitorPage sessionId={sessionId} />
+        <AdminLiveClassAttendanceLiveMonitorPage
+          sessionId={sessionId}
+          initialSnapshot={initialSnapshot}
+        />
       </Suspense>
     </AdminPageGate>
   );

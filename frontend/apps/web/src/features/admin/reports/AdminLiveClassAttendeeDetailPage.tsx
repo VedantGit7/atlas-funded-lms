@@ -25,12 +25,15 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchLiveClassAttendeeDetail,
   sendLiveClassAttendanceMessage,
   updateLiveClassAttendeeStatus,
   type LiveAttendeeDetail,
 } from "./admin-live-class-attendance-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type AttendanceStatus = LiveAttendeeDetail["status"];
 
@@ -61,11 +64,12 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatDate(value: string | null | undefined): string {
+function formatDateFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -74,37 +78,42 @@ function formatDate(value: string | null | undefined): string {
   });
 }
 
-function formatDateShort(value: string | null | undefined): string {
+function formatDateShortFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const today = new Date();
-  if (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  ) {
+  const day = (value: Date) => value.toLocaleDateString("en-CA", { timeZone: viewer.timeZone });
+  if (day(date) === day(new Date(viewer.now))) {
     return "Today";
   }
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+  });
 }
 
-function formatRegisteredChip(value: string | null | undefined): string {
+function formatRegisteredChipFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "Registered date unavailable";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Registered date unavailable";
-  return `Registered ${date.toLocaleDateString(undefined, {
+  return `Registered ${date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
     year: "numeric",
   })}`;
 }
 
-function formatTimeOnly(value: string | null | undefined): string {
+function formatTimeOnlyFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function formatDuration(seconds: number | null | undefined): string {
@@ -229,7 +238,10 @@ function getFocusable(root: HTMLElement): HTMLElement[] {
   );
 }
 
-function presenceSegments(detail: LiveAttendeeDetail): Array<{
+function presenceSegmentsFor(
+  detail: LiveAttendeeDetail,
+  viewer: ViewerLocale,
+): Array<{
   id: string;
   leftPct: number;
   widthPct: number;
@@ -269,7 +281,7 @@ function presenceSegments(detail: LiveAttendeeDetail): Array<{
         id: segment.id,
         leftPct: Math.max(0, Math.min(100, leftPct)),
         widthPct: Math.max(0.4, Math.min(100, widthPct)),
-        label: `${formatTimeOnly(segment.joinedAt)} to ${formatTimeOnly(segment.leftAt)} (${formatDuration(segment.durationSeconds)})`,
+        label: `${formatTimeOnlyFor(segment.joinedAt, viewer)} to ${formatTimeOnlyFor(segment.leftAt, viewer)} (${formatDuration(segment.durationSeconds)})`,
       };
     })
     .filter((segment) => segment.widthPct > 0);
@@ -325,7 +337,9 @@ function DetailLoadingSkeleton() {
 }
 
 function PresenceTimeline({ detail }: { detail: LiveAttendeeDetail }) {
-  const segments = useMemo(() => presenceSegments(detail), [detail]);
+  const viewer = useViewerLocale();
+  const formatTimeOnly = withViewer(formatTimeOnlyFor, viewer);
+  const segments = useMemo(() => presenceSegmentsFor(detail, viewer), [detail, viewer]);
   const empty =
     detail.status === "absent" ||
     segments.length === 0 ||
@@ -916,15 +930,35 @@ function MessageModal({
   return createPortal(dialog, document.body);
 }
 
-export function AdminLiveClassAttendeeDetailPage({
-  sessionId,
-  attendeeId,
-}: {
+type LiveAttendeeDetailPageProps = {
   sessionId: string;
   attendeeId: string;
-}) {
-  const [detail, setDetail] = useState<LiveAttendeeDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  /** The attendee, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<LiveAttendeeDetail> | null;
+};
+
+/**
+ * "Today" on the page counts from when the server rendered it until hydration
+ * ends (see viewer-time), so both renders read the same.
+ */
+export function AdminLiveClassAttendeeDetailPage(props: LiveAttendeeDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <LiveAttendeeReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function LiveAttendeeReport({ sessionId, attendeeId, initialDetail }: LiveAttendeeDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatDate = withViewer(formatDateFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
+  const formatRegisteredChip = withViewer(formatRegisteredChipFor, viewer);
+  const formatTimeOnly = withViewer(formatTimeOnlyFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<LiveAttendeeDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -938,23 +972,25 @@ export function AdminLiveClassAttendeeDetailPage({
 
   const sessionHref = `/admin/reports/live-class-attendance/${sessionId}`;
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveClassAttendeeDetail(sessionId, attendeeId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setError(errMsg(loadError, "Couldn't load attendee details."));
-    } finally {
-      setLoading(false);
-    }
-  }, [attendeeId, sessionId]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveClassAttendeeDetail(sessionId, attendeeId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setError(errMsg(loadError, "Couldn't load attendee details."));
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [attendeeId, sessionId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleStatusSave(status: AttendanceStatus, reason?: string) {
     setStatusBusy(true);

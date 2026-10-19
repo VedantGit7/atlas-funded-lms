@@ -29,12 +29,15 @@ import {
   dropdownItemClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchLiveClassLearnerAttendanceDetail,
   sendLiveClassAttendanceMessage,
   type LiveLearnerDetail,
   type LiveLearnerDetailSessionStatus,
 } from "./admin-live-class-attendance-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-transparent px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-low)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -90,11 +93,12 @@ function formatDuration(seconds: number | null | undefined): string {
   return `${String(total)}s`;
 }
 
-function formatScheduled(value: string | null): string {
+function formatScheduledFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -102,18 +106,22 @@ function formatScheduled(value: string | null): string {
   });
 }
 
-function formatClock(value: string | null): string {
+function formatClockFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "--:--";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "--:--";
-  return date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "Never";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Never";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const days = Math.floor(diffMs / 86_400_000);
   if (days <= 0) return "Today";
   if (days === 1) return "1 day ago";
@@ -570,13 +578,33 @@ function exportSessionsCsv(detail: LiveLearnerDetail) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminLiveClassLearnerAttendanceDetailPage({
-  membershipId,
-}: {
+type LiveLearnerDetailPageProps = {
   membershipId: string;
-}) {
-  const [detail, setDetail] = useState<LiveLearnerDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  /** The learner's attendance, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<LiveLearnerDetail> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminLiveClassLearnerAttendanceDetailPage(props: LiveLearnerDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <LiveLearnerReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function LiveLearnerReport({ membershipId, initialDetail }: LiveLearnerDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatScheduled = withViewer(formatScheduledFor, viewer);
+  const formatClock = withViewer(formatClockFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<LiveLearnerDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [compareCohort, setCompareCohort] = useState(true);
   const [sessionFilter, setSessionFilter] = useState<SessionFilter>("all");
@@ -591,29 +619,31 @@ export function AdminLiveClassLearnerAttendanceDetailPage({
   const [messageBusy, setMessageBusy] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveClassLearnerAttendanceDetail(membershipId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveClassLearnerAttendanceDetail(membershipId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load learner attendance.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [membershipId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load learner attendance.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [membershipId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const filteredSessions = useMemo(() => {
     if (!detail) return [];

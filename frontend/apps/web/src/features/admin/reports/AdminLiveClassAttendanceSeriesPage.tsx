@@ -30,7 +30,11 @@ import {
   dropdownItemClassName,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  LIVE_SERIES_DEFAULTS,
+  liveSessionsPresetRange,
+  type LiveSeriesPayload,
   dateInputToEndIso,
   dateInputToStartIso,
   fetchLiveClassAttendanceSeries,
@@ -43,6 +47,8 @@ import {
   type LiveSeriesListSummary,
   type LiveSeriesSortBy,
 } from "./admin-live-class-attendance-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type ModuleTab = "sessions" | "learners" | "series" | "exports";
 type DatePreset = "7d" | "30d" | "90d" | "custom";
@@ -82,32 +88,24 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function presetToRange(preset: DatePreset): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  if (preset === "7d") from.setDate(from.getDate() - 7);
-  else if (preset === "30d") from.setDate(from.getDate() - 30);
-  else if (preset === "90d") from.setDate(from.getDate() - 90);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
-}
-
 function formatPct(value: number | null | undefined): string {
   if (value == null || Number.isNaN(value)) return "—";
   return `${value.toFixed(1)}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatDateShort(value: string | null): string {
+function formatDateShortFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function formatDelta(pts: number | null): string {
@@ -402,6 +400,9 @@ function ExpandedPanel({
   error: string | null;
   onRetry: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
   if (loading && !detail) {
     return (
       <div className="space-y-4 border-t border-[var(--admin-border)] bg-[var(--admin-bg)] px-6 py-5">
@@ -672,28 +673,45 @@ function exportSeriesCsv(items: LiveSeriesListItem[]) {
   URL.revokeObjectURL(url);
 }
 
-export function AdminLiveClassAttendanceSeriesPage() {
+export function AdminLiveClassAttendanceSeriesPage({
+  initialSeries,
+}: {
+  /** The first page over the last 90 days, loaded by the server; the first browser load is skipped when present. */
+  initialSeries?: ReportInitialDataInRange<LiveSeriesPayload> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDateShort = withViewer(formatDateShortFor, viewer);
   const datePresetLabelId = useId();
   const sortLabelId = useId();
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSeries ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<LiveSeriesListItem[]>([]);
-  const [summary, setSummary] = useState<LiveSeriesListSummary>(EMPTY_SUMMARY);
-  const [dropOff, setDropOff] = useState<LiveSeriesDropOff>(EMPTY_DROP_OFF);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [items, setItems] = useState<LiveSeriesListItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<LiveSeriesListSummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
+  const [dropOff, setDropOff] = useState<LiveSeriesDropOff>(
+    initial?.data.dropOff ?? EMPTY_DROP_OFF,
+  );
+  const [page, setPage] = useState<number>(LIVE_SERIES_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
-  const initialRange = presetToRange("90d");
-  const [datePreset, setDatePreset] = useState<DatePreset>("90d");
+  // The server's range when it loaded the first page, so both renders agree.
+  const [initialRange] = useState(
+    () => initial?.range ?? liveSessionsPresetRange(LIVE_SERIES_DEFAULTS.datePreset),
+  );
+  const [datePreset, setDatePreset] = useState<DatePreset>(LIVE_SERIES_DEFAULTS.datePreset);
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [scheduledFrom, setScheduledFrom] = useState(initialRange.from);
   const [scheduledTo, setScheduledTo] = useState(initialRange.to);
-  const [groupBy, setGroupBy] = useState<LiveSeriesGroupBy>("course");
+  const [groupBy, setGroupBy] = useState<LiveSeriesGroupBy>(LIVE_SERIES_DEFAULTS.groupBy);
   const [searchQ, setSearchQ] = useState("");
-  const [sortBy, setSortBy] = useState<LiveSeriesSortBy>("avg_turnout");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortBy, setSortBy] = useState<LiveSeriesSortBy>(LIVE_SERIES_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(LIVE_SERIES_DEFAULTS.sortDir);
   const [sortOpen, setSortOpen] = useState(false);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -728,7 +746,7 @@ export function AdminLiveClassAttendanceSeriesPage() {
       sortBy,
       sortDir,
       page,
-      limit: 25,
+      limit: LIVE_SERIES_DEFAULTS.limit,
     };
     const trimmed = searchQ.trim();
     if (trimmed) payload.q = trimmed;
@@ -739,35 +757,37 @@ export function AdminLiveClassAttendanceSeriesPage() {
     return payload;
   }, [groupBy, page, scheduledFrom, scheduledTo, searchQ, sortBy, sortDir]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchLiveClassAttendanceSeries(filterPayload);
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setDropOff(response.data.dropOff);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setTotalCount(response.data.pageInfo.totalCount);
-    } catch (loadError) {
-      setItems([]);
-      setSummary(EMPTY_SUMMARY);
-      setDropOff(EMPTY_DROP_OFF);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchLiveClassAttendanceSeries(filterPayload);
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setDropOff(response.data.dropOff);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setTotalCount(response.data.pageInfo.totalCount);
+      } catch (loadError) {
+        setItems([]);
+        setSummary(EMPTY_SUMMARY);
+        setDropOff(EMPTY_DROP_OFF);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load series rollup.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [filterPayload]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load series rollup.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [filterPayload],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const loadExpand = useCallback(
     async (seriesId: string) => {
@@ -799,7 +819,7 @@ export function AdminLiveClassAttendanceSeriesPage() {
   function applyDatePreset(preset: DatePreset) {
     setDatePreset(preset);
     if (preset !== "custom") {
-      const range = presetToRange(preset);
+      const range = liveSessionsPresetRange(preset);
       setScheduledFrom(range.from);
       setScheduledTo(range.to);
     }
