@@ -15,7 +15,10 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import { generalSettingsFormCardClassName } from "../general-settings/general-settings-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  type ProgressProductsPayload,
+  type ScoreProductsPayload,
   createProgressGroup,
   createScoreGroup,
   dateInputToEndIso,
@@ -43,6 +46,7 @@ import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
 import { AdminProgressProductPicker } from "./AdminProgressProductPicker";
 import { AdminScoresProductPicker } from "./AdminScoresProductPicker";
 import type { ScoreLearnerResultStatus } from "./admin-progress-score-roster-api";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type MainTab = "progress" | "scores";
 type ProgressProduct = ProgressProductType;
@@ -66,11 +70,11 @@ const ENROLLED_TYPE_OPTIONS = [
   { value: "trial", label: "Trial" },
 ] as const;
 
-function formatDate(value: string | null): string {
+function formatDateFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString();
+  return date.toLocaleString(viewer.locale);
 }
 
 function titleCase(value: string): string {
@@ -79,9 +83,17 @@ function titleCase(value: string): string {
 
 export function AdminProgressScoreRosterPage({
   initialMainTab = "progress",
+  initialProducts,
+  initialScoreProducts,
 }: {
   initialMainTab?: MainTab;
+  /** The progress picker's first page, loaded by the server. */
+  initialProducts?: ReportInitialData<ProgressProductsPayload> | null;
+  /** The scores picker's first page, loaded by the server. */
+  initialScoreProducts?: ReportInitialData<ScoreProductsPayload> | null;
 }) {
+  const viewer = useViewerLocale();
+  const formatDate = withViewer(formatDateFor, viewer);
   const router = useRouter();
   const [mainTab] = useState<MainTab>(initialMainTab);
   const [progressProduct, setProgressProduct] = useState<ProgressProduct>("course");
@@ -440,6 +452,7 @@ export function AdminProgressScoreRosterPage({
       {mainTab === "progress" && !selectedProduct ? (
         <AdminProgressProductPicker
           productType={progressProduct}
+          initialProducts={initialProducts ?? null}
           onProductTypeChange={(type) => {
             setProgressProduct(type);
             resetDrill();
@@ -451,6 +464,7 @@ export function AdminProgressScoreRosterPage({
       ) : mainTab === "scores" && !selectedProduct ? (
         <AdminScoresProductPicker
           productType={scoreApiProductType(scoreProduct)}
+          initialProducts={initialScoreProducts ?? null}
           onProductTypeChange={(type) => {
             setScoreProduct(scoreUiProduct(type));
             resetDrill();

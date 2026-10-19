@@ -17,7 +17,9 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  type ScoreProductsPayload,
   fetchScoreProducts,
   type ScorePassRateBand,
   type ScoreProductItem,
@@ -25,6 +27,8 @@ import {
   type ScoreProductType,
   type ScoreProductsSummary,
 } from "./admin-progress-score-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const PRODUCT_TABS: Array<{ key: ScoreProductType; label: string }> = [
   { key: "course", label: "Course quiz" },
@@ -65,23 +69,23 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatPct(value: number | null): string {
+function formatPctFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "Never";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "Never";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absMinutes = Math.round(Math.abs(diffMs) / (1000 * 60));
   if (absMinutes < 60) {
     return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
@@ -103,14 +107,18 @@ function formatRelative(iso: string | null): string {
       "day",
     );
   }
-  return date.toLocaleDateString();
+  return date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone });
 }
 
-function formatAbsolute(iso: string | null): string {
+function formatAbsoluteFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 function productPath(productType: ScoreProductType, slug: string): string {
@@ -133,6 +141,8 @@ function typeLabel(productType: ScoreProductType): string {
 }
 
 function ScoreBar({ avgPct, passMarkPct }: { avgPct: number | null; passMarkPct: number | null }) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
   const fillPct = avgPct != null ? Math.min(100, Math.max(0, avgPct)) : 0;
   const belowPass = passMarkPct != null && avgPct != null && avgPct < passMarkPct;
 
@@ -227,33 +237,61 @@ type PageInfo = {
   hasPreviousPage: boolean;
 };
 
-export function AdminScoresProductPicker({
-  productType,
-  onProductTypeChange,
-  onSelectProduct,
-}: {
+type AdminScoresProductPickerProps = {
   productType: ScoreProductType;
   onProductTypeChange: (type: ScoreProductType) => void;
   onSelectProduct: (product: ScoreProductItem) => void;
-}) {
+  /** The first page for the default product type, loaded by the server; the first browser load is skipped when present. */
+  initialProducts?: ReportInitialData<ScoreProductsPayload> | null;
+};
+
+/**
+ * Relative times count from when the server rendered the page until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminScoresProductPicker(props: AdminScoresProductPickerProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialProducts?.loadedAt ?? null}>
+      <ScoreProductPickerReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ScoreProductPickerReport({
+  productType,
+  onProductTypeChange,
+  onSelectProduct,
+  initialProducts,
+}: AdminScoresProductPickerProps) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
   const searchId = useId();
   const ungradedToggleId = useId();
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the picker has changed since.
+  const [initial] = useState(() => initialProducts ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<ScoreProductItem[]>([]);
-  const [summary, setSummary] = useState<ScoreProductsSummary>({
-    productCount: 0,
-    assessmentCount: 0,
-    attemptCount: 0,
-  });
-  const [pageInfo, setPageInfo] = useState<PageInfo>({
-    page: 1,
-    pageSize: 25,
-    totalCount: 0,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
-  });
+  const [items, setItems] = useState<ScoreProductItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<ScoreProductsSummary>(
+    initial?.data.summary ?? {
+      productCount: 0,
+      assessmentCount: 0,
+      attemptCount: 0,
+    },
+  );
+  const [pageInfo, setPageInfo] = useState<PageInfo>(
+    initial?.data.pageInfo ?? {
+      page: 1,
+      pageSize: 25,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  );
   const [searchInput, setSearchInput] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [passRateBand, setPassRateBand] = useState<ScorePassRateBand | "">("");
@@ -273,43 +311,45 @@ export function AdminScoresProductPicker({
     };
   }, [searchInput]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    const [sortByRaw, sortDirRaw] = sortKey.split(":");
-    const sortBy = (sortByRaw ?? "attempts") as ScoreProductSortBy;
-    const sortDir = sortDirRaw === "asc" ? "asc" : "desc";
-    try {
-      const response = await fetchScoreProducts(productType, {
-        q: debouncedQ || undefined,
-        page,
-        limit: 25,
-        passRateBand,
-        hasUngraded: hasUngraded || undefined,
-        sortBy,
-        sortDir,
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setPageInfo(response.data.pageInfo);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      const [sortByRaw, sortDirRaw] = sortKey.split(":");
+      const sortBy = (sortByRaw ?? "attempts") as ScoreProductSortBy;
+      const sortDir = sortDirRaw === "asc" ? "asc" : "desc";
+      try {
+        const response = await fetchScoreProducts(productType, {
+          q: debouncedQ || undefined,
+          page,
+          limit: 25,
+          passRateBand,
+          hasUngraded: hasUngraded || undefined,
+          sortBy,
+          sortDir,
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setPageInfo(response.data.pageInfo);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Failed to load product data.",
-      );
-      setItems([]);
-      setSummary({ productCount: 0, assessmentCount: 0, attemptCount: 0 });
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedQ, hasUngraded, page, passRateBand, productType, sortKey]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Failed to load product data.",
+        );
+        setItems([]);
+        setSummary({ productCount: 0, assessmentCount: 0, attemptCount: 0 });
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [debouncedQ, hasUngraded, page, passRateBand, productType, sortKey],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   function clearFilters() {
     setSearchInput("");

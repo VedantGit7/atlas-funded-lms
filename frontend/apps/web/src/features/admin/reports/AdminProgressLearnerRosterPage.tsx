@@ -21,7 +21,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  PROGRESS_LEARNERS_DEFAULTS,
+  type ProgressLearnersPayload,
   exportProgressReport,
   fetchProgressLearners,
   PROGRESS_LEARNER_COLUMN_OPTIONS,
@@ -39,6 +42,8 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { CohortActionsDrawer, type CohortDrawerMode } from "./CohortActionsDrawer";
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const ENROLLED_TYPE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "", label: "All types" },
@@ -95,23 +100,23 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatPct(value: number | null): string {
+function formatPctFor(value: number | null, viewer: ViewerLocale): string {
   if (value == null) return "—";
-  return `${value.toLocaleString(undefined, {
+  return `${value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value % 1 === 0 ? 0 : 1,
     maximumFractionDigits: 1,
   })}%`;
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelativeActivity(iso: string | null): string {
+function formatRelativeActivityFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "Never";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "Never";
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absMinutes = Math.round(Math.abs(diffMs) / (1000 * 60));
   if (absMinutes < 60) {
     return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(
@@ -133,14 +138,15 @@ function formatRelativeActivity(iso: string | null): string {
       "day",
     );
   }
-  return date.toLocaleDateString();
+  return date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone });
 }
 
-function formatAbsoluteDate(iso: string | null): string {
+function formatAbsoluteDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -203,11 +209,11 @@ function openProductHref(productType: ProgressProductType): string {
   return "/admin/reports/progress-score/progress";
 }
 
-function isExpiringWithin30Days(iso: string | null): boolean {
+function isExpiringWithin30DaysFor(iso: string | null, viewer: ViewerLocale): boolean {
   if (!iso) return false;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return false;
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   return diffMs >= 0 && diffMs <= 30 * 24 * 60 * 60 * 1000;
 }
 
@@ -307,6 +313,9 @@ function CurriculumStrip({
   curriculum: ProgressCurriculumStrip;
   productType: ProgressProductType;
 }) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   if (productType !== "course" || curriculum.lessons.length === 0) {
     return null;
   }
@@ -368,6 +377,9 @@ function SummaryBand({
   summary: ProgressLearnerRosterSummary;
   onStalledClick: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   return (
     <div className="grid grid-cols-1 overflow-hidden rounded-sm border border-[var(--admin-border)] md:grid-cols-6 md:gap-px md:bg-[var(--admin-border)]">
       <div className="flex flex-col justify-between bg-[var(--admin-surface)] p-6 md:col-span-2">
@@ -437,34 +449,65 @@ function SummaryBand({
   );
 }
 
-export function AdminProgressLearnerRosterPage({
-  productType,
-  productId,
-}: {
+type ProgressLearnerRosterPageProps = {
   productType: ProgressProductType;
   productId: string;
-}) {
+  /** The first page of learners, loaded by the server; the first browser load is skipped when present. */
+  initialLearners?: ReportInitialData<ProgressLearnersPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminProgressLearnerRosterPage(props: ProgressLearnerRosterPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialLearners?.loadedAt ?? null}>
+      <ProgressLearnerRosterReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ProgressLearnerRosterReport({
+  productType,
+  productId,
+  initialLearners,
+}: ProgressLearnerRosterPageProps) {
+  const viewer = useViewerLocale();
+  const formatPct = withViewer(formatPctFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelativeActivity = withViewer(formatRelativeActivityFor, viewer);
+  const formatAbsoluteDate = withViewer(formatAbsoluteDateFor, viewer);
+  const isExpiringWithin30Days = withViewer(isExpiringWithin30DaysFor, viewer);
   const router = useRouter();
   const searchId = useId();
   const columnsPanelId = useId();
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialLearners ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [product, setProduct] = useState<ProgressLearnerRosterProduct | null>(null);
-  const [summary, setSummary] = useState<ProgressLearnerRosterSummary | null>(null);
-  const [curriculum, setCurriculum] = useState<ProgressCurriculumStrip>({
-    lessons: [],
-    steepestDropOff: null,
-  });
-  const [learners, setLearners] = useState<ProgressLearnerItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [product, setProduct] = useState<ProgressLearnerRosterProduct | null>(
+    initial?.data.product ?? null,
+  );
+  const [summary, setSummary] = useState<ProgressLearnerRosterSummary | null>(
+    initial?.data.summary ?? null,
+  );
+  const [curriculum, setCurriculum] = useState<ProgressCurriculumStrip>(
+    initial?.data.curriculum ?? {
+      lessons: [],
+      steepestDropOff: null,
+    },
+  );
+  const [learners, setLearners] = useState<ProgressLearnerItem[]>(initial?.data.items ?? []);
+  const [page, setPage] = useState<number>(PROGRESS_LEARNERS_DEFAULTS.page);
+  const [pageSize, setPageSize] = useState<number>(PROGRESS_LEARNERS_DEFAULTS.limit);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
 
-  const [view, setView] = useState<ProgressLearnerView>("all");
+  const [view, setView] = useState<ProgressLearnerView>(PROGRESS_LEARNERS_DEFAULTS.view);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [enrolledType, setEnrolledType] = useState("");
@@ -489,59 +532,61 @@ export function AdminProgressLearnerRosterPage({
     };
   }, [searchInput]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchProgressLearners(productType, productId, {
-        ...(debouncedSearch ? { learnerName: debouncedSearch } : {}),
-        ...(enrolledType ? { enrolledType } : {}),
-        view,
-        ...(completionBand ? { completionBand } : {}),
-        ...(activityStatus ? { activityStatus } : {}),
-        sortBy: "last_activity_at",
-        sortDir: "desc",
-        columns: progressColumns,
-        page,
-        limit: pageSize,
-      });
-      setProduct(response.data.product);
-      setSummary(response.data.summary);
-      setCurriculum(response.data.curriculum);
-      setLearners(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (loadError) {
-      setProduct(null);
-      setSummary(null);
-      setCurriculum({ lessons: [], steepestDropOff: null });
-      setLearners([]);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchProgressLearners(productType, productId, {
+          ...(debouncedSearch ? { learnerName: debouncedSearch } : {}),
+          ...(enrolledType ? { enrolledType } : {}),
+          view,
+          ...(completionBand ? { completionBand } : {}),
+          ...(activityStatus ? { activityStatus } : {}),
+          sortBy: PROGRESS_LEARNERS_DEFAULTS.sortBy,
+          sortDir: PROGRESS_LEARNERS_DEFAULTS.sortDir,
+          columns: progressColumns,
+          page,
+          limit: pageSize,
+        });
+        setProduct(response.data.product);
+        setSummary(response.data.summary);
+        setCurriculum(response.data.curriculum);
+        setLearners(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (loadError) {
+        setProduct(null);
+        setSummary(null);
+        setCurriculum({ lessons: [], steepestDropOff: null });
+        setLearners([]);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load learner roster.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    activityStatus,
-    completionBand,
-    debouncedSearch,
-    enrolledType,
-    page,
-    pageSize,
-    productId,
-    productType,
-    progressColumns,
-    view,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load learner roster.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      activityStatus,
+      completionBand,
+      debouncedSearch,
+      enrolledType,
+      page,
+      pageSize,
+      productId,
+      productType,
+      progressColumns,
+      view,
+    ],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const hasActiveFilters = Boolean(
     debouncedSearch || enrolledType || completionBand || activityStatus || view !== "all",
@@ -657,6 +702,7 @@ export function AdminProgressLearnerRosterPage({
     selectedMembershipIds.length,
     typeLabel,
     view,
+    viewer,
   ]);
 
   function openCohortDrawer(mode: CohortDrawerMode) {
