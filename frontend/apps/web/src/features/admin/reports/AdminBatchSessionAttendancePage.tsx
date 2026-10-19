@@ -35,7 +35,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  readBatchSessionAttendanceAddress,
+  type BatchSessionAttendanceInitial,
   exportBatchReport,
   fetchBatchLiveSessionAttendees,
   fetchBatchLiveSessionDetail,
@@ -45,9 +48,10 @@ import {
   type BatchLiveSessionDetailData,
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type SortBy = "learner_name" | "joined_at" | "left_at" | "watch_pct" | "status" | "rejoins";
-type SortDir = "asc" | "desc";
 type KindFilter = "any" | BatchLiveSessionAttendanceKind;
 type MessageMode = "absentees" | "selected";
 
@@ -107,11 +111,12 @@ function formatPct(v: number | null | undefined) {
   return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDateTime(v: string | null | undefined) {
+function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -120,11 +125,15 @@ function formatDateTime(v: string | null | undefined) {
   });
 }
 
-function formatTimeOnly(v: string | null | undefined) {
+function formatTimeOnlyFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function formatMinutes(v: number | null | undefined) {
@@ -267,32 +276,6 @@ function DeviceIcon({ label }: { label: string }) {
     return <Laptop className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
   }
   return <Monitor className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
-}
-
-function parseKind(raw: string | null): KindFilter {
-  if (
-    raw === "attended" ||
-    raw === "partial" ||
-    raw === "absent" ||
-    raw === "excused" ||
-    raw === "upcoming"
-  ) {
-    return raw;
-  }
-  return "any";
-}
-
-function parseSortBy(raw: string | null): SortBy {
-  if (
-    raw === "learner_name" ||
-    raw === "joined_at" ||
-    raw === "left_at" ||
-    raw === "watch_pct" ||
-    raw === "rejoins"
-  ) {
-    return raw;
-  }
-  return "status";
 }
 
 function defaultMessageBody(sessionTitle: string) {
@@ -691,27 +674,36 @@ function MessageDrawer({
 export function AdminBatchSessionAttendancePage({
   batchId,
   sessionId,
+  initialAttendance,
 }: {
   batchId: string;
   sessionId: string;
+  /** The session and the attendees the address asks for, loaded by the server; the first browser load is skipped when present. */
+  initialAttendance?: ReportInitialData<BatchSessionAttendanceInitial> | null;
 }) {
+  const viewer = useViewerLocale();
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatTimeOnly = withViewer(formatTimeOnlyFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchId = useId();
 
-  const q = searchParams.get("q") ?? "";
-  const pageRaw = Number(searchParams.get("page"));
-  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
-  const sortBy = parseSortBy(searchParams.get("sortBy"));
-  const sortDir: SortDir = searchParams.get("sortDir") === "desc" ? "desc" : "asc";
-  const kind = parseKind(searchParams.get("kind"));
+  const { q, page, sortBy, sortDir, kind } = readBatchSessionAttendanceAddress((name) =>
+    searchParams.get(name),
+  );
 
   const [draftQ, setDraftQ] = useState(q);
-  const [detail, setDetail] = useState<BatchLiveSessionDetailData | null>(null);
-  const [items, setItems] = useState<BatchLiveSessionAttendeeItem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialAttendance ?? null);
+  const [detail, setDetail] = useState<BatchLiveSessionDetailData | null>(
+    initial?.data.detail ?? null,
+  );
+  const [items, setItems] = useState<BatchLiveSessionAttendeeItem[]>(
+    initial?.data.attendees.items ?? [],
+  );
+  const [totalCount, setTotalCount] = useState(initial?.data.attendees.pageInfo.totalCount ?? 0);
+  const [totalPages, setTotalPages] = useState(initial?.data.attendees.pageInfo.totalPages ?? 0);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -773,40 +765,42 @@ export function AdminBatchSessionAttendancePage({
     };
   }, [rowMenuId]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [detailRes, attendeesRes] = await Promise.all([
-        fetchBatchLiveSessionDetail(batchId, sessionId),
-        fetchBatchLiveSessionAttendees(batchId, sessionId, {
-          ...(q.trim() ? { q: q.trim() } : {}),
-          attendanceKind: kind,
-          sortBy,
-          sortDir,
-          page,
-          limit: PAGE_SIZE,
-        }),
-      ]);
-      setDetail(detailRes.data);
-      setItems(attendeesRes.data.items);
-      setTotalCount(attendeesRes.data.pageInfo.totalCount);
-      setTotalPages(attendeesRes.data.pageInfo.totalPages);
-      setSelectedIds((current) =>
-        current.filter((id) => attendeesRes.data.items.some((row) => row.membershipId === id)),
-      );
-    } catch (e) {
-      setDetail(null);
-      setItems([]);
-      setError(errMsg(e, "Couldn't load session attendance."));
-    } finally {
-      setLoading(false);
-    }
-  }, [batchId, sessionId, q, kind, sortBy, sortDir, page]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const [detailRes, attendeesRes] = await Promise.all([
+          fetchBatchLiveSessionDetail(batchId, sessionId),
+          fetchBatchLiveSessionAttendees(batchId, sessionId, {
+            ...(q.trim() ? { q: q.trim() } : {}),
+            attendanceKind: kind,
+            sortBy,
+            sortDir,
+            page,
+            limit: PAGE_SIZE,
+          }),
+        ]);
+        setDetail(detailRes.data);
+        setItems(attendeesRes.data.items);
+        setTotalCount(attendeesRes.data.pageInfo.totalCount);
+        setTotalPages(attendeesRes.data.pageInfo.totalPages);
+        setSelectedIds((current) =>
+          current.filter((id) => attendeesRes.data.items.some((row) => row.membershipId === id)),
+        );
+      } catch (e) {
+        setDetail(null);
+        setItems([]);
+        setError(errMsg(e, "Couldn't load session attendance."));
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [batchId, sessionId, q, kind, sortBy, sortDir, page],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const cancelled = detail ? statusKind(detail.session.status) === "cancelled" : false;
   const upcoming = detail ? statusKind(detail.session.status) === "upcoming" : false;

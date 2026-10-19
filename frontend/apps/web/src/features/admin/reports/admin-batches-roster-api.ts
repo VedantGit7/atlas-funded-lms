@@ -234,6 +234,133 @@ export function dateInputToEndIso(value: string): string | undefined {
   return `${trimmed}T23:59:59.999Z`;
 }
 
+/** Reads one parameter of a page's address (its first value), or null when absent. */
+export type AddressReader = (name: string) => string | null;
+
+function readPage(get: AddressReader): number {
+  const raw = Number(get("page"));
+  return Number.isFinite(raw) && raw >= 1 ? Math.floor(raw) : 1;
+}
+
+export type BatchDetailTab =
+  | "overview"
+  | "learners"
+  | "live_sessions"
+  | "exams"
+  | "content"
+  | "messages";
+
+/** The batch page's tab, from `tab`. */
+export function parseBatchDetailTab(value: string | null): BatchDetailTab {
+  if (
+    value === "learners" ||
+    value === "live_sessions" ||
+    value === "exams" ||
+    value === "content" ||
+    value === "messages"
+  ) {
+    return value;
+  }
+  return "overview";
+}
+
+/** What the batch page's learner list opens on (every column); the server loads it with this too. */
+export const BATCH_LEARNERS_DEFAULTS = {
+  sortBy: "joined_at",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const;
+
+export type BatchContentView = "any" | "stalled" | "never_started" | "finished" | "in_progress";
+
+/** The content page's address: search, learner view and page. */
+export function readBatchContentAddress(get: AddressReader) {
+  const raw = get("view");
+  const view: BatchContentView =
+    raw === "stalled" || raw === "never_started" || raw === "finished" || raw === "in_progress"
+      ? raw
+      : "any";
+  return { q: get("q") ?? "", view, page: readPage(get) };
+}
+
+/** The exams page's address: view and search. */
+export function readBatchExamsAddress(get: AddressReader) {
+  return {
+    view: get("view") === "matrix" ? ("matrix" as const) : ("assessments" as const),
+    q: get("q") ?? "",
+  };
+}
+
+/** The live sessions page's address: view, search, page and sort. */
+export function readBatchLiveSessionsAddress(get: AddressReader) {
+  const sortByRaw = get("sortBy");
+  const sortBy: "scheduled_at" | "title" | "attendance_rate" =
+    sortByRaw === "title" || sortByRaw === "attendance_rate" ? sortByRaw : "scheduled_at";
+  return {
+    view: get("view") === "matrix" ? ("matrix" as const) : ("sessions" as const),
+    q: get("q") ?? "",
+    page: readPage(get),
+    sortBy,
+    sortDir: get("sortDir") === "asc" ? ("asc" as const) : ("desc" as const),
+  };
+}
+
+export type BatchSessionAttendeesSortBy =
+  | "learner_name"
+  | "joined_at"
+  | "left_at"
+  | "watch_pct"
+  | "status"
+  | "rejoins";
+
+/** A live session's attendee list address: search, page, sort and attendance kind. */
+export function readBatchSessionAttendanceAddress(get: AddressReader) {
+  const sortByRaw = get("sortBy");
+  const kindRaw = get("kind");
+  const sortBy: BatchSessionAttendeesSortBy =
+    sortByRaw === "learner_name" ||
+    sortByRaw === "joined_at" ||
+    sortByRaw === "left_at" ||
+    sortByRaw === "watch_pct" ||
+    sortByRaw === "rejoins"
+      ? sortByRaw
+      : "status";
+  const kind: "any" | BatchLiveSessionAttendanceKind =
+    kindRaw === "attended" ||
+    kindRaw === "partial" ||
+    kindRaw === "absent" ||
+    kindRaw === "excused" ||
+    kindRaw === "upcoming"
+      ? kindRaw
+      : "any";
+  return {
+    q: get("q") ?? "",
+    page: readPage(get),
+    sortBy,
+    sortDir: get("sortDir") === "desc" ? ("desc" as const) : ("asc" as const),
+    kind,
+  };
+}
+
+/** Batches the compare page can hold at once. */
+export const BATCHES_COMPARE_MAX = 4;
+
+/** The compare page's batch ids, from `ids`: distinct, at most four. */
+export function parseBatchesCompareIds(raw: string | null): string[] {
+  if (!raw) return [];
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const part of raw.split(",")) {
+    const id = part.trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+    if (ids.length >= BATCHES_COMPARE_MAX) break;
+  }
+  return ids;
+}
+
 function buildQuery(params: Record<string, string | number | undefined>): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -289,57 +416,64 @@ export async function fetchBatchesRoster(filters?: BatchesRosterFilters) {
   return clientApi.get<{ data: BatchesRosterPayload }>(batchesRosterPath(filters));
 }
 
-export async function fetchBatchDetail(batchId: string) {
-  return clientApi.get<{ data: BatchDetail }>(`/api/v1/reports/batches/${batchId}`);
+export function batchDetailPath(batchId: string): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}`;
 }
 
-export async function fetchBatchLearners(
-  batchId: string,
-  filters: {
-    learnerName?: string | undefined;
-    joinedFrom?: string | undefined;
-    joinedTo?: string | undefined;
-    minCompletion?: number | undefined;
-    maxCompletion?: number | undefined;
-    health?: BatchesListHealthFilter | undefined;
-    sortBy?: string | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    columns?: BatchLearnerColumnKey[] | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  },
-) {
-  return clientApi.get<{
-    data: {
-      batchId: string;
-      batchName: string;
-      courseId: string | null;
-      courseTitle: string | null;
-      items: BatchLearnerItem[];
-      pageInfo: PageInfo;
-      columns: string[];
-    };
-  }>(
-    `/api/v1/reports/batches/${batchId}/learners${buildQuery({
-      learnerName: filters.learnerName,
-      joinedFrom: filters.joinedFrom,
-      joinedTo: filters.joinedTo,
-      minCompletion: filters.minCompletion,
-      maxCompletion: filters.maxCompletion,
-      health: filters.health,
-      sortBy: filters.sortBy,
-      sortDir: filters.sortDir,
-      columns: filters.columns?.join(","),
-      page: filters.page ?? 1,
-      limit: filters.limit ?? 25,
-    })}`,
-  );
+export async function fetchBatchDetail(batchId: string) {
+  return clientApi.get<{ data: BatchDetail }>(batchDetailPath(batchId));
+}
+
+export type BatchLearnersFilters = {
+  learnerName?: string | undefined;
+  joinedFrom?: string | undefined;
+  joinedTo?: string | undefined;
+  minCompletion?: number | undefined;
+  maxCompletion?: number | undefined;
+  health?: BatchesListHealthFilter | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: BatchLearnerColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+export type BatchLearnersPayload = {
+  batchId: string;
+  batchName: string;
+  courseId: string | null;
+  courseTitle: string | null;
+  items: BatchLearnerItem[];
+  pageInfo: PageInfo;
+  columns: string[];
+};
+
+export function batchLearnersPath(batchId: string, filters: BatchLearnersFilters): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/learners${buildQuery({
+    learnerName: filters.learnerName,
+    joinedFrom: filters.joinedFrom,
+    joinedTo: filters.joinedTo,
+    minCompletion: filters.minCompletion,
+    maxCompletion: filters.maxCompletion,
+    health: filters.health,
+    sortBy: filters.sortBy,
+    sortDir: filters.sortDir,
+    columns: filters.columns?.join(","),
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 25,
+  })}`;
+}
+
+export async function fetchBatchLearners(batchId: string, filters: BatchLearnersFilters) {
+  return clientApi.get<{ data: BatchLearnersPayload }>(batchLearnersPath(batchId, filters));
+}
+
+export function batchLearnerDetailPath(batchId: string, membershipId: string): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/learners/${encodeURIComponent(membershipId)}`;
 }
 
 export async function fetchBatchLearnerDetail(batchId: string, membershipId: string) {
-  return clientApi.get<{ data: BatchLearnerDetail }>(
-    `/api/v1/reports/batches/${batchId}/learners/${membershipId}`,
-  );
+  return clientApi.get<{ data: BatchLearnerDetail }>(batchLearnerDetailPath(batchId, membershipId));
 }
 
 export async function removeBatchLearner(
@@ -451,43 +585,58 @@ export type BatchLiveSessionsMatrixData = {
   }>;
 };
 
+export type BatchLiveSessionsFilters = {
+  q?: string | undefined;
+  status?: "any" | "upcoming" | "completed" | "cancelled" | "live" | undefined;
+  sortBy?: "scheduled_at" | "title" | "attendance_rate" | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+export function batchLiveSessionsPath(batchId: string, filters: BatchLiveSessionsFilters = {}) {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/live-sessions${buildQuery({
+    q: filters.q,
+    status: filters.status ?? "any",
+    sortBy: filters.sortBy ?? "scheduled_at",
+    sortDir: filters.sortDir ?? "desc",
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 25,
+  })}`;
+}
+
 export async function fetchBatchLiveSessions(
   batchId: string,
-  filters: {
-    q?: string | undefined;
-    status?: "any" | "upcoming" | "completed" | "cancelled" | "live" | undefined;
-    sortBy?: "scheduled_at" | "title" | "attendance_rate" | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  } = {},
+  filters: BatchLiveSessionsFilters = {},
 ) {
   return clientApi.get<{ data: BatchLiveSessionsListData }>(
-    `/api/v1/reports/batches/${batchId}/live-sessions${buildQuery({
-      q: filters.q,
-      status: filters.status ?? "any",
-      sortBy: filters.sortBy ?? "scheduled_at",
-      sortDir: filters.sortDir ?? "desc",
-      page: filters.page ?? 1,
-      limit: filters.limit ?? 25,
-    })}`,
+    batchLiveSessionsPath(batchId, filters),
   );
+}
+
+export type BatchLiveSessionsMatrixFilters = {
+  q?: string | undefined;
+  limitLearners?: number | undefined;
+  limitSessions?: number | undefined;
+};
+
+export function batchLiveSessionsMatrixPath(
+  batchId: string,
+  filters: BatchLiveSessionsMatrixFilters = {},
+) {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/live-sessions/matrix${buildQuery({
+    q: filters.q,
+    limitLearners: filters.limitLearners ?? 100,
+    limitSessions: filters.limitSessions ?? 40,
+  })}`;
 }
 
 export async function fetchBatchLiveSessionsMatrix(
   batchId: string,
-  filters: {
-    q?: string | undefined;
-    limitLearners?: number | undefined;
-    limitSessions?: number | undefined;
-  } = {},
+  filters: BatchLiveSessionsMatrixFilters = {},
 ) {
   return clientApi.get<{ data: BatchLiveSessionsMatrixData }>(
-    `/api/v1/reports/batches/${batchId}/live-sessions/matrix${buildQuery({
-      q: filters.q,
-      limitLearners: filters.limitLearners ?? 100,
-      limitSessions: filters.limitSessions ?? 40,
-    })}`,
+    batchLiveSessionsMatrixPath(batchId, filters),
   );
 }
 
@@ -579,47 +728,56 @@ export type BatchLiveSessionAttendeeItem = {
   deviceLabel: string | null;
 };
 
+export function batchLiveSessionDetailPath(batchId: string, sessionId: string): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/live-sessions/${encodeURIComponent(sessionId)}`;
+}
+
 export async function fetchBatchLiveSessionDetail(batchId: string, sessionId: string) {
   return clientApi.get<{ data: BatchLiveSessionDetailData }>(
-    `/api/v1/reports/batches/${batchId}/live-sessions/${sessionId}`,
+    batchLiveSessionDetailPath(batchId, sessionId),
   );
 }
 
-export async function fetchBatchLiveSessionAttendees(
+export type BatchLiveSessionAttendeesFilters = {
+  q?: string | undefined;
+  attendanceKind?: "any" | BatchLiveSessionAttendanceKind | undefined;
+  sortBy?: BatchSessionAttendeesSortBy | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+export type BatchLiveSessionAttendeesPayload = {
+  sessionId: string;
+  sessionTitle: string;
+  items: BatchLiveSessionAttendeeItem[];
+  pageInfo: PageInfo;
+};
+
+export function batchLiveSessionAttendeesPath(
   batchId: string,
   sessionId: string,
-  filters: {
-    q?: string | undefined;
-    attendanceKind?: "any" | BatchLiveSessionAttendanceKind | undefined;
-    sortBy?:
-      | "learner_name"
-      | "joined_at"
-      | "left_at"
-      | "watch_pct"
-      | "status"
-      | "rejoins"
-      | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  } = {},
-) {
-  return clientApi.get<{
-    data: {
-      sessionId: string;
-      sessionTitle: string;
-      items: BatchLiveSessionAttendeeItem[];
-      pageInfo: PageInfo;
-    };
-  }>(
-    `/api/v1/reports/batches/${batchId}/live-sessions/${sessionId}/attendees${buildQuery({
+  filters: BatchLiveSessionAttendeesFilters = {},
+): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/live-sessions/${encodeURIComponent(sessionId)}/attendees${buildQuery(
+    {
       q: filters.q,
       attendanceKind: filters.attendanceKind ?? "any",
       sortBy: filters.sortBy ?? "status",
       sortDir: filters.sortDir ?? "asc",
       page: filters.page ?? 1,
       limit: filters.limit ?? 25,
-    })}`,
+    },
+  )}`;
+}
+
+export async function fetchBatchLiveSessionAttendees(
+  batchId: string,
+  sessionId: string,
+  filters: BatchLiveSessionAttendeesFilters = {},
+) {
+  return clientApi.get<{ data: BatchLiveSessionAttendeesPayload }>(
+    batchLiveSessionAttendeesPath(batchId, sessionId, filters),
   );
 }
 
@@ -699,33 +857,41 @@ export type BatchExamsMatrixData = {
   cohortAvgScorePct: number | null;
 };
 
-export async function fetchBatchExams(
-  batchId: string,
-  filters: {
-    q?: string | undefined;
-    sortBy?: "released_at" | "title" | "attempted_pct" | "avg_score" | "pass_rate" | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-  } = {},
-) {
-  return clientApi.get<{ data: BatchExamsListData }>(
-    `/api/v1/reports/batches/${batchId}/exams${buildQuery({
-      q: filters.q,
-      sortBy: filters.sortBy ?? "released_at",
-      sortDir: filters.sortDir ?? "asc",
-    })}`,
-  );
+export type BatchExamsFilters = {
+  q?: string | undefined;
+  sortBy?: "released_at" | "title" | "attempted_pct" | "avg_score" | "pass_rate" | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+};
+
+export function batchExamsPath(batchId: string, filters: BatchExamsFilters = {}): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/exams${buildQuery({
+    q: filters.q,
+    sortBy: filters.sortBy ?? "released_at",
+    sortDir: filters.sortDir ?? "asc",
+  })}`;
+}
+
+export async function fetchBatchExams(batchId: string, filters: BatchExamsFilters = {}) {
+  return clientApi.get<{ data: BatchExamsListData }>(batchExamsPath(batchId, filters));
+}
+
+export type BatchExamsMatrixFilters = {
+  q?: string | undefined;
+  limitLearners?: number | undefined;
+};
+
+export function batchExamsMatrixPath(batchId: string, filters: BatchExamsMatrixFilters = {}) {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/exams/matrix${buildQuery({
+    q: filters.q,
+    limitLearners: filters.limitLearners ?? 100,
+  })}`;
 }
 
 export async function fetchBatchExamsMatrix(
   batchId: string,
-  filters: { q?: string | undefined; limitLearners?: number | undefined } = {},
+  filters: BatchExamsMatrixFilters = {},
 ) {
-  return clientApi.get<{ data: BatchExamsMatrixData }>(
-    `/api/v1/reports/batches/${batchId}/exams/matrix${buildQuery({
-      q: filters.q,
-      limitLearners: filters.limitLearners ?? 100,
-    })}`,
-  );
+  return clientApi.get<{ data: BatchExamsMatrixData }>(batchExamsMatrixPath(batchId, filters));
 }
 
 export async function fetchBatchExamsBelowPass(batchId: string) {
@@ -820,43 +986,56 @@ export type BatchContentLearnerItem = {
   healthRail: "none" | "success" | "warning" | "danger";
 };
 
+export function batchContentPath(batchId: string): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/content`;
+}
+
 export async function fetchBatchContent(batchId: string) {
-  return clientApi.get<{ data: BatchContentReportData }>(
-    `/api/v1/reports/batches/${batchId}/content`,
-  );
+  return clientApi.get<{ data: BatchContentReportData }>(batchContentPath(batchId));
+}
+
+export type BatchContentLearnersFilters = {
+  q?: string | undefined;
+  view?: BatchContentView | undefined;
+  sortBy?: "learner_name" | "completion_pct" | "days_since" | "projected_finish" | "last_activity";
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+export type BatchContentLearnersPayload = {
+  batchId: string;
+  items: BatchContentLearnerItem[];
+  pageInfo: PageInfo;
+};
+
+/** The content page's learner list sorts by days since activity, most first, 25 a page. */
+export const BATCH_CONTENT_LEARNERS_DEFAULTS = {
+  sortBy: "days_since",
+  sortDir: "desc",
+  limit: 25,
+} as const;
+
+export function batchContentLearnersPath(
+  batchId: string,
+  filters: BatchContentLearnersFilters = {},
+): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/content/learners${buildQuery({
+    q: filters.q,
+    view: filters.view ?? "any",
+    sortBy: filters.sortBy ?? "completion_pct",
+    sortDir: filters.sortDir ?? "asc",
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 25,
+  })}`;
 }
 
 export async function fetchBatchContentLearners(
   batchId: string,
-  filters: {
-    q?: string | undefined;
-    view?: "any" | "stalled" | "never_started" | "finished" | "in_progress" | undefined;
-    sortBy?:
-      | "learner_name"
-      | "completion_pct"
-      | "days_since"
-      | "projected_finish"
-      | "last_activity";
-    sortDir?: "asc" | "desc" | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  } = {},
+  filters: BatchContentLearnersFilters = {},
 ) {
-  return clientApi.get<{
-    data: {
-      batchId: string;
-      items: BatchContentLearnerItem[];
-      pageInfo: PageInfo;
-    };
-  }>(
-    `/api/v1/reports/batches/${batchId}/content/learners${buildQuery({
-      q: filters.q,
-      view: filters.view ?? "any",
-      sortBy: filters.sortBy ?? "completion_pct",
-      sortDir: filters.sortDir ?? "asc",
-      page: filters.page ?? 1,
-      limit: filters.limit ?? 25,
-    })}`,
+  return clientApi.get<{ data: BatchContentLearnersPayload }>(
+    batchContentLearnersPath(batchId, filters),
   );
 }
 
@@ -917,28 +1096,44 @@ export type BatchMessagesListData = {
   pageInfo: PageInfo;
 };
 
+/** The message history's page size. */
+export const BATCH_MESSAGES_PAGE_SIZE = 20;
+
+export function batchMessagesPath(
+  batchId: string,
+  filters: { page?: number | undefined; limit?: number | undefined } = {},
+): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/messages${buildQuery({
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 20,
+  })}`;
+}
+
 export async function fetchBatchMessages(
   batchId: string,
   filters: { page?: number | undefined; limit?: number | undefined } = {},
 ) {
-  return clientApi.get<{ data: BatchMessagesListData }>(
-    `/api/v1/reports/batches/${batchId}/messages${buildQuery({
-      page: filters.page ?? 1,
-      limit: filters.limit ?? 20,
-    })}`,
-  );
+  return clientApi.get<{ data: BatchMessagesListData }>(batchMessagesPath(batchId, filters));
+}
+
+export type BatchMessageAudiencesPayload = { batchId: string; audiences: BatchMessageAudience[] };
+
+export function batchMessageAudiencesPath(batchId: string): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/messages/audiences`;
 }
 
 export async function fetchBatchMessageAudiences(batchId: string) {
-  return clientApi.get<{
-    data: { batchId: string; audiences: BatchMessageAudience[] };
-  }>(`/api/v1/reports/batches/${batchId}/messages/audiences`);
+  return clientApi.get<{ data: BatchMessageAudiencesPayload }>(batchMessageAudiencesPath(batchId));
+}
+
+export type BatchMessageNudgesPayload = { batchId: string; nudges: BatchMessageNudge[] };
+
+export function batchMessageNudgesPath(batchId: string): string {
+  return `/api/v1/reports/batches/${encodeURIComponent(batchId)}/messages/nudges`;
 }
 
 export async function fetchBatchMessageNudges(batchId: string) {
-  return clientApi.get<{
-    data: { batchId: string; nudges: BatchMessageNudge[] };
-  }>(`/api/v1/reports/batches/${batchId}/messages/nudges`);
+  return clientApi.get<{ data: BatchMessageNudgesPayload }>(batchMessageNudgesPath(batchId));
 }
 
 export async function updateBatchMessageNudges(batchId: string, nudges: BatchMessageNudge[]) {
@@ -1018,14 +1213,49 @@ export type BatchesCompareData = {
   items: BatchCompareItem[];
 };
 
+/*
+ * Pages that load several things together get them from the server as one
+ * value, the way their own load sets them.
+ */
+
+/** The exams page's first data: the list, and in matrix view the matrix. */
+export type BatchExamsInitial = {
+  list: BatchExamsListData;
+  matrix: BatchExamsMatrixData | null;
+};
+
+/** The live sessions page's first data: the list, and in matrix view the matrix. */
+export type BatchLiveSessionsInitial = {
+  list: BatchLiveSessionsListData;
+  matrix: BatchLiveSessionsMatrixData | null;
+};
+
+/** A live session's attendance page's first data: the session and its attendees. */
+export type BatchSessionAttendanceInitial = {
+  detail: BatchLiveSessionDetailData;
+  attendees: BatchLiveSessionAttendeesPayload;
+};
+
+/** The messages page's first data: history, audiences and nudges. */
+export type BatchMessagesInitial = {
+  messages: BatchMessagesListData;
+  audiences: BatchMessageAudiencesPayload;
+  nudges: BatchMessageNudgesPayload;
+};
+
+export function batchesComparePath(
+  batchIds: string[],
+  normalize: BatchesCompareNormalize = "week_of_batch",
+): string {
+  const params = new URLSearchParams();
+  params.set("batchIds", batchIds.join(","));
+  params.set("normalize", normalize);
+  return `/api/v1/reports/batches/compare?${params.toString()}`;
+}
+
 export async function fetchBatchesCompare(
   batchIds: string[],
   normalize: BatchesCompareNormalize = "week_of_batch",
 ) {
-  const params = new URLSearchParams();
-  params.set("batchIds", batchIds.join(","));
-  params.set("normalize", normalize);
-  return clientApi.get<{ data: BatchesCompareData }>(
-    `/api/v1/reports/batches/compare?${params.toString()}`,
-  );
+  return clientApi.get<{ data: BatchesCompareData }>(batchesComparePath(batchIds, normalize));
 }

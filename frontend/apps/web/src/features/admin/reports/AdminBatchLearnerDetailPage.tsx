@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   AlertTriangle,
   Check,
@@ -21,6 +21,7 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchBatchLearnerDetail,
   removeBatchLearner,
@@ -28,6 +29,8 @@ import {
   type BatchHealth,
   type BatchLearnerDetail,
 } from "./admin-batches-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type LearnerTab = "attendance" | "exams" | "course";
 type RemoveReason = "transferred" | "withdrawn" | "administrative" | "other";
@@ -68,22 +71,24 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDate(value: string | null | undefined): string {
+function formatDateFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 }
 
-function formatDateTime(value: string | null | undefined): string {
+function formatDateTimeFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -92,11 +97,11 @@ function formatDateTime(value: string | null | undefined): string {
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "No activity";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "No activity";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (days < 1) return "Today";
   if (days === 1) return "1 day ago";
@@ -354,19 +359,38 @@ function DetailLoadingSkeleton() {
   );
 }
 
-export function AdminBatchLearnerDetailPage({
-  batchId,
-  membershipId,
-}: {
+type BatchLearnerDetailPageProps = {
   batchId: string;
   membershipId: string;
-}) {
+  /** The learner, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<BatchLearnerDetail> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminBatchLearnerDetailPage(props: BatchLearnerDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <BatchLearnerReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function BatchLearnerReport({ batchId, membershipId, initialDetail }: BatchLearnerDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatDate = withViewer(formatDateFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = parseTab(searchParams.get("tab"));
 
-  const [detail, setDetail] = useState<BatchLearnerDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<BatchLearnerDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [showCohortTicks, setShowCohortTicks] = useState(true);
   const [copiedId, setCopiedId] = useState(false);
@@ -400,29 +424,31 @@ export function AdminBatchLearnerDetailPage({
     [batchId, membershipId, router, searchParams],
   );
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchBatchLearnerDetail(batchId, membershipId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchBatchLearnerDetail(batchId, membershipId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load this learner report.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [batchId, membershipId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load this learner report.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [batchId, membershipId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const heatmapWeeks = useMemo(() => {
     const cells = detail?.activityHeatmap.cells ?? [];
@@ -439,7 +465,8 @@ export function AdminBatchLearnerDetailPage({
     for (const week of heatmapWeeks) {
       const first = week[0];
       if (!first) continue;
-      const month = new Date(`${first.date}T00:00:00`).toLocaleString(undefined, {
+      const month = new Date(`${first.date}T00:00:00Z`).toLocaleString(viewer.locale, {
+        timeZone: "UTC",
         month: "short",
       });
       if (month !== lastMonth) {
@@ -448,7 +475,7 @@ export function AdminBatchLearnerDetailPage({
       }
     }
     return labels;
-  }, [heatmapWeeks]);
+  }, [heatmapWeeks, viewer.locale]);
 
   const nextLesson = useMemo(
     () => detail?.lessonStrip.find((lesson) => lesson.isNext) ?? null,

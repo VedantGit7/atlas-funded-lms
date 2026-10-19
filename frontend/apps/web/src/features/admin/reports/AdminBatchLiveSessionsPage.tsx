@@ -24,7 +24,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  readBatchLiveSessionsAddress,
+  type BatchLiveSessionsInitial,
   exportBatchReport,
   fetchBatchLiveSessionAbsentees,
   fetchBatchLiveSessions,
@@ -36,6 +39,8 @@ import {
   type BatchLiveSessionsMatrixData,
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -44,9 +49,7 @@ function defined<T>(value: T, message = "Expected value to be defined"): NonNull
   return value;
 }
 
-type ViewMode = "sessions" | "matrix";
 type SortBy = "scheduled_at" | "title" | "attendance_rate";
-type SortDir = "asc" | "desc";
 
 const PAGE_SIZE = 25;
 const thClass =
@@ -83,11 +86,16 @@ function formatPct(v: number | null | undefined) {
   return `${v.toFixed(v % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDateTime(v: string | null | undefined) {
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
+}
+
+function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -117,12 +125,12 @@ function statusKind(status: string) {
   return "other" as const;
 }
 
-function isUpcoming(item: BatchLiveSessionItem) {
+function isUpcomingFor(item: BatchLiveSessionItem, viewer: ViewerLocale) {
   const k = statusKind(item.status);
   if (k === "upcoming") return true;
   if (k === "cancelled" || k === "completed" || k === "live") return false;
   if (!item.scheduledAt || item.endedAt) return false;
-  return new Date(item.scheduledAt).getTime() >= Date.now();
+  return new Date(item.scheduledAt).getTime() >= viewer.now;
 }
 
 function statusPillClass(status: string) {
@@ -263,25 +271,48 @@ function PageSkeleton() {
   );
 }
 
-export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
+type BatchLiveSessionsPageProps = {
+  batchId: string;
+  /** The sessions the address asks for, loaded by the server; the first browser load is skipped when present. */
+  initialSessions?: ReportInitialData<BatchLiveSessionsInitial> | null;
+};
+
+/**
+ * Past and upcoming split at when the server rendered the page until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminBatchLiveSessionsPage(props: BatchLiveSessionsPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialSessions?.loadedAt ?? null}>
+      <BatchLiveSessionsReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function BatchLiveSessionsReport({ batchId, initialSessions }: BatchLiveSessionsPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const isUpcoming = withViewer(isUpcomingFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchId = useId();
   const messageTitleId = useId();
 
-  const view: ViewMode = searchParams.get("view") === "matrix" ? "matrix" : "sessions";
-  const q = searchParams.get("q") ?? "";
-  const pageRaw = Number(searchParams.get("page"));
-  const page = Number.isFinite(pageRaw) && pageRaw >= 1 ? Math.floor(pageRaw) : 1;
-  const sortByRaw = searchParams.get("sortBy");
-  const sortBy: SortBy =
-    sortByRaw === "title" || sortByRaw === "attendance_rate" ? sortByRaw : "scheduled_at";
-  const sortDir: SortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
+  const { view, q, page, sortBy, sortDir } = readBatchLiveSessionsAddress((name) =>
+    searchParams.get(name),
+  );
 
   const [draftQ, setDraftQ] = useState(q);
-  const [listData, setListData] = useState<BatchLiveSessionsListData | null>(null);
-  const [matrixData, setMatrixData] = useState<BatchLiveSessionsMatrixData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSessions ?? null);
+  const [listData, setListData] = useState<BatchLiveSessionsListData | null>(
+    initial?.data.list ?? null,
+  );
+  const [matrixData, setMatrixData] = useState<BatchLiveSessionsMatrixData | null>(
+    initial?.data.matrix ?? null,
+  );
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -324,39 +355,41 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
     };
   }, [draftQ, q, replaceParams]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (view === "matrix") {
-        const [matrixRes, listRes] = await Promise.all([
-          fetchBatchLiveSessionsMatrix(batchId, { q: q.trim() || undefined }),
-          fetchBatchLiveSessions(batchId, { page: 1, limit: 1 }),
-        ]);
-        setMatrixData(matrixRes.data);
-        setListData(listRes.data);
-      } else {
-        const response = await fetchBatchLiveSessions(batchId, {
-          q: q.trim() || undefined,
-          sortBy,
-          sortDir,
-          page,
-          limit: PAGE_SIZE,
-        });
-        setListData(response.data);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        if (view === "matrix") {
+          const [matrixRes, listRes] = await Promise.all([
+            fetchBatchLiveSessionsMatrix(batchId, { q: q.trim() || undefined }),
+            fetchBatchLiveSessions(batchId, { page: 1, limit: 1 }),
+          ]);
+          setMatrixData(matrixRes.data);
+          setListData(listRes.data);
+        } else {
+          const response = await fetchBatchLiveSessions(batchId, {
+            q: q.trim() || undefined,
+            sortBy,
+            sortDir,
+            page,
+            limit: PAGE_SIZE,
+          });
+          setListData(response.data);
+        }
+      } catch (e) {
+        setError(errMsg(e, "Couldn't load live sessions."));
+        if (view === "matrix") setMatrixData(null);
+        else setListData(null);
+      } finally {
+        if (!soft) setLoading(false);
       }
-    } catch (e) {
-      setError(errMsg(e, "Couldn't load live sessions."));
-      if (view === "matrix") setMatrixData(null);
-      else setListData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [batchId, page, q, sortBy, sortDir, view]);
+    },
+    [batchId, page, q, sortBy, sortDir, view],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const batchName = listData?.batchName ?? matrixData?.batchName ?? "Batch";
   const summary = listData?.summary;
@@ -364,10 +397,10 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
     const past: BatchLiveSessionItem[] = [];
     const upcoming: BatchLiveSessionItem[] = [];
     for (const item of listData?.items ?? []) {
-      (isUpcoming(item) ? upcoming : past).push(item);
+      (isUpcomingFor(item, viewer) ? upcoming : past).push(item);
     }
     return { past, upcoming };
-  }, [listData?.items]);
+  }, [listData?.items, viewer]);
 
   function toggleSort(next: SortBy) {
     if (sortBy === next) {
@@ -992,7 +1025,7 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
               </div>
               <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                  Showing {rangeStart}-{rangeEnd} of {totalCount.toLocaleString()} sessions
+                  Showing {rangeStart}-{rangeEnd} of {formatCount(totalCount)} sessions
                 </p>
                 {totalPages > 1 ? (
                   <div className="flex items-center gap-2">
@@ -1067,7 +1100,8 @@ export function AdminBatchLiveSessionsPage({ batchId }: { batchId: string }) {
                           </div>
                           <p className="mt-1 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                             {session.scheduledAt
-                              ? new Date(session.scheduledAt).toLocaleDateString(undefined, {
+                              ? new Date(session.scheduledAt).toLocaleDateString(viewer.locale, {
+                                  timeZone: viewer.timeZone,
                                   month: "short",
                                   day: "numeric",
                                 })

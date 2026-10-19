@@ -29,7 +29,12 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  BATCH_LEARNERS_DEFAULTS,
+  parseBatchDetailTab,
+  type BatchDetailTab,
+  type BatchLearnersPayload,
   BATCH_LEARNER_COLUMN_OPTIONS,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -46,8 +51,10 @@ import {
   type BatchesListHealthFilter,
 } from "./admin-batches-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
-type DetailTab = "overview" | "learners" | "live_sessions" | "exams" | "content" | "messages";
+type DetailTab = BatchDetailTab;
 
 type LearnerPanelTab = "live" | "exams" | "course";
 type CompletionOp = "gte" | "lte";
@@ -93,22 +100,28 @@ function formatPct(value: number | null | undefined): string {
   return `${value.toFixed(value % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatDate(value: string | null | undefined): string {
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
+}
+
+function formatDateFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 }
 
-function formatDateTime(value: string | null | undefined): string {
+function formatDateTimeFor(value: string | null | undefined, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -117,11 +130,11 @@ function formatDateTime(value: string | null | undefined): string {
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "No activity";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "No activity";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (days < 1) return "Today";
   if (days === 1) return "1 day ago";
@@ -130,11 +143,11 @@ function formatRelative(value: string | null): string {
   return months === 1 ? "1 month ago" : `${months} months ago`;
 }
 
-function isStaleActivity(value: string | null): boolean {
+function isStaleActivityFor(value: string | null, viewer: ViewerLocale): boolean {
   if (!value) return true;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return true;
-  return Date.now() - date.getTime() > 14 * 24 * 60 * 60 * 1000;
+  return viewer.now - date.getTime() > 14 * 24 * 60 * 60 * 1000;
 }
 
 function titleCase(value: string): string {
@@ -175,8 +188,12 @@ function healthLabel(health: BatchHealth): string {
   return "On track";
 }
 
-function weekCaption(startsAt: string | null, endsAt: string | null): string {
-  const now = Date.now();
+function weekCaptionFor(
+  startsAt: string | null,
+  endsAt: string | null,
+  viewer: ViewerLocale,
+): string {
+  const now = viewer.now;
   if (endsAt) {
     const ends = new Date(endsAt).getTime();
     if (!Number.isNaN(ends) && ends < now) {
@@ -212,19 +229,6 @@ function learnerInitials(name: string | null, email: string | null): string {
     return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
   }
   return source.slice(0, 2).toUpperCase();
-}
-
-function parseTab(value: string | null): DetailTab {
-  if (
-    value === "learners" ||
-    value === "live_sessions" ||
-    value === "exams" ||
-    value === "content" ||
-    value === "messages"
-  ) {
-    return value;
-  }
-  return "overview";
 }
 
 function TripleMetricCell({
@@ -380,25 +384,57 @@ function DetailLoadingSkeleton() {
   );
 }
 
-export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
+type BatchDetailPageProps = {
+  batchId: string;
+  /** The batch, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<BatchDetail> | null;
+  /** The first page of learners, loaded by the server when the address opens that tab. */
+  initialLearners?: ReportInitialData<BatchLearnersPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminBatchDetailPage(props: BatchDetailPageProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <BatchDetailReport {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function BatchDetailReport({ batchId, initialDetail, initialLearners }: BatchDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatDate = withViewer(formatDateFor, viewer);
+  const formatDateTime = withViewer(formatDateTimeFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const isStaleActivity = withViewer(isStaleActivityFor, viewer);
+  const weekCaption = withViewer(weekCaptionFor, viewer);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchId = useId();
   const columnsPanelId = useId();
   const columnsRef = useRef<HTMLDivElement | null>(null);
 
-  const activeTab = parseTab(searchParams.get("tab"));
+  const activeTab = parseBatchDetailTab(searchParams.get("tab"));
 
-  const [detail, setDetail] = useState<BatchDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => ({
+    detail: initialDetail ?? null,
+    learners: initialLearners ?? null,
+  }));
+  const [detail, setDetail] = useState<BatchDetail | null>(initial.detail?.data ?? null);
+  const [detailLoading, setDetailLoading] = useState(initial.detail === null);
   const [detailError, setDetailError] = useState<string | null>(null);
 
-  const [learners, setLearners] = useState<BatchLearnerItem[]>([]);
+  const [learners, setLearners] = useState<BatchLearnerItem[]>(initial.learners?.data.items ?? []);
   const [learnersLoading, setLearnersLoading] = useState(false);
   const [learnersError, setLearnersError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState<number>(BATCH_LEARNERS_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial.learners?.data.pageInfo.totalPages ?? 0);
+  const [totalCount, setTotalCount] = useState(initial.learners?.data.pageInfo.totalCount ?? 0);
 
   const [draftSearch, setDraftSearch] = useState("");
   const [learnerName, setLearnerName] = useState("");
@@ -407,8 +443,8 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
   const [completionOp, setCompletionOp] = useState<CompletionOp>("gte");
   const [completionValue, setCompletionValue] = useState("");
   const [healthFilter, setHealthFilter] = useState<BatchesListHealthFilter>("any");
-  const [sortBy, setSortBy] = useState("joined_at");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortBy, setSortBy] = useState<string>(BATCH_LEARNERS_DEFAULTS.sortBy);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(BATCH_LEARNERS_DEFAULTS.sortDir);
 
   const [columns, setColumns] = useState<BatchLearnerColumnKey[]>(DEFAULT_COLUMNS);
   const [draftColumns, setDraftColumns] = useState<BatchLearnerColumnKey[]>(DEFAULT_COLUMNS);
@@ -465,90 +501,98 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
     [batchId, router, searchParams],
   );
 
-  const loadDetail = useCallback(async () => {
-    setDetailLoading(true);
-    setDetailError(null);
-    try {
-      const response = await fetchBatchDetail(batchId);
-      setDetail(response.data);
-    } catch (loadError) {
-      setDetail(null);
-      setDetailError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const loadDetail = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setDetailLoading(true);
+      setDetailError(null);
+      try {
+        const response = await fetchBatchDetail(batchId);
+        setDetail(response.data);
+      } catch (loadError) {
+        setDetail(null);
+        setDetailError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load this batch report.",
-      );
-    } finally {
-      setDetailLoading(false);
-    }
-  }, [batchId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load this batch report.",
+        );
+      } finally {
+        if (!soft) setDetailLoading(false);
+      }
+    },
+    [batchId],
+  );
 
-  const loadLearners = useCallback(async () => {
-    setLearnersLoading(true);
-    setLearnersError(null);
-    try {
-      const trimmedName = learnerName.trim();
-      const joinedFromIso = dateInputToStartIso(joinedFrom);
-      const joinedToIso = dateInputToEndIso(joinedTo);
-      const parsedCompletion = completionValue.trim() ? Number(completionValue.trim()) : undefined;
-      const completionFilter =
-        parsedCompletion != null && !Number.isNaN(parsedCompletion)
-          ? completionOp === "gte"
-            ? { minCompletion: parsedCompletion }
-            : { maxCompletion: parsedCompletion }
-          : {};
+  const loadLearners = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLearnersLoading(true);
+      setLearnersError(null);
+      try {
+        const trimmedName = learnerName.trim();
+        const joinedFromIso = dateInputToStartIso(joinedFrom);
+        const joinedToIso = dateInputToEndIso(joinedTo);
+        const parsedCompletion = completionValue.trim()
+          ? Number(completionValue.trim())
+          : undefined;
+        const completionFilter =
+          parsedCompletion != null && !Number.isNaN(parsedCompletion)
+            ? completionOp === "gte"
+              ? { minCompletion: parsedCompletion }
+              : { maxCompletion: parsedCompletion }
+            : {};
 
-      const response = await fetchBatchLearners(batchId, {
-        ...(trimmedName ? { learnerName: trimmedName } : {}),
-        ...(joinedFromIso ? { joinedFrom: joinedFromIso } : {}),
-        ...(joinedToIso ? { joinedTo: joinedToIso } : {}),
-        ...completionFilter,
-        ...(healthFilter !== "any" ? { health: healthFilter } : {}),
-        sortBy,
-        sortDir,
-        columns,
-        page,
-        limit: PAGE_SIZE,
-      });
-      setLearners(response.data.items);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-      setSelectedIds((current) =>
-        current.filter((id) => response.data.items.some((item) => item.membershipId === id)),
-      );
-    } catch (loadError) {
-      setLearners([]);
-      setTotalCount(0);
-      setTotalPages(0);
-      setLearnersError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+        const response = await fetchBatchLearners(batchId, {
+          ...(trimmedName ? { learnerName: trimmedName } : {}),
+          ...(joinedFromIso ? { joinedFrom: joinedFromIso } : {}),
+          ...(joinedToIso ? { joinedTo: joinedToIso } : {}),
+          ...completionFilter,
+          ...(healthFilter !== "any" ? { health: healthFilter } : {}),
+          sortBy,
+          sortDir,
+          columns,
+          page,
+          limit: BATCH_LEARNERS_DEFAULTS.limit,
+        });
+        setLearners(response.data.items);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+        setSelectedIds((current) =>
+          current.filter((id) => response.data.items.some((item) => item.membershipId === id)),
+        );
+      } catch (loadError) {
+        setLearners([]);
+        setTotalCount(0);
+        setTotalPages(0);
+        setLearnersError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load batch learners.",
-      );
-    } finally {
-      setLearnersLoading(false);
-    }
-  }, [
-    batchId,
-    columns,
-    completionOp,
-    completionValue,
-    healthFilter,
-    joinedFrom,
-    joinedTo,
-    learnerName,
-    page,
-    sortBy,
-    sortDir,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load batch learners.",
+        );
+      } finally {
+        if (!soft) setLearnersLoading(false);
+      }
+    },
+    [
+      batchId,
+      columns,
+      completionOp,
+      completionValue,
+      healthFilter,
+      joinedFrom,
+      joinedTo,
+      learnerName,
+      page,
+      sortBy,
+      sortDir,
+    ],
+  );
 
-  useEffect(() => {
-    void loadDetail();
-  }, [loadDetail]);
+  useReportLoad(loadDetail, initial.detail);
 
   useEffect(() => {
     if (activeTab === "live_sessions") {
@@ -565,10 +609,16 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
     }
   }, [activeTab, batchId, router]);
 
-  useEffect(() => {
-    if (activeTab !== "learners") return;
-    void loadLearners();
-  }, [activeTab, loadLearners]);
+  // Learners load only on their tab.
+  const loadLearnersOnTab = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (activeTab !== "learners") return;
+      await loadLearners(options);
+    },
+    [activeTab, loadLearners],
+  );
+
+  useReportLoad(loadLearnersOnTab, initial.learners);
 
   useEffect(() => {
     if (!columnsOpen) return;
@@ -910,7 +960,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
               {weekCaption(detail.startsAt, detail.endsAt)}
             </span>
             <span className="inline-flex rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-2 py-0.5 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-              {detail.memberCount.toLocaleString()} learners
+              {formatCount(detail.memberCount)} learners
             </span>
           </div>
         </div>
@@ -1150,7 +1200,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
             <SummaryMetricCard
               label="Content completion"
               value={formatPct(detail.averages.contentCompletionPct)}
-              caption={`Average across ${detail.memberCount.toLocaleString()} learners`}
+              caption={`Average across ${formatCount(detail.memberCount)} learners`}
               barValue={detail.averages.contentCompletionPct}
               passMark={passMark}
               span2
@@ -1177,7 +1227,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
               <SummaryMetricCard
                 label="Active (14d)"
                 value={String(detail.averages.activeLearnerCount)}
-                caption={`of ${detail.memberCount.toLocaleString()} learners`}
+                caption={`of ${formatCount(detail.memberCount)} learners`}
               />
               <SummaryMetricCard
                 label="At risk"
@@ -1930,7 +1980,7 @@ export function AdminBatchDetailPage({ batchId }: { batchId: string }) {
               <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                    Showing {rangeStart}-{rangeEnd} of {totalCount.toLocaleString()} learners
+                    Showing {rangeStart}-{rangeEnd} of {formatCount(totalCount)} learners
                   </p>
                   <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
                     <span className="mr-3 inline-flex items-center gap-1.5">

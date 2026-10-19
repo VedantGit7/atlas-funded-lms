@@ -18,7 +18,10 @@ import {
   primaryButtonClassName,
 } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  BATCH_MESSAGES_PAGE_SIZE,
+  type BatchMessagesInitial,
   fetchBatchMessageAudiences,
   fetchBatchMessageNudges,
   fetchBatchMessages,
@@ -30,6 +33,8 @@ import {
   type BatchMessageNudge,
   type BatchMessagesListData,
 } from "./admin-batches-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type Channel = "email" | "in_app";
 type TimingMode = "now" | "schedule";
@@ -63,7 +68,7 @@ const MERGE_TAGS = [
   { key: "{{Next Session Date}}", label: "Next Session Date" },
 ] as const;
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = BATCH_MESSAGES_PAGE_SIZE;
 
 function Shimmer({ className }: { className?: string }) {
   return (
@@ -78,11 +83,12 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatDateTime(v: string | null | undefined) {
+function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -91,9 +97,9 @@ function formatDateTime(v: string | null | undefined) {
   });
 }
 
-function formatCount(n: number | null | undefined) {
+function formatCountFor(n: number | null | undefined, viewer: ViewerLocale) {
   if (n == null || Number.isNaN(n)) return "-";
-  return new Intl.NumberFormat().format(n);
+  return new Intl.NumberFormat(viewer.locale).format(n);
 }
 
 function errMsg(e: unknown, fallback: string) {
@@ -140,18 +146,18 @@ function statusBadge(status: BatchMessageHistoryItem["status"]) {
   };
 }
 
-function messageFooter(item: BatchMessageHistoryItem) {
+function messageFooterFor(item: BatchMessageHistoryItem, viewer: ViewerLocale) {
   if (item.status === "scheduled" && item.scheduledAt) {
-    return `Scheduled for ${formatDateTime(item.scheduledAt)}`;
+    return `Scheduled for ${formatDateTimeFor(item.scheduledAt, viewer)}`;
   }
   if (item.isAutomated) {
     return "System automated nudge";
   }
   if (item.sentByLabel && item.sentAt) {
-    return `Sent by ${item.sentByLabel} on ${formatDateTime(item.sentAt)}`;
+    return `Sent by ${item.sentByLabel} on ${formatDateTimeFor(item.sentAt, viewer)}`;
   }
   if (item.sentAt) {
-    return `Sent on ${formatDateTime(item.sentAt)}`;
+    return `Sent on ${formatDateTimeFor(item.sentAt, viewer)}`;
   }
   return "-";
 }
@@ -320,6 +326,8 @@ function ConfirmSendModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const titleId = useId();
 
   useEffect(() => {
@@ -404,6 +412,8 @@ function ComposerDrawer({
   onSent: () => void;
   onError: (message: string) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const titleId = useId();
   const panelRef = useRef<HTMLElement | null>(null);
   const messageRef = useRef<HTMLTextAreaElement | null>(null);
@@ -747,6 +757,8 @@ function MessageHistoryCard({
   retryingId: string | null;
   onRetry: (sendGroupId: string) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const badge = statusBadge(item.status);
   const showRail = item.status === "partially_failed" || item.status === "failed";
   const canRetry = showRail;
@@ -816,7 +828,9 @@ function MessageHistoryCard({
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--admin-border)] pt-3">
-          <p className="text-xs text-[var(--admin-on-surface-variant)]">{messageFooter(item)}</p>
+          <p className="text-xs text-[var(--admin-on-surface-variant)]">
+            {messageFooterFor(item, viewer)}
+          </p>
           {canRetry ? (
             <button
               type="button"
@@ -836,12 +850,25 @@ function MessageHistoryCard({
   );
 }
 
-export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
-  const [data, setData] = useState<BatchMessagesListData | null>(null);
-  const [audiences, setAudiences] = useState<BatchMessageAudience[]>([]);
-  const [nudges, setNudges] = useState<BatchMessageNudge[]>([]);
+export function AdminBatchMessagesPage({
+  batchId,
+  initialMessages,
+}: {
+  batchId: string;
+  /** The first page of history, the audiences and the nudges, loaded by the server; the first browser load is skipped when present. */
+  initialMessages?: ReportInitialData<BatchMessagesInitial> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialMessages ?? null);
+  const [data, setData] = useState<BatchMessagesListData | null>(initial?.data.messages ?? null);
+  const [audiences, setAudiences] = useState<BatchMessageAudience[]>(
+    initial?.data.audiences.audiences ?? [],
+  );
+  const [nudges, setNudges] = useState<BatchMessageNudge[]>(initial?.data.nudges.nudges ?? []);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -910,9 +937,14 @@ export function AdminBatchMessagesPage({ batchId }: { batchId: string }) {
     [batchId, page],
   );
 
-  useEffect(() => {
-    void loadAll({ page: 1 });
-  }, [batchId]);
+  // The first page; a soft load refreshes the server's data in place.
+  const loadFirstPage = useCallback(
+    (options?: { soft?: boolean }) =>
+      loadAll({ page: 1, ...(options?.soft ? { soft: true } : {}) }),
+    [batchId],
+  );
+
+  useReportLoad(loadFirstPage, initial);
 
   function openComposer(opts?: {
     membershipIds?: string[] | null;
