@@ -10,7 +10,12 @@ import { AdminSalesMarketingExportsPanel } from "./AdminSalesMarketingExportsPan
 import type { SalesMarketingExportsPayload } from "./admin-sales-marketing-exports-api";
 import {
   SALES_MARKETING_PANEL_TABS,
+  type AffiliateProductsPayload,
+  type AffiliatesPayload,
+  type CouponsList,
+  type ReferralWalletPayload,
   type SalesMarketingOverview,
+  type SalesProductsList,
 } from "./admin-sales-marketing-roster-api";
 import { AdminSalesMarketingOverviewPanel } from "./AdminSalesMarketingOverviewPanel";
 import { AdminSalesByProductPanel } from "./AdminSalesByProductPanel";
@@ -41,11 +46,22 @@ function tabFromPathname(pathname: string | null): SalesMarketingReportTab | nul
 export function AdminSalesMarketingRosterPage({
   initialOverview,
   initialExports,
+  initialSales,
+  initialCoupons,
+  initialReferralWallet,
+  initialAffiliateProducts,
+  initialAffiliates,
 }: {
   /** The Overview tab's data, when the server loaded it for the page opening on it. */
   initialOverview?: ReportInitialDataInRange<SalesMarketingOverview> | null | undefined;
   /** The Exports tab's data, when the server loaded it for the exports route. */
   initialExports?: ReportInitialData<SalesMarketingExportsPayload> | null | undefined;
+  /** Each panel's first page, when the server loaded it for the panel's own route. */
+  initialSales?: ReportInitialDataInRange<SalesProductsList> | null | undefined;
+  initialCoupons?: ReportInitialData<CouponsList> | null | undefined;
+  initialReferralWallet?: ReportInitialDataInRange<ReferralWalletPayload> | null | undefined;
+  initialAffiliateProducts?: ReportInitialDataInRange<AffiliateProductsPayload> | null | undefined;
+  initialAffiliates?: ReportInitialDataInRange<AffiliatesPayload> | null | undefined;
 } = {}) {
   const router = useRouter();
   const pathname = usePathname();
@@ -88,15 +104,19 @@ export function AdminSalesMarketingRosterPage({
         />
       ) : null}
 
-      {showSalesPanel ? <AdminSalesByProductPanel /> : null}
+      {showSalesPanel ? <AdminSalesByProductPanel initialData={initialSales} /> : null}
 
-      {showCouponsPanel ? <AdminCouponsPanel /> : null}
+      {showCouponsPanel ? <AdminCouponsPanel initialData={initialCoupons} /> : null}
 
-      {showReferralWalletPanel ? <AdminReferralWalletPanel /> : null}
+      {showReferralWalletPanel ? (
+        <AdminReferralWalletPanel initialData={initialReferralWallet} />
+      ) : null}
 
-      {showAffiliateProductsPanel ? <AdminAffiliateProductsPanel /> : null}
+      {showAffiliateProductsPanel ? (
+        <AdminAffiliateProductsPanel initialData={initialAffiliateProducts} />
+      ) : null}
 
-      {showAffiliatesPanel ? <AdminAffiliatesPanel /> : null}
+      {showAffiliatesPanel ? <AdminAffiliatesPanel initialData={initialAffiliates} /> : null}
 
       {showExportsPanel ? (
         <AdminSalesMarketingExportsPanel initialExports={initialExports} />

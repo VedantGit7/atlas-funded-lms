@@ -20,8 +20,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import { AFFILIATES_HREF } from "../grow/affiliates-shared";
 import {
+  AFFILIATES_DEFAULTS,
+  salesMarketingRangeBefore,
   dateInputToEndIso,
   dateInputToStartIso,
   exportSalesMarketingReport,
@@ -38,6 +41,8 @@ import {
   type AffiliatesSummary,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -58,24 +63,23 @@ const VIEW_TO_QUERY: Record<Exclude<ViewTab, "pending">, string> = {
   suspended: "suspended",
 };
 
-function defaultActivityRange(days = 30): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
-}
-
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatShortDate(iso: string | null): string {
+function formatShortDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function initials(name: string | null, email: string | null): string {
@@ -218,11 +222,29 @@ function InitialsAvatar({
   );
 }
 
-export function AdminAffiliatesPanel() {
-  const initialRange = useMemo(() => defaultActivityRange(30), []);
+export function AdminAffiliatesPanel({
+  initialData,
+}: {
+  /**
+   * The first page over the default 30 days of activity, loaded by the server
+   * with the range it counted; the first browser load is skipped when present.
+   */
+  initialData?: ReportInitialDataInRange<AffiliatesPayload> | null | undefined;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  // The server's range when it loaded the panel, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const initialRange = useMemo(
+    () => initial?.range ?? salesMarketingRangeBefore(AFFILIATES_DEFAULTS.rangeDays),
+    [initial],
+  );
 
-  const [payload, setPayload] = useState<AffiliatesPayload | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [payload, setPayload] = useState<AffiliatesPayload | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -279,53 +301,57 @@ export function AdminAffiliatesPanel() {
     Boolean(signedUpTo) ||
     viewTab !== "all";
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchAffiliates({
-        q: searchQ.trim() || undefined,
-        status: statusFilter === "all" ? undefined : statusFilter,
-        tier: tierFilter === "any" ? undefined : tierFilter,
-        unpaidBand: unpaidBand === "any" ? undefined : unpaidBand,
-        view: viewTab === "pending" ? "all" : VIEW_TO_QUERY[viewTab],
-        activityFrom: dateInputToStartIso(activityFrom),
-        activityTo: dateInputToEndIso(activityTo),
-        signedUpFrom: dateInputToStartIso(signedUpFrom),
-        signedUpTo: dateInputToEndIso(signedUpTo),
-        sortBy: viewTab === "top" ? "commission_earned_cents" : undefined,
-        sortDir: "desc",
-        page: viewTab === "pending" ? 1 : page,
-        limit: 25,
-      });
-      setPayload(response.data);
-      if (viewTab !== "pending") {
-        setSelectedIds(new Set());
-      }
-    } catch (loadError) {
-      setPayload(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchAffiliates({
+          q: searchQ.trim() || undefined,
+          status: statusFilter === "all" ? undefined : statusFilter,
+          tier: tierFilter === "any" ? undefined : tierFilter,
+          unpaidBand: unpaidBand === "any" ? undefined : unpaidBand,
+          view: viewTab === "pending" ? "all" : VIEW_TO_QUERY[viewTab],
+          activityFrom: dateInputToStartIso(activityFrom),
+          activityTo: dateInputToEndIso(activityTo),
+          signedUpFrom: dateInputToStartIso(signedUpFrom),
+          signedUpTo: dateInputToEndIso(signedUpTo),
+          sortBy: viewTab === "top" ? "commission_earned_cents" : undefined,
+          sortDir: "desc",
+          page: viewTab === "pending" ? 1 : page,
+          limit: 25,
+        });
+        setPayload(response.data);
+        if (viewTab !== "pending") {
+          setSelectedIds(new Set());
+        }
+      } catch (loadError) {
+        setPayload(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load affiliates.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    activityFrom,
-    activityTo,
-    page,
-    searchQ,
-    signedUpFrom,
-    signedUpTo,
-    statusFilter,
-    tierFilter,
-    unpaidBand,
-    viewTab,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load affiliates.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      activityFrom,
+      activityTo,
+      page,
+      searchQ,
+      signedUpFrom,
+      signedUpTo,
+      statusFilter,
+      tierFilter,
+      unpaidBand,
+      viewTab,
+    ],
+  );
 
   const loadPending = useCallback(async () => {
     setPendingLoading(true);
@@ -367,9 +393,7 @@ export function AdminAffiliatesPanel() {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (viewTab === "pending") {
@@ -860,7 +884,7 @@ export function AdminAffiliatesPanel() {
                   </span>
                 </p>
                 <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                  across {summary.unpaidAffiliateCount.toLocaleString()} affiliate
+                  across {summary.unpaidAffiliateCount.toLocaleString(viewer.locale)} affiliate
                   {summary.unpaidAffiliateCount === 1 ? "" : "s"}
                 </p>
               </div>
@@ -882,13 +906,13 @@ export function AdminAffiliatesPanel() {
                   Active affiliates
                 </p>
                 <p className="font-mono text-lg font-medium text-[var(--admin-on-surface)]">
-                  {summary.activeCount.toLocaleString()}
+                  {summary.activeCount.toLocaleString(viewer.locale)}
                   <span className="ml-1 text-xs font-normal text-[var(--admin-on-surface-variant)]">
-                    of {summary.totalCount.toLocaleString()}
+                    of {summary.totalCount.toLocaleString(viewer.locale)}
                   </span>
                 </p>
                 <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                  {summary.pendingApprovalCount.toLocaleString()} pending approval
+                  {summary.pendingApprovalCount.toLocaleString(viewer.locale)} pending approval
                 </p>
               </div>
             </div>
@@ -1481,7 +1505,7 @@ export function AdminAffiliatesPanel() {
               {pageInfo ? (
                 <div className="flex items-center justify-between border-t border-[var(--admin-border)] px-4 py-3 text-xs text-[var(--admin-on-surface-variant)]">
                   <span>
-                    {pageInfo.totalCount.toLocaleString()} affiliate
+                    {pageInfo.totalCount.toLocaleString(viewer.locale)} affiliate
                     {pageInfo.totalCount === 1 ? "" : "s"}
                     {pageInfo.totalPages > 1
                       ? ` · Page ${String(pageInfo.page)} of ${String(pageInfo.totalPages)}`

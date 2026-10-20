@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminProductPurchasersPanel } from "../../../../../../features/admin/reports/AdminProductPurchasersPanel";
+import { loadSalesPurchasersData } from "../../../../../../lib/server/report-sales-marketing-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminProductPurchasersRoutePage({
@@ -16,7 +17,10 @@ export default async function AdminProductPurchasersRoutePage({
     notFound();
   }
 
-  const gate = await runTenantStateGate();
+  const [gate, initialData] = await Promise.all([
+    runTenantStateGate(),
+    loadSalesPurchasersData(courseId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -33,7 +37,7 @@ export default async function AdminProductPurchasersRoutePage({
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
-        <AdminProductPurchasersPanel courseId={courseId} />
+        <AdminProductPurchasersPanel courseId={courseId} initialData={initialData} />
       </Suspense>
     </AdminPageGate>
   );

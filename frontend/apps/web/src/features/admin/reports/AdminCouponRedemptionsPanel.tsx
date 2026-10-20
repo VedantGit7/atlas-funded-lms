@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { couponEditHref } from "../grow/coupons-shared";
 import {
   createSalesMarketingGroup,
@@ -30,6 +31,8 @@ import {
   type CouponRedemptionsSortBy,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -38,7 +41,11 @@ function defined<T>(value: T, message = "Expected value to be defined"): NonNull
   return value;
 }
 
-type Props = { couponId: string };
+type Props = {
+  couponId: string;
+  /** The first page, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<CouponRedemptionsPayload> | null | undefined;
+};
 
 type CohortTab = "group" | "message";
 type MembershipMode = "static" | "live";
@@ -50,23 +57,29 @@ const SORT_OPTIONS: Array<{ value: CouponRedemptionsSortBy; label: string }> = [
   { value: "learner_name", label: "Learner name" },
 ];
 
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function formatAbsoluteDateTime(iso: string): string {
+function formatAbsoluteDateTimeFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -75,15 +88,15 @@ function formatAbsoluteDateTime(iso: string): string {
   });
 }
 
-function relativeTime(iso: string): string {
+function relativeTimeFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absMs = Math.abs(diffMs);
   const minutes = Math.round(absMs / 60_000);
   const hours = Math.round(absMs / 3_600_000);
   const days = Math.round(absMs / 86_400_000);
-  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat(viewer.locale, { numeric: "auto" });
   if (minutes < 60) return rtf.format(Math.sign(diffMs) * Math.max(1, minutes), "minute");
   if (hours < 48) return rtf.format(Math.sign(diffMs) * hours, "hour");
   if (days < 60) return rtf.format(Math.sign(diffMs) * days, "day");
@@ -99,11 +112,16 @@ function initials(name: string | null, email: string | null): string {
   return source.slice(0, 2).toUpperCase();
 }
 
-function discountLabel(type: string, value: number, currency: string): string {
+function discountLabelFor(
+  type: string,
+  value: number,
+  currency: string,
+  viewer: ViewerLocale,
+): string {
   if (type.toUpperCase() === "PERCENT") {
     return `${String(value)}% OFF`;
   }
-  return `${formatMoneyAmount(value)} ${currency} OFF`;
+  return `${formatMoneyAmountFor(value, viewer)} ${currency} OFF`;
 }
 
 function statusPillClass(displayStatus: string): string {
@@ -241,6 +259,9 @@ function RedemptionsTrendChart({
   endsAt: string | null;
   currency: string;
 }) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
   if (trend.length === 0) {
     return (
       <p className="flex min-h-[180px] items-center justify-center text-sm text-[var(--admin-on-surface-variant)]">
@@ -354,9 +375,29 @@ function RedemptionsTrendChart({
   );
 }
 
-export function AdminCouponRedemptionsPanel({ couponId }: Props) {
-  const [payload, setPayload] = useState<CouponRedemptionsPayload | null>(null);
-  const [loading, setLoading] = useState(true);
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminCouponRedemptionsPanel(props: Props) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <CouponRedemptions {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function CouponRedemptions({ couponId, initialData }: Props) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
+  const formatAbsoluteDateTime = withViewer(formatAbsoluteDateTimeFor, viewer);
+  const relativeTime = withViewer(relativeTimeFor, viewer);
+  const discountLabel = withViewer(discountLabelFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const [payload, setPayload] = useState<CouponRedemptionsPayload | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -399,50 +440,42 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
     [appliedFrom, appliedTo, courseFilterId, maxAmount, minAmount, searchQ, sortBy],
   );
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchCouponRedemptions(couponId, {
-        q: searchQ.trim() || undefined,
-        courseId: courseFilterId || undefined,
-        appliedFrom: dateInputToStartIso(appliedFrom),
-        appliedTo: dateInputToEndIso(appliedTo),
-        minFinalAmountCents: parseAmountToCents(minAmount),
-        maxFinalAmountCents: parseAmountToCents(maxAmount),
-        sortBy,
-        sortDir: "desc",
-        page,
-        limit: 25,
-      });
-      setPayload(response.data);
-    } catch (loadError) {
-      setPayload(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchCouponRedemptions(couponId, {
+          q: searchQ.trim() || undefined,
+          courseId: courseFilterId || undefined,
+          appliedFrom: dateInputToStartIso(appliedFrom),
+          appliedTo: dateInputToEndIso(appliedTo),
+          minFinalAmountCents: parseAmountToCents(minAmount),
+          maxFinalAmountCents: parseAmountToCents(maxAmount),
+          sortBy,
+          sortDir: "desc",
+          page,
+          limit: 25,
+        });
+        setPayload(response.data);
+      } catch (loadError) {
+        setPayload(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load coupon redemptions.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    appliedFrom,
-    appliedTo,
-    couponId,
-    courseFilterId,
-    maxAmount,
-    minAmount,
-    page,
-    searchQ,
-    sortBy,
-  ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load coupon redemptions.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [appliedFrom, appliedTo, couponId, courseFilterId, maxAmount, minAmount, page, searchQ, sortBy],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -790,7 +823,7 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
               </span>
               <span className="inline-flex items-center gap-2 rounded bg-[var(--admin-surface-high)] px-2 py-0.5 text-xs text-[var(--admin-on-surface)]">
                 <span className="font-mono">
-                  {payload.redemptionCount.toLocaleString()} / {capLabel}
+                  {payload.redemptionCount.toLocaleString(viewer.locale)} / {capLabel}
                 </span>
                 <span className="h-1 w-16 overflow-hidden rounded-full bg-[var(--admin-border)]">
                   <span
@@ -908,7 +941,7 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
             <div className="bg-[var(--admin-surface)] p-4">
               <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Redemptions</p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
-                {summary.redemptionCount.toLocaleString()}
+                {summary.redemptionCount.toLocaleString(viewer.locale)}
               </p>
               {payload.totalUsageLimit != null ? (
                 <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
@@ -935,7 +968,7 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                 First-Time Buyers
               </p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
-                {summary.firstTimeBuyerCount.toLocaleString()}
+                {summary.firstTimeBuyerCount.toLocaleString(viewer.locale)}
               </p>
               <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
                 {summary.firstTimeBuyerPercent}% of redeemers
@@ -1045,7 +1078,7 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
             <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
               Created {formatShortDate(payload.createdAt)}
               {payload.totalUsageLimit != null
-                ? ` · Usage cap ${payload.totalUsageLimit.toLocaleString()}`
+                ? ` · Usage cap ${payload.totalUsageLimit.toLocaleString(viewer.locale)}`
                 : " · No usage cap"}
             </p>
             <Link
@@ -1468,7 +1501,7 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                   id="cohort-drawer-title"
                   className="font-mono text-lg font-semibold tracking-tight text-[var(--admin-on-surface)]"
                 >
-                  {matchCount.toLocaleString()} redeemers match the current filters
+                  {matchCount.toLocaleString(viewer.locale)} redeemers match the current filters
                 </h2>
                 {filterChips.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1653,7 +1686,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                   disabled={busy || !groupName.trim() || membershipMode === "live"}
                   onClick={() => void handleCreateGroup()}
                 >
-                  {busy ? "Creating…" : `Create group with ${matchCount.toLocaleString()} learners`}
+                  {busy
+                    ? "Creating…"
+                    : `Create group with ${matchCount.toLocaleString(viewer.locale)} learners`}
                 </button>
               ) : (
                 <button
@@ -1662,7 +1697,9 @@ export function AdminCouponRedemptionsPanel({ couponId }: Props) {
                   disabled={busy || !messageSubject.trim() || !messageBody.trim()}
                   onClick={() => void handleSendMessage()}
                 >
-                  {busy ? "Sending…" : `Send to ${matchCount.toLocaleString()} learners`}
+                  {busy
+                    ? "Sending…"
+                    : `Send to ${matchCount.toLocaleString(viewer.locale)} learners`}
                 </button>
               )}
             </div>

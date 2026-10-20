@@ -3,10 +3,14 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminSalesMarketingRosterPage } from "../../../../../features/admin/reports/AdminSalesMarketingRosterPage";
+import { loadReferralWalletData } from "../../../../../lib/server/report-sales-marketing-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminSalesMarketingReferralWalletRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialReferralWallet] = await Promise.all([
+    runTenantStateGate(),
+    loadReferralWalletData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -23,7 +27,7 @@ export default async function AdminSalesMarketingReferralWalletRoutePage() {
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
-        <AdminSalesMarketingRosterPage />
+        <AdminSalesMarketingRosterPage initialReferralWallet={initialReferralWallet} />
       </Suspense>
     </AdminPageGate>
   );

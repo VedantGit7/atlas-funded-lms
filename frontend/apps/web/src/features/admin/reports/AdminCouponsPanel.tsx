@@ -12,9 +12,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, type MouseEvent } from "react";
+import { useCallback, useState, type MouseEvent } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { COUPONS_CREATE_HREF, COUPONS_LIST_HREF } from "../grow/coupons-shared";
 import {
   exportSalesMarketingReport,
@@ -26,6 +27,8 @@ import {
   type CouponsListView,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 const VIEW_TABS: Array<{ key: CouponsListView; label: string }> = [
   { key: "all", label: "All coupons" },
@@ -57,24 +60,34 @@ const SORT_OPTIONS: Array<{ value: CouponsListSortBy; label: string }> = [
   { value: "code", label: "Code" },
 ];
 
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function discountLabel(type: string, value: number, currency: string): string {
+function discountLabelFor(
+  type: string,
+  value: number,
+  currency: string,
+  viewer: ViewerLocale,
+): string {
   if (type.toUpperCase() === "PERCENT") {
     return `${String(value)}% OFF`;
   }
-  return `${formatMoneyAmount(value)} ${currency} OFF`;
+  return `${formatMoneyAmountFor(value, viewer)} ${currency} OFF`;
 }
 
 function statusPillClass(displayStatus: string): string {
@@ -176,16 +189,27 @@ function redemptionProgress(item: CouponListItem): number {
   return Math.min(100, Math.round((item.redemptionCount / item.totalUsageLimit) * 100));
 }
 
-export function AdminCouponsPanel() {
+export function AdminCouponsPanel({
+  initialData,
+}: {
+  /** The first page of coupons, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<CouponsList> | null | undefined;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
+  const discountLabel = withViewer(discountLabelFor, viewer);
   const router = useRouter();
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
   const [view, setView] = useState<CouponsListView>("all");
   const [searchQ, setSearchQ] = useState("");
   const [status, setStatus] = useState("");
   const [discountType, setDiscountType] = useState("");
   const [sortBy, setSortBy] = useState<CouponsListSortBy>("revenue_cents");
   const [page, setPage] = useState(1);
-  const [payload, setPayload] = useState<CouponsList | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [payload, setPayload] = useState<CouponsList | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -194,38 +218,40 @@ export function AdminCouponsPanel() {
   const filtersActive =
     view !== "all" || Boolean(status) || Boolean(discountType) || Boolean(searchQ.trim());
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchSalesCoupons({
-        q: searchQ.trim() || undefined,
-        status: status || undefined,
-        discountType: discountType || undefined,
-        view,
-        sortBy,
-        sortDir: "desc",
-        page,
-        limit: 25,
-      });
-      setPayload(response.data);
-    } catch (loadError) {
-      setPayload(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchSalesCoupons({
+          q: searchQ.trim() || undefined,
+          status: status || undefined,
+          discountType: discountType || undefined,
+          view,
+          sortBy,
+          sortDir: "desc",
+          page,
+          limit: 25,
+        });
+        setPayload(response.data);
+      } catch (loadError) {
+        setPayload(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load coupons data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [discountType, page, searchQ, sortBy, status, view]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load coupons data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [discountType, page, searchQ, sortBy, status, view],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleExport() {
     setBusy(true);
@@ -453,7 +479,7 @@ export function AdminCouponsPanel() {
           <div className="flex flex-col rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-sm">
             <span className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Redemptions</span>
             <span className="mb-1 font-mono text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
-              {summary.totalRedemptions.toLocaleString()}
+              {summary.totalRedemptions.toLocaleString(viewer.locale)}
             </span>
             <span className="mt-auto text-[11px] text-[var(--admin-on-surface-variant)]">
               {summary.avgRedemptionsPerActive} per active coupon
@@ -711,7 +737,7 @@ export function AdminCouponsPanel() {
                       <td className="h-12 px-4">
                         <div className="flex flex-col gap-1">
                           <span className="font-mono text-sm text-[var(--admin-on-surface)]">
-                            {coupon.redemptionCount.toLocaleString()}
+                            {coupon.redemptionCount.toLocaleString(viewer.locale)}
                             <span className="text-[var(--admin-on-surface-variant)]">
                               {" "}
                               / {limitLabel}

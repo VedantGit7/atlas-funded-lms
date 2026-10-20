@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminCouponRedemptionsPanel } from "../../../../../../features/admin/reports/AdminCouponRedemptionsPanel";
+import { loadCouponRedemptionsData } from "../../../../../../lib/server/report-sales-marketing-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminCouponRedemptionsRoutePage({
@@ -16,7 +17,10 @@ export default async function AdminCouponRedemptionsRoutePage({
     notFound();
   }
 
-  const gate = await runTenantStateGate();
+  const [gate, initialData] = await Promise.all([
+    runTenantStateGate(),
+    loadCouponRedemptionsData(couponId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -33,7 +37,7 @@ export default async function AdminCouponRedemptionsRoutePage({
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
-        <AdminCouponRedemptionsPanel couponId={couponId} />
+        <AdminCouponRedemptionsPanel couponId={couponId} initialData={initialData} />
       </Suspense>
     </AdminPageGate>
   );

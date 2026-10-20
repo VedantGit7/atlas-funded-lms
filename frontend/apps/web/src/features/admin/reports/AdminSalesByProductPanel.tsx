@@ -17,11 +17,14 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import {
+  SALES_PRODUCTS_DEFAULTS,
+  salesMarketingRangeBefore,
   dateInputToEndIso,
   dateInputToStartIso,
   exportSalesMarketingReport,
@@ -32,10 +35,17 @@ import {
   type SalesProductsSummary,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type Props = {
   /** Optional; row click navigates to the purchasers route. Kept for backward compatibility. */
   onSelectProduct?: (product: SalesProductItem) => void;
+  /**
+   * The first page over the default 30 days, loaded by the server with the
+   * range it counted; the first browser load is skipped when present.
+   */
+  initialData?: ReportInitialDataInRange<SalesProductsList> | null | undefined;
 };
 
 const DATE_PRESETS = [
@@ -60,17 +70,22 @@ function ytdRange(): { from: string; to: string } {
   return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
 }
 
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatShortDate(iso: string): string {
+function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function productTypeLabel(type: string): string {
@@ -210,19 +225,29 @@ function KpiCard({
   );
 }
 
-export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
+export function AdminSalesByProductPanel({ onSelectProduct, initialData }: Props) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
   const router = useRouter();
-  const initial = useMemo(() => defaultRange(30), []);
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  // The server's range when it loaded the panel, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const initialRange = useMemo(
+    () => initial?.range ?? salesMarketingRangeBefore(SALES_PRODUCTS_DEFAULTS.rangeDays),
+    [initial],
+  );
   const [preset, setPreset] = useState<DatePreset>("30d");
-  const [paidFrom, setPaidFrom] = useState(initial.from);
-  const [paidTo, setPaidTo] = useState(initial.to);
+  const [paidFrom, setPaidFrom] = useState(initialRange.from);
+  const [paidTo, setPaidTo] = useState(initialRange.to);
   const [productType, setProductType] = useState("");
   const [searchQ, setSearchQ] = useState("");
   const [sortBy, setSortBy] = useState<SalesProductsSortBy>("revenue_cents");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
-  const [payload, setPayload] = useState<SalesProductsList | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [payload, setPayload] = useState<SalesProductsList | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -241,38 +266,40 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
     setPaidTo(range.to);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchSalesProducts({
-        q: searchQ.trim() || undefined,
-        paidFrom: dateInputToStartIso(paidFrom),
-        paidTo: dateInputToEndIso(paidTo),
-        productType: productType || undefined,
-        sortBy,
-        sortDir,
-        page,
-        limit: 25,
-      });
-      setPayload(response.data);
-    } catch (loadError) {
-      setPayload(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchSalesProducts({
+          q: searchQ.trim() || undefined,
+          paidFrom: dateInputToStartIso(paidFrom),
+          paidTo: dateInputToEndIso(paidTo),
+          productType: productType || undefined,
+          sortBy,
+          sortDir,
+          page,
+          limit: 25,
+        });
+        setPayload(response.data);
+      } catch (loadError) {
+        setPayload(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load sales by product data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [paidFrom, paidTo, page, productType, searchQ, sortBy, sortDir]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load sales by product data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [paidFrom, paidTo, page, productType, searchQ, sortBy, sortDir],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleExport() {
     setBusy(true);
@@ -471,11 +498,11 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
             />
             <KpiCard
               label="Units sold"
-              value={summary.totalUnitsSold.toLocaleString()}
+              value={summary.totalUnitsSold.toLocaleString(viewer.locale)}
               change={summary.unitsChangePercent}
               previousLabel={
                 summary.unitsChangePercent != null
-                  ? `vs prior period (${summary.previousTotalUnitsSold.toLocaleString()})`
+                  ? `vs prior period (${summary.previousTotalUnitsSold.toLocaleString(viewer.locale)})`
                   : undefined
               }
             />
@@ -487,7 +514,7 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
             />
             <KpiCard
               label="Products with sales"
-              value={summary.productCount.toLocaleString()}
+              value={summary.productCount.toLocaleString(viewer.locale)}
               change={null}
               previousLabel={`Net ${formatMoneyAmount(summary.totalNetCents)} ${summary.currency}`}
             />
@@ -729,7 +756,7 @@ export function AdminSalesByProductPanel({ onSelectProduct }: Props) {
                           </span>
                         </td>
                         <td className="h-11 px-4 text-right font-mono text-sm font-medium text-[var(--admin-on-surface)]">
-                          {product.unitsSold.toLocaleString()}
+                          {product.unitsSold.toLocaleString(viewer.locale)}
                         </td>
                         <td className="h-11 px-4 text-right font-mono text-sm text-[var(--admin-on-surface)]">
                           {formatMoneyAmount(product.revenueCents)}
