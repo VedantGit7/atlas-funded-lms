@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -15,6 +15,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -28,6 +29,7 @@ import {
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { PaymentOrdersErrorState } from "./PaymentOrdersStates";
 import {
+  UNMATCHED_DEFAULT_STALE_PENDING_DAYS,
   fetchUnmatchedPaymentOrders,
   type PaymentOrder,
   type UnmatchedOrderGroup,
@@ -36,8 +38,8 @@ import {
 import {
   ORDER_FAULT_COPY,
   formatAge,
-  formatAmount,
-  formatTimestamp,
+  formatAmountFor,
+  formatTimestampFor,
   ordersNoteClassName,
   ordersSignalCardClassName,
   ordersSignalLabelClassName,
@@ -47,6 +49,8 @@ import {
   statusChipClassName,
   unmatchedOrdersToCsv,
 } from "./payment-orders-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider } from "./viewer-time";
 
 /**
  * `/admin/reports/payments/orders/unmatched`.
@@ -78,12 +82,34 @@ function shortId(id: string): string {
   return id.slice(0, 8);
 }
 
-export function AdminPaymentOrdersUnmatchedPage() {
-  const [stalePendingDays, setStalePendingDays] = useState(7);
+type UnmatchedPageProps = {
+  /** The worklist at the default threshold, loaded by the server; the first browser load is skipped when present. */
+  initialWorklist?: ReportInitialData<UnmatchedPaymentOrders> | null;
+};
+
+/**
+ * Ages on the page count from when the server rendered it until hydration
+ * ends (see viewer-time), so both renders read the same.
+ */
+export function AdminPaymentOrdersUnmatchedPage(props: UnmatchedPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialWorklist?.loadedAt ?? null}>
+      <UnmatchedWorklist {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function UnmatchedWorklist({ initialWorklist }: UnmatchedPageProps) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialWorklist ?? null);
+  const [stalePendingDays, setStalePendingDays] = useState<number>(
+    UNMATCHED_DEFAULT_STALE_PENDING_DAYS,
+  );
   const [thresholdOpen, setThresholdOpen] = useState(false);
 
-  const [data, setData] = useState<UnmatchedPaymentOrders | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<UnmatchedPaymentOrders | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -115,9 +141,14 @@ export function AdminPaymentOrdersUnmatchedPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load(stalePendingDays, "initial");
-  }, [load, stalePendingDays]);
+  // A soft load is the worklist's own in-place refresh.
+  const loadForThreshold = useCallback(
+    (options?: { soft?: boolean }) =>
+      load(stalePendingDays, options?.soft === true ? "refresh" : "initial"),
+    [load, stalePendingDays],
+  );
+
+  useReportLoad(loadForThreshold, initial);
 
   const populated = useMemo(() => data?.groups.filter((entry) => entry.total > 0) ?? [], [data]);
   const anyTruncated = populated.some((entry) => entry.truncated);
@@ -262,7 +293,7 @@ export function AdminPaymentOrdersUnmatchedPage() {
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
               Every order in the ledger was scanned —{" "}
               <span className="font-data font-semibold text-[var(--admin-on-surface)]">
-                {data.scannedTotal.toLocaleString()}
+                {data.scannedTotal.toLocaleString(viewer.locale)}
               </span>{" "}
               in total. Nothing on this screen changes an order; orders are never edited or deleted
               here, so the audit trail survives the fix.
@@ -279,12 +310,12 @@ export function AdminPaymentOrdersUnmatchedPage() {
                     : "text-[var(--admin-success)]"
                 }`}
               >
-                {data.affectedTotal.toLocaleString()}
+                {data.affectedTotal.toLocaleString(viewer.locale)}
               </span>
               <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                 {/* Distinct orders. An order stuck for two reasons appears in
                     two groups but is counted once here. */}
-                distinct orders across {data.scannedTotal.toLocaleString()}
+                distinct orders across {data.scannedTotal.toLocaleString(viewer.locale)}
               </p>
             </div>
 
@@ -298,7 +329,7 @@ export function AdminPaymentOrdersUnmatchedPage() {
                     entry.total > 0 ? "text-[var(--admin-warning)]" : ""
                   }`}
                 >
-                  {entry.total.toLocaleString()}
+                  {entry.total.toLocaleString(viewer.locale)}
                 </span>
                 {entry.fault === "stale-pending" ? (
                   <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
@@ -311,7 +342,7 @@ export function AdminPaymentOrdersUnmatchedPage() {
             <div className={ordersSignalCardClassName}>
               <span className={ordersSignalLabelClassName}>Oldest</span>
               <span className={ordersSignalValueClassName}>
-                {data.oldest === null ? "—" : formatAge(data.oldest.createdAt)}
+                {data.oldest === null ? "—" : formatAge(data.oldest.createdAt, viewer.now)}
               </span>
               {data.oldest !== null ? (
                 <Link
@@ -401,6 +432,7 @@ export function AdminPaymentOrdersUnmatchedPage() {
 }
 
 function FaultGroupPanel({ group, limit }: { group: UnmatchedOrderGroup; limit: number }) {
+  const viewer = useViewerLocale();
   const copy = ORDER_FAULT_COPY[group.fault];
   return (
     <section className={panelClassName}>
@@ -408,13 +440,13 @@ function FaultGroupPanel({ group, limit }: { group: UnmatchedOrderGroup; limit: 
         <div className="flex flex-wrap items-center gap-3">
           <ShieldAlert className="h-4 w-4 text-[var(--admin-warning)]" aria-hidden="true" />
           <h2 className="text-sm font-bold text-[var(--admin-on-surface)]">{copy.title}</h2>
-          <span className={countChipClassName}>{group.total.toLocaleString()}</span>
+          <span className={countChipClassName}>{group.total.toLocaleString(viewer.locale)}</span>
         </div>
         <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">{copy.why}</p>
         {group.truncated ? (
           <p className="mt-2 text-sm font-semibold text-[var(--admin-warning)]">
             {/* Never let a capped sample read as the whole group. */}
-            Showing the {limit} oldest of {group.total.toLocaleString()}.
+            Showing the {limit} oldest of {group.total.toLocaleString(viewer.locale)}.
           </p>
         ) : null}
       </div>
@@ -445,6 +477,9 @@ function FaultGroupPanel({ group, limit }: { group: UnmatchedOrderGroup; limit: 
 }
 
 function WorklistRow({ order, fault }: { order: PaymentOrder; fault: string }) {
+  const viewer = useViewerLocale();
+  const formatAmount = withViewer(formatAmountFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const missingExternalId = order.externalId === null || order.externalId.trim() === "";
   return (
     <tr className={faultRowClassName}>
@@ -465,7 +500,7 @@ function WorklistRow({ order, fault }: { order: PaymentOrder; fault: string }) {
         )}
       </td>
       <td className="font-data whitespace-nowrap px-4 py-2.5 text-sm text-[var(--admin-on-surface-variant)]">
-        {fault === "paid-without-timestamp" ? "—" : formatAge(order.createdAt)}
+        {fault === "paid-without-timestamp" ? "—" : formatAge(order.createdAt, viewer.now)}
       </td>
       <td className="whitespace-nowrap px-4 py-2.5 text-right">
         {/* A real destination rather than an overflow menu with nothing behind

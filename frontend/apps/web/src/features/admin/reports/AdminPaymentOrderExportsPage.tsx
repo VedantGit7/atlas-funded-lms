@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -18,20 +19,23 @@ import {
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { PaymentOrdersErrorState } from "./PaymentOrdersStates";
 import {
+  paymentOrderExportFilters,
+  readPaymentOrderExportFields,
+  type PaymentOrderSummary,
   PAYMENT_ORDER_STATUSES,
   fetchPaymentOrderSummary,
   fetchPaymentOrdersExport,
   type PaymentOrderFilters,
-  type PaymentOrderSettlement,
 } from "./payment-orders-api";
 import {
   ALL_ORDER_EXPORT_COLUMN_KEYS,
   ORDER_EXPORT_COLUMNS,
-  formatAmount,
+  formatAmountFor,
   orderExportFilename,
   ordersToCsv,
   type OrderExportColumnKey,
 } from "./payment-orders-shared";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 /**
  * `/admin/reports/payments/orders/exports`: the filtered order ledger as a
@@ -58,36 +62,32 @@ const ORDERS_HREF = "/admin/reports/payments/orders";
 const searchFieldClassName =
   "w-full rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30";
 
-function isSettlement(value: string): value is PaymentOrderSettlement {
-  return value === "settled" || value === "unsettled";
-}
-
-export function AdminPaymentOrderExportsPage() {
+export function AdminPaymentOrderExportsPage({
+  initialSummary,
+}: {
+  /** The count for the filters in the address, loaded by the server; the first browser load is skipped when present. */
+  initialSummary?: ReportInitialData<PaymentOrderSummary> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatAmount = withViewer(formatAmountFor, viewer);
   const searchParams = useSearchParams();
 
   // Seeded from the URL so "Export" on the ledger arrives here already
-  // describing the same set of rows the operator was looking at.
-  const [status, setStatus] = useState(() => searchParams.get("status") ?? "");
-  const [currency, setCurrency] = useState(() =>
-    (searchParams.get("currency") ?? "").toUpperCase(),
-  );
-  const [settlement, setSettlement] = useState<string>(() => {
-    const value = searchParams.get("settlement") ?? "";
-    return isSettlement(value) ? value : "";
-  });
-  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  // describing the same set of rows the operator was looking at. Read once,
+  // like the server's count below.
+  const [seed] = useState(() => readPaymentOrderExportFields((name) => searchParams.get(name)));
+  const [initial] = useState(() => initialSummary ?? null);
+  const [status, setStatus] = useState(seed.status);
+  const [currency, setCurrency] = useState(seed.currency);
+  const [settlement, setSettlement] = useState<string>(seed.settlement);
+  const [query, setQuery] = useState(seed.query);
 
   const [statusOpen, setStatusOpen] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [settlementOpen, setSettlementOpen] = useState(false);
 
   const filters: PaymentOrderFilters = useMemo(
-    () => ({
-      ...(query.trim() ? { q: query.trim() } : {}),
-      ...(status ? { status } : {}),
-      ...(currency ? { currency } : {}),
-      ...(isSettlement(settlement) ? { settlement } : {}),
-    }),
+    () => paymentOrderExportFilters({ status, currency, settlement, query }),
     [query, status, currency, settlement],
   );
 
@@ -101,6 +101,7 @@ export function AdminPaymentOrderExportsPage() {
     noun: { one: "order", many: "orders" },
     narrow: "the filters",
     summaryErrorMessage: "The ledger count could not be read.",
+    initial,
   });
   const { summary } = exportState;
 
@@ -362,7 +363,8 @@ export function AdminPaymentOrderExportsPage() {
                     {formatAmount(entry.amountCents, entry.currency)}
                   </span>
                   <span className="text-xs text-[var(--admin-on-surface-variant)]">
-                    {entry.count.toLocaleString()} {entry.count === 1 ? "order" : "orders"}
+                    {entry.count.toLocaleString(viewer.locale)}{" "}
+                    {entry.count === 1 ? "order" : "orders"}
                   </span>
                 </li>
               ))}

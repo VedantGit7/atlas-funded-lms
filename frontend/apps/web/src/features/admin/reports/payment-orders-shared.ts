@@ -1,5 +1,6 @@
 import { csvRow } from "../../../lib/export/csv";
 import type { PaymentOrder, PaymentOrderFault } from "./payment-orders-api";
+import type { ViewerLocale } from "./viewer-time";
 
 /**
  * Presentation vocabulary for the payment order ledger.
@@ -75,20 +76,21 @@ export function statusChipClassName(status: string): string {
  * imported from a legacy system still has to be readable, so the code is
  * appended verbatim instead.
  */
-export function formatAmount(cents: number, currency: string): string {
+export function formatAmountFor(cents: number, currency: string, viewer: ViewerLocale): string {
   const amount = cents / 100;
   try {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(amount);
+    return new Intl.NumberFormat(viewer.locale, { style: "currency", currency }).format(amount);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }
 }
 
-export function formatTimestamp(iso: string | null): string {
+export function formatTimestampFor(iso: string | null, viewer: ViewerLocale): string {
   if (iso === null) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
     day: "numeric",

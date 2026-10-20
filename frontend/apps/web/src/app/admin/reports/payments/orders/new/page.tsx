@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminPaymentOrderNewPage } from "../../../../../../features/admin/reports/AdminPaymentOrderNewPage";
+import { loadPaymentOrderCapabilitiesData } from "../../../../../../lib/server/report-payments-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 /**
@@ -12,7 +13,10 @@ import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-ga
  * only handles tenant availability.
  */
 export default async function AdminPaymentOrderNewRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialSummary] = await Promise.all([
+    runTenantStateGate(),
+    loadPaymentOrderCapabilitiesData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -26,7 +30,7 @@ export default async function AdminPaymentOrderNewRoutePage() {
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Record a manual order">
-      <AdminPaymentOrderNewPage />
+      <AdminPaymentOrderNewPage initialSummary={initialSummary} />
     </AdminPageGate>
   );
 }

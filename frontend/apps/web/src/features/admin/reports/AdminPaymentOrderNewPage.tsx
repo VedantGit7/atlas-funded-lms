@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   managePageDescClassName,
   managePageTitleClassName,
@@ -23,6 +24,7 @@ import {
   manageSecondaryButtonClassName,
 } from "../manage/manage-ui-shared";
 import {
+  type PaymentOrderSummary,
   PAYMENT_ORDER_STATUSES,
   createPaymentOrder,
   fetchPaymentOrderSummary,
@@ -31,12 +33,14 @@ import {
   type PaymentOrderStatus,
 } from "./payment-orders-api";
 import {
-  formatAmount,
+  formatAmountFor,
   ordersEmptyPanelClassName,
   ordersFieldClassName,
   ordersNoteClassName,
   statusChipClassName,
 } from "./payment-orders-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 const ORDERS_HREF = "/admin/reports/payments/orders";
 
@@ -68,11 +72,22 @@ const helpClassName = "mt-1 text-xs text-[var(--admin-on-surface-variant)]";
  * **It records why.** The reason rides along in the order's metadata, because
  * six months later it is the only thing that makes the row auditable.
  */
-export function AdminPaymentOrderNewPage() {
+export function AdminPaymentOrderNewPage({
+  initialSummary,
+}: {
+  /** The ledger's totals, whose capabilities say whether the operator may record; loaded by the server. */
+  initialSummary?: ReportInitialData<PaymentOrderSummary> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatAmount = withViewer(formatAmountFor, viewer);
   const router = useRouter();
   const fieldId = useId();
 
-  const [canRecord, setCanRecord] = useState<boolean | null>(null);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSummary ?? null);
+  const [canRecord, setCanRecord] = useState<boolean | null>(
+    initial?.data.capabilities.canRecord ?? null,
+  );
 
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("INR");
@@ -104,9 +119,7 @@ export function AdminPaymentOrderNewPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadCapabilities();
-  }, [loadCapabilities]);
+  useReportLoad(loadCapabilities, initial);
 
   const searchTicket = useRef(0);
 
@@ -166,7 +179,7 @@ export function AdminPaymentOrderNewPage() {
       },
       { label: "External ID", value: missingExternalId ? "None" : externalId.trim() },
     ],
-    [amountValid, amountCents, currency, status, learner, missingExternalId, externalId],
+    [amountValid, amountCents, currency, status, learner, missingExternalId, externalId, viewer],
   );
 
   async function record() {

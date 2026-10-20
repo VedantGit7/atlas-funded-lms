@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -17,6 +17,7 @@ import {
   User,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   managePageTitleClassName,
   managePrimaryButtonClassName,
@@ -24,14 +25,16 @@ import {
 } from "../manage/manage-ui-shared";
 import { fetchPaymentOrder, type PaymentOrderDetail } from "./payment-orders-api";
 import {
-  formatAmount,
-  formatTimestamp,
+  formatAmountFor,
+  formatTimestampFor,
   manualEntryNote,
   orderChecks,
   ordersEmptyPanelClassName,
   ordersNoteClassName,
   statusChipClassName,
 } from "./payment-orders-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 const ORDERS_HREF = "/admin/reports/payments/orders";
 
@@ -56,33 +59,47 @@ const cellLabelClassName =
  * you a webhook settled an order — only that the row says so, unless the order
  * carries a manual-entry note, in which case a person wrote it.
  */
-export function AdminPaymentOrderDetailPage({ orderId }: { orderId: string }) {
-  const [order, setOrder] = useState<PaymentOrderDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+export function AdminPaymentOrderDetailPage({
+  orderId,
+  initialOrder,
+}: {
+  orderId: string;
+  /** The order, loaded by the server; the first browser load is skipped when present. */
+  initialOrder?: ReportInitialData<PaymentOrderDetail> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatAmount = withViewer(formatAmountFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialOrder ?? null);
+  const [order, setOrder] = useState<PaymentOrderDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setNotFound(false);
-    setError(null);
-    try {
-      setOrder(await fetchPaymentOrder(orderId));
-    } catch (caught) {
-      if (caught instanceof ClientApiError && caught.status === 404) {
-        setNotFound(true);
-      } else {
-        setError(caught instanceof ClientApiError ? caught.message : "Could not load the order.");
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setNotFound(false);
+      setError(null);
+      try {
+        setOrder(await fetchPaymentOrder(orderId));
+      } catch (caught) {
+        if (caught instanceof ClientApiError && caught.status === 404) {
+          setNotFound(true);
+        } else {
+          setError(caught instanceof ClientApiError ? caught.message : "Could not load the order.");
+        }
+      } finally {
+        if (!soft) setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [orderId]);
+    },
+    [orderId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   function copyValue(value: string, label: string) {
     void navigator.clipboard.writeText(value).then(

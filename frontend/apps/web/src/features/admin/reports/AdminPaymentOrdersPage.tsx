@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -29,6 +30,7 @@ import {
 } from "../manage/manage-ui-shared";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import {
+  type PaymentOrdersLedger,
   PAYMENT_ORDER_STATUSES,
   fetchPaymentOrderSummary,
   fetchPaymentOrders,
@@ -39,8 +41,8 @@ import {
 } from "./payment-orders-api";
 import {
   faultLabel,
-  formatAmount,
-  formatTimestamp,
+  formatAmountFor,
+  formatTimestampFor,
   orderFaults,
   ordersCheckboxClassName,
   ordersNoteClassName,
@@ -65,6 +67,8 @@ import {
   PaymentOrdersNoMatchState,
   PaymentOrdersSkeleton,
 } from "./PaymentOrdersStates";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 const STATUS_FILTERS = [
   { value: "", label: "All statuses" },
@@ -100,12 +104,24 @@ const SETTLEMENT_FILTERS = [
  * **Totals are never summed across currencies.** A single figure adding INR to
  * USD means nothing and looks authoritative.
  */
-export function AdminPaymentOrdersPage() {
-  const [orders, setOrders] = useState<PaymentOrder[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [summary, setSummary] = useState<PaymentOrderSummary | null>(null);
+export function AdminPaymentOrdersPage({
+  initialLedger,
+}: {
+  /** The ledger's first page and totals, loaded by the server; the first browser load is skipped when present. */
+  initialLedger?: ReportInitialData<PaymentOrdersLedger> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatAmount = withViewer(formatAmountFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialLedger ?? null);
+  const [orders, setOrders] = useState<PaymentOrder[]>(initial?.data.page.items ?? []);
+  const [nextCursor, setNextCursor] = useState<string | null>(
+    initial?.data.page.pageInfo.nextCursor ?? null,
+  );
+  const [summary, setSummary] = useState<PaymentOrderSummary | null>(initial?.data.summary ?? null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -190,9 +206,13 @@ export function AdminPaymentOrdersPage() {
     [],
   );
 
-  useEffect(() => {
-    void load(filters, "initial");
-  }, [load, filters]);
+  // A soft load is the ledger's own in-place refresh.
+  const loadForFilters = useCallback(
+    (options?: { soft?: boolean }) => load(filters, options?.soft === true ? "refresh" : "initial"),
+    [load, filters],
+  );
+
+  useReportLoad(loadForFilters, initial);
 
   // Consumed once and stripped from the URL: a refresh should not re-announce
   // an order recorded ten minutes ago.
