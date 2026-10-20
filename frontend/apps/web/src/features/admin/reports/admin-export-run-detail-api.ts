@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type ExportRunPipelineStage = {
@@ -66,14 +64,20 @@ export type ExportRunDetail = {
   accessLogAvailable: boolean;
 };
 
-export async function fetchExportRunDetail(
-  runId: string,
-  sourceType?: "report_run" | "export_job",
-) {
+export type ExportRunSourceType = "report_run" | "export_job";
+
+/** The `?source=` a run's page names its source with, or undefined when it names none it knows. */
+export function exportRunSourceType(value: string | null): ExportRunSourceType | undefined {
+  return value === "report_run" || value === "export_job" ? value : undefined;
+}
+
+export function exportRunDetailPath(runId: string, sourceType?: ExportRunSourceType): string {
   const query = sourceType ? `?sourceType=${encodeURIComponent(sourceType)}` : "";
-  return clientApi.get<{ data: ExportRunDetail }>(
-    `/api/v1/reports/exports/${encodeURIComponent(runId)}${query}`,
-  );
+  return `/api/v1/reports/exports/${encodeURIComponent(runId)}${query}`;
+}
+
+export async function fetchExportRunDetail(runId: string, sourceType?: ExportRunSourceType) {
+  return clientApi.get<{ data: ExportRunDetail }>(exportRunDetailPath(runId, sourceType));
 }
 
 export async function deleteExportRunFile(runId: string, sourceType?: "report_run" | "export_job") {

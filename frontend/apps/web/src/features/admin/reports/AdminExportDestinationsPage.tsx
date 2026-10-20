@@ -25,8 +25,11 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { DropdownField } from "../../studio/courses/admin-form-dropdown-shared";
 import {
+  DESTINATIONS_ROSTER_DEFAULTS,
+  type DestinationsRosterPayload,
   createDestination,
   deleteDestination,
   exportDestinationsList,
@@ -41,6 +44,8 @@ import {
   type DestinationsRosterSummary,
   type HealthDayStatus,
 } from "./admin-export-destinations-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const primaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 text-[13px] font-semibold text-[var(--admin-on-primary)] transition-all hover:bg-[var(--admin-primary-strong)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -71,15 +76,15 @@ const EMPTY_SUMMARY: DestinationsRosterSummary = {
   tenantEmailDomains: [],
 };
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 0) {
     const ahead = Math.abs(diffMs);
     if (ahead < 60_000) return "in under a minute";
@@ -1001,6 +1006,9 @@ function DestinationBlock({
   onDelete: () => void;
   onCopyWebhook: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const [secretVisible, setSecretVisible] = useState(false);
 
   const railClass = item.isFailing
@@ -1184,25 +1192,51 @@ function DestinationBlock({
   );
 }
 
-export function AdminExportDestinationsPage() {
+type DestinationsPageProps = {
+  /** The first page, loaded by the server; the first browser load is skipped when present. */
+  initialRoster?: ReportInitialData<DestinationsRosterPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminExportDestinationsPage(props: DestinationsPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialRoster?.loadedAt ?? null}>
+      <DestinationsRoster {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function DestinationsRoster({ initialRoster }: DestinationsPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const kindLabelId = useId();
   const statusLabelId = useId();
   const sortLabelId = useId();
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialRoster ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<DestinationItem[]>([]);
-  const [summary, setSummary] = useState<DestinationsRosterSummary>(EMPTY_SUMMARY);
-  const [totalCount, setTotalCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+  const [items, setItems] = useState<DestinationItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<DestinationsRosterSummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [page, setPage] = useState<number>(DESTINATIONS_ROSTER_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
 
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
-  const [kind, setKind] = useState<DestinationKind | "any">("any");
-  const [status, setStatus] = useState<DestinationStatusFilter>("all");
-  const [sort, setSort] = useState<DestinationSort>("name_asc");
+  const [kind, setKind] = useState<DestinationKind | "any">(DESTINATIONS_ROSTER_DEFAULTS.kind);
+  const [status, setStatus] = useState<DestinationStatusFilter>(
+    DESTINATIONS_ROSTER_DEFAULTS.status,
+  );
+  const [sort, setSort] = useState<DestinationSort>(DESTINATIONS_ROSTER_DEFAULTS.sort);
 
   const [kindOpen, setKindOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
@@ -1223,40 +1257,42 @@ export function AdminExportDestinationsPage() {
     };
   }, [q]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchDestinationsRoster({
-        q: debouncedQ || undefined,
-        kind,
-        status,
-        sort,
-        page,
-        limit: 50,
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (err) {
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchDestinationsRoster({
+          q: debouncedQ || undefined,
+          kind,
+          status,
+          sort,
+          page,
+          limit: DESTINATIONS_ROSTER_DEFAULTS.limit,
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (err) {
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Unable to load destinations.",
-      );
-      setItems([]);
-      setSummary(EMPTY_SUMMARY);
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedQ, kind, status, sort, page]);
+            : err instanceof Error
+              ? err.message
+              : "Unable to load destinations.",
+        );
+        setItems([]);
+        setSummary(EMPTY_SUMMARY);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [debouncedQ, kind, status, sort, page],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     setPage(1);
