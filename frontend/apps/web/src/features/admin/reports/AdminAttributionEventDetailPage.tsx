@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -15,6 +15,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   managePageDescClassName,
   managePageTitleClassName,
@@ -28,12 +29,14 @@ import {
   eventTypeChipClassName,
   formatDuration,
   formatRelative,
-  formatRevenue,
-  formatTimestamp,
+  formatRevenueFor,
+  formatTimestampFor,
   isAttributed,
   isNotableSkew,
   utmFields,
 } from "./attribution-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider } from "./viewer-time";
 
 /**
  * `/admin/reports/sales-marketing/attribution/[eventId]`.
@@ -63,41 +66,63 @@ const panelTitleClassName = "text-sm font-bold text-[var(--admin-on-surface)]";
 const fieldLabelClassName =
   "text-[11px] font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]";
 
-export function AdminAttributionEventDetailPage({ eventId }: { eventId: string }) {
-  const [event, setEvent] = useState<AttributionEventDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+type EventDetailProps = {
+  eventId: string;
+  /** The event, loaded by the server; the first browser load is skipped when present. */
+  initialEvent?: ReportInitialData<AttributionEventDetail> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminAttributionEventDetailPage(props: EventDetailProps) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialEvent?.loadedAt ?? null}>
+      <EventDetailScreen {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function EventDetailScreen({ eventId, initialEvent }: EventDetailProps) {
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialEvent ?? null);
+  const [event, setEvent] = useState<AttributionEventDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const next = await fetchAttributionEvent(eventId);
-      setEvent(next);
-      setNotFound(false);
-      setError(null);
-    } catch (caught) {
-      setEvent(null);
-      // A missing event and an unreachable API need opposite recovery actions,
-      // so they must not share a screen.
-      if (caught instanceof ClientApiError && caught.status === 404) {
-        setNotFound(true);
-        setError(null);
-      } else {
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      try {
+        const next = await fetchAttributionEvent(eventId);
+        setEvent(next);
         setNotFound(false);
-        setError(
-          caught instanceof ClientApiError ? caught.message : "The event could not be read.",
-        );
+        setError(null);
+      } catch (caught) {
+        setEvent(null);
+        // A missing event and an unreachable API need opposite recovery actions,
+        // so they must not share a screen.
+        if (caught instanceof ClientApiError && caught.status === 404) {
+          setNotFound(true);
+          setError(null);
+        } else {
+          setNotFound(false);
+          setError(
+            caught instanceof ClientApiError ? caught.message : "The event could not be read.",
+          );
+        }
+      } finally {
+        if (!soft) setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId]);
+    },
+    [eventId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   function copyValue(value: string, label: string) {
     void navigator.clipboard.writeText(value).then(
@@ -170,6 +195,9 @@ function EventDetail({
   event: AttributionEventDetail;
   onCopy: (value: string, label: string) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatRevenue = withViewer(formatRevenueFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const attributed = isAttributed(event);
   const skew = clockSkewMs(event.occurredAt, event.createdAt);
   const metadataEntries = Object.entries(event.metadataJson ?? {});
@@ -188,7 +216,7 @@ function EventDetail({
             <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="font-data">{formatTimestamp(event.occurredAt)}</span>
             <span className="text-[var(--admin-on-surface-variant)]">
-              ({formatRelative(event.occurredAt)})
+              ({formatRelative(event.occurredAt, viewer.now)})
             </span>
           </p>
         </div>
@@ -360,7 +388,7 @@ function EventDetail({
                   // Minor units spelled out, because a currency with a
                   // different exponent makes the divided figure ambiguous.
                   <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
-                    {event.revenueCents.toLocaleString()} minor units
+                    {event.revenueCents.toLocaleString(viewer.locale)} minor units
                   </p>
                 ) : (
                   <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">

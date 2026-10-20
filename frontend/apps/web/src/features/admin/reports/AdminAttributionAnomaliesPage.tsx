@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -12,6 +12,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -24,6 +25,7 @@ import {
 import { SalesMarketingReportTabs } from "./SalesMarketingReportTabs";
 import { AttributionErrorState } from "./AttributionStates";
 import {
+  ATTRIBUTION_DEFAULT_WINDOW_DAYS,
   fetchAttributionAnomalies,
   type AttributionAnomalies,
   type AttributionAnomalyEvent,
@@ -37,9 +39,11 @@ import {
   attributionSignalValueClassName,
   attributionTableHeadCellClassName,
   attributionTableShellClassName,
-  formatTimestamp,
+  formatTimestampFor,
   utmFields,
 } from "./attribution-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 /**
  * `/admin/reports/sales-marketing/attribution/anomalies`.
@@ -66,11 +70,21 @@ const panelClassName =
 const countChipClassName =
   "font-data inline-flex items-center rounded-full border border-[color-mix(in_srgb,var(--admin-warning)_45%,transparent)] bg-[color-mix(in_srgb,var(--admin-warning)_14%,var(--admin-surface))] px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-[var(--admin-warning)]";
 
-export function AdminAttributionAnomaliesPage() {
-  const [days, setDays] = useState(30);
+type AttributionAnomaliesScreenProps = {
+  /** The default window's data, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<AttributionAnomalies> | null;
+};
+
+export function AdminAttributionAnomaliesPage({
+  initialData,
+}: AttributionAnomaliesScreenProps = {}) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const [days, setDays] = useState(ATTRIBUTION_DEFAULT_WINDOW_DAYS);
   const [windowOpen, setWindowOpen] = useState(false);
-  const [data, setData] = useState<AttributionAnomalies | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AttributionAnomalies | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -98,9 +112,13 @@ export function AdminAttributionAnomaliesPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load(days, "initial");
-  }, [load, days]);
+  // A soft load is the screen's own in-place refresh.
+  const loadForWindow = useCallback(
+    (options?: { soft?: boolean }) => load(days, options?.soft === true ? "refresh" : "initial"),
+    [load, days],
+  );
+
+  useReportLoad(loadForWindow, initial);
 
   function copyId(id: string) {
     void navigator.clipboard.writeText(id).then(
@@ -225,7 +243,7 @@ export function AdminAttributionAnomaliesPage() {
                   data.affectedTotal > 0 ? "text-[var(--admin-warning)]" : ""
                 }`}
               >
-                {data.affectedTotal.toLocaleString()}
+                {data.affectedTotal.toLocaleString(viewer.locale)}
               </span>
               <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
                 {/* Not called distinct, because it is not: one event can be both
@@ -337,6 +355,8 @@ function AnomalyGroup({
   sampleLimit: number;
   onCopy: (id: string) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const copy = ANOMALY_COPY[kind];
 
   return (
@@ -345,14 +365,14 @@ function AnomalyGroup({
         <div className="flex flex-wrap items-center gap-3">
           <AlertTriangle className="h-4 w-4 text-[var(--admin-warning)]" aria-hidden="true" />
           <h2 className="text-sm font-bold text-[var(--admin-on-surface)]">{copy.title}</h2>
-          <span className={countChipClassName}>{total.toLocaleString()}</span>
+          <span className={countChipClassName}>{total.toLocaleString(viewer.locale)}</span>
         </div>
         <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">{copy.why}</p>
         <p className="mt-2 text-sm text-[var(--admin-on-surface)]">{copy.fix}</p>
         {truncated ? (
           <p className="mt-2 text-sm font-semibold text-[var(--admin-warning)]">
             {/* Never let a capped sample read as the whole set. */}
-            Showing {sampleLimit} of {total.toLocaleString()}.
+            Showing {sampleLimit} of {total.toLocaleString(viewer.locale)}.
           </p>
         ) : null}
       </div>
@@ -430,6 +450,8 @@ function AnomalyDetail({
   kind: AttributionAnomalyKind;
   event: AttributionAnomalyEvent;
 }) {
+  const viewer = useViewerLocale();
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   if (kind === "duplicate") {
     return (
       <span className="font-data tabular-nums text-[var(--admin-warning)]">

@@ -3,10 +3,19 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminAttributionEventsPage } from "../../../../../features/admin/reports/AdminAttributionEventsPage";
+import type { ReportSearchParams } from "../../../../../lib/server/report-landing-initial-data";
+import { loadAttributionLogData } from "../../../../../lib/server/report-attribution-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
-export default async function AdminSalesMarketingAttributionRoutePage() {
-  const gate = await runTenantStateGate();
+type Props = {
+  searchParams: Promise<ReportSearchParams>;
+};
+
+export default async function AdminSalesMarketingAttributionRoutePage({ searchParams }: Props) {
+  const [gate, initialLog] = await Promise.all([
+    runTenantStateGate(),
+    searchParams.then(loadAttributionLogData),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -23,7 +32,7 @@ export default async function AdminSalesMarketingAttributionRoutePage() {
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
-        <AdminAttributionEventsPage />
+        <AdminAttributionEventsPage initialLog={initialLog} />
       </Suspense>
     </AdminPageGate>
   );

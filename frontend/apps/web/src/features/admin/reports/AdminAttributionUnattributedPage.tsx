@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -25,6 +26,7 @@ import {
 import { SalesMarketingReportTabs } from "./SalesMarketingReportTabs";
 import { AttributionErrorState } from "./AttributionStates";
 import {
+  ATTRIBUTION_DEFAULT_WINDOW_DAYS,
   fetchAttributionGaps,
   type AttributionGapEvent,
   type AttributionGapKind,
@@ -38,11 +40,13 @@ import {
   attributionSignalValueClassName,
   attributionTableHeadCellClassName,
   attributionTableShellClassName,
-  formatRevenue,
+  formatRevenueFor,
   formatShare,
-  formatTimestamp,
+  formatTimestampFor,
   gapShare,
 } from "./attribution-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer } from "./viewer-time";
 import { csvRow } from "../../../lib/export/csv";
 
 /**
@@ -112,11 +116,19 @@ function gapsToCsv(groups: AttributionGaps["groups"]): string {
   ].join("\r\n");
 }
 
-export function AdminAttributionUnattributedPage() {
-  const [days, setDays] = useState(30);
+type AttributionGapsScreenProps = {
+  /** The default window's data, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<AttributionGaps> | null;
+};
+
+export function AdminAttributionUnattributedPage({ initialData }: AttributionGapsScreenProps = {}) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const [days, setDays] = useState(ATTRIBUTION_DEFAULT_WINDOW_DAYS);
   const [windowOpen, setWindowOpen] = useState(false);
-  const [data, setData] = useState<AttributionGaps | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AttributionGaps | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -144,9 +156,13 @@ export function AdminAttributionUnattributedPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load(days, "initial");
-  }, [load, days]);
+  // A soft load is the screen's own in-place refresh.
+  const loadForWindow = useCallback(
+    (options?: { soft?: boolean }) => load(days, options?.soft === true ? "refresh" : "initial"),
+    [load, days],
+  );
+
+  useReportLoad(loadForWindow, initial);
 
   function exportGaps() {
     if (data === null) return;
@@ -286,10 +302,10 @@ export function AdminAttributionUnattributedPage() {
                   data.affectedTotal > 0 ? "text-[var(--admin-warning)]" : ""
                 }`}
               >
-                {data.affectedTotal.toLocaleString()}
+                {data.affectedTotal.toLocaleString(viewer.locale)}
               </span>
               <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-                of {data.scannedTotal.toLocaleString()} scanned
+                of {data.scannedTotal.toLocaleString(viewer.locale)} scanned
               </p>
             </div>
             {data.groups.map((group) => (
@@ -302,7 +318,7 @@ export function AdminAttributionUnattributedPage() {
                     group.total > 0 ? "text-[var(--admin-warning)]" : ""
                   }`}
                 >
-                  {group.total.toLocaleString()}
+                  {group.total.toLocaleString(viewer.locale)}
                 </span>
               </div>
             ))}
@@ -357,7 +373,7 @@ export function AdminAttributionUnattributedPage() {
                           : "text-[var(--admin-on-surface)]"
                       }`}
                     >
-                      {field.value.toLocaleString()}
+                      {field.value.toLocaleString(viewer.locale)}
                     </dd>
                   </div>
                 ))}
@@ -378,8 +394,8 @@ export function AdminAttributionUnattributedPage() {
                   <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
                     {/* Scoped to what was scanned, and to what this screen
                         actually checks. */}
-                    All {data.scannedTotal.toLocaleString()} events in the last {data.days} days
-                    carry a full source, medium and campaign.
+                    All {data.scannedTotal.toLocaleString(viewer.locale)} events in the last{" "}
+                    {data.days} days carry a full source, medium and campaign.
                   </p>
                 </div>
               ) : (
@@ -435,7 +451,7 @@ export function AdminAttributionUnattributedPage() {
                       {/* Counted here, listed on anomalies. Two lists of the
                           same rows would be two things to keep in step. */}
                       <span className="font-semibold text-[var(--admin-on-surface)]">
-                        {data.revenueWithoutCurrency.toLocaleString()}
+                        {data.revenueWithoutCurrency.toLocaleString(viewer.locale)}
                       </span>{" "}
                       {data.revenueWithoutCurrency === 1 ? "event carries" : "events carry"} revenue
                       with no currency, so those amounts join no total.{" "}
@@ -497,6 +513,9 @@ function GapGroup({
   items: AttributionGapEvent[];
   sampleLimit: number;
 }) {
+  const viewer = useViewerLocale();
+  const formatRevenue = withViewer(formatRevenueFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const copy = GAP_COPY[kind];
 
   return (
@@ -505,12 +524,12 @@ function GapGroup({
         <div className="flex flex-wrap items-center gap-3">
           <AlertTriangle className="h-4 w-4 text-[var(--admin-warning)]" aria-hidden="true" />
           <h2 className="text-sm font-bold text-[var(--admin-on-surface)]">{copy.title}</h2>
-          <span className={countChipClassName}>{total.toLocaleString()}</span>
+          <span className={countChipClassName}>{total.toLocaleString(viewer.locale)}</span>
         </div>
         <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">{copy.why}</p>
         {truncated ? (
           <p className="mt-2 text-sm font-semibold text-[var(--admin-warning)]">
-            Showing the {sampleLimit} most recent of {total.toLocaleString()}.
+            Showing the {sampleLimit} most recent of {total.toLocaleString(viewer.locale)}.
           </p>
         ) : null}
       </div>

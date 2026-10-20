@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -13,6 +13,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   managePageDescClassName,
   managePageTitleClassName,
@@ -26,7 +27,7 @@ import {
   fetchAttributionRetention,
   fetchAttributionSnippets,
   type AttributionExportRules,
-  type AttributionRetention,
+  type AttributionSettingsInitial,
   type AttributionSnippets,
   type SectionResult,
 } from "./attribution-settings-api";
@@ -37,8 +38,10 @@ import {
   attributionSignalValueClassName,
   attributedPercent,
   formatRelative,
-  formatTimestamp,
+  formatTimestampFor,
 } from "./attribution-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider } from "./viewer-time";
 
 /**
  * `/admin/reports/sales-marketing/attribution/settings`.
@@ -82,15 +85,38 @@ const labelClassName = "text-sm font-semibold text-[var(--admin-on-surface)]";
 
 const hintClassName = "mt-0.5 text-xs text-[var(--admin-on-surface-variant)]";
 
-export function AdminAttributionSettingsPage() {
-  const [summary, setSummary] = useState<SectionResult<AttributionSummary> | null>(null);
-  const [snippets, setSnippets] = useState<SectionResult<AttributionSnippets> | null>(null);
-  const [rules, setRules] = useState<SectionResult<AttributionExportRules> | null>(null);
-  const [retention, setRetention] = useState<SectionResult<AttributionRetention> | null>(null);
-  const [loading, setLoading] = useState(true);
+type SettingsPageProps = {
+  /** Every section, loaded by the server; the first browser load is skipped when present. */
+  initialSettings?: ReportInitialData<AttributionSettingsInitial> | null;
+};
 
-  const load = useCallback(async () => {
-    setLoading(true);
+function loaded<T>(data: T | undefined): SectionResult<T> | null {
+  return data === undefined ? null : { kind: "ok", data };
+}
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminAttributionSettingsPage(props: SettingsPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialSettings?.loadedAt ?? null}>
+      <AttributionSettings {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function AttributionSettings({ initialSettings }: SettingsPageProps) {
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSettings ?? null);
+  const [summary, setSummary] = useState(() => loaded(initial?.data.summary));
+  const [snippets, setSnippets] = useState(() => loaded(initial?.data.snippets));
+  const [rules, setRules] = useState(() => loaded(initial?.data.rules));
+  const [retention, setRetention] = useState(() => loaded(initial?.data.retention));
+  const [loading, setLoading] = useState(initial === null);
+
+  const load = useCallback(async (options?: { soft?: boolean }) => {
+    if (options?.soft !== true) setLoading(true);
     // Independent on purpose: one refused section must not blank the others.
     const [summaryResult, snippetResult, ruleResult] = await Promise.all([
       fetchAttributionSummary({}).then(
@@ -113,9 +139,7 @@ export function AdminAttributionSettingsPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   return (
     <div className="space-y-5">
@@ -187,6 +211,8 @@ export function AdminAttributionSettingsPage() {
 
 /** Whether events are arriving at all — the only real diagnostic on this page. */
 function IncomingEventsPanel({ result }: { result: SectionResult<AttributionSummary> | null }) {
+  const viewer = useViewerLocale();
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   if (result === null) return null;
   if (result.kind !== "ok") {
     return <SectionFallback title="Incoming events" result={result} permission="reports.run" />;
@@ -196,7 +222,7 @@ function IncomingEventsPanel({ result }: { result: SectionResult<AttributionSumm
   const percent = attributedPercent(summary.attributed, summary.total);
   const lastAt = summary.lastOccurredAt;
   const stale =
-    lastAt !== null && summary.total > 0 && Date.now() - Date.parse(lastAt) > STALE_BEACON_MS;
+    lastAt !== null && summary.total > 0 && viewer.now - Date.parse(lastAt) > STALE_BEACON_MS;
 
   return (
     <section className={panelClassName}>
@@ -224,8 +250,8 @@ function IncomingEventsPanel({ result }: { result: SectionResult<AttributionSumm
                   log that has events in it is worth a look. */}
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
                 {/* `stale` already proved this is a real timestamp. */}
-                Nothing has arrived for {formatRelative(lastAt)}. If the site has had traffic since,
-                the tracking snippets are the first thing to check.
+                Nothing has arrived for {formatRelative(lastAt, viewer.now)}. If the site has had
+                traffic since, the tracking snippets are the first thing to check.
               </p>
             </div>
           ) : null}
@@ -234,7 +260,7 @@ function IncomingEventsPanel({ result }: { result: SectionResult<AttributionSumm
             <div className={attributionSignalCardClassName}>
               <span className={attributionSignalLabelClassName}>Events recorded</span>
               <span className={attributionSignalValueClassName}>
-                {summary.total.toLocaleString()}
+                {summary.total.toLocaleString(viewer.locale)}
               </span>
             </div>
             <div className={attributionSignalCardClassName}>
@@ -250,7 +276,9 @@ function IncomingEventsPanel({ result }: { result: SectionResult<AttributionSumm
             <div>
               <span className={labelClassName}>Most recent event</span>
               <p className={hintClassName}>
-                {lastAt === null ? "—" : `${formatTimestamp(lastAt)} (${formatRelative(lastAt)})`}
+                {lastAt === null
+                  ? "—"
+                  : `${formatTimestamp(lastAt)} (${formatRelative(lastAt, viewer.now)})`}
               </p>
             </div>
             <Link
@@ -269,6 +297,7 @@ function IncomingEventsPanel({ result }: { result: SectionResult<AttributionSumm
 
 /** The three script slots that fire the beacon. Read only — edited elsewhere. */
 function TrackingPanel({ result }: { result: SectionResult<AttributionSnippets> | null }) {
+  const viewer = useViewerLocale();
   if (result === null) return null;
   if (result.kind !== "ok") {
     return <SectionFallback title="Tracking snippets" result={result} permission="config.update" />;
@@ -302,7 +331,7 @@ function TrackingPanel({ result }: { result: SectionResult<AttributionSnippets> 
           {configured} of {slots.length} configured
           {snippets.updatedAt === null
             ? ""
-            : ` · last changed ${formatRelative(snippets.updatedAt)}`}
+            : ` · last changed ${formatRelative(snippets.updatedAt, viewer.now)}`}
         </p>
       </div>
 
@@ -345,6 +374,7 @@ function TrackingPanel({ result }: { result: SectionResult<AttributionSnippets> 
 
 /** Retention and personal-data rules that apply to attribution exports. */
 function ExportRulesPanel({ result }: { result: SectionResult<AttributionExportRules> | null }) {
+  const viewer = useViewerLocale();
   if (result === null) return null;
   if (result.kind !== "ok") {
     return (
@@ -401,7 +431,7 @@ function ExportRulesPanel({ result }: { result: SectionResult<AttributionExportR
           </p>
         </div>
         <span className="font-data shrink-0 text-sm text-[var(--admin-on-surface)]">
-          {rules.maxRowsPerExport.toLocaleString()}
+          {rules.maxRowsPerExport.toLocaleString(viewer.locale)}
         </span>
       </div>
 

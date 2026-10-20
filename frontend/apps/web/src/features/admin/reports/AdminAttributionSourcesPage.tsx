@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -13,6 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   managePageDescClassName,
   managePageTitleClassName,
@@ -21,13 +22,13 @@ import {
 import { SalesMarketingReportTabs } from "./SalesMarketingReportTabs";
 import { AttributionEmptyState, AttributionErrorState } from "./AttributionStates";
 import {
+  readAttributionBreakdownAddress,
   ATTRIBUTION_DIMENSIONS,
   fetchAttributionBreakdown,
   type AttributionBreakdown,
   type AttributionDimension,
   type AttributionFilters,
   type AttributionGroup,
-  type AttributionPresence,
 } from "./attribution-api";
 import {
   UNATTRIBUTED_LABEL,
@@ -40,13 +41,15 @@ import {
   attributionTableShellClassName,
   dimensionLabel,
   formatRelative,
-  formatRevenue,
+  formatRevenueFor,
   formatShare,
-  formatTimestamp,
+  formatTimestampFor,
   isThinData,
   shareOfTotal,
   THIN_DATA_THRESHOLD,
 } from "./attribution-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider } from "./viewer-time";
 
 /**
  * `/admin/reports/sales-marketing/attribution/sources`.
@@ -98,41 +101,42 @@ function compositionTint(index: number, unattributed: boolean): string {
   return `color-mix(in srgb, var(--admin-primary) ${String(mix)}%, var(--admin-surface))`;
 }
 
-function isPresence(value: string): value is AttributionPresence {
-  return value === "any" || value === "attributed" || value === "none";
+type SourcesPageProps = {
+  /** The breakdown for the address, loaded by the server; the first browser load is skipped when present. */
+  initialBreakdown?: ReportInitialData<AttributionBreakdown> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminAttributionSourcesPage(props: SourcesPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialBreakdown?.loadedAt ?? null}>
+      <AttributionSources {...props} />
+    </RenderedAtProvider>
+  );
 }
 
-function isDimension(value: string): value is AttributionDimension {
-  return (ATTRIBUTION_DIMENSIONS as readonly string[]).includes(value);
-}
-
-export function AdminAttributionSourcesPage() {
+function AttributionSources({ initialBreakdown }: SourcesPageProps) {
   const searchParams = useSearchParams();
 
-  const [dimension, setDimension] = useState<AttributionDimension>(() => {
-    const value = searchParams.get("dimension") ?? "source";
-    return isDimension(value) ? value : "source";
-  });
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialBreakdown ?? null);
+  const [dimension, setDimension] = useState<AttributionDimension>(
+    () => readAttributionBreakdownAddress((name) => searchParams.get(name)).dimension,
+  );
 
   // Filters ride in from the log, so the breakdown describes the same events
   // the operator was looking at rather than silently widening to everything.
-  const filters: AttributionFilters = useMemo(() => {
-    const attribution = searchParams.get("attribution") ?? "";
-    const eventType = searchParams.get("eventType") ?? "";
-    const q = searchParams.get("q") ?? "";
-    const from = searchParams.get("from") ?? "";
-    const to = searchParams.get("to") ?? "";
-    return {
-      ...(q ? { q } : {}),
-      ...(eventType ? { eventType } : {}),
-      ...(isPresence(attribution) && attribution !== "any" ? { attribution } : {}),
-      ...(from ? { from } : {}),
-      ...(to ? { to } : {}),
-    };
-  }, [searchParams]);
+  // Read the way the server reads them, so its load is this page's first.
+  const filters: AttributionFilters = useMemo(
+    () => readAttributionBreakdownAddress((name) => searchParams.get(name)).filters,
+    [searchParams],
+  );
 
-  const [data, setData] = useState<AttributionBreakdown | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AttributionBreakdown | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -166,9 +170,14 @@ export function AdminAttributionSourcesPage() {
     [],
   );
 
-  useEffect(() => {
-    void load(filters, dimension, "initial");
-  }, [load, filters, dimension]);
+  // A soft load is the screen's own in-place refresh.
+  const loadForAxis = useCallback(
+    (options?: { soft?: boolean }) =>
+      load(filters, dimension, options?.soft === true ? "refresh" : "initial"),
+    [load, filters, dimension],
+  );
+
+  useReportLoad(loadForAxis, initial);
 
   function exportBreakdown() {
     if (data === null) return;
@@ -290,6 +299,8 @@ function BreakdownBody({
   data: AttributionBreakdown;
   filters: AttributionFilters;
 }) {
+  const viewer = useViewerLocale();
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const thin = isThinData(data.totalEvents);
 
   return (
@@ -310,7 +321,7 @@ function BreakdownBody({
             {/* The shares below are arithmetic, not evidence. Saying so is the
                 difference between a caveat and a decision made on nine events. */}
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-              {data.totalEvents.toLocaleString()} matching{" "}
+              {data.totalEvents.toLocaleString(viewer.locale)} matching{" "}
               {data.totalEvents === 1 ? "event" : "events"} — under {THIN_DATA_THRESHOLD}, a single
               new event can move every share below by several points. The counts are exact; the
               ranking is not yet meaningful.
@@ -332,7 +343,7 @@ function BreakdownBody({
             {/* Amounts with no currency cannot join any total, so without this
                 they would simply be missing from every revenue figure. */}
             <span className="font-semibold text-[var(--admin-on-surface)]">
-              {data.revenueWithoutCurrency.toLocaleString()}
+              {data.revenueWithoutCurrency.toLocaleString(viewer.locale)}
             </span>{" "}
             {data.revenueWithoutCurrency === 1 ? "event carries" : "events carry"} a revenue amount
             with no currency recorded. Those amounts are counted below but cannot be added to any
@@ -409,7 +420,8 @@ function BreakdownBody({
             {data.truncated ? (
               <p className="border-t border-[var(--admin-border)] px-5 py-3 text-sm font-semibold text-[var(--admin-warning)]">
                 {/* Never let a capped list read as the whole axis. */}
-                Showing the top {data.groups.length} of {data.groupTotal.toLocaleString()} distinct{" "}
+                Showing the top {data.groups.length} of{" "}
+                {data.groupTotal.toLocaleString(viewer.locale)} distinct{" "}
                 {dimensionLabel(data.dimension).toLowerCase()} values.
               </p>
             ) : null}
@@ -443,6 +455,7 @@ function SignalCard({
   value: number;
   tone?: "warning" | undefined;
 }) {
+  const viewer = useViewerLocale();
   return (
     <div className={attributionSignalCardClassName}>
       <span className={attributionSignalLabelClassName}>{label}</span>
@@ -451,13 +464,14 @@ function SignalCard({
           tone === "warning" ? "text-[var(--admin-warning)]" : ""
         }`}
       >
-        {value.toLocaleString()}
+        {value.toLocaleString(viewer.locale)}
       </span>
     </div>
   );
 }
 
 function CompositionBar({ data }: { data: AttributionBreakdown }) {
+  const viewer = useViewerLocale();
   const shown = data.groups.slice(0, 8);
   return (
     <div className="mt-3 space-y-2">
@@ -476,7 +490,7 @@ function CompositionBar({ data }: { data: AttributionBreakdown }) {
                 width: `${String(share)}%`,
                 backgroundColor: compositionTint(index, group.value === null),
               }}
-              title={`${group.value ?? UNATTRIBUTED_LABEL}: ${group.events.toLocaleString()}`}
+              title={`${group.value ?? UNATTRIBUTED_LABEL}: ${group.events.toLocaleString(viewer.locale)}`}
             />
           );
         })}
@@ -518,6 +532,9 @@ function GroupRow({
   totalEvents: number;
   filters: AttributionFilters;
 }) {
+  const viewer = useViewerLocale();
+  const formatRevenue = withViewer(formatRevenueFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const unattributed = group.value === null;
   const share = shareOfTotal(group.events, totalEvents);
 
@@ -550,7 +567,7 @@ function GroupRow({
         )}
       </td>
       <td className="font-data whitespace-nowrap px-4 py-2.5 text-right text-sm tabular-nums text-[var(--admin-on-surface)]">
-        {group.events.toLocaleString()}
+        {group.events.toLocaleString(viewer.locale)}
       </td>
       <td className="px-4 py-2.5">
         <div className="flex items-center justify-end gap-2">
@@ -569,7 +586,7 @@ function GroupRow({
         </div>
       </td>
       <td className="font-data whitespace-nowrap px-4 py-2.5 text-right text-sm tabular-nums text-[var(--admin-on-surface)]">
-        {group.revenueEvents.toLocaleString()}
+        {group.revenueEvents.toLocaleString(viewer.locale)}
       </td>
       <td className="px-4 py-2.5 text-right">
         {group.revenueByCurrency.length === 0 && group.revenueWithoutCurrency === 0 ? (
@@ -598,7 +615,7 @@ function GroupRow({
         {formatTimestamp(group.firstSeen)}
       </td>
       <td className="font-data whitespace-nowrap px-4 py-2.5 text-right text-sm text-[var(--admin-on-surface-variant)]">
-        {formatRelative(group.lastSeen)}
+        {formatRelative(group.lastSeen, viewer.now)}
       </td>
       <td className="whitespace-nowrap px-4 py-2.5 text-right">
         <Link
@@ -614,6 +631,7 @@ function GroupRow({
 }
 
 function SourceMediumMatrix({ matrix }: { matrix: AttributionBreakdown["matrix"] }) {
+  const viewer = useViewerLocale();
   const lookup = new Map(
     matrix.cells.map((cell) => [`${cell.source ?? " null"}|${cell.medium ?? " null"}`, cell.events]),
   );
@@ -696,14 +714,14 @@ function SourceMediumMatrix({ matrix }: { matrix: AttributionBreakdown["matrix"]
                         <span className="text-[var(--admin-on-surface-variant)]">—</span>
                       ) : (
                         <span className="text-[var(--admin-on-surface)]">
-                          {events.toLocaleString()}
+                          {events.toLocaleString(viewer.locale)}
                         </span>
                       )}
                     </td>
                   );
                 })}
                 <td className="font-data border-l border-[var(--admin-border)] py-2 pl-2 text-right text-sm font-semibold tabular-nums text-[var(--admin-on-surface)]">
-                  {rowTotal(source).toLocaleString()}
+                  {rowTotal(source).toLocaleString(viewer.locale)}
                 </td>
               </tr>
             ))}

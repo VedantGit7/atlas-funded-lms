@@ -14,6 +14,9 @@ export type AttributionPresence = (typeof ATTRIBUTION_PRESENCE)[number];
 
 export const ATTRIBUTION_PAGE_SIZE = 50;
 
+/** The window, in days, the health, anomalies and unattributed screens open on. */
+export const ATTRIBUTION_DEFAULT_WINDOW_DAYS = 30;
+
 export type AttributionEvent = {
   id: string;
   eventType: string;
@@ -90,17 +93,22 @@ function toParams(filters: AttributionFilters): URLSearchParams {
   return params;
 }
 
-export async function fetchAttributionEvents(
-  filters: AttributionFilters,
-  cursor?: string,
-): Promise<{ items: AttributionEvent[]; pageInfo: AttributionPageInfo }> {
+export type AttributionEventsPage = { items: AttributionEvent[]; pageInfo: AttributionPageInfo };
+
+export function attributionEventsPath(filters: AttributionFilters, cursor?: string): string {
   const params = toParams(filters);
   params.set("limit", String(ATTRIBUTION_PAGE_SIZE));
   if (cursor) params.set("cursor", cursor);
+  return `/api/v1/sales/attribution?${params.toString()}`;
+}
 
-  const response = await clientApi.get<{
-    data: { items: AttributionEvent[]; pageInfo: AttributionPageInfo };
-  }>(`/api/v1/sales/attribution?${params.toString()}`);
+export async function fetchAttributionEvents(
+  filters: AttributionFilters,
+  cursor?: string,
+): Promise<AttributionEventsPage> {
+  const response = await clientApi.get<{ data: AttributionEventsPage }>(
+    attributionEventsPath(filters, cursor),
+  );
   return response.data;
 }
 
@@ -112,14 +120,95 @@ export async function fetchAttributionEvents(
  * A signal band derived in the browser can only ever describe the first page,
  * which is how a broken tracking link goes unnoticed.
  */
+export function attributionSummaryPath(filters: AttributionFilters): string {
+  const query = toParams(filters).toString();
+  return query ? `/api/v1/sales/attribution/summary?${query}` : "/api/v1/sales/attribution/summary";
+}
+
 export async function fetchAttributionSummary(
   filters: AttributionFilters,
 ): Promise<AttributionSummary> {
-  const query = toParams(filters).toString();
   const response = await clientApi.get<{ data: AttributionSummary }>(
-    query ? `/api/v1/sales/attribution/summary?${query}` : "/api/v1/sales/attribution/summary",
+    attributionSummaryPath(filters),
   );
   return response.data;
+}
+
+/** The log's first page and its totals, which the log loads together. */
+export type AttributionLog = { page: AttributionEventsPage; summary: AttributionSummary };
+
+function isPresence(value: string): value is AttributionPresence {
+  return value === "any" || value === "attributed" || value === "none";
+}
+
+/** The log's filter fields as it seeds them from the address. */
+export type AttributionLogFields = {
+  query: string;
+  eventType: string;
+  attribution: AttributionPresence;
+  /** Date inputs (YYYY-MM-DD), which the page turns into the viewer's own midnights. */
+  fromDate: string;
+  toDate: string;
+  axis: {
+    source: string;
+    medium: string;
+    campaign: string;
+    sourceUnset: boolean;
+    mediumUnset: boolean;
+    campaignUnset: boolean;
+  };
+};
+
+/**
+ * Reads the log's filters from the address, the way a breakdown row links
+ * here. Shared by the page and its server load, so both describe the same
+ * events.
+ */
+export function readAttributionLogFields(
+  get: (name: string) => string | null,
+): AttributionLogFields {
+  const attribution = get("attribution") ?? "any";
+  return {
+    query: get("q") ?? "",
+    eventType: get("eventType") ?? "",
+    attribution: attribution === "attributed" || attribution === "none" ? attribution : "any",
+    fromDate: get("from")?.slice(0, 10) ?? "",
+    toDate: get("to")?.slice(0, 10) ?? "",
+    axis: {
+      source: get("utmSource") ?? "",
+      medium: get("utmMedium") ?? "",
+      campaign: get("utmCampaign") ?? "",
+      sourceUnset: get("utmSourceUnset") === "true",
+      mediumUnset: get("utmMediumUnset") === "true",
+      campaignUnset: get("utmCampaignUnset") === "true",
+    },
+  };
+}
+
+/**
+ * The filters the log loads for its fields. The date bounds are passed in
+ * already converted, because they are the viewer's own midnights.
+ */
+export function attributionLogFilters(
+  fields: Omit<AttributionLogFields, "fromDate" | "toDate">,
+  from: string | undefined,
+  to: string | undefined,
+): AttributionFilters {
+  // Absent bounds are absent keys, not explicit undefined: the client turns
+  // this object straight into query parameters.
+  return {
+    ...(fields.query.trim() ? { q: fields.query.trim() } : {}),
+    ...(fields.eventType ? { eventType: fields.eventType } : {}),
+    ...(fields.attribution !== "any" ? { attribution: fields.attribution } : {}),
+    ...(from === undefined ? {} : { from }),
+    ...(to === undefined ? {} : { to }),
+    ...(fields.axis.source ? { utmSource: fields.axis.source } : {}),
+    ...(fields.axis.medium ? { utmMedium: fields.axis.medium } : {}),
+    ...(fields.axis.campaign ? { utmCampaign: fields.axis.campaign } : {}),
+    ...(fields.axis.sourceUnset ? { utmSourceUnset: true } : {}),
+    ...(fields.axis.mediumUnset ? { utmMediumUnset: true } : {}),
+    ...(fields.axis.campaignUnset ? { utmCampaignUnset: true } : {}),
+  };
 }
 
 export type AttributionEventDetail = AttributionEvent & {
@@ -137,9 +226,13 @@ export type AttributionEventDetail = AttributionEvent & {
  * the beacon attached and the time the server recorded the row, neither of
  * which the list returns.
  */
+export function attributionEventPath(eventId: string): string {
+  return `/api/v1/sales/attribution/${encodeURIComponent(eventId)}`;
+}
+
 export async function fetchAttributionEvent(eventId: string): Promise<AttributionEventDetail> {
   const response = await clientApi.get<{ data: AttributionEventDetail }>(
-    `/api/v1/sales/attribution/${encodeURIComponent(eventId)}`,
+    attributionEventPath(eventId),
   );
   return response.data;
 }
@@ -218,16 +311,53 @@ export type AttributionBreakdown = {
  * as the operator scrolls. This is one server-side scan, so the ranking is the
  * ranking.
  */
+export function attributionBreakdownPath(
+  filters: AttributionFilters,
+  dimension: AttributionDimension,
+): string {
+  const params = toParams(filters);
+  params.set("dimension", dimension);
+  return `/api/v1/sales/attribution/breakdown?${params.toString()}`;
+}
+
 export async function fetchAttributionBreakdown(
   filters: AttributionFilters,
   dimension: AttributionDimension,
 ): Promise<AttributionBreakdown> {
-  const params = toParams(filters);
-  params.set("dimension", dimension);
   const response = await clientApi.get<{ data: AttributionBreakdown }>(
-    `/api/v1/sales/attribution/breakdown?${params.toString()}`,
+    attributionBreakdownPath(filters, dimension),
   );
   return response.data;
+}
+
+function isDimension(value: string): value is AttributionDimension {
+  return (ATTRIBUTION_DIMENSIONS as readonly string[]).includes(value);
+}
+
+/**
+ * Reads the breakdown's axis and filters from the address, the way the log
+ * links here. Shared by the page and its server load.
+ */
+export function readAttributionBreakdownAddress(get: (name: string) => string | null): {
+  dimension: AttributionDimension;
+  filters: AttributionFilters;
+} {
+  const dimension = get("dimension") ?? "source";
+  const attribution = get("attribution") ?? "";
+  const eventType = get("eventType") ?? "";
+  const q = get("q") ?? "";
+  const from = get("from") ?? "";
+  const to = get("to") ?? "";
+  return {
+    dimension: isDimension(dimension) ? dimension : "source",
+    filters: {
+      ...(q ? { q } : {}),
+      ...(eventType ? { eventType } : {}),
+      ...(isPresence(attribution) && attribution !== "any" ? { attribution } : {}),
+      ...(from ? { from } : {}),
+      ...(to ? { to } : {}),
+    },
+  };
 }
 
 export type AttributionHealthDay = {
@@ -260,11 +390,13 @@ export type AttributionHealth = {
  * a beacon that stopped days ago — 60,000 events look identical whether the
  * newest arrived this morning or last month.
  */
-export async function fetchAttributionHealth(days: number): Promise<AttributionHealth> {
+export function attributionHealthPath(days: number): string {
   const params = new URLSearchParams({ days: String(days) });
-  const response = await clientApi.get<{ data: AttributionHealth }>(
-    `/api/v1/sales/attribution/health?${params.toString()}`,
-  );
+  return `/api/v1/sales/attribution/health?${params.toString()}`;
+}
+
+export async function fetchAttributionHealth(days: number): Promise<AttributionHealth> {
+  const response = await clientApi.get<{ data: AttributionHealth }>(attributionHealthPath(days));
   return response.data;
 }
 
@@ -304,10 +436,14 @@ export type AttributionAnomalies = {
  * The health screen counts some of these faults. A count says something is
  * wrong; only a list says which events to look at.
  */
-export async function fetchAttributionAnomalies(days: number): Promise<AttributionAnomalies> {
+export function attributionAnomaliesPath(days: number): string {
   const params = new URLSearchParams({ days: String(days) });
+  return `/api/v1/sales/attribution/anomalies?${params.toString()}`;
+}
+
+export async function fetchAttributionAnomalies(days: number): Promise<AttributionAnomalies> {
   const response = await clientApi.get<{ data: AttributionAnomalies }>(
-    `/api/v1/sales/attribution/anomalies?${params.toString()}`,
+    attributionAnomaliesPath(days),
   );
   return response.data;
 }
@@ -345,10 +481,12 @@ export type AttributionGaps = {
  * Scanned across the window rather than over a loaded page: a share of "the
  * loaded events" is a number about the screen, not about the academy.
  */
-export async function fetchAttributionGaps(days: number): Promise<AttributionGaps> {
+export function attributionGapsPath(days: number): string {
   const params = new URLSearchParams({ days: String(days) });
-  const response = await clientApi.get<{ data: AttributionGaps }>(
-    `/api/v1/sales/attribution/unattributed?${params.toString()}`,
-  );
+  return `/api/v1/sales/attribution/unattributed?${params.toString()}`;
+}
+
+export async function fetchAttributionGaps(days: number): Promise<AttributionGaps> {
+  const response = await clientApi.get<{ data: AttributionGaps }>(attributionGapsPath(days));
   return response.data;
 }

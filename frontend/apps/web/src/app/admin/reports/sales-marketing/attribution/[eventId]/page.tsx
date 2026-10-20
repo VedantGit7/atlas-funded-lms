@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminAttributionEventDetailPage } from "../../../../../../features/admin/reports/AdminAttributionEventDetailPage";
+import { loadAttributionEventData } from "../../../../../../lib/server/report-attribution-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -27,7 +28,10 @@ export default async function AdminAttributionEventRoute({
     notFound();
   }
 
-  const gate = await runTenantStateGate();
+  const [gate, initialEvent] = await Promise.all([
+    runTenantStateGate(),
+    loadAttributionEventData(eventId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -41,7 +45,7 @@ export default async function AdminAttributionEventRoute({
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Attribution event">
-      <AdminAttributionEventDetailPage eventId={eventId} />
+      <AdminAttributionEventDetailPage eventId={eventId} initialEvent={initialEvent} />
     </AdminPageGate>
   );
 }

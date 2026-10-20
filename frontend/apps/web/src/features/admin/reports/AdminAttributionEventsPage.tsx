@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -34,6 +35,9 @@ import {
   AttributionSkeleton,
 } from "./AttributionStates";
 import {
+  attributionLogFilters,
+  readAttributionLogFields,
+  type AttributionLog,
   ATTRIBUTION_PAGE_SIZE,
   fetchAttributionEvents,
   fetchAttributionSummary,
@@ -58,12 +62,14 @@ import {
   dateInputToIso,
   eventTypeChipClassName,
   fallbackAttributionLabel,
-  formatRevenue,
-  formatTimestamp,
+  formatRevenueFor,
+  formatTimestampFor,
   isAttributed,
   looksLikeBrokenTracking,
   sourceMediumLabel,
 } from "./attribution-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 /**
  * `/admin/reports/sales-marketing/attribution`.
@@ -128,12 +134,24 @@ const ATTRIBUTION_FILTERS: Array<{ value: AttributionPresence; label: string }> 
   { value: "none", label: "No UTM at all" },
 ];
 
-export function AdminAttributionEventsPage() {
-  const [events, setEvents] = useState<AttributionEvent[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [summary, setSummary] = useState<AttributionSummary | null>(null);
+export function AdminAttributionEventsPage({
+  initialLog,
+}: {
+  /** The first page and totals for the filters in the address, loaded by the server; the first browser load is skipped when present. */
+  initialLog?: ReportInitialData<AttributionLog> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatRevenue = withViewer(formatRevenueFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialLog ?? null);
+  const [events, setEvents] = useState<AttributionEvent[]>(initial?.data.page.items ?? []);
+  const [nextCursor, setNextCursor] = useState<string | null>(
+    initial?.data.page.pageInfo.nextCursor ?? null,
+  );
+  const [summary, setSummary] = useState<AttributionSummary | null>(initial?.data.summary ?? null);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,24 +159,16 @@ export function AdminAttributionEventsPage() {
   // Seeded from the URL. A breakdown row links here with an exact axis
   // narrowing, and a screen that ignored it would open the whole log while
   // claiming to show one campaign's events.
+  // Read the way the server reads them, so its load is this page's first.
   const searchParams = useSearchParams();
-  const [searchInput, setSearchInput] = useState(() => searchParams.get("q") ?? "");
-  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
-  const [eventType, setEventType] = useState(() => searchParams.get("eventType") ?? "");
-  const [attribution, setAttribution] = useState<AttributionPresence>(() => {
-    const value = searchParams.get("attribution") ?? "any";
-    return value === "attributed" || value === "none" ? value : "any";
-  });
-  const [fromDate, setFromDate] = useState(() => searchParams.get("from")?.slice(0, 10) ?? "");
-  const [toDate, setToDate] = useState(() => searchParams.get("to")?.slice(0, 10) ?? "");
-  const [axis, setAxis] = useState<AxisFilter>(() => ({
-    source: searchParams.get("utmSource") ?? "",
-    medium: searchParams.get("utmMedium") ?? "",
-    campaign: searchParams.get("utmCampaign") ?? "",
-    sourceUnset: searchParams.get("utmSourceUnset") === "true",
-    mediumUnset: searchParams.get("utmMediumUnset") === "true",
-    campaignUnset: searchParams.get("utmCampaignUnset") === "true",
-  }));
+  const [seed] = useState(() => readAttributionLogFields((name) => searchParams.get(name)));
+  const [searchInput, setSearchInput] = useState(seed.query);
+  const [query, setQuery] = useState(seed.query);
+  const [eventType, setEventType] = useState(seed.eventType);
+  const [attribution, setAttribution] = useState<AttributionPresence>(seed.attribution);
+  const [fromDate, setFromDate] = useState(seed.fromDate);
+  const [toDate, setToDate] = useState(seed.toDate);
+  const [axis, setAxis] = useState<AxisFilter>(seed.axis);
   const [eventTypeOpen, setEventTypeOpen] = useState(false);
   const [attributionOpen, setAttributionOpen] = useState(false);
 
@@ -173,25 +183,15 @@ export function AdminAttributionEventsPage() {
     };
   }, [searchInput]);
 
-  const filters: AttributionFilters = useMemo(() => {
-    // Absent bounds are absent keys, not explicit undefined: the client turns
-    // this object straight into query parameters.
-    const from = dateInputToIso(fromDate, "start");
-    const to = dateInputToIso(toDate, "end");
-    return {
-      ...(query.trim() ? { q: query.trim() } : {}),
-      ...(eventType ? { eventType } : {}),
-      ...(attribution !== "any" ? { attribution } : {}),
-      ...(from === undefined ? {} : { from }),
-      ...(to === undefined ? {} : { to }),
-      ...(axis.source ? { utmSource: axis.source } : {}),
-      ...(axis.medium ? { utmMedium: axis.medium } : {}),
-      ...(axis.campaign ? { utmCampaign: axis.campaign } : {}),
-      ...(axis.sourceUnset ? { utmSourceUnset: true } : {}),
-      ...(axis.mediumUnset ? { utmMediumUnset: true } : {}),
-      ...(axis.campaignUnset ? { utmCampaignUnset: true } : {}),
-    };
-  }, [query, eventType, attribution, fromDate, toDate, axis]);
+  const filters: AttributionFilters = useMemo(
+    () =>
+      attributionLogFilters(
+        { query, eventType, attribution, axis },
+        dateInputToIso(fromDate, "start"),
+        dateInputToIso(toDate, "end"),
+      ),
+    [query, eventType, attribution, fromDate, toDate, axis],
+  );
 
   const requestId = useRef(0);
 
@@ -226,9 +226,13 @@ export function AdminAttributionEventsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load(filters, "initial");
-  }, [load, filters]);
+  // A soft load is the log's own in-place refresh.
+  const loadForFilters = useCallback(
+    (options?: { soft?: boolean }) => load(filters, options?.soft === true ? "refresh" : "initial"),
+    [load, filters],
+  );
+
+  useReportLoad(loadForFilters, initial);
 
   async function loadMore() {
     if (nextCursor === null) return;
@@ -430,7 +434,7 @@ export function AdminAttributionEventsPage() {
             {loading ? (
               <span className="inline-block h-7 w-20 rounded bg-[var(--admin-surface-high)] align-middle motion-safe:animate-pulse" />
             ) : (
-              (summary?.total ?? 0).toLocaleString()
+              (summary?.total ?? 0).toLocaleString(viewer.locale)
             )}
           </span>
           <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
@@ -449,7 +453,7 @@ export function AdminAttributionEventsPage() {
             {percent === null ? "—" : `${String(percent)}%`}
           </span>
           <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-            {summary === null ? "—" : `${summary.attributed.toLocaleString()} events`}
+            {summary === null ? "—" : `${summary.attributed.toLocaleString(viewer.locale)} events`}
           </p>
         </div>
 
@@ -460,7 +464,7 @@ export function AdminAttributionEventsPage() {
               summary !== null && summary.noUtm > 0 ? "text-[var(--admin-warning)]" : ""
             }`}
           >
-            {summary === null ? "—" : summary.noUtm.toLocaleString()}
+            {summary === null ? "—" : summary.noUtm.toLocaleString(viewer.locale)}
           </span>
           <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
             includes genuine direct traffic
@@ -470,7 +474,7 @@ export function AdminAttributionEventsPage() {
         <div className={attributionSignalCardClassName}>
           <span className={attributionSignalLabelClassName}>Revenue events</span>
           <span className={attributionSignalValueClassName}>
-            {summary === null ? "—" : summary.revenueEvents.toLocaleString()}
+            {summary === null ? "—" : summary.revenueEvents.toLocaleString(viewer.locale)}
           </span>
           <div className="mt-1 flex flex-wrap gap-x-3 text-xs text-[var(--admin-on-surface-variant)]">
             {/* One figure per currency, never a grand total. */}
@@ -564,7 +568,7 @@ export function AdminAttributionEventsPage() {
                 >
                   <span className="font-data">{entry.eventType}</span>
                   <span className="text-xs text-[var(--admin-on-surface-variant)]">
-                    {entry.total.toLocaleString()}
+                    {entry.total.toLocaleString(viewer.locale)}
                   </span>
                 </button>
               ))}
@@ -755,8 +759,8 @@ export function AdminAttributionEventsPage() {
           </div>
 
           <p className="text-xs text-[var(--admin-on-surface-variant)]">
-            Showing {events.length.toLocaleString()} of{" "}
-            {(summary?.total ?? events.length).toLocaleString()} matching events.
+            Showing {events.length.toLocaleString(viewer.locale)} of{" "}
+            {(summary?.total ?? events.length).toLocaleString(viewer.locale)} matching events.
           </p>
         </>
       )}
@@ -765,6 +769,9 @@ export function AdminAttributionEventsPage() {
 }
 
 function AttributionRow({ event }: { event: AttributionEvent }) {
+  const viewer = useViewerLocale();
+  const formatRevenue = withViewer(formatRevenueFor, viewer);
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const attributed = isAttributed(event);
   const fallback = fallbackAttributionLabel(event);
   const hasRevenue = event.revenueCents !== null;
