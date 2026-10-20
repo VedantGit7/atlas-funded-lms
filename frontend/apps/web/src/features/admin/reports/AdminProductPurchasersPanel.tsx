@@ -18,7 +18,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  SALES_PURCHASERS_DEFAULTS,
   createSalesMarketingGroup,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -31,6 +33,8 @@ import {
   type SalesPurchasersList,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -39,19 +43,16 @@ function defined<T>(value: T, message = "Expected value to be defined"): NonNull
   return value;
 }
 
-type Props = { courseId: string };
+type Props = {
+  courseId: string;
+  /** The first page, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<SalesPurchasersList> | null | undefined;
+};
 
 type CohortTab = "group" | "message";
 type MembershipMode = "static" | "live";
 
-const DEFAULT_COLUMNS: SalesPurchaserColumnKey[] = [
-  "learner_name",
-  "amount_cents",
-  "enrolled_type",
-  "coupon_code",
-  "payment_order_id",
-  "purchased_at",
-];
+const DEFAULT_COLUMNS: SalesPurchaserColumnKey[] = [...SALES_PURCHASERS_DEFAULTS.columns];
 
 const ENROLLED_TYPE_OPTIONS = [
   { value: "", label: "All" },
@@ -59,8 +60,8 @@ const ENROLLED_TYPE_OPTIONS = [
   { value: "trial", label: "Trial" },
 ];
 
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -75,25 +76,26 @@ function initials(name: string | null, email: string | null): string {
   return source.slice(0, 2).toUpperCase();
 }
 
-function formatRelativeTime(iso: string): string {
+function formatRelativeTimeFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  const diffMs = date.getTime() - Date.now();
+  const diffMs = date.getTime() - viewer.now;
   const absMs = Math.abs(diffMs);
   const minutes = Math.round(absMs / 60_000);
   const hours = Math.round(absMs / 3_600_000);
   const days = Math.round(absMs / 86_400_000);
-  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat(viewer.locale, { numeric: "auto" });
   if (minutes < 60) return rtf.format(Math.sign(diffMs) * Math.max(1, minutes), "minute");
   if (hours < 48) return rtf.format(Math.sign(diffMs) * hours, "hour");
   if (days < 60) return rtf.format(Math.sign(diffMs) * days, "day");
   return rtf.format(Math.sign(diffMs) * Math.round(days / 30), "month");
 }
 
-function formatAbsoluteDateTime(iso: string): string {
+function formatAbsoluteDateTimeFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -221,11 +223,29 @@ function PurchasersSkeleton() {
   );
 }
 
-export function AdminProductPurchasersPanel({ courseId }: Props) {
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminProductPurchasersPanel(props: Props) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <ProductPurchasers {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ProductPurchasers({ courseId, initialData }: Props) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatRelativeTime = withViewer(formatRelativeTimeFor, viewer);
+  const formatAbsoluteDateTime = withViewer(formatAbsoluteDateTimeFor, viewer);
   const columnsPanelId = useId();
   const columnsRef = useRef<HTMLDivElement>(null);
-  const [payload, setPayload] = useState<SalesPurchasersList | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const [payload, setPayload] = useState<SalesPurchasersList | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -254,37 +274,39 @@ export function AdminProductPurchasersPanel({ courseId }: Props) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchSalesPurchasers(courseId, {
-        q: searchQ.trim() || undefined,
-        enrolledType: enrolledType || undefined,
-        purchasedFrom: dateInputToStartIso(purchasedFrom),
-        purchasedTo: dateInputToEndIso(purchasedTo),
-        columns,
-        page,
-        limit: 25,
-      });
-      setPayload(response.data);
-    } catch (loadError) {
-      setPayload(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchSalesPurchasers(courseId, {
+          q: searchQ.trim() || undefined,
+          enrolledType: enrolledType || undefined,
+          purchasedFrom: dateInputToStartIso(purchasedFrom),
+          purchasedTo: dateInputToEndIso(purchasedTo),
+          columns,
+          page,
+          limit: 25,
+        });
+        setPayload(response.data);
+      } catch (loadError) {
+        setPayload(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load purchaser data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [columns, courseId, enrolledType, page, purchasedFrom, purchasedTo, searchQ]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load purchaser data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [columns, courseId, enrolledType, page, purchasedFrom, purchasedTo, searchQ],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (!columnsOpen) return;
@@ -737,19 +759,19 @@ export function AdminProductPurchasersPanel({ courseId }: Props) {
             <div className="bg-[var(--admin-surface)] p-4">
               <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Purchasers</p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
-                {payload.purchaserCount.toLocaleString()}
+                {payload.purchaserCount.toLocaleString(viewer.locale)}
               </p>
             </div>
             <div className="bg-[var(--admin-surface)] p-4">
               <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Paid</p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-on-surface)]">
-                {payload.paidLearnerCount.toLocaleString()}
+                {payload.paidLearnerCount.toLocaleString(viewer.locale)}
               </p>
             </div>
             <div className="bg-[var(--admin-surface)] p-4">
               <p className="mb-1 text-xs text-[var(--admin-on-surface-variant)]">Trial</p>
               <p className="font-mono text-2xl font-semibold text-[var(--admin-warning)]">
-                {payload.trialLearnerCount.toLocaleString()}
+                {payload.trialLearnerCount.toLocaleString(viewer.locale)}
               </p>
             </div>
             <div className="col-span-2 bg-[var(--admin-surface)] p-4 sm:col-span-1 lg:col-span-1">
@@ -761,7 +783,7 @@ export function AdminProductPurchasersPanel({ courseId }: Props) {
                 </span>
               </p>
               <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                Discounted orders {payload.discountedOrderCount.toLocaleString()}
+                Discounted orders {payload.discountedOrderCount.toLocaleString(viewer.locale)}
                 <span className="ml-1">({payload.discountedOrderPercent}% used a coupon)</span>
               </p>
             </div>
@@ -1117,7 +1139,7 @@ export function AdminProductPurchasersPanel({ courseId }: Props) {
                   id="cohort-drawer-title"
                   className="font-mono text-lg font-semibold tracking-tight text-[var(--admin-on-surface)]"
                 >
-                  {matchCount.toLocaleString()} purchasers match the current filters
+                  {matchCount.toLocaleString(viewer.locale)} purchasers match the current filters
                 </h2>
                 {filterChips.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1298,7 +1320,9 @@ export function AdminProductPurchasersPanel({ courseId }: Props) {
                   disabled={busy || !groupName.trim() || membershipMode === "live"}
                   onClick={() => void handleCreateGroup()}
                 >
-                  {busy ? "Creating…" : `Create group with ${matchCount.toLocaleString()} learners`}
+                  {busy
+                    ? "Creating…"
+                    : `Create group with ${matchCount.toLocaleString(viewer.locale)} learners`}
                 </button>
               ) : (
                 <button
@@ -1307,7 +1331,9 @@ export function AdminProductPurchasersPanel({ courseId }: Props) {
                   disabled={busy || !messageSubject.trim() || !messageBody.trim()}
                   onClick={() => void handleSendMessage()}
                 >
-                  {busy ? "Sending…" : `Send to ${matchCount.toLocaleString()} learners`}
+                  {busy
+                    ? "Sending…"
+                    : `Send to ${matchCount.toLocaleString(viewer.locale)} learners`}
                 </button>
               )}
             </div>

@@ -535,14 +535,112 @@ export type SalesMarketingOverviewFilters = {
   grain?: SalesMarketingOverviewGrain | undefined;
 };
 
+/** Date inputs (YYYY-MM-DD) from `days` days before `now` to `now`, in UTC. */
+export function salesMarketingRangeBefore(
+  days: number,
+  now: Date = new Date(),
+): { from: string; to: string } {
+  const from = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  return { from: from.toISOString().slice(0, 10), to: now.toISOString().slice(0, 10) };
+}
+
 /** The overview's default date inputs (YYYY-MM-DD): the 36 days up to `now`, in UTC. */
 export function salesMarketingOverviewDefaultRange(now: Date = new Date()): {
   from: string;
   to: string;
 } {
-  const from = new Date(now.getTime() - 36 * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: now.toISOString().slice(0, 10) };
+  return salesMarketingRangeBefore(36, now);
 }
+
+/*
+ * What each panel and detail page opens on. The server loads the first page
+ * with the same values, so the page can skip its first browser load. Ranges
+ * are the days up to today.
+ */
+
+export const SALES_PRODUCTS_DEFAULTS = {
+  rangeDays: 30,
+  sortBy: "revenue_cents",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const satisfies {
+  rangeDays: number;
+  sortBy: SalesProductsSortBy;
+  sortDir: "asc" | "desc";
+  page: number;
+  limit: number;
+};
+
+export const SALES_COUPONS_DEFAULTS = {
+  view: "all",
+  sortBy: "revenue_cents",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const satisfies {
+  view: CouponsListView;
+  sortBy: CouponsListSortBy;
+  sortDir: "asc" | "desc";
+  page: number;
+  limit: number;
+};
+
+export const REFERRAL_WALLET_DEFAULTS = {
+  rangeDays: 30,
+  sortBy: "successful_referrals",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const;
+
+export const AFFILIATE_PRODUCTS_DEFAULTS = {
+  rangeDays: 30,
+  enabled: "all",
+  commissionBand: "any",
+  sortBy: "revenue_cents",
+  sortDir: "desc",
+  page: 1,
+  limit: 50,
+} as const;
+
+/** The affiliates panel opens on every affiliate, in the server's own order. */
+export const AFFILIATES_DEFAULTS = {
+  rangeDays: 30,
+  view: "all",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const;
+
+export const SALES_PURCHASERS_DEFAULTS = {
+  columns: [
+    "learner_name",
+    "amount_cents",
+    "enrolled_type",
+    "coupon_code",
+    "payment_order_id",
+    "purchased_at",
+  ],
+  page: 1,
+  limit: 25,
+} as const satisfies {
+  columns: readonly SalesPurchaserColumnKey[];
+  page: number;
+  limit: number;
+};
+
+export const COUPON_REDEMPTIONS_DEFAULTS = {
+  sortBy: "applied_at",
+  sortDir: "desc",
+  page: 1,
+  limit: 25,
+} as const satisfies {
+  sortBy: CouponRedemptionsSortBy;
+  sortDir: "asc" | "desc";
+  page: number;
+  limit: number;
+};
 
 /** What the overview opens on, besides its range; the server loads the first one with it too. */
 export const SALES_MARKETING_OVERVIEW_DEFAULTS = {
@@ -566,7 +664,7 @@ export async function fetchSalesMarketingOverview(filters: SalesMarketingOvervie
   return clientApi.get<{ data: SalesMarketingOverview }>(salesMarketingOverviewPath(filters));
 }
 
-export async function fetchSalesProducts(filters?: {
+export type SalesProductsFilters = {
   q?: string | undefined;
   paidFrom?: string | undefined;
   paidTo?: string | undefined;
@@ -576,40 +674,43 @@ export async function fetchSalesProducts(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: SalesProductsList }>(
-    `/api/v1/reports/sales-marketing/sales${buildQuery({
-      q: filters?.q,
-      paidFrom: filters?.paidFrom,
-      paidTo: filters?.paidTo,
-      productType: filters?.productType,
-      currency: filters?.currency,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+export function salesProductsPath(filters?: SalesProductsFilters): string {
+  return `/api/v1/reports/sales-marketing/sales${buildQuery({
+    q: filters?.q,
+    paidFrom: filters?.paidFrom,
+    paidTo: filters?.paidTo,
+    productType: filters?.productType,
+    currency: filters?.currency,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
 }
 
-export async function fetchSalesPurchasers(
-  courseId: string,
-  filters: {
-    learnerName?: string | undefined;
-    email?: string | undefined;
-    q?: string | undefined;
-    enrolledType?: string | undefined;
-    purchasedFrom?: string | undefined;
-    purchasedTo?: string | undefined;
-    sortBy?: string | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    columns?: SalesPurchaserColumnKey[] | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  },
-) {
-  return clientApi.get<{ data: SalesPurchasersList }>(
-    `/api/v1/reports/sales-marketing/sales/${courseId}/purchasers${buildQuery({
+export async function fetchSalesProducts(filters?: SalesProductsFilters) {
+  return clientApi.get<{ data: SalesProductsList }>(salesProductsPath(filters));
+}
+
+export type SalesPurchasersFilters = {
+  learnerName?: string | undefined;
+  email?: string | undefined;
+  q?: string | undefined;
+  enrolledType?: string | undefined;
+  purchasedFrom?: string | undefined;
+  purchasedTo?: string | undefined;
+  sortBy?: string | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  columns?: readonly SalesPurchaserColumnKey[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+export function salesPurchasersPath(courseId: string, filters: SalesPurchasersFilters): string {
+  return `/api/v1/reports/sales-marketing/sales/${encodeURIComponent(courseId)}/purchasers${buildQuery(
+    {
       learnerName: filters.learnerName,
       email: filters.email,
       q: filters.q,
@@ -621,11 +722,15 @@ export async function fetchSalesPurchasers(
       columns: filters.columns?.join(","),
       page: filters.page ?? 1,
       limit: filters.limit ?? 25,
-    })}`,
-  );
+    },
+  )}`;
 }
 
-export async function fetchSalesCoupons(filters?: {
+export async function fetchSalesPurchasers(courseId: string, filters: SalesPurchasersFilters) {
+  return clientApi.get<{ data: SalesPurchasersList }>(salesPurchasersPath(courseId, filters));
+}
+
+export type SalesCouponsFilters = {
   q?: string | undefined;
   status?: string | undefined;
   discountType?: string | undefined;
@@ -634,39 +739,45 @@ export async function fetchSalesCoupons(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: CouponsList }>(
-    `/api/v1/reports/sales-marketing/coupons${buildQuery({
-      q: filters?.q,
-      status: filters?.status,
-      discountType: filters?.discountType,
-      view: filters?.view,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+export function salesCouponsPath(filters?: SalesCouponsFilters): string {
+  return `/api/v1/reports/sales-marketing/coupons${buildQuery({
+    q: filters?.q,
+    status: filters?.status,
+    discountType: filters?.discountType,
+    view: filters?.view,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
 }
 
-export async function fetchCouponRedemptions(
+export async function fetchSalesCoupons(filters?: SalesCouponsFilters) {
+  return clientApi.get<{ data: CouponsList }>(salesCouponsPath(filters));
+}
+
+export type CouponRedemptionsFilters = {
+  learnerName?: string | undefined;
+  q?: string | undefined;
+  courseId?: string | undefined;
+  appliedFrom?: string | undefined;
+  appliedTo?: string | undefined;
+  minFinalAmountCents?: number | undefined;
+  maxFinalAmountCents?: number | undefined;
+  sortBy?: CouponRedemptionsSortBy | undefined;
+  sortDir?: "asc" | "desc" | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+};
+
+export function couponRedemptionsPath(
   couponId: string,
-  filters?: {
-    learnerName?: string | undefined;
-    q?: string | undefined;
-    courseId?: string | undefined;
-    appliedFrom?: string | undefined;
-    appliedTo?: string | undefined;
-    minFinalAmountCents?: number | undefined;
-    maxFinalAmountCents?: number | undefined;
-    sortBy?: CouponRedemptionsSortBy | undefined;
-    sortDir?: "asc" | "desc" | undefined;
-    page?: number | undefined;
-    limit?: number | undefined;
-  },
-) {
-  return clientApi.get<{ data: CouponRedemptionsPayload }>(
-    `/api/v1/reports/sales-marketing/coupons/${couponId}/redemptions${buildQuery({
+  filters?: CouponRedemptionsFilters,
+): string {
+  return `/api/v1/reports/sales-marketing/coupons/${encodeURIComponent(couponId)}/redemptions${buildQuery(
+    {
       learnerName: filters?.learnerName,
       q: filters?.q,
       courseId: filters?.courseId,
@@ -678,11 +789,17 @@ export async function fetchCouponRedemptions(
       sortDir: filters?.sortDir,
       page: filters?.page ?? 1,
       limit: filters?.limit ?? 25,
-    })}`,
+    },
+  )}`;
+}
+
+export async function fetchCouponRedemptions(couponId: string, filters?: CouponRedemptionsFilters) {
+  return clientApi.get<{ data: CouponRedemptionsPayload }>(
+    couponRedemptionsPath(couponId, filters),
   );
 }
 
-export async function fetchReferralWallet(filters?: {
+export type ReferralWalletFilters = {
   q?: string | undefined;
   signedUpFrom?: string | undefined;
   signedUpTo?: string | undefined;
@@ -694,22 +811,38 @@ export async function fetchReferralWallet(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: ReferralWalletPayload }>(
-    `/api/v1/reports/sales-marketing/referral-wallet${buildQuery({
-      q: filters?.q,
-      signedUpFrom: filters?.signedUpFrom,
-      signedUpTo: filters?.signedUpTo,
-      activityFrom: filters?.activityFrom,
-      activityTo: filters?.activityTo,
-      minCreditEarned: filters?.minCreditEarned,
-      minWalletBalance: filters?.minWalletBalance,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
+};
+
+export function referralWalletPath(filters?: ReferralWalletFilters): string {
+  return `/api/v1/reports/sales-marketing/referral-wallet${buildQuery({
+    q: filters?.q,
+    signedUpFrom: filters?.signedUpFrom,
+    signedUpTo: filters?.signedUpTo,
+    activityFrom: filters?.activityFrom,
+    activityTo: filters?.activityTo,
+    minCreditEarned: filters?.minCreditEarned,
+    minWalletBalance: filters?.minWalletBalance,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
+export async function fetchReferralWallet(filters?: ReferralWalletFilters) {
+  return clientApi.get<{ data: ReferralWalletPayload }>(referralWalletPath(filters));
+}
+
+export function referredLearnersPath(
+  membershipId: string,
+  filters?: { page?: number | undefined; limit?: number | undefined },
+): string {
+  return `/api/v1/reports/sales-marketing/referral-wallet/${encodeURIComponent(membershipId)}/referred${buildQuery(
+    {
       page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+      limit: filters?.limit ?? 100,
+    },
+  )}`;
 }
 
 export async function fetchReferredLearners(
@@ -717,14 +850,11 @@ export async function fetchReferredLearners(
   filters?: { page?: number | undefined; limit?: number | undefined },
 ) {
   return clientApi.get<{ data: ReferredLearnersPayload }>(
-    `/api/v1/reports/sales-marketing/referral-wallet/${membershipId}/referred${buildQuery({
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 100,
-    })}`,
+    referredLearnersPath(membershipId, filters),
   );
 }
 
-export async function fetchAffiliateProducts(filters?: {
+export type AffiliateProductsFilters = {
   q?: string | undefined;
   enabled?: "all" | "enabled" | "disabled" | undefined;
   commissionBand?: "any" | "below_10" | "10_20" | "above_20" | undefined;
@@ -734,20 +864,24 @@ export async function fetchAffiliateProducts(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: AffiliateProductsPayload }>(
-    `/api/v1/reports/sales-marketing/affiliate-products${buildQuery({
-      q: filters?.q,
-      enabled: filters?.enabled,
-      commissionBand: filters?.commissionBand,
-      activityFrom: filters?.activityFrom,
-      activityTo: filters?.activityTo,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 50,
-    })}`,
-  );
+};
+
+export function affiliateProductsPath(filters?: AffiliateProductsFilters): string {
+  return `/api/v1/reports/sales-marketing/affiliate-products${buildQuery({
+    q: filters?.q,
+    enabled: filters?.enabled,
+    commissionBand: filters?.commissionBand,
+    activityFrom: filters?.activityFrom,
+    activityTo: filters?.activityTo,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 50,
+  })}`;
+}
+
+export async function fetchAffiliateProducts(filters?: AffiliateProductsFilters) {
+  return clientApi.get<{ data: AffiliateProductsPayload }>(affiliateProductsPath(filters));
 }
 
 export async function upsertAffiliateProduct(body: {
@@ -776,7 +910,7 @@ export async function upsertAffiliateProduct(body: {
   });
 }
 
-export async function fetchAffiliates(filters?: {
+export type AffiliatesFilters = {
   q?: string | undefined;
   status?: string | undefined;
   tier?: string | undefined;
@@ -790,41 +924,56 @@ export async function fetchAffiliates(filters?: {
   sortDir?: "asc" | "desc" | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: AffiliatesPayload }>(
-    `/api/v1/reports/sales-marketing/affiliates${buildQuery({
-      q: filters?.q,
-      status: filters?.status,
-      tier: filters?.tier,
-      unpaidBand: filters?.unpaidBand,
-      view: filters?.view,
-      activityFrom: filters?.activityFrom,
-      activityTo: filters?.activityTo,
-      signedUpFrom: filters?.signedUpFrom,
-      signedUpTo: filters?.signedUpTo,
-      sortBy: filters?.sortBy,
-      sortDir: filters?.sortDir,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-    })}`,
-  );
+};
+
+export function affiliatesPath(filters?: AffiliatesFilters): string {
+  return `/api/v1/reports/sales-marketing/affiliates${buildQuery({
+    q: filters?.q,
+    status: filters?.status,
+    tier: filters?.tier,
+    unpaidBand: filters?.unpaidBand,
+    view: filters?.view,
+    activityFrom: filters?.activityFrom,
+    activityTo: filters?.activityTo,
+    signedUpFrom: filters?.signedUpFrom,
+    signedUpTo: filters?.signedUpTo,
+    sortBy: filters?.sortBy,
+    sortDir: filters?.sortDir,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+  })}`;
+}
+
+export async function fetchAffiliates(filters?: AffiliatesFilters) {
+  return clientApi.get<{ data: AffiliatesPayload }>(affiliatesPath(filters));
+}
+
+export function affiliateDetailPath(
+  affiliateId: string,
+  filters?: { ordersLimit?: number | undefined; payoutsLimit?: number | undefined },
+): string {
+  return `/api/v1/reports/sales-marketing/affiliates/${encodeURIComponent(affiliateId)}${buildQuery(
+    {
+      ordersLimit: filters?.ordersLimit ?? 25,
+      payoutsLimit: filters?.payoutsLimit ?? 20,
+    },
+  )}`;
 }
 
 export async function fetchAffiliateDetail(
   affiliateId: string,
   filters?: { ordersLimit?: number | undefined; payoutsLimit?: number | undefined },
 ) {
-  return clientApi.get<{ data: AffiliateDetailPayload }>(
-    `/api/v1/reports/sales-marketing/affiliates/${affiliateId}${buildQuery({
-      ordersLimit: filters?.ordersLimit ?? 25,
-      payoutsLimit: filters?.payoutsLimit ?? 20,
-    })}`,
-  );
+  return clientApi.get<{ data: AffiliateDetailPayload }>(affiliateDetailPath(affiliateId, filters));
 }
+
+/** The affiliates waiting for approval, which the pending view lists. */
+export const PENDING_AFFILIATE_REQUESTS_PATH =
+  "/api/v1/sales/affiliates/requests?status=PENDING&limit=100";
 
 export async function fetchPendingAffiliateRequests() {
   return clientApi.get<{ data: { items: AffiliatePendingRequest[] } }>(
-    "/api/v1/sales/affiliates/requests?status=PENDING&limit=100",
+    PENDING_AFFILIATE_REQUESTS_PATH,
   );
 }
 

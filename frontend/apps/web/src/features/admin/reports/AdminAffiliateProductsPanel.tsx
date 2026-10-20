@@ -15,11 +15,14 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import { AFFILIATES_HREF } from "../grow/affiliates-shared";
 import {
+  AFFILIATE_PRODUCTS_DEFAULTS,
+  salesMarketingRangeBefore,
   dateInputToEndIso,
   dateInputToStartIso,
   exportSalesMarketingReport,
@@ -30,6 +33,8 @@ import {
   type AffiliateProductsSummary,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 type ProgrammeFilter = "all" | "enabled" | "disabled";
 type CommissionBand = "any" | "below_10" | "10_20" | "above_20";
@@ -67,28 +72,27 @@ const DISABLE_REASONS: Array<{ value: Exclude<DisableReason, "">; label: string 
   { value: "other", label: "Other" },
 ];
 
-function defaultActivityRange(days = 30): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
-}
-
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatShortDate(iso: string | null): string {
+function formatShortDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function formatRate(value: number): string {
-  return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
+function formatRateFor(value: number, viewer: ViewerLocale): string {
+  return `${value.toLocaleString(viewer.locale, { maximumFractionDigits: 1 })}%`;
 }
 
 function productTypeLabel(value: string): string {
@@ -201,11 +205,30 @@ function ProgrammeToggle({
   );
 }
 
-export function AdminAffiliateProductsPanel() {
-  const initialRange = useMemo(() => defaultActivityRange(30), []);
+export function AdminAffiliateProductsPanel({
+  initialData,
+}: {
+  /**
+   * The first page over the default 30 days of activity, loaded by the server
+   * with the range it counted; the first browser load is skipped when present.
+   */
+  initialData?: ReportInitialDataInRange<AffiliateProductsPayload> | null | undefined;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
+  const formatRate = withViewer(formatRateFor, viewer);
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  // The server's range when it loaded the panel, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const initialRange = useMemo(
+    () => initial?.range ?? salesMarketingRangeBefore(AFFILIATE_PRODUCTS_DEFAULTS.rangeDays),
+    [initial],
+  );
 
-  const [payload, setPayload] = useState<AffiliateProductsPayload | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [payload, setPayload] = useState<AffiliateProductsPayload | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -243,39 +266,41 @@ export function AdminAffiliateProductsPanel() {
 
   const filtersActive = Boolean(searchQ.trim()) || programme !== "all" || commissionBand !== "any";
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchAffiliateProducts({
-        q: searchQ.trim() || undefined,
-        enabled: programme,
-        commissionBand,
-        activityFrom: dateInputToStartIso(activityFrom),
-        activityTo: dateInputToEndIso(activityTo),
-        sortBy,
-        sortDir: "desc",
-        page,
-        limit: 50,
-      });
-      setPayload(response.data);
-      setSelectedIds(new Set());
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchAffiliateProducts({
+          q: searchQ.trim() || undefined,
+          enabled: programme,
+          commissionBand,
+          activityFrom: dateInputToStartIso(activityFrom),
+          activityTo: dateInputToEndIso(activityTo),
+          sortBy,
+          sortDir: "desc",
+          page,
+          limit: 50,
+        });
+        setPayload(response.data);
+        setSelectedIds(new Set());
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to load affiliate products.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [activityFrom, activityTo, commissionBand, page, programme, searchQ, sortBy]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to load affiliate products.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [activityFrom, activityTo, commissionBand, page, programme, searchQ, sortBy],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const applyFilters = () => {
     setSearchQ(draftQ.trim());
@@ -716,7 +741,7 @@ export function AdminAffiliateProductsPanel() {
                 Orders
               </p>
               <p className="font-mono text-lg font-medium text-[var(--admin-on-surface)]">
-                {summary.orderCount.toLocaleString()}
+                {summary.orderCount.toLocaleString(viewer.locale)}
               </p>
               <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
                 {formatMoneyAmount(summary.avgOrderValueCents)} {summary.currency} average
@@ -728,13 +753,13 @@ export function AdminAffiliateProductsPanel() {
                 Products enabled
               </p>
               <p className="font-mono text-lg font-medium text-[var(--admin-on-surface)]">
-                {summary.productsEnabled.toLocaleString()}
+                {summary.productsEnabled.toLocaleString(viewer.locale)}
                 <span className="ml-1 text-xs font-normal text-[var(--admin-on-surface-variant)]">
-                  of {summary.productsTotal.toLocaleString()}
+                  of {summary.productsTotal.toLocaleString(viewer.locale)}
                 </span>
               </p>
               <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                {summary.productsInProgramme.toLocaleString()} in programme
+                {summary.productsInProgramme.toLocaleString(viewer.locale)} in programme
               </p>
             </div>
           </div>
@@ -1031,7 +1056,7 @@ export function AdminAffiliateProductsPanel() {
                               muted ? "text-[var(--admin-on-surface-variant)]" : "",
                             ].join(" ")}
                           >
-                            {row.orderCount.toLocaleString()}
+                            {row.orderCount.toLocaleString(viewer.locale)}
                           </td>
                           <td className="px-4 py-2 text-right">
                             <div className="flex items-center justify-end gap-2">
@@ -1102,7 +1127,7 @@ export function AdminAffiliateProductsPanel() {
                 <div className="flex items-center justify-between border-t border-[var(--admin-border)] px-4 py-3 text-xs text-[var(--admin-on-surface-variant)]">
                   <span>
                     Page {pageInfo.page} of {pageInfo.totalPages} ·{" "}
-                    {pageInfo.totalCount.toLocaleString()} products
+                    {pageInfo.totalCount.toLocaleString(viewer.locale)} products
                   </span>
                   <div className="flex gap-2">
                     <button
@@ -1179,7 +1204,7 @@ export function AdminAffiliateProductsPanel() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-[var(--admin-on-surface-variant)]">Active affiliates</span>
                   <span className="font-mono text-[var(--admin-on-surface)]">
-                    {disableTarget.activeAffiliateCount.toLocaleString()}
+                    {disableTarget.activeAffiliateCount.toLocaleString(viewer.locale)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">

@@ -22,8 +22,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialDataInRange } from "../../../lib/server/report-initial-data";
 import { REFERRAL_HREF } from "../grow/referral-shared";
 import {
+  REFERRAL_WALLET_DEFAULTS,
+  salesMarketingRangeBefore,
   createSalesMarketingGroup,
   dateInputToEndIso,
   dateInputToStartIso,
@@ -38,6 +41,8 @@ import {
   type ReferredLearnersPayload,
 } from "./admin-sales-marketing-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -66,28 +71,27 @@ const SORT_OPTIONS: Array<{ value: ReferralSortBy; label: string }> = [
   { value: "learner_name", label: "Learner name" },
 ];
 
-function defaultActivityRange(days = 30): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
-}
-
-function formatMoneyAmount(cents: number): string {
-  return (cents / 100).toLocaleString(undefined, {
+function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
+  return (cents / 100).toLocaleString(viewer.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 
-function formatCredits(value: number): string {
-  return value.toLocaleString();
+function formatCreditsFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatShortDate(iso: string | null): string {
+function formatShortDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function initials(name: string | null, email: string | null): string {
@@ -225,11 +229,30 @@ function ReferralWalletSkeleton() {
   );
 }
 
-export function AdminReferralWalletPanel() {
-  const initialRange = useMemo(() => defaultActivityRange(30), []);
+export function AdminReferralWalletPanel({
+  initialData,
+}: {
+  /**
+   * The first page over the default 30 days of activity, loaded by the server
+   * with the range it counted; the first browser load is skipped when present.
+   */
+  initialData?: ReportInitialDataInRange<ReferralWalletPayload> | null | undefined;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatMoneyAmount = withViewer(formatMoneyAmountFor, viewer);
+  const formatCredits = withViewer(formatCreditsFor, viewer);
+  const formatShortDate = withViewer(formatShortDateFor, viewer);
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  // The server's range when it loaded the panel, so both render the same
+  // dates even if the clocks disagree or the day turned in between.
+  const initialRange = useMemo(
+    () => initial?.range ?? salesMarketingRangeBefore(REFERRAL_WALLET_DEFAULTS.rangeDays),
+    [initial],
+  );
 
-  const [payload, setPayload] = useState<ReferralWalletPayload | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [payload, setPayload] = useState<ReferralWalletPayload | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -267,35 +290,39 @@ export function AdminReferralWalletPanel() {
 
   const filtersActive = Boolean(searchQ.trim()) || Boolean(signedUpFrom) || Boolean(signedUpTo);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchReferralWallet({
-        q: searchQ.trim() || undefined,
-        signedUpFrom: dateInputToStartIso(signedUpFrom),
-        signedUpTo: dateInputToEndIso(signedUpTo),
-        activityFrom: dateInputToStartIso(activityFrom),
-        activityTo: dateInputToEndIso(activityTo),
-        sortBy,
-        sortDir: "desc",
-        page,
-        limit: 25,
-      });
-      setPayload(response.data);
-    } catch (loadError) {
-      setPayload(null);
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchReferralWallet({
+          q: searchQ.trim() || undefined,
+          signedUpFrom: dateInputToStartIso(signedUpFrom),
+          signedUpTo: dateInputToEndIso(signedUpTo),
+          activityFrom: dateInputToStartIso(activityFrom),
+          activityTo: dateInputToEndIso(activityTo),
+          sortBy,
+          sortDir: "desc",
+          page,
+          limit: 25,
+        });
+        setPayload(response.data);
+      } catch (loadError) {
+        setPayload(null);
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Couldn't load referral and wallet data.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [activityFrom, activityTo, page, searchQ, signedUpFrom, signedUpTo, sortBy]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Couldn't load referral and wallet data.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [activityFrom, activityTo, page, searchQ, signedUpFrom, signedUpTo, sortBy],
+  );
 
   const loadReferred = useCallback(async (membershipId: string, referredPageNum: number) => {
     setReferredLoading(true);
@@ -320,9 +347,7 @@ export function AdminReferralWalletPanel() {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (!cohortDrawerOpen) return;
@@ -678,12 +703,12 @@ export function AdminReferralWalletPanel() {
               </p>
               <div className="flex flex-wrap items-end gap-2">
                 <p className="font-mono text-[28px] font-semibold leading-tight tracking-tight text-[var(--admin-on-surface)]">
-                  {summary.successfulReferrals.toLocaleString()}
+                  {summary.successfulReferrals.toLocaleString(viewer.locale)}
                 </p>
                 <ChangePill value={summary.changePercent} windowLabel={summary.windowLabel} />
               </div>
               <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                {summary.previousSuccessfulReferrals.toLocaleString()} in previous{" "}
+                {summary.previousSuccessfulReferrals.toLocaleString(viewer.locale)} in previous{" "}
                 {summary.windowLabel}
               </p>
             </div>
@@ -712,7 +737,7 @@ export function AdminReferralWalletPanel() {
                 </span>
               </p>
               <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                held in {summary.walletsWithBalance.toLocaleString()} wallet
+                held in {summary.walletsWithBalance.toLocaleString(viewer.locale)} wallet
                 {summary.walletsWithBalance === 1 ? "" : "s"}
               </p>
             </div>
@@ -728,8 +753,8 @@ export function AdminReferralWalletPanel() {
                 </span>
               </p>
               <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">
-                {summary.referrerCount.toLocaleString()} of {summary.totalLearners.toLocaleString()}{" "}
-                learners
+                {summary.referrerCount.toLocaleString(viewer.locale)} of{" "}
+                {summary.totalLearners.toLocaleString(viewer.locale)} learners
               </p>
             </div>
           </div>
@@ -1018,7 +1043,7 @@ export function AdminReferralWalletPanel() {
                                   openReferralsDrawer(item, event);
                                 }}
                               >
-                                {item.successfulReferrals.toLocaleString()}
+                                {item.successfulReferrals.toLocaleString(viewer.locale)}
                               </button>
                             </td>
                             <td className="h-11 px-4 text-right font-mono text-sm text-[var(--admin-on-surface)]">
@@ -1346,7 +1371,7 @@ export function AdminReferralWalletPanel() {
                   id="cohort-drawer-title"
                   className="font-mono text-lg font-semibold tracking-tight text-[var(--admin-on-surface)]"
                 >
-                  {matchCount.toLocaleString()} referrers match the current filters
+                  {matchCount.toLocaleString(viewer.locale)} referrers match the current filters
                 </h2>
                 {filterChips.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1527,7 +1552,9 @@ export function AdminReferralWalletPanel() {
                   disabled={busy || !groupName.trim() || membershipMode === "live"}
                   onClick={() => void handleCreateGroup()}
                 >
-                  {busy ? "Creating…" : `Create group with ${matchCount.toLocaleString()} learners`}
+                  {busy
+                    ? "Creating…"
+                    : `Create group with ${matchCount.toLocaleString(viewer.locale)} learners`}
                 </button>
               ) : (
                 <button
@@ -1536,7 +1563,9 @@ export function AdminReferralWalletPanel() {
                   disabled={busy || !messageSubject.trim() || !messageBody.trim()}
                   onClick={() => void handleSendMessage()}
                 >
-                  {busy ? "Sending…" : `Send to ${matchCount.toLocaleString()} learners`}
+                  {busy
+                    ? "Sending…"
+                    : `Send to ${matchCount.toLocaleString(viewer.locale)} learners`}
                 </button>
               )}
             </div>

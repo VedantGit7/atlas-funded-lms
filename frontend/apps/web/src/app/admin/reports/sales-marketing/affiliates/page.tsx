@@ -3,10 +3,11 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminSalesMarketingRosterPage } from "../../../../../features/admin/reports/AdminSalesMarketingRosterPage";
+import { loadAffiliatesData } from "../../../../../lib/server/report-sales-marketing-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminSalesMarketingAffiliatesRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialAffiliates] = await Promise.all([runTenantStateGate(), loadAffiliatesData()]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -23,7 +24,7 @@ export default async function AdminSalesMarketingAffiliatesRoutePage() {
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
-        <AdminSalesMarketingRosterPage />
+        <AdminSalesMarketingRosterPage initialAffiliates={initialAffiliates} />
       </Suspense>
     </AdminPageGate>
   );
