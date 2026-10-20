@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminAttributionSettingsPage } from "../../../../../../features/admin/reports/AdminAttributionSettingsPage";
+import { loadAttributionSettingsData } from "../../../../../../lib/server/report-attribution-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 /**
@@ -11,7 +12,10 @@ import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-ga
  * and degrades on its own, so this gate only handles tenant availability.
  */
 export default async function AdminAttributionSettingsRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialSettings] = await Promise.all([
+    runTenantStateGate(),
+    loadAttributionSettingsData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +29,7 @@ export default async function AdminAttributionSettingsRoutePage() {
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Attribution settings">
-      <AdminAttributionSettingsPage />
+      <AdminAttributionSettingsPage initialSettings={initialSettings} />
     </AdminPageGate>
   );
 }

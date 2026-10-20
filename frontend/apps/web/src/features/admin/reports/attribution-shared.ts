@@ -1,4 +1,5 @@
 import { csvRow } from "../../../lib/export/csv";
+import type { ViewerLocale } from "./viewer-time";
 import type {
   AttributionAnomalyKind,
   AttributionDimension,
@@ -138,22 +139,46 @@ export function sourceMediumLabel(event: AttributionEvent): string {
  * An event with no revenue is not zero revenue — a page view has no amount at
  * all — so the absence is preserved rather than formatted as 0.00.
  */
+/**
+ * The viewer's own settings, for code outside a component: CSV files and the
+ * plain formatters below. These formatters do not read `now`.
+ */
+const OWN_SETTINGS: ViewerLocale = { locale: undefined, timeZone: undefined, now: 0 };
+
 export function formatRevenue(cents: number | null, currency: string | null): string {
+  return formatRevenueFor(cents, currency, OWN_SETTINGS);
+}
+
+export function formatTimestamp(iso: string): string {
+  return formatTimestampFor(iso, OWN_SETTINGS);
+}
+
+export function formatUtcDay(iso: string): string {
+  return formatUtcDayFor(iso, OWN_SETTINGS);
+}
+
+/** In a component, bind these to `useViewerLocale()` (see viewer-time). */
+export function formatRevenueFor(
+  cents: number | null,
+  currency: string | null,
+  viewer: ViewerLocale,
+): string {
   if (cents === null) return "—";
   const amount = cents / 100;
   if (currency === null) return amount.toFixed(2);
   try {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(amount);
+    return new Intl.NumberFormat(viewer.locale, { style: "currency", currency }).format(amount);
   } catch {
     // An unrecognised currency code must not blank the cell or throw.
     return `${amount.toFixed(2)} ${currency}`;
   }
 }
 
-export function formatTimestamp(iso: string): string {
+export function formatTimestampFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
+    timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -431,10 +456,10 @@ export function dailyAttributionRate(day: { total: number; attributed: number })
 }
 
 /** A UTC day, labelled the way the series is bucketed. */
-export function formatUtcDay(iso: string): string {
+export function formatUtcDayFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(viewer.locale, {
     month: "short",
     day: "numeric",
     timeZone: "UTC",

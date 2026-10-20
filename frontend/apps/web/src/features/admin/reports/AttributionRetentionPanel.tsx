@@ -12,7 +12,7 @@ import {
   managePrimaryButtonClassName,
   manageSecondaryButtonClassName,
 } from "../manage/manage-ui-shared";
-import { formatRelative, formatTimestamp } from "./attribution-shared";
+import { formatRelative, formatTimestampFor } from "./attribution-shared";
 import {
   previewAttributionRetention,
   purgeAttributionEventsNow,
@@ -20,6 +20,7 @@ import {
   type AttributionRetention,
   type SectionResult,
 } from "./attribution-settings-api";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 /**
  * Retention for the attribution event log.
@@ -69,6 +70,8 @@ export function AttributionRetentionPanel({
   result: SectionResult<AttributionRetention> | null;
   onChanged: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatTimestamp = withViewer(formatTimestampFor, viewer);
   const loaded = result?.kind === "ok" ? result.data : null;
 
   const [selected, setSelected] = useState<string>(OFF_VALUE);
@@ -166,8 +169,8 @@ export function AttributionRetentionPanel({
       const outcome = await purgeAttributionEventsNow();
       setNotice(
         outcome.moreRemaining
-          ? `Deleted ${outcome.deleted.toLocaleString()} events. More remain past the window — run again, or leave them to the nightly sweep.`
-          : `Deleted ${outcome.deleted.toLocaleString()} ${outcome.deleted === 1 ? "event" : "events"}.`,
+          ? `Deleted ${outcome.deleted.toLocaleString(viewer.locale)} events. More remain past the window — run again, or leave them to the nightly sweep.`
+          : `Deleted ${outcome.deleted.toLocaleString(viewer.locale)} ${outcome.deleted === 1 ? "event" : "events"}.`,
       );
       setConfirmPurge(false);
       onChanged();
@@ -192,7 +195,7 @@ export function AttributionRetentionPanel({
             : `Keeping ${current} days`}
           {loaded.updatedAt === null
             ? ""
-            : ` · set ${formatRelative(loaded.updatedAt)}${
+            : ` · set ${formatRelative(loaded.updatedAt, viewer.now)}${
                 loaded.updatedByName === null ? "" : ` by ${loaded.updatedByName}`
               }`}
         </p>
@@ -273,10 +276,11 @@ export function AttributionRetentionPanel({
               ) : (
                 <>
                   <span className="font-semibold text-[var(--admin-on-surface)]">
-                    {preview.toLocaleString()}
+                    {preview.toLocaleString(viewer.locale)}
                   </span>{" "}
-                  of {loaded.totalEvents.toLocaleString()} events fall outside this window and will
-                  be deleted once the purge runs. Attribution events cannot be recovered.
+                  of {loaded.totalEvents.toLocaleString(viewer.locale)} events fall outside this
+                  window and will be deleted once the purge runs. Attribution events cannot be
+                  recovered.
                 </>
               )}
             </p>
@@ -287,7 +291,7 @@ export function AttributionRetentionPanel({
           <div className="flex items-baseline justify-between gap-3">
             <dt className="text-[var(--admin-on-surface-variant)]">Events held</dt>
             <dd className="font-data tabular-nums text-[var(--admin-on-surface)]">
-              {loaded.totalEvents.toLocaleString()}
+              {loaded.totalEvents.toLocaleString(viewer.locale)}
             </dd>
           </div>
           <div className="flex items-baseline justify-between gap-3">
@@ -305,7 +309,7 @@ export function AttributionRetentionPanel({
                   : "text-[var(--admin-on-surface)]"
               }`}
             >
-              {loaded.deletableNow.toLocaleString()}
+              {loaded.deletableNow.toLocaleString(viewer.locale)}
             </dd>
           </div>
         </dl>
@@ -317,9 +321,9 @@ export function AttributionRetentionPanel({
                 <p className="text-sm text-[var(--admin-on-surface)]">
                   {/* An irreversible action names its own consequence rather
                       than asking "are you sure". */}
-                  Delete {loaded.deletableNow.toLocaleString()} attribution events older than{" "}
-                  {current} days? This cannot be undone, and every report over that period will
-                  change.
+                  Delete {loaded.deletableNow.toLocaleString(viewer.locale)} attribution events
+                  older than {current} days? This cannot be undone, and every report over that
+                  period will change.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button

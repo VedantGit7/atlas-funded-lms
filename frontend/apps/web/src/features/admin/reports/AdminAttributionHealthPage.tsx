@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -11,6 +11,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -22,7 +23,11 @@ import {
 } from "../manage/manage-ui-shared";
 import { SalesMarketingReportTabs } from "./SalesMarketingReportTabs";
 import { AttributionEmptyState, AttributionErrorState } from "./AttributionStates";
-import { fetchAttributionHealth, type AttributionHealth } from "./attribution-api";
+import {
+  ATTRIBUTION_DEFAULT_WINDOW_DAYS,
+  fetchAttributionHealth,
+  type AttributionHealth,
+} from "./attribution-api";
 import {
   attributedPercent,
   attributionNoteClassName,
@@ -35,8 +40,10 @@ import {
   dailyAttributionRate,
   formatRelative,
   formatShare,
-  formatUtcDay,
+  formatUtcDayFor,
 } from "./attribution-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider } from "./viewer-time";
 
 /**
  * `/admin/reports/sales-marketing/attribution/health`.
@@ -93,11 +100,30 @@ function rateSplit(series: AttributionHealth["series"]): {
   return { recent: rate(recentDays), earlier: rate(earlierDays) };
 }
 
-export function AdminAttributionHealthPage() {
-  const [days, setDays] = useState(30);
+type AttributionHealthScreenProps = {
+  /** The default window's data, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<AttributionHealth> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminAttributionHealthPage(props: AttributionHealthScreenProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <AttributionHealthScreen {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function AttributionHealthScreen({ initialData }: AttributionHealthScreenProps) {
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const [days, setDays] = useState(ATTRIBUTION_DEFAULT_WINDOW_DAYS);
   const [windowOpen, setWindowOpen] = useState(false);
-  const [data, setData] = useState<AttributionHealth | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<AttributionHealth | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -126,9 +152,13 @@ export function AdminAttributionHealthPage() {
     }
   }, []);
 
-  useEffect(() => {
-    void load(days, "initial");
-  }, [load, days]);
+  // A soft load is the screen's own in-place refresh.
+  const loadForWindow = useCallback(
+    (options?: { soft?: boolean }) => load(days, options?.soft === true ? "refresh" : "initial"),
+    [load, days],
+  );
+
+  useReportLoad(loadForWindow, initial);
 
   return (
     <div className="space-y-5">
@@ -233,6 +263,8 @@ export function AdminAttributionHealthPage() {
 }
 
 function HealthBody({ data }: { data: AttributionHealth }) {
+  const viewer = useViewerLocale();
+  const formatUtcDay = withViewer(formatUtcDayFor, viewer);
   const { recent, earlier } = rateSplit(data.series);
   const rateDropped = recent !== null && earlier !== null && earlier - recent >= RATE_DROP_POINTS;
   const windowRate = attributedPercent(data.windowAttributed, data.windowTotal);
@@ -267,9 +299,9 @@ function HealthBody({ data }: { data: AttributionHealth }) {
             {/* The failure a headline count cannot show: plenty of events, none
                 of them recent. */}
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-              The log holds {data.windowTotal.toLocaleString()} events over this window, but the
-              most recent is {formatRelative(data.lastEventAt ?? "")}. If the site has had traffic
-              since, the tracking snippets are the first thing to check.
+              The log holds {data.windowTotal.toLocaleString(viewer.locale)} events over this
+              window, but the most recent is {formatRelative(data.lastEventAt ?? "", viewer.now)}.
+              If the site has had traffic since, the tracking snippets are the first thing to check.
             </p>
           </div>
         </div>
@@ -316,7 +348,7 @@ function HealthBody({ data }: { data: AttributionHealth }) {
         <div className={attributionSignalCardClassName}>
           <span className={attributionSignalLabelClassName}>Events in window</span>
           <span className={attributionSignalValueClassName}>
-            {data.windowTotal.toLocaleString()}
+            {data.windowTotal.toLocaleString(viewer.locale)}
           </span>
         </div>
         <div className={attributionSignalCardClassName}>
@@ -328,7 +360,7 @@ function HealthBody({ data }: { data: AttributionHealth }) {
         <div className={attributionSignalCardClassName}>
           <span className={attributionSignalLabelClassName}>Last event</span>
           <span className={`${attributionSignalValueClassName} text-base`}>
-            {data.lastEventAt === null ? "—" : formatRelative(data.lastEventAt)}
+            {data.lastEventAt === null ? "—" : formatRelative(data.lastEventAt, viewer.now)}
           </span>
         </div>
         <div className={attributionSignalCardClassName}>
@@ -338,7 +370,7 @@ function HealthBody({ data }: { data: AttributionHealth }) {
               data.windowSkewed > 0 ? "text-[var(--admin-warning)]" : ""
             }`}
           >
-            {data.windowSkewed.toLocaleString()}
+            {data.windowSkewed.toLocaleString(viewer.locale)}
           </span>
           <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
             recorded over {Math.round(data.skewToleranceSeconds / 60)} min from when they happened
@@ -382,7 +414,7 @@ function HealthBody({ data }: { data: AttributionHealth }) {
                 </thead>
                 <tbody>
                   {data.eventTypes.map((entry) => {
-                    const stale = Date.now() - Date.parse(entry.lastSeenAt) > 3 * 86_400_000;
+                    const stale = viewer.now - Date.parse(entry.lastSeenAt) > 3 * 86_400_000;
                     return (
                       <tr
                         key={entry.eventType}
@@ -392,7 +424,7 @@ function HealthBody({ data }: { data: AttributionHealth }) {
                           {entry.eventType}
                         </td>
                         <td className="font-data px-4 py-2.5 text-right text-sm tabular-nums text-[var(--admin-on-surface)]">
-                          {entry.total.toLocaleString()}
+                          {entry.total.toLocaleString(viewer.locale)}
                         </td>
                         <td
                           className={`px-4 py-2.5 text-right text-sm ${
@@ -401,7 +433,7 @@ function HealthBody({ data }: { data: AttributionHealth }) {
                               : "text-[var(--admin-on-surface-variant)]"
                           }`}
                         >
-                          {formatRelative(entry.lastSeenAt)}
+                          {formatRelative(entry.lastSeenAt, viewer.now)}
                         </td>
                       </tr>
                     );
@@ -426,6 +458,8 @@ function HealthBody({ data }: { data: AttributionHealth }) {
 }
 
 function DailyChart({ series }: { series: AttributionHealth["series"] }) {
+  const viewer = useViewerLocale();
+  const formatUtcDay = withViewer(formatUtcDayFor, viewer);
   const peak = series.reduce((max, day) => Math.max(max, day.total), 0);
 
   return (
@@ -439,7 +473,7 @@ function DailyChart({ series }: { series: AttributionHealth["series"] }) {
             <div
               key={day.day}
               className="group relative flex h-full flex-1 flex-col justify-end"
-              title={`${formatUtcDay(day.day)} · ${day.total.toLocaleString()} events${
+              title={`${formatUtcDay(day.day)} · ${day.total.toLocaleString(viewer.locale)} events${
                 rate === null ? "" : ` · ${formatShare(rate)} attributed`
               }`}
             >

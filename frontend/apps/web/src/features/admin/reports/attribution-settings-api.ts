@@ -1,4 +1,5 @@
 import { clientApi } from "../../../lib/client-api";
+import type { AttributionSummary } from "./attribution-api";
 
 /**
  * The things that actually govern the attribution log.
@@ -20,6 +21,22 @@ export type AttributionSnippets = {
   orderTrackingHtml: string | null;
   signupTrackingHtml: string | null;
   updatedAt: string | null;
+};
+
+export const ATTRIBUTION_SNIPPETS_PATH = "/api/v1/marketing/integrations/snippets";
+export const ATTRIBUTION_EXPORT_RULES_PATH = "/api/v1/reports/exports/settings";
+export const ATTRIBUTION_RETENTION_PATH = "/api/v1/sales/attribution/retention";
+
+/**
+ * The settings page's sections, as the server loads them for its first render.
+ * Only passed when every section loaded: a refused one is told apart in the
+ * browser, as before.
+ */
+export type AttributionSettingsInitial = {
+  summary: AttributionSummary;
+  snippets: AttributionSnippets;
+  rules: AttributionExportRules;
+  retention: AttributionRetention;
 };
 
 /** A section either loaded, was refused, or failed — and they are not the same. */
@@ -52,9 +69,7 @@ async function readSection<T>(load: () => Promise<T>): Promise<SectionResult<T>>
  */
 export async function fetchAttributionSnippets(): Promise<SectionResult<AttributionSnippets>> {
   return await readSection(async () => {
-    const response = await clientApi.get<{ data: AttributionSnippets }>(
-      "/api/v1/marketing/integrations/snippets",
-    );
+    const response = await clientApi.get<{ data: AttributionSnippets }>(ATTRIBUTION_SNIPPETS_PATH);
     return response.data;
   });
 }
@@ -74,7 +89,7 @@ export async function fetchAttributionExportRules(): Promise<
 > {
   return await readSection(async () => {
     const response = await clientApi.get<{ data: { settings: AttributionExportRules } }>(
-      "/api/v1/reports/exports/settings",
+      ATTRIBUTION_EXPORT_RULES_PATH,
     );
     return response.data.settings;
   });
@@ -101,7 +116,7 @@ export type AttributionRetention = {
 export async function fetchAttributionRetention(): Promise<SectionResult<AttributionRetention>> {
   return await readSection(async () => {
     const response = await clientApi.get<{ data: AttributionRetention }>(
-      "/api/v1/sales/attribution/retention",
+      ATTRIBUTION_RETENTION_PATH,
     );
     return response.data;
   });

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminAttributionUnattributedPage } from "../../../../../../features/admin/reports/AdminAttributionUnattributedPage";
+import { loadAttributionGapsData } from "../../../../../../lib/server/report-attribution-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 /**
@@ -11,7 +12,7 @@ import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-ga
  * the route, so this gate only handles tenant availability.
  */
 export default async function AdminAttributionUnattributedRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialData] = await Promise.all([runTenantStateGate(), loadAttributionGapsData()]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +26,7 @@ export default async function AdminAttributionUnattributedRoutePage() {
 
   return (
     <AdminPageGate screenId="T50" state="ready" title="Unattributed and incomplete">
-      <AdminAttributionUnattributedPage />
+      <AdminAttributionUnattributedPage initialData={initialData} />
     </AdminPageGate>
   );
 }
