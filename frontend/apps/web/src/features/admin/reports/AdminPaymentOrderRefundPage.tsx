@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -14,6 +14,7 @@ import {
   Undo2,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   managePageDescClassName,
   managePageTitleClassName,
@@ -27,7 +28,7 @@ import {
   type PaymentTransactionDetail,
 } from "./admin-payments-roster-api";
 import {
-  formatAmount,
+  formatAmountFor,
   ordersEmptyPanelClassName,
   ordersFieldClassName,
   ordersNoteClassName,
@@ -49,7 +50,8 @@ import {
   type RefundRequestIdentity,
   type RefundStatus,
 } from "./refund-submission";
-import { ownViewerLocale } from "./viewer-time";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, ownViewerLocale } from "./viewer-time";
 
 const ORDERS_HREF = "/admin/reports/payments/orders";
 
@@ -82,17 +84,32 @@ const helpClassName = "mt-1 text-xs text-[var(--admin-on-surface-variant)]";
  * them would let the form accept something the server rejects, or worse, look
  * like it accepted something it did not.
  */
-export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
+export function AdminPaymentOrderRefundPage({
+  orderId,
+  initialDetail,
+}: {
+  orderId: string;
+  /** The payment, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<PaymentTransactionDetail> | null;
+}) {
+  const viewer = useViewerLocale();
+  const formatAmount = withViewer(formatAmountFor, viewer);
   const router = useRouter();
   const fieldId = useId();
 
-  const [detail, setDetail] = useState<PaymentTransactionDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<PaymentTransactionDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [mode, setMode] = useState<"full" | "partial">("full");
-  const [amountInput, setAmountInput] = useState("");
+  // Seeded as the browser load seeds it. The field shows only for a partial
+  // refund, which the operator picks after the page has hydrated.
+  const [amountInput, setAmountInput] = useState(() =>
+    initial ? formatAmountInputFor(initial.data.refundableAmountCents, ownViewerLocale()) : "",
+  );
   const [reason, setReason] = useState<RefundReason>("customer_requested");
   const [note, setNote] = useState("");
   const [revokeAccess, setRevokeAccess] = useState(false);
@@ -108,30 +125,34 @@ export function AdminPaymentOrderRefundPage({ orderId }: { orderId: string }) {
   const [gatewayNote, setGatewayNote] = useState<string | null>(null);
   const [refundStatus, setRefundStatus] = useState<RefundStatus>("requested");
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setNotFound(false);
-    setLoadError(null);
-    try {
-      const response = await fetchPaymentTransactionDetail(orderId);
-      setDetail(response.data);
-      setAmountInput(formatAmountInputFor(response.data.refundableAmountCents, ownViewerLocale()));
-    } catch (caught) {
-      if (caught instanceof ClientApiError && caught.status === 404) {
-        setNotFound(true);
-      } else {
-        setLoadError(
-          caught instanceof ClientApiError ? caught.message : "Could not load this payment.",
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setNotFound(false);
+      setLoadError(null);
+      try {
+        const response = await fetchPaymentTransactionDetail(orderId);
+        setDetail(response.data);
+        setAmountInput(
+          formatAmountInputFor(response.data.refundableAmountCents, ownViewerLocale()),
         );
+      } catch (caught) {
+        if (caught instanceof ClientApiError && caught.status === 404) {
+          setNotFound(true);
+        } else {
+          setLoadError(
+            caught instanceof ClientApiError ? caught.message : "Could not load this payment.",
+          );
+        }
+      } finally {
+        if (!soft) setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [orderId]);
+    },
+    [orderId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const breadcrumb = (
     <nav aria-label="Breadcrumb" className="font-data flex items-center gap-1.5 text-xs">

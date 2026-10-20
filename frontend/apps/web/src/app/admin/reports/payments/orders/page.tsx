@@ -3,10 +3,11 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminPaymentOrdersPage } from "../../../../../features/admin/reports/AdminPaymentOrdersPage";
+import { loadPaymentOrdersData } from "../../../../../lib/server/report-payments-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminPaymentOrdersRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialLedger] = await Promise.all([runTenantStateGate(), loadPaymentOrdersData()]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -23,7 +24,7 @@ export default async function AdminPaymentOrdersRoutePage() {
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
-        <AdminPaymentOrdersPage />
+        <AdminPaymentOrdersPage initialLedger={initialLedger} />
       </Suspense>
     </AdminPageGate>
   );

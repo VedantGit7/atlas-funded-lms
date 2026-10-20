@@ -73,17 +73,22 @@ function toParams(filters: PaymentOrderFilters): URLSearchParams {
   return params;
 }
 
-export async function fetchPaymentOrders(
-  filters: PaymentOrderFilters,
-  cursor?: string,
-): Promise<{ items: PaymentOrder[]; pageInfo: PaymentOrderPageInfo }> {
+export type PaymentOrdersPage = { items: PaymentOrder[]; pageInfo: PaymentOrderPageInfo };
+
+export function paymentOrdersPath(filters: PaymentOrderFilters, cursor?: string): string {
   const params = toParams(filters);
   params.set("limit", String(PAYMENT_ORDER_PAGE_SIZE));
   if (cursor) params.set("cursor", cursor);
+  return `/api/v1/payments/orders?${params.toString()}`;
+}
 
-  const response = await clientApi.get<{
-    data: { items: PaymentOrder[]; pageInfo: PaymentOrderPageInfo };
-  }>(`/api/v1/payments/orders?${params.toString()}`);
+export async function fetchPaymentOrders(
+  filters: PaymentOrderFilters,
+  cursor?: string,
+): Promise<PaymentOrdersPage> {
+  const response = await clientApi.get<{ data: PaymentOrdersPage }>(
+    paymentOrdersPath(filters, cursor),
+  );
   return response.data;
 }
 
@@ -93,15 +98,60 @@ export async function fetchPaymentOrders(
  * Separate from the page because these are totals, not a window: "7 pending"
  * has to mean the ledger, not the fifty rows currently loaded.
  */
+export function paymentOrderSummaryPath(filters: PaymentOrderFilters): string {
+  const query = toParams(filters).toString();
+  return query ? `/api/v1/payments/orders/summary?${query}` : "/api/v1/payments/orders/summary";
+}
+
 export async function fetchPaymentOrderSummary(
   filters: PaymentOrderFilters,
 ): Promise<PaymentOrderSummary> {
-  const params = toParams(filters);
-  const query = params.toString();
   const response = await clientApi.get<{ data: PaymentOrderSummary }>(
-    query ? `/api/v1/payments/orders/summary?${query}` : "/api/v1/payments/orders/summary",
+    paymentOrderSummaryPath(filters),
   );
   return response.data;
+}
+
+/** The first page of the ledger and its totals, which the ledger loads together. */
+export type PaymentOrdersLedger = { page: PaymentOrdersPage; summary: PaymentOrderSummary };
+
+function isSettlement(value: string): value is PaymentOrderSettlement {
+  return value === "settled" || value === "unsettled";
+}
+
+/** The export screen's filter fields as it seeds them from the address. */
+export type PaymentOrderExportFields = {
+  status: string;
+  currency: string;
+  settlement: string;
+  query: string;
+};
+
+/**
+ * Reads the export screen's filters from the address, the way the ledger's
+ * "Export" link writes them. Shared by the page and its server load, so both
+ * describe the same rows.
+ */
+export function readPaymentOrderExportFields(
+  get: (name: string) => string | null,
+): PaymentOrderExportFields {
+  const settlement = get("settlement") ?? "";
+  return {
+    status: get("status") ?? "",
+    currency: (get("currency") ?? "").toUpperCase(),
+    settlement: isSettlement(settlement) ? settlement : "",
+    query: get("q") ?? "",
+  };
+}
+
+/** The filters the export screen counts and downloads for its fields. */
+export function paymentOrderExportFilters(fields: PaymentOrderExportFields): PaymentOrderFilters {
+  return {
+    ...(fields.query.trim() ? { q: fields.query.trim() } : {}),
+    ...(fields.status ? { status: fields.status } : {}),
+    ...(fields.currency ? { currency: fields.currency } : {}),
+    ...(isSettlement(fields.settlement) ? { settlement: fields.settlement } : {}),
+  };
 }
 
 export type PaymentOrderDetail = PaymentOrder & {
@@ -123,10 +173,12 @@ export type PaymentOrderDetail = PaymentOrder & {
  * to load: the list is cursor-paginated, so an older order was previously
  * indistinguishable from one that does not exist.
  */
+export function paymentOrderPath(orderId: string): string {
+  return `/api/v1/payments/orders/${encodeURIComponent(orderId)}`;
+}
+
 export async function fetchPaymentOrder(orderId: string): Promise<PaymentOrderDetail> {
-  const response = await clientApi.get<{ data: PaymentOrderDetail }>(
-    `/api/v1/payments/orders/${encodeURIComponent(orderId)}`,
-  );
+  const response = await clientApi.get<{ data: PaymentOrderDetail }>(paymentOrderPath(orderId));
   return response.data;
 }
 
@@ -251,12 +303,19 @@ export type UnmatchedPaymentOrders = {
  * fifty rows a screen happened to load reports clean books while the stuck
  * order sits on page nine. Only the row samples are capped; the counts are not.
  */
+/** How long a pending order waits before the worklist opens by calling it stale. */
+export const UNMATCHED_DEFAULT_STALE_PENDING_DAYS = 7;
+
+export function unmatchedPaymentOrdersPath(stalePendingDays: number): string {
+  const params = new URLSearchParams({ stalePendingDays: String(stalePendingDays) });
+  return `/api/v1/payments/orders/unmatched?${params.toString()}`;
+}
+
 export async function fetchUnmatchedPaymentOrders(
   stalePendingDays: number,
 ): Promise<UnmatchedPaymentOrders> {
-  const params = new URLSearchParams({ stalePendingDays: String(stalePendingDays) });
   const response = await clientApi.get<{ data: UnmatchedPaymentOrders }>(
-    `/api/v1/payments/orders/unmatched?${params.toString()}`,
+    unmatchedPaymentOrdersPath(stalePendingDays),
   );
   return response.data;
 }

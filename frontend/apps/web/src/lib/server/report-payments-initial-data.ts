@@ -31,7 +31,26 @@ import {
   type PaymentTransactionDetail,
   type PaymentTransactionsPayload,
 } from "../../features/admin/reports/admin-payments-roster-api";
-import { loadReportInitialData, type ReportInitialDataInRange } from "./report-initial-data";
+import {
+  UNMATCHED_DEFAULT_STALE_PENDING_DAYS,
+  paymentOrderExportFilters,
+  paymentOrderPath,
+  paymentOrderSummaryPath,
+  paymentOrdersPath,
+  readPaymentOrderExportFields,
+  unmatchedPaymentOrdersPath,
+  type PaymentOrderDetail,
+  type PaymentOrderSummary,
+  type PaymentOrdersLedger,
+  type PaymentOrdersPage,
+  type UnmatchedPaymentOrders,
+} from "../../features/admin/reports/payment-orders-api";
+import { searchParam, type ReportSearchParams } from "./report-landing-initial-data";
+import {
+  loadReportInitialData,
+  type ReportInitialData,
+  type ReportInitialDataInRange,
+} from "./report-initial-data";
 
 /*
  * The first data each Payments page shows, loaded on the server so the page
@@ -149,4 +168,41 @@ export async function loadPaymentGatewayData(gatewayKey: string) {
     ),
   ]);
   return { detail, transactions };
+}
+
+/** The order ledger's first page and its totals, which the page loads together. */
+export async function loadPaymentOrdersData(): Promise<ReportInitialData<PaymentOrdersLedger> | null> {
+  const [page, summary] = await Promise.all([
+    loadReportInitialData<PaymentOrdersPage>(paymentOrdersPath({})),
+    loadReportInitialData<PaymentOrderSummary>(paymentOrderSummaryPath({})),
+  ]);
+  if (!page || !summary) return null;
+  return {
+    data: { page: page.data, summary: summary.data },
+    loadedAt: Math.min(page.loadedAt, summary.loadedAt),
+  };
+}
+
+export function loadPaymentOrderData(orderId: string) {
+  return loadReportInitialData<PaymentOrderDetail>(paymentOrderPath(orderId));
+}
+
+/** The ledger's totals, whose capabilities say whether the operator may record an order. */
+export function loadPaymentOrderCapabilitiesData() {
+  return loadReportInitialData<PaymentOrderSummary>(paymentOrderSummaryPath({}));
+}
+
+/** The reconciliation worklist at its default threshold. */
+export function loadUnmatchedPaymentOrdersData() {
+  return loadReportInitialData<UnmatchedPaymentOrders>(
+    unmatchedPaymentOrdersPath(UNMATCHED_DEFAULT_STALE_PENDING_DAYS),
+  );
+}
+
+/** The export screen's count for the filters in the address, read the way the page reads them. */
+export function loadPaymentOrderExportSummaryData(params: ReportSearchParams) {
+  const fields = readPaymentOrderExportFields((name) => searchParam(params, name));
+  return loadReportInitialData<PaymentOrderSummary>(
+    paymentOrderSummaryPath(paymentOrderExportFilters(fields)),
+  );
 }

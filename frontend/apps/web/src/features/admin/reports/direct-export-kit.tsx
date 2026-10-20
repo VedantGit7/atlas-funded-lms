@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -13,12 +13,15 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   managePageDescClassName,
   managePageTitleClassName,
   managePrimaryButtonClassName,
   manageSecondaryButtonClassName,
 } from "../manage/manage-ui-shared";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale } from "./viewer-time";
 
 /*
  * The "export the filtered set now" pages (Payment orders, Attribution
@@ -82,6 +85,7 @@ export function useDirectExport<TFilters, TSummary, TItem, TColumn extends strin
   noun,
   narrow,
   summaryErrorMessage,
+  initial = null,
 }: {
   filters: TFilters;
   fetchSummary: (filters: TFilters) => Promise<TSummary>;
@@ -94,10 +98,15 @@ export function useDirectExport<TFilters, TSummary, TItem, TColumn extends strin
   /** What to narrow when the cap is reached: "the filters", "the date range". */
   narrow: string;
   summaryErrorMessage: string;
+  /**
+   * The count for the filters the page opens on, loaded by the server; the
+   * first browser load is skipped when present. The page reads it once.
+   */
+  initial?: ReportInitialData<TSummary> | null;
 }) {
   const [columns, setColumns] = useState<Set<TColumn>>(() => new Set(allColumns));
-  const [summary, setSummary] = useState<TSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState<TSummary | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
@@ -106,9 +115,9 @@ export function useDirectExport<TFilters, TSummary, TItem, TColumn extends strin
   const requestId = useRef(0);
 
   const load = useCallback(
-    async (activeFilters: TFilters) => {
+    async (activeFilters: TFilters, soft = false) => {
       const ticket = ++requestId.current;
-      setLoading(true);
+      if (!soft) setLoading(true);
       try {
         const next = await fetchSummary(activeFilters);
         // A count for filters the operator has already changed would be worse
@@ -121,15 +130,18 @@ export function useDirectExport<TFilters, TSummary, TItem, TColumn extends strin
         setSummary(null);
         setError(caught instanceof ClientApiError ? caught.message : summaryErrorMessage);
       } finally {
-        if (ticket === requestId.current) setLoading(false);
+        if (ticket === requestId.current && !soft) setLoading(false);
       }
     },
     [fetchSummary, summaryErrorMessage],
   );
 
-  useEffect(() => {
-    void load(filters);
-  }, [load, filters]);
+  const loadForFilters = useCallback(
+    (options?: { soft?: boolean }) => load(filters, options?.soft === true),
+    [load, filters],
+  );
+
+  useReportLoad(loadForFilters, initial);
 
   function toggleColumn(key: TColumn) {
     setColumns((previous) => {
@@ -255,6 +267,7 @@ export function DirectExportPage<TColumn extends string>({
   /** What the file holds beyond its row count, or null when there is nothing to say. */
   detail: ReactNode;
 }) {
+  const viewer = useViewerLocale();
   const selectedCount = columnOptions.filter((column) => state.columns.has(column.key)).length;
 
   return (
@@ -393,7 +406,7 @@ export function DirectExportPage<TColumn extends string>({
                 {state.loading ? (
                   <span className="inline-block h-7 w-20 rounded bg-[var(--admin-surface-high)] align-middle motion-safe:animate-pulse" />
                 ) : (
-                  (rowCount ?? 0).toLocaleString()
+                  (rowCount ?? 0).toLocaleString(viewer.locale)
                 )}
               </span>
               <p className="mt-2 text-xs text-[var(--admin-on-surface-variant)]">{rowCountHint}</p>

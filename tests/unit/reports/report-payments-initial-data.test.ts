@@ -131,5 +131,59 @@ describe("Payments initial data", () => {
       detail: null,
       transactions: null,
     });
+    await expect(payments.loadPaymentOrdersData()).resolves.toBeNull();
+    await expect(payments.loadPaymentOrderData("ord-1")).resolves.toBeNull();
+    await expect(payments.loadPaymentOrderCapabilitiesData()).resolves.toBeNull();
+    await expect(payments.loadUnmatchedPaymentOrdersData()).resolves.toBeNull();
+    await expect(payments.loadPaymentOrderExportSummaryData({})).resolves.toBeNull();
+  });
+});
+
+const O = "/api/v1/payments/orders";
+
+describe("Payment orders initial data", () => {
+  it("asks for what each order page's first browser load would", async () => {
+    await payments.loadPaymentOrdersData();
+    await payments.loadPaymentOrderData("ord-1");
+    await payments.loadPaymentOrderCapabilitiesData();
+    await payments.loadUnmatchedPaymentOrdersData();
+    await payments.loadPaymentOrderExportSummaryData({});
+    expect(state.paths).toEqual([
+      `${O}?limit=50`,
+      `${O}/summary`,
+      `${O}/ord-1`,
+      `${O}/summary`,
+      `${O}/unmatched?stalePendingDays=7`,
+      `${O}/summary`,
+    ]);
+  });
+
+  it("counts the export screen's filters the way the page reads them from the address", async () => {
+    await payments.loadPaymentOrderExportSummaryData({
+      status: "paid",
+      currency: ["inr", "usd"],
+      settlement: "bogus",
+      q: " asha ",
+    });
+    await payments.loadPaymentOrderExportSummaryData({ settlement: "unsettled", q: "  " });
+    expect(state.paths).toEqual([
+      `${O}/summary?status=paid&q=asha&currency=INR`,
+      `${O}/summary?settlement=unsettled`,
+    ]);
+  });
+
+  it("keeps an order id inside its own path segment", async () => {
+    await payments.loadPaymentOrderData("a/b?c");
+    expect(state.paths).toEqual([`${O}/a%2Fb%3Fc`]);
+  });
+
+  it("gives the ledger its first page and totals together, or nothing", async () => {
+    await expect(payments.loadPaymentOrdersData()).resolves.toMatchObject({
+      data: { page: { path: `${O}?limit=50` }, summary: { path: `${O}/summary` } },
+    });
+    state.failing = ["/summary"];
+    await expect(payments.loadPaymentOrdersData()).resolves.toBeNull();
+    state.failing = ["?limit="];
+    await expect(payments.loadPaymentOrdersData()).resolves.toBeNull();
   });
 });
