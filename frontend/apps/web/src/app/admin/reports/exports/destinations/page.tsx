@@ -3,10 +3,14 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { AdminExportDestinationsPage } from "../../../../../features/admin/reports/AdminExportDestinationsPage";
+import { loadExportDestinationsData } from "../../../../../lib/server/report-exports-initial-data";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 export default async function AdminExportDestinationsRoutePage() {
-  const gate = await runTenantStateGate();
+  const [gate, initialRoster] = await Promise.all([
+    runTenantStateGate(),
+    loadExportDestinationsData(),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -25,7 +29,7 @@ export default async function AdminExportDestinationsRoutePage() {
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading destinations…</p>
         }
       >
-        <AdminExportDestinationsPage />
+        <AdminExportDestinationsPage initialRoster={initialRoster} />
       </Suspense>
     </AdminPageGate>
   );

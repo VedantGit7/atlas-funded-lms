@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 import { EXPORTS_REPORT_DEFINITIONS } from "./admin-exports-roster-api";
 
@@ -92,26 +90,38 @@ function buildQuery(params: Record<string, string | number | boolean | undefined
   return query ? `?${query}` : "";
 }
 
+export type SchedulesRosterPayload = {
+  items: SchedulesRosterItem[];
+  pageInfo: PageInfo;
+  summary: SchedulesRosterSummary;
+};
+
+/** What the schedules roster opens on; the server loads the first page with it too. */
+export const SCHEDULES_ROSTER_DEFAULTS = {
+  status: "all",
+  cadence: "any",
+  destination: "any",
+  sort: "next_run_asc",
+  page: 1,
+  limit: 50,
+} as const satisfies SchedulesRosterFilters;
+
+export function schedulesRosterPath(filters?: SchedulesRosterFilters): string {
+  return `/api/v1/reports/exports/schedules${buildQuery({
+    q: filters?.q,
+    definitionKey: filters?.definitionKey,
+    status: filters?.status,
+    cadence: filters?.cadence,
+    destination: filters?.destination,
+    ownerMembershipId: filters?.ownerMembershipId,
+    sort: filters?.sort,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 50,
+  })}`;
+}
+
 export async function fetchSchedulesRoster(filters?: SchedulesRosterFilters) {
-  return clientApi.get<{
-    data: {
-      items: SchedulesRosterItem[];
-      pageInfo: PageInfo;
-      summary: SchedulesRosterSummary;
-    };
-  }>(
-    `/api/v1/reports/exports/schedules${buildQuery({
-      q: filters?.q,
-      definitionKey: filters?.definitionKey,
-      status: filters?.status,
-      cadence: filters?.cadence,
-      destination: filters?.destination,
-      ownerMembershipId: filters?.ownerMembershipId,
-      sort: filters?.sort,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 50,
-    })}`,
-  );
+  return clientApi.get<{ data: SchedulesRosterPayload }>(schedulesRosterPath(filters));
 }
 
 export async function updateReportSchedule(
@@ -226,17 +236,25 @@ export type ScheduleDetail = {
   runsPageInfo: PageInfo;
 };
 
-export async function fetchScheduleDetail(
+/** The page of past runs a schedule's page opens on. */
+export const SCHEDULE_DETAIL_RUNS_DEFAULTS = { runsPage: 1, runsLimit: 10 } as const;
+
+export function scheduleDetailPath(
   scheduleId: string,
   opts?: { runsPage?: number; runsLimit?: number },
-) {
+): string {
   const search = new URLSearchParams();
   if (opts?.runsPage) search.set("runsPage", String(opts.runsPage));
   if (opts?.runsLimit) search.set("runsLimit", String(opts.runsLimit));
   const q = search.toString();
-  return clientApi.get<{ data: ScheduleDetail }>(
-    `/api/v1/reports/exports/schedules/${scheduleId}${q ? `?${q}` : ""}`,
-  );
+  return `/api/v1/reports/exports/schedules/${encodeURIComponent(scheduleId)}${q ? `?${q}` : ""}`;
+}
+
+export async function fetchScheduleDetail(
+  scheduleId: string,
+  opts?: { runsPage?: number; runsLimit?: number },
+) {
+  return clientApi.get<{ data: ScheduleDetail }>(scheduleDetailPath(scheduleId, opts));
 }
 
 export async function duplicateSchedule(scheduleId: string) {

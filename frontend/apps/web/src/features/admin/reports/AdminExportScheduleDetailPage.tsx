@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -20,8 +20,10 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { downloadReportExport } from "./admin-reports-api";
 import {
+  SCHEDULE_DETAIL_RUNS_DEFAULTS,
   deleteReportSchedule,
   duplicateSchedule,
   fetchScheduleDetail,
@@ -30,6 +32,8 @@ import {
   type ScheduleDetail,
   type ScheduleDetailRun,
 } from "./admin-export-schedules-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const primaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 text-[13px] font-semibold text-[var(--admin-on-primary)] transition-all hover:bg-[var(--admin-primary-strong)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -40,27 +44,34 @@ const secondaryButtonClassName =
 const dangerOutlineButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-danger)] bg-transparent px-3 text-[13px] font-semibold text-[var(--admin-danger)] transition-all hover:bg-[color-mix(in_srgb,var(--admin-danger)_8%,transparent)] active:translate-y-px disabled:opacity-50";
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatAbsolute(value: string | null): string {
+function formatAbsoluteFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${d} ${hh}:${mm}`;
+  // YYYY-MM-DD HH:mm in the viewer's timezone (see viewer-time).
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: viewer.timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((entry) => entry.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}`;
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 0) {
     const ahead = Math.abs(diffMs);
     if (ahead < 60_000) return "in under a minute";
@@ -217,6 +228,8 @@ function DeleteModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   return (
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center bg-[color-mix(in_srgb,var(--admin-on-surface)_40%,transparent)] p-4 backdrop-blur-[2px]"
@@ -300,46 +313,77 @@ function DeleteModal({
   );
 }
 
-export function AdminExportScheduleDetailPage() {
+type ScheduleDetailPageProps = {
+  /** The schedule, from the route; the address names it when absent. */
+  scheduleId?: string;
+  /** The schedule and its first page of runs, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<ScheduleDetail> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminExportScheduleDetailPage(props: ScheduleDetailPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <ScheduleDetailScreen {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ScheduleDetailScreen({
+  scheduleId: scheduleIdProp,
+  initialDetail,
+}: ScheduleDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const params = useParams<{ scheduleId: string }>();
   const router = useRouter();
-  const scheduleId = params.scheduleId;
+  const scheduleId = scheduleIdProp ?? params.scheduleId;
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [detail, setDetail] = useState<ScheduleDetail | null>(null);
-  const [runsPage, setRunsPage] = useState(1);
+  const [detail, setDetail] = useState<ScheduleDetail | null>(initial?.data ?? null);
+  const [runsPage, setRunsPage] = useState<number>(SCHEDULE_DETAIL_RUNS_DEFAULTS.runsPage);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    if (!scheduleId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchScheduleDetail(scheduleId, {
-        runsPage,
-        runsLimit: 10,
-      });
-      setDetail(response.data);
-    } catch (err) {
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (!scheduleId) return;
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchScheduleDetail(scheduleId, {
+          runsPage,
+          runsLimit: SCHEDULE_DETAIL_RUNS_DEFAULTS.runsLimit,
+        });
+        setDetail(response.data);
+      } catch (err) {
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Unable to load schedule.",
-      );
-      setDetail(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [scheduleId, runsPage]);
+            : err instanceof Error
+              ? err.message
+              : "Unable to load schedule.",
+        );
+        setDetail(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [scheduleId, runsPage],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleToggle() {
     if (!detail) return;

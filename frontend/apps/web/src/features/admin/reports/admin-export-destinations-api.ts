@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type DestinationKind = "email" | "webhook" | "storage";
@@ -85,23 +83,34 @@ function buildQuery(params: Record<string, string | number | boolean | undefined
   return query ? `?${query}` : "";
 }
 
+export type DestinationsRosterPayload = {
+  items: DestinationItem[];
+  pageInfo: PageInfo;
+  summary: DestinationsRosterSummary;
+};
+
+/** What the destinations roster opens on; the server loads the first page with it too. */
+export const DESTINATIONS_ROSTER_DEFAULTS = {
+  kind: "any",
+  status: "all",
+  sort: "name_asc",
+  page: 1,
+  limit: 50,
+} as const satisfies DestinationsRosterFilters;
+
+export function destinationsRosterPath(filters?: DestinationsRosterFilters): string {
+  return `/api/v1/reports/exports/destinations${buildQuery({
+    q: filters?.q,
+    kind: filters?.kind,
+    status: filters?.status,
+    sort: filters?.sort,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 50,
+  })}`;
+}
+
 export async function fetchDestinationsRoster(filters?: DestinationsRosterFilters) {
-  return clientApi.get<{
-    data: {
-      items: DestinationItem[];
-      pageInfo: PageInfo;
-      summary: DestinationsRosterSummary;
-    };
-  }>(
-    `/api/v1/reports/exports/destinations${buildQuery({
-      q: filters?.q,
-      kind: filters?.kind,
-      status: filters?.status,
-      sort: filters?.sort,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 50,
-    })}`,
-  );
+  return clientApi.get<{ data: DestinationsRosterPayload }>(destinationsRosterPath(filters));
 }
 
 export type CreateDestinationBody =

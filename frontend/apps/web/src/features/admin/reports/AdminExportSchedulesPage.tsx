@@ -22,8 +22,11 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { DropdownField } from "../../studio/courses/admin-form-dropdown-shared";
 import {
+  SCHEDULES_ROSTER_DEFAULTS,
+  type SchedulesRosterPayload,
   bulkMutateSchedules,
   deleteReportSchedule,
   EXPORTS_REPORT_DEFINITIONS,
@@ -37,6 +40,8 @@ import {
   type SchedulesRosterItem,
   type SchedulesRosterSummary,
 } from "./admin-export-schedules-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const primaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 text-[13px] font-semibold text-[var(--admin-on-primary)] transition-all hover:bg-[var(--admin-primary-strong)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -64,27 +69,34 @@ const EMPTY_SUMMARY: SchedulesRosterSummary = {
   externalDeliveryCount: 0,
 };
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatAbsolute(value: string | null): string {
+function formatAbsoluteFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${d} ${hh}:${mm}`;
+  // YYYY-MM-DD HH:mm in the viewer's timezone (see viewer-time).
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: viewer.timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((entry) => entry.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}`;
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 0) {
     const ahead = Math.abs(diffMs);
     if (ahead < 60_000) return "in under a minute";
@@ -186,6 +198,8 @@ function DeleteScheduleModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const destinationLabel = item.destinations.map((d) => d.label).join(", ") || "Download";
 
   return (
@@ -270,29 +284,56 @@ function DeleteScheduleModal({
   );
 }
 
-export function AdminExportSchedulesPage() {
+type SchedulesPageProps = {
+  /** The first page, loaded by the server; the first browser load is skipped when present. */
+  initialRoster?: ReportInitialData<SchedulesRosterPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminExportSchedulesPage(props: SchedulesPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialRoster?.loadedAt ?? null}>
+      <SchedulesRoster {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function SchedulesRoster({ initialRoster }: SchedulesPageProps) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const statusLabelId = useId();
   const cadenceLabelId = useId();
   const destinationLabelId = useId();
   const sortLabelId = useId();
   const reportLabelId = useId();
 
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialRoster ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [items, setItems] = useState<SchedulesRosterItem[]>([]);
-  const [summary, setSummary] = useState<SchedulesRosterSummary>(EMPTY_SUMMARY);
-  const [totalCount, setTotalCount] = useState(0);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+  const [items, setItems] = useState<SchedulesRosterItem[]>(initial?.data.items ?? []);
+  const [summary, setSummary] = useState<SchedulesRosterSummary>(
+    initial?.data.summary ?? EMPTY_SUMMARY,
+  );
+  const [totalCount, setTotalCount] = useState(initial?.data.pageInfo.totalCount ?? 0);
+  const [page, setPage] = useState<number>(SCHEDULES_ROSTER_DEFAULTS.page);
+  const [totalPages, setTotalPages] = useState(initial?.data.pageInfo.totalPages ?? 0);
 
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
-  const [status, setStatus] = useState<ScheduleStatusFilter>("all");
-  const [cadence, setCadence] = useState<ScheduleCadenceFilter>("any");
-  const [destination, setDestination] = useState<ScheduleDestinationFilter>("any");
+  const [status, setStatus] = useState<ScheduleStatusFilter>(SCHEDULES_ROSTER_DEFAULTS.status);
+  const [cadence, setCadence] = useState<ScheduleCadenceFilter>(SCHEDULES_ROSTER_DEFAULTS.cadence);
+  const [destination, setDestination] = useState<ScheduleDestinationFilter>(
+    SCHEDULES_ROSTER_DEFAULTS.destination,
+  );
   const [definitionKey, setDefinitionKey] = useState("");
-  const [sort, setSort] = useState<ScheduleSort>("next_run_asc");
+  const [sort, setSort] = useState<ScheduleSort>(SCHEDULES_ROSTER_DEFAULTS.sort);
 
   const [statusOpen, setStatusOpen] = useState(false);
   const [cadenceOpen, setCadenceOpen] = useState(false);
@@ -313,42 +354,44 @@ export function AdminExportSchedulesPage() {
     };
   }, [q]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchSchedulesRoster({
-        q: debouncedQ || undefined,
-        status,
-        cadence,
-        destination,
-        definitionKey: definitionKey || undefined,
-        sort,
-        page,
-        limit: 50,
-      });
-      setItems(response.data.items);
-      setSummary(response.data.summary);
-      setTotalCount(response.data.pageInfo.totalCount);
-      setTotalPages(response.data.pageInfo.totalPages);
-    } catch (err) {
-      setError(
-        err instanceof ClientApiError
-          ? err.message
-          : err instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchSchedulesRoster({
+          q: debouncedQ || undefined,
+          status,
+          cadence,
+          destination,
+          definitionKey: definitionKey || undefined,
+          sort,
+          page,
+          limit: SCHEDULES_ROSTER_DEFAULTS.limit,
+        });
+        setItems(response.data.items);
+        setSummary(response.data.summary);
+        setTotalCount(response.data.pageInfo.totalCount);
+        setTotalPages(response.data.pageInfo.totalPages);
+      } catch (err) {
+        setError(
+          err instanceof ClientApiError
             ? err.message
-            : "Unable to load schedules.",
-      );
-      setItems([]);
-      setSummary(EMPTY_SUMMARY);
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedQ, status, cadence, destination, definitionKey, sort, page]);
+            : err instanceof Error
+              ? err.message
+              : "Unable to load schedules.",
+        );
+        setItems([]);
+        setSummary(EMPTY_SUMMARY);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [debouncedQ, status, cadence, destination, definitionKey, sort, page],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     setPage(1);

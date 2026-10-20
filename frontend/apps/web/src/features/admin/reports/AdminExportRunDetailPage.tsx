@@ -18,8 +18,10 @@ import {
 } from "lucide-react";
 import { primaryButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { downloadReportExport } from "./admin-reports-api";
 import {
+  exportRunSourceType,
   cancelExportRun,
   deleteExportRunFile,
   fetchExportRunDetail,
@@ -27,6 +29,8 @@ import {
   type ExportRunDetail,
   type ExportRunPipelineStage,
 } from "./admin-export-run-detail-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-low)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -38,11 +42,12 @@ function formatCount(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
-function formatAbsolute(value: string | null): string {
+function formatAbsoluteFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
   return date.toLocaleString("en-GB", {
+    timeZone: viewer.timeZone,
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -53,11 +58,12 @@ function formatAbsolute(value: string | null): string {
   });
 }
 
-function formatClock(value: string | null): string {
+function formatClockFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
   return date.toLocaleTimeString("en-GB", {
+    timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -65,11 +71,11 @@ function formatClock(value: string | null): string {
   });
 }
 
-function formatRelative(value: string | null): string {
+function formatRelativeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const delta = Date.now() - date.getTime();
+  const delta = viewer.now - date.getTime();
   const seconds = Math.round(delta / 1000);
   if (seconds < 60) return `${String(seconds)}s ago`;
   const minutes = Math.round(seconds / 60);
@@ -88,22 +94,22 @@ function formatDuration(seconds: number | null): string {
   return rem === 0 ? `${String(mins)}m` : `${String(mins)}m ${String(rem)}s`;
 }
 
-function expiresInLabel(expiresAt: string | null): string | null {
+function expiresInLabelFor(expiresAt: string | null, viewer: ViewerLocale): string | null {
   if (!expiresAt) return null;
   const date = new Date(expiresAt);
   if (Number.isNaN(date.getTime())) return null;
-  const ms = date.getTime() - Date.now();
+  const ms = date.getTime() - viewer.now;
   if (ms <= 0) return "Expired";
   const days = Math.ceil(ms / (24 * 60 * 60 * 1000));
   if (days === 1) return "in 1 day";
   return `in ${String(days)} days`;
 }
 
-function isExpiringSoon(expiresAt: string | null): boolean {
+function isExpiringSoonFor(expiresAt: string | null, viewer: ViewerLocale): boolean {
   if (!expiresAt) return false;
   const date = new Date(expiresAt);
   if (Number.isNaN(date.getTime())) return false;
-  const ms = date.getTime() - Date.now();
+  const ms = date.getTime() - viewer.now;
   return ms > 0 && ms <= 48 * 60 * 60 * 1000;
 }
 
@@ -215,6 +221,8 @@ function DetailLoadingSkeleton() {
 }
 
 function PipelinePanel({ stages }: { stages: ExportRunPipelineStage[] }) {
+  const viewer = useViewerLocale();
+  const formatClock = withViewer(formatClockFor, viewer);
   return (
     <section className="overflow-x-auto rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-sm">
       <h2 className="mb-6 text-[16px] font-semibold text-[var(--admin-on-surface)]">
@@ -310,6 +318,8 @@ function DeleteFileModal({
   onClose: () => void;
   onConfirm: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatAbsolute = withViewer(formatAbsoluteFor, viewer);
   const titleId = useId();
 
   useEffect(() => {
@@ -422,19 +432,41 @@ function DeleteFileModal({
   );
 }
 
-export function AdminExportRunDetailPage() {
+type ExportRunDetailPageProps = {
+  /** The run, from the route; the address names it when absent. */
+  runId?: string;
+  /** The run, loaded by the server; the first browser load is skipped when present. */
+  initialDetail?: ReportInitialData<ExportRunDetail> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminExportRunDetailPage(props: ExportRunDetailPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialDetail?.loadedAt ?? null}>
+      <ExportRunDetailScreen {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ExportRunDetailScreen({ runId: runIdProp, initialDetail }: ExportRunDetailPageProps) {
+  const viewer = useViewerLocale();
+  const formatClock = withViewer(formatClockFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const expiresInLabel = withViewer(expiresInLabelFor, viewer);
+  const isExpiringSoon = withViewer(isExpiringSoonFor, viewer);
   const params = useParams<{ runId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const runId = params.runId;
-  const sourceTypeParam = searchParams.get("source");
-  const sourceType =
-    sourceTypeParam === "report_run" || sourceTypeParam === "export_job"
-      ? sourceTypeParam
-      : undefined;
+  const runId = runIdProp ?? params.runId;
+  const sourceType = exportRunSourceType(searchParams.get("source"));
 
-  const [detail, setDetail] = useState<ExportRunDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialDetail ?? null);
+  const [detail, setDetail] = useState<ExportRunDetail | null>(initial?.data ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [cleanupNotice, setCleanupNotice] = useState<string | null>(null);
   const [copyFlash, setCopyFlash] = useState<"id" | "name" | "params" | null>(null);
@@ -463,10 +495,16 @@ export function AdminExportRunDetailPage() {
     }
   }, [runId, sourceType]);
 
-  useEffect(() => {
-    setLoading(true);
-    void load();
-  }, [load]);
+  // The first load, as the server did it; polling below repeats `load` itself.
+  const loadFirst = useCallback(
+    async (options?: { soft?: boolean }) => {
+      if (options?.soft !== true) setLoading(true);
+      await load();
+    },
+    [load],
+  );
+
+  useReportLoad(loadFirst, initial);
 
   useEffect(() => {
     if (!detail) return;
