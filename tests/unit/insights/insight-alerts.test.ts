@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyInsightAlertMutation,
   emptyInsightAlertState,
+  fillRuleDescription,
   evaluateInsightAlertRules,
   muteUntilIso,
   openAlertsFromBoard,
@@ -326,5 +327,17 @@ describe("insight alerts board", () => {
 
     expect(formRule?.currentCaption).toBe("Current data would produce 1 warning alert.");
     expect(ctaRule?.currentCaption).toBe("Current click-through rate is 3%.");
+  });
+
+  it("writes a percent threshold once", () => {
+    expect(fillRuleDescription("Warn below {threshold}% of views.", 4, "percent")).toBe(
+      "Warn below 4% of views.",
+    );
+    expect(fillRuleDescription("Warn below {threshold} percent.", 4, "percent")).toBe(
+      "Warn below 4% percent.",
+    );
+    expect(fillRuleDescription("Warn at {threshold} or more.", 4, "count")).toBe(
+      "Warn at 4 or more.",
+    );
   });
 });
