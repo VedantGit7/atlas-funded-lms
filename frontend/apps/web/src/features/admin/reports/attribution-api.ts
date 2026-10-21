@@ -185,6 +185,16 @@ export function readAttributionLogFields(
   };
 }
 
+/** No narrowing on any UTM axis: the export screen offers none. */
+export const ATTRIBUTION_EXPORT_AXIS: AttributionLogFields["axis"] = {
+  source: "",
+  medium: "",
+  campaign: "",
+  sourceUnset: false,
+  mediumUnset: false,
+  campaignUnset: false,
+};
+
 /**
  * The filters the log loads for its fields. The date bounds are passed in
  * already converted, because they are the viewer's own midnights.

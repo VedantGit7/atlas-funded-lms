@@ -1,9 +1,14 @@
 import "server-only";
 import {
   DESTINATIONS_ROSTER_DEFAULTS,
+  ENABLED_DESTINATIONS_FILTERS,
   destinationsRosterPath,
   type DestinationsRosterPayload,
 } from "../../features/admin/reports/admin-export-destinations-api";
+import {
+  EXPORT_SETTINGS_PATH,
+  type ExportSettingsPayload,
+} from "../../features/admin/reports/admin-export-settings-api";
 import {
   exportRunDetailPath,
   exportRunSourceType,
@@ -17,6 +22,17 @@ import {
   type ScheduleDetail,
   type SchedulesRosterPayload,
 } from "../../features/admin/reports/admin-export-schedules-api";
+import {
+  REPORT_DEFINITIONS_PATH,
+  type DomainDefinition,
+} from "../../features/admin/reports/admin-reports-api";
+import {
+  ATTRIBUTION_EXPORT_AXIS,
+  attributionLogFilters,
+  attributionSummaryPath,
+  readAttributionLogFields,
+  type AttributionSummary,
+} from "../../features/admin/reports/attribution-api";
 import { loadReportInitialData } from "./report-initial-data";
 import { searchParam, type ReportSearchParams } from "./report-landing-initial-data";
 
@@ -50,5 +66,35 @@ export function loadExportSchedulesData() {
 export function loadExportDestinationsData() {
   return loadReportInitialData<DestinationsRosterPayload>(
     destinationsRosterPath(DESTINATIONS_ROSTER_DEFAULTS),
+  );
+}
+
+/** The export builder's report definitions, as the API returns them, and the destinations it offers. */
+export async function loadNewExportData() {
+  const [definitions, destinations] = await Promise.all([
+    loadReportInitialData<{ items: DomainDefinition[] }>(REPORT_DEFINITIONS_PATH),
+    loadReportInitialData<DestinationsRosterPayload>(
+      destinationsRosterPath(ENABLED_DESTINATIONS_FILTERS),
+    ),
+  ]);
+  return { definitions, destinations };
+}
+
+export function loadExportSettingsData() {
+  return loadReportInitialData<ExportSettingsPayload>(EXPORT_SETTINGS_PATH);
+}
+
+/**
+ * The Attribution export screen's count for the filters in the address. A
+ * date bound is left to the browser, which turns it into the viewer's own
+ * midnight.
+ */
+export function loadAttributionExportSummaryData(params: ReportSearchParams) {
+  const fields = readAttributionLogFields((name) => searchParam(params, name));
+  if (fields.fromDate.trim() !== "" || fields.toDate.trim() !== "") return Promise.resolve(null);
+  return loadReportInitialData<AttributionSummary>(
+    attributionSummaryPath(
+      attributionLogFilters({ ...fields, axis: ATTRIBUTION_EXPORT_AXIS }, undefined, undefined),
+    ),
   );
 }

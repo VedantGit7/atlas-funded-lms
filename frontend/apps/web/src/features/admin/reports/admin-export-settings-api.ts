@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 
 export type FileRetentionUnit = "days" | "hours";
@@ -90,8 +88,10 @@ function buildQuery(params: Record<string, string | number | boolean | undefined
   return query ? `?${query}` : "";
 }
 
+export const EXPORT_SETTINGS_PATH = "/api/v1/reports/exports/settings";
+
 export async function fetchExportSettings() {
-  return clientApi.get<{ data: ExportSettingsPayload }>("/api/v1/reports/exports/settings");
+  return clientApi.get<{ data: ExportSettingsPayload }>(EXPORT_SETTINGS_PATH);
 }
 
 export async function updateExportSettings(body: {

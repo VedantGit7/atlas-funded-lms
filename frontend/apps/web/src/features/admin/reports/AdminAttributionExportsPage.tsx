@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -18,6 +19,10 @@ import {
 import { SalesMarketingReportTabs } from "./SalesMarketingReportTabs";
 import { AttributionErrorState } from "./AttributionStates";
 import {
+  ATTRIBUTION_EXPORT_AXIS,
+  attributionLogFilters,
+  readAttributionLogFields,
+  type AttributionSummary,
   fetchAttributionEventsExport,
   fetchAttributionSummary,
   type AttributionFilters,
@@ -30,9 +35,10 @@ import {
   attributionExportFilename,
   attributionFieldClassName,
   dateInputToIso,
-  formatRevenue,
+  formatRevenueFor,
   type AttributionExportColumnKey,
 } from "./attribution-shared";
+import { useViewerLocale, withViewer } from "./viewer-time";
 
 /**
  * `/admin/reports/sales-marketing/attribution/exports`: the filtered
@@ -61,40 +67,40 @@ const ATTRIBUTION_ONLY_COLUMNS: AttributionExportColumnKey[] = [
   "attributed",
 ];
 
-function isPresence(value: string): value is AttributionPresence {
-  return value === "any" || value === "attributed" || value === "none";
-}
-
-export function AdminAttributionExportsPage() {
+export function AdminAttributionExportsPage({
+  initialSummary,
+}: {
+  /** The count for the filters in the address, loaded by the server; the first browser load is skipped when present. */
+  initialSummary?: ReportInitialData<AttributionSummary> | null;
+} = {}) {
+  const viewer = useViewerLocale();
+  const formatRevenue = withViewer(formatRevenueFor, viewer);
   const searchParams = useSearchParams();
 
   // Seeded from the URL so "Export CSV" on the log arrives here already
-  // describing the same set of events the operator was looking at.
-  const [eventType, setEventType] = useState(() => searchParams.get("eventType") ?? "");
-  const [attribution, setAttribution] = useState<AttributionPresence>(() => {
-    const value = searchParams.get("attribution") ?? "any";
-    return isPresence(value) ? value : "any";
-  });
-  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
-  const [fromDate, setFromDate] = useState(() => searchParams.get("from")?.slice(0, 10) ?? "");
-  const [toDate, setToDate] = useState(() => searchParams.get("to")?.slice(0, 10) ?? "");
+  // describing the same set of events the operator was looking at. Read the
+  // way the server reads them, and once, like the server's count.
+  const [seed] = useState(() => readAttributionLogFields((name) => searchParams.get(name)));
+  const [initial] = useState(() => initialSummary ?? null);
+  const [eventType, setEventType] = useState(seed.eventType);
+  const [attribution, setAttribution] = useState<AttributionPresence>(seed.attribution);
+  const [query, setQuery] = useState(seed.query);
+  const [fromDate, setFromDate] = useState(seed.fromDate);
+  const [toDate, setToDate] = useState(seed.toDate);
 
   const [eventTypeOpen, setEventTypeOpen] = useState(false);
   const [attributionOpen, setAttributionOpen] = useState(false);
 
-  const filters: AttributionFilters = useMemo(() => {
-    // Absent bounds are absent keys, not explicit undefined: the client turns
-    // this object straight into query parameters.
-    const from = dateInputToIso(fromDate, "start");
-    const to = dateInputToIso(toDate, "end");
-    return {
-      ...(query.trim() ? { q: query.trim() } : {}),
-      ...(eventType ? { eventType } : {}),
-      ...(attribution !== "any" ? { attribution } : {}),
-      ...(from === undefined ? {} : { from }),
-      ...(to === undefined ? {} : { to }),
-    };
-  }, [query, eventType, attribution, fromDate, toDate]);
+  // The export narrows by no UTM axis, whatever the address says.
+  const filters: AttributionFilters = useMemo(
+    () =>
+      attributionLogFilters(
+        { query, eventType, attribution, axis: ATTRIBUTION_EXPORT_AXIS },
+        dateInputToIso(fromDate, "start"),
+        dateInputToIso(toDate, "end"),
+      ),
+    [query, eventType, attribution, fromDate, toDate],
+  );
 
   const exportState = useDirectExport({
     filters,
@@ -112,6 +118,7 @@ export function AdminAttributionExportsPage() {
     noun: { one: "event", many: "events" },
     narrow: "the date range",
     summaryErrorMessage: "The event count could not be read.",
+    initial,
   });
   const { summary } = exportState;
 
@@ -270,7 +277,7 @@ export function AdminAttributionExportsPage() {
                     >
                       <span className="font-data">{entry.eventType}</span>
                       <span className="text-xs text-[var(--admin-on-surface-variant)]">
-                        {entry.total.toLocaleString()}
+                        {entry.total.toLocaleString(viewer.locale)}
                       </span>
                     </button>
                   ))}
@@ -357,13 +364,13 @@ export function AdminAttributionExportsPage() {
               <li className="flex items-baseline justify-between gap-3">
                 <span className="text-[var(--admin-on-surface)]">Carrying attribution</span>
                 <span className="font-data tabular-nums text-[var(--admin-on-surface-variant)]">
-                  {summary.attributed.toLocaleString()}
+                  {summary.attributed.toLocaleString(viewer.locale)}
                 </span>
               </li>
               <li className="flex items-baseline justify-between gap-3">
                 <span className="text-[var(--admin-on-surface)]">No UTM at all</span>
                 <span className="font-data tabular-nums text-[var(--admin-on-surface-variant)]">
-                  {summary.noUtm.toLocaleString()}
+                  {summary.noUtm.toLocaleString(viewer.locale)}
                 </span>
               </li>
               {/* One line per currency, never a grand total. */}
@@ -376,7 +383,8 @@ export function AdminAttributionExportsPage() {
                     {formatRevenue(entry.amountCents, entry.currency)}
                   </span>
                   <span className="text-xs text-[var(--admin-on-surface-variant)]">
-                    {entry.events.toLocaleString()} {entry.events === 1 ? "event" : "events"}
+                    {entry.events.toLocaleString(viewer.locale)}{" "}
+                    {entry.events === 1 ? "event" : "events"}
                   </span>
                 </li>
               ))}

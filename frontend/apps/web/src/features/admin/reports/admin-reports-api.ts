@@ -1,5 +1,3 @@
-"use client";
-
 import { clientApi } from "../../../lib/client-api";
 import type { NormalizedResult, VizType } from "../../analytics/viz";
 
@@ -62,7 +60,7 @@ export type ReportHistoryItem = {
   completedAt: string | null;
 };
 
-type DomainDefinition = {
+export type DomainDefinition = {
   id: string;
   key: string;
   category: string;
@@ -143,7 +141,10 @@ function parseParamSchema(paramSchema: Record<string, unknown>): ReportParamDefi
   });
 }
 
-function mapDefinition(definition: DomainDefinition): ReportDefinition {
+/** Every report definition the tenant can run, as the API returns them. */
+export const REPORT_DEFINITIONS_PATH = "/api/v1/reports/definitions";
+
+export function mapDefinition(definition: DomainDefinition): ReportDefinition {
   return {
     id: definition.id,
     key: definition.key,
@@ -159,7 +160,7 @@ function mapDefinition(definition: DomainDefinition): ReportDefinition {
 
 export async function fetchReportDefinitions(category: string) {
   const response = await clientApi.get<{ data: { items: DomainDefinition[] } }>(
-    "/api/v1/reports/definitions",
+    REPORT_DEFINITIONS_PATH,
   );
 
   const definitions = response.data.items
@@ -176,7 +177,7 @@ export async function fetchReportDefinitions(category: string) {
 
 export async function fetchAllReportDefinitions() {
   const response = await clientApi.get<{ data: { items: DomainDefinition[] } }>(
-    "/api/v1/reports/definitions",
+    REPORT_DEFINITIONS_PATH,
   );
   return {
     data: {

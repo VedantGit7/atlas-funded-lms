@@ -64,5 +64,47 @@ describe("Exports initial data", () => {
     await expect(exportsData.loadExportScheduleData("schedule-1")).resolves.toBeNull();
     await expect(exportsData.loadExportSchedulesData()).resolves.toBeNull();
     await expect(exportsData.loadExportDestinationsData()).resolves.toBeNull();
+    await expect(exportsData.loadNewExportData()).resolves.toEqual({
+      definitions: null,
+      destinations: null,
+    });
+    await expect(exportsData.loadExportSettingsData()).resolves.toBeNull();
+    await expect(exportsData.loadAttributionExportSummaryData({})).resolves.toBeNull();
+  });
+});
+
+describe("Export builder, settings and Attribution export initial data", () => {
+  it("asks for what each page's first browser load would", async () => {
+    await exportsData.loadNewExportData();
+    await exportsData.loadExportSettingsData();
+    await exportsData.loadAttributionExportSummaryData({});
+    expect(state.paths).toEqual([
+      "/api/v1/reports/definitions",
+      `${E}/destinations?status=enabled&sort=name_asc&page=1&limit=100`,
+      `${E}/settings`,
+      "/api/v1/sales/attribution/summary",
+    ]);
+  });
+
+  it("counts the Attribution export's filters the way the page reads them, without a UTM axis", async () => {
+    await exportsData.loadAttributionExportSummaryData({
+      eventType: "purchase_completed",
+      attribution: "none",
+      q: " diwali ",
+      utmSource: "google",
+    });
+    expect(state.paths).toEqual([
+      "/api/v1/sales/attribution/summary?eventType=purchase_completed&q=diwali&attribution=none",
+    ]);
+  });
+
+  it("leaves an Attribution export with a date bound to the browser, which knows the viewer's midnight", async () => {
+    await expect(
+      exportsData.loadAttributionExportSummaryData({ from: "2026-09-01" }),
+    ).resolves.toBeNull();
+    await expect(
+      exportsData.loadAttributionExportSummaryData({ to: "2026-09-30T23:59:59.999Z" }),
+    ).resolves.toBeNull();
+    expect(state.paths).toEqual([]);
   });
 });

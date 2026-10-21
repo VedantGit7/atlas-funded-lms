@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { DropdownField } from "../../studio/courses/admin-form-dropdown-shared";
 import {
   fetchExportSettings,
@@ -33,6 +34,8 @@ import {
   type RetentionImpact,
   type RunRecordRetention,
 } from "./admin-export-settings-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const primaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 text-[13px] font-semibold text-[var(--admin-on-primary)] transition-all hover:bg-[var(--admin-primary-strong)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -125,10 +128,10 @@ function formatBytes(bytes: number): string {
   return `${gb < 10 ? gb.toFixed(2) : Math.round(gb)} GB`;
 }
 
-function formatRelative(value: string): string {
+function formatRelativeFor(value: string, viewer: ViewerLocale): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   if (diffMs < 60_000) return "Just now";
   const mins = Math.floor(diffMs / 60_000);
   if (mins < 60) return `${mins} min ago`;
@@ -383,6 +386,7 @@ function RetentionReductionModal({
   onCancel: () => void;
   onApply: () => void;
 }) {
+  const viewer = useViewerLocale();
   const titleId = useId();
   if (!open || !impact) return null;
   return (
@@ -431,7 +435,7 @@ function RetentionReductionModal({
                 Immediate impact
               </p>
               <p className="mt-0.5 text-base font-semibold text-[var(--admin-danger)]">
-                {impact.filesDeletedImmediately.toLocaleString()} file
+                {impact.filesDeletedImmediately.toLocaleString(viewer.locale)} file
                 {impact.filesDeletedImmediately === 1 ? "" : "s"}
               </p>
             </div>
@@ -454,7 +458,7 @@ function RetentionReductionModal({
               className="mt-0.5 h-4 w-4 rounded border-[var(--admin-outline)] text-[var(--admin-danger)] focus-visible:ring-2 focus-visible:ring-[var(--admin-danger)]/30"
             />
             <span className="text-sm text-[var(--admin-on-surface)]">
-              I acknowledge that {impact.filesDeletedImmediately.toLocaleString()} file
+              I acknowledge that {impact.filesDeletedImmediately.toLocaleString(viewer.locale)} file
               {impact.filesDeletedImmediately === 1 ? "" : "s"} will be queued for permanent
               deletion.
             </span>
@@ -499,6 +503,7 @@ function PurgeExpiredModal({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+  const viewer = useViewerLocale();
   const titleId = useId();
   if (!open) return null;
   return (
@@ -532,7 +537,7 @@ function PurgeExpiredModal({
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
             This will queue permanent deletion of{" "}
             <span className="font-semibold text-[var(--admin-on-surface)]">
-              {expiredCount.toLocaleString()}
+              {expiredCount.toLocaleString(viewer.locale)}
             </span>{" "}
             expired export file
             {expiredCount === 1 ? "" : "s"}
@@ -626,7 +631,28 @@ function ModuleTabNav({
   );
 }
 
-export function AdminExportSettingsPage() {
+type ExportSettingsPageProps = {
+  /** The settings, loaded by the server; the first browser load is skipped when present. */
+  initialSettings?: ReportInitialData<ExportSettingsPayload> | null;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminExportSettingsPage(props: ExportSettingsPageProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialSettings?.loadedAt ?? null}>
+      <ExportSettingsScreen {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ExportSettingsScreen({ initialSettings }: ExportSettingsPageProps) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialSettings ?? null);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const unitLabelId = useId();
   const runRecordLabelId = useId();
   const addRoleLabelId = useId();
@@ -634,20 +660,36 @@ export function AdminExportSettingsPage() {
   const externalToggleId = useId();
   const watermarkToggleId = useId();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [saving, setSaving] = useState(false);
   const [purging, setPurging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cleanupNotice, setCleanupNotice] = useState<string | null>(null);
-  const [draft, setDraft] = useState<ExportSettings | null>(null);
-  const [saved, setSaved] = useState<ExportSettings | null>(null);
-  const [storage, setStorage] = useState<ExportSettingsPayload["storage"] | null>(null);
-  const [availableRoles, setAvailableRoles] = useState<ExportSettingsRole[]>([]);
-  const [externalDestinationCount, setExternalDestinationCount] = useState(0);
-  const [personalDataFields, setPersonalDataFields] = useState<PersonalDataFieldMeta[]>([]);
-  const [recentAudit, setRecentAudit] = useState<ExportSettingsAuditEvent[]>([]);
-  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
-  const [updatedByName, setUpdatedByName] = useState<string | null>(null);
+  const [draft, setDraft] = useState<ExportSettings | null>(() =>
+    initial ? cloneSettings(initial.data.settings) : null,
+  );
+  const [saved, setSaved] = useState<ExportSettings | null>(() =>
+    initial ? cloneSettings(initial.data.settings) : null,
+  );
+  const [storage, setStorage] = useState<ExportSettingsPayload["storage"] | null>(
+    initial?.data.storage ?? null,
+  );
+  const [availableRoles, setAvailableRoles] = useState<ExportSettingsRole[]>(
+    initial?.data.availableRoles ?? [],
+  );
+  const [externalDestinationCount, setExternalDestinationCount] = useState(
+    initial?.data.externalDestinationCount ?? 0,
+  );
+  const [personalDataFields, setPersonalDataFields] = useState<PersonalDataFieldMeta[]>(
+    initial?.data.personalDataFields ?? [],
+  );
+  const [recentAudit, setRecentAudit] = useState<ExportSettingsAuditEvent[]>(
+    initial?.data.recentAudit ?? [],
+  );
+  const [updatedAt, setUpdatedAt] = useState<string | null>(initial?.data.updatedAt ?? null);
+  const [updatedByName, setUpdatedByName] = useState<string | null>(
+    initial?.data.updatedByName ?? null,
+  );
 
   const [unitOpen, setUnitOpen] = useState(false);
   const [runRecordOpen, setRunRecordOpen] = useState(false);
@@ -695,28 +737,30 @@ export function AdminExportSettingsPage() {
     setUpdatedByName(payload.updatedByName);
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchExportSettings();
-      applyPayload(response.data);
-    } catch (caught) {
-      setError(
-        caught instanceof ClientApiError
-          ? caught.message
-          : caught instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchExportSettings();
+        applyPayload(response.data);
+      } catch (caught) {
+        setError(
+          caught instanceof ClientApiError
             ? caught.message
-            : "Could not load export settings.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [applyPayload]);
+            : caught instanceof Error
+              ? caught.message
+              : "Could not load export settings.",
+        );
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [applyPayload],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     function onBeforeUnload(event: BeforeUnloadEvent) {
@@ -1158,14 +1202,14 @@ export function AdminExportSettingsPage() {
 
             <div className="mt-5 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
               <p className="text-sm text-[var(--admin-on-surface)]">
-                {storage.filesStoredCount.toLocaleString()} file
+                {storage.filesStoredCount.toLocaleString(viewer.locale)} file
                 {storage.filesStoredCount === 1 ? "" : "s"} stored (
                 {formatBytes(storage.estimatedBytes)}).{" "}
                 {storage.expiringSoonCount > 0
-                  ? `${storage.expiringSoonCount.toLocaleString()} expiring soon. `
+                  ? `${storage.expiringSoonCount.toLocaleString(viewer.locale)} expiring soon. `
                   : null}
                 {storage.expiredCount > 0
-                  ? `${storage.expiredCount.toLocaleString()} already expired.`
+                  ? `${storage.expiredCount.toLocaleString(viewer.locale)} already expired.`
                   : "No expired files waiting for purge."}
               </p>
               <div className="mt-3">
@@ -1338,13 +1382,14 @@ export function AdminExportSettingsPage() {
                         <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         Data can leave the protected console boundary
                         {externalDestinationCount > 0
-                          ? ` (${externalDestinationCount.toLocaleString()} active destination${externalDestinationCount === 1 ? "" : "s"})`
+                          ? ` (${externalDestinationCount.toLocaleString(viewer.locale)} active destination${externalDestinationCount === 1 ? "" : "s"})`
                           : ""}
                         .
                       </p>
                     ) : externalDestinationCount > 0 ? (
                       <p className="mt-1 text-xs text-[var(--admin-warning)]">
-                        {externalDestinationCount.toLocaleString()} existing external destination
+                        {externalDestinationCount.toLocaleString(viewer.locale)} existing external
+                        destination
                         {externalDestinationCount === 1 ? "" : "s"} may stop receiving new
                         deliveries while this is off.
                       </p>
