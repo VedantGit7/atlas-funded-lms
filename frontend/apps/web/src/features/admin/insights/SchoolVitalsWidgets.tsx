@@ -930,7 +930,8 @@ export function SchoolVitalsChartWidget({
       "funnel",
       "pie",
     ];
-    return preferred.filter((type) => types.includes(type));
+    // The default viz leads the list and appears again in its usual place; keep it once.
+    return [...new Set(preferred)].filter((type) => types.includes(type));
   }, [widget.data, widget.defaultViz]);
 
   const [vizType, setVizType] = useState<VizType>(() => {
