@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, Check, ChevronRight, Copy, Info, RefreshCw } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   fetchResourceUsageMetricDetail,
   type ResourceUsageMetricDetail,
 } from "./admin-resource-usage-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -27,21 +30,21 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatValue(value: number, unit: string): string {
+function formatValueFor(value: number, unit: string, viewer: ViewerLocale): string {
   if (unit === "GB" || unit === "h") {
     if (value < 0.01 && value > 0) return "<0.01";
-    return value.toLocaleString(undefined, {
+    return value.toLocaleString(viewer.locale, {
       minimumFractionDigits: value >= 100 ? 0 : 1,
       maximumFractionDigits: 2,
     });
   }
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 10_000) return `${Math.round(value / 1000)}k`;
-  return formatCount(value);
+  return formatCountFor(value, viewer);
 }
 
 function formatUnitSuffix(unit: string): string {
@@ -51,17 +54,21 @@ function formatUnitSuffix(unit: string): string {
   return ` ${unit}`;
 }
 
-function formatPeriodLabel(period: string): string {
+function formatPeriodLabelFor(period: string, viewer: ViewerLocale): string {
   const date = new Date(`${period}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric", timeZone: "UTC" });
+  return date.toLocaleDateString(viewer.locale, {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const minutes = Math.floor(diffMs / 60_000);
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${String(minutes)}m ago`;
@@ -70,7 +77,12 @@ function formatRelative(iso: string | null): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function formatDateShort(iso: string | null): string {
@@ -197,6 +209,9 @@ function SeriesChart({
   unit: string;
   limit: number | null;
 }) {
+  const viewer = useViewerLocale();
+  const formatValue = withViewer(formatValueFor, viewer);
+  const formatPeriodLabel = withViewer(formatPeriodLabelFor, viewer);
   if (series.length === 0) return null;
   const maxValue = Math.max(limit ?? 0, ...series.map((point) => point.value), 1);
   const limitTop = limit != null ? Math.max(4, 100 - (limit / maxValue) * 100) : null;
@@ -319,6 +334,8 @@ function NotMeteredBody({ data }: { data: ResourceUsageMetricDetail }) {
 }
 
 function LiveOnlyBody({ data }: { data: ResourceUsageMetricDetail }) {
+  const viewer = useViewerLocale();
+  const formatValue = withViewer(formatValueFor, viewer);
   return (
     <div className="max-w-3xl rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-8">
       <div className="flex flex-col gap-2 border-b border-[var(--admin-border)] pb-6">
@@ -365,6 +382,10 @@ function LiveOnlyBody({ data }: { data: ResourceUsageMetricDetail }) {
 }
 
 function MeteredBody({ data }: { data: ResourceUsageMetricDetail }) {
+  const viewer = useViewerLocale();
+  const formatValue = withViewer(formatValueFor, viewer);
+  const formatPeriodLabel = withViewer(formatPeriodLabelFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
   const value = data.currentValue ?? 0;
   const unit = data.unit;
 
@@ -686,36 +707,54 @@ function MeteredBody({ data }: { data: ResourceUsageMetricDetail }) {
 
 type Props = {
   metricKey: string;
+  /** The metric, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<ResourceUsageMetricDetail> | null;
 };
 
-export function AdminResourceUsageMetricDetailPage({ metricKey }: Props) {
-  const [loading, setLoading] = useState(true);
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminResourceUsageMetricDetailPage(props: Props) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <ResourceUsageMetricDetailScreen {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ResourceUsageMetricDetailScreen({ metricKey, initialData }: Props) {
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<ResourceUsageMetricDetail | null>(null);
+  const [data, setData] = useState<ResourceUsageMetricDetail | null>(initial?.data ?? null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchResourceUsageMetricDetail(metricKey);
-      setData(response.data);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchResourceUsageMetricDetail(metricKey);
+        setData(response.data);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Could not load metric detail.",
-      );
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [metricKey]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Could not load metric detail.",
+        );
+        setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [metricKey],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   if (loading && !data) {
     return <MetricLoadingSkeleton />;

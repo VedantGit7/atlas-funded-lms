@@ -16,7 +16,9 @@ import {
 } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  RESOURCE_USAGE_STORAGE_DEFAULTS,
   fetchResourceUsageStorage,
   type ResourceUsageStorageAssetType,
   type ResourceUsageStorageHolder,
@@ -25,6 +27,8 @@ import {
   type ResourceUsageStorageSegment,
   type ResourceUsageStorageSort,
 } from "./admin-resource-usage-roster-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const selectClassName =
   "h-9 min-w-[140px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-xs font-medium text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -82,23 +86,23 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatGb(value: number): string {
+function formatGbFor(value: number, viewer: ViewerLocale): string {
   if (value < 0.01 && value > 0) return "<0.01";
-  return value.toLocaleString(undefined, {
+  return value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value >= 100 ? 0 : 1,
     maximumFractionDigits: 2,
   });
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const minutes = Math.floor(diffMs / 60_000);
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${String(minutes)}m ago`;
@@ -107,7 +111,12 @@ function formatRelative(iso: string | null): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function downloadHoldersCsv(holders: ResourceUsageStorageHolder[]) {
@@ -269,6 +278,8 @@ function CompositionBand({
   dominantLabel: string | null;
   dominantShare: number | null;
 }) {
+  const viewer = useViewerLocale();
+  const formatGb = withViewer(formatGbFor, viewer);
   if (composition.length === 0) {
     return (
       <section className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5">
@@ -325,6 +336,8 @@ function CompositionBand({
 }
 
 function GrowthChart({ sparkline, deltaGb }: { sparkline: number[]; deltaGb: number }) {
+  const viewer = useViewerLocale();
+  const formatGb = withViewer(formatGbFor, viewer);
   const values = sparkline.length > 0 ? sparkline : [0];
   const max = Math.max(1, ...values);
   const mid = max / 2;
@@ -395,6 +408,8 @@ function GrowthChart({ sparkline, deltaGb }: { sparkline: number[]; deltaGb: num
 }
 
 function ReclaimPanel({ items }: { items: ResourceUsageStorageReclaim[] }) {
+  const viewer = useViewerLocale();
+  const formatGb = withViewer(formatGbFor, viewer);
   return (
     <section className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
       <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
@@ -433,52 +448,77 @@ function ReclaimPanel({ items }: { items: ResourceUsageStorageReclaim[] }) {
   );
 }
 
-export function AdminResourceUsageStoragePanel() {
-  const [loading, setLoading] = useState(true);
+type StoragePanelProps = {
+  /** The first page of storage holders, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<ResourceUsageStorageResponse> | null | undefined;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminResourceUsageStoragePanel(props: StoragePanelProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <ResourceUsageStorage {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ResourceUsageStorage({ initialData }: StoragePanelProps) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const formatGb = withViewer(formatGbFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const [loading, setLoading] = useState(initial === null);
   const [error, setError] = useState<string | null>(null);
   const [stale, setStale] = useState(false);
-  const [data, setData] = useState<ResourceUsageStorageResponse | null>(null);
-  const dataRef = useRef<ResourceUsageStorageResponse | null>(null);
-  const [page, setPage] = useState(1);
-  const [sort, setSort] = useState<ResourceUsageStorageSort>("size_desc");
+  const [data, setData] = useState<ResourceUsageStorageResponse | null>(initial?.data ?? null);
+  const dataRef = useRef<ResourceUsageStorageResponse | null>(initial?.data ?? null);
+  const [page, setPage] = useState<number>(RESOURCE_USAGE_STORAGE_DEFAULTS.page);
+  const [sort, setSort] = useState<ResourceUsageStorageSort>(RESOURCE_USAGE_STORAGE_DEFAULTS.sort);
   const [assetType, setAssetType] = useState<string>("");
 
   useEffect(() => {
     dataRef.current = data;
   }, [data]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchResourceUsageStorage({
-        page,
-        sort,
-        ...(assetType ? { assetType: assetType as ResourceUsageStorageAssetType } : {}),
-      });
-      setData(response.data);
-      setStale(false);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchResourceUsageStorage({
+          page,
+          sort,
+          ...(assetType ? { assetType: assetType as ResourceUsageStorageAssetType } : {}),
+        });
+        setData(response.data);
+        setStale(false);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Unable to fetch current storage metrics from the provider.",
-      );
-      if (dataRef.current) {
-        setStale(true);
-      } else {
-        setData(null);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Unable to fetch current storage metrics from the provider.",
+        );
+        if (dataRef.current) {
+          setStale(true);
+        } else {
+          setData(null);
+        }
+      } finally {
+        if (!soft) setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, [assetType, page, sort]);
+    },
+    [assetType, page, sort],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const summary = data?.summary;
   const pageInfo = data?.pageInfo;

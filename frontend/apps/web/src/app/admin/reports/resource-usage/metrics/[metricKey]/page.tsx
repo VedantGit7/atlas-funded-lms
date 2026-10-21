@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminResourceUsageMetricDetailPage } from "../../../../../../features/admin/reports/AdminResourceUsageMetricDetailPage";
+import { loadResourceUsageMetricData } from "../../../../../../lib/server/report-resource-usage-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -12,7 +13,10 @@ type PageProps = {
 export default async function AdminResourceUsageMetricRoutePage({ params }: PageProps) {
   const { metricKey } = await params;
   const decodedKey = decodeURIComponent(metricKey);
-  const gate = await runTenantStateGate();
+  const [gate, initialData] = await Promise.all([
+    runTenantStateGate(),
+    loadResourceUsageMetricData(decodedKey),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -31,7 +35,7 @@ export default async function AdminResourceUsageMetricRoutePage({ params }: Page
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading metric...</p>
         }
       >
-        <AdminResourceUsageMetricDetailPage metricKey={decodedKey} />
+        <AdminResourceUsageMetricDetailPage metricKey={decodedKey} initialData={initialData} />
       </Suspense>
     </AdminPageGate>
   );

@@ -17,8 +17,11 @@ import {
 } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import { RoleToggle } from "../../studio/courses/admin-form-dropdown-shared";
 import {
+  RESOURCE_USAGE_INACTIVITY_DEFAULTS,
+  RESOURCE_USAGE_INACTIVE_DEFAULTS,
   deactivateResourceUsageInactive,
   exportResourceUsageReport,
   fetchResourceUsageInactive,
@@ -33,6 +36,8 @@ import {
   type ResourceUsageInactiveView,
 } from "./admin-resource-usage-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const SETTINGS_KEY = "atlas.resource-usage.inactivity-settings";
 
@@ -49,11 +54,7 @@ type DeactivateReason =
   | "violation"
   | "other";
 
-const DEFAULT_SETTINGS: InactivitySettings = {
-  inactiveDays: 90,
-  includeInvitedNeverSignedIn: true,
-  excludeActivePaidEnrolment: false,
-};
+const DEFAULT_SETTINGS: InactivitySettings = { ...RESOURCE_USAGE_INACTIVITY_DEFAULTS };
 
 const DEFAULT_MESSAGE_SUBJECT = "We saved your place";
 const DEFAULT_MESSAGE_BODY = `Hi {{learner_name}},
@@ -154,15 +155,15 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "Never active";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
+  const minutes = Math.floor((viewer.now - date.getTime()) / 60_000);
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${String(minutes)}m ago`;
   const hours = Math.floor(minutes / 60);
@@ -170,21 +171,35 @@ function formatRelative(iso: string | null): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function formatMonthYear(iso: string | null): string {
+function formatMonthYearFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    year: "numeric",
+  });
 }
 
-function formatAbsoluteDate(iso: string | null): string {
+function formatAbsoluteDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function learnerInitial(name: string | null, email: string | null): string {
@@ -458,6 +473,8 @@ function DeactivateModal({
   onClose: () => void;
   onConfirm: (input: { reason: DeactivateReason; excludePaid: boolean }) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const [reason, setReason] = useState("");
   const [excludePaid, setExcludePaid] = useState(true);
   const titleId = useId();
@@ -596,6 +613,8 @@ function MessageDrawer({
     sendTestToSelf: boolean;
   }) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const titleId = useId();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [subject, setSubject] = useState(DEFAULT_MESSAGE_SUBJECT);
@@ -823,6 +842,8 @@ function SettingsDrawer({
   onReset: () => void;
   onSave: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const titleId = useId();
   if (!open || typeof document === "undefined") return null;
 
@@ -937,28 +958,64 @@ function SettingsDrawer({
   );
 }
 
-export function AdminResourceUsageInactivePanel() {
+type InactivePanelProps = {
+  /**
+   * The first page under the default inactivity rules, loaded by the server;
+   * the first browser load is skipped when present. Saved rules reload it.
+   */
+  initialData?: ReportInitialData<ResourceUsageInactiveResponse> | null | undefined;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminResourceUsageInactivePanel(props: InactivePanelProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <ResourceUsageInactive {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ResourceUsageInactive({ initialData }: InactivePanelProps) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatMonthYear = withViewer(formatMonthYearFor, viewer);
+  const formatAbsoluteDate = withViewer(formatAbsoluteDateFor, viewer);
   const [settings, setSettings] = useState<InactivitySettings>(DEFAULT_SETTINGS);
   const [settingsDraft, setSettingsDraft] = useState<InactivitySettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [data, setData] = useState<ResourceUsageInactiveResponse | null>(null);
-  const dataRef = useRef<ResourceUsageInactiveResponse | null>(null);
+  const [data, setData] = useState<ResourceUsageInactiveResponse | null>(initial?.data ?? null);
+  const dataRef = useRef<ResourceUsageInactiveResponse | null>(initial?.data ?? null);
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(RESOURCE_USAGE_INACTIVE_DEFAULTS.page);
   const [q, setQ] = useState("");
   const [qDebounced, setQDebounced] = useState("");
-  const [view, setView] = useState<ResourceUsageInactiveView>("all");
-  const [activityStatus, setActivityStatus] = useState<ResourceUsageInactiveActivityStatus>("any");
+  const [view, setView] = useState<ResourceUsageInactiveView>(
+    RESOURCE_USAGE_INACTIVE_DEFAULTS.view,
+  );
+  const [activityStatus, setActivityStatus] = useState<ResourceUsageInactiveActivityStatus>(
+    RESOURCE_USAGE_INACTIVE_DEFAULTS.activityStatus,
+  );
   const [inactiveForMin, setInactiveForMin] = useState("");
-  const [enrolmentFilter, setEnrolmentFilter] =
-    useState<ResourceUsageInactiveEnrolmentFilter>("any");
-  const [paidFilter, setPaidFilter] = useState<ResourceUsageInactivePaidFilter>("any");
-  const [sort, setSort] = useState<ResourceUsageInactiveSort>("inactive_desc");
+  const [enrolmentFilter, setEnrolmentFilter] = useState<ResourceUsageInactiveEnrolmentFilter>(
+    RESOURCE_USAGE_INACTIVE_DEFAULTS.enrolmentFilter,
+  );
+  const [paidFilter, setPaidFilter] = useState<ResourceUsageInactivePaidFilter>(
+    RESOURCE_USAGE_INACTIVE_DEFAULTS.paidFilter,
+  );
+  const [sort, setSort] = useState<ResourceUsageInactiveSort>(
+    RESOURCE_USAGE_INACTIVE_DEFAULTS.sort,
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deactivateTargets, setDeactivateTargets] = useState<ResourceUsageInactiveItem[] | null>(
     null,
@@ -993,52 +1050,54 @@ export function AdminResourceUsageInactivePanel() {
     };
   }, [toast]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchResourceUsageInactive({
-        page,
-        view,
-        activityStatus,
-        sort,
-        inactiveDays: settings.inactiveDays,
-        includeInvitedNeverSignedIn: settings.includeInvitedNeverSignedIn,
-        excludeActivePaidEnrolment: settings.excludeActivePaidEnrolment,
-        enrolmentFilter,
-        paidFilter,
-        ...(qDebounced ? { q: qDebounced } : {}),
-        ...(inactiveForMin ? { inactiveForMin: Number(inactiveForMin) } : {}),
-      });
-      setData(response.data);
-      setSelectedIds((current) =>
-        current.filter((id) =>
-          response.data.items.some((item) => item.membershipId === id && item.selectable),
-        ),
-      );
-    } catch (loadError) {
-      setError(errorMessage(loadError, "Unable to load inactive learners."));
-      if (!dataRef.current) setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    activityStatus,
-    enrolmentFilter,
-    inactiveForMin,
-    page,
-    paidFilter,
-    qDebounced,
-    settings.excludeActivePaidEnrolment,
-    settings.inactiveDays,
-    settings.includeInvitedNeverSignedIn,
-    sort,
-    view,
-  ]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchResourceUsageInactive({
+          page,
+          view,
+          activityStatus,
+          sort,
+          inactiveDays: settings.inactiveDays,
+          includeInvitedNeverSignedIn: settings.includeInvitedNeverSignedIn,
+          excludeActivePaidEnrolment: settings.excludeActivePaidEnrolment,
+          enrolmentFilter,
+          paidFilter,
+          ...(qDebounced ? { q: qDebounced } : {}),
+          ...(inactiveForMin ? { inactiveForMin: Number(inactiveForMin) } : {}),
+        });
+        setData(response.data);
+        setSelectedIds((current) =>
+          current.filter((id) =>
+            response.data.items.some((item) => item.membershipId === id && item.selectable),
+          ),
+        );
+      } catch (loadError) {
+        setError(errorMessage(loadError, "Unable to load inactive learners."));
+        if (!dataRef.current) setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      activityStatus,
+      enrolmentFilter,
+      inactiveForMin,
+      page,
+      paidFilter,
+      qDebounced,
+      settings.excludeActivePaidEnrolment,
+      settings.inactiveDays,
+      settings.includeInvitedNeverSignedIn,
+      sort,
+      view,
+    ],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const summary = data?.summary ?? null;
   const items = data?.items ?? [];

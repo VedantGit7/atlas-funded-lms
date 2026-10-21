@@ -21,8 +21,12 @@ import {
   RESOURCE_USAGE_DEFAULT_PERIOD,
   RESOURCE_USAGE_PERIOD_OPTIONS,
   fetchResourceUsageOverview,
+  type ResourceUsageDormantResponse,
+  type ResourceUsageHistoryResponse,
+  type ResourceUsageInactiveResponse,
   type ResourceUsageOverview,
   type ResourceUsagePeriod,
+  type ResourceUsageStorageResponse,
 } from "./admin-resource-usage-roster-api";
 import { AdminResourceUsageHistoryPanel } from "./AdminResourceUsageHistoryPanel";
 import { AdminResourceUsageStoragePanel } from "./AdminResourceUsageStoragePanel";
@@ -281,11 +285,20 @@ function StorageSparkline({ points }: { points: number[] }) {
 export function AdminResourceUsageRosterPage({
   initialOverview,
   initialExports,
+  initialHistory,
+  initialStorage,
+  initialDormant,
+  initialInactive,
 }: {
   /** The overview for the default period, loaded by the server; the first browser load is skipped when present. */
   initialOverview?: ReportInitialData<ResourceUsageOverview> | null | undefined;
   /** The Exports tab's data, when the server loaded it for the exports route. */
   initialExports?: ReportInitialData<ResourceUsageExportsPayload> | null | undefined;
+  /** Each tab panel's first page, when the server loaded it for the panel's own route. */
+  initialHistory?: ReportInitialData<ResourceUsageHistoryResponse> | null | undefined;
+  initialStorage?: ReportInitialData<ResourceUsageStorageResponse> | null | undefined;
+  initialDormant?: ReportInitialData<ResourceUsageDormantResponse> | null | undefined;
+  initialInactive?: ReportInitialData<ResourceUsageInactiveResponse> | null | undefined;
 } = {}) {
   const router = useRouter();
   const pathname = usePathname();
@@ -618,10 +631,12 @@ export function AdminResourceUsageRosterPage({
         </nav>
       </div>
 
-      {tab === "history" ? <AdminResourceUsageHistoryPanel /> : null}
-      {tab === "storage" ? <AdminResourceUsageStoragePanel /> : null}
-      {tab === "dormant" ? <AdminResourceUsageDormantPanel /> : null}
-      {tab === "inactive" ? <AdminResourceUsageInactivePanel /> : null}
+      {tab === "history" ? <AdminResourceUsageHistoryPanel initialData={initialHistory} /> : null}
+      {tab === "storage" ? <AdminResourceUsageStoragePanel initialData={initialStorage} /> : null}
+      {tab === "dormant" ? <AdminResourceUsageDormantPanel initialData={initialDormant} /> : null}
+      {tab === "inactive" ? (
+        <AdminResourceUsageInactivePanel initialData={initialInactive} />
+      ) : null}
       {tab === "exports" ? (
         <AdminResourceUsageExportsPanel initialExports={initialExports} />
       ) : null}

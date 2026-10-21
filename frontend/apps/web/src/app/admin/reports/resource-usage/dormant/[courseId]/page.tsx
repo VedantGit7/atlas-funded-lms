@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../../components/patterns/AdminPageGate";
 import { AdminResourceUsageDormantCourseDetailPage } from "../../../../../../features/admin/reports/AdminResourceUsageDormantCourseDetailPage";
+import { loadResourceUsageDormantCourseData } from "../../../../../../lib/server/report-resource-usage-initial-data";
 import { runTenantStateGate } from "../../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -11,7 +12,10 @@ type PageProps = {
 
 export default async function AdminResourceUsageDormantCourseRoutePage({ params }: PageProps) {
   const { courseId } = await params;
-  const gate = await runTenantStateGate();
+  const [gate, initialData] = await Promise.all([
+    runTenantStateGate(),
+    loadResourceUsageDormantCourseData(courseId),
+  ]);
   if (gate.kind !== "ok") {
     return (
       <AdminPageGate
@@ -30,7 +34,7 @@ export default async function AdminResourceUsageDormantCourseRoutePage({ params 
           <p className="text-sm text-[var(--admin-on-surface-variant)]">Loading course...</p>
         }
       >
-        <AdminResourceUsageDormantCourseDetailPage courseId={courseId} />
+        <AdminResourceUsageDormantCourseDetailPage courseId={courseId} initialData={initialData} />
       </Suspense>
     </AdminPageGate>
   );

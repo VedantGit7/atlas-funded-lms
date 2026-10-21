@@ -321,6 +321,73 @@ function buildQuery(params: Record<string, string | number | boolean | undefined
 /** The period the overview opens on; the server loads the first overview with it too. */
 export const RESOURCE_USAGE_DEFAULT_PERIOD: ResourceUsagePeriod = "this_month";
 
+/*
+ * What each panel opens on. The server loads the first page with the same
+ * values, so the panel can skip its first browser load.
+ */
+
+export const RESOURCE_USAGE_HISTORY_DEFAULTS = {
+  page: 1,
+  rangeMonths: 24,
+  sort: "newest",
+} as const satisfies { page: number; rangeMonths: number; sort: ResourceUsageHistorySort };
+
+export const RESOURCE_USAGE_STORAGE_DEFAULTS = {
+  page: 1,
+  sort: "size_desc",
+} as const satisfies { page: number; sort: ResourceUsageStorageSort };
+
+/**
+ * The dormancy rules the panel starts with. An operator's saved rules live in
+ * their browser, which applies them after the first load.
+ */
+export const RESOURCE_USAGE_DORMANCY_DEFAULTS = {
+  dormantDays: 30,
+  minLessons: 1,
+  includeUnpublished: true,
+  includeArchived: false,
+} as const;
+
+export const RESOURCE_USAGE_DORMANT_DEFAULTS = {
+  page: 1,
+  view: "all",
+  status: "all",
+  sort: "storage_desc",
+  enrolmentFilter: "any",
+} as const satisfies {
+  page: number;
+  view: ResourceUsageDormantView;
+  status: ResourceUsageDormantStatusFilter;
+  sort: ResourceUsageDormantSort;
+  enrolmentFilter: ResourceUsageDormantEnrolmentFilter;
+};
+
+/**
+ * The inactivity rules the panel starts with. An operator's saved rules live
+ * in their browser, which applies them after the first load.
+ */
+export const RESOURCE_USAGE_INACTIVITY_DEFAULTS = {
+  inactiveDays: 90,
+  includeInvitedNeverSignedIn: true,
+  excludeActivePaidEnrolment: false,
+} as const;
+
+export const RESOURCE_USAGE_INACTIVE_DEFAULTS = {
+  page: 1,
+  view: "all",
+  activityStatus: "any",
+  sort: "inactive_desc",
+  enrolmentFilter: "any",
+  paidFilter: "any",
+} as const satisfies {
+  page: number;
+  view: ResourceUsageInactiveView;
+  activityStatus: ResourceUsageInactiveActivityStatus;
+  sort: ResourceUsageInactiveSort;
+  enrolmentFilter: ResourceUsageInactiveEnrolmentFilter;
+  paidFilter: ResourceUsageInactivePaidFilter;
+};
+
 export function resourceUsageOverviewPath(period?: ResourceUsagePeriod): string {
   return `/api/v1/reports/resource-usage${buildQuery({ period: period ?? "this_month" })}`;
 }
@@ -329,26 +396,28 @@ export async function fetchResourceUsageOverview(period?: ResourceUsagePeriod) {
   return clientApi.get<{ data: ResourceUsageOverview }>(resourceUsageOverviewPath(period));
 }
 
-export async function fetchResourceUsageHistory(filters?: {
+export type ResourceUsageHistoryFilters = {
   metricKey?: string | undefined;
   page?: number | undefined;
   rangeMonths?: number | undefined;
   sort?: ResourceUsageHistorySort | undefined;
-}) {
-  return clientApi.get<{
-    data: ResourceUsageHistoryResponse;
-  }>(
-    `/api/v1/reports/resource-usage/history${buildQuery({
-      metricKey: filters?.metricKey,
-      page: filters?.page ?? 1,
-      limit: 50,
-      rangeMonths: filters?.rangeMonths ?? 24,
-      sort: filters?.sort ?? "newest",
-    })}`,
-  );
+};
+
+export function resourceUsageHistoryPath(filters?: ResourceUsageHistoryFilters): string {
+  return `/api/v1/reports/resource-usage/history${buildQuery({
+    metricKey: filters?.metricKey,
+    page: filters?.page ?? 1,
+    limit: 50,
+    rangeMonths: filters?.rangeMonths ?? 24,
+    sort: filters?.sort ?? "newest",
+  })}`;
 }
 
-export async function fetchResourceUsageDormant(filters?: {
+export async function fetchResourceUsageHistory(filters?: ResourceUsageHistoryFilters) {
+  return clientApi.get<{ data: ResourceUsageHistoryResponse }>(resourceUsageHistoryPath(filters));
+}
+
+export type ResourceUsageDormantFilters = {
   q?: string | undefined;
   page?: number | undefined;
   view?: ResourceUsageDormantView | undefined;
@@ -362,24 +431,37 @@ export async function fetchResourceUsageDormant(filters?: {
   enrolmentFilter?: ResourceUsageDormantEnrolmentFilter | undefined;
   sort?: ResourceUsageDormantSort | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: ResourceUsageDormantResponse }>(
-    `/api/v1/reports/resource-usage/dormant${buildQuery({
-      q: filters?.q,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-      view: filters?.view ?? "all",
-      status: filters?.status ?? "all",
-      dormantDays: filters?.dormantDays ?? 30,
-      minLessons: filters?.minLessons ?? 1,
-      includeUnpublished: filters?.includeUnpublished ?? true,
-      includeArchived: filters?.includeArchived ?? false,
-      dormantForMin: filters?.dormantForMin,
-      storageMinGb: filters?.storageMinGb,
-      enrolmentFilter: filters?.enrolmentFilter ?? "any",
-      sort: filters?.sort ?? "storage_desc",
-    })}`,
-  );
+};
+
+export function resourceUsageDormantPath(filters?: ResourceUsageDormantFilters): string {
+  return `/api/v1/reports/resource-usage/dormant${buildQuery({
+    q: filters?.q,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+    view: filters?.view ?? "all",
+    status: filters?.status ?? "all",
+    dormantDays: filters?.dormantDays ?? 30,
+    minLessons: filters?.minLessons ?? 1,
+    includeUnpublished: filters?.includeUnpublished ?? true,
+    includeArchived: filters?.includeArchived ?? false,
+    dormantForMin: filters?.dormantForMin,
+    storageMinGb: filters?.storageMinGb,
+    enrolmentFilter: filters?.enrolmentFilter ?? "any",
+    sort: filters?.sort ?? "storage_desc",
+  })}`;
+}
+
+export async function fetchResourceUsageDormant(filters?: ResourceUsageDormantFilters) {
+  return clientApi.get<{ data: ResourceUsageDormantResponse }>(resourceUsageDormantPath(filters));
+}
+
+export function resourceUsageDormantCoursePath(
+  courseId: string,
+  filters?: { dormantDays?: number | undefined },
+): string {
+  return `/api/v1/reports/resource-usage/dormant/${encodeURIComponent(courseId)}${buildQuery({
+    dormantDays: filters?.dormantDays ?? 30,
+  })}`;
 }
 
 export async function fetchResourceUsageDormantCourse(
@@ -387,9 +469,7 @@ export async function fetchResourceUsageDormantCourse(
   filters?: { dormantDays?: number | undefined },
 ) {
   return clientApi.get<{ data: ResourceUsageDormantCourseDetail }>(
-    `/api/v1/reports/resource-usage/dormant/${encodeURIComponent(courseId)}${buildQuery({
-      dormantDays: filters?.dormantDays ?? 30,
-    })}`,
+    resourceUsageDormantCoursePath(courseId, filters),
   );
 }
 
@@ -426,7 +506,7 @@ export async function archiveResourceUsageDormant(body: {
   );
 }
 
-export async function fetchResourceUsageInactive(filters?: {
+export type ResourceUsageInactiveFilters = {
   q?: string | undefined;
   page?: number | undefined;
   view?: ResourceUsageInactiveView | undefined;
@@ -439,23 +519,27 @@ export async function fetchResourceUsageInactive(filters?: {
   excludeActivePaidEnrolment?: boolean | undefined;
   sort?: ResourceUsageInactiveSort | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: ResourceUsageInactiveResponse }>(
-    `/api/v1/reports/resource-usage/inactive-learners${buildQuery({
-      q: filters?.q,
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 25,
-      view: filters?.view ?? "all",
-      activityStatus: filters?.activityStatus ?? "any",
-      inactiveDays: filters?.inactiveDays ?? 90,
-      inactiveForMin: filters?.inactiveForMin,
-      enrolmentFilter: filters?.enrolmentFilter ?? "any",
-      paidFilter: filters?.paidFilter ?? "any",
-      includeInvitedNeverSignedIn: filters?.includeInvitedNeverSignedIn ?? true,
-      excludeActivePaidEnrolment: filters?.excludeActivePaidEnrolment ?? false,
-      sort: filters?.sort ?? "inactive_desc",
-    })}`,
-  );
+};
+
+export function resourceUsageInactivePath(filters?: ResourceUsageInactiveFilters): string {
+  return `/api/v1/reports/resource-usage/inactive-learners${buildQuery({
+    q: filters?.q,
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 25,
+    view: filters?.view ?? "all",
+    activityStatus: filters?.activityStatus ?? "any",
+    inactiveDays: filters?.inactiveDays ?? 90,
+    inactiveForMin: filters?.inactiveForMin,
+    enrolmentFilter: filters?.enrolmentFilter ?? "any",
+    paidFilter: filters?.paidFilter ?? "any",
+    includeInvitedNeverSignedIn: filters?.includeInvitedNeverSignedIn ?? true,
+    excludeActivePaidEnrolment: filters?.excludeActivePaidEnrolment ?? false,
+    sort: filters?.sort ?? "inactive_desc",
+  })}`;
+}
+
+export async function fetchResourceUsageInactive(filters?: ResourceUsageInactiveFilters) {
+  return clientApi.get<{ data: ResourceUsageInactiveResponse }>(resourceUsageInactivePath(filters));
 }
 
 export async function deactivateResourceUsageInactive(body: {
@@ -572,9 +656,13 @@ export type ResourceUsageMetricDetail = {
   related: Array<{ label: string; href: string; description: string | null }>;
 };
 
+export function resourceUsageMetricDetailPath(metricKey: string): string {
+  return `/api/v1/reports/resource-usage/metrics/${encodeURIComponent(metricKey)}`;
+}
+
 export async function fetchResourceUsageMetricDetail(metricKey: string) {
   return clientApi.get<{ data: ResourceUsageMetricDetail }>(
-    `/api/v1/reports/resource-usage/metrics/${encodeURIComponent(metricKey)}`,
+    resourceUsageMetricDetailPath(metricKey),
   );
 }
 
@@ -643,20 +731,24 @@ export type ResourceUsageStorageResponse = {
   isEmpty: boolean;
 };
 
-export async function fetchResourceUsageStorage(filters?: {
+export type ResourceUsageStorageFilters = {
   assetType?: ResourceUsageStorageAssetType | undefined;
   sort?: ResourceUsageStorageSort | undefined;
   page?: number | undefined;
   limit?: number | undefined;
-}) {
-  return clientApi.get<{ data: ResourceUsageStorageResponse }>(
-    `/api/v1/reports/resource-usage/storage${buildQuery({
-      assetType: filters?.assetType,
-      sort: filters?.sort ?? "size_desc",
-      page: filters?.page ?? 1,
-      limit: filters?.limit ?? 12,
-    })}`,
-  );
+};
+
+export function resourceUsageStoragePath(filters?: ResourceUsageStorageFilters): string {
+  return `/api/v1/reports/resource-usage/storage${buildQuery({
+    assetType: filters?.assetType,
+    sort: filters?.sort ?? "size_desc",
+    page: filters?.page ?? 1,
+    limit: filters?.limit ?? 12,
+  })}`;
+}
+
+export async function fetchResourceUsageStorage(filters?: ResourceUsageStorageFilters) {
+  return clientApi.get<{ data: ResourceUsageStorageResponse }>(resourceUsageStoragePath(filters));
 }
 
 export async function exportResourceUsageReport(body: {
