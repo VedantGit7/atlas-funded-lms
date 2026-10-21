@@ -30,12 +30,15 @@ import {
 } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   dropdownItemClassName,
   dropdownPanelSurfaceClassName,
   RoleToggle,
 } from "../../studio/courses/admin-form-dropdown-shared";
 import {
+  RESOURCE_USAGE_DORMANCY_DEFAULTS,
+  RESOURCE_USAGE_DORMANT_DEFAULTS,
   archiveResourceUsageDormant,
   exportResourceUsageReport,
   fetchResourceUsageDormant,
@@ -48,6 +51,8 @@ import {
   type ResourceUsageDormantView,
 } from "./admin-resource-usage-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 const SETTINGS_KEY = "atlas.resource-usage.dormancy-settings";
 
@@ -60,12 +65,7 @@ type DormancySettings = {
 
 type ArchiveReason = "outdated" | "consolidated" | "low_engagement" | "other";
 
-const DEFAULT_SETTINGS: DormancySettings = {
-  dormantDays: 30,
-  minLessons: 1,
-  includeUnpublished: true,
-  includeArchived: false,
-};
+const DEFAULT_SETTINGS: DormancySettings = { ...RESOURCE_USAGE_DORMANCY_DEFAULTS };
 
 const selectClassName =
   "h-9 min-w-[130px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-xs font-medium text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -143,23 +143,23 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatGb(value: number): string {
+function formatGbFor(value: number, viewer: ViewerLocale): string {
   if (value < 0.01 && value > 0) return "<0.01";
-  return value.toLocaleString(undefined, {
+  return value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value >= 100 ? 0 : 1,
     maximumFractionDigits: 2,
   });
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "Never opened";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
+  const minutes = Math.floor((viewer.now - date.getTime()) / 60_000);
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${String(minutes)}m ago`;
   const hours = Math.floor(minutes / 60);
@@ -167,14 +167,23 @@ function formatRelative(iso: string | null): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function formatMonthYear(iso: string | null): string {
+function formatMonthYearFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    year: "numeric",
+  });
 }
 
 async function copyToClipboard(value: string): Promise<boolean> {
@@ -496,6 +505,9 @@ function ArchiveModal({
   onClose: () => void;
   onConfirm: (input: { reason: ArchiveReason; deleteAssets: boolean }) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatGb = withViewer(formatGbFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
   const [reason, setReason] = useState("");
   const [deleteAssets, setDeleteAssets] = useState(false);
   const titleId = useId();
@@ -654,6 +666,8 @@ function SettingsDrawer({
   onReset: () => void;
   onSave: () => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   const titleId = useId();
   if (!open || typeof document === "undefined") return null;
 
@@ -841,27 +855,57 @@ function HeadlineCard({
   );
 }
 
-export function AdminResourceUsageDormantPanel() {
+type DormantPanelProps = {
+  /**
+   * The first page under the default dormancy rules, loaded by the server; the
+   * first browser load is skipped when present. Saved rules reload it.
+   */
+  initialData?: ReportInitialData<ResourceUsageDormantResponse> | null | undefined;
+};
+
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminResourceUsageDormantPanel(props: DormantPanelProps = {}) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <ResourceUsageDormant {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ResourceUsageDormant({ initialData }: DormantPanelProps) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const formatGb = withViewer(formatGbFor, viewer);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatMonthYear = withViewer(formatMonthYearFor, viewer);
   const [settings, setSettings] = useState<DormancySettings>(DEFAULT_SETTINGS);
   const [settingsDraft, setSettingsDraft] = useState<DormancySettings>(DEFAULT_SETTINGS);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copyHint, setCopyHint] = useState<string | null>(null);
-  const [data, setData] = useState<ResourceUsageDormantResponse | null>(null);
-  const dataRef = useRef<ResourceUsageDormantResponse | null>(null);
+  const [data, setData] = useState<ResourceUsageDormantResponse | null>(initial?.data ?? null);
+  const dataRef = useRef<ResourceUsageDormantResponse | null>(initial?.data ?? null);
 
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(RESOURCE_USAGE_DORMANT_DEFAULTS.page);
   const [q, setQ] = useState("");
   const [qDebounced, setQDebounced] = useState("");
-  const [view, setView] = useState<ResourceUsageDormantView>("all");
-  const [status, setStatus] = useState<ResourceUsageDormantStatusFilter>("all");
+  const [view, setView] = useState<ResourceUsageDormantView>(RESOURCE_USAGE_DORMANT_DEFAULTS.view);
+  const [status, setStatus] = useState<ResourceUsageDormantStatusFilter>(
+    RESOURCE_USAGE_DORMANT_DEFAULTS.status,
+  );
   const [dormantForMin, setDormantForMin] = useState("");
   const [storageMinGb, setStorageMinGb] = useState("");
-  const [enrolmentFilter, setEnrolmentFilter] =
-    useState<ResourceUsageDormantEnrolmentFilter>("any");
-  const [sort, setSort] = useState<ResourceUsageDormantSort>("storage_desc");
+  const [enrolmentFilter, setEnrolmentFilter] = useState<ResourceUsageDormantEnrolmentFilter>(
+    RESOURCE_USAGE_DORMANT_DEFAULTS.enrolmentFilter,
+  );
+  const [sort, setSort] = useState<ResourceUsageDormantSort>(RESOURCE_USAGE_DORMANT_DEFAULTS.sort);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [archiveTargets, setArchiveTargets] = useState<ResourceUsageDormantItem[] | null>(null);
 
@@ -894,54 +938,56 @@ export function AdminResourceUsageDormantPanel() {
     };
   }, [copyHint]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchResourceUsageDormant({
-        page,
-        view,
-        status,
-        sort,
-        dormantDays: settings.dormantDays,
-        minLessons: settings.minLessons,
-        includeUnpublished: settings.includeUnpublished,
-        includeArchived: settings.includeArchived,
-        enrolmentFilter,
-        ...(qDebounced ? { q: qDebounced } : {}),
-        ...(dormantForMin ? { dormantForMin: Number(dormantForMin) } : {}),
-        ...(storageMinGb ? { storageMinGb: Number(storageMinGb) } : {}),
-      });
-      setData(response.data);
-      setSelectedIds((current) =>
-        current.filter((id) =>
-          response.data.items.some((item) => item.courseId === id && item.selectable),
-        ),
-      );
-    } catch (loadError) {
-      setError(errorMessage(loadError, "Unable to load dormant content."));
-      if (!dataRef.current) setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    dormantForMin,
-    enrolmentFilter,
-    page,
-    qDebounced,
-    settings.dormantDays,
-    settings.includeArchived,
-    settings.includeUnpublished,
-    settings.minLessons,
-    sort,
-    status,
-    storageMinGb,
-    view,
-  ]);
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchResourceUsageDormant({
+          page,
+          view,
+          status,
+          sort,
+          dormantDays: settings.dormantDays,
+          minLessons: settings.minLessons,
+          includeUnpublished: settings.includeUnpublished,
+          includeArchived: settings.includeArchived,
+          enrolmentFilter,
+          ...(qDebounced ? { q: qDebounced } : {}),
+          ...(dormantForMin ? { dormantForMin: Number(dormantForMin) } : {}),
+          ...(storageMinGb ? { storageMinGb: Number(storageMinGb) } : {}),
+        });
+        setData(response.data);
+        setSelectedIds((current) =>
+          current.filter((id) =>
+            response.data.items.some((item) => item.courseId === id && item.selectable),
+          ),
+        );
+      } catch (loadError) {
+        setError(errorMessage(loadError, "Unable to load dormant content."));
+        if (!dataRef.current) setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [
+      dormantForMin,
+      enrolmentFilter,
+      page,
+      qDebounced,
+      settings.dormantDays,
+      settings.includeArchived,
+      settings.includeUnpublished,
+      settings.minLessons,
+      sort,
+      status,
+      storageMinGb,
+      view,
+    ],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   const summary = data?.summary ?? null;
   const items = data?.items ?? [];
@@ -1563,7 +1609,8 @@ export function AdminResourceUsageDormantPanel() {
                         </p>
                         {row.lastLearnerActivityAt ? (
                           <p className="mt-0.5 text-[10px] text-[var(--admin-on-surface-variant)]">
-                            {new Date(row.lastLearnerActivityAt).toLocaleDateString(undefined, {
+                            {new Date(row.lastLearnerActivityAt).toLocaleDateString(viewer.locale, {
+                              timeZone: viewer.timeZone,
                               month: "short",
                               day: "numeric",
                               year: "numeric",

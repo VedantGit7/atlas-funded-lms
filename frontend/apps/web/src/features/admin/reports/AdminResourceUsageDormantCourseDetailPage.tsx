@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   archiveResourceUsageDormant,
   exportResourceUsageReport,
@@ -26,6 +27,8 @@ import {
   type ResourceUsageDormantCourseDetail,
 } from "./admin-resource-usage-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -66,13 +69,13 @@ function segmentTone(key: string): string {
   return SEGMENT_TONE[key] ?? "bg-[var(--admin-surface-high)]";
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatGb(value: number): string {
+function formatGbFor(value: number, viewer: ViewerLocale): string {
   if (value < 0.01 && value > 0) return "<0.01";
-  return value.toLocaleString(undefined, {
+  return value.toLocaleString(viewer.locale, {
     minimumFractionDigits: value >= 100 ? 0 : 1,
     maximumFractionDigits: 2,
   });
@@ -279,6 +282,9 @@ function SingleArchiveModal({
   onClose: () => void;
   onConfirm: (input: { reason: ArchiveReason; deleteAssets: boolean }) => void;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatGb = withViewer(formatGbFor, viewer);
   const [reason, setReason] = useState("");
   const [deleteAssets, setDeleteAssets] = useState(false);
   const titleId = useId();
@@ -469,39 +475,48 @@ function SingleArchiveModal({
 
 type Props = {
   courseId: string;
+  /** The course, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<ResourceUsageDormantCourseDetail> | null;
 };
 
-export function AdminResourceUsageDormantCourseDetailPage({ courseId }: Props) {
-  const [loading, setLoading] = useState(true);
+export function AdminResourceUsageDormantCourseDetailPage({ courseId, initialData }: Props) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the page has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatGb = withViewer(formatGbFor, viewer);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<ResourceUsageDormantCourseDetail | null>(null);
+  const [data, setData] = useState<ResourceUsageDormantCourseDetail | null>(initial?.data ?? null);
   const [copyHint, setCopyHint] = useState<string | null>(null);
   const [archiveOpen, setArchiveOpen] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchResourceUsageDormantCourse(courseId);
-      setData(response.data);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchResourceUsageDormantCourse(courseId);
+        setData(response.data);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Could not load dormant course detail.",
-      );
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [courseId]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Could not load dormant course detail.",
+        );
+        setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [courseId],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   useEffect(() => {
     if (!copyHint) return;

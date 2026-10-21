@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -18,7 +18,9 @@ import {
 } from "lucide-react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
+  RESOURCE_USAGE_HISTORY_DEFAULTS,
   RESOURCE_USAGE_METRIC_OPTIONS,
   exportResourceUsageReport,
   fetchResourceUsageHistory,
@@ -29,6 +31,8 @@ import {
   type ResourceUsageHistorySummary,
 } from "./admin-resource-usage-roster-api";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
+import { useReportLoad } from "./use-report-load";
+import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
 
 type HistoryView = "table" | "chart";
 
@@ -68,21 +72,21 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-function formatCount(value: number): string {
-  return value.toLocaleString();
+function formatCountFor(value: number, viewer: ViewerLocale): string {
+  return value.toLocaleString(viewer.locale);
 }
 
-function formatValue(value: number, unit: string): string {
+function formatValueFor(value: number, unit: string, viewer: ViewerLocale): string {
   if (unit === "GB") {
     if (value < 0.01 && value > 0) return "<0.01";
-    return value.toLocaleString(undefined, {
+    return value.toLocaleString(viewer.locale, {
       minimumFractionDigits: value >= 100 ? 0 : 1,
       maximumFractionDigits: 2,
     });
   }
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 10_000) return `${Math.round(value / 1000)}k`;
-  return formatCount(value);
+  return formatCountFor(value, viewer);
 }
 
 function formatUnitBadge(unit: string): string {
@@ -91,17 +95,21 @@ function formatUnitBadge(unit: string): string {
   return unit.slice(0, 3).toUpperCase();
 }
 
-function formatPeriodLabel(period: string): string {
+function formatPeriodLabelFor(period: string, viewer: ViewerLocale): string {
   const date = new Date(`${period}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric", timeZone: "UTC" });
+  return date.toLocaleDateString(viewer.locale, {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
-function formatRelative(iso: string | null): string {
+function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const diffMs = Date.now() - date.getTime();
+  const diffMs = viewer.now - date.getTime();
   const minutes = Math.floor(diffMs / 60_000);
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${String(minutes)}m ago`;
@@ -110,14 +118,19 @@ function formatRelative(iso: string | null): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString(viewer.locale, {
+    timeZone: viewer.timeZone,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-function formatExactUtc(iso: string | null): string {
+function formatExactUtcFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(viewer.locale, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -147,6 +160,8 @@ function ChangeCell({
   changePercent: number | null;
   unit: string;
 }) {
+  const viewer = useViewerLocale();
+  const formatValue = withViewer(formatValueFor, viewer);
   if (changeAbsolute == null) {
     return (
       <span className="inline-flex items-center gap-1 font-mono text-xs text-[var(--admin-on-surface-variant)]">
@@ -245,14 +260,14 @@ function EmptyHistory({ onClear }: { onClear: () => void }) {
   );
 }
 
-function formatAxisTick(value: number, unit: string): string {
+function formatAxisTickFor(value: number, unit: string, viewer: ViewerLocale): string {
   if (unit === "GB") {
     if (value >= 100) return String(Math.round(value));
     return value.toFixed(value >= 10 ? 0 : 1);
   }
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 10_000) return `${Math.round(value / 1000)}k`;
-  return formatCount(Math.round(value));
+  return formatCountFor(Math.round(value), viewer);
 }
 
 function MovementCell({
@@ -264,6 +279,8 @@ function MovementCell({
   movement: ResourceUsageHistorySummary["largestMovement"];
   tone: "warning" | "muted";
 }) {
+  const viewer = useViewerLocale();
+  const formatValue = withViewer(formatValueFor, viewer);
   return (
     <div className="p-4">
       <p className="mb-1 text-[11px] font-medium tracking-wider text-[var(--admin-on-surface-variant)] uppercase">
@@ -293,6 +310,10 @@ function MovementCell({
 }
 
 function HistoryChartPanel({ series }: { series: ResourceUsageHistorySeries }) {
+  const viewer = useViewerLocale();
+  const formatValue = withViewer(formatValueFor, viewer);
+  const formatPeriodLabel = withViewer(formatPeriodLabelFor, viewer);
+  const formatAxisTick = withViewer(formatAxisTickFor, viewer);
   const max = Math.max(1, ...series.points.map((point) => point.value));
   const mid = max / 2;
   const latestChange = series.latestChangeAbsolute;
@@ -401,6 +422,11 @@ function HistoryChartPanel({ series }: { series: ResourceUsageHistorySeries }) {
 }
 
 function SummaryBand({ summary }: { summary: ResourceUsageHistorySummary }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
+  const formatPeriodLabel = withViewer(formatPeriodLabelFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatExactUtc = withViewer(formatExactUtcFor, viewer);
   const missingMeters = summary.metersAvailable - summary.metricsTracked;
 
   return (
@@ -488,6 +514,8 @@ function HistoryPagination({
   onPageChange: (page: number | ((current: number) => number)) => void;
   embedded?: boolean;
 }) {
+  const viewer = useViewerLocale();
+  const formatCount = withViewer(formatCountFor, viewer);
   return (
     <div
       className={[
@@ -567,47 +595,71 @@ function HistoryPagination({
 
 type Props = {
   onExportBusyChange?: (busy: boolean) => void;
+  /** The first page of history, loaded by the server; the first browser load is skipped when present. */
+  initialData?: ReportInitialData<ResourceUsageHistoryResponse> | null | undefined;
 };
 
-export function AdminResourceUsageHistoryPanel({ onExportBusyChange }: Props) {
+/**
+ * Relative times on the page count from when the server rendered it until
+ * hydration ends (see viewer-time), so both renders read the same.
+ */
+export function AdminResourceUsageHistoryPanel(props: Props) {
+  return (
+    <RenderedAtProvider renderedAt={props.initialData?.loadedAt ?? null}>
+      <ResourceUsageHistory {...props} />
+    </RenderedAtProvider>
+  );
+}
+
+function ResourceUsageHistory({ onExportBusyChange, initialData }: Props) {
+  const viewer = useViewerLocale();
+  // Read once: later renders must not reset what the panel has changed since.
+  const [initial] = useState(() => initialData ?? null);
+  const formatValue = withViewer(formatValueFor, viewer);
+  const formatRelative = withViewer(formatRelativeFor, viewer);
+  const formatExactUtc = withViewer(formatExactUtcFor, viewer);
   const [view, setView] = useState<HistoryView>("table");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initial === null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [metricKey, setMetricKey] = useState("");
-  const [rangeMonths, setRangeMonths] = useState(24);
-  const [sort, setSort] = useState<ResourceUsageHistorySort>("newest");
-  const [page, setPage] = useState(1);
-  const [data, setData] = useState<ResourceUsageHistoryResponse | null>(null);
+  const [rangeMonths, setRangeMonths] = useState<number>(
+    RESOURCE_USAGE_HISTORY_DEFAULTS.rangeMonths,
+  );
+  const [sort, setSort] = useState<ResourceUsageHistorySort>(RESOURCE_USAGE_HISTORY_DEFAULTS.sort);
+  const [page, setPage] = useState<number>(RESOURCE_USAGE_HISTORY_DEFAULTS.page);
+  const [data, setData] = useState<ResourceUsageHistoryResponse | null>(initial?.data ?? null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetchResourceUsageHistory({
-        ...(metricKey ? { metricKey } : {}),
-        page,
-        rangeMonths,
-        sort,
-      });
-      setData(response.data);
-    } catch (loadError) {
-      setError(
-        loadError instanceof ClientApiError
-          ? loadError.message
-          : loadError instanceof Error
+  const load = useCallback(
+    async (options?: { soft?: boolean }) => {
+      const soft = options?.soft === true;
+      if (!soft) setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchResourceUsageHistory({
+          ...(metricKey ? { metricKey } : {}),
+          page,
+          rangeMonths,
+          sort,
+        });
+        setData(response.data);
+      } catch (loadError) {
+        setError(
+          loadError instanceof ClientApiError
             ? loadError.message
-            : "Could not load history data.",
-      );
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [metricKey, page, rangeMonths, sort]);
+            : loadError instanceof Error
+              ? loadError.message
+              : "Could not load history data.",
+        );
+        setData(null);
+      } finally {
+        if (!soft) setLoading(false);
+      }
+    },
+    [metricKey, page, rangeMonths, sort],
+  );
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useReportLoad(load, initial);
 
   async function handleExport() {
     setBusy(true);
