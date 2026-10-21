@@ -798,7 +798,11 @@ export function fillRuleDescription(
   kind: InsightAlertRuleDef["thresholdKind"],
 ): string {
   if (kind === "none") return description.replace("{threshold}", "the configured");
-  const label = kind === "percent" ? `${threshold}%` : String(threshold);
+  // Percent rules already write "{threshold}%" in their copy.
+  const label =
+    kind === "percent" && !description.includes("{threshold}%")
+      ? `${threshold}%`
+      : String(threshold);
   return description.replace("{threshold}", label);
 }
 
