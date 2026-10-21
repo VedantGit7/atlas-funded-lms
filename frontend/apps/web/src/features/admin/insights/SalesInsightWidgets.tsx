@@ -990,7 +990,8 @@ export function SalesInsightChartWidget({
           ? ["pie", "donut"]
           : [],
     );
-    return preferred.filter((type) => types.includes(type) && !blocked.has(type));
+    // The default viz leads the list and appears again in its usual place; keep it once.
+    return [...new Set(preferred)].filter((type) => types.includes(type) && !blocked.has(type));
   }, [widget.data, widget.defaultViz, widget.id]);
 
   const [vizType, setVizType] = useState<VizType>(() => {

@@ -13,6 +13,7 @@ import {
 import { adminInsightCustomizeHref, adminInsightHref } from "./admin-insights-catalog";
 import { setInsightNumberFormat } from "./admin-insights-format";
 import { clearLayoutDraft, readLayoutDraft } from "./admin-insights-layout";
+import { insightDashboardArea } from "./insight-dashboard-areas";
 import { InsightDashboardView } from "./InsightDashboardView";
 
 type AdminInsightDashboardPageProps = {
@@ -126,8 +127,10 @@ export function AdminInsightDashboardPage({
 
   return (
     <InsightDashboardView
+      key={slug}
       slug={slug}
       title={title}
+      area={insightDashboardArea(slug)}
       dashboard={dashboard}
       loading={loading || !rangeReady}
       error={error}
