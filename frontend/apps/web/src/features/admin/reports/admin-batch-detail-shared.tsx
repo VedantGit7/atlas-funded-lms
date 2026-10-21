@@ -13,8 +13,6 @@ import { type ViewerLocale } from "./viewer-time";
 
 export type DetailTab = BatchDetailTab;
 
-export type LearnerPanelTab = "live" | "exams" | "course";
-
 export type CompletionOp = "gte" | "lte";
 
 export const PAGE_SIZE = 25;

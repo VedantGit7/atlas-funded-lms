@@ -10,12 +10,10 @@ import {
   dateInputToStartIso,
   exportBatchReport,
   fetchBatchDetail,
-  fetchBatchLearnerDetail,
   fetchBatchLearners,
   sendBatchMessage,
   type BatchDetail,
   type BatchLearnerColumnKey,
-  type BatchLearnerDetail,
   type BatchLearnerItem,
   type BatchesListHealthFilter,
 } from "./admin-batches-roster-api";
@@ -27,7 +25,6 @@ import {
   type CompletionOp,
   DEFAULT_COLUMNS,
   type DetailTab,
-  type LearnerPanelTab,
   PAGE_SIZE,
   formatCountFor,
   formatDateFor,
@@ -96,11 +93,6 @@ export function useBatchDetailReport(props: BatchDetailPageProps) {
   const [messageSubject, setMessageSubject] = useState("");
   const [messageBody, setMessageBody] = useState("");
   const [messageMembershipIds, setMessageMembershipIds] = useState<string[] | null>(null);
-
-  const [learnerDetail, setLearnerDetail] = useState<BatchLearnerDetail | null>(null);
-  const [learnerPanelTab, setLearnerPanelTab] = useState<LearnerPanelTab>("live");
-  const [learnerDetailLoading, setLearnerDetailLoading] = useState(false);
-  const [learnerDetailError, setLearnerDetailError] = useState<string | null>(null);
 
   const passMark = detail?.averages.passMarkPct ?? 70;
 
@@ -269,33 +261,6 @@ export function useBatchDetailReport(props: BatchDetailPageProps) {
     };
   }, [columnsOpen]);
 
-  useEffect(() => {
-    if (!learnerDetail?.membershipId) return;
-    let cancelled = false;
-    setLearnerDetailLoading(true);
-    setLearnerDetailError(null);
-    void fetchBatchLearnerDetail(batchId, learnerDetail.membershipId)
-      .then((response) => {
-        if (!cancelled) setLearnerDetail(response.data);
-      })
-      .catch((loadError: unknown) => {
-        if (cancelled) return;
-        setLearnerDetailError(
-          loadError instanceof ClientApiError
-            ? loadError.message
-            : loadError instanceof Error
-              ? loadError.message
-              : "Unable to load learner detail.",
-        );
-      })
-      .finally(() => {
-        if (!cancelled) setLearnerDetailLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [batchId, learnerDetail?.membershipId]);
-
   const hasLearnerFilters = useMemo(() => {
     return Boolean(
       learnerName || joinedFrom || joinedTo || completionValue || healthFilter !== "any",
@@ -349,11 +314,6 @@ export function useBatchDetailReport(props: BatchDetailPageProps) {
   function openLearnerPanel(learner: BatchLearnerItem) {
     setRowMenuId(null);
     router.push(`/admin/reports/batches/${batchId}/learners/${learner.membershipId}`);
-  }
-
-  function closeLearnerPanel() {
-    setLearnerDetail(null);
-    setLearnerDetailError(null);
   }
 
   function openMessageModal(membershipIds?: string[]) {
@@ -554,11 +514,6 @@ export function useBatchDetailReport(props: BatchDetailPageProps) {
     messageBody,
     setMessageBody,
     messageMembershipIds,
-    learnerDetail,
-    learnerPanelTab,
-    setLearnerPanelTab,
-    learnerDetailLoading,
-    learnerDetailError,
     passMark,
     setTab,
     loadDetail,
@@ -572,7 +527,6 @@ export function useBatchDetailReport(props: BatchDetailPageProps) {
     applySearch,
     copyBatchKey,
     openLearnerPanel,
-    closeLearnerPanel,
     openMessageModal,
     handleSendMessage,
     handleExport,

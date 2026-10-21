@@ -11,10 +11,6 @@ import {
 } from "./admin-batches-roster-api";
 import { type ViewerLocale } from "./viewer-time";
 
-export type DrillLevel = "batches" | "learners" | "learner_detail";
-
-export type LearnerTab = "live" | "exams" | "course";
-
 export type ModuleTab = "batches" | "compare" | "exports";
 
 export type SavedView = "active" | "at_risk" | "ending_soon" | "archived";

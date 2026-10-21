@@ -13,7 +13,6 @@ import {
 import {
   BatchDetailHeader,
   BatchLearnerFilters,
-  BatchLearnerPanel,
   BatchLearnerTable,
   BatchMessageModal,
   BatchOverviewTab,
@@ -44,7 +43,6 @@ function BatchDetailReport(props: BatchDetailPageProps) {
     detailLoading,
     formatDate,
     handleExport,
-    learnerDetail,
     learnersError,
     loadDetail,
     loadLearners,
@@ -199,83 +197,79 @@ function BatchDetailReport(props: BatchDetailPageProps) {
       <BatchOverviewTab view={{ ...view, detail }} />
 
       {activeTab === "learners" ? (
-        <div className={learnerDetail ? "grid gap-4 xl:grid-cols-[1fr_360px]" : ""}>
-          <div className="min-w-0 space-y-4">
-            {learnersError ? (
-              <div
-                className="flex flex-col gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-danger)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] p-4 sm:flex-row sm:items-center sm:justify-between"
-                role="alert"
-              >
-                <div className="flex items-start gap-3">
-                  <AlertTriangle
-                    className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-[var(--admin-danger)]">
-                      Couldn&apos;t load learners.
-                    </p>
-                    <p className="mt-0.5 text-xs text-[color-mix(in_srgb,var(--admin-danger)_70%,var(--admin-on-surface))]">
-                      {learnersError}
-                    </p>
-                  </div>
+        <div className="min-w-0 space-y-4">
+          {learnersError ? (
+            <div
+              className="flex flex-col gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-danger)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] p-4 sm:flex-row sm:items-center sm:justify-between"
+              role="alert"
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="text-sm font-medium text-[var(--admin-danger)]">
+                    Couldn&apos;t load learners.
+                  </p>
+                  <p className="mt-0.5 text-xs text-[color-mix(in_srgb,var(--admin-danger)_70%,var(--admin-on-surface))]">
+                    {learnersError}
+                  </p>
                 </div>
+              </div>
+              <button
+                type="button"
+                className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)]"
+                onClick={() => void loadLearners()}
+              >
+                <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                Retry
+              </button>
+            </div>
+          ) : null}
+
+          <BatchLearnerFilters view={view} />
+
+          {selectedIds.length > 0 ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-3">
+              <p className="text-sm text-[var(--admin-on-surface)]">
+                <span className="font-mono font-medium">{selectedIds.length}</span> learners
+                selected
+              </p>
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)]"
-                  onClick={() => void loadLearners()}
+                  className={secondaryButtonClassName}
+                  onClick={() => {
+                    openMessageModal(selectedIds);
+                  }}
                 >
-                  <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-                  Retry
+                  <Mail className="h-4 w-4" aria-hidden="true" />
+                  Message
+                </button>
+                <button
+                  type="button"
+                  className={secondaryButtonClassName}
+                  disabled={busy}
+                  onClick={() => void handleExport()}
+                >
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                  Export
+                </button>
+                <button
+                  type="button"
+                  className={ghostButtonClassName}
+                  onClick={() => {
+                    setSelectedIds([]);
+                  }}
+                >
+                  Clear
                 </button>
               </div>
-            ) : null}
+            </div>
+          ) : null}
 
-            <BatchLearnerFilters view={view} />
-
-            {selectedIds.length > 0 ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-3">
-                <p className="text-sm text-[var(--admin-on-surface)]">
-                  <span className="font-mono font-medium">{selectedIds.length}</span> learners
-                  selected
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className={secondaryButtonClassName}
-                    onClick={() => {
-                      openMessageModal(selectedIds);
-                    }}
-                  >
-                    <Mail className="h-4 w-4" aria-hidden="true" />
-                    Message
-                  </button>
-                  <button
-                    type="button"
-                    className={secondaryButtonClassName}
-                    disabled={busy}
-                    onClick={() => void handleExport()}
-                  >
-                    <Download className="h-4 w-4" aria-hidden="true" />
-                    Export
-                  </button>
-                  <button
-                    type="button"
-                    className={ghostButtonClassName}
-                    onClick={() => {
-                      setSelectedIds([]);
-                    }}
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
-            <BatchLearnerTable view={view} />
-          </div>
-
-          <BatchLearnerPanel view={view} />
+          <BatchLearnerTable view={view} />
         </div>
       ) : null}
 
