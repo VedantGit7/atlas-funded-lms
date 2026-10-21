@@ -78,9 +78,11 @@ beforeAll(() => {
     { mode: 0o755 },
   );
   env = { ...process.env, PATH: `${join(directory, "bin")}${delimiter}${process.env.PATH}` };
+  // A git hook (such as pre-push) exports GIT_DIR and friends; left in, the
+  // fixture's `git init` would reinitialise the outer repository instead.
   for (const key of Object.keys(env)) {
     if (
-      /DATABASE|DB_URL|DIRECT_URL|ATLAS_APP_LOGIN_URL|GIT_SHA|GITHUB_|^CI$|RELEASE_|RESTORED_|FAIL_GATE|MUTATE_GATE/.test(
+      /DATABASE|DB_URL|DIRECT_URL|ATLAS_APP_LOGIN_URL|GIT_SHA|^GIT_|GITHUB_|^CI$|RELEASE_|RESTORED_|FAIL_GATE|MUTATE_GATE/.test(
         key,
       )
     )
