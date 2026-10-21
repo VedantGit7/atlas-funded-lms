@@ -40,13 +40,11 @@ import {
   dateInputToStartIso,
   exportBatchReport,
   fetchBatchDetail,
-  fetchBatchLearnerDetail,
   fetchBatchLearners,
   sendBatchMessage,
   type BatchDetail,
   type BatchHealth,
   type BatchLearnerColumnKey,
-  type BatchLearnerDetail,
   type BatchLearnerItem,
   type BatchesListHealthFilter,
 } from "./admin-batches-roster-api";
@@ -56,7 +54,6 @@ import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } fr
 
 type DetailTab = BatchDetailTab;
 
-type LearnerPanelTab = "live" | "exams" | "course";
 type CompletionOp = "gte" | "lte";
 
 const PAGE_SIZE = 25;
@@ -462,11 +459,6 @@ function BatchDetailReport({ batchId, initialDetail, initialLearners }: BatchDet
   const [messageBody, setMessageBody] = useState("");
   const [messageMembershipIds, setMessageMembershipIds] = useState<string[] | null>(null);
 
-  const [learnerDetail, setLearnerDetail] = useState<BatchLearnerDetail | null>(null);
-  const [learnerPanelTab, setLearnerPanelTab] = useState<LearnerPanelTab>("live");
-  const [learnerDetailLoading, setLearnerDetailLoading] = useState(false);
-  const [learnerDetailError, setLearnerDetailError] = useState<string | null>(null);
-
   const passMark = detail?.averages.passMarkPct ?? 70;
 
   const setTab = useCallback(
@@ -634,33 +626,6 @@ function BatchDetailReport({ batchId, initialDetail, initialLearners }: BatchDet
     };
   }, [columnsOpen]);
 
-  useEffect(() => {
-    if (!learnerDetail?.membershipId) return;
-    let cancelled = false;
-    setLearnerDetailLoading(true);
-    setLearnerDetailError(null);
-    void fetchBatchLearnerDetail(batchId, learnerDetail.membershipId)
-      .then((response) => {
-        if (!cancelled) setLearnerDetail(response.data);
-      })
-      .catch((loadError: unknown) => {
-        if (cancelled) return;
-        setLearnerDetailError(
-          loadError instanceof ClientApiError
-            ? loadError.message
-            : loadError instanceof Error
-              ? loadError.message
-              : "Unable to load learner detail.",
-        );
-      })
-      .finally(() => {
-        if (!cancelled) setLearnerDetailLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [batchId, learnerDetail?.membershipId]);
-
   const hasLearnerFilters = useMemo(() => {
     return Boolean(
       learnerName || joinedFrom || joinedTo || completionValue || healthFilter !== "any",
@@ -714,11 +679,6 @@ function BatchDetailReport({ batchId, initialDetail, initialLearners }: BatchDet
   function openLearnerPanel(learner: BatchLearnerItem) {
     setRowMenuId(null);
     router.push(`/admin/reports/batches/${batchId}/learners/${learner.membershipId}`);
-  }
-
-  function closeLearnerPanel() {
-    setLearnerDetail(null);
-    setLearnerDetailError(null);
   }
 
   function openMessageModal(membershipIds?: string[]) {
@@ -1442,748 +1402,586 @@ function BatchDetailReport({ batchId, initialDetail, initialLearners }: BatchDet
       ) : null}
 
       {activeTab === "learners" ? (
-        <div className={learnerDetail ? "grid gap-4 xl:grid-cols-[1fr_360px]" : ""}>
-          <div className="min-w-0 space-y-4">
-            {learnersError ? (
-              <div
-                className="flex flex-col gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-danger)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] p-4 sm:flex-row sm:items-center sm:justify-between"
-                role="alert"
-              >
-                <div className="flex items-start gap-3">
-                  <AlertTriangle
-                    className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-[var(--admin-danger)]">
-                      Couldn&apos;t load learners.
-                    </p>
-                    <p className="mt-0.5 text-xs text-[color-mix(in_srgb,var(--admin-danger)_70%,var(--admin-on-surface))]">
-                      {learnersError}
-                    </p>
-                  </div>
+        <div className="min-w-0 space-y-4">
+          {learnersError ? (
+            <div
+              className="flex flex-col gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-danger)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] p-4 sm:flex-row sm:items-center sm:justify-between"
+              role="alert"
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle
+                  className="mt-0.5 h-5 w-5 shrink-0 text-[var(--admin-danger)]"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="text-sm font-medium text-[var(--admin-danger)]">
+                    Couldn&apos;t load learners.
+                  </p>
+                  <p className="mt-0.5 text-xs text-[color-mix(in_srgb,var(--admin-danger)_70%,var(--admin-on-surface))]">
+                    {learnersError}
+                  </p>
                 </div>
+              </div>
+              <button
+                type="button"
+                className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)]"
+                onClick={() => void loadLearners()}
+              >
+                <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
+                Retry
+              </button>
+            </div>
+          ) : null}
+
+          <div className="sticky top-0 z-20 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 shadow-sm">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+              <label className="relative flex min-w-0 flex-1 items-center" htmlFor={searchId}>
+                <Search
+                  className="pointer-events-none absolute left-3 h-4 w-4 text-[var(--admin-on-surface-variant)]"
+                  aria-hidden="true"
+                />
+                <input
+                  id={searchId}
+                  className={`${fieldClassName} w-full pl-9`}
+                  placeholder="Search learner name"
+                  value={draftSearch}
+                  onChange={(event) => {
+                    setDraftSearch(event.target.value);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") applySearch();
+                  }}
+                />
+              </label>
+              <label className="grid gap-1 text-[11px] text-[var(--admin-on-surface-variant)]">
+                Joined from
+                <input
+                  type="date"
+                  className={fieldClassName}
+                  value={joinedFrom}
+                  onChange={(event) => {
+                    setJoinedFrom(event.target.value);
+                    setPage(1);
+                  }}
+                />
+              </label>
+              <label className="grid gap-1 text-[11px] text-[var(--admin-on-surface-variant)]">
+                Joined to
+                <input
+                  type="date"
+                  className={fieldClassName}
+                  value={joinedTo}
+                  onChange={(event) => {
+                    setJoinedTo(event.target.value);
+                    setPage(1);
+                  }}
+                />
+              </label>
+              <div className="flex items-end gap-2">
+                <label className="grid gap-1 text-[11px] text-[var(--admin-on-surface-variant)]">
+                  Completion
+                  <Select
+                    className={selectClassName}
+                    value={completionOp}
+                    onValueChange={(value) => {
+                      setCompletionOp(value as CompletionOp);
+                      setPage(1);
+                    }}
+                    options={[
+                      { value: "gte", label: "≥" },
+                      { value: "lte", label: "≤" },
+                    ]}
+                    ariaLabel="Completion comparison"
+                  />
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  className={`${fieldClassName} w-20`}
+                  placeholder="%"
+                  value={completionValue}
+                  onChange={(event) => {
+                    setCompletionValue(event.target.value);
+                    setPage(1);
+                  }}
+                  aria-label="Completion percent"
+                />
+              </div>
+              <Select
+                className={selectClassName}
+                value={healthFilter}
+                onValueChange={(value) => {
+                  setHealthFilter(value as BatchesListHealthFilter);
+                  setPage(1);
+                }}
+                options={[
+                  { value: "any", label: "Health: All" },
+                  { value: "on_track", label: "On track" },
+                  { value: "needs_attention", label: "At risk + critical" },
+                  { value: "at_risk", label: "At risk" },
+                  { value: "critical", label: "Critical" },
+                ]}
+                ariaLabel="Health"
+              />
+              <Select
+                className={selectClassName}
+                value={`${sortBy}:${sortDir}`}
+                onValueChange={(value) => {
+                  const [nextSort, nextDir] = value.split(":");
+                  setSortBy(nextSort ?? "joined_at");
+                  setSortDir(nextDir === "asc" ? "asc" : "desc");
+                  setPage(1);
+                }}
+                options={[
+                  { value: "joined_at:desc", label: "Joined · newest" },
+                  { value: "joined_at:asc", label: "Joined · oldest" },
+                  { value: "activity_at:desc", label: "Activity · recent" },
+                  { value: "content_completion_pct:desc", label: "Completion · high" },
+                  { value: "live_attendance_pct:desc", label: "Attendance · high" },
+                  { value: "test_score_pct:desc", label: "Test · high" },
+                  { value: "learner_name:asc", label: "Name · A-Z" },
+                ]}
+                ariaLabel="Sort"
+              />
+              <button
+                type="button"
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] px-3 text-xs font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_18%,var(--admin-surface))]"
+                onClick={applySearch}
+              >
+                <Filter className="h-3.5 w-3.5" aria-hidden="true" />
+                Apply
+              </button>
+              <button
+                type="button"
+                className={ghostButtonClassName}
+                onClick={clearLearnerFilters}
+                title="Clear filters"
+              >
+                Add filter
+              </button>
+            </div>
+            {hasLearnerFilters ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--admin-border)] pt-3">
+                {learnerName ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px] text-[var(--admin-on-surface)]"
+                    onClick={() => {
+                      setLearnerName("");
+                      setDraftSearch("");
+                      setPage(1);
+                    }}
+                  >
+                    Search: {learnerName}
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                ) : null}
+                {joinedFrom ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
+                    onClick={() => {
+                      setJoinedFrom("");
+                      setPage(1);
+                    }}
+                  >
+                    From {joinedFrom}
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                ) : null}
+                {joinedTo ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
+                    onClick={() => {
+                      setJoinedTo("");
+                      setPage(1);
+                    }}
+                  >
+                    To {joinedTo}
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                ) : null}
+                {completionValue ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
+                    onClick={() => {
+                      setCompletionValue("");
+                      setPage(1);
+                    }}
+                  >
+                    Completion {completionOp === "gte" ? "≥" : "≤"} {completionValue}%
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                ) : null}
+                {healthFilter !== "any" ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
+                    onClick={() => {
+                      setHealthFilter("any");
+                      setPage(1);
+                    }}
+                  >
+                    Health:{" "}
+                    {healthFilter === "needs_attention"
+                      ? "At risk + critical"
+                      : titleCase(healthFilter)}
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                ) : null}
                 <button
                   type="button"
-                  className="inline-flex h-8 items-center justify-center rounded-lg bg-[var(--admin-danger)] px-4 text-xs font-semibold text-[var(--admin-on-danger)]"
-                  onClick={() => void loadLearners()}
+                  className="text-xs font-medium text-[var(--admin-primary)] hover:underline"
+                  onClick={clearLearnerFilters}
                 >
-                  <RefreshCw className="mr-2 h-3.5 w-3.5" aria-hidden="true" />
-                  Retry
+                  Clear all
                 </button>
               </div>
             ) : null}
+          </div>
 
-            <div className="sticky top-0 z-20 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 shadow-sm">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                <label className="relative flex min-w-0 flex-1 items-center" htmlFor={searchId}>
-                  <Search
-                    className="pointer-events-none absolute left-3 h-4 w-4 text-[var(--admin-on-surface-variant)]"
-                    aria-hidden="true"
-                  />
-                  <input
-                    id={searchId}
-                    className={`${fieldClassName} w-full pl-9`}
-                    placeholder="Search learner name"
-                    value={draftSearch}
-                    onChange={(event) => {
-                      setDraftSearch(event.target.value);
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") applySearch();
-                    }}
-                  />
-                </label>
-                <label className="grid gap-1 text-[11px] text-[var(--admin-on-surface-variant)]">
-                  Joined from
-                  <input
-                    type="date"
-                    className={fieldClassName}
-                    value={joinedFrom}
-                    onChange={(event) => {
-                      setJoinedFrom(event.target.value);
-                      setPage(1);
-                    }}
-                  />
-                </label>
-                <label className="grid gap-1 text-[11px] text-[var(--admin-on-surface-variant)]">
-                  Joined to
-                  <input
-                    type="date"
-                    className={fieldClassName}
-                    value={joinedTo}
-                    onChange={(event) => {
-                      setJoinedTo(event.target.value);
-                      setPage(1);
-                    }}
-                  />
-                </label>
-                <div className="flex items-end gap-2">
-                  <label className="grid gap-1 text-[11px] text-[var(--admin-on-surface-variant)]">
-                    Completion
-                    <Select
-                      className={selectClassName}
-                      value={completionOp}
-                      onValueChange={(value) => {
-                        setCompletionOp(value as CompletionOp);
-                        setPage(1);
-                      }}
-                      options={[
-                        { value: "gte", label: "≥" },
-                        { value: "lte", label: "≤" },
-                      ]}
-                      ariaLabel="Completion comparison"
-                    />
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    className={`${fieldClassName} w-20`}
-                    placeholder="%"
-                    value={completionValue}
-                    onChange={(event) => {
-                      setCompletionValue(event.target.value);
-                      setPage(1);
-                    }}
-                    aria-label="Completion percent"
-                  />
-                </div>
-                <Select
-                  className={selectClassName}
-                  value={healthFilter}
-                  onValueChange={(value) => {
-                    setHealthFilter(value as BatchesListHealthFilter);
-                    setPage(1);
-                  }}
-                  options={[
-                    { value: "any", label: "Health: All" },
-                    { value: "on_track", label: "On track" },
-                    { value: "needs_attention", label: "At risk + critical" },
-                    { value: "at_risk", label: "At risk" },
-                    { value: "critical", label: "Critical" },
-                  ]}
-                  ariaLabel="Health"
-                />
-                <Select
-                  className={selectClassName}
-                  value={`${sortBy}:${sortDir}`}
-                  onValueChange={(value) => {
-                    const [nextSort, nextDir] = value.split(":");
-                    setSortBy(nextSort ?? "joined_at");
-                    setSortDir(nextDir === "asc" ? "asc" : "desc");
-                    setPage(1);
-                  }}
-                  options={[
-                    { value: "joined_at:desc", label: "Joined · newest" },
-                    { value: "joined_at:asc", label: "Joined · oldest" },
-                    { value: "activity_at:desc", label: "Activity · recent" },
-                    { value: "content_completion_pct:desc", label: "Completion · high" },
-                    { value: "live_attendance_pct:desc", label: "Attendance · high" },
-                    { value: "test_score_pct:desc", label: "Test · high" },
-                    { value: "learner_name:asc", label: "Name · A-Z" },
-                  ]}
-                  ariaLabel="Sort"
-                />
+          {selectedIds.length > 0 ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-3">
+              <p className="text-sm text-[var(--admin-on-surface)]">
+                <span className="font-mono font-medium">{selectedIds.length}</span> learners
+                selected
+              </p>
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex h-9 items-center gap-2 rounded-lg bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] px-3 text-xs font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_18%,var(--admin-surface))]"
-                  onClick={applySearch}
+                  className={secondaryButtonClassName}
+                  onClick={() => {
+                    openMessageModal(selectedIds);
+                  }}
                 >
-                  <Filter className="h-3.5 w-3.5" aria-hidden="true" />
-                  Apply
+                  <Mail className="h-4 w-4" aria-hidden="true" />
+                  Message
+                </button>
+                <button
+                  type="button"
+                  className={secondaryButtonClassName}
+                  disabled={busy}
+                  onClick={() => void handleExport()}
+                >
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                  Export
                 </button>
                 <button
                   type="button"
                   className={ghostButtonClassName}
-                  onClick={clearLearnerFilters}
-                  title="Clear filters"
+                  onClick={() => {
+                    setSelectedIds([]);
+                  }}
                 >
-                  Add filter
+                  Clear
                 </button>
               </div>
-              {hasLearnerFilters ? (
-                <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--admin-border)] pt-3">
-                  {learnerName ? (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px] text-[var(--admin-on-surface)]"
-                      onClick={() => {
-                        setLearnerName("");
-                        setDraftSearch("");
-                        setPage(1);
-                      }}
-                    >
-                      Search: {learnerName}
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {joinedFrom ? (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
-                      onClick={() => {
-                        setJoinedFrom("");
-                        setPage(1);
-                      }}
-                    >
-                      From {joinedFrom}
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {joinedTo ? (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
-                      onClick={() => {
-                        setJoinedTo("");
-                        setPage(1);
-                      }}
-                    >
-                      To {joinedTo}
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {completionValue ? (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
-                      onClick={() => {
-                        setCompletionValue("");
-                        setPage(1);
-                      }}
-                    >
-                      Completion {completionOp === "gte" ? "≥" : "≤"} {completionValue}%
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                  {healthFilter !== "any" ? (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1.5 rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-2 py-1 text-[11px]"
-                      onClick={() => {
-                        setHealthFilter("any");
-                        setPage(1);
-                      }}
-                    >
-                      Health:{" "}
-                      {healthFilter === "needs_attention"
-                        ? "At risk + critical"
-                        : titleCase(healthFilter)}
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </button>
-                  ) : null}
+            </div>
+          ) : null}
+
+          <section className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
+            {learnersLoading && learners.length === 0 ? (
+              <div className="space-y-0">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="relative flex items-center gap-3 border-b border-[var(--admin-border)] px-4 py-3 last:border-b-0"
+                  >
+                    <span className="absolute bottom-0 left-0 top-0 w-1 bg-[var(--admin-surface-high)]" />
+                    <Shimmer className="h-4 w-4" />
+                    <Shimmer className="h-8 w-8 rounded-full" />
+                    <Shimmer className="h-4 w-36" />
+                    <Shimmer className="ml-auto h-4 w-24" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[960px] text-left text-sm">
+                  <thead>
+                    <tr className="h-11 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] font-mono text-[11px] uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
+                      <th className="w-11 px-3">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 accent-[var(--admin-primary)]"
+                          checked={learners.length > 0 && selectedIds.length === learners.length}
+                          onChange={toggleSelectAll}
+                          aria-label="Select all learners on this page"
+                        />
+                      </th>
+                      {columns.includes("learner_name") ? <th className="px-3">Learner</th> : null}
+                      {columns.includes("activity_at") ? (
+                        <th className="px-3">Last activity</th>
+                      ) : null}
+                      {columns.includes("live_attendance_pct") ? (
+                        <th className="px-3">Live attendance</th>
+                      ) : null}
+                      {columns.includes("test_score_pct") ? (
+                        <th className="px-3">Test score</th>
+                      ) : null}
+                      {columns.includes("content_completion_pct") ? (
+                        <th className="px-3">Content</th>
+                      ) : null}
+                      {columns.includes("joined_at") ? <th className="px-3">Joined on</th> : null}
+                      <th className="w-12 px-3">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!learnersLoading && learners.length === 0 ? (
+                      <tr>
+                        <td colSpan={Math.max(3, columns.length + 2)} className="p-0">
+                          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+                            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
+                              <Users
+                                className="h-9 w-9 text-[var(--admin-primary)]"
+                                aria-hidden="true"
+                                strokeWidth={1.5}
+                              />
+                            </div>
+                            <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
+                              {hasLearnerFilters
+                                ? "No learners match these filters"
+                                : "No learners in this batch"}
+                            </h3>
+                            <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
+                              {hasLearnerFilters
+                                ? "Adjust search, dates, completion, or health filters to see matching memberships."
+                                : "Add members in Batch Settings, then return here to track attendance, scores, and completion."}
+                            </p>
+                            <div className="mt-6 flex flex-wrap justify-center gap-2">
+                              {hasLearnerFilters ? (
+                                <button
+                                  type="button"
+                                  className={secondaryButtonClassName}
+                                  onClick={clearLearnerFilters}
+                                >
+                                  Clear filters
+                                </button>
+                              ) : (
+                                <Link href="/admin/batches" className={primaryButtonClassName}>
+                                  Batch Settings
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      learners.map((learner, index) => {
+                        const selected = selectedIds.includes(learner.membershipId);
+                        const stale = isStaleActivity(learner.activityAt);
+                        return (
+                          <tr
+                            key={learner.membershipId}
+                            className={[
+                              "group relative h-11 border-b border-[var(--admin-border)] last:border-b-0",
+                              "cursor-pointer transition-colors duration-150",
+                              selected
+                                ? "bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))]"
+                                : "hover:bg-[var(--admin-surface-high)]",
+                            ].join(" ")}
+                            style={{
+                              animationDelay: `${Math.min(index, 11) * 20}ms`,
+                            }}
+                            onClick={() => {
+                              openLearnerPanel(learner);
+                            }}
+                          >
+                            <td
+                              className="relative px-3"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                              }}
+                            >
+                              <span
+                                className={`absolute bottom-0 left-0 top-0 w-1 ${healthRailClass(learner.health)}`}
+                                aria-hidden="true"
+                              />
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4 accent-[var(--admin-primary)]"
+                                checked={selected}
+                                onChange={() => {
+                                  toggleSelect(learner.membershipId);
+                                }}
+                                aria-label={`Select ${learner.learnerName ?? learner.email ?? "learner"}`}
+                              />
+                            </td>
+                            {columns.includes("learner_name") ? (
+                              <td className="px-3">
+                                <div className="flex items-center gap-3">
+                                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--admin-surface-high)] font-mono text-[11px] font-medium text-[var(--admin-on-surface)]">
+                                    {learnerInitials(learner.learnerName, learner.email)}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <p className="truncate font-medium text-[var(--admin-on-surface)]">
+                                      {learner.learnerName ?? learner.email ?? "Learner"}
+                                    </p>
+                                    {columns.includes("email") && learner.email ? (
+                                      <p className="truncate font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+                                        {learner.email}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              </td>
+                            ) : null}
+                            {columns.includes("activity_at") ? (
+                              <td className="px-3">
+                                <p
+                                  className={[
+                                    "font-mono text-xs",
+                                    stale
+                                      ? "text-[var(--admin-danger)]"
+                                      : "text-[var(--admin-on-surface-variant)]",
+                                  ].join(" ")}
+                                >
+                                  {formatRelative(learner.activityAt)}
+                                </p>
+                                <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
+                                  {formatDateTime(learner.activityAt)}
+                                </p>
+                              </td>
+                            ) : null}
+                            {columns.includes("live_attendance_pct") ? (
+                              <td className="px-3">
+                                <TripleMetricCell
+                                  value={learner.liveAttendancePct}
+                                  caption={`${learner.liveAttendedCount} of ${learner.liveSessionCount} sessions`}
+                                  passMark={passMark}
+                                />
+                              </td>
+                            ) : null}
+                            {columns.includes("test_score_pct") ? (
+                              <td className="px-3">
+                                <TripleMetricCell
+                                  value={learner.testScorePct}
+                                  caption={`${learner.testAttemptCount} attempts`}
+                                  linked={linkedCourse}
+                                  passMark={passMark}
+                                />
+                              </td>
+                            ) : null}
+                            {columns.includes("content_completion_pct") ? (
+                              <td className="px-3">
+                                <TripleMetricCell
+                                  value={learner.contentCompletionPct}
+                                  caption={`${learner.completedLessons} of ${learner.totalLessons} lessons`}
+                                  linked={linkedCourse}
+                                  passMark={passMark}
+                                />
+                              </td>
+                            ) : null}
+                            {columns.includes("joined_at") ? (
+                              <td className="px-3 font-mono text-xs text-[var(--admin-on-surface-variant)]">
+                                {formatDate(learner.joinedAt)}
+                              </td>
+                            ) : null}
+                            <td
+                              className="relative px-3"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                              }}
+                            >
+                              <button
+                                type="button"
+                                className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
+                                aria-label="Row actions"
+                                onClick={() => {
+                                  setRowMenuId((current) =>
+                                    current === learner.membershipId ? null : learner.membershipId,
+                                  );
+                                }}
+                              >
+                                <MoreVertical className="h-4 w-4" aria-hidden="true" />
+                              </button>
+                              {rowMenuId === learner.membershipId ? (
+                                <div className="absolute right-3 top-9 z-30 min-w-[180px] rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] py-1 shadow-lg">
+                                  <button
+                                    type="button"
+                                    className="block w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
+                                    onClick={() => {
+                                      openLearnerPanel(learner);
+                                    }}
+                                  >
+                                    View learner report
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="block w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
+                                    onClick={() => {
+                                      openMessageModal([learner.membershipId]);
+                                    }}
+                                  >
+                                    Message learner
+                                  </button>
+                                </div>
+                              ) : null}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
+                  Showing {rangeStart}-{rangeEnd} of {formatCount(totalCount)} learners
+                </p>
+                <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
+                  <span className="mr-3 inline-flex items-center gap-1.5">
+                    <span className="inline-block h-3 w-1 bg-[var(--admin-warning)]" />
+                    At risk
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block h-3 w-1 bg-[var(--admin-danger)]" />
+                    Critical
+                  </span>
+                  {" · "}
+                  At risk: any metric below 40% or no activity in 14 days. Critical: two or more
+                  metrics below 40%.
+                </p>
+              </div>
+              {totalPages > 1 ? (
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="text-xs font-medium text-[var(--admin-primary)] hover:underline"
-                    onClick={clearLearnerFilters}
+                    className={ghostButtonClassName}
+                    disabled={page <= 1 || learnersLoading}
+                    onClick={() => {
+                      setPage((current) => Math.max(1, current - 1));
+                    }}
+                    aria-label="Previous page"
                   >
-                    Clear all
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  <span className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
+                    {page} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className={ghostButtonClassName}
+                    disabled={page >= totalPages || learnersLoading}
+                    onClick={() => {
+                      setPage((current) => current + 1);
+                    }}
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               ) : null}
             </div>
-
-            {selectedIds.length > 0 ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))] px-4 py-3">
-                <p className="text-sm text-[var(--admin-on-surface)]">
-                  <span className="font-mono font-medium">{selectedIds.length}</span> learners
-                  selected
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className={secondaryButtonClassName}
-                    onClick={() => {
-                      openMessageModal(selectedIds);
-                    }}
-                  >
-                    <Mail className="h-4 w-4" aria-hidden="true" />
-                    Message
-                  </button>
-                  <button
-                    type="button"
-                    className={secondaryButtonClassName}
-                    disabled={busy}
-                    onClick={() => void handleExport()}
-                  >
-                    <Download className="h-4 w-4" aria-hidden="true" />
-                    Export
-                  </button>
-                  <button
-                    type="button"
-                    className={ghostButtonClassName}
-                    onClick={() => {
-                      setSelectedIds([]);
-                    }}
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
-            <section className="overflow-hidden rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)]">
-              {learnersLoading && learners.length === 0 ? (
-                <div className="space-y-0">
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="relative flex items-center gap-3 border-b border-[var(--admin-border)] px-4 py-3 last:border-b-0"
-                    >
-                      <span className="absolute bottom-0 left-0 top-0 w-1 bg-[var(--admin-surface-high)]" />
-                      <Shimmer className="h-4 w-4" />
-                      <Shimmer className="h-8 w-8 rounded-full" />
-                      <Shimmer className="h-4 w-36" />
-                      <Shimmer className="ml-auto h-4 w-24" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[960px] text-left text-sm">
-                    <thead>
-                      <tr className="h-11 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] font-mono text-[11px] uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
-                        <th className="w-11 px-3">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 accent-[var(--admin-primary)]"
-                            checked={learners.length > 0 && selectedIds.length === learners.length}
-                            onChange={toggleSelectAll}
-                            aria-label="Select all learners on this page"
-                          />
-                        </th>
-                        {columns.includes("learner_name") ? (
-                          <th className="px-3">Learner</th>
-                        ) : null}
-                        {columns.includes("activity_at") ? (
-                          <th className="px-3">Last activity</th>
-                        ) : null}
-                        {columns.includes("live_attendance_pct") ? (
-                          <th className="px-3">Live attendance</th>
-                        ) : null}
-                        {columns.includes("test_score_pct") ? (
-                          <th className="px-3">Test score</th>
-                        ) : null}
-                        {columns.includes("content_completion_pct") ? (
-                          <th className="px-3">Content</th>
-                        ) : null}
-                        {columns.includes("joined_at") ? <th className="px-3">Joined on</th> : null}
-                        <th className="w-12 px-3">
-                          <span className="sr-only">Actions</span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {!learnersLoading && learners.length === 0 ? (
-                        <tr>
-                          <td colSpan={Math.max(3, columns.length + 2)} className="p-0">
-                            <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-                              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
-                                <Users
-                                  className="h-9 w-9 text-[var(--admin-primary)]"
-                                  aria-hidden="true"
-                                  strokeWidth={1.5}
-                                />
-                              </div>
-                              <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                                {hasLearnerFilters
-                                  ? "No learners match these filters"
-                                  : "No learners in this batch"}
-                              </h3>
-                              <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
-                                {hasLearnerFilters
-                                  ? "Adjust search, dates, completion, or health filters to see matching memberships."
-                                  : "Add members in Batch Settings, then return here to track attendance, scores, and completion."}
-                              </p>
-                              <div className="mt-6 flex flex-wrap justify-center gap-2">
-                                {hasLearnerFilters ? (
-                                  <button
-                                    type="button"
-                                    className={secondaryButtonClassName}
-                                    onClick={clearLearnerFilters}
-                                  >
-                                    Clear filters
-                                  </button>
-                                ) : (
-                                  <Link href="/admin/batches" className={primaryButtonClassName}>
-                                    Batch Settings
-                                  </Link>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
-                        learners.map((learner, index) => {
-                          const selected = selectedIds.includes(learner.membershipId);
-                          const stale = isStaleActivity(learner.activityAt);
-                          return (
-                            <tr
-                              key={learner.membershipId}
-                              className={[
-                                "group relative h-11 border-b border-[var(--admin-border)] last:border-b-0",
-                                "cursor-pointer transition-colors duration-150",
-                                selected
-                                  ? "bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))]"
-                                  : "hover:bg-[var(--admin-surface-high)]",
-                              ].join(" ")}
-                              style={{
-                                animationDelay: `${Math.min(index, 11) * 20}ms`,
-                              }}
-                              onClick={() => {
-                                openLearnerPanel(learner);
-                              }}
-                            >
-                              <td
-                                className="relative px-3"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                }}
-                              >
-                                <span
-                                  className={`absolute bottom-0 left-0 top-0 w-1 ${healthRailClass(learner.health)}`}
-                                  aria-hidden="true"
-                                />
-                                <input
-                                  type="checkbox"
-                                  className="h-4 w-4 accent-[var(--admin-primary)]"
-                                  checked={selected}
-                                  onChange={() => {
-                                    toggleSelect(learner.membershipId);
-                                  }}
-                                  aria-label={`Select ${learner.learnerName ?? learner.email ?? "learner"}`}
-                                />
-                              </td>
-                              {columns.includes("learner_name") ? (
-                                <td className="px-3">
-                                  <div className="flex items-center gap-3">
-                                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--admin-surface-high)] font-mono text-[11px] font-medium text-[var(--admin-on-surface)]">
-                                      {learnerInitials(learner.learnerName, learner.email)}
-                                    </span>
-                                    <div className="min-w-0">
-                                      <p className="truncate font-medium text-[var(--admin-on-surface)]">
-                                        {learner.learnerName ?? learner.email ?? "Learner"}
-                                      </p>
-                                      {columns.includes("email") && learner.email ? (
-                                        <p className="truncate font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                                          {learner.email}
-                                        </p>
-                                      ) : null}
-                                    </div>
-                                  </div>
-                                </td>
-                              ) : null}
-                              {columns.includes("activity_at") ? (
-                                <td className="px-3">
-                                  <p
-                                    className={[
-                                      "font-mono text-xs",
-                                      stale
-                                        ? "text-[var(--admin-danger)]"
-                                        : "text-[var(--admin-on-surface-variant)]",
-                                    ].join(" ")}
-                                  >
-                                    {formatRelative(learner.activityAt)}
-                                  </p>
-                                  <p className="font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                                    {formatDateTime(learner.activityAt)}
-                                  </p>
-                                </td>
-                              ) : null}
-                              {columns.includes("live_attendance_pct") ? (
-                                <td className="px-3">
-                                  <TripleMetricCell
-                                    value={learner.liveAttendancePct}
-                                    caption={`${learner.liveAttendedCount} of ${learner.liveSessionCount} sessions`}
-                                    passMark={passMark}
-                                  />
-                                </td>
-                              ) : null}
-                              {columns.includes("test_score_pct") ? (
-                                <td className="px-3">
-                                  <TripleMetricCell
-                                    value={learner.testScorePct}
-                                    caption={`${learner.testAttemptCount} attempts`}
-                                    linked={linkedCourse}
-                                    passMark={passMark}
-                                  />
-                                </td>
-                              ) : null}
-                              {columns.includes("content_completion_pct") ? (
-                                <td className="px-3">
-                                  <TripleMetricCell
-                                    value={learner.contentCompletionPct}
-                                    caption={`${learner.completedLessons} of ${learner.totalLessons} lessons`}
-                                    linked={linkedCourse}
-                                    passMark={passMark}
-                                  />
-                                </td>
-                              ) : null}
-                              {columns.includes("joined_at") ? (
-                                <td className="px-3 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                                  {formatDate(learner.joinedAt)}
-                                </td>
-                              ) : null}
-                              <td
-                                className="relative px-3"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                }}
-                              >
-                                <button
-                                  type="button"
-                                  className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
-                                  aria-label="Row actions"
-                                  onClick={() => {
-                                    setRowMenuId((current) =>
-                                      current === learner.membershipId
-                                        ? null
-                                        : learner.membershipId,
-                                    );
-                                  }}
-                                >
-                                  <MoreVertical className="h-4 w-4" aria-hidden="true" />
-                                </button>
-                                {rowMenuId === learner.membershipId ? (
-                                  <div className="absolute right-3 top-9 z-30 min-w-[180px] rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] py-1 shadow-lg">
-                                    <button
-                                      type="button"
-                                      className="block w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                      onClick={() => {
-                                        openLearnerPanel(learner);
-                                      }}
-                                    >
-                                      View learner report
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="block w-full px-3 py-2 text-left text-xs text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-high)]"
-                                      onClick={() => {
-                                        openMessageModal([learner.membershipId]);
-                                      }}
-                                    >
-                                      Message learner
-                                    </button>
-                                  </div>
-                                ) : null}
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                    Showing {rangeStart}-{rangeEnd} of {formatCount(totalCount)} learners
-                  </p>
-                  <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
-                    <span className="mr-3 inline-flex items-center gap-1.5">
-                      <span className="inline-block h-3 w-1 bg-[var(--admin-warning)]" />
-                      At risk
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="inline-block h-3 w-1 bg-[var(--admin-danger)]" />
-                      Critical
-                    </span>
-                    {" · "}
-                    At risk: any metric below 40% or no activity in 14 days. Critical: two or more
-                    metrics below 40%.
-                  </p>
-                </div>
-                {totalPages > 1 ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className={ghostButtonClassName}
-                      disabled={page <= 1 || learnersLoading}
-                      onClick={() => {
-                        setPage((current) => Math.max(1, current - 1));
-                      }}
-                      aria-label="Previous page"
-                    >
-                      <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                    <span className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                      {page} / {totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      className={ghostButtonClassName}
-                      disabled={page >= totalPages || learnersLoading}
-                      onClick={() => {
-                        setPage((current) => current + 1);
-                      }}
-                      aria-label="Next page"
-                    >
-                      <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </section>
-          </div>
-
-          {learnerDetail ? (
-            <aside className="h-fit rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] xl:sticky xl:top-4">
-              <div className="flex items-start justify-between gap-2 border-b border-[var(--admin-border)] px-4 py-3">
-                <div className="min-w-0">
-                  <h2 className="truncate text-base font-semibold text-[var(--admin-on-surface)]">
-                    {learnerDetail.learnerName ?? learnerDetail.email ?? "Learner"}
-                  </h2>
-                  <p className="mt-0.5 truncate font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                    {learnerDetail.email ?? "-"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="rounded p-1 text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
-                  onClick={closeLearnerPanel}
-                  aria-label="Close learner detail"
-                >
-                  <X className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2 border-b border-[var(--admin-border)] p-3">
-                <div className="rounded-md bg-[var(--admin-surface-low)] p-2">
-                  <p className="text-[10px] uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
-                    Live
-                  </p>
-                  <p className="mt-1 font-mono text-sm font-semibold text-[var(--admin-on-surface)]">
-                    {formatPct(learnerDetail.summary.liveAttendancePct)}
-                  </p>
-                </div>
-                <div className="rounded-md bg-[var(--admin-surface-low)] p-2">
-                  <p className="text-[10px] uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
-                    Test
-                  </p>
-                  <p className="mt-1 font-mono text-sm font-semibold text-[var(--admin-on-surface)]">
-                    {formatPct(learnerDetail.summary.testScorePct)}
-                  </p>
-                </div>
-                <div className="rounded-md bg-[var(--admin-surface-low)] p-2">
-                  <p className="text-[10px] uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]">
-                    Content
-                  </p>
-                  <p className="mt-1 font-mono text-sm font-semibold text-[var(--admin-on-surface)]">
-                    {formatPct(learnerDetail.summary.contentCompletionPct)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-1 border-b border-[var(--admin-border)] px-2 pt-2">
-                {(
-                  [
-                    ["live", "Live"],
-                    ["exams", "Exams"],
-                    ["course", "Course"],
-                  ] as const
-                ).map(([key, label]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={[
-                      "h-8 flex-1 rounded-md text-xs font-semibold transition-colors",
-                      learnerPanelTab === key
-                        ? "bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] text-[var(--admin-primary)]"
-                        : "text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]",
-                    ].join(" ")}
-                    onClick={() => {
-                      setLearnerPanelTab(key);
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="max-h-[480px] overflow-y-auto p-3">
-                {learnerDetailError ? (
-                  <p className="text-sm text-[var(--admin-danger)]">{learnerDetailError}</p>
-                ) : null}
-                {learnerDetailLoading ? (
-                  <div className="space-y-2">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                      <Shimmer key={index} className="h-10 w-full" />
-                    ))}
-                  </div>
-                ) : learnerPanelTab === "live" ? (
-                  learnerDetail.liveAttendance.length === 0 ? (
-                    <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                      No live session attendance for this learner in the batch scope.
-                    </p>
-                  ) : (
-                    <ul className="space-y-2">
-                      {learnerDetail.liveAttendance.map((session) => (
-                        <li
-                          key={session.liveSessionId}
-                          className="rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2"
-                        >
-                          <p className="text-sm font-medium text-[var(--admin-on-surface)]">
-                            {session.title}
-                          </p>
-                          <p className="mt-1 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                            {formatDateTime(session.scheduledAt)} · {titleCase(session.status)}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  )
-                ) : learnerPanelTab === "exams" ? (
-                  learnerDetail.exams.length === 0 ? (
-                    <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                      No exam attempts in the batch scope.
-                    </p>
-                  ) : (
-                    <ul className="space-y-2">
-                      {learnerDetail.exams.map((exam) => (
-                        <li
-                          key={exam.attemptId}
-                          className="rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2"
-                        >
-                          <p className="text-sm font-medium text-[var(--admin-on-surface)]">
-                            {exam.assessmentTitle}
-                          </p>
-                          <p className="mt-1 font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                            {formatPct(exam.scorePct)} · {titleCase(exam.attemptStatus)} ·{" "}
-                            {formatDateTime(exam.submittedAt ?? exam.startedAt)}
-                          </p>
-                        </li>
-                      ))}
-                    </ul>
-                  )
-                ) : learnerDetail.courseProgress.length === 0 ? (
-                  <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                    No course progress found for this learner.
-                  </p>
-                ) : (
-                  <ul className="space-y-2">
-                    {learnerDetail.courseProgress.map((course) => (
-                      <li
-                        key={course.courseId}
-                        className="rounded-md border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2"
-                      >
-                        <p className="text-sm font-medium text-[var(--admin-on-surface)]">
-                          {course.courseTitle}
-                        </p>
-                        <TripleMetricCell
-                          value={course.completionPct}
-                          caption={`${course.completedLessons} of ${course.totalLessons} lessons`}
-                          passMark={passMark}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </aside>
-          ) : null}
+          </section>
         </div>
       ) : null}
 
