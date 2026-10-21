@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { primaryButtonClassName } from "../../analytics/analytics-admin-shared";
 import { ClientApiError } from "../../../lib/client-api";
+import type { ReportInitialData } from "../../../lib/server/report-initial-data";
 import {
   DropdownField,
   dropdownItemClassName,
@@ -35,10 +36,18 @@ import {
   downloadReportExport,
   fetchAllReportDefinitions,
   startReportExportRun,
+  mapDefinition,
+  type DomainDefinition,
   type ReportDefinition,
   type ReportParamDefinition,
 } from "./admin-reports-api";
-import { fetchDestinationsRoster, type DestinationItem } from "./admin-export-destinations-api";
+import {
+  ENABLED_DESTINATIONS_FILTERS,
+  fetchDestinationsRoster,
+  type DestinationItem,
+  type DestinationsRosterPayload,
+} from "./admin-export-destinations-api";
+import { useReportLoad } from "./use-report-load";
 
 type Phase = "configure" | "running" | "succeeded" | "failed";
 type FormatOption = "csv" | "xlsx" | "json";
@@ -119,6 +128,23 @@ function datePresetRange(preset: Exclude<DatePreset, "custom">): { from: string;
     from: from.toISOString().slice(0, 10),
     to: to.toISOString().slice(0, 10),
   };
+}
+
+/** The definitions the builder lists. */
+function builderDefinitions(definitions: ReportDefinition[]): ReportDefinition[] {
+  return definitions.filter((d) => d.scope !== "tenant" || d.key);
+}
+
+/** A report's parameters the filter row offers: not its date bounds or output options. */
+function filterableParamsOf(selected: ReportDefinition | null): ReportParamDefinition[] {
+  if (!selected) return [];
+  const dates = dateParamKeys(selected.params);
+  return selected.params.filter(
+    (p) =>
+      p.key !== dates.start &&
+      p.key !== dates.end &&
+      !["columns", "rowLimit", "limit", "format", "delivery"].includes(p.key),
+  );
 }
 
 function dateParamKeys(params: ReportParamDefinition[]): { start?: string; end?: string } {
@@ -270,22 +296,43 @@ function PipelineMini({
   );
 }
 
-export function AdminNewExportPage() {
+type NewExportPageProps = {
+  /** The report definitions as the API returns them, loaded by the server. */
+  initialDefinitions?: ReportInitialData<{ items: DomainDefinition[] }> | null;
+  /** The destinations the builder offers, loaded by the server. */
+  initialDestinations?: ReportInitialData<DestinationsRosterPayload> | null;
+};
+
+export function AdminNewExportPage({
+  initialDefinitions,
+  initialDestinations,
+}: NewExportPageProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefillKey = searchParams.get("definition") ?? searchParams.get("report");
 
+  // Read once: later renders must not reset what the page has changed since.
+  const [initialDefs] = useState(() => initialDefinitions ?? null);
+  const [initialDests] = useState(() => initialDestinations ?? null);
+  // With the server's definitions, the report the address names starts
+  // selected, as the browser load selects it once it arrives.
+  const [boot] = useState(() => {
+    const items = initialDefs ? builderDefinitions(initialDefs.data.items.map(mapDefinition)) : [];
+    const prefill = prefillKey && items.some((d) => d.key === prefillKey) ? prefillKey : null;
+    return { items, prefill, chosen: items.find((d) => d.key === prefill) ?? null };
+  });
+
   const [phase, setPhase] = useState<Phase>("configure");
-  const [definitions, setDefinitions] = useState<ReportDefinition[]>([]);
-  const [loadingDefs, setLoadingDefs] = useState(true);
+  const [definitions, setDefinitions] = useState<ReportDefinition[]>(boot.items);
+  const [loadingDefs, setLoadingDefs] = useState(initialDefs === null);
   const [error, setError] = useState<string | null>(null);
 
   const [reportQuery, setReportQuery] = useState("");
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [reportCollapsed, setReportCollapsed] = useState(false);
+  const [selectedKey, setSelectedKey] = useState<string | null>(boot.prefill);
+  const [reportCollapsed, setReportCollapsed] = useState(boot.prefill !== null);
 
   const [filters, setFilters] = useState<FilterRow[]>([]);
-  const [draftField, setDraftField] = useState("");
+  const [draftField, setDraftField] = useState(() => filterableParamsOf(boot.chosen)[0]?.key ?? "");
   const [draftOperator, setDraftOperator] = useState<"eq" | "contains">("eq");
   const [draftValue, setDraftValue] = useState("");
   const [fieldOpen, setFieldOpen] = useState(false);
@@ -296,7 +343,7 @@ export function AdminNewExportPage() {
   const [customTo, setCustomTo] = useState("");
   const [rowLimit, setRowLimit] = useState("");
 
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>(boot.chosen?.columns ?? []);
   const [emptyValuesMode, setEmptyValuesMode] = useState<EmptyValuesMode>("blank");
   const [placeholderText, setPlaceholderText] = useState("-");
 
@@ -308,7 +355,9 @@ export function AdminNewExportPage() {
 
   const [delivery, setDelivery] = useState<DeliveryMode>("download");
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>("");
-  const [destinations, setDestinations] = useState<DestinationItem[]>([]);
+  const [destinations, setDestinations] = useState<DestinationItem[]>(
+    () => initialDests?.data.items.filter((item) => item.isActive) ?? [],
+  );
   const [destinationsLoading, setDestinationsLoading] = useState(false);
   const [destinationOpen, setDestinationOpen] = useState(false);
   const [scheduleEnabled, setScheduleEnabled] = useState(false);
@@ -321,7 +370,7 @@ export function AdminNewExportPage() {
   const [previewBusy, setPreviewBusy] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [runBusy, setRunBusy] = useState(false);
-  const [activeSection, setActiveSection] = useState<SectionKey>("report");
+  const [activeSection, setActiveSection] = useState<SectionKey>(boot.prefill ? "scope" : "report");
 
   const [runDetail, setRunDetail] = useState<ExportRunDetail | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
@@ -337,16 +386,7 @@ export function AdminNewExportPage() {
     [definitions, selectedKey],
   );
 
-  const filterableParams = useMemo(() => {
-    if (!selected) return [];
-    const dates = dateParamKeys(selected.params);
-    return selected.params.filter(
-      (p) =>
-        p.key !== dates.start &&
-        p.key !== dates.end &&
-        !["columns", "rowLimit", "limit", "format", "delivery"].includes(p.key),
-    );
-  }, [selected]);
+  const filterableParams = useMemo(() => filterableParamsOf(selected), [selected]);
 
   const availableColumns = useMemo(() => {
     if (preview?.columns.length) return preview.columns;
@@ -487,15 +527,21 @@ export function AdminNewExportPage() {
     [destinations, selectedDestinationId],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setLoadingDefs(true);
+  // A newer load, or leaving the page, cancels the one in flight.
+  const definitionsRequest = useRef<AbortController | null>(null);
+
+  const loadDefinitions = useCallback(
+    async (options?: { soft?: boolean }) => {
+      definitionsRequest.current?.abort();
+      const request = new AbortController();
+      definitionsRequest.current = request;
+      const soft = options?.soft === true;
+      if (!soft) setLoadingDefs(true);
       setError(null);
       try {
         const response = await fetchAllReportDefinitions();
-        if (cancelled) return;
-        const items = response.data.definitions.filter((d) => d.scope !== "tenant" || d.key);
+        if (request.signal.aborted) return;
+        const items = builderDefinitions(response.data.definitions);
         setDefinitions(items);
         const prefill = prefillKey && items.some((d) => d.key === prefillKey) ? prefillKey : null;
         if (prefill) {
@@ -504,7 +550,7 @@ export function AdminNewExportPage() {
           setActiveSection("scope");
         }
       } catch (loadError) {
-        if (!cancelled) {
+        if (!request.signal.aborted) {
           setError(
             loadError instanceof ClientApiError
               ? loadError.message
@@ -514,38 +560,42 @@ export function AdminNewExportPage() {
           );
         }
       } finally {
-        if (!cancelled) setLoadingDefs(false);
+        if (!request.signal.aborted && !soft) setLoadingDefs(false);
       }
-    }
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [prefillKey]);
+    },
+    [prefillKey],
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    async function loadDestinations() {
-      setDestinationsLoading(true);
-      try {
-        const response = await fetchDestinationsRoster({
-          status: "enabled",
-          limit: 100,
-          sort: "name_asc",
-        });
-        if (cancelled) return;
-        setDestinations(response.data.items.filter((item) => item.isActive));
-      } catch {
-        if (!cancelled) setDestinations([]);
-      } finally {
-        if (!cancelled) setDestinationsLoading(false);
-      }
+  useReportLoad(loadDefinitions, initialDefs);
+
+  const destinationsRequest = useRef<AbortController | null>(null);
+
+  const loadDestinations = useCallback(async (options?: { soft?: boolean }) => {
+    destinationsRequest.current?.abort();
+    const request = new AbortController();
+    destinationsRequest.current = request;
+    const soft = options?.soft === true;
+    if (!soft) setDestinationsLoading(true);
+    try {
+      const response = await fetchDestinationsRoster(ENABLED_DESTINATIONS_FILTERS);
+      if (request.signal.aborted) return;
+      setDestinations(response.data.items.filter((item) => item.isActive));
+    } catch {
+      if (!request.signal.aborted) setDestinations([]);
+    } finally {
+      if (!request.signal.aborted && !soft) setDestinationsLoading(false);
     }
-    void loadDestinations();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useReportLoad(loadDestinations, initialDests);
+
+  useEffect(
+    () => () => {
+      definitionsRequest.current?.abort();
+      destinationsRequest.current?.abort();
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!selected) return;

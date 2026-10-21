@@ -98,6 +98,13 @@ export const DESTINATIONS_ROSTER_DEFAULTS = {
   limit: 50,
 } as const satisfies DestinationsRosterFilters;
 
+/** The destinations the export builder offers: the enabled ones, by name. */
+export const ENABLED_DESTINATIONS_FILTERS = {
+  status: "enabled",
+  sort: "name_asc",
+  limit: 100,
+} as const satisfies DestinationsRosterFilters;
+
 export function destinationsRosterPath(filters?: DestinationsRosterFilters): string {
   return `/api/v1/reports/exports/destinations${buildQuery({
     q: filters?.q,
