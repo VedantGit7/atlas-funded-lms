@@ -18,13 +18,46 @@ docker build -f deploy/managed-node/Dockerfile --target api --secret id=api_buil
 docker build -f deploy/managed-node/Dockerfile --target web --secret id=web_build_env,src=/secure/web-build.env -t atlas-web:SOURCE_SHA .
 ```
 
-CI builds all three targets and fails on fixable HIGH/CRITICAL vulnerabilities; the runtime images apply Debian security updates and carry no package managers (see `container-scanning.md`). The API build secret is a dotenv-format file containing the actual staging/production F05 configuration, including `ATLAS_SERVICE_RUNTIME=managed-node` and `APP_ENV`. Do not check it into the repository. The web build secret has the same format. Next fixes `API_INTERNAL_URL` (the `/api/v1` rewrite) and every `NEXT_PUBLIC_*` value into the web build, so the web image is built once per environment and a production image can't serve staging. The web image runs the standalone server at `frontend/apps/web/server.js` on port 3000, with its `.next/static` and `public` files copied beside it (`standalone-build-output.md`). Unlike the API and worker, the web service doesn't require `ATLAS_SERVICE_RUNTIME`. Next embeds intentionally public build settings; never use public variable names for secrets. Runtime settings come from the host secret manager. The Docker build context excludes env files, local storage, generated clients, private key/backup files and development outputs. An explicit schema-only Prisma generation step runs after installation; the image does not rely on lifecycle scripts to create the client. The worker image ships a bundle of the worker (`deploy/managed-node/build-worker.mjs`), not the source tree: no source, no other workspace dependencies and no dev tools, only `playwright-core` beside it for Chromium. Its build then checks, as the unprivileged runtime user with networking disabled, that the complete processor graph, generated client and usage drain import, and runs the paths a bundle can break lazily: SVG sanitizing, a report workbook and a certificate PDF through Chromium.
+CI builds all three targets and fails on fixable HIGH/CRITICAL vulnerabilities; the runtime images apply Debian security updates and carry no package managers (see `container-scanning.md`). The API build secret is a dotenv-format file with the target environment's non-secret settings (see "Publishing" below). It isn't the full runtime configuration: credentials are never fixed into a build. Do not check it into the repository. The web build secret has the same format. Next fixes `API_INTERNAL_URL` (the `/api/v1` rewrite) and every `NEXT_PUBLIC_*` value into the web build, so the web image is built once per environment and a production image can't serve staging. The web image runs the standalone server at `frontend/apps/web/server.js` on port 3000, with its `.next/static` and `public` files copied beside it (`standalone-build-output.md`). Unlike the API and worker, the web service doesn't require `ATLAS_SERVICE_RUNTIME`. Next embeds intentionally public build settings; never use public variable names for secrets. Runtime settings come from the host secret manager. The Docker build context excludes env files, local storage, generated clients, private key/backup files and development outputs. An explicit schema-only Prisma generation step runs after installation; the image does not rely on lifecycle scripts to create the client. The worker image ships a bundle of the worker (`deploy/managed-node/build-worker.mjs`), not the source tree: no source, no other workspace dependencies and no dev tools, only `playwright-core` beside it for Chromium. Its build then checks, as the unprivileged runtime user with networking disabled, that the complete processor graph, generated client and usage drain import, and runs the paths a bundle can break lazily: SVG sanitizing, a report workbook and a certificate PDF through Chromium.
 
 Export `ATLAS_API_IMAGE`, `ATLAS_WORKER_IMAGE`, `ATLAS_API_ENV_FILE`, and `ATLAS_WORKER_ENV_FILE`, then review `docker compose -f deploy/managed-node/compose.yaml config --quiet` before `up -d`. The API binds only loopback port 3001 in this reference deployment; connect it to an authenticated TLS ingress or private managed-service origin. Do not expose worker port 8081 publicly. This reference compose file doesn't run the web service yet; adding it is task 1.3 of `docs/engineering/launch-plan-2026-10-23.md`.
 
 The API image sets `KEEP_ALIVE_TIMEOUT=65000`: idle connections stay open 65 s. The ingress's upstream idle timeout must be shorter, so it always closes an idle connection first. If the API closes first, a request the ingress sends on that connection at the same moment fails as a 502 that neither side logs. Most ingresses default to 60 s; if the chosen one keeps idle upstream connections longer, raise this above it.
 
 The worker image starts Node directly on the bundle (`node worker.mjs`), preserving SIGTERM delivery. Both services run as an unprivileged user. The reference limits are 2 CPUs/2 GiB per service, 256 MiB `/tmp` and 256 MiB worker shared memory; validate measured workload headroom before changing replica counts. Compose restarts exited processes; an unhealthy Docker health check by itself does **not** restart a container. Configure the managed host's liveness restart policy against `/healthz` and readiness against `/readyz`.
+
+### Publishing
+
+`.github/workflows/images.yml` ("Publish images") publishes the deployable images to the GitHub Container Registry.
+
+- **Trigger:** it runs when CI succeeds for a push to this repository's `main`, or manually on `main`. A pull request never publishes, including one from a fork whose branch is named `main`.
+- **Gate:** it builds each image, applies the same Trivy gate as `container-scan`, and only then pushes.
+- **Tags:** immutable and end with the commit SHA, the same value as `RELEASE_SHA`:
+
+| Image  | Tag                                                | Built                                             |
+| ------ | -------------------------------------------------- | ------------------------------------------------- |
+| Worker | `ghcr.io/vedantgit7/atlas-worker:<sha>`            | Once per commit. The bundle fixes no settings in. |
+| API    | `ghcr.io/vedantgit7/atlas-api:<environment>-<sha>` | Once per environment                              |
+| Web    | `ghcr.io/vedantgit7/atlas-web:<environment>-<sha>` | Once per environment                              |
+
+**Why the API is built per environment:** Next fixes every `NEXT_PUBLIC_*` value into the **API** build too, not only the web's. The shared auth and observability packages read `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `NEXT_PUBLIC_SENTRY_DSN`. A built API contains those values as literal text, so an API image built for staging keeps staging's values in production. The same holds for the web build, which also fixes `API_INTERNAL_URL`.
+
+**Build settings:**
+
+- Each GitHub environment (`staging`, `production`) holds two dotenv-format secrets, `API_BUILD_ENV` and `WEB_BUILD_ENV`.
+- The workflow passes them to the builds as the `api_build_env` and `web_build_env` BuildKit secrets.
+- An environment without them is skipped with a notice, not failed.
+- They contain the environment's **non-secret** settings only:
+  - `APP_ENV`, `PLATFORM_HOST`, `APP_URL` and `API_INTERNAL_URL`;
+  - every `NEXT_PUBLIC_*` value;
+  - and, optionally, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` for source-map upload.
+- **Leave credentials out:** database URLs, SMTP, R2, `API_PROXY_SECRET`, `CRON_SECRET` and the like. A build never fixes them in (CI compiles both apps with empty settings), so they belong only in the runtime settings.
+- **Rebuild after changing a fixed value.** A changed `NEXT_PUBLIC_*` value or `API_INTERNAL_URL` needs a rebuild; setting it at runtime alone changes nothing.
+
+**Pulling:**
+
+- Packages published by the workflow are linked to the repository. Check each package's visibility after its first publish, and keep it private.
+- A host pulls with a personal access token (classic) that has only `read:packages`.
 
 ## Work and recovery contract
 
