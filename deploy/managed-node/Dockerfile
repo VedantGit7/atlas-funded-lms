@@ -41,6 +41,14 @@ COPY --from=source /source/ ./
 RUN --mount=type=secret,id=api_build_env,required=true \
     pnpm exec dotenv -e /run/secrets/api_build_env -- pnpm --filter @atlas/api-app build
 
+# Next fixes API_INTERNAL_URL (the /api/v1 rewrite) and every NEXT_PUBLIC_*
+# value into the build, so the web image is built once per environment. Its
+# settings arrive the same way as the API's: a BuildKit secret, never COPYed.
+FROM dependencies AS web-build
+COPY --from=source /source/ ./
+RUN --mount=type=secret,id=web_build_env,required=true \
+    pnpm exec dotenv -e /run/secrets/web_build_env -- pnpm --filter @atlas/web build
+
 # The worker ships as a bundle (build-worker.mjs), not as the monorepo run
 # through tsx: no source, no other workspace's dependencies, no dev tools.
 FROM dependencies AS worker-build
@@ -104,3 +112,24 @@ USER node
 EXPOSE 3001
 STOPSIGNAL SIGTERM
 CMD ["node", "backend/apps/api/server.js"]
+
+FROM runtime-base AS web
+WORKDIR /app
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+# The same idle-connection margin as the API: the proxy must close first.
+ENV KEEP_ALIVE_TIMEOUT=65000
+# Runtime starts node directly; package managers are build-time only.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+       /usr/local/bin/yarn /usr/local/bin/yarnpkg
+# Standalone output leaves out .next/static and public, and without them every
+# asset 404s; the entrypoint keeps its workspace path (standalone-build-output.md).
+COPY --from=web-build --chown=node:node /app/frontend/apps/web/.next/standalone ./
+COPY --from=web-build --chown=node:node /app/frontend/apps/web/.next/static ./frontend/apps/web/.next/static
+COPY --from=web-build --chown=node:node /app/frontend/apps/web/public ./frontend/apps/web/public
+USER node
+EXPOSE 3000
+STOPSIGNAL SIGTERM
+CMD ["node", "frontend/apps/web/server.js"]
