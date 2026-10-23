@@ -1033,23 +1033,25 @@ jobs:
           echo "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  $RUNNER_TEMP/trivy.tar.gz" | sha256sum --check
           tar -xzf "$RUNNER_TEMP/trivy.tar.gz" -C "$RUNNER_TEMP" trivy
 
-      - name: Build API and worker images
+      - name: Build API, worker and web images
         run: |
-          # The API build needs its dotenv secret to exist; compiling requires no values.
+          # The API and web builds need their dotenv secrets to exist; compiling requires no values.
           printf '# Compile-only fixture: no runtime credentials or live providers.\n' > "$RUNNER_TEMP/api-build.env"
+          printf '# Compile-only fixture: no runtime credentials or live providers.\n' > "$RUNNER_TEMP/web-build.env"
           docker build -f deploy/managed-node/Dockerfile --target api --secret id=api_build_env,src="$RUNNER_TEMP/api-build.env" -t atlas-api:ci .
           docker build -f deploy/managed-node/Dockerfile --target worker -t atlas-worker:ci .
+          docker build -f deploy/managed-node/Dockerfile --target web --secret id=web_build_env,src="$RUNNER_TEMP/web-build.env" -t atlas-web:ci .
 
       - name: List HIGH/CRITICAL vulnerabilities, including those without a fix
         run: |
-          for image in atlas-api:ci atlas-worker:ci; do
+          for image in atlas-api:ci atlas-worker:ci atlas-web:ci; do
             "$RUNNER_TEMP/trivy" image --scanners vuln --severity HIGH,CRITICAL --exit-code 0 "$image"
           done
 
       - name: Fail on fixable HIGH/CRITICAL vulnerabilities
         run: |
           status=0
-          for image in atlas-api:ci atlas-worker:ci; do
+          for image in atlas-api:ci atlas-worker:ci atlas-web:ci; do
             "$RUNNER_TEMP/trivy" image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table "$image" || status=1
           done
           exit "$status"
