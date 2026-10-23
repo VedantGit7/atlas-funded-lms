@@ -129,6 +129,7 @@ describe("aggregate CI gate", () => {
 describe("workflow graph and supply chain", () => {
   const ci = parse(readFileSync(join(root, ".github/workflows/ci.yml"), "utf8"));
   const drills = parse(readFileSync(join(root, ".github/workflows/drills.yml"), "utf8"));
+  const publishImages = parse(readFileSync(join(root, ".github/workflows/images.yml"), "utf8"));
   it("uses one pinned Node runtime compatible with locked Linux CI dependencies", () => {
     const version = readFileSync(join(root, ".node-version"), "utf8").trim();
     expect(version).toMatch(/^\d+\.\d+\.\d+$/);
@@ -144,7 +145,7 @@ describe("workflow graph and supply chain", () => {
       .filter(([, pkg]) => pkg.engines?.node && !satisfies(version, pkg.engines.node))
       .map(([name, pkg]) => `${name}: ${pkg.engines?.node}`);
     expect(incompatible).toEqual([]);
-    for (const workflow of [ci, drills]) {
+    for (const workflow of [ci, drills, publishImages]) {
       for (const job of Object.values(workflow.jobs) as Array<{
         steps: Array<{ uses?: string; with?: Record<string, string> }>;
       }>) {
@@ -201,7 +202,7 @@ describe("workflow graph and supply chain", () => {
       "defaults",
       "jobs",
     ]);
-    for (const workflow of [ci, drills]) {
+    for (const workflow of [ci, drills, publishImages]) {
       expect(Object.keys(workflow).filter((key) => !keys.has(key))).toEqual([]);
       for (const job of Object.values(workflow.jobs) as Array<{
         env?: unknown;
@@ -212,6 +213,62 @@ describe("workflow graph and supply chain", () => {
           if (step.uses) expect(step.uses).toMatch(/^[\w.-]+\/[\w./-]+@[a-f0-9]{40}$/);
       }
     }
+  });
+  it("publishes images only for CI-passing pushes to this repository's main", () => {
+    // workflow_run names the CI workflow; a rename would silently stop publishing.
+    expect(publishImages.on.workflow_run).toEqual({
+      workflows: [ci.name],
+      types: ["completed"],
+      branches: ["main"],
+    });
+    expect(Object.keys(publishImages.on).sort()).toEqual(["workflow_dispatch", "workflow_run"]);
+    expect(publishImages.permissions).toEqual({});
+    const jobs = Object.values(publishImages.jobs) as Array<{
+      if: string;
+      permissions: Record<string, string>;
+      steps: Array<{ name?: string; uses?: string; run?: string; with?: Record<string, unknown> }>;
+    }>;
+    expect(jobs).toHaveLength(2);
+    for (const job of jobs) {
+      // workflow_run also fires for pull requests, including forks with a branch named main.
+      for (const condition of [
+        "github.event.workflow_run.conclusion == 'success'",
+        "github.event.workflow_run.event == 'push'",
+        "github.event.workflow_run.head_branch == 'main'",
+        "github.event.workflow_run.head_repository.full_name == github.repository",
+        "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
+      ])
+        expect(job.if).toContain(condition);
+      expect(job.permissions).toEqual({ contents: "read", packages: "write" });
+      const checkout = job.steps.find((step) => step.uses?.startsWith("actions/checkout@"));
+      expect(checkout?.with).toEqual({
+        ref: "${{ env.SOURCE_SHA }}",
+        "persist-credentials": false,
+      });
+      const names = job.steps.map((step) => step.name);
+      // Nothing is pushed until the same Trivy gate as container-scan has passed.
+      expect(names.indexOf("Fail on fixable HIGH/CRITICAL vulnerabilities")).toBeGreaterThan(-1);
+      expect(names.indexOf("Push to GHCR")).toBeGreaterThan(
+        names.indexOf("Fail on fixable HIGH/CRITICAL vulnerabilities"),
+      );
+      // Each image records the commit it was built from.
+      const builds = job.steps.filter((step) => step.run?.includes("docker build "));
+      expect(builds).toHaveLength(1);
+      expect(builds[0]?.run).toContain('org.opencontainers.image.revision=$SOURCE_SHA"');
+    }
+    // Every published tag is immutable: it ends with the commit SHA.
+    const source = readFileSync(join(root, ".github/workflows/images.yml"), "utf8");
+    const tags = [...source.matchAll(/\/(atlas-[a-z]+):([^"]+)"/g)];
+    expect(tags.map((match) => match[1]).sort()).toEqual([
+      "atlas-api",
+      "atlas-web",
+      "atlas-worker",
+    ]);
+    for (const match of tags) expect(match[2]).toMatch(/\$SOURCE_SHA$/);
+    // The same pinned Trivy release and checksum as container-scan.
+    const trivy = (job: { steps: Array<{ name?: string; run?: string }> }) =>
+      job.steps.find((step) => step.name === "Install Trivy")?.run;
+    for (const job of jobs) expect(trivy(job)).toBe(trivy(ci.jobs["container-scan"]));
   });
   it("publishes fresh release and aggregate evidence even on failure", () => {
     for (const [id, path] of [

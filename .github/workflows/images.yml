@@ -1,0 +1,181 @@
+name: Publish images
+
+# Builds the deployable images for a main commit that passed CI, gates them on
+# the same Trivy policy as container-scan, and pushes them to GHCR tagged with
+# the commit SHA (docs/runbooks/managed-node-runtime.md, "Publishing").
+#
+# The worker image is the same in every environment. The API and web images are
+# not: Next fixes NEXT_PUBLIC_* values into both builds (the API's shared auth
+# and observability packages read them too) and API_INTERNAL_URL into the web
+# build. So each environment gets its own, built from that GitHub environment's
+# API_BUILD_ENV and WEB_BUILD_ENV secrets. An environment without them is
+# skipped with a notice, not failed.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: images-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  worker:
+    name: worker image
+    # workflow_run also fires for pull requests, including from forks whose
+    # branch happens to be named main. Publish only a successful CI run for a
+    # push to this repository's main, or a manual run on main.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      TRIVY_NO_PROGRESS: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      # The worker image (Chromium) plus Trivy's image export exceed the default free space.
+      - name: Free runner disk space
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
+
+      # Pinned by checksum, as in container-scan (GHSA-69fq-xp46-6x23).
+      - name: Install Trivy
+        run: |
+          curl --fail --silent --show-error --location https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz --output "$RUNNER_TEMP/trivy.tar.gz"
+          echo "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  $RUNNER_TEMP/trivy.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/trivy.tar.gz" -C "$RUNNER_TEMP" trivy
+
+      - name: Build the worker image
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/atlas-worker:$SOURCE_SHA"
+          echo "IMAGES=$image" >> "$GITHUB_ENV"
+          docker build -f deploy/managed-node/Dockerfile --target worker --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" --label "org.opencontainers.image.revision=$SOURCE_SHA" -t "$image" .
+
+      - name: Fail on fixable HIGH/CRITICAL vulnerabilities
+        run: |
+          for image in $IMAGES; do
+            "$RUNNER_TEMP/trivy" image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table "$image"
+          done
+
+      - name: Push to GHCR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          for image in $IMAGES; do
+            docker push "$image"
+            echo "- \`$image\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+          docker logout ghcr.io
+
+  environment-images:
+    name: ${{ matrix.environment }} API and web images
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [staging, production]
+    environment: ${{ matrix.environment }}
+    permissions:
+      contents: read
+      packages: write
+    env:
+      SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      TARGET_ENVIRONMENT: ${{ matrix.environment }}
+      TRIVY_NO_PROGRESS: "true"
+    steps:
+      # Dotenv-format build settings, written only to the runner's temp directory
+      # and passed to the builds as BuildKit secrets (never COPYed into a layer).
+      - name: Load the build settings
+        id: settings
+        env:
+          API_BUILD_ENV: ${{ secrets.API_BUILD_ENV }}
+          WEB_BUILD_ENV: ${{ secrets.WEB_BUILD_ENV }}
+        run: |
+          if [ -z "$API_BUILD_ENV" ] || [ -z "$WEB_BUILD_ENV" ]; then
+            echo "::notice::The $TARGET_ENVIRONMENT environment has no API_BUILD_ENV or WEB_BUILD_ENV secret, so its API and web images are not published."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          umask 077
+          printf '%s\n' "$API_BUILD_ENV" > "$RUNNER_TEMP/api-build.env"
+          printf '%s\n' "$WEB_BUILD_ENV" > "$RUNNER_TEMP/web-build.env"
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - if: steps.settings.outputs.ready == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: Free runner disk space
+        if: steps.settings.outputs.ready == 'true'
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
+
+      - name: Install Trivy
+        if: steps.settings.outputs.ready == 'true'
+        run: |
+          curl --fail --silent --show-error --location https://github.com/aquasecurity/trivy/releases/download/v0.75.0/trivy_0.75.0_Linux-64bit.tar.gz --output "$RUNNER_TEMP/trivy.tar.gz"
+          echo "c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f  $RUNNER_TEMP/trivy.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/trivy.tar.gz" -C "$RUNNER_TEMP" trivy
+
+      - name: Build the API and web images
+        if: steps.settings.outputs.ready == 'true'
+        run: |
+          registry="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}"
+          api="$registry/atlas-api:$TARGET_ENVIRONMENT-$SOURCE_SHA"
+          web="$registry/atlas-web:$TARGET_ENVIRONMENT-$SOURCE_SHA"
+          echo "IMAGES=$api $web" >> "$GITHUB_ENV"
+          labels=(--label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" --label "org.opencontainers.image.revision=$SOURCE_SHA")
+          docker build -f deploy/managed-node/Dockerfile --target api --secret id=api_build_env,src="$RUNNER_TEMP/api-build.env" "${labels[@]}" -t "$api" .
+          docker build -f deploy/managed-node/Dockerfile --target web --secret id=web_build_env,src="$RUNNER_TEMP/web-build.env" "${labels[@]}" -t "$web" .
+
+      - name: Remove the build settings
+        if: always()
+        run: rm -f "$RUNNER_TEMP/api-build.env" "$RUNNER_TEMP/web-build.env"
+
+      - name: Fail on fixable HIGH/CRITICAL vulnerabilities
+        if: steps.settings.outputs.ready == 'true'
+        run: |
+          for image in $IMAGES; do
+            "$RUNNER_TEMP/trivy" image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table "$image"
+          done
+
+      - name: Push to GHCR
+        if: steps.settings.outputs.ready == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          for image in $IMAGES; do
+            docker push "$image"
+            echo "- \`$image\`" >> "$GITHUB_STEP_SUMMARY"
+          done
+          docker logout ghcr.io
