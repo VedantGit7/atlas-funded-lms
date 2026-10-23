@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@sentry/nextjs", () => ({ withSentryConfig: (config: unknown) => config }));
+vi.mock("@sentry/nextjs/config", () => ({ withSentryConfig: (config: unknown) => config }));
 vi.mock("@next/bundle-analyzer", () => ({ default: () => (config: unknown) => config }));
 
 afterEach(() => {
