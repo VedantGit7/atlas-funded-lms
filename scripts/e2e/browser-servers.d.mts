@@ -5,7 +5,7 @@ export type BrowserServerHandle = {
   exited: boolean;
 };
 
-export declare function browserServers(env?: NodeJS.ProcessEnv): [BrowserServer, BrowserServer];
+export { browserServerEnv, browserServers } from "./browser-server-list.cjs";
 export declare function isServerReady(url: string): Promise<boolean>;
 export declare function startBrowserServers(
   servers: readonly BrowserServer[],

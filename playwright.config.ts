@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
-import { browserServers } from "./scripts/e2e/browser-servers.mjs";
+// CommonJS: Playwright compiles what its config imports to CommonJS, so an ES
+// module there would fail on `import.meta` (scripts/e2e/browser-server-list.cjs).
+import { browserServers } from "./scripts/e2e/browser-server-list.cjs";
 
 // The local dev host for the primary tenant fixture, overridable by environment.
 // This is tenant configuration for the browser suite, not a brand in product code.
