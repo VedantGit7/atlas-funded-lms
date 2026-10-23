@@ -19,7 +19,12 @@ function runFixture(t, mode = "valid") {
     mkdirSync(dirname(join(root, file)), { recursive: true });
     writeFileSync(join(root, file), content);
   };
-  for (const file of ["verify-failure-probes.mjs", "isolated-target.mjs", "browser-servers.mjs"]) {
+  for (const file of [
+    "verify-failure-probes.mjs",
+    "isolated-target.mjs",
+    "browser-servers.mjs",
+    "browser-server-list.cjs",
+  ]) {
     mkdirSync(join(root, "scripts/e2e"), { recursive: true });
     copyFileSync(join(repository, "scripts/e2e", file), join(root, "scripts/e2e", file));
   }

@@ -266,7 +266,7 @@ export default tseslint.config(
   },
 
   {
-    files: ["scripts/**/*.mjs"],
+    files: ["scripts/**/*.{mjs,cjs}"],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: {
       globals: {
