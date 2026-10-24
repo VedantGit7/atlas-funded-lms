@@ -24,7 +24,7 @@
     "test:e2e": "echo \"No release-readiness e2e tests configured yet.\""
   },
   "dependencies": {
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"

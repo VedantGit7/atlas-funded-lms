@@ -24,7 +24,7 @@
     "@atlas/db": "workspace:*",
     "@atlas/domain-config": "workspace:*",
     "@atlas/events": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^24.0.0"
