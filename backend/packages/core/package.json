@@ -17,7 +17,7 @@
     "./text/safe-text": "./src/text/safe-text.ts"
   },
   "dependencies": {
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.3"
   },
   "scripts": {
     "build": "echo \"No core build configured yet.\"",
