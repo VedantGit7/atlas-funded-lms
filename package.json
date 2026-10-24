@@ -164,7 +164,7 @@
     "prisma": "^7.10.0",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.1",
+    "typescript-eslint": "^8.72.0",
     "vitest": "^4.1.11",
     "yaml": "2.9.1",
     "zod": "^4.6.7"
