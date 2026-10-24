@@ -23,6 +23,9 @@ services:
     links:
       - api:api.atlas.internal
     environment:
+      # Trust Coolify's CA, which signs PostgreSQL's TLS certificate: pg treats
+      # sslmode=require as verify-full, and the contract forbids sslrootcert.
+      NODE_EXTRA_CA_CERTS: /etc/ssl/certs/coolify-ca.crt
       API_INTERNAL_URL: http://api.atlas.internal:3001
       API_PROXY_SECRET: ${API_PROXY_SECRET:?}
       APP_ENV: ${APP_ENV:?}
@@ -59,6 +62,9 @@ services:
       # Cloudflare sets this header and the firewall admits only Cloudflare.
       TRUSTED_CLIENT_IP_HEADER: cf-connecting-ip
       TRUSTED_PROXY_HOPS: "0"
+    volumes:
+      # Created on the server when SSL is turned on for Coolify's PostgreSQL.
+      - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
     init: true
     restart: unless-stopped
     stop_grace_period: 45s
@@ -91,6 +97,9 @@ services:
   api:
     image: ghcr.io/vedantgit7/atlas-api:${APP_ENV:?}-${RELEASE_SHA:?}
     environment:
+      # Trust Coolify's CA, which signs PostgreSQL's TLS certificate: pg treats
+      # sslmode=require as verify-full, and the contract forbids sslrootcert.
+      NODE_EXTRA_CA_CERTS: /etc/ssl/certs/coolify-ca.crt
       API_INTERNAL_URL: http://api.atlas.internal:3001
       API_PROXY_SECRET: ${API_PROXY_SECRET:?}
       APP_ENV: ${APP_ENV:?}
@@ -126,6 +135,9 @@ services:
       SMTP_USER: ${SMTP_USER:?}
       STORAGE_PROVIDER: r2
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?}
+    volumes:
+      # Created on the server when SSL is turned on for Coolify's PostgreSQL.
+      - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
     init: true
     restart: unless-stopped
     stop_grace_period: 45s
@@ -154,6 +166,9 @@ services:
   worker:
     image: ghcr.io/vedantgit7/atlas-worker:${RELEASE_SHA:?}
     environment:
+      # Trust Coolify's CA, which signs PostgreSQL's TLS certificate: pg treats
+      # sslmode=require as verify-full, and the contract forbids sslrootcert.
+      NODE_EXTRA_CA_CERTS: /etc/ssl/certs/coolify-ca.crt
       API_INTERNAL_URL: http://api.atlas.internal:3001
       APP_ENV: ${APP_ENV:?}
       APP_URL: ${APP_URL:?}
@@ -189,6 +204,9 @@ services:
       SMTP_USER: ${SMTP_USER:?}
       STORAGE_PROVIDER: r2
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?}
+    volumes:
+      # Created on the server when SSL is turned on for Coolify's PostgreSQL.
+      - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
     init: true
     restart: unless-stopped
     stop_grace_period: 45s

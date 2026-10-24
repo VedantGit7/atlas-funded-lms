@@ -72,9 +72,37 @@ Each hop's idle timeout must be longer than the one in front of it, so the side 
 
    `CERTIFICATE_OPEN_BADGE`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `0.05`, `587`).
 
-4. **Database TLS is mandatory.** The contract requires `sslmode=require` (or stricter) in `DATABASE_URL` and `PLATFORM_DATABASE_URL`, so turn on SSL for Coolify's PostgreSQL. Each URL uses its own restricted runtime login, never an owner role.
+4. **Database TLS is mandatory, and the certificate is verified.** The contract requires `sslmode=require` (or stricter) in `DATABASE_URL` and `PLATFORM_DATABASE_URL`. Write `sslmode=verify-full`: `pg` 8 already treats `require` as `verify-full`, and logs a security warning that pg 9 will change `require` to encrypt without verifying. Each URL uses its own restricted runtime login, never an owner role.
+   - **Turn on SSL for Coolify's PostgreSQL.** Coolify then writes its CA to `/data/coolify/ssl/coolify-ca.crt` on the server. Every service mounts that file read-only and trusts it through `NODE_EXTRA_CA_CERTS`. A service won't start until the file exists.
+   - **The host in the URL must be in the server certificate.** `verify-full` checks both the CA and the hostname. Use a hostname that Coolify's PostgreSQL certificate lists as a subject alternative name. Check it once from the server:
+
+     ```bash
+     openssl s_client -starttls postgres -connect <database host>:5432 </dev/null 2>/dev/null | openssl x509 -noout -ext subjectAltName
+     ```
+
+     If the host isn't listed, the services fail at their first query with "Hostname/IP does not match certificate's altnames".
+
 5. **Domains go on `web` only, container port 3000.** For example, staging gets `https://staging-academy.fundedbeyond.com:3000` and `https://staging-platform.fundedbeyond.com:3000`; the `:3000` tells Coolify's proxy the container port.
 6. **Deploy, then check all three health checks** report healthy, and run `pnpm release:health` against the environment with the expected SHA (`release-health.md`).
+
+## Rehearsing locally
+
+`pnpm deploy:rehearse` runs this file's web, API and worker services on your machine, the way a Coolify server would. It needs Docker. With `-- --skip-build`, which reuses the `atlas-*:rehearsal` images, it takes about 2 minutes. Building the three images first adds 20 minutes or more on a cold Docker cache, and needs most of Docker's memory: run nothing else heavy alongside it.
+
+- **What it runs:** the real services from `deploy/coolify/compose.yaml`, in staging mode, on images built from your working tree. `deploy/rehearsal/compose.yaml` adds only what the server would provide:
+  - PostgreSQL and the GoTrue gateway, both behind TLS, signed by a throwaway CA mounted where Coolify's CA goes;
+  - Redis;
+  - a loopback port, `127.0.0.1:3200`, to reach web.
+- **What it provisions:** the database, with the browser-test scripts (`scripts/e2e/setup-local.mjs`, then `local-run.mjs seed`).
+- **What it checks:**
+  - all three services report healthy;
+  - a seeded learner logs in through web;
+  - their course page renders;
+  - the worker completes a sweep;
+  - the runtime logins reach PostgreSQL over TLS (`pg_stat_ssl`).
+- **Afterwards:** it tears everything down, unless you pass `-- --keep`. Results and logs are in `.test-results/rehearsal/`.
+
+Run it after changing the compose file, the Dockerfile or anything the services read at startup.
 
 ## Deploying, rolling back and changing settings
 
