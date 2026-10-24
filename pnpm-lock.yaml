@@ -757,14 +757,14 @@ importers:
         specifier: ^1.21.0
         version: 1.21.0(react@19.2.7)
       mobx:
-        specifier: ^6.16.1
-        version: 6.16.1
+        specifier: ^7.1.0
+        version: 7.1.0
       mobx-react-lite:
         specifier: ^4.1.1
-        version: 4.1.1(mobx@6.16.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 4.1.1(mobx@7.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       mobx-state-tree:
         specifier: ^7.3.1
-        version: 7.3.1(mobx@6.16.1)(typescript@6.0.3)
+        version: 7.3.1(mobx@7.1.0)(typescript@6.0.3)
       motion:
         specifier: ^12.42.2
         version: 12.42.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -4220,8 +4220,8 @@ packages:
     peerDependencies:
       mobx: ^6.3.0
 
-  mobx@6.16.1:
-    resolution: {integrity: sha512-syNcDdX3KT+Jq3je6eGjBhuc24Z68td2VG0zNFqRswaE433D9SNH5VRy/xrGbJsUixfppLLccXhAW9JSf6n+SQ==}
+  mobx@7.1.0:
+    resolution: {integrity: sha512-5eGlbA7iJ7bUwtdLaUTu7g9DDQsTo3bhtVkWD/Rii24zhjhSPdTXJ5sjKVd9n7AaJ/h6xlmUvUsyO6B1zK9HVQ==}
 
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
@@ -8671,22 +8671,22 @@ snapshots:
     dependencies:
       minimist: 1.2.8
 
-  mobx-react-lite@4.1.1(mobx@6.16.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+  mobx-react-lite@4.1.1(mobx@7.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
-      mobx: 6.16.1
+      mobx: 7.1.0
       react: 19.2.7
       use-sync-external-store: 1.6.0(react@19.2.7)
     optionalDependencies:
       react-dom: 19.2.7(react@19.2.7)
 
-  mobx-state-tree@7.3.1(mobx@6.16.1)(typescript@6.0.3):
+  mobx-state-tree@7.3.1(mobx@7.1.0)(typescript@6.0.3):
     dependencies:
-      mobx: 6.16.1
+      mobx: 7.1.0
       ts-essentials: 9.4.2(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
 
-  mobx@6.16.1: {}
+  mobx@7.1.0: {}
 
   module-details-from-path@1.0.4: {}
 
