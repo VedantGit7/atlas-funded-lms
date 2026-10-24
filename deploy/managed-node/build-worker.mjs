@@ -42,6 +42,43 @@ const cssTreeCommonJs = {
   },
 };
 
+const replaceOnce = (contents, from, to, file, owner) => {
+  if (!contents.includes(from)) {
+    throw new Error(`${owner} changed: "${from}" not found in ${file}; update build-worker.mjs`);
+  }
+  return contents.replace(from, to);
+};
+
+/**
+ * @sentry/nextjs's CommonJS config helpers, which its server entry loads,
+ * call createRequire(__filename) when they load. An ES module bundle has no
+ * __filename, so the deployed worker crashed as soon as it imported Sentry,
+ * and the error capture helper (observability/src/sentry/capture.ts) silently
+ * found no Sentry. The file's own path, as a literal, takes its place (import.meta
+ * would turn the file into an ES module and lose its exports). That require
+ * only looks for Next.js, which the worker never has, and that lookup already
+ * tolerates failing. The other __filename uses in the package sit in
+ * build-time functions the worker never calls.
+ */
+const sentryFiles = {
+  name: "sentry-files",
+  setup(pluginBuild) {
+    pluginBuild.onLoad(
+      { filter: /[\\/]@sentry[\\/]nextjs[\\/]build[\\/]cjs[\\/]config[\\/]util\.js$/ },
+      async (args) => ({
+        loader: "js",
+        contents: replaceOnce(
+          await readFile(args.path, "utf8"),
+          "sdkRequire = module$1.createRequire(__filename);",
+          `sdkRequire = module$1.createRequire(${JSON.stringify(args.path)});`,
+          args.path,
+          "@sentry/nextjs",
+        ),
+      }),
+    );
+  },
+};
+
 /**
  * jsdom reads two things beside its own code when its modules load, neither
  * of which exists beside a bundle:
@@ -56,12 +93,6 @@ const cssTreeCommonJs = {
 const jsdomFiles = {
   name: "jsdom-files",
   setup(pluginBuild) {
-    const replaceOnce = (contents, from, to, file) => {
-      if (!contents.includes(from)) {
-        throw new Error(`jsdom changed: "${from}" not found in ${file}; update build-worker.mjs`);
-      }
-      return contents.replace(from, to);
-    };
     pluginBuild.onLoad(
       {
         filter:
@@ -81,6 +112,7 @@ const jsdomFiles = {
             `fs.readFileSync(\n  path.resolve(__dirname, "../../../browser/default-stylesheet.css"),\n  { encoding: "utf-8" }\n)`,
             JSON.stringify(stylesheet),
             args.path,
+            "jsdom",
           ),
         };
       },
@@ -94,6 +126,7 @@ const jsdomFiles = {
           `require.resolve("./xhr-sync-worker.js")`,
           JSON.stringify("jsdom-synchronous-xhr-is-not-bundled"),
           args.path,
+          "jsdom",
         ),
       }),
     );
@@ -117,7 +150,7 @@ const result = await build({
   target: "node24",
   tsconfig: "backend/apps/api/tsconfig.json",
   external: ["playwright-core"],
-  plugins: [cssTreeCommonJs, jsdomFiles],
+  plugins: [cssTreeCommonJs, jsdomFiles, sentryFiles],
   // Bundled CommonJS dependencies still call require() for Node built-ins.
   banner: {
     js: "import { createRequire as __atlasCreateRequire } from 'node:module'; const require = __atlasCreateRequire(import.meta.url);",

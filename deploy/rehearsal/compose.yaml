@@ -1,0 +1,64 @@
+# Local rehearsal of the Coolify deployment (launch plan task 1.5), run by
+# scripts/deploy/rehearse.mjs. Layered on:
+#   1. scripts/e2e/local-stack.compose.yml: Postgres, GoTrue and Kong, the
+#      disposable stack the browser tests already use;
+#   2. deploy/coolify/compose.yaml: the real web, API and worker services.
+# This file changes only what a Coolify server would provide:
+#   - TLS on Postgres and on the auth gateway, signed by a throwaway local CA
+#     that stands in for Coolify's (mounted where Coolify's CA would be);
+#   - Redis;
+#   - the locally built images, and a loopback port to reach web.
+# The .internal aliases exist only here. On Coolify, the database and auth
+# hosts are whatever the deployed URLs name.
+services:
+  database:
+    networks:
+      default:
+        aliases: [database.atlas.internal]
+    volumes:
+      - ${REHEARSAL_CERTS:?}:/certs:ro
+    # PostgreSQL refuses a key file group or others can read, and a bind mount
+    # can't set its owner, so the key is copied in first.
+    command:
+      - sh
+      - -c
+      - >-
+        install -o postgres -g postgres -m 0600 /certs/database.atlas.internal.key /tmp/server.key &&
+        exec docker-entrypoint.sh postgres -c ssl=on
+        -c ssl_cert_file=/certs/database.atlas.internal.crt -c ssl_key_file=/tmp/server.key
+
+  gateway:
+    networks:
+      default:
+        aliases: [auth.atlas.internal]
+    volumes:
+      - ${REHEARSAL_CERTS:?}:/certs:ro
+    environment:
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+      KONG_SSL_CERT: /certs/auth.atlas.internal.crt
+      KONG_SSL_CERT_KEY: /certs/auth.atlas.internal.key
+
+  redis:
+    image: redis:7.4.2-alpine
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  web:
+    image: atlas-web:rehearsal
+    ports:
+      - "127.0.0.1:3200:3000"
+    volumes:
+      - ${REHEARSAL_CERTS:?}/ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
+
+  api:
+    image: atlas-api:rehearsal
+    volumes:
+      - ${REHEARSAL_CERTS:?}/ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
+
+  worker:
+    image: atlas-worker:rehearsal
+    volumes:
+      - ${REHEARSAL_CERTS:?}/ca.crt:/etc/ssl/certs/coolify-ca.crt:ro

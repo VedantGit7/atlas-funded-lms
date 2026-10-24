@@ -145,6 +145,15 @@ describe("Coolify compose topology", () => {
     expect(coolify("worker").healthcheck).toEqual(managed("worker").healthcheck);
   });
 
+  it.each(services)("trusts Coolify's CA for %s's database TLS", (service) => {
+    // pg treats sslmode=require as verify-full, and the contract forbids
+    // sslrootcert, so the CA that signs Coolify's PostgreSQL certificate has to
+    // reach Node through NODE_EXTRA_CA_CERTS, mounted read-only.
+    const path = coolify(service).environment.NODE_EXTRA_CA_CERTS;
+    expect(path).toBe("/etc/ssl/certs/coolify-ca.crt");
+    expect(coolify(service).volumes).toEqual([`/data/coolify/ssl/coolify-ca.crt:${path}:ro`]);
+  });
+
   it.each(services)(
     "health-checks %s with the restarting probe, its grace equal to start_period",
     (service) => {
