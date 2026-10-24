@@ -145,8 +145,14 @@ function buildImages() {
 
 /** Interpolation values for the compose files: the deployed settings. */
 function writeComposeEnv(tenantHost) {
-  const runtime = (role, password) =>
-    `postgresql://${role}:${password}@database.atlas.internal:5432/atlas_lms_e2e?sslmode=verify-full`;
+  const runtime = (role, password) => {
+    const url = new URL(
+      "postgresql://database.atlas.internal:5432/atlas_lms_e2e?sslmode=verify-full",
+    );
+    url.username = role;
+    url.password = password;
+    return url.href;
+  };
   const settings = {
     ...deploymentEnv(),
     APP_ENV: "staging",
