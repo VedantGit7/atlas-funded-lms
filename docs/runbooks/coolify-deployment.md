@@ -34,7 +34,27 @@
 
 **A misconfigured web or API container does not exit.** Next.js logs the failed startup hook (for example "REDIS_URL ... is required in production and staging"), keeps running, and answers every request with 500. Only the health check catches it.
 
-**Unhealthy containers are not restarted yet.** Docker doesn't restart a container that only fails its health check, and Coolify's documentation doesn't say that it does. Adding the restart is launch-plan task 1.4.
+**Unhealthy containers are restarted by the probe itself.** Docker never restarts a container that only fails its health check, and Coolify doesn't either.
+
+- **What the probe does:** each probe runs `/app/healthcheck.mjs`, which counts consecutive failures in `/tmp`. After 3 in a row, once the container has run for `--grace` seconds, it sends SIGTERM to PID 1 and `restart: unless-stopped` starts the container again.
+- **`--grace`** equals the service's `start_period`.
+- **What a misconfigured container looks like:** a restart roughly every 90 s, with "unhealthy 3 times in a row: restarting" in the health log. Fix the setting and redeploy; restarts alone can't repair it.
+
+## Proxy timeouts
+
+Each hop's idle timeout must be longer than the one in front of it, so the side that sends requests always closes an idle connection first. Otherwise, a request sent on a connection the other side just closed fails: as a 502 from Traefik, or a 520 from Cloudflare.
+
+| Hop                  | Front side keeps idle connections             | Back side keeps them            | Set by                                             |
+| -------------------- | --------------------------------------------- | ------------------------------- | -------------------------------------------------- |
+| Traefik → web or API | 90 s (Traefik's `serversTransport` default)   | 100 s (`KEEP_ALIVE_TIMEOUT`)    | The images; nothing to configure                   |
+| Cloudflare → Traefik | 900 s (Cloudflare's fixed Proxy Idle Timeout) | **180 s by default: too short** | Coolify's proxy configuration, set once per server |
+
+**Set Traefik's entrypoint idle timeout above 900 s.** In Coolify: **Servers → your server → Proxy → Configuration**. Add these to the Traefik `command:` list, using the entrypoint names the configuration already defines (normally `http` and `https`), then restart the proxy:
+
+```yaml
+- "--entrypoints.http.transport.respondingTimeouts.idleTimeout=960s"
+- "--entrypoints.https.transport.respondingTimeouts.idleTimeout=960s"
+```
 
 ## Setting up an environment
 

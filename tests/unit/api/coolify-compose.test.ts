@@ -145,11 +145,28 @@ describe("Coolify compose topology", () => {
     expect(coolify("worker").healthcheck).toEqual(managed("worker").healthcheck);
   });
 
+  it.each(services)(
+    "health-checks %s with the restarting probe, its grace equal to start_period",
+    (service) => {
+      // Docker never restarts an unhealthy container; healthcheck.mjs does,
+      // after the failures Docker counts, and never during the startup grace.
+      const { test, retries, start_period } = coolify(service).healthcheck as {
+        test: string[];
+        retries: number;
+        start_period: string;
+      };
+      expect(test.slice(0, 4)).toEqual(["CMD", "node", "/app/healthcheck.mjs", "--url"]);
+      expect(test[test.indexOf("--grace") + 1]).toBe(start_period.replace(/s$/, ""));
+      expect(test).not.toContain("--failures");
+      expect(retries).toBe(3);
+    },
+  );
+
   it("health-checks web and API on paths that fail when startup validation failed", () => {
-    const probe = (service: DeploymentService) =>
-      /fetch\('(http:\/\/127\.0\.0\.1:\d+[^']*)'\)/.exec(
-        coolify(service).healthcheck.test.join(" "),
-      )?.[1];
+    const probe = (service: DeploymentService) => {
+      const test = coolify(service).healthcheck.test;
+      return test[test.indexOf("--url") + 1];
+    };
     expect(probe("api")).toBe("http://127.0.0.1:3001/api/v1/health");
     expect(existsSync(join(root, "backend/apps/api/src/app/api/v1/health/route.ts"))).toBe(true);
     const web = new URL(String(probe("web")));

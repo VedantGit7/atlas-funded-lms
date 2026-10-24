@@ -67,7 +67,8 @@ test("runs the web image like the API: unprivileged, no package managers, clean 
     "WORKDIR /app",
     "ENV NODE_ENV=production",
     "ENV HOSTNAME=0.0.0.0",
-    "ENV KEEP_ALIVE_TIMEOUT=65000",
+    // Above Traefik's 90 s default idle-connection time, so the proxy closes first.
+    "ENV KEEP_ALIVE_TIMEOUT=100000",
     "USER node",
     "STOPSIGNAL SIGTERM",
   ]) {
@@ -84,4 +85,14 @@ test("runs the web image like the API: unprivileged, no package managers, clean 
   // USER comes after every COPY, so nothing runs or is copied as root afterwards.
   const user = web.lines.indexOf("USER node");
   assert.ok(web.lines.slice(user).every((line) => !/^(COPY|RUN)\b/.test(line)));
+});
+
+test("ships the health probe in every runtime image, root-owned and before USER", () => {
+  const copy = "COPY --from=source /source/deploy/managed-node/healthcheck.mjs ./healthcheck.mjs";
+  for (const name of ["web", "api", "worker"]) {
+    const stage = byName.get(name);
+    const at = stage.lines.indexOf(copy);
+    assert.ok(at >= 0, `${name} copies healthcheck.mjs`);
+    assert.ok(at < stage.lines.indexOf("USER node"), `${name} copies it before USER`);
+  }
 });
