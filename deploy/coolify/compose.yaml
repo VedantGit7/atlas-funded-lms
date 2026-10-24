@@ -70,13 +70,18 @@ services:
     # A public file served through the middleware: cheap and independent of
     # the API, and 500 whenever startup validation failed. A misconfigured
     # container keeps running and answers 500, so only this check catches it.
+    # healthcheck.mjs restarts a container after 3 failures in a row once
+    # --grace (start_period) has passed; Docker alone never would.
     healthcheck:
       test:
         [
           CMD,
           node,
-          -e,
-          "fetch('http://127.0.0.1:3000/brand/avatar-gradient.svg').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+          /app/healthcheck.mjs,
+          --url,
+          "http://127.0.0.1:3000/brand/avatar-gradient.svg",
+          --grace,
+          "60",
         ]
       interval: 30s
       timeout: 5s
@@ -135,8 +140,11 @@ services:
         [
           CMD,
           node,
-          -e,
-          "fetch('http://127.0.0.1:3001/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+          /app/healthcheck.mjs,
+          --url,
+          "http://127.0.0.1:3001/api/v1/health",
+          --grace,
+          "60",
         ]
       interval: 30s
       timeout: 5s
@@ -192,12 +200,7 @@ services:
     shm_size: 256m
     healthcheck:
       test:
-        [
-          CMD,
-          node,
-          -e,
-          "fetch('http://127.0.0.1:8081/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
+        [CMD, node, /app/healthcheck.mjs, --url, "http://127.0.0.1:8081/healthz", --grace, "120"]
       interval: 30s
       timeout: 5s
       start_period: 120s

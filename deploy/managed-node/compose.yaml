@@ -18,6 +18,23 @@ services:
       - /tmp:size=256m,mode=1777
     ports:
       - "127.0.0.1:3001:3001"
+    # healthcheck.mjs restarts a container after 3 failures in a row once
+    # --grace (start_period) has passed; Docker alone never would.
+    healthcheck:
+      test:
+        [
+          CMD,
+          node,
+          /app/healthcheck.mjs,
+          --url,
+          "http://127.0.0.1:3001/api/v1/health",
+          --grace,
+          "60",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
   worker:
     image: ${ATLAS_WORKER_IMAGE:?Set an immutable worker image tag}
     env_file:
@@ -38,12 +55,7 @@ services:
     shm_size: 256m
     healthcheck:
       test:
-        [
-          CMD,
-          node,
-          -e,
-          "fetch('http://127.0.0.1:8081/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
-        ]
+        [CMD, node, /app/healthcheck.mjs, --url, "http://127.0.0.1:8081/healthz", --grace, "120"]
       interval: 30s
       timeout: 5s
       start_period: 120s

@@ -75,6 +75,9 @@ RUN --mount=type=cache,id=atlas-apt-cache,target=/var/cache/apt,sharing=locked \
 
 FROM worker-browser AS worker
 COPY --from=worker-build /worker/ ./
+# The health probe that also restarts a container stuck unhealthy (healthcheck.mjs).
+# Root-owned and read-only at runtime, like the rest of the image.
+COPY --from=source /source/deploy/managed-node/healthcheck.mjs ./healthcheck.mjs
 ENV NODE_ENV=production
 ENV ATLAS_SERVICE_RUNTIME=managed-node
 # Runtime starts node directly; package managers and root's build caches are build-time only.
@@ -97,17 +100,21 @@ ENV NODE_ENV=production
 ENV ATLAS_SERVICE_RUNTIME=managed-node
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3001
-# Idle connections stay open longer than the 60 s idle timeout most proxies and
-# load balancers use, so the proxy always closes first. With Node's 5 s default
-# the server can close a connection just as the proxy reuses it: a 502 that
-# neither side logs (managed-node-runtime.md).
-ENV KEEP_ALIVE_TIMEOUT=65000
+# Idle connections stay open longer than the proxy in front keeps them, so the
+# proxy always closes first. Traefik, the Coolify proxy, keeps idle upstream
+# connections 90 s by default. With Node's 5 s default, or anything under the
+# proxy's, the server can close a connection just as the proxy reuses it: a 502
+# that neither side logs (managed-node-runtime.md).
+ENV KEEP_ALIVE_TIMEOUT=100000
 # Runtime starts node directly; package managers are build-time only.
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
        /usr/local/bin/yarn /usr/local/bin/yarnpkg
 COPY --from=api-build --chown=node:node /app/backend/apps/api/.next/standalone ./
 COPY --from=api-build --chown=node:node /app/backend/apps/api/.next/static ./backend/apps/api/.next/static
+# The health probe that also restarts a container stuck unhealthy (healthcheck.mjs).
+# Root-owned and read-only at runtime, like the rest of the image.
+COPY --from=source /source/deploy/managed-node/healthcheck.mjs ./healthcheck.mjs
 USER node
 EXPOSE 3001
 STOPSIGNAL SIGTERM
@@ -119,7 +126,7 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 # The same idle-connection margin as the API: the proxy must close first.
-ENV KEEP_ALIVE_TIMEOUT=65000
+ENV KEEP_ALIVE_TIMEOUT=100000
 # Runtime starts node directly; package managers are build-time only.
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
@@ -129,6 +136,9 @@ RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack 
 COPY --from=web-build --chown=node:node /app/frontend/apps/web/.next/standalone ./
 COPY --from=web-build --chown=node:node /app/frontend/apps/web/.next/static ./frontend/apps/web/.next/static
 COPY --from=web-build --chown=node:node /app/frontend/apps/web/public ./frontend/apps/web/public
+# The health probe that also restarts a container stuck unhealthy (healthcheck.mjs).
+# Root-owned and read-only at runtime, like the rest of the image.
+COPY --from=source /source/deploy/managed-node/healthcheck.mjs ./healthcheck.mjs
 USER node
 EXPOSE 3000
 STOPSIGNAL SIGTERM
