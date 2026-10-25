@@ -139,7 +139,10 @@ export class SmtpEmailProvider implements EmailProvider {
 
     const defaultFrom = this.env["NOTIFICATION_EMAIL_FROM"] ?? "";
     const fromEmail = input.fromEmail?.trim() || defaultFrom;
-    const from = input.fromName ? `"${input.fromName}" <${fromEmail}>` : fromEmail;
+    // An object, not a '"Name" <address>' string: nodemailer then encodes the
+    // display name instead of re-parsing it, so a quote or bracket in a
+    // tenant's sender name cannot change the sender address.
+    const from = input.fromName ? { name: input.fromName, address: fromEmail } : fromEmail;
 
     const transporter = this.getTransporter();
     const messageId =
