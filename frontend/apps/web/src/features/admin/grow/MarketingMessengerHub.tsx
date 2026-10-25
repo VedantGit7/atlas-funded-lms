@@ -104,12 +104,30 @@ const FILTER_TABS: ReadonlyArray<{ id: FilterTab; label: string }> = [
   { id: "beta", label: "Beta" },
 ];
 
-const QUICK_ACTIONS = [
-  { label: "New email campaign", href: "/admin/marketing/messenger/email/create" },
-  { label: "New push message", href: "/admin/marketing/messenger/push/create" },
-  { label: "New announcement", href: "/admin/marketing/messenger/announcements/create" },
-  { label: "WhatsApp campaign", href: "/admin/marketing/messenger/whatsapp/create" },
-] as const;
+type QuickAction = { label: string; href: string; channel: ChannelCardId };
+
+const QUICK_ACTIONS: readonly QuickAction[] = [
+  {
+    label: "New email campaign",
+    href: "/admin/marketing/messenger/email/create",
+    channel: "marketing-email",
+  },
+  {
+    label: "New push message",
+    href: "/admin/marketing/messenger/push/create",
+    channel: "push-message",
+  },
+  {
+    label: "New announcement",
+    href: "/admin/marketing/messenger/announcements/create",
+    channel: "announcements",
+  },
+  {
+    label: "WhatsApp campaign",
+    href: "/admin/marketing/messenger/whatsapp/create",
+    channel: "whatsapp",
+  },
+];
 
 type HubResponse = { data: MessengerHubSummary };
 
@@ -258,7 +276,7 @@ function WeeklySparkline({ values }: { values: number[] }) {
   );
 }
 
-function QuickActionsMenu() {
+function QuickActionsMenu({ actions }: { actions: readonly QuickAction[] }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -299,7 +317,7 @@ function QuickActionsMenu() {
           role="menu"
           className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-[0_18px_40px_color-mix(in_srgb,var(--admin-on-surface)_12%,transparent)]"
         >
-          {QUICK_ACTIONS.map((action) => (
+          {actions.map((action) => (
             <Link
               key={action.href}
               href={action.href}
@@ -320,7 +338,14 @@ function QuickActionsMenu() {
   );
 }
 
-export function MarketingMessengerHub() {
+type MarketingMessengerHubProps = {
+  /** False while the deployment turns marketing email off (MARKETING_EMAIL_ENABLED). */
+  marketingEmailEnabled?: boolean;
+};
+
+export function MarketingMessengerHub({
+  marketingEmailEnabled = true,
+}: MarketingMessengerHubProps = {}) {
   const [summary, setSummary] = useState<MessengerHubSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -365,6 +390,7 @@ export function MarketingMessengerHub() {
   const visibleChannels = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return CHANNELS.filter((channel) => {
+      if (channel.id === "marketing-email" && !marketingEmailEnabled) return false;
       if (filter === "beta" && channel.badge !== "beta") return false;
       if (filter === "active" && !channelIsActive(channel.id, data)) return false;
       if (!normalized) return true;
@@ -373,7 +399,7 @@ export function MarketingMessengerHub() {
         .toLowerCase();
       return haystack.includes(normalized);
     });
-  }, [data, filter, query]);
+  }, [data, filter, marketingEmailEnabled, query]);
 
   const showChannel = (id: ChannelCardId) => visibleChannels.some((channel) => channel.id === id);
 
@@ -438,7 +464,11 @@ export function MarketingMessengerHub() {
               className="ml-2 w-full border-none bg-transparent text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[color-mix(in_srgb,var(--admin-on-surface-variant)_55%,transparent)]"
             />
           </label>
-          <QuickActionsMenu />
+          <QuickActionsMenu
+            actions={QUICK_ACTIONS.filter(
+              (action) => action.channel !== "marketing-email" || marketingEmailEnabled,
+            )}
+          />
         </div>
       </header>
 

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { WorkflowsBuilderPanel } from "../../../../../features/admin/grow/WorkflowsBuilderPanel";
+import { isMarketingEmailEnabled } from "../../../../../lib/server/marketing-email";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 type PageProps = {
@@ -26,7 +27,7 @@ export default async function AdminWorkflowBuilderPage({ params }: PageProps) {
       <Suspense
         fallback={<p className="text-sm text-[var(--admin-on-surface-variant)]">Loading…</p>}
       >
-        <WorkflowsBuilderPanel workflowId={id} />
+        <WorkflowsBuilderPanel workflowId={id} marketingEmailEnabled={isMarketingEmailEnabled()} />
       </Suspense>
     </AdminPageGate>
   );

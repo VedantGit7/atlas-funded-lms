@@ -88,6 +88,7 @@ export function validateDeploymentConfiguration(
     "CERTIFICATE_WALLETS",
     "CERTIFICATE_BLOCKCHAIN_ANCHOR",
     "CERTIFICATE_PDF_WORKER",
+    "MARKETING_EMAIL_ENABLED",
   ]) {
     const raw = env[key];
     if (raw && raw !== "true" && raw !== "false")
@@ -310,6 +311,9 @@ export function validateDeploymentConfiguration(
   const smtpHost = requireValue("SMTP_HOST");
   if (smtpHost && (!/^[a-z0-9.-]+$/i.test(smtpHost) || smtpHost.includes("..")))
     issues.push("SMTP_HOST must be a hostname without URL components");
+  // Marketing email shares this SMTP setting, and ZeptoMail allows only transactional mail.
+  if (/(^|\.)zeptomail\./i.test(smtpHost) && value("MARKETING_EMAIL_ENABLED") !== "false")
+    issues.push("MARKETING_EMAIL_ENABLED must be false while SMTP_HOST is ZeptoMail");
   integer("SMTP_PORT", 587, 65535);
   requireValue("SMTP_USER");
   requireValue("SMTP_PASSWORD");

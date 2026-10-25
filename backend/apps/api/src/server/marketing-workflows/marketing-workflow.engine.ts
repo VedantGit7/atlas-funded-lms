@@ -7,6 +7,10 @@ import {
   marketingWorkflowEmailPayloadSchema,
 } from "./marketing-workflow-email.events";
 import { readTenantEmailChannel } from "../tenant-settings/tenant-settings.service";
+import {
+  isMarketingEmailEnabled,
+  MARKETING_EMAIL_DISABLED_MESSAGE,
+} from "../marketing-email/marketing-email-sending";
 import { registerMarketingEventFromWorkflow } from "../marketing-events/marketing-events.service";
 import {
   TRIGGER_EVENT_MAP,
@@ -93,6 +97,16 @@ async function queueActionEmail(args: {
   subject: string;
   bodyHtml: string;
 }) {
+  if (!isMarketingEmailEnabled()) {
+    await marketingWorkflowRepository.insertLog(args.tx, {
+      runId: args.run.id,
+      nodeId: args.node.id,
+      nodeType: args.node.type,
+      status: "SKIPPED",
+      message: MARKETING_EMAIL_DISABLED_MESSAGE,
+    });
+    return;
+  }
   const payload = asRecord(args.run.trigger_payload_json);
   const profile = args.run.membership_id
     ? await marketingWorkflowRepository.resolveMembershipEmail(args.tx, args.run.membership_id)

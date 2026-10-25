@@ -11,6 +11,10 @@ import {
 } from "../marketing-email/marketing-email.service";
 import { marketingEmailRepository } from "../marketing-email/marketing-email.repository";
 import {
+  isMarketingEmailEnabled,
+  marketingEmailDisabledError,
+} from "../marketing-email/marketing-email-sending";
+import {
   composePushMessage,
   createPushMessage,
   sendPushMessage,
@@ -242,6 +246,7 @@ export async function updateMarketingCampaignTouchpoints(
   if (!enabled.email && !enabled.push && !enabled.announcement && !enabled.whatsapp) {
     throw validationError("Select at least one channel.");
   }
+  if (enabled.email && !isMarketingEmailEnabled()) throw marketingEmailDisabledError();
 
   for (const point of body.touchpoints) {
     if (!enabled[point.channel]) {
@@ -304,6 +309,10 @@ export async function launchMarketingCampaign(
   if (!dto.audienceType) throw validationError("Set an audience before launch.");
   if (dto.touchpoints.length === 0) {
     throw validationError("Add at least one touchpoint before launch.");
+  }
+  // Before any touchpoint sends, so a launch never goes out on some channels only.
+  if (dto.touchpoints.some((point) => point.channel === "email") && !isMarketingEmailEnabled()) {
+    throw marketingEmailDisabledError();
   }
 
   const launchBase = body.mode === "schedule" ? new Date(defined(body.scheduledAt)) : new Date();

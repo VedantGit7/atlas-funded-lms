@@ -3,6 +3,7 @@ import {
   OutboxDeliveryError,
   type OutboxHandler,
 } from "@atlas/events/services/outbox-worker.service";
+import { isMarketingEmailEnabled } from "../marketing-email/marketing-email-sending";
 import { getEmailProvider } from "../notifications/notification.email-provider";
 import { notificationRepository } from "../notifications/notification.repository";
 import { buildSafeInboxPayload } from "../notifications/notification.service";
@@ -36,6 +37,9 @@ export const handleMarketingWorkflowEmailOutboxEvent: OutboxHandler["handle"] = 
     return false;
   });
   if (delivered) return;
+  // Queued before sending was turned off.
+  if (!isMarketingEmailEnabled())
+    throw new OutboxDeliveryError("permanent", "MARKETING_EMAIL_DISABLED");
 
   const provider = getEmailProvider();
   if (!provider.isConfigured())

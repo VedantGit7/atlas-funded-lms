@@ -132,9 +132,14 @@ function enabledChannelList(channels: CampaignChannels): CampaignChannel[] {
 
 type CampaignBuilderPanelProps = {
   campaignId?: string;
+  /** False while the deployment turns marketing email off (MARKETING_EMAIL_ENABLED). */
+  marketingEmailEnabled?: boolean;
 };
 
-export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) {
+export function CampaignBuilderPanel({
+  campaignId,
+  marketingEmailEnabled = true,
+}: CampaignBuilderPanelProps) {
   const router = useRouter();
   const [campaign, setCampaign] = useState<MarketingCampaignDto | null>(null);
   const [step, setStep] = useState<BuilderStep>("goal");
@@ -151,7 +156,10 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
   const [groupEstimate, setGroupEstimate] = useState<number | null>(null);
   const [estimateBusy, setEstimateBusy] = useState(false);
 
-  const [channels, setChannels] = useState<CampaignChannels>(emptyChannels());
+  const [channels, setChannels] = useState<CampaignChannels>(() => ({
+    ...emptyChannels(),
+    email: marketingEmailEnabled,
+  }));
   const [touchpoints, setTouchpoints] = useState<CampaignTouchpoint[]>([]);
   const [selectedTouchpointId, setSelectedTouchpointId] = useState<string | null>(null);
 
@@ -530,6 +538,8 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
 
   function toggleChannel(channel: CampaignChannel) {
     if (readOnly) return;
+    // A draft that already uses email can still turn it off.
+    if (channel === "email" && !marketingEmailEnabled && !channels.email) return;
     setChannels((current) => ({ ...current, [channel]: !current[channel] }));
   }
 
@@ -861,6 +871,7 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                 {CHANNEL_META.map((entry) => {
                   const Icon = entry.icon;
                   const checked = channels[entry.id];
+                  const unavailable = entry.id === "email" && !marketingEmailEnabled && !checked;
                   return (
                     <label
                       key={entry.id}
@@ -869,13 +880,13 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                         checked
                           ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_8%,var(--admin-surface))]"
                           : "border-[var(--admin-border)] bg-[var(--admin-surface-low)]",
-                        readOnly ? "cursor-default opacity-80" : "",
+                        readOnly || unavailable ? "cursor-default opacity-80" : "",
                       ].join(" ")}
                     >
                       <input
                         type="checkbox"
                         checked={checked}
-                        disabled={readOnly}
+                        disabled={readOnly || unavailable}
                         onChange={() => {
                           toggleChannel(entry.id);
                         }}
@@ -890,7 +901,9 @@ export function CampaignBuilderPanel({ campaignId }: CampaignBuilderPanelProps) 
                           {entry.label}
                         </span>
                         <span className="mt-1 block text-[12px] text-[var(--admin-on-surface-variant)]">
-                          {entry.description}
+                          {entry.id === "email" && !marketingEmailEnabled
+                            ? "Turned off on this platform: its email provider allows only transactional mail."
+                            : entry.description}
                         </span>
                       </span>
                     </label>

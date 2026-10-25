@@ -1,5 +1,6 @@
 import { AdminPageGate } from "../../../../../components/patterns/AdminPageGate";
 import { CampaignBuilderPanel } from "../../../../../features/admin/grow/CampaignBuilderPanel";
+import { isMarketingEmailEnabled } from "../../../../../lib/server/marketing-email";
 import { runTenantStateGate } from "../../../../../lib/server/tenant-state-gate";
 
 type AdminCampaignBuilderPageProps = {
@@ -21,7 +22,7 @@ export default async function AdminCampaignBuilderPage({ params }: AdminCampaign
   }
   return (
     <AdminPageGate screenId="T91" state="ready" title="Campaign Builder">
-      <CampaignBuilderPanel campaignId={id} />
+      <CampaignBuilderPanel campaignId={id} marketingEmailEnabled={isMarketingEmailEnabled()} />
     </AdminPageGate>
   );
 }
