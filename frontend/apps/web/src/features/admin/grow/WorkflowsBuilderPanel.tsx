@@ -331,7 +331,14 @@ function LiveToggle({
   );
 }
 
-export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
+export function WorkflowsBuilderPanel({
+  workflowId,
+  marketingEmailEnabled = true,
+}: {
+  workflowId: string;
+  /** False while the deployment turns marketing email off (MARKETING_EMAIL_ENABLED). */
+  marketingEmailEnabled?: boolean;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pickUseCase = searchParams.get("pickUseCase") === "1";
@@ -939,6 +946,15 @@ export function WorkflowsBuilderPanel({ workflowId }: { workflowId: string }) {
               className={FIELD_CLASS}
             />
           </div>
+        ) : null}
+        {!marketingEmailEnabled ? (
+          <p
+            role="note"
+            className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-[12px] text-[var(--admin-on-surface-variant)]"
+          >
+            Email is turned off on this platform, because its email provider allows only
+            transactional mail. Runs skip this step&apos;s email and record why.
+          </p>
         ) : null}
         <div>
           <label htmlFor="wf-email-subject" className={LABEL_CLASS}>

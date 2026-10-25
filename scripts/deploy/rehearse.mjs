@@ -7,7 +7,8 @@
 // local CA standing in for Coolify's. The database is provisioned and seeded
 // by the browser-test scripts. Then it checks that a learner can log in
 // through the web, that a course page renders for them, and that the worker
-// completes sweeps.
+// completes sweeps. It also checks that marketing email is refused, as the
+// compose file's default leaves it while the SMTP agent is ZeptoMail.
 //
 //   pnpm deploy:rehearse                  build images, run, check, tear down
 //   pnpm deploy:rehearse -- --skip-build  reuse the atlas-*:rehearsal images
@@ -22,6 +23,7 @@ import { resolve } from "node:path";
 import { parse } from "dotenv";
 import pg from "pg";
 import { localEnv, ownerUrl } from "../e2e/local-env.mjs";
+import { totp } from "../e2e/totp.mjs";
 import { deploymentEnv } from "../../tests/helpers/deployment-env.ts";
 
 const options = new Set(process.argv.slice(2).filter((arg) => arg !== "--"));
@@ -216,6 +218,37 @@ function request(method, path, { host, cookies = "", body } = {}) {
   });
 }
 
+/** Session cookies from a response, merged over earlier ones by name. */
+function withCookies(jar, response) {
+  const cookies = new Map(
+    jar
+      .split("; ")
+      .filter(Boolean)
+      .map((pair) => [pair.split("=")[0], pair]),
+  );
+  for (const cookie of response.headers["set-cookie"] ?? []) {
+    const pair = cookie.split(";")[0];
+    cookies.set(pair.split("=")[0], pair);
+  }
+  return [...cookies.values()].join("; ");
+}
+
+/** The seeded admin's session: password, then the TOTP second factor. */
+async function signInAdmin(host, credentials) {
+  const login = await request("POST", "/api/v1/public/auth/login", {
+    host,
+    body: { email: credentials.E2E_ADMIN_EMAIL, password: credentials.E2E_ADMIN_PASSWORD },
+  });
+  const verify = await request("POST", "/api/v1/public/auth/verify-mfa", {
+    host,
+    cookies: withCookies("", login),
+    body: { code: totp(credentials.E2E_ADMIN_TOTP_SECRET) },
+  });
+  if (login.status !== 200 || verify.status !== 200)
+    throw new Error(`Admin sign-in failed: login HTTP ${login.status}, MFA HTTP ${verify.status}`);
+  return withCookies(withCookies("", login), verify);
+}
+
 async function owner(query, values) {
   const client = new pg.Client({ connectionString: ownerUrl });
   await client.connect();
@@ -314,6 +347,36 @@ try {
     "course page renders for the learner",
     course.status === 200 && course.text.includes(courseTitle),
     `HTTP ${course.status}, title "${courseTitle}" ${course.text.includes(courseTitle) ? "found" : "missing"}`,
+  );
+
+  // The compose default turns marketing email off (the SMTP agent is ZeptoMail).
+  const admin = await signInAdmin(tenantHost, credentials);
+  const created = await request("POST", "/api/v1/marketing/email-campaigns", {
+    host: tenantHost,
+    cookies: admin,
+    body: { title: "Rehearsal campaign" },
+  });
+  const campaignId = created.status < 300 ? JSON.parse(created.text).data?.id : undefined;
+  const send = campaignId
+    ? await request("POST", `/api/v1/marketing/email-campaigns/${campaignId}/send`, {
+        host: tenantHost,
+        cookies: admin,
+        body: { mode: "test", testEmail: "rehearsal@example.test" },
+      })
+    : created;
+  record(
+    "marketing email send is refused",
+    send.status === 400 && send.text.includes("Marketing email is turned off"),
+    `create HTTP ${created.status}, send HTTP ${send.status}`,
+  );
+  const screen = await request("GET", "/admin/marketing/messenger/email", {
+    host: tenantHost,
+    cookies: admin,
+  });
+  record(
+    "email campaign screen explains it is off",
+    screen.status === 200 && screen.text.includes("Email campaigns are turned off"),
+    `HTTP ${screen.status}`,
   );
 
   const sweep = await waitFor(

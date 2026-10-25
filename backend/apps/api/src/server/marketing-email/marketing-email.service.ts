@@ -4,6 +4,7 @@ import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { notificationRepository } from "../notifications/notification.repository";
 import { getEmailProvider } from "../notifications/notification.email-provider";
 import { readTenantEmailChannel } from "../tenant-settings/tenant-settings.service";
+import { assertMarketingEmailEnabled, isMarketingEmailEnabled } from "./marketing-email-sending";
 import {
   composeMarketingEmailBodySchema,
   createMarketingEmailCampaignBodySchema,
@@ -214,6 +215,8 @@ async function deliverCampaign(
 }
 
 export async function processDueScheduledMarketingEmails(tx: TenantTx, ctx: ServiceCtx) {
+  // Campaigns scheduled before sending was turned off stay scheduled, unsent.
+  if (!isMarketingEmailEnabled()) return;
   const due = await marketingEmailRepository.listDueScheduled(tx);
   for (const row of due) {
     await deliverCampaign(tx, ctx, row);
@@ -407,6 +410,8 @@ export async function sendMarketingEmail(
   id: string,
   rawBody: unknown,
 ) {
+  // Every mode refuses, test sends included: each goes through the same SMTP setting.
+  assertMarketingEmailEnabled();
   await processDueScheduledMarketingEmails(tx, ctx);
   const body = sendMarketingEmailBodySchema.parse(rawBody);
   const existing = await requireCampaign(tx, id);

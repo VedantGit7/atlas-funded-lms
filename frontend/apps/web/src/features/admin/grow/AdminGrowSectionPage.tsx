@@ -22,7 +22,7 @@ import { ReferralAdminPanel } from "./ReferralAdminPanel";
 import { AffiliatesAdminPanel } from "./AffiliatesAdminPanel";
 
 type GrowSectionPageProps =
-  | { kind: "marketing"; slug: AdminMarketingSlug }
+  | { kind: "marketing"; slug: AdminMarketingSlug; marketingEmailEnabled?: boolean }
   | { kind: "sales"; slug: AdminSalesSlug };
 
 export function AdminGrowSectionPage(props: GrowSectionPageProps) {
@@ -43,7 +43,7 @@ export function AdminGrowSectionPage(props: GrowSectionPageProps) {
   }
 
   if (props.kind === "marketing" && props.slug === "messenger") {
-    return <MarketingMessengerHub />;
+    return <MarketingMessengerHub marketingEmailEnabled={props.marketingEmailEnabled ?? true} />;
   }
 
   if (props.kind === "marketing" && props.slug === "workflows") {

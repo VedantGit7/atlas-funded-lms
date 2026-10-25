@@ -145,6 +145,23 @@ describe("Coolify compose topology", () => {
     expect(coolify("worker").healthcheck).toEqual(managed("worker").healthcheck);
   });
 
+  it.each(services)(
+    "turns marketing email off on %s unless the variable says otherwise",
+    (service) => {
+      // The SMTP agent is ZeptoMail, which allows only transactional mail (launch plan 1.6).
+      expect(coolify(service).environment.MARKETING_EMAIL_ENABLED).toBe(
+        "${MARKETING_EMAIL_ENABLED:-false}",
+      );
+      expect(resolveEnvironment(service).MARKETING_EMAIL_ENABLED).toBe("false");
+      expect(() =>
+        validateDeploymentStartup(
+          service,
+          resolveEnvironment(service, { ...settings, SMTP_HOST: "smtp.zeptomail.in" }),
+        ),
+      ).not.toThrow();
+    },
+  );
+
   it.each(services)("trusts Coolify's CA for %s's database TLS", (service) => {
     // pg treats sslmode=require as verify-full, and the contract forbids
     // sslrootcert, so the CA that signs Coolify's PostgreSQL certificate has to

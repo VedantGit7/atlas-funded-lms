@@ -188,6 +188,30 @@ describe("F05 deployment contract", () => {
       validateDeploymentConfiguration({ ...deploymentEnv(), API_PROXY_SECRET: "" }, "worker"),
     ).not.toThrow();
   });
+  it.each(["api", "worker", "web"] as const)(
+    "refuses marketing email on %s while SMTP_HOST is ZeptoMail (launch plan 1.6)",
+    (service) => {
+      const zepto = { ...deploymentEnv(), SMTP_HOST: "smtp.zeptomail.in" };
+      for (const MARKETING_EMAIL_ENABLED of [undefined, "true"])
+        expect(() =>
+          validateDeploymentConfiguration({ ...zepto, MARKETING_EMAIL_ENABLED }, service),
+        ).toThrow(/MARKETING_EMAIL_ENABLED must be false while SMTP_HOST is ZeptoMail/);
+      expect(() =>
+        validateDeploymentConfiguration({ ...zepto, MARKETING_EMAIL_ENABLED: "false" }, service),
+      ).not.toThrow();
+      expect(() =>
+        validateDeploymentConfiguration(
+          { ...deploymentEnv(), MARKETING_EMAIL_ENABLED: "true" },
+          service,
+        ),
+      ).not.toThrow();
+    },
+  );
+  it("accepts MARKETING_EMAIL_ENABLED only as exactly true or false", () => {
+    expect(() =>
+      validateDeploymentConfiguration({ ...deploymentEnv(), MARKETING_EMAIL_ENABLED: "off" }),
+    ).toThrow(/MARKETING_EMAIL_ENABLED must be exactly true or false/);
+  });
   it("rejects whitespace in feature flags rather than skipping signing requirements", () => {
     expect(() =>
       validateDeploymentConfiguration({ ...deploymentEnv(), CERTIFICATE_OPEN_BADGE: "false " }),

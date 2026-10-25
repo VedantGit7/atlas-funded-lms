@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { startSingleWorkflowRun } from "../../../backend/apps/api/src/server/marketing-workflows/marketing-workflow.engine";
 import { OutboxDeliveryError } from "@atlas/events/services/outbox-worker.service";
 
@@ -101,6 +101,9 @@ beforeEach(() => {
   });
   state.log.mockReset().mockResolvedValue(undefined);
 });
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("workflow email scheduling", () => {
   it("queues immutable email content and stable action identity without sending inside the workflow", async () => {
@@ -126,6 +129,25 @@ describe("workflow email scheduling", () => {
       },
     });
     expect(state.log.mock.calls.some((call) => call[1]?.status === "SENT")).toBe(false);
+  });
+  it("records a skipped step instead of queueing while marketing email is off", async () => {
+    vi.stubEnv("MARKETING_EMAIL_ENABLED", "false");
+    await startSingleWorkflowRun({} as never, ctx, {
+      workflowId,
+      membershipId: memberId,
+      eventType: "membership.created",
+      payload: {},
+      sourceEventId: "source",
+    });
+    expect(state.publish).not.toHaveBeenCalled();
+    expect(state.log).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        nodeId: "email",
+        status: "SKIPPED",
+        message: expect.stringContaining("Marketing email is turned off"),
+      }),
+    );
   });
   it("propagates enqueue failures instead of acknowledging a failed action", async () => {
     state.publish.mockRejectedValue(new Error("enqueue failed"));
@@ -226,6 +248,14 @@ describe("workflow email delivery", () => {
     await expect(
       (await worker()).handleMarketingWorkflowEmailOutboxEvent(event),
     ).rejects.toMatchObject({ kind: "permanent", code: "EMAIL_PROVIDER_NOT_CONFIGURED" });
+    expect(state.insert).not.toHaveBeenCalled();
+  });
+  it("refuses an email queued before marketing email was turned off, without sending", async () => {
+    vi.stubEnv("MARKETING_EMAIL_ENABLED", "false");
+    await expect(
+      (await worker()).handleMarketingWorkflowEmailOutboxEvent(event),
+    ).rejects.toMatchObject({ kind: "permanent", code: "MARKETING_EMAIL_DISABLED" });
+    expect(state.send).not.toHaveBeenCalled();
     expect(state.insert).not.toHaveBeenCalled();
   });
 });

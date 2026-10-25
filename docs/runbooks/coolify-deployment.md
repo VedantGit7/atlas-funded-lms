@@ -70,7 +70,7 @@ Each hop's idle timeout must be longer than the one in front of it, so the side 
    - the SMTP agent;
    - every secret, generated independently per environment (`deployment-configuration.md`).
 
-   `CERTIFICATE_OPEN_BADGE`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `0.05`, `587`).
+   `CERTIFICATE_OPEN_BADGE`, `MARKETING_EMAIL_ENABLED`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `false`, `0.05`, `587`).
 
 4. **Database TLS is mandatory, and the certificate is verified.** The contract requires `sslmode=require` (or stricter) in `DATABASE_URL` and `PLATFORM_DATABASE_URL`. Write `sslmode=verify-full`: `pg` 8 already treats `require` as `verify-full`, and logs a security warning that pg 9 will change `require` to encrypt without verifying. Each URL uses its own restricted runtime login, never an owner role.
    - **Turn on SSL for Coolify's PostgreSQL.** Coolify then writes its CA to `/data/coolify/ssl/coolify-ca.crt` on the server. Every service mounts that file read-only and trusts it through `NODE_EXTRA_CA_CERTS`. A service won't start until the file exists.
@@ -113,4 +113,5 @@ Run it after changing the compose file, the Dockerfile or anything the services 
   1. add `NAME: ${NAME:?}`, or `${NAME:-default}`, to each service that reads it;
   2. run `pnpm exec vitest run tests/unit/api/coolify-compose.test.ts`;
   3. fill in the value in Coolify.
+- **Marketing email** is off by default (`MARKETING_EMAIL_ENABLED=false`), because the SMTP agent is ZeptoMail, which allows only transactional mail. Email campaigns, campaigns with an email touchpoint and marketing workflow email are refused, and their screens are hidden; login, notification, certificate and report email still send. The services refuse to start with it on while `SMTP_HOST` is ZeptoMail. Newsletters go out from Brevo directly; to send them from the LMS, marketing email first needs its own SMTP setting (launch plan, "Later: email campaigns from inside the LMS").
 - **Open Badges** are off by default (`CERTIFICATE_OPEN_BADGE=false`). Turning them on also needs `CERTIFICATE_ISSUER_PRIVATE_KEY` (Ed25519), `CERTIFICATE_ISSUER_DID` and `CERTIFICATE_PUBLIC_BASE_URL` added to the API and worker.
