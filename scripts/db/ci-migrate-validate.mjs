@@ -43,6 +43,10 @@ if (owner) {
     await admin.query(
       `CREATE DATABASE ${admin.escapeIdentifier(ownedDatabase)} OWNER ${admin.escapeIdentifier(owner)}`,
     );
+    // As the runbook's setup does: only roles granted CONNECT reach the database.
+    await admin.query(
+      `REVOKE ALL ON DATABASE ${admin.escapeIdentifier(ownedDatabase)} FROM PUBLIC`,
+    );
   } finally {
     await admin.end();
   }
@@ -65,4 +69,24 @@ for (const step of steps) {
     stdio: "inherit",
     env: process.env,
   });
+}
+
+// The runtime logins must be able to reach the database they were granted on.
+if (owner) {
+  const client = new Client({ connectionString: target });
+  await client.connect();
+  try {
+    const { rows } = await client.query(
+      `select rolname from pg_roles
+        where rolname in ('atlas_app_login', 'atlas_platform_login')
+          and has_database_privilege(rolname, current_database(), 'CONNECT')`,
+    );
+    if (rows.length !== 2) {
+      console.error("FAILED: the runtime logins can't connect to the provisioned database.");
+      process.exit(1);
+    }
+    console.log("The runtime logins can connect.");
+  } finally {
+    await client.end();
+  }
 }

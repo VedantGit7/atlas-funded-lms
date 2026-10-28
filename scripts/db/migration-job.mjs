@@ -93,11 +93,16 @@ if (command === "migrate") {
               where n.nspname = 'public' and c.relkind in ('r', 'p') and c.relrowsecurity) as rls_tables,
            (select count(*)::int from pg_policies where schemaname = 'public') as policies,
            (select json_agg(json_build_object('role', rolname, 'login', rolcanlogin,
-                    'superuser', rolsuper, 'bypassrls', rolbypassrls) order by rolname)
+                    'superuser', rolsuper, 'bypassrls', rolbypassrls,
+                    'connect', has_database_privilege(rolname, current_database(), 'CONNECT'))
+                    order by rolname)
               from pg_roles where rolname in ('atlas_app_login', 'atlas_platform_login')) as logins,
            (select ssl from pg_stat_ssl where pid = pg_backend_pid()) as tls`);
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-  const unsafeLogin = (report.logins ?? []).some((login) => login.superuser || login.bypassrls);
-  if (!report.tls || report.unfinished > 0 || unsafeLogin)
+  const logins = report.logins ?? [];
+  const unsafeLogin = logins.some((login) => login.superuser || login.bypassrls);
+  // A login that can't connect fails every request, so it fails here first.
+  const lockedOut = logins.length < 2 || logins.some((login) => !login.login || !login.connect);
+  if (!report.tls || report.unfinished > 0 || unsafeLogin || lockedOut)
     fail("verification failed: see the report above");
 }

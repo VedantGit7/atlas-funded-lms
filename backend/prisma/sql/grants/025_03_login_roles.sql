@@ -78,3 +78,15 @@ BEGIN
     REVOKE atlas_platform FROM atlas_app_login;
   END IF;
 END $$;
+
+-- The logins connect to whichever database this runs in. A deployed database
+-- revokes the default CONNECT from PUBLIC so that only chosen roles can reach
+-- it (docs/runbooks/coolify-deployment.md, "Databases and migrations"), so
+-- grant it to them here. Harmless where PUBLIC still has it.
+DO $$
+BEGIN
+  EXECUTE format(
+    'GRANT CONNECT ON DATABASE %I TO atlas_app_login, atlas_platform_login',
+    current_database()
+  );
+END $$;
