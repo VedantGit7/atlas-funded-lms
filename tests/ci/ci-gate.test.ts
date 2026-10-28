@@ -261,6 +261,7 @@ describe("workflow graph and supply chain", () => {
     const tags = [...source.matchAll(/\/(atlas-[a-z]+):([^"]+)"/g)];
     expect(tags.map((match) => match[1]).sort()).toEqual([
       "atlas-api",
+      "atlas-migrate",
       "atlas-web",
       "atlas-worker",
     ]);

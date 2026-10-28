@@ -96,3 +96,25 @@ test("ships the health probe in every runtime image, root-owned and before USER"
     assert.ok(at < stage.lines.indexOf("USER node"), `${name} copies it before USER`);
   }
 });
+
+test("ships the migration job with only what applying the schema needs, unprivileged", () => {
+  const migrate = byName.get("migrate");
+  assert.ok(migrate, "migrate stage");
+  assert.equal(migrate.base, "dependencies");
+  const copied = migrate.lines
+    .filter((line) => line.startsWith("COPY"))
+    .map((line) => line.split(/\s+/)[2]);
+  // The schema, migrations, SQL and their scripts; never the apps or the whole tree.
+  assert.deepEqual(copied.sort(), [
+    "/source/backend/prisma",
+    "/source/backend/prisma.config.ts",
+    "/source/scripts/db",
+    "/source/scripts/guards/check-migrate-status.mjs",
+  ]);
+  // pnpm stays usable for the runtime user, without reaching the network.
+  assert.ok(migrate.lines.includes("ENV COREPACK_ENABLE_NETWORK=0"));
+  const user = migrate.lines.indexOf("USER node");
+  assert.ok(user > -1, "runs as node");
+  assert.ok(migrate.lines.slice(user).every((line) => !/^(COPY|RUN)\b/.test(line)));
+  assert.ok(migrate.lines.includes('ENTRYPOINT ["node", "scripts/db/migration-job.mjs"]'));
+});

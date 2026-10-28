@@ -40,9 +40,25 @@ BEGIN
 END $$;
 
 -- Re-assert the safety attributes even if the roles already existed, so an
--- accidentally-elevated role is corrected on the next provision.
-ALTER ROLE atlas_app_login NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE INHERIT;
-ALTER ROLE atlas_platform_login NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE INHERIT;
+-- accidentally-elevated role is corrected on the next provision. Only a role
+-- that has drifted is altered: Postgres lets only a superuser change SUPERUSER
+-- or BYPASSRLS, even to switch them off, and deployed databases provision as a
+-- non-superuser owner. If a role has drifted there, the ALTER fails and so
+-- does provisioning, which is the safe outcome.
+DO $$
+DECLARE
+  login text;
+BEGIN
+  FOREACH login IN ARRAY ARRAY['atlas_app_login', 'atlas_platform_login'] LOOP
+    IF EXISTS (
+      SELECT 1 FROM pg_roles
+      WHERE rolname = login
+        AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole OR NOT rolinherit)
+    ) THEN
+      EXECUTE format('ALTER ROLE %I NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE INHERIT', login);
+    END IF;
+  END LOOP;
+END $$;
 
 GRANT atlas_app TO atlas_app_login;
 GRANT atlas_platform TO atlas_platform_login;

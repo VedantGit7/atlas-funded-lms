@@ -88,8 +88,33 @@ async function assertDatabaseIsEmpty() {
   }
 }
 
+/**
+ * `--release` brings a database this script provisioned up to the current
+ * release: the same sequence, because every SQL phase is idempotent and a new
+ * migration's tables still need the grants and policies applied after it.
+ * Prisma's migration history is what proves the database came from here; a
+ * populated database without it (a pg_dump clone, say) is still refused.
+ */
+async function assertProvisionedByThisScript() {
+  const client = new Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+  try {
+    const { rows } = await client.query(
+      `select to_regclass('public._prisma_migrations') is not null as tracked`,
+    );
+    if (!rows[0]?.tracked) {
+      console.error("Refusing --release: the database has no Prisma migration history.");
+      console.error("Provision an empty database without --release instead.");
+      process.exit(1);
+    }
+  } finally {
+    await client.end();
+  }
+}
+
 try {
-  await assertDatabaseIsEmpty();
+  if (process.argv.includes("--release")) await assertProvisionedByThisScript();
+  else await assertDatabaseIsEmpty();
   applySql("setup");
   // Migration 039 grants to these group roles, before the post-migration grants phase.
   const rolesClient = new Client({ connectionString: process.env.DATABASE_URL });
