@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,19 +36,24 @@ if (migrationDirectories.length === 0) {
   process.exit(1);
 }
 
-const statusArgs = `prisma migrate status --config ${prismaConfig}`;
-const migrateStatusCommand = process.env.DATABASE_URL
-  ? `pnpm exec ${statusArgs}`
-  : `pnpm exec dotenv -e .env.local -- ${statusArgs}`;
-
 console.log(`Checking migrate status for ${migrationDirectories.length} migrations...`);
 
 try {
-  execSync(migrateStatusCommand, {
-    cwd: repoRoot,
-    stdio: "inherit",
-    env: process.env,
-  });
+  const options = { cwd: repoRoot, stdio: "inherit", env: process.env };
+  if (process.env.DATABASE_URL) {
+    // The Prisma CLI with the current Node: the migration image has no pnpm.
+    const { prismaCli } = await import("../db/prisma-cli.mjs");
+    execFileSync(
+      process.execPath,
+      [prismaCli, "migrate", "status", "--config", prismaConfig],
+      options,
+    );
+  } else {
+    execSync(
+      `pnpm exec dotenv -e .env.local -- prisma migrate status --config ${prismaConfig}`,
+      options,
+    );
+  }
 } catch {
   console.error("\nMigration status check FAILED: database schema is not up to date.");
   process.exit(1);

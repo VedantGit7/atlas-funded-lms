@@ -143,3 +143,23 @@ USER node
 EXPOSE 3000
 STOPSIGNAL SIGTERM
 CMD ["node", "frontend/apps/web/server.js"]
+
+# The database migration job (scripts/db/migration-job.mjs): run once per
+# deploy with the owner's login, then exits. The dependency layer already has
+# the Prisma CLI and pg; this adds the schema, migrations, SQL and the scripts
+# that apply them, nothing from the apps.
+FROM dependencies AS migrate
+COPY --from=source /source/backend/prisma.config.ts ./backend/prisma.config.ts
+COPY --from=source /source/backend/prisma ./backend/prisma
+COPY --from=source /source/scripts/db ./scripts/db
+COPY --from=source /source/scripts/guards/check-migrate-status.mjs ./scripts/guards/check-migrate-status.mjs
+ENV NODE_ENV=production
+# The job runs Prisma with node (scripts/db/prisma-cli.mjs), so like the other
+# runtime images it ships no package manager: npm and pnpm each bundle their
+# own copies of packages, outside the lockfile and its overrides.
+RUN rm -rf /root/.cache /pnpm /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+       /usr/local/bin/pnpm /usr/local/bin/pnpx /usr/local/bin/yarn /usr/local/bin/yarnpkg
+USER node
+ENTRYPOINT ["node", "scripts/db/migration-job.mjs"]
+CMD ["verify"]

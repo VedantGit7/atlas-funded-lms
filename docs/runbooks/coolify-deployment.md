@@ -115,6 +115,54 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
 5. **Domains go on `web` only, container port 3000.** For example, staging gets `https://staging-academy.fundedbeyond.com:3000` and `https://staging-platform.fundedbeyond.com:3000`; the `:3000` tells Coolify's proxy the container port.
 6. **Deploy, then check all three health checks** report healthy, and run `pnpm release:health` against the environment with the expected SHA (`release-health.md`).
 
+## Databases and migrations
+
+Each environment has its own PostgreSQL 16 and Redis, created in Coolify on that environment's own Docker network (`atlas-staging`, then `atlas-production`), with no public port. Environments can't share one PostgreSQL: its logins are server-wide, and each environment needs its own `atlas_app_login`.
+
+- **Logins:**
+  - `postgres`, Coolify's superuser: only for the one-time setup below.
+  - `atlas` owns the database and runs migrations. It is **not** a superuser and can't bypass row-level security; it can create roles, which the SQL needs.
+  - `atlas_app_login` and `atlas_platform_login` are the services' logins (`DATABASE_URL`, `PLATFORM_DATABASE_URL`), restricted like `atlas`.
+- **The migration job** is the `atlas-migrate` image, published for every `main` commit next to the worker. It runs `scripts/db/migration-job.mjs` on the environment's network, verifying the database's certificate (`sslmode=verify-full`):
+  - `migrate` provisions an empty database or brings it up to the release: setup, roles, Prisma migrations, then functions, RLS, triggers, indexes, grants and partitions. Every step is idempotent, so a release reruns all of them.
+  - `login-roles` sets the runtime logins' passwords.
+  - `verify` prints the owner, migrations, RLS tables and policies, the logins' attributes and TLS, and fails if anything is unsafe.
+- **CI guards the non-superuser owner.** `migration-validation` provisions as one and then reruns the release sequence, so a migration that only a superuser could apply fails CI, not a deploy.
+- **The database's certificate** comes from Coolify, signed by Coolify's CA (valid ten years). It names the PostgreSQL container (for example `z5xw99119qtqv6bc4yvzayxe`) and the server's public IP, so the URLs use the **container name** as host, as Coolify's internal URL does. It is valid for **one year**: Coolify shows the expiry on the database's **General** page. Before then, use **Regenerate SSL Certificates** and restart the database. Staging's first certificate expires on 28 October 2027.
+- **Server-side TLS isn't enforced.** Coolify's `pg_hba.conf` also accepts unencrypted logins (`host all all all scram-sha-256`). The database has no public port, and every client here insists on `verify-full`, so nothing connects unencrypted.
+
+**One-time setup per environment**, as root on the server, once its PostgreSQL is running with SSL on. It creates the owner and the database, and keeps the passwords in `/root/atlas/<environment>/` (mode 700, files 600). Neither file leaves the server: Coolify gets the runtime URLs from `runtime.env`.
+
+```bash
+ENV=staging
+PG=$(docker ps --filter network=atlas-$ENV --filter ancestor=postgres:16-alpine --format '{{.Names}}')
+install -d -m 700 /root/atlas/$ENV && umask 077
+OWNER=$(openssl rand -hex 24) APP=$(openssl rand -hex 24) PLATFORM=$(openssl rand -hex 24)
+docker exec -i "$PG" psql -v ON_ERROR_STOP=1 -U postgres -v owner="$OWNER" <<'SQL'
+CREATE ROLE atlas LOGIN NOSUPERUSER CREATEROLE NOBYPASSRLS NOCREATEDB PASSWORD :'owner';
+CREATE DATABASE atlas_lms OWNER atlas;
+REVOKE ALL ON DATABASE atlas_lms FROM PUBLIC;
+SQL
+URL="@$PG:5432/atlas_lms?sslmode=verify-full"
+printf 'DATABASE_URL=postgresql://atlas:%s%s\nATLAS_APP_LOGIN_PASSWORD=%s\nATLAS_PLATFORM_LOGIN_PASSWORD=%s\n' "$OWNER" "$URL" "$APP" "$PLATFORM" > /root/atlas/$ENV/migrate.env
+printf 'DATABASE_URL=postgresql://atlas_app_login:%s%s\nPLATFORM_DATABASE_URL=postgresql://atlas_platform_login:%s%s\n' "$APP" "$URL" "$PLATFORM" "$URL" > /root/atlas/$ENV/runtime.env
+```
+
+Then run the job with `login-roles` once after the first `migrate`.
+
+**Every deploy runs the job before the services change:**
+
+```bash
+ENV=staging SHA=<the release's 40-character SHA>
+docker run --rm --network atlas-$ENV --read-only --tmpfs /tmp \
+  -v /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro \
+  -e NODE_EXTRA_CA_CERTS=/etc/ssl/certs/coolify-ca.crt \
+  --env-file /root/atlas/$ENV/migrate.env \
+  ghcr.io/vedantgit7/atlas-migrate:$SHA migrate
+```
+
+Then run the same command with `verify`. Migrations aren't undone on rollback (`rollback.md`), so a release's migrations must keep the previous release working.
+
 ## Rehearsing locally
 
 `pnpm deploy:rehearse` runs this file's web, API and worker services on your machine, the way a Coolify server would. It needs Docker. With `-- --skip-build`, which reuses the `atlas-*:rehearsal` images, it takes about 2 minutes. Building the three images first adds 20 minutes or more on a cold Docker cache, and needs most of Docker's memory: run nothing else heavy alongside it.
