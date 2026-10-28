@@ -56,6 +56,36 @@ Each hop's idle timeout must be longer than the one in front of it, so the side 
 - "--entrypoints.https.transport.respondingTimeouts.idleTimeout=960s"
 ```
 
+## Server access and firewall
+
+The production server is a Hostinger VPS that Coolify Cloud manages over SSH (launch plan tasks 2.1 and 2.2).
+
+- **SSH is key only.** `/etc/ssh/sshd_config.d/00-atlas-hardening.conf` turns off passwords and allows `root` by key only. It is named to sort before Hostinger's `50-cloud-init.conf`, which turns passwords on, because sshd keeps the first value it reads. `/root/.ssh/authorized_keys` holds exactly two keys: the administrator's and Coolify's (`coolify-hostinger-mumbai`). Coolify logs in as `root` because its non-root mode is experimental and still needs passwordless sudo.
+- **The firewall is Hostinger's, not UFW.** It filters before traffic reaches the server, so it also covers the ports Docker publishes, which UFW does not ([Coolify's firewall guide](https://coolify.io/docs/knowledge-base/server/firewall)). Everything is dropped except:
+  - SSH from Coolify Cloud's addresses and the administrators';
+  - ports 80 and 443 from Cloudflare's ranges only, so nobody can reach the server's sites except through Cloudflare;
+  - ICMP and ICMPv6.
+
+  It covers IPv4 and IPv6. The server has a public IPv6 address, and Docker publishes ports on it too.
+
+- **`scripts/deploy/hostinger-firewall.mjs` manages it** (firewall group `atlas-production`). It fetches Coolify's and Cloudflare's address lists and this machine's public IPv4 on every run.
+- **Updates:** Ubuntu's security updates install nightly at about 02:30 India time (`unattended-upgrades`; the timer is moved by `/etc/systemd/system/apt-daily-upgrade.timer.d/override.conf`). Docker comes from Docker's own repository and is updated by hand, because an upgrade restarts every container.
+- **Reboots:** `atlas-weekly-reboot.timer` runs on Mondays at 03:30 India time (Sunday 22:00 UTC). It reboots only if an update has left `/run/reboot-required`; otherwise it skips. The sites are down for 1 to 2 minutes when it does. Check with `systemctl list-timers atlas-weekly-reboot.timer`.
+
+**Changing the firewall** (when your address changes, or monthly to pick up changes to Coolify's or Cloudflare's lists):
+
+1. In hPanel → **API**, create a token with the shortest expiry.
+2. In PowerShell, from the repository root, read it through a hidden prompt. Paste the token at the prompt, never into the command:
+
+   ```powershell
+   $env:HOSTINGER_API_TOKEN = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'Hostinger API token')).Password
+   ```
+
+3. Run `node scripts/deploy/hostinger-firewall.mjs plan --server 201.18.202.220` to see the rules. Then run `apply` (with `--admin-ip a,b` to allow other addresses), then `status`. The rules take effect within two minutes, and open connections survive.
+4. Revoke the token.
+
+**Locked out of SSH?** Use hPanel's **Web console**. It is the server's own console, not SSH, so neither the firewall nor the SSH settings affect it, and it signs in with the root password (keep that password in a password manager). Or turn the firewall off with `deactivate` (or in hPanel → **Security → Firewall**), fix the problem and `activate` again.
+
 ## Setting up an environment
 
 1. **Create the resource.** In Coolify, create a **Docker Compose** resource from this Git repository, with the compose file `deploy/coolify/compose.yaml`. No build happens: every service has an `image`.
