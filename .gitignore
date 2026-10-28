@@ -57,6 +57,7 @@ tmp-*
 # committing them would create the same staleness problem as release-evidence.json (H18).
 perf-exam-window.json
 restore-drill.json
+backup-restore-drill.json
 
 # Supabase CLI local state (the auth stack for the browser journeys).
 # config.toml is committed; the runtime state is not.
