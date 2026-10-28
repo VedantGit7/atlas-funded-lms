@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "pg";
+import { prismaCli } from "./prisma-cli.mjs";
 
 /**
  * Provision a database from an empty state, in the only order that works.
@@ -44,13 +45,14 @@ if (!existsSync(join(repoRoot, prismaConfig))) {
   process.exit(1);
 }
 
-function run(label, file, args) {
+/** Runs a Node script with the current Node: no shell, no package manager. */
+function run(label, args) {
   console.log(`\n=== ${label} ===`);
-  execFileSync(file, args, { cwd: repoRoot, stdio: "inherit", env: process.env, shell: true });
+  execFileSync(process.execPath, args, { cwd: repoRoot, stdio: "inherit", env: process.env });
 }
 
 function applySql(phase) {
-  run(`sql/${phase}`, "node", [
+  run(`sql/${phase}`, [
     join("scripts", "db", "apply-sql-directory.mjs"),
     `backend/prisma/sql/${phase}`,
   ]);
@@ -126,14 +128,7 @@ try {
   } finally {
     await rolesClient.end();
   }
-  run("prisma migrate deploy", "pnpm", [
-    "exec",
-    "prisma",
-    "migrate",
-    "deploy",
-    "--config",
-    prismaConfig,
-  ]);
+  run("prisma migrate deploy", [prismaCli, "migrate", "deploy", "--config", prismaConfig]);
   for (const phase of SQL_PHASES) {
     applySql(phase);
   }

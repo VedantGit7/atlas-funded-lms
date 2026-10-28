@@ -111,8 +111,13 @@ test("ships the migration job with only what applying the schema needs, unprivil
     "/source/scripts/db",
     "/source/scripts/guards/check-migrate-status.mjs",
   ]);
-  // pnpm stays usable for the runtime user, without reaching the network.
-  assert.ok(migrate.lines.includes("ENV COREPACK_ENABLE_NETWORK=0"));
+  // No package manager: npm and pnpm bundle copies of packages outside the
+  // lockfile, and the job runs Prisma with node.
+  const cleanup = migrate.lines.find((line) => line.startsWith("RUN rm -rf"));
+  for (const path of ["/usr/local/lib/node_modules/npm", "/usr/local/lib/node_modules/corepack"])
+    assert.ok(cleanup?.includes(path), `removes ${path}`);
+  for (const path of ["/root/.cache", "/usr/local/bin/pnpm", "/usr/local/bin/npm"])
+    assert.ok(cleanup?.includes(path), `removes ${path}`);
   const user = migrate.lines.indexOf("USER node");
   assert.ok(user > -1, "runs as node");
   assert.ok(migrate.lines.slice(user).every((line) => !/^(COPY|RUN)\b/.test(line)));
