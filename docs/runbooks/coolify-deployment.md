@@ -163,6 +163,40 @@ docker run --rm --network atlas-$ENV --read-only --tmpfs /tmp \
 
 Then run the same command with `verify`. Migrations aren't undone on rollback (`rollback.md`), so a release's migrations must keep the previous release working.
 
+## Backups and restore drills
+
+Coolify backs up each environment's PostgreSQL to that environment's own R2 bucket (`atlas-staging-backups`, `atlas-prod-backups`). A backup only counts once a restore of it has passed the drill below.
+
+- **Schedule:** on the database's **Backups** page, every 6 hours (`0 */6 * * *`, UTC), with **All databases**. That is a gzipped `pg_dumpall`, which also carries the logins and their password hashes, so a restore needs no new passwords.
+- **Retention:** S3 copies are kept 14 days, and local copies (under `/data/coolify/backups`) 2 days, for faster restores.
+- **Not backed up:** Redis holds only rate-limit counters.
+- **Two R2 keys per bucket, each limited to that bucket:**
+  - **Object Read & Write**, entered only in Coolify's S3 storage. It uploads backups and deletes expired ones.
+  - **Object Read only**, kept in the password manager. It is for drills and real restores.
+
+  Neither is stored on the server.
+
+**The restore drill** proves the newest backup in R2 restores. From your PC, it drives Docker on the server over SSH:
+
+1. downloads the backup with the read-only key;
+2. restores it into a throwaway PostgreSQL with **no network**;
+3. compares the result with the live database: every table's rows and content, sequences, the schema with ownership and grants, RLS coverage, the databases, and the logins with their password hashes;
+4. removes the container and the downloaded file.
+
+Nothing may write to the database between the backup and the drill, or the comparison fails. That holds on staging before the app runs; once it does, run the drill right after a backup.
+
+```powershell
+$env:R2_ACCESS_KEY_ID = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'R2 read-only Access Key ID')).Password
+$env:R2_SECRET_ACCESS_KEY = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'R2 read-only Secret Access Key')).Password
+$env:R2_ACCOUNT_ID = 'ae645de64b709479a18bbd90942fdb28'; $env:R2_BUCKET = 'atlas-staging-backups'
+$env:BACKUP_DRILL_ENV = 'staging'; $env:BACKUP_DRILL_DOCKER_HOST = 'ssh://root@201.18.202.220'
+$env:BACKUP_DRILL_MIGRATE_IMAGE = 'ghcr.io/vedantgit7/atlas-migrate:<a published SHA>'
+$env:BACKUP_DRILL_QUIESCED = '1'
+pnpm release:backup:drill
+```
+
+It prints and saves a JSON report (`backup-restore-drill.json`) with the backup's key, size, age and SHA-256, each check, and the time the database took to come back. Keep it with the release evidence. To restore for real, use the same download (`scripts/db/fetch-backup.mjs`) and then Coolify's **Import Backup** on a fresh PostgreSQL.
+
 ## Rehearsing locally
 
 `pnpm deploy:rehearse` runs this file's web, API and worker services on your machine, the way a Coolify server would. It needs Docker. With `-- --skip-build`, which reuses the `atlas-*:rehearsal` images, it takes about 2 minutes. Building the three images first adds 20 minutes or more on a cold Docker cache, and needs most of Docker's memory: run nothing else heavy alongside it.
