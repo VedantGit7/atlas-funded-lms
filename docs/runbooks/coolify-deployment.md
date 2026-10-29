@@ -56,6 +56,75 @@ Each hop's idle timeout must be longer than the one in front of it, so the side 
 - "--entrypoints.https.transport.respondingTimeouts.idleTimeout=960s"
 ```
 
+Set on the production server on 29 October 2026. Check after any proxy change or Coolify upgrade with `docker inspect coolify-proxy --format '{{range .Args}}{{println .}}{{end}}' | grep idleTimeout`.
+
+## TLS and DNS
+
+Visitors reach the server only through Cloudflare (the firewall allows ports 80 and 443 from Cloudflare's ranges only). The decision behind this is in the hosting decision doc, section 4.
+
+- **Edge:** Cloudflare's Universal SSL covers every name one level under `fundedbeyond.com`.
+- **Origin:** a **Cloudflare Origin CA certificate** in Traefik covers the four LMS addresses: `academy`, `platform`, `staging-academy` and `staging-platform`.
+  - Only Cloudflare trusts it, so **every LMS DNS record must stay proxied** (orange cloud).
+  - There is no Let's Encrypt. Traefik keeps Coolify's `letsencrypt` resolver, but it never requests a certificate for a name the Origin certificate already covers, so `/data/coolify/proxy/acme.json` stays empty.
+  - **It expires on 25 October 2041.** Cloudflare sends no reminder.
+
+**The files on the server:**
+
+| File (host path; Traefik sees `/data/coolify/proxy` as `/traefik`) | What it is                                                                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `/data/coolify/proxy/certs/fundedbeyond-origin.key`                | The private key. ECDSA P-256, generated on the server, mode 600. It has never left the server.                |
+| `/data/coolify/proxy/certs/fundedbeyond-origin.csr`                | The signing request Cloudflare signed.                                                                        |
+| `/data/coolify/proxy/certs/fundedbeyond-origin.crt`                | The certificate.                                                                                              |
+| `/data/coolify/proxy/dynamic/origin-certificate.yaml`              | Loads the pair into Traefik (`tls.certificates`). Listed in Coolify under **Proxy → Dynamic Configurations**. |
+
+**Issuing or replacing the certificate** (for a new LMS address, a lost key or expiry):
+
+1. On the server, create a key and a signing request listing every address. Keep an existing key unless it may have leaked:
+
+   ```bash
+   cd /data/coolify/proxy/certs
+   (umask 077; openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out fundedbeyond-origin.key)
+   openssl req -new -key fundedbeyond-origin.key -out fundedbeyond-origin.csr -subj "/CN=academy.fundedbeyond.com" \
+     -addext "subjectAltName=DNS:academy.fundedbeyond.com,DNS:platform.fundedbeyond.com,DNS:staging-academy.fundedbeyond.com,DNS:staging-platform.fundedbeyond.com"
+   ```
+
+2. In Cloudflare → **SSL/TLS → Origin Server → Create Certificate**, choose **Use my private key and CSR**, paste the signing request, list the same hostnames (remove the defaults), and pick 15 years.
+3. Check the certificate carries the server's key before installing it. The two hashes must match:
+
+   ```bash
+   openssl x509 -in new.crt -noout -pubkey | openssl sha256
+   openssl pkey -in fundedbeyond-origin.key -pubout | openssl sha256
+   ```
+
+4. Replace `fundedbeyond-origin.crt` (mode 644). Traefik watches the dynamic directory and picks it up without a restart. Confirm from the server, for each address:
+
+   ```bash
+   openssl s_client -connect 127.0.0.1:443 -servername staging-academy.fundedbeyond.com </dev/null 2>/dev/null | openssl x509 -noout -subject -enddate
+   ```
+
+5. Revoke the old certificate in Cloudflare and update the expiry date above.
+
+**Cloudflare settings for the LMS addresses.** The zone also serves the company site and email, so these settings are scoped to the LMS addresses. The zone-wide SSL mode (Full) and Always Use HTTPS (off) stay as they are.
+
+| Setting        | Where                                                     | Value                                                                                                                                             |
+| -------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DNS            | DNS → Records                                             | A record per address → `201.18.202.220`, **proxied**. The `*` wildcard (Porkbun's forwarding) stays; an explicit record takes precedence over it. |
+| SSL mode       | Rules → Configuration Rules, `LMS staging: Full (strict)` | `(http.host in {"staging-academy.fundedbeyond.com" "staging-platform.fundedbeyond.com"})` → SSL **Full (strict)**                                 |
+| HTTPS redirect | Rules → Redirect Rules, `LMS staging: HTTP to HTTPS`      | `(http.host in {...the same names...} and not ssl)` → dynamic `concat("https://", http.host, http.request.uri.path)`, 301, preserve query string  |
+
+**At launch,** add `academy.fundedbeyond.com` and `platform.fundedbeyond.com` to both rules, in the same change as their DNS records. Until then they must stay out: `academy` currently reaches Porkbun's redirect through the wildcard, and Full (strict) would break it.
+
+**Checking it end to end:**
+
+```bash
+curl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" https://staging-academy.fundedbeyond.com/
+curl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" "http://staging-academy.fundedbeyond.com/a?b=1"
+```
+
+- **HTTPS:** expect the app's response, or Traefik's "Site not available" page (503) when nothing is deployed for that address.
+- **HTTP:** expect a 301 to the same path and query on `https://`.
+- **Cloudflare errors:** a 526 means Cloudflare rejected the origin certificate (it doesn't cover the name, or it expired). A 525 means the TLS handshake with Traefik failed.
+
 ## Server access and firewall
 
 The production server is a Hostinger VPS that Coolify Cloud manages over SSH (launch plan tasks 2.1 and 2.2).
