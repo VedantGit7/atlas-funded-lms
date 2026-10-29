@@ -63,7 +63,7 @@ Record at least one successful worker sweep per task in each environment with ti
 
 ## Acceptance evidence
 
-- Run `pnpm release:health --base-url <candidate-https-origin> --expected-release <deployed-sha>`. Expected SHA is mandatory, also available as `RELEASE_HEALTH_EXPECTED_RELEASE`; inherited callers such as restore validation need this variable too. Verify both probes identify the expected release and unique matching request IDs. This route is not a full dependency-readiness check.
+- Run `pnpm release:health --base-url <candidate-https-origin> --expected-release <release>`, where the release is the deployed `RELEASE_VERSION`, or the first 12 characters of `RELEASE_SHA` (`release-health.md`). The expected release is mandatory, also available as `RELEASE_HEALTH_EXPECTED_RELEASE`; inherited callers such as restore validation need this variable too. Verify both probes identify the expected release and unique matching request IDs. This route is not a full dependency-readiness check.
 - On an allowed staging tenant domain: anonymous page/login load, sign-in, protected API request, refresh, sign-out and denied anonymous request. Confirm tenant A cannot access tenant B by replacing IDs or headers.
 - On the canonical platform host: a platform operator can read and mutate an approved test fixture, a tenant admin is denied, and foreign Origin mutations are rejected. Test through the actual edge/web/API chain.
 - OAuth callback relays access/refresh cookies, removes temporary OAuth cookies and resolves the correct tenant. Verify cookie flags and domain/path through the browser.
