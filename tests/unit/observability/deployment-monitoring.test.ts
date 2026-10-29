@@ -1,6 +1,12 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { afterEach, expect, it, vi } from "vitest";
 import { validateProductionObservabilityEnv } from "@atlas/observability/env";
-const sentry = vi.hoisted(() => ({ init: vi.fn(), captureRequestError: vi.fn() }));
+const sentry = vi.hoisted(() => ({
+  init: vi.fn(),
+  captureRequestError: vi.fn(),
+  captureRouterTransitionStart: vi.fn(),
+}));
 vi.mock("@sentry/nextjs", () => sentry);
 vi.mock("../../../backend/apps/api/node_modules/@sentry/nextjs", () => sentry);
 vi.mock("../../../frontend/apps/web/node_modules/@sentry/nextjs", () => sentry);
@@ -32,4 +38,28 @@ it.each(["backend", "frontend"])("uses configured fallback Sentry settings in %s
       release: "release-sha",
     }),
   );
+});
+it("starts browser Sentry from the file Next loads, with build-time values only", async () => {
+  // Sentry's sentry.client.config.ts is never loaded by a Turbopack build.
+  const web = resolve(import.meta.dirname, "../../../frontend/apps/web");
+  expect(existsSync(resolve(web, "sentry.client.config.ts"))).toBe(false);
+  vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "https://public@sentry.example.test/1");
+  vi.stubEnv("ATLAS_BUILD_APP_ENV", "staging");
+  const client = await import("../../../frontend/apps/web/src/instrumentation-client");
+  expect(sentry.init).toHaveBeenCalledWith(
+    expect.objectContaining({
+      enabled: true,
+      dsn: "https://public@sentry.example.test/1",
+      environment: "staging",
+      sendDefaultPii: false,
+    }),
+  );
+  // The release comes from the plugin's build-time injection, not a runtime setting.
+  expect(sentry.init.mock.calls[0]?.[0]).not.toHaveProperty("release");
+  expect(client.onRouterTransitionStart).toBe(sentry.captureRouterTransitionStart);
+});
+it("leaves browser Sentry off in a build without a DSN", async () => {
+  vi.stubEnv("NEXT_PUBLIC_SENTRY_DSN", "");
+  await import("../../../frontend/apps/web/src/instrumentation-client");
+  expect(sentry.init).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
 });

@@ -160,15 +160,15 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
 1. **Create the resource.** In Coolify, create a **Docker Compose** resource from this Git repository, with the compose file `deploy/coolify/compose.yaml`. No build happens: every service has an `image`.
 2. **Publish the environment's images.** In GitHub, give the environment the `API_BUILD_ENV` and `WEB_BUILD_ENV` secrets, then run "Publish images" for the commit (`managed-node-runtime.md`, "Publishing"). Environment names ignore case, so the workflow's `production` is the `Production` environment Vercel created. Both secrets hold the same dotenv text:
 
-   | Setting                         | Staging                                                                                     |
-   | ------------------------------- | ------------------------------------------------------------------------------------------- |
-   | `APP_ENV`                       | `staging`                                                                                   |
-   | `PLATFORM_HOST`                 | `staging-platform.fundedbeyond.com`                                                         |
-   | `APP_URL`                       | `https://staging-academy.fundedbeyond.com`                                                  |
-   | `API_INTERNAL_URL`              | `http://api.atlas.internal:3001`                                                            |
-   | `NEXT_PUBLIC_SUPABASE_URL`      | The staging Supabase project's URL (project `acfkhlnrlnlignkqpxhc`)                         |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | That project's legacy anon key, the key type the rehearsal tests (Supabase → API Keys)      |
-   | `NEXT_PUBLIC_SENTRY_DSN`        | The `atlas-lms` Sentry project's DSN (EU region). The CSP's `connect-src` takes its origin. |
+   | Setting                         | Staging                                                                                                           |
+   | ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+   | `APP_ENV`                       | `staging`                                                                                                         |
+   | `PLATFORM_HOST`                 | `staging-platform.fundedbeyond.com`                                                                               |
+   | `APP_URL`                       | `https://staging-academy.fundedbeyond.com`                                                                        |
+   | `API_INTERNAL_URL`              | `http://api.atlas.internal:3001`                                                                                  |
+   | `NEXT_PUBLIC_SUPABASE_URL`      | The staging Supabase project's URL (project `acfkhlnrlnlignkqpxhc`)                                               |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | That project's legacy anon key, the key type the rehearsal tests (Supabase → API Keys)                            |
+   | `NEXT_PUBLIC_SENTRY_DSN`        | The `atlas-lms` Sentry project's DSN (EU region). Browser Sentry (`src/instrumentation-client.ts`) reports to it. |
 
    **Registry access:** none. The packages are public, like the repository (`managed-node-runtime.md`, "Pulling").
 
@@ -177,7 +177,7 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
    - `APP_URL`;
    - `PLATFORM_HOST`;
    - `RELEASE_SHA`;
-   - `SENTRY_DSN`, the same DSN as the build's;
+   - `SENTRY_DSN`, the same DSN as the build's. The web also gets it as `NEXT_PUBLIC_SENTRY_DSN`, because the per-request CSP builds `connect-src` from it;
    - the database URLs;
    - the R2 bucket and its keys;
    - the SMTP agent;

@@ -64,6 +64,7 @@ Readiness against `/readyz` remains the managed host's concern.
   - `APP_ENV`, `PLATFORM_HOST`, `APP_URL` and `API_INTERNAL_URL`;
   - every `NEXT_PUBLIC_*` value;
   - and, optionally, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` for source-map upload.
+- The workflow adds `SENTRY_RELEASE=<sha>` to the web build, and the Sentry plugin fixes it into the browser bundle as its release. The browser's environment is the build's `APP_ENV` (`ATLAS_BUILD_APP_ENV` in `next.config.ts`).
 - **Leave credentials out:** database URLs, SMTP, R2, `API_PROXY_SECRET`, `CRON_SECRET` and the like. A build never fixes them in (CI compiles both apps with empty settings), so they belong only in the runtime settings.
 - **Rebuild after changing a fixed value.** A changed `NEXT_PUBLIC_*` value or `API_INTERNAL_URL` needs a rebuild; setting it at runtime alone changes nothing.
 
