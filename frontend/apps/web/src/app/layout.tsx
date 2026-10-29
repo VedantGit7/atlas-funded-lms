@@ -8,6 +8,7 @@ import "../styles/jetbrains-mono.css";
 
 import { AppProviders } from "@/components/providers/AppProviders";
 import { AnalyticsConsentBridge } from "../observability/AnalyticsConsentBridge";
+import { BrowserSentryStarter } from "../observability/BrowserSentryStarter";
 import { LazyMarketingSnippets } from "../features/marketing/LazyMarketingSnippets";
 import { loadTenantThemeRuntime } from "@atlas/tenant-theme";
 import { ThemeInitScript } from "../components/ThemeInitScript";
@@ -129,6 +130,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <AppProviders initialDisplayCurrency={displayCurrency} initialFxRates={fxRates}>
           <AnalyticsConsentBridge hasSession={hasSession}>
             <LazyMarketingSnippets />
+            <BrowserSentryStarter />
             {children}
           </AnalyticsConsentBridge>
         </AppProviders>

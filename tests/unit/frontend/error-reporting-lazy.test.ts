@@ -3,10 +3,10 @@ import { afterEach, expect, it, vi } from "vitest";
 import { act, createElement } from "../../../frontend/apps/web/node_modules/react";
 import { createRoot } from "../../../frontend/apps/web/node_modules/react-dom/client";
 
-const sdk = vi.hoisted(() => ({ loads: 0, captureException: vi.fn() }));
+const sdk = vi.hoisted(() => ({ loads: 0, init: vi.fn(), captureException: vi.fn() }));
 vi.mock("../../../frontend/apps/web/node_modules/@sentry/nextjs", () => {
   sdk.loads += 1;
-  return { captureException: sdk.captureException };
+  return { init: sdk.init, captureException: sdk.captureException };
 });
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -29,6 +29,11 @@ it("loads error reporting only when a fallback mounts, retaining the error and r
     expect(container.textContent).toContain(error.digest);
     await vi.waitFor(() => expect(sdk.captureException).toHaveBeenCalledWith(error));
     expect(sdk.loads).toBe(1);
+    // Started before capturing: an uninitialized SDK drops every event.
+    expect(sdk.init).toHaveBeenCalledOnce();
+    expect(sdk.init.mock.invocationCallOrder[0]).toBeLessThan(
+      sdk.captureException.mock.invocationCallOrder[0] ?? 0,
+    );
     await act(() => container.querySelector("button")?.click());
     expect(reset).toHaveBeenCalledOnce();
   } finally {

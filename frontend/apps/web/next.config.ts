@@ -38,9 +38,11 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
   transpilePackages: ["@atlas/design-system"],
   // The browser has no runtime settings, so browser Sentry tags its events with
-  // the environment the image was built for (src/instrumentation-client.ts).
+  // the environment and commit the image was built for ("Publish images" sets
+  // SENTRY_RELEASE; see src/observability/browser-sentry.ts).
   env: {
     ATLAS_BUILD_APP_ENV: process.env["APP_ENV"] ?? "",
+    ATLAS_BUILD_RELEASE: process.env["SENTRY_RELEASE"] ?? "",
   },
   experimental: {
     // Cold API compilation exceeded Next's 30s rewrite deadline in browser CI.
