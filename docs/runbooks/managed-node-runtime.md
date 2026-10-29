@@ -69,8 +69,9 @@ Readiness against `/readyz` remains the managed host's concern.
 
 **Pulling:**
 
-- Packages published by the workflow are linked to the repository. Check each package's visibility after its first publish, and keep it private.
-- A host pulls with a personal access token (classic) that has only `read:packages`.
+- **The packages are public, like the repository** (decided 29 October 2026). Anyone can already read and build the source, and an image adds only its non-secret build settings, which every browser receives anyway. A host pulls without credentials, so no token can expire and break a deploy.
+- Packages published by the workflow are linked to the repository and take its visibility. Check a new package's visibility after its first publish.
+- **If the repository becomes private,** make each package private too (the package's **Package settings → Change visibility**: `atlas-api`, `atlas-web`, `atlas-worker` and `atlas-migrate`). Then log each host in with a personal access token (classic) that has only `read:packages`. In Coolify, **Registries → Log in** runs `docker login ghcr.io` on the server and does not keep the token.
 
 ## Work and recovery contract
 
