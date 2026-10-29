@@ -178,6 +178,7 @@ export function createPlatformRoute<
 
           const ctx: PlatformRouteContext = {
             platformPrincipalId: platformPrincipal.platformPrincipalId,
+            platformPermissions: platformPrincipal.platformPermissions,
             requestId,
             reason,
             idempotencyKey,

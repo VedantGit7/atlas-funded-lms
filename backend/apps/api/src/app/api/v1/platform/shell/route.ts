@@ -1,10 +1,6 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requirePlatformPrincipal } from "@atlas/auth/platform-auth";
-import { getOrCreateRequestId } from "@atlas/core/request/request-id";
-import { withGlobalDb } from "@atlas/db/global-db";
-import { withPlatformScope } from "@atlas/db";
+import { createPlatformRoute } from "@atlas/api/create-platform-route";
+import { routeMetadata } from "./route.metadata";
 
 const outputSchema = z.object({
   data: z.object({
@@ -14,45 +10,28 @@ const outputSchema = z.object({
   }),
 });
 
-export async function GET(req: NextRequest) {
-  const requestId = getOrCreateRequestId(req.headers);
+/**
+ * Who the console is for. Built like every platform route, so a refusal
+ * answers with its code (PERMISSION_DENIED, MFA_REQUIRED) instead of an
+ * unhandled 500: the console's gate needs MFA_REQUIRED to offer MFA setup.
+ */
+export const GET = createPlatformRoute({
+  metadata: routeMetadata,
+  output: outputSchema,
+  handler: async ({ tx, ctx }) => {
+    const rows = await tx.$queryRaw<{ email: string; mfa_enabled: boolean }[]>`
+      SELECT email, mfa_enabled
+      FROM auth_principals
+      WHERE id = ${ctx.platformPrincipalId}::uuid
+      LIMIT 1
+    `;
 
-  return withGlobalDb(async (db) => {
-    const principal = await requirePlatformPrincipal({
-      req,
-      db,
-      requiredPermission: "platform.tenant.read",
-    });
-
-    const body = await withPlatformScope(
-      {
-        principalId: principal.platformPrincipalId,
-        requestId,
-        requiredPermission: "platform.tenant.read",
-        platformPermissions: principal.platformPermissions as never,
-        route: "/api/v1/platform/shell",
+    return {
+      data: {
+        email: rows[0]?.email ?? "platform-operator",
+        mfaEnabled: rows[0]?.mfa_enabled ?? false,
+        platformPermissions: [...ctx.platformPermissions],
       },
-      "platform.shell.read",
-      async (tx) => {
-        const rows = await tx.$queryRaw<{ email: string; mfa_enabled: boolean }[]>`
-          SELECT email, mfa_enabled
-          FROM auth_principals
-          WHERE id = ${principal.platformPrincipalId}::uuid
-          LIMIT 1
-        `;
-
-        return outputSchema.parse({
-          data: {
-            email: rows[0]?.email ?? "platform-operator",
-            mfaEnabled: rows[0]?.mfa_enabled ?? false,
-            platformPermissions: principal.platformPermissions,
-          },
-        });
-      },
-    );
-
-    return NextResponse.json(body, {
-      headers: { "x-request-id": requestId },
-    });
-  });
-}
+    };
+  },
+});

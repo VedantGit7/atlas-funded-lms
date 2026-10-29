@@ -92,6 +92,8 @@ export type RouteMetadata<TInput = unknown> = {
 
 export type PlatformRouteContext = {
   platformPrincipalId: string;
+  /** What the operator's active grant allows; the console shell reports it. */
+  platformPermissions: readonly string[];
   requestId: string;
   reason: string;
   idempotencyKey: string;
