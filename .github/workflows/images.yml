@@ -130,6 +130,8 @@ jobs:
           umask 077
           printf '%s\n' "$API_BUILD_ENV" > "$RUNNER_TEMP/api-build.env"
           printf '%s\n' "$WEB_BUILD_ENV" > "$RUNNER_TEMP/web-build.env"
+          # next.config.ts fixes this into the browser bundle as browser Sentry's release.
+          printf 'SENTRY_RELEASE=%s\n' "$SOURCE_SHA" >> "$RUNNER_TEMP/web-build.env"
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
       - if: steps.settings.outputs.ready == 'true'

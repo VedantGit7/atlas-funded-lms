@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
+import { buildDocumentCsp } from "../../../configs/security-headers.mjs";
 import { validateDeploymentStartup } from "../../../backend/packages/api/src/deployment-startup";
 import { deploymentEnv } from "../../helpers/deployment-env";
 
@@ -103,6 +104,15 @@ describe("Coolify compose topology", () => {
     for (const service of services)
       for (const key of ["DIRECT_DATABASE_URL", "MIGRATION_DATABASE_URL", "PRISMA_MIGRATION_URL"])
         expect(env(service)).not.toContain(key);
+  });
+
+  it("lets the web's CSP admit browser Sentry reports", () => {
+    // The proxy builds connect-src per request from the runtime settings.
+    const env = resolveEnvironment("web");
+    expect(env.NEXT_PUBLIC_SENTRY_DSN).toBe(settings.SENTRY_DSN);
+    const csp = buildDocumentCsp("A".repeat(24), env);
+    const connect = csp.split(";").find((part) => part.trim().startsWith("connect-src"));
+    expect(connect).toContain(new URL(String(settings.SENTRY_DSN)).origin);
   });
 
   it("deploys one commit's images and reports that commit", () => {

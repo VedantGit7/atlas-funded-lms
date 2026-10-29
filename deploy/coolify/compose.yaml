@@ -42,6 +42,9 @@ services:
       MARKETING_EMAIL_ENABLED: ${MARKETING_EMAIL_ENABLED:-false}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?}
       NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?}
+      # The per-request CSP reads this at runtime to admit the browser's Sentry
+      # reports. It is the same DSN the web image was built with.
+      NEXT_PUBLIC_SENTRY_DSN: ${SENTRY_DSN:?}
       NOTIFICATION_EMAIL_FROM: ${NOTIFICATION_EMAIL_FROM:?}
       NOTIFICATION_EMAIL_PROVIDER: smtp
       OBSERVABILITY_HASH_SALT: ${OBSERVABILITY_HASH_SALT:?}
