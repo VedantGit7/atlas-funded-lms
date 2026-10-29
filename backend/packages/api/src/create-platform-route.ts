@@ -172,6 +172,7 @@ export function createPlatformRoute<
                 req,
                 db,
                 requiredPermission: config.metadata.permission,
+                allowMfaEnrollment: config.metadata.mfa === "enrollment",
               }),
           );
 

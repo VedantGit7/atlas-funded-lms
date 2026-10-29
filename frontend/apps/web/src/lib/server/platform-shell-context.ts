@@ -11,7 +11,7 @@ import {
   type PlatformCapabilityProjection,
 } from "../../features/platform/platform-capability-projection";
 import { resolvePlatformHost } from "./platform-host-gate";
-import { serverApi } from "../server-api";
+import { ServerApiError, serverApi } from "../server-api";
 
 type PlatformShellApiResponse = {
   data: {
@@ -49,6 +49,11 @@ export type PlatformShellContext =
       kind: "platform_forbidden";
       requestId: string;
       message: string;
+    }
+  | {
+      // An operator with no verified factor yet: the console sets one up.
+      kind: "mfa_setup_required";
+      requestId: string;
     };
 
 export async function loadPlatformShellContext(): Promise<PlatformShellContext> {
@@ -93,11 +98,34 @@ export async function loadPlatformShellContext(): Promise<PlatformShellContext> 
       capabilities,
       navigationItems: filterPlatformNavigation(PLATFORM_PRIMARY_NAV, capabilities),
     };
-  } catch {
+  } catch (error) {
+    if (error instanceof ServerApiError && error.code === "MFA_REQUIRED") {
+      return platformMfaContext(requestId);
+    }
     return {
       kind: "auth_blocked",
       requestId,
       message: "Sign in with a platform operator account to access the platform console.",
+    };
+  }
+}
+
+/**
+ * The console answered MFA_REQUIRED, so this is an operator: a non-operator is
+ * denied before MFA is checked. The enrollment routes admit a password-only
+ * session only while no factor is verified. If they refuse too, the operator
+ * has a factor and must sign in again with it.
+ */
+async function platformMfaContext(requestId: string): Promise<PlatformShellContext> {
+  try {
+    await serverApi.get("/api/v1/platform/me/security/mfa");
+    return { kind: "mfa_setup_required", requestId };
+  } catch {
+    return {
+      kind: "session_assurance_blocked",
+      requestId,
+      message:
+        "This session has not completed multi-factor authentication. Sign out, then sign in again and enter the code from your authenticator app.",
     };
   }
 }

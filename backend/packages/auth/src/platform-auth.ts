@@ -43,6 +43,13 @@ export async function requirePlatformPrincipal(args: {
   req: NextRequest;
   db: QueryableDb;
   requiredPermission: string;
+  /**
+   * The platform MFA enrollment routes only. An operator with no verified
+   * factor cannot complete MFA, and enrollment is otherwise a tenant route, so
+   * an operator without a tenant could never reach the console. Once a factor
+   * is verified, aal2 is required again, so a stolen password cannot add one.
+   */
+  allowMfaEnrollment?: boolean;
 }): Promise<PlatformPrincipal> {
   const supabaseUser = await requireSupabaseUser(args.req);
   const principal = await upsertAuthPrincipal({
@@ -68,10 +75,12 @@ export async function requirePlatformPrincipal(args: {
   // operator learns "denied" rather than "you need MFA" — the second answer
   // would confirm that the account is a platform operator to anyone who can
   // reach the endpoint.
-  assertPlatformMfa({
-    sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
-    principalId: principal.id,
-  });
+  if (!(args.allowMfaEnrollment === true && !supabaseUser.mfaEnabled)) {
+    assertPlatformMfa({
+      sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+      principalId: principal.id,
+    });
+  }
 
   return {
     platformPrincipalId: principal.id,
