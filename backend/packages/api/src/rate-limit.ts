@@ -167,13 +167,23 @@ export async function enforceMfaAttemptRateLimit(args: {
 }): Promise<void> {
   if (!args.tenantId || !args.actorId)
     throw new RateLimitConfigurationError("Missing MFA rate-limit identity.");
+  await countMfaAttempt(`tenant:mfa_attempt:${identity([args.tenantId, args.actorId])}`);
+}
+
+/** The same budget for a platform operator's codes, keyed by the operator. */
+export async function enforcePlatformMfaAttemptRateLimit(args: {
+  principalId: string;
+  requestId: string;
+}): Promise<void> {
+  if (!args.principalId) throw new RateLimitConfigurationError("Missing MFA rate-limit identity.");
+  await countMfaAttempt(`platform:mfa_attempt:${identity([args.principalId])}`);
+}
+
+async function countMfaAttempt(key: string): Promise<void> {
   const store = resolveRateLimitStore();
   let hit;
   try {
-    hit = await store.hit(
-      `tenant:mfa_attempt:${identity([args.tenantId, args.actorId])}`,
-      MFA_ATTEMPT_WINDOW_MS,
-    );
+    hit = await store.hit(key, MFA_ATTEMPT_WINDOW_MS);
   } catch {
     throw new AtlasHttpError({
       code: "SERVICE_UNAVAILABLE",

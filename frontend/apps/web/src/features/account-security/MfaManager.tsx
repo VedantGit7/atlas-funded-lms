@@ -18,12 +18,35 @@ function formatError(error: unknown): string {
   return "Something went wrong. Please try again.";
 }
 
+export type MfaApiPaths = Readonly<{
+  factors: string;
+  verify: string;
+  /** Without it, factors cannot be removed here. */
+  factor?: (factorId: string) => string;
+}>;
+
+const ACCOUNT_MFA_API: MfaApiPaths = {
+  factors: "/api/v1/me/security/mfa",
+  verify: "/api/v1/me/security/mfa/verify",
+  factor: (factorId) => `/api/v1/me/security/mfa/${factorId}`,
+};
+
 type MfaManagerProps = Readonly<{
   highlight?: boolean;
   continuePath?: string | null;
+  /**
+   * The routes it calls. The platform console sets up an operator's first
+   * factor through its own (PLATFORM_MFA_API in PlatformMfaSetup). Keep them
+   * literal: the API-closure check reads the paths from source.
+   */
+  api?: MfaApiPaths;
 }>;
 
-export function MfaManager({ highlight = false, continuePath = null }: MfaManagerProps) {
+export function MfaManager({
+  highlight = false,
+  continuePath = null,
+  api = ACCOUNT_MFA_API,
+}: MfaManagerProps) {
   const { classes } = useAccountTheme();
   const [factors, setFactors] = useState<MfaFactor[]>([]);
   const [enroll, setEnroll] = useState<{
@@ -38,11 +61,9 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
   const enrolling = useRef(false);
 
   const loadFactors = useCallback(async () => {
-    const response = await clientApi.get<{ data: { factors: MfaFactor[] } }>(
-      "/api/v1/me/security/mfa",
-    );
+    const response = await clientApi.get<{ data: { factors: MfaFactor[] } }>(api.factors);
     setFactors(response.data.factors);
-  }, []);
+  }, [api.factors]);
 
   useEffect(() => {
     void loadFactors().catch(() => {
@@ -62,7 +83,7 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
       setQrCode(() => MfaQrCode);
       const response = await clientApi.post<{
         data: { factorId: string; qrCode: string; secret: string; uri: string };
-      }>("/api/v1/me/security/mfa", {}, "mfa-enroll");
+      }>(api.factors, {}, "mfa-enroll");
       setEnroll({
         factorId: response.data.factorId,
         qrCode: response.data.qrCode,
@@ -81,11 +102,7 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
     setBusy(true);
     setMessage(null);
     try {
-      await clientApi.post(
-        "/api/v1/me/security/mfa/verify",
-        { factorId: enroll.factorId, code },
-        "mfa-verify-enroll",
-      );
+      await clientApi.post(api.verify, { factorId: enroll.factorId, code }, "mfa-verify-enroll");
       setEnroll(null);
       setCode("");
       setMessage("Two-factor authentication enabled.");
@@ -98,10 +115,11 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
   }
 
   async function removeFactor(factorId: string) {
+    if (!api.factor) return;
     setBusy(true);
     setMessage(null);
     try {
-      await clientApi.delete(`/api/v1/me/security/mfa/${factorId}`, "mfa-unenroll");
+      await clientApi.delete(api.factor(factorId), "mfa-unenroll");
       await loadFactors();
     } catch (error) {
       setMessage(formatError(error));
@@ -111,6 +129,7 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
   }
 
   const hasVerifiedFactor = factors.some((factor) => factor.status === "verified");
+  const allowRemove = api.factor !== undefined;
 
   return (
     <SecuritySection
@@ -137,7 +156,7 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
             role="switch"
             aria-checked={hasVerifiedFactor}
             aria-label="Toggle two-factor authentication"
-            disabled={busy || Boolean(enroll)}
+            disabled={busy || Boolean(enroll) || (hasVerifiedFactor && !allowRemove)}
             onClick={() => {
               if (hasVerifiedFactor && factors[0]) {
                 void removeFactor(factors[0].id);
@@ -163,16 +182,18 @@ export function MfaManager({ highlight = false, continuePath = null }: MfaManage
                 <span className="text-sm text-[var(--acct-on-surface)]">
                   {factor.friendlyName ?? factor.factorType} ({factor.status})
                 </span>
-                <button
-                  type="button"
-                  className={classes.outlineButton}
-                  disabled={busy}
-                  onClick={() => {
-                    void removeFactor(factor.id);
-                  }}
-                >
-                  Remove
-                </button>
+                {allowRemove ? (
+                  <button
+                    type="button"
+                    className={classes.outlineButton}
+                    disabled={busy}
+                    onClick={() => {
+                      void removeFactor(factor.id);
+                    }}
+                  >
+                    Remove
+                  </button>
+                ) : null}
               </li>
             ))}
           </ul>

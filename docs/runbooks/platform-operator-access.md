@@ -53,6 +53,32 @@ COMMIT;
 
 The initial grantor is null because no application operator exists yet; the executing DBA and approval must be retained in the maintenance change record. Do not claim that a direct SQL change was written through the application's audit hash chain.
 
+### On a fresh environment
+
+A new environment has no tenant, so the first operator gets an account, a grant and MFA without one.
+
+1. **Create the sign-in.** In the environment's Supabase project, open **Authentication → Users → Add user → Create new user**. Enter the operator's email and a strong password, and tick **Auto Confirm User**.
+2. **Sign in on the platform host** (`https://<PLATFORM_HOST>/login`). The sign-in records the account in `auth_principals`. The console then answers "Platform access denied", because there is no grant yet.
+3. **Grant it.** As the database owner, find the principal and run the bootstrap above with its id. On Coolify, the owner's URL is in `/root/atlas/<env>/migrate.env` ("Databases and migrations" in `coolify-deployment.md`):
+
+   ```bash
+   ENV=staging
+   docker run --rm -it --network atlas-$ENV \
+     -v /data/coolify/ssl/coolify-ca.crt:/ca.crt:ro -e PGSSLROOTCERT=/ca.crt \
+     --env-file /root/atlas/$ENV/migrate.env \
+     postgres:16-alpine sh -c 'psql "$DATABASE_URL"'
+   ```
+
+   ```sql
+   SELECT id, global_status FROM auth_principals WHERE email_normalized = lower('<email>');
+   ```
+
+4. **Set up MFA in the console.** Reload `https://<PLATFORM_HOST>/platform`. With a grant but no verified factor, the console shows **Set up multi-factor authentication**: scan the code, enter the 6-digit code, then continue. Verifying the factor completes MFA for that session.
+
+   The platform's enrollment routes (`/api/v1/platform/me/security/mfa`) are the only platform routes that accept a password-only session, and only while the operator has no verified factor (route metadata `mfa: "enrollment"`). After that they need aal2 like every other platform route, so a stolen password cannot add a factor.
+
+5. **Create the first tenant** in the console (**Provision**, `/platform/tenants/new`).
+
 ## Recovery when operator history exists
 
 There is no environment bypass or temporary emergency-access feature. First determine whether the revocation was intentional. An authorized DBA may create a new, narrowly scoped database grant after a recorded review of identity, reason, role and environment. Retain all revoked rows; never clear their revocation fields, and never reinstate every address from old deployment configuration. Record the executing administrator in the maintenance log and `granted_by_principal_id` when an application principal represents that administrator.

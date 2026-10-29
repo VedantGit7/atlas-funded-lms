@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { loadPlatformShellContext } from "../../lib/server/platform-shell-context";
 import { PlatformConsoleShellClient } from "./PlatformConsoleShellClient";
+import { PlatformMfaSetup } from "./PlatformMfaSetup";
 
 type PlatformConsoleShellGateProps = {
   children: ReactNode;
@@ -31,6 +32,10 @@ export async function PlatformConsoleShellGate({ children }: PlatformConsoleShel
         <p className="mt-4 text-xs opacity-70">Request ID: {context.requestId}</p>
       </main>
     );
+  }
+
+  if (context.kind === "mfa_setup_required") {
+    return <PlatformMfaSetup requestId={context.requestId} />;
   }
 
   if (context.kind === "session_assurance_blocked") {

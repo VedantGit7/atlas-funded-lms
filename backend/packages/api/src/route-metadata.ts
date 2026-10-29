@@ -103,4 +103,11 @@ export type PlatformRouteMetadata = {
   rateLimit: string;
   idempotency: "none" | "required";
   reasonRequired?: boolean;
+  /**
+   * Every platform route requires an MFA-verified (aal2) session, except
+   * "enrollment": an operator who has no verified factor yet may call it with
+   * a password-only session, to set up their first one. Only the platform MFA
+   * enrollment routes declare it (tests/unit/platform/platform-mfa-enrollment.test.ts).
+   */
+  mfa?: "enrollment";
 };
