@@ -17,7 +17,7 @@ pnpm release:health
 - Health endpoint returns 2xx twice
 - Each response includes unique `x-request-id`
 - Response JSON matches approved health schema
-- Required release identifier match on both responses
+- Required release identifier match on both responses. The identifier is `RELEASE_VERSION` when set, otherwise the first 12 characters of `RELEASE_SHA` (`readReleaseIdentifier`), so pass `--expected-release` in that form: `79ae02550896`, not the full 40-character SHA.
 - Prints rollback target from `RELEASE_SHA` or `RELEASE_VERSION`
 - Emits machine-readable JSON
 
