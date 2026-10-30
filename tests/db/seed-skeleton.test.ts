@@ -17,6 +17,15 @@ describe("seed skeleton", () => {
     ]);
   });
 
+  // The migration job runs the global group on every deploy, so it must stay
+  // platform-wide: a tenant's roles and workflows are provisioned once, and a
+  // tenant's own changes to them must survive deploys.
+  it("limits the global group, which every deploy seeds, to platform-wide catalogues", () => {
+    expect(
+      seedModules.filter((module) => module.groups.includes("global")).map((module) => module.name),
+    ).toEqual(["00-permissions", "02-feature-flags", "04-item-types", "05-extension-points"]);
+  });
+
   it("runs all seeds in dry-run mode without inserting rows", async () => {
     const results = await runSeeds("all", "dry-run");
 

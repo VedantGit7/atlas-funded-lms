@@ -4,10 +4,21 @@
 // environment's private Docker network:
 //
 //   migrate      provision an empty database, or bring one this job
-//                provisioned up to this release (provision-database.mjs)
+//                provisioned up to this release (provision-database.mjs),
+//                then seed the global catalogues (below)
+//   catalogues   seed the platform-wide catalogues this release's code relies
+//                on: permissions, feature flags, item types, extension points
+//                (backend/prisma/seeds/global-catalogues.ts, bundled into
+//                seed/ by deploy/managed-node/build-migrate-seed.mjs). Only
+//                adds what is missing, and never touches a tenant.
 //   login-roles  set the runtime logins' passwords (setup-login-roles.mjs)
 //   verify       report what the release relies on: owner, logins, migrations,
-//                row-level security, and that this connection uses TLS
+//                row-level security, the permission catalogue, and that this
+//                connection uses TLS
+//
+// Until 30 October 2026 nothing seeded the catalogues outside local databases:
+// staging had 1 of 135 permissions, so every permission check failed and no
+// tenant member could use the academy.
 //
 // DATABASE_URL is the database owner's login with sslmode=verify-full, and
 // NODE_EXTRA_CA_CERTS names the CA that signed the server's certificate, as
@@ -32,8 +43,8 @@ function fail(message) {
   process.exit(1);
 }
 
-if (!["migrate", "login-roles", "verify"].includes(command ?? ""))
-  fail("usage: migration-job.mjs migrate|login-roles|verify");
+if (!["migrate", "catalogues", "login-roles", "verify"].includes(command ?? ""))
+  fail("usage: migration-job.mjs migrate|catalogues|login-roles|verify");
 if (!databaseUrl) fail("DATABASE_URL (the owner login) is required");
 const url = new URL(databaseUrl);
 if (url.searchParams.get("sslmode") !== "verify-full")
@@ -54,6 +65,20 @@ function run(script, args = []) {
     cwd: repoRoot,
     stdio: "inherit",
     env: { ...process.env, DIRECT_DATABASE_URL: prismaUrl() },
+  });
+}
+
+/**
+ * The seed connects through the app's own database package, which verifies the
+ * server with NODE_EXTRA_CA_CERTS like the services do. Its catalogue writes
+ * run in the platform scope, here on the owner's login as well.
+ */
+function seedCatalogues() {
+  process.stdout.write("Seeding the global catalogues.\n");
+  execFileSync(process.execPath, [join(repoRoot, "seed", "global-catalogues.mjs")], {
+    cwd: repoRoot,
+    stdio: "inherit",
+    env: { ...process.env, PLATFORM_DATABASE_URL: databaseUrl },
   });
 }
 
@@ -81,6 +106,9 @@ if (command === "migrate") {
   );
   run("scripts/db/provision-database.mjs", release ? ["--release"] : []);
   run("scripts/guards/check-migrate-status.mjs");
+  seedCatalogues();
+} else if (command === "catalogues") {
+  seedCatalogues();
 } else if (command === "login-roles") {
   run("scripts/db/setup-login-roles.mjs");
 } else {
@@ -92,6 +120,10 @@ if (command === "migrate") {
            (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
               where n.nspname = 'public' and c.relkind in ('r', 'p') and c.relrowsecurity) as rls_tables,
            (select count(*)::int from pg_policies where schemaname = 'public') as policies,
+           (select count(*)::int from permissions) as permissions,
+           (select count(distinct rp.permission_key)::int from role_permissions rp
+              where not exists (select 1 from permissions p where p.key = rp.permission_key))
+             as role_permissions_outside_catalogue,
            (select json_agg(json_build_object('role', rolname, 'login', rolcanlogin,
                     'superuser', rolsuper, 'bypassrls', rolbypassrls,
                     'connect', has_database_privilege(rolname, current_database(), 'CONNECT'))
@@ -103,6 +135,9 @@ if (command === "migrate") {
   const unsafeLogin = logins.some((login) => login.superuser || login.bypassrls);
   // A login that can't connect fails every request, so it fails here first.
   const lockedOut = logins.length < 2 || logins.some((login) => !login.login || !login.connect);
-  if (!report.tls || report.unfinished > 0 || unsafeLogin || lockedOut)
+  // A role granted a permission the catalogue lacks is refused it on every
+  // request (UNKNOWN_PERMISSION): the catalogues were never seeded.
+  const catalogueGap = report.role_permissions_outside_catalogue > 0;
+  if (!report.tls || report.unfinished > 0 || unsafeLogin || lockedOut || catalogueGap)
     fail("verification failed: see the report above");
 }

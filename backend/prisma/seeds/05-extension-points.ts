@@ -75,7 +75,7 @@ async function seedExtensionPoints(): Promise<SeedResult> {
 
 export const extensionPointsSeed: SeedModule = {
   name: "05-extension-points",
-  groups: ["all", "catalogues"],
+  groups: ["all", "catalogues", "global"],
   async run(ctx): Promise<SeedResult> {
     if (ctx.mode === "dry-run") {
       ctx.log("[05-extension-points] dry-run only; no rows inserted");

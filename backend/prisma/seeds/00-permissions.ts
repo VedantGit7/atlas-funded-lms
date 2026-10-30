@@ -3,7 +3,7 @@ import { emptySeedResult, type SeedModule, type SeedResult } from "./types";
 
 export const permissionsSeed: SeedModule = {
   name: "00-permissions",
-  groups: ["all", "catalogues"],
+  groups: ["all", "catalogues", "global"],
   async run(ctx): Promise<SeedResult> {
     if (ctx.mode === "dry-run") {
       ctx.log("[00-permissions] dry-run only; no rows inserted");
