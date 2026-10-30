@@ -110,6 +110,7 @@ describe("POST /api/v1/public/auth/signup", () => {
     mockEnsureSelfServiceLearnerMembership.mockResolvedValue({
       membershipId: "new-membership",
       created: true,
+      status: "ACTIVE",
     });
     mockSignupWithPassword.mockResolvedValue({
       status: "verification_required",

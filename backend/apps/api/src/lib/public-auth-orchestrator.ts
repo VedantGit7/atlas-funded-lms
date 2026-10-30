@@ -79,6 +79,7 @@ async function buildResponse(args: {
             authPrincipalId: principalId,
           })
         : null;
+      let pendingInvitation: { id: string; status: "INVITED" } | null = null;
 
       // Open self-service signup: a fully authenticated user (including one who
       // just cleared an MFA challenge) with no membership becomes an ACTIVE
@@ -97,6 +98,12 @@ async function buildResponse(args: {
           authPrincipalId: principalId,
         });
 
+        // An invitation to this email is waiting: answer INVITED_MEMBERSHIP so
+        // the person goes on to accept it, rather than "no access".
+        if (!membership && provisioned?.status === "INVITED") {
+          pendingInvitation = { id: provisioned.membershipId, status: "INVITED" };
+        }
+
         if (provisioned?.created && membership) {
           await applyReferralForNewMembership(tx, {
             refereeMembershipId: membership.id,
@@ -110,7 +117,9 @@ async function buildResponse(args: {
         tenantId: args.tenantId,
         serviceStatus: args.serviceStatus,
         mfaEnabled: args.mfaEnabled,
-        membership: membership ? { id: membership.id, status: membership.status } : null,
+        membership: membership
+          ? { id: membership.id, status: membership.status }
+          : pendingInvitation,
       });
     },
   );

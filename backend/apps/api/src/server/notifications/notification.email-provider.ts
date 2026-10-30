@@ -59,6 +59,39 @@ function resolveMode(env: NodeJS.ProcessEnv): ProviderMode {
   return "unconfigured";
 }
 
+/**
+ * NOTIFICATION_EMAIL_FROM is a mailbox: a bare address or "Name <address>"
+ * (the deployment contract checks which).
+ */
+export function parseSenderMailbox(value: string): { name: string; address: string } {
+  const trimmed = value.trim();
+  const open = trimmed.lastIndexOf("<");
+  if (open >= 0 && trimmed.endsWith(">")) {
+    return {
+      name: trimmed
+        .slice(0, open)
+        .trim()
+        .replace(/^"(.*)"$/, "$1"),
+      address: trimmed.slice(open + 1, -1).trim(),
+    };
+  }
+  return { name: "", address: trimmed };
+}
+
+/**
+ * The sender for a tenant's email channel. An empty From email is left empty,
+ * so the provider sends as NOTIFICATION_EMAIL_FROM. Never a made-up address:
+ * ZeptoMail refuses any sender it has not verified (staging, 25 October 2026).
+ */
+export function channelSender(channel: { fromName: string; fromEmail: string }): {
+  fromName: string;
+  fromEmail: string;
+} {
+  const fromEmail = channel.fromEmail.trim();
+  const fromName = channel.fromName.trim();
+  return { fromName: fromName || (fromEmail ? "Academy" : ""), fromEmail };
+}
+
 /** Logs a redacted line and discards. Never selectable in production. */
 class MockEmailProvider implements EmailProvider {
   isConfigured(): boolean {
@@ -137,12 +170,16 @@ export class SmtpEmailProvider implements EmailProvider {
       throw new OutboxDeliveryError("permanent", "EMAIL_PROVIDER_NOT_CONFIGURED");
     }
 
-    const defaultFrom = this.env["NOTIFICATION_EMAIL_FROM"] ?? "";
-    const fromEmail = input.fromEmail?.trim() || defaultFrom;
+    // With no sender address of its own, the email goes out as the platform
+    // sender, under the tenant's name if it set one, else the platform's.
+    const platformSender = parseSenderMailbox(this.env["NOTIFICATION_EMAIL_FROM"] ?? "");
+    const tenantEmail = input.fromEmail?.trim() ?? "";
+    const fromEmail = tenantEmail || platformSender.address;
+    const fromName = input.fromName?.trim() || (tenantEmail ? "" : platformSender.name);
     // An object, not a '"Name" <address>' string: nodemailer then encodes the
     // display name instead of re-parsing it, so a quote or bracket in a
     // tenant's sender name cannot change the sender address.
-    const from = input.fromName ? { name: input.fromName, address: fromEmail } : fromEmail;
+    const from = fromName ? { name: fromName, address: fromEmail } : fromEmail;
 
     const transporter = this.getTransporter();
     const messageId =

@@ -47,12 +47,19 @@ type InviteAcceptCardProps = Readonly<{
 type InviteSession = {
   accessToken: string;
   refreshToken: string;
+  type: string | null;
 };
 
 // Invitation links land here with the invited account's session in the URL hash
 // (Supabase implicit flow for invite / magic-link). We read it once on mount so
 // the invitee finishes as their own account, regardless of who was signed in.
 const INVITE_HASH_TYPES = new Set(["invite", "magiclink", "signup", "recovery"]);
+
+// An email that already has an account gets a sign-in link (magiclink) rather
+// than an invite. That person signs in to accept: setting a password from the
+// link fails for anyone with MFA, whose link session is only aal1, and would
+// replace a password they already have (staging, 30 October 2026).
+const EXISTING_ACCOUNT_HASH_TYPE = "magiclink";
 
 function readInviteSessionFromHash(): InviteSession | null {
   if (typeof window === "undefined") {
@@ -76,7 +83,7 @@ function readInviteSessionFromHash(): InviteSession | null {
     return null;
   }
 
-  return { accessToken, refreshToken: refreshToken ?? "" };
+  return { accessToken, refreshToken: refreshToken ?? "", type };
 }
 
 function emailsMismatch(signedInEmail: string | null, invitedEmail: string | null): boolean {
@@ -210,6 +217,7 @@ export function InviteAcceptCard({
     initialState,
   );
   const [inviteSession, setInviteSession] = useState<InviteSession | null>(null);
+  const [existingAccount, setExistingAccount] = useState(false);
   const [hashChecked, setHashChecked] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -217,7 +225,11 @@ export function InviteAcceptCard({
   useEffect(() => {
     const session = readInviteSessionFromHash();
     if (session) {
-      setInviteSession(session);
+      if (session.type === EXISTING_ACCOUNT_HASH_TYPE) {
+        setExistingAccount(true);
+      } else {
+        setInviteSession(session);
+      }
       // Strip the tokens from the address bar so they aren't left in history.
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
     }
@@ -272,7 +284,10 @@ export function InviteAcceptCard({
         <h2 id="invite-missing-token" className={headlineClass}>
           Invitation required
         </h2>
-        <p className={`mt-2 ${bodyClass}`}>This page requires a valid invitation link.</p>
+        <p className={`mt-2 ${bodyClass}`}>
+          Open the link in your latest invitation email to accept it. If the link has expired, ask
+          your academy administrator to send a new invitation.
+        </p>
       </CardShell>
     );
   }
@@ -388,6 +403,32 @@ export function InviteAcceptCard({
     const loginHref = `/login?next=${encodeURIComponent(`/invite/accept?token=${token}`)}`;
     const signupHref = `/signup?inviteToken=${encodeURIComponent(token)}`;
 
+    if (existingAccount) {
+      return (
+        <CardShell labelledBy="invite-existing-account">
+          <h2 id="invite-existing-account" className={`mb-2 ${headlineClass}`}>
+            Sign in to accept
+          </h2>
+          <p className={bodyClass}>
+            {invitedEmail ? (
+              <>
+                <span className="font-bold text-[var(--fba-tx)]">{invitedEmail}</span> already has
+                an account.
+              </>
+            ) : (
+              "This email already has an account."
+            )}{" "}
+            Sign in with it, and you&apos;ll come back here to accept the invitation.
+          </p>
+          <div className="mt-6 flex flex-col gap-3">
+            <Link href={loginHref} className={primaryButtonClass}>
+              Sign in
+            </Link>
+          </div>
+        </CardShell>
+      );
+    }
+
     return (
       <CardShell labelledBy="invite-auth-required">
         <h2 id="invite-auth-required" className={`mb-2 ${headlineClass}`}>
@@ -457,13 +498,16 @@ export function InviteAcceptCard({
         </div>
       ) : (
         <>
-          {/* The invited-session path returned above, so this always renders. */}
-          <p
-            className={`mt-4 rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-bg2)] p-3 text-[13px] ${bodyClass}`}
-          >
-            Open the invitation link from your email on this device to set your password. If you
-            already completed that step, click below to finish accepting.
-          </p>
+          {/* The invited-session path returned above. An existing account has
+              no password to set, so it skips straight to accepting. */}
+          {existingAccount ? null : (
+            <p
+              className={`mt-4 rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-bg2)] p-3 text-[13px] ${bodyClass}`}
+            >
+              Open the invitation link from your email on this device to set your password. If you
+              already completed that step, click below to finish accepting.
+            </p>
+          )}
 
           {acceptState.message ? (
             <p

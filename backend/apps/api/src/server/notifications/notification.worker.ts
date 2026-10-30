@@ -8,7 +8,7 @@ import {
 } from "@atlas/membership";
 import type { NotificationPreferenceCategory } from "@atlas/membership";
 import { notificationQueuedOutboxPayloadSchema } from "./notification.dto";
-import { getEmailProvider } from "./notification.email-provider";
+import { channelSender, getEmailProvider } from "./notification.email-provider";
 import {
   CERTIFICATE_ISSUED_EVENT,
   CERTIFICATE_REVOKED_EVENT,
@@ -423,8 +423,7 @@ export async function processNotificationQueuedEvent(
       body: prepared.rendered.body,
       requestId: ctx.requestId,
       idempotencyKey,
-      fromName: prepared.channel.fromName.trim() || "Academy",
-      fromEmail: prepared.channel.fromEmail.trim() || "noreply@localhost.test",
+      ...channelSender(prepared.channel),
       replyToEmail: prepared.channel.replyToEmail,
     });
   } catch (error) {

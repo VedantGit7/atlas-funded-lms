@@ -55,7 +55,24 @@ async function request<T>(
     credentials: "same-origin",
   });
 
-  const body: unknown = await response.json();
+  // Read as text first: a proxy's error page is HTML, and parsing it as JSON
+  // put "Unexpected token '<'" in place of the real failure (staging, 30
+  // October 2026). Same handling as the tenant client.
+  const rawBody = await response.text();
+  let body: unknown;
+
+  try {
+    body = rawBody ? (JSON.parse(rawBody) as unknown) : null;
+  } catch {
+    throw new PlatformApiError(
+      "INVALID_RESPONSE",
+      response.status,
+      createUuid(),
+      response.status >= 500
+        ? "The server returned an unexpected error. Check the API logs for details."
+        : "Request failed.",
+    );
+  }
 
   if (!response.ok) {
     const envelope = body as ApiErrorBody;

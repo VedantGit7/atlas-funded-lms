@@ -113,6 +113,7 @@ describe("POST /api/v1/public/auth/login", () => {
     mockEnsureSelfServiceLearnerMembership.mockResolvedValue({
       membershipId: "new-membership",
       created: true,
+      status: "ACTIVE",
     });
     mockLoginWithPassword.mockResolvedValue({
       status: "signed_in",
@@ -250,6 +251,22 @@ describe("POST /api/v1/public/auth/login", () => {
       }),
     );
     expect(body).toEqual({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
+  });
+
+  it("answers an invitee who signs in before accepting with their invitation", async () => {
+    mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
+    mockFindMembership.mockResolvedValue(null);
+    mockEnsureSelfServiceLearnerMembership.mockResolvedValue({
+      membershipId: "invited-membership",
+      created: false,
+      status: "INVITED",
+    });
+
+    await POST(createRequest({ email: "owner@example.com", password: "password123" }));
+
+    expect(mockBuildPublicAuthResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ membership: { id: "invited-membership", status: "INVITED" } }),
+    );
   });
 
   it("does not provision a membership while an MFA challenge is still pending", async () => {

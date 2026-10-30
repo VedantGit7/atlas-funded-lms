@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockFindMembership = vi.fn();
 const mockInsertMembership = vi.fn();
+const mockFindPendingInvitation = vi.fn();
 const mockCreateProfile = vi.fn();
 const mockAssignLearnerRole = vi.fn();
 
 vi.mock("../../../backend/packages/membership/src/membership.repository", () => ({
   findMembershipByPrincipal: (...args: unknown[]) => mockFindMembership(...args),
   insertActiveSelfServiceMembership: (...args: unknown[]) => mockInsertMembership(...args),
+  findPendingInvitationByEmail: (...args: unknown[]) => mockFindPendingInvitation(...args),
 }));
 
 vi.mock("../../../backend/packages/membership/src/member-profile.repository", () => ({
@@ -43,6 +45,8 @@ describe("ensureSelfServiceLearnerMembership", () => {
   beforeEach(() => {
     mockFindMembership.mockReset();
     mockInsertMembership.mockReset();
+    mockFindPendingInvitation.mockReset();
+    mockFindPendingInvitation.mockResolvedValue(null);
     mockCreateProfile.mockReset();
     mockAssignLearnerRole.mockReset();
   });
@@ -62,7 +66,7 @@ describe("ensureSelfServiceLearnerMembership", () => {
       displayName: "New Learner",
     });
 
-    expect(result).toEqual({ membershipId: "new-membership", created: true });
+    expect(result).toEqual({ membershipId: "new-membership", created: true, status: "ACTIVE" });
     expect(mockInsertMembership).toHaveBeenCalledOnce();
     expect(mockAssignLearnerRole).toHaveBeenCalledWith(
       expect.objectContaining({ tenantId: "tenant-id", membershipId: "new-membership" }),
@@ -77,7 +81,11 @@ describe("ensureSelfServiceLearnerMembership", () => {
 
     const result = await ensureSelfServiceLearnerMembership(baseArgs);
 
-    expect(result).toEqual({ membershipId: "existing-membership", created: false });
+    expect(result).toEqual({
+      membershipId: "existing-membership",
+      created: false,
+      status: "SUSPENDED",
+    });
     expect(mockInsertMembership).not.toHaveBeenCalled();
     expect(mockAssignLearnerRole).not.toHaveBeenCalled();
     expect(mockCreateProfile).not.toHaveBeenCalled();
@@ -88,9 +96,41 @@ describe("ensureSelfServiceLearnerMembership", () => {
 
     const result = await ensureSelfServiceLearnerMembership(baseArgs);
 
-    expect(result).toEqual({ membershipId: "existing-membership", created: false });
+    expect(result).toEqual({
+      membershipId: "existing-membership",
+      created: false,
+      status: "INVITED",
+    });
     expect(mockInsertMembership).not.toHaveBeenCalled();
     expect(mockAssignLearnerRole).not.toHaveBeenCalled();
+  });
+
+  it("never makes a learner of someone with an invitation waiting for their email", async () => {
+    // The invited row has no principal until accepted, so the principal lookup
+    // misses it. Signing in before accepting made the invitee a learner, and
+    // accepting then failed on the duplicate membership (staging, 30 Oct 2026).
+    mockFindMembership.mockResolvedValueOnce(null);
+    mockFindPendingInvitation.mockResolvedValueOnce({
+      id: "invited-membership",
+      tenantId: "tenant-id",
+      authPrincipalId: null,
+      status: "INVITED",
+      invitedEmailNormalized: "learner@example.com",
+    });
+
+    const result = await ensureSelfServiceLearnerMembership(baseArgs);
+
+    expect(result).toEqual({
+      membershipId: "invited-membership",
+      created: false,
+      status: "INVITED",
+    });
+    expect(mockFindPendingInvitation).toHaveBeenCalledWith(
+      expect.objectContaining({ tenantId: "tenant-id", email: "learner@example.com" }),
+    );
+    expect(mockInsertMembership).not.toHaveBeenCalled();
+    expect(mockAssignLearnerRole).not.toHaveBeenCalled();
+    expect(mockCreateProfile).not.toHaveBeenCalled();
   });
 
   it("is a no-op (created: false) when the membership already exists and is ACTIVE", async () => {
@@ -98,7 +138,11 @@ describe("ensureSelfServiceLearnerMembership", () => {
 
     const result = await ensureSelfServiceLearnerMembership(baseArgs);
 
-    expect(result).toEqual({ membershipId: "existing-membership", created: false });
+    expect(result).toEqual({
+      membershipId: "existing-membership",
+      created: false,
+      status: "ACTIVE",
+    });
     expect(mockInsertMembership).not.toHaveBeenCalled();
   });
 
@@ -111,7 +155,7 @@ describe("ensureSelfServiceLearnerMembership", () => {
 
     const result = await ensureSelfServiceLearnerMembership(baseArgs);
 
-    expect(result).toEqual({ membershipId: "raced-membership", created: false });
+    expect(result).toEqual({ membershipId: "raced-membership", created: false, status: "ACTIVE" });
     expect(mockAssignLearnerRole).not.toHaveBeenCalled();
     expect(mockCreateProfile).not.toHaveBeenCalled();
   });

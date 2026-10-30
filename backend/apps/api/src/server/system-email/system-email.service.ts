@@ -1,7 +1,7 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
-import { getEmailProvider } from "../notifications/notification.email-provider";
+import { channelSender, getEmailProvider } from "../notifications/notification.email-provider";
 import { notificationRepository } from "../notifications/notification.repository";
 import { notificationSourceEventKeySchema } from "../notifications/notification.dto";
 import { readTenantEmailChannel } from "../tenant-settings/tenant-settings.service";
@@ -238,11 +238,7 @@ async function resolveTransactionalSender(tx: TenantTx) {
       "Configure Transactional Email channel settings (From name and From email) before sending.",
     );
   }
-  return {
-    fromName: fromName || "Academy",
-    fromEmail: fromEmail || "noreply@localhost.test",
-    replyToEmail: channel.replyToEmail,
-  };
+  return { ...channelSender(channel), replyToEmail: channel.replyToEmail };
 }
 
 export async function testSystemEmail(

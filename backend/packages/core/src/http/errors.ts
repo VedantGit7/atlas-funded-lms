@@ -15,6 +15,9 @@ export type AtlasErrorCode =
   | "MEMBERSHIP_REMOVED"
   | "INVALID_INVITATION"
   | "INVITATION_EMAIL_MISMATCH"
+  // 409. The invitee already belongs to the tenant, so accepting would make a
+  // second membership; an admin changes their role instead.
+  | "ALREADY_MEMBER"
   | "PERMISSION_DENIED"
   // 403, but distinct from PERMISSION_DENIED: the caller has the permission and
   // is missing a second factor, so the client can offer enrolment instead of a
