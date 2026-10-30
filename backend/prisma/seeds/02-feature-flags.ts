@@ -71,7 +71,7 @@ async function seedFeatureFlags(): Promise<SeedResult> {
 
 export const featureFlagsSeed: SeedModule = {
   name: "02-feature-flags",
-  groups: ["all", "catalogues"],
+  groups: ["all", "catalogues", "global"],
   async run(ctx): Promise<SeedResult> {
     if (ctx.mode === "dry-run") {
       ctx.log("[02-feature-flags] dry-run only; no rows inserted");

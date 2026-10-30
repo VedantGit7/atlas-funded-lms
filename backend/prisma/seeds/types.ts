@@ -1,6 +1,17 @@
 export type SeedMode = "dry-run" | "apply";
 
-export type SeedGroup = "all" | "catalogues" | "tenants" | "fundedbeyond" | "smoke-tenant";
+/**
+ * `global` is the platform-wide catalogues only (permissions, feature flags, item
+ * types, extension points): what the migration job seeds on every deploy.
+ * `catalogues` adds the per-tenant roles and workflows, for local databases.
+ */
+export type SeedGroup =
+  | "all"
+  | "catalogues"
+  | "global"
+  | "tenants"
+  | "fundedbeyond"
+  | "smoke-tenant";
 
 export type SeedContext = {
   mode: SeedMode;

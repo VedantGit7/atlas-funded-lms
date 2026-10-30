@@ -165,7 +165,7 @@ async function seedItemTypes(): Promise<SeedResult> {
 
 export const itemTypesSeed: SeedModule = {
   name: "04-item-types",
-  groups: ["all", "catalogues"],
+  groups: ["all", "catalogues", "global"],
   async run(ctx): Promise<SeedResult> {
     if (ctx.mode === "dry-run") {
       ctx.log("[04-item-types] dry-run only; no rows inserted");

@@ -55,6 +55,12 @@ FROM dependencies AS worker-build
 COPY --from=source /source/ ./
 RUN node deploy/managed-node/build-worker.mjs /worker
 
+# The migration job's global catalogue seed, bundled the same way
+# (build-migrate-seed.mjs): the job image ships no workspace source.
+FROM dependencies AS migrate-seed-build
+COPY --from=source /source/ ./
+RUN node deploy/managed-node/build-migrate-seed.mjs /seed
+
 # playwright-core is the one package the bundle loads at runtime: it starts
 # Chromium from files beside its own code. The locked version, from installed
 # dependencies rather than source, so source edits keep the browser layer.
@@ -147,12 +153,13 @@ CMD ["node", "frontend/apps/web/server.js"]
 # The database migration job (scripts/db/migration-job.mjs): run once per
 # deploy with the owner's login, then exits. The dependency layer already has
 # the Prisma CLI and pg; this adds the schema, migrations, SQL and the scripts
-# that apply them, nothing from the apps.
+# that apply them, and the bundled catalogue seed, nothing from the apps.
 FROM dependencies AS migrate
 COPY --from=source /source/backend/prisma.config.ts ./backend/prisma.config.ts
 COPY --from=source /source/backend/prisma ./backend/prisma
 COPY --from=source /source/scripts/db ./scripts/db
 COPY --from=source /source/scripts/guards/check-migrate-status.mjs ./scripts/guards/check-migrate-status.mjs
+COPY --from=migrate-seed-build /seed/ ./seed/
 ENV NODE_ENV=production
 # The job runs Prisma with node (scripts/db/prisma-cli.mjs), so like the other
 # runtime images it ships no package manager: npm and pnpm each bundle their

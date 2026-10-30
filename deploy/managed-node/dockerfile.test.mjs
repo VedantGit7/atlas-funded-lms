@@ -104,13 +104,19 @@ test("ships the migration job with only what applying the schema needs, unprivil
   const copied = migrate.lines
     .filter((line) => line.startsWith("COPY"))
     .map((line) => line.split(/\s+/)[2]);
-  // The schema, migrations, SQL and their scripts; never the apps or the whole tree.
+  // The schema, migrations, SQL and their scripts, and the bundled catalogue
+  // seed; never the apps or the whole tree.
   assert.deepEqual(copied.sort(), [
+    "/seed/",
     "/source/backend/prisma",
     "/source/backend/prisma.config.ts",
     "/source/scripts/db",
     "/source/scripts/guards/check-migrate-status.mjs",
   ]);
+  assert.ok(migrate.lines.includes("COPY --from=migrate-seed-build /seed/ ./seed/"));
+  const seedBuild = byName.get("migrate-seed-build");
+  assert.equal(seedBuild?.base, "dependencies");
+  assert.ok(seedBuild.lines.includes("RUN node deploy/managed-node/build-migrate-seed.mjs /seed"));
   // No package manager: npm and pnpm bundle copies of packages outside the
   // lockfile, and the job runs Prisma with node.
   const cleanup = migrate.lines.find((line) => line.startsWith("RUN rm -rf"));
