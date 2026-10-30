@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockFindInvited = vi.fn();
 const mockActivate = vi.fn();
+const mockFindByPrincipal = vi.fn();
 const mockCreateProfile = vi.fn();
 const mockWriteAudit = vi.fn();
 
 vi.mock("../../../backend/packages/membership/src/membership.repository", () => ({
   findInvitedMembershipByTokenHash: (...args: unknown[]) => mockFindInvited(...args),
   activateInvitedMembership: (...args: unknown[]) => mockActivate(...args),
+  findMembershipByPrincipal: (...args: unknown[]) => mockFindByPrincipal(...args),
 }));
 
 vi.mock("../../../backend/packages/membership/src/member-profile.repository", () => ({
@@ -24,6 +26,8 @@ describe("acceptInvitation", () => {
   beforeEach(() => {
     mockFindInvited.mockReset();
     mockActivate.mockReset();
+    mockFindByPrincipal.mockReset();
+    mockFindByPrincipal.mockResolvedValue(null);
     mockCreateProfile.mockReset();
     mockWriteAudit.mockReset();
   });
@@ -133,5 +137,33 @@ describe("acceptInvitation", () => {
     expect(String((rejection as { message?: string }).message)).not.toContain(
       "invited@example.com",
     );
+  });
+
+  it("refuses a principal who already belongs to the tenant instead of failing on the key", async () => {
+    mockFindInvited.mockResolvedValue({
+      id: "membership-id",
+      tenantId: "tenant-id",
+      authPrincipalId: null,
+      status: "INVITED",
+      invitedEmailNormalized: "member@example.com",
+    });
+    mockFindByPrincipal.mockResolvedValue({
+      id: "learner-membership-id",
+      tenantId: "tenant-id",
+      authPrincipalId: "principal-id",
+      status: "ACTIVE",
+      invitedEmailNormalized: "member@example.com",
+    });
+
+    await expect(
+      acceptInvitation({
+        tx: { $queryRaw: vi.fn() },
+        tenantId: "tenant-id",
+        requestId: "req_00000000-0000-4000-8000-000000000000",
+        input: { token: "invite-token-abcdefghijklmnopqrstuvwxyz123456" },
+        principal: { id: "principal-id", emailNormalized: "member@example.com" },
+      }),
+    ).rejects.toMatchObject({ code: "ALREADY_MEMBER", status: 409 });
+    expect(mockActivate).not.toHaveBeenCalled();
   });
 });

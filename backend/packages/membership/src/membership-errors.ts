@@ -57,6 +57,15 @@ export function invitationEmailMismatch(): AtlasHttpError {
   });
 }
 
+export function alreadyMember(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "ALREADY_MEMBER",
+    status: 409,
+    message:
+      "This account already belongs to this academy. Ask an administrator to change your role instead.",
+  });
+}
+
 export function permissionDeniedBeforeCan(): AtlasHttpError {
   return new AtlasHttpError({
     code: "PERMISSION_DENIED",

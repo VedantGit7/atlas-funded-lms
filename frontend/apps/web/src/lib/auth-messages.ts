@@ -70,6 +70,8 @@ export function safeInvitationErrorMessage(code: string | undefined): string {
       return "This invitation is invalid or has expired.";
     case "INVITATION_EMAIL_MISMATCH":
       return "Sign in with the email address that received this invitation.";
+    case "ALREADY_MEMBER":
+      return "This account already belongs to this academy. Ask an administrator to change your role instead.";
     case "AUTH_REQUIRED":
       return "Sign in or create an account to accept this invitation.";
     case "INVITATION_EXPIRED":

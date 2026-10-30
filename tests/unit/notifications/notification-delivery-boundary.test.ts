@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type * as EmailProviderModule from "../../../backend/apps/api/src/server/notifications/notification.email-provider";
 import {
   handleNotificationQueuedOutboxEvent,
   notificationQueuedOutboxHandlers,
@@ -36,9 +37,13 @@ vi.mock("../../../backend/apps/api/src/server/tenant-settings/tenant-settings.se
     replyToEmail: null,
   }),
 }));
-vi.mock("../../../backend/apps/api/src/server/notifications/notification.email-provider", () => ({
-  getEmailProvider: () => ({ isConfigured: () => true, send: state.sends }),
-}));
+vi.mock(
+  "../../../backend/apps/api/src/server/notifications/notification.email-provider",
+  async (importOriginal) => ({
+    channelSender: (await importOriginal<typeof EmailProviderModule>()).channelSender,
+    getEmailProvider: () => ({ isConfigured: () => true, send: state.sends }),
+  }),
+);
 vi.mock("../../../backend/apps/api/src/server/notifications/notification.repository", () => ({
   notificationRepository: {
     findDispatchByIdempotencyKey: async () => {

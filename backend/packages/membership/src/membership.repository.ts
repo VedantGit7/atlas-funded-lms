@@ -164,6 +164,42 @@ export async function insertActiveSelfServiceMembership(args: {
   return rows[0] ?? null;
 }
 
+/**
+ * A live invitation to this email that nobody has accepted yet. Invitations
+ * are matched by email until accepted, because the invited row has no
+ * principal until then.
+ */
+export async function findPendingInvitationByEmail(args: {
+  tx: Tx;
+  tenantId: string;
+  email: string;
+}): Promise<MembershipProjection | null> {
+  const rows = await args.tx.$queryRaw<MembershipRow[]>`
+    select
+      id::text,
+      tenant_id::text,
+      auth_principal_id::text,
+      status::text,
+      invited_email_normalized::text
+    from memberships
+    where tenant_id = ${args.tenantId}::uuid
+      and status = 'INVITED'
+      and auth_principal_id is null
+      and invited_email_normalized = ${args.email.trim().toLowerCase()}
+      and invite_expires_at > now()
+      and accepted_at is null
+    order by created_at desc
+    limit 1
+  `;
+
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+
+  return mapMembershipRow(row);
+}
+
 export async function findInvitedMembershipByTokenHash(args: {
   tx: Tx;
   tenantId: string;

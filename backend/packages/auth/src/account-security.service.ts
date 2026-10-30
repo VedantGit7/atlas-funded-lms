@@ -1,6 +1,7 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { authRequired, passwordPolicyRejection } from "./auth-errors";
 import { assertPasswordNotBreached } from "./password-policy";
+import { createSupabasePublicServerClient } from "./supabase-server";
 import { requireSupabaseUserClient } from "./supabase-user-client";
 
 function mapAuthError(): never {
@@ -14,7 +15,12 @@ function mapAuthError(): never {
 export async function changePassword(args: { currentPassword: string; newPassword: string }) {
   const { supabase, email } = await requireSupabaseUserClient();
 
-  const signIn = await supabase.auth.signInWithPassword({
+  // Check the current password on a client of its own. Signing in on the
+  // user's client would swap its session for a new one at aal1, and Supabase
+  // then refuses the update for anyone with MFA (insufficient_aal; staging, 30
+  // October 2026). The check's own session is signed out straight away.
+  const verifier = createSupabasePublicServerClient();
+  const signIn = await verifier.auth.signInWithPassword({
     email,
     password: args.currentPassword,
   });
@@ -22,6 +28,7 @@ export async function changePassword(args: { currentPassword: string; newPasswor
   if (signIn.error) {
     mapAuthError();
   }
+  await verifier.auth.signOut({ scope: "local" });
 
   await assertPasswordNotBreached(args.newPassword);
 

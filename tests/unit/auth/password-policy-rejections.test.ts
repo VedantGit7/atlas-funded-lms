@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   setSession: vi.fn(),
   updateUser: vi.fn(),
+  signOut: vi.fn(),
   getSession: vi.fn(),
   upsert: vi.fn(),
   redirect: vi.fn(),

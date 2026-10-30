@@ -2,7 +2,7 @@ import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { notificationRepository } from "../notifications/notification.repository";
-import { getEmailProvider } from "../notifications/notification.email-provider";
+import { channelSender, getEmailProvider } from "../notifications/notification.email-provider";
 import { readTenantEmailChannel } from "../tenant-settings/tenant-settings.service";
 import { assertMarketingEmailEnabled, isMarketingEmailEnabled } from "./marketing-email-sending";
 import {
@@ -108,12 +108,8 @@ async function requireSenderChannel(tx: TenantTx) {
     );
   }
   if (!fromEmail || !fromName) {
-    // Allow local/mock delivery with safe defaults when channel settings are empty.
-    return {
-      fromName: fromName || "Academy",
-      fromEmail: fromEmail || "noreply@localhost.test",
-      replyToEmail: channel.replyToEmail,
-    };
+    // An empty sender falls back to the provider's NOTIFICATION_EMAIL_FROM.
+    return { ...channelSender(channel), replyToEmail: channel.replyToEmail };
   }
   return channel;
 }

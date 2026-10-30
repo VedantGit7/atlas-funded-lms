@@ -17,10 +17,12 @@ function isExistingSupabaseUserError(error: {
   );
 }
 
+// 503, not 502: a proxy may answer a 502 with its own HTML page, which hid
+// this message from the console (staging, 30 October 2026).
 function invitationEmailFailed(): never {
   throw new AtlasHttpError({
-    code: "INTERNAL_ERROR",
-    status: 502,
+    code: "SERVICE_UNAVAILABLE",
+    status: 503,
     message: "Unable to send the invitation email. Please try again.",
   });
 }

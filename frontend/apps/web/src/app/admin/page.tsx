@@ -75,11 +75,20 @@ function formatCount(value: number): string {
  * Soft-fail helper: one flaky secondary call must not blank the dashboard.
  * Auth failures still propagate so the page can render the denied gate.
  */
+/**
+ * A summary that fails reads as unavailable. Only an auth refusal denies the
+ * whole dashboard: a feature the plan leaves out (ENTITLEMENT_REQUIRED) hides
+ * its own card, not every other one (staging, 30 October 2026).
+ */
 async function softGet<T>(promise: Promise<T>): Promise<T | null> {
   try {
     return await promise;
   } catch (error) {
-    if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
+    if (
+      error instanceof ServerApiError &&
+      (error.status === 401 || error.status === 403) &&
+      error.code !== "ENTITLEMENT_REQUIRED"
+    ) {
       throw error;
     }
     return null;

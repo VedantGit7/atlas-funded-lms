@@ -2,9 +2,10 @@ import { createHash } from "node:crypto";
 import {
   activateInvitedMembership,
   findInvitedMembershipByTokenHash,
+  findMembershipByPrincipal,
 } from "./membership.repository";
 import { createMemberProfileIfMissing } from "./member-profile.repository";
-import { invalidInvitation, invitationEmailMismatch } from "./membership-errors";
+import { alreadyMember, invalidInvitation, invitationEmailMismatch } from "./membership-errors";
 import { writeMembershipStatusAudit } from "./membership-audit.repository";
 import type { AcceptInvitationInput } from "./schemas";
 
@@ -61,6 +62,17 @@ export async function acceptInvitation(args: {
     invited.invitedEmailNormalized !== args.principal.emailNormalized
   ) {
     throw invitationEmailMismatch();
+  }
+
+  // A principal has one membership per tenant. Accepting while holding one
+  // failed on the unique key as an INTERNAL_ERROR (staging, 30 October 2026).
+  const existing = await findMembershipByPrincipal({
+    tx: args.tx,
+    tenantId: args.tenantId,
+    authPrincipalId: args.principal.id,
+  });
+  if (existing) {
+    throw alreadyMember();
   }
 
   const activated = await activateInvitedMembership({

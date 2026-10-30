@@ -102,6 +102,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
             authPrincipalId: principalId,
           })
         : null;
+      let pendingInvitation: { id: string; status: "INVITED" } | null = null;
 
       // Open self-service signup: a verified user signing in for the first
       // time with no membership becomes an ACTIVE learner. Gated on a fully
@@ -124,6 +125,12 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
           authPrincipalId: principalId,
         });
 
+        // An invitation to this email is waiting: answer INVITED_MEMBERSHIP so
+        // the person goes on to accept it, rather than "no access".
+        if (!membership && provisioned?.status === "INVITED") {
+          pendingInvitation = { id: provisioned.membershipId, status: "INVITED" };
+        }
+
         if (provisioned?.created && membership) {
           await applyReferralForNewMembership(tx, {
             refereeMembershipId: membership.id,
@@ -137,7 +144,9 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         tenantId: tenant.tenantId,
         serviceStatus: result.status,
         mfaEnabled: result.identity.mfaEnabled,
-        membership: membership ? { id: membership.id, status: membership.status } : null,
+        membership: membership
+          ? { id: membership.id, status: membership.status }
+          : pendingInvitation,
       });
     },
   );

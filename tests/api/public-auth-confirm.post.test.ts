@@ -129,6 +129,7 @@ describe("POST /api/v1/public/auth/confirm", () => {
     mockEnsureSelfServiceLearnerMembership.mockResolvedValue({
       membershipId: "new-membership",
       created: true,
+      status: "ACTIVE",
     });
     mockEstablishSessionFromTokenHash.mockResolvedValue(signedInResult);
     mockBuildPublicAuthResponse.mockResolvedValue({

@@ -1,7 +1,9 @@
 import type { TenantTx } from "@atlas/db";
 import { assignDefaultLearnerRole } from "@atlas/access";
+import type { MembershipStatus } from "./types";
 import {
   findMembershipByPrincipal,
+  findPendingInvitationByEmail,
   insertActiveSelfServiceMembership,
 } from "./membership.repository";
 import { createMemberProfileIfMissing } from "./member-profile.repository";
@@ -9,6 +11,8 @@ import { createMemberProfileIfMissing } from "./member-profile.repository";
 export type SelfServiceMembershipResult = {
   membershipId: string;
   created: boolean;
+  /** INVITED when an invitation to this email is waiting to be accepted. */
+  status: MembershipStatus;
 };
 
 /**
@@ -20,6 +24,11 @@ export type SelfServiceMembershipResult = {
  *   REMOVED), it is left untouched and returned with `created: false`. This
  *   guarantees we never reactivate a suspended/removed member and never bypass
  *   the invitation acceptance flow for an invited member.
+ * - If a live invitation to this email is waiting, nothing is created and that
+ *   invitation is returned (status INVITED). The invited row has no principal
+ *   until it is accepted, so the check above misses it; without this, an
+ *   invitee who signed in before accepting became a learner, and accepting
+ *   then failed on the duplicate membership (staging, 30 October 2026).
  * - Otherwise a new ACTIVE membership is created, the default `learner` role is
  *   assigned, and a member profile is created with the provided display name.
  *
@@ -40,7 +49,17 @@ export async function ensureSelfServiceLearnerMembership(args: {
   });
 
   if (existing) {
-    return { membershipId: existing.id, created: false };
+    return { membershipId: existing.id, created: false, status: existing.status };
+  }
+
+  const invitation = await findPendingInvitationByEmail({
+    tx: args.tx,
+    tenantId: args.tenantId,
+    email: args.email,
+  });
+
+  if (invitation) {
+    return { membershipId: invitation.id, created: false, status: "INVITED" };
   }
 
   const inserted = await insertActiveSelfServiceMembership({
@@ -57,7 +76,7 @@ export async function ensureSelfServiceLearnerMembership(args: {
       tenantId: args.tenantId,
       authPrincipalId: args.authPrincipalId,
     });
-    return current ? { membershipId: current.id, created: false } : null;
+    return current ? { membershipId: current.id, created: false, status: current.status } : null;
   }
 
   await assignDefaultLearnerRole({
@@ -73,5 +92,5 @@ export async function ensureSelfServiceLearnerMembership(args: {
     displayName: args.displayName ?? null,
   });
 
-  return { membershipId: inserted.id, created: true };
+  return { membershipId: inserted.id, created: true, status: "ACTIVE" };
 }
