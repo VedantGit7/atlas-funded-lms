@@ -47,7 +47,10 @@ export function PlatformTenantDetailClient({
   const [entitlements, setEntitlements] = useState<EntitlementDraft[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogKind, setDialogKind] = useState<"lifecycle" | "entitlements" | null>(null);
+  const [dialogKind, setDialogKind] = useState<
+    "lifecycle" | "entitlements" | "owner-invitation" | null
+  >(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<"suspend" | "resume" | "archive" | null>(null);
   const [actionReason, setActionReason] = useState("");
 
@@ -112,6 +115,26 @@ export function PlatformTenantDetailClient({
     setActionReason("");
   }
 
+  async function sendOwnerInvitation() {
+    if (!reason) return;
+    setError(null);
+    setNotice(null);
+    try {
+      const sent = await platformApi.post<{ data: { email: string; hostname: string } }>(
+        `/api/v1/platform/tenants/${tenantId}/owner-invitation`,
+        { reason: actionReason },
+        reason,
+        "platform-owner-invitation",
+      );
+      setNotice(`Owner invitation sent to ${sent.data.email}, linking to ${sent.data.hostname}.`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Request failed.");
+    }
+    setDialogOpen(false);
+    setDialogKind(null);
+    setActionReason("");
+  }
+
   async function saveEntitlements() {
     if (!reason) return;
 
@@ -148,6 +171,11 @@ export function PlatformTenantDetailClient({
         {error ? (
           <p role="alert" className="text-sm text-destructive">
             {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p role="status" className="text-sm">
+            {notice}
           </p>
         ) : null}
 
@@ -246,7 +274,23 @@ export function PlatformTenantDetailClient({
               >
                 Archive
               </button>
+              <button
+                type="button"
+                className="rounded border border-border px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
+                disabled={state !== "ACTIVE"}
+                onClick={() => {
+                  setPendingAction(null);
+                  setDialogKind("owner-invitation");
+                  setDialogOpen(true);
+                }}
+              >
+                Send owner invitation
+              </button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Emails the owner a new invitation link to the tenant's live primary domain. Any
+              earlier link stops working.
+            </p>
           </div>
         ) : null}
 
@@ -297,7 +341,9 @@ export function PlatformTenantDetailClient({
         title={
           dialogKind === "entitlements"
             ? "Confirm entitlement changes"
-            : `Confirm tenant ${pendingAction ?? "action"}`
+            : dialogKind === "owner-invitation"
+              ? "Send owner invitation"
+              : `Confirm tenant ${pendingAction ?? "action"}`
         }
         description="This action requires an operational reason of at least 10 characters."
         value={actionReason}
@@ -309,6 +355,9 @@ export function PlatformTenantDetailClient({
           }
           if (dialogKind === "entitlements") {
             void saveEntitlements();
+          }
+          if (dialogKind === "owner-invitation") {
+            void sendOwnerInvitation();
           }
         }}
         onCancel={() => {

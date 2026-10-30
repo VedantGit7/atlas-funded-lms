@@ -17,6 +17,7 @@ export {
   resumeTenant,
   archiveTenant,
 } from "./services/platform-tenant-lifecycle.service";
+export { issueTenantOwnerInvitation } from "./services/platform-tenant-owner-invitation.service";
 export {
   openPlatformSupportSession,
   listActivePlatformSupportSessions,
