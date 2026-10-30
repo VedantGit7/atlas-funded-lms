@@ -23,6 +23,18 @@ type TenantDetail = {
   provisioning: { latestStatus: string | null };
 };
 
+type TenantDomain = {
+  id: string;
+  hostname: string;
+  type: string;
+  status: string;
+  isPrimary: boolean;
+  verification: { txtName: string; txtValue: string } | null;
+  failureReason: string | null;
+};
+
+type DomainAction = { kind: "add" } | { kind: "verify" | "primary"; domain: TenantDomain };
+
 type ProvisioningJob = {
   id: string;
   status: string;
@@ -39,16 +51,19 @@ export function PlatformTenantDetailClient({
   capabilities: PlatformCapabilityProjection;
 }) {
   const { reason, isValid } = usePlatformReason();
-  const [tab, setTab] = useState<"overview" | "lifecycle" | "provisioning" | "entitlements">(
-    "overview",
-  );
+  const [tab, setTab] = useState<
+    "overview" | "lifecycle" | "domains" | "provisioning" | "entitlements"
+  >("overview");
+  const [domains, setDomains] = useState<TenantDomain[]>([]);
+  const [newHostname, setNewHostname] = useState("");
+  const [domainAction, setDomainAction] = useState<DomainAction | null>(null);
   const [tenant, setTenant] = useState<TenantDetail | null>(null);
   const [jobs, setJobs] = useState<ProvisioningJob[]>([]);
   const [entitlements, setEntitlements] = useState<EntitlementDraft[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogKind, setDialogKind] = useState<
-    "lifecycle" | "entitlements" | "owner-invitation" | null
+    "lifecycle" | "entitlements" | "owner-invitation" | "domain" | null
   >(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<"suspend" | "resume" | "archive" | null>(null);
@@ -66,6 +81,10 @@ export function PlatformTenantDetailClient({
         `/api/v1/platform/tenants/${tenantId}/provisioning`,
         reason,
       ),
+      platformApi.get<{ data: TenantDomain[] }>(
+        `/api/v1/platform/tenants/${tenantId}/domains`,
+        reason,
+      ),
       capabilities.canEntitlementManage
         ? platformApi.get<{
             data: Array<{
@@ -77,10 +96,11 @@ export function PlatformTenantDetailClient({
           }>(`/api/v1/platform/tenants/${tenantId}/entitlements`, reason)
         : Promise.resolve({ data: [] }),
     ])
-      .then(([detail, provisioning, entitlementResponse]) => {
+      .then(([detail, provisioning, domainResponse, entitlementResponse]) => {
         if (!cancelled) {
           setTenant(detail.data);
           setJobs(provisioning.data);
+          setDomains(domainResponse.data);
           setEntitlements(entitlementResponse.data.map(entitlementFromApi));
         }
       })
@@ -135,6 +155,59 @@ export function PlatformTenantDetailClient({
     setActionReason("");
   }
 
+  async function runDomainAction(action: DomainAction) {
+    if (!reason) return;
+    setError(null);
+    setNotice(null);
+    try {
+      if (action.kind === "add") {
+        const added = await platformApi.post<{ data: TenantDomain }>(
+          `/api/v1/platform/tenants/${tenantId}/domains`,
+          { hostname: newHostname, reason: actionReason },
+          reason,
+          "platform-domain-add",
+        );
+        setNewHostname("");
+        setNotice(`Added ${added.data.hostname}. Create its TXT record, then verify it.`);
+      } else if (action.kind === "verify") {
+        const checked = await platformApi.post<{ data: TenantDomain }>(
+          `/api/v1/platform/tenants/${tenantId}/domains/${action.domain.id}/verify`,
+          { reason: actionReason },
+          reason,
+          "platform-domain-verify",
+        );
+        setNotice(
+          checked.data.status === "ACTIVE"
+            ? `${checked.data.hostname} is verified and active.`
+            : `${checked.data.hostname} is not verified: ${checked.data.failureReason ?? "unknown reason"}`,
+        );
+      } else {
+        await platformApi.post(
+          `/api/v1/platform/tenants/${tenantId}/domains/${action.domain.id}/primary`,
+          { reason: actionReason },
+          reason,
+          "platform-domain-primary",
+        );
+        setNotice(`${action.domain.hostname} is now the primary domain.`);
+      }
+      const [listed, detail] = await Promise.all([
+        platformApi.get<{ data: TenantDomain[] }>(
+          `/api/v1/platform/tenants/${tenantId}/domains`,
+          reason,
+        ),
+        platformApi.get<{ data: TenantDetail }>(`/api/v1/platform/tenants/${tenantId}`, reason),
+      ]);
+      setDomains(listed.data);
+      setTenant(detail.data);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Request failed.");
+    }
+    setDialogOpen(false);
+    setDialogKind(null);
+    setDomainAction(null);
+    setActionReason("");
+  }
+
   async function saveEntitlements() {
     if (!reason) return;
 
@@ -180,29 +253,31 @@ export function PlatformTenantDetailClient({
         ) : null}
 
         <div className="flex flex-wrap gap-2" role="tablist">
-          {(["overview", "lifecycle", "provisioning", "entitlements"] as const).map((value) => {
-            if (value === "lifecycle" && !canLifecycle) return null;
-            if (value === "entitlements" && !canEntitlements) return null;
-            return (
-              <button
-                key={value}
-                type="button"
-                role="tab"
-                aria-selected={tab === value}
-                className={`rounded border px-3 py-1 text-sm ${
-                  tab === value
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border hover:bg-muted"
-                }`}
-                onClick={() => {
-                  setTab(value);
-                }}
-              >
-                {value[0]?.toUpperCase()}
-                {value.slice(1)}
-              </button>
-            );
-          })}
+          {(["overview", "lifecycle", "domains", "provisioning", "entitlements"] as const).map(
+            (value) => {
+              if (value === "lifecycle" && !canLifecycle) return null;
+              if (value === "entitlements" && !canEntitlements) return null;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === value}
+                  className={`rounded border px-3 py-1 text-sm ${
+                    tab === value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border hover:bg-muted"
+                  }`}
+                  onClick={() => {
+                    setTab(value);
+                  }}
+                >
+                  {value[0]?.toUpperCase()}
+                  {value.slice(1)}
+                </button>
+              );
+            },
+          )}
         </div>
 
         {tab === "overview" && tenant ? (
@@ -294,6 +369,110 @@ export function PlatformTenantDetailClient({
           </div>
         ) : null}
 
+        {tab === "domains" ? (
+          <div className="space-y-4">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-border text-left">
+                  <th className="py-2 pr-4">Domain</th>
+                  <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Verification</th>
+                  <th className="py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {domains.map((domain) => (
+                  <tr key={domain.id} className="border-b border-border align-top">
+                    <td className="py-2 pr-4">
+                      {domain.hostname}
+                      {domain.isPrimary ? " (primary)" : ""}
+                      <div className="text-xs text-muted-foreground">{domain.type}</div>
+                    </td>
+                    <td className="py-2 pr-4">
+                      {domain.status}
+                      {domain.failureReason ? (
+                        <div className="text-xs text-destructive">{domain.failureReason}</div>
+                      ) : null}
+                    </td>
+                    <td className="py-2 pr-4 text-xs">
+                      {domain.verification ? (
+                        <>
+                          <div>TXT name: {domain.verification.txtName}</div>
+                          <div className="break-all">TXT value: {domain.verification.txtValue}</div>
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="py-2">
+                      {canLifecycle && domain.verification ? (
+                        <button
+                          type="button"
+                          className="mr-2 rounded border border-border px-2 py-1 text-xs hover:bg-muted"
+                          onClick={() => {
+                            setDomainAction({ kind: "verify", domain });
+                            setDialogKind("domain");
+                            setDialogOpen(true);
+                          }}
+                        >
+                          Verify
+                        </button>
+                      ) : null}
+                      {canLifecycle && domain.status === "ACTIVE" && !domain.isPrimary ? (
+                        <button
+                          type="button"
+                          className="rounded border border-border px-2 py-1 text-xs hover:bg-muted"
+                          onClick={() => {
+                            setDomainAction({ kind: "primary", domain });
+                            setDialogKind("domain");
+                            setDialogOpen(true);
+                          }}
+                        >
+                          Make primary
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {canLifecycle ? (
+              <form
+                className="flex flex-wrap items-end gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  setDomainAction({ kind: "add" });
+                  setDialogKind("domain");
+                  setDialogOpen(true);
+                }}
+              >
+                <label className="text-sm">
+                  Custom domain
+                  <input
+                    className="ml-2 rounded border border-border px-2 py-1"
+                    placeholder="academy.example.com"
+                    value={newHostname}
+                    onChange={(event) => {
+                      setNewHostname(event.target.value);
+                    }}
+                    required
+                  />
+                </label>
+                <button
+                  type="submit"
+                  className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground hover:opacity-90"
+                >
+                  Add domain
+                </button>
+              </form>
+            ) : null}
+            <p className="text-xs text-muted-foreground">
+              A custom domain goes live once its TXT record is verified. Make it primary so
+              invitation and email links use it.
+            </p>
+          </div>
+        ) : null}
+
         {tab === "provisioning" ? (
           <table className="w-full border-collapse text-sm">
             <thead>
@@ -343,7 +522,13 @@ export function PlatformTenantDetailClient({
             ? "Confirm entitlement changes"
             : dialogKind === "owner-invitation"
               ? "Send owner invitation"
-              : `Confirm tenant ${pendingAction ?? "action"}`
+              : dialogKind === "domain"
+                ? domainAction?.kind === "add"
+                  ? `Add ${newHostname}`
+                  : domainAction?.kind === "verify"
+                    ? `Verify ${domainAction.domain.hostname}`
+                    : `Make ${domainAction?.domain.hostname ?? "domain"} primary`
+                : `Confirm tenant ${pendingAction ?? "action"}`
         }
         description="This action requires an operational reason of at least 10 characters."
         value={actionReason}
@@ -359,11 +544,15 @@ export function PlatformTenantDetailClient({
           if (dialogKind === "owner-invitation") {
             void sendOwnerInvitation();
           }
+          if (dialogKind === "domain" && domainAction) {
+            void runDomainAction(domainAction);
+          }
         }}
         onCancel={() => {
           setDialogOpen(false);
           setDialogKind(null);
           setPendingAction(null);
+          setDomainAction(null);
         }}
       />
     </PlatformReasonGate>

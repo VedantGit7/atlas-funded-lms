@@ -78,7 +78,12 @@ A new environment has no tenant, so the first operator gets an account, a grant 
    The platform's enrollment routes (`/api/v1/platform/me/security/mfa`) are the only platform routes that accept a password-only session, and only while the operator has no verified factor (route metadata `mfa: "enrollment"`). After that they need aal2 like every other platform route, so a stolen password cannot add a factor.
 
 5. **Create the first tenant** in the console (**Provision**, `/platform/tenants/new`), with the owner's email. Provisioning creates the owner's invitation, carrying the `owner` role, but does not send it: a new tenant has no live domain to link to yet.
-6. **Invite the owner** once the tenant's primary domain is active: open the tenant, then **Lifecycle → Send owner invitation**, with a reason. The owner gets an email (Supabase's invitation, or a sign-in link for an existing account) that opens `https://<primary domain>/invite/accept`. Sending again replaces the link. The action refuses while the tenant is not active, has no active primary domain (or only a local one outside development), or has no pending owner invitation.
+6. **Give it its domain.** Provisioning's own domain is `<slug>.<TENANT_BASE_DOMAIN>`, which is not a public address unless that setting names one. In the tenant's **Domains** tab:
+   1. **Add domain** with the tenant's public hostname. It is added pending, with a TXT record to create.
+   2. In the hostname's DNS (Cloudflare), create that TXT record: name `_atlas-verify.<hostname>`, the value shown. Also point the hostname at the server (`coolify-deployment.md`, "TLS and DNS").
+   3. **Verify.** The API looks the record up through public resolvers. A match makes the domain active, so requests for it reach the tenant. Otherwise the reason is shown, and Verify can be repeated once DNS has published the record.
+   4. **Make primary**, so invitation and email links use it.
+7. **Invite the owner** once the tenant's primary domain is active: open the tenant, then **Lifecycle → Send owner invitation**, with a reason. The owner gets an email (Supabase's invitation, or a sign-in link for an existing account) that opens `https://<primary domain>/invite/accept`. Sending again replaces the link. The action refuses while the tenant is not active, has no active primary domain (or only a local one outside development), or has no pending owner invitation.
 
 ## Recovery when operator history exists
 

@@ -19,6 +19,14 @@ export {
 } from "./services/platform-tenant-lifecycle.service";
 export { issueTenantOwnerInvitation } from "./services/platform-tenant-owner-invitation.service";
 export {
+  listPlatformTenantDomains,
+  addPlatformTenantCustomDomain,
+  verifyPlatformTenantDomain,
+  setPlatformTenantPrimaryDomain,
+  normalizeCustomHostname,
+  type ResolveTxt,
+} from "./services/platform-tenant-domain.service";
+export {
   openPlatformSupportSession,
   listActivePlatformSupportSessions,
 } from "./services/platform-support-session.service";

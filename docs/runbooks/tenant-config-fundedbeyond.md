@@ -35,13 +35,12 @@ Production apply is refused by default. Execute the printed plan through approve
 
 ## Production domain: `academy.fundedbeyond.com`
 
-1. Ensure `branding.custom_domain.enable` entitlement is granted.
-2. Create domain record via approved domain admin API/console using manifest hostname.
-3. Complete DNS TXT verification per existing `tenant_domains` workflow.
-4. Complete Vercel domain verification and SSL issuance (manual provider operations).
-5. Activate domain only after verification status confirms success.
-6. Record audit review and run tenant smoke on the branded host.
-7. Rollback: disable domain, revert DNS, keep tenant data intact; no fallback tenant behavior.
+1. In the platform console, open the tenant's **Domains** tab and add `academy.fundedbeyond.com`. It is added pending, with a TXT record to create.
+2. In Cloudflare, create the TXT record shown (`_atlas-verify.academy.fundedbeyond.com`). Point `academy` at the server with a proxied record, and add it to the Full (strict) and HTTPS rules (`coolify-deployment.md`, "TLS and DNS"). The origin certificate already covers it.
+3. **Verify** in the console. The domain becomes active only when the TXT record matches.
+4. **Make primary**, so invitation and email links use it. Then send the owner invitation (`platform-operator-access.md`, "On a fresh environment").
+5. Record audit review and run tenant smoke on the branded host.
+6. Rollback: disable domain, revert DNS, keep tenant data intact; no fallback tenant behavior.
 
 ## Legal / readiness gate
 
