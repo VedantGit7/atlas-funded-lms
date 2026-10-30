@@ -77,7 +77,8 @@ A new environment has no tenant, so the first operator gets an account, a grant 
 
    The platform's enrollment routes (`/api/v1/platform/me/security/mfa`) are the only platform routes that accept a password-only session, and only while the operator has no verified factor (route metadata `mfa: "enrollment"`). After that they need aal2 like every other platform route, so a stolen password cannot add a factor.
 
-5. **Create the first tenant** in the console (**Provision**, `/platform/tenants/new`).
+5. **Create the first tenant** in the console (**Provision**, `/platform/tenants/new`), with the owner's email. Provisioning creates the owner's invitation, carrying the `owner` role, but does not send it: a new tenant has no live domain to link to yet.
+6. **Invite the owner** once the tenant's primary domain is active: open the tenant, then **Lifecycle → Send owner invitation**, with a reason. The owner gets an email (Supabase's invitation, or a sign-in link for an existing account) that opens `https://<primary domain>/invite/accept`. Sending again replaces the link. The action refuses while the tenant is not active, has no active primary domain (or only a local one outside development), or has no pending owner invitation.
 
 ## Recovery when operator history exists
 

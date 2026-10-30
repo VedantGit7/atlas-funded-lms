@@ -1,7 +1,11 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { PlatformTx } from "@atlas/db";
 import { seedTenantDefaultWorkflowDefinitions } from "@atlas/db/seed/tenant-workflow-definitions";
-import { seedTenantRolePermissions, seedTenantSystemRoles } from "@atlas/access";
+import {
+  assignSystemRoleToMembership,
+  seedTenantRolePermissions,
+  seedTenantSystemRoles,
+} from "@atlas/access";
 
 export async function seedTenantSystemRolesFromCatalogue(
   tx: PlatformTx,
@@ -28,10 +32,13 @@ export async function seedOwnerInvitationFromExistingHelper(
   },
 ): Promise<void> {
   const invitedEmailNormalized = args.email.trim().toLowerCase();
+  // Not delivered: a new tenant has no live domain for the link yet. The
+  // console's "Send owner invitation" (sendTenantOwnerInvitation) issues a
+  // fresh token and emails it once the tenant has one.
   const inviteToken = randomBytes(32).toString("base64url");
   const inviteTokenHash = createHash("sha256").update(inviteToken, "utf8").digest("hex");
 
-  await tx.$executeRaw`
+  const rows = await tx.$queryRaw<Array<{ id: string }>>`
     INSERT INTO memberships (
       id,
       tenant_id,
@@ -54,5 +61,19 @@ export async function seedOwnerInvitationFromExistingHelper(
       now(),
       now()
     )
+    RETURNING id::text
   `;
+  const membershipId = rows[0]?.id;
+  if (!membershipId) throw new Error("Owner invitation was not created.");
+
+  // Accepting an invitation only activates the membership; roles come with the
+  // invitation, as a member invite carries the learner role. Without this the
+  // owner would join with no permissions.
+  await assignSystemRoleToMembership({
+    tx,
+    tenantId: args.tenantId,
+    membershipId,
+    roleKey: "owner",
+    assignedByMembershipId: null,
+  });
 }

@@ -90,6 +90,15 @@ export const TenantLifecycleRequestSchema = z.object({
   reason: z.string().min(10).max(1000),
 });
 
+/** Where the owner's invitation went; the link itself is only in the email. */
+export const TenantOwnerInvitationResponseSchema = z.object({
+  data: z.object({
+    email: z.string(),
+    hostname: z.string(),
+    expiresAt: z.iso.datetime().nullable(),
+  }),
+});
+
 export const ProvisioningJobViewSchema = z.object({
   id: z.uuid(),
   tenantId: z.uuid(),
