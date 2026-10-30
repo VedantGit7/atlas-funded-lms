@@ -90,6 +90,36 @@ export const TenantLifecycleRequestSchema = z.object({
   reason: z.string().min(10).max(1000),
 });
 
+export const PlatformTenantDomainParamsSchema = z.object({
+  id: z.uuid(),
+  domainId: z.uuid(),
+});
+
+export const PlatformTenantDomainViewSchema = z.object({
+  id: z.uuid(),
+  hostname: z.string(),
+  type: z.string(),
+  status: z.string(),
+  isPrimary: z.boolean(),
+  /** The TXT record to create, until the domain is verified. */
+  verification: z.object({ txtName: z.string(), txtValue: z.string() }).nullable(),
+  failureReason: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+});
+
+export const PlatformTenantDomainListResponseSchema = z.object({
+  data: z.array(PlatformTenantDomainViewSchema),
+});
+
+export const PlatformTenantDomainResponseSchema = z.object({
+  data: PlatformTenantDomainViewSchema,
+});
+
+export const AddPlatformTenantDomainRequestSchema = z.object({
+  hostname: z.string().min(3).max(253),
+  reason: z.string().min(10).max(1000),
+});
+
 /** Where the owner's invitation went; the link itself is only in the email. */
 export const TenantOwnerInvitationResponseSchema = z.object({
   data: z.object({
