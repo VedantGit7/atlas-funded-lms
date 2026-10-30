@@ -16,6 +16,7 @@ export default async function TransactionalEmailPageRoute() {
           endpoint="/api/v1/tenant-settings/transactional-email"
           idempotencyPrefix="transactional-email-update"
           initial={response.data}
+          showTestEmail
         />
       </AdminPageGate>
     );

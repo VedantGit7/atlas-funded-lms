@@ -10,6 +10,7 @@ const requestId = "req_branding_publish_test";
 const {
   getTenantBrandingMock,
   getTenantThemeMock,
+  upsertTenantThemeDraftMock,
   insertTenantBrandingVersionMock,
   insertTenantThemeVersionMock,
   markBrandingPublishedMock,
@@ -19,6 +20,7 @@ const {
 } = vi.hoisted(() => ({
   getTenantBrandingMock: vi.fn(),
   getTenantThemeMock: vi.fn(),
+  upsertTenantThemeDraftMock: vi.fn(),
   insertTenantBrandingVersionMock: vi.fn(),
   insertTenantThemeVersionMock: vi.fn(),
   markBrandingPublishedMock: vi.fn(),
@@ -37,6 +39,7 @@ vi.mock("@atlas/domain-branding/repositories/theme.repository", () => ({
   getTenantTheme: (...args: unknown[]) => getTenantThemeMock(...args),
   insertTenantThemeVersion: (...args: unknown[]) => insertTenantThemeVersionMock(...args),
   markThemePublished: (...args: unknown[]) => markThemePublishedMock(...args),
+  upsertTenantThemeDraft: (...args: unknown[]) => upsertTenantThemeDraftMock(...args),
 }));
 
 vi.mock("@atlas/audit", () => ({
@@ -114,6 +117,22 @@ describe("branding publish", () => {
     });
     auditWriterWriteMock.mockResolvedValue(undefined);
     outboxPublishMock.mockResolvedValue({ id: "018f0000-0000-7000-8000-000000000099" });
+  });
+
+  it("publishes the default theme for a tenant that never saved one", async () => {
+    // A provisioned tenant has no theme row; reads show the default preset.
+    getTenantThemeMock.mockResolvedValue(null);
+    upsertTenantThemeDraftMock.mockResolvedValue(themeBefore);
+
+    await publishTenantBrandingAndTheme(tx, { tenantId, actorMembershipId, requestId });
+
+    expect(upsertTenantThemeDraftMock).toHaveBeenCalledWith(tx, {
+      tokens: expect.objectContaining({ primary: expect.any(String) }),
+    });
+    expect(insertTenantThemeVersionMock).toHaveBeenCalledWith(tx, {
+      snapshot: themeBefore,
+      publishedByMembershipId: actorMembershipId,
+    });
   });
 
   it("creates tenant_branding_version and tenant_theme_version rows", async () => {

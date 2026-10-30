@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { toPlainText } from "@atlas/core/text/safe-text";
 import { NOTIFICATION_SOURCE_EVENT_KEYS } from "./notification.events";
+import { CHANNEL_TEST_EMAIL_TEMPLATE_KEY } from "./channel-test-email.contract";
 
 const rejectClientTenantFields = z
   .object({
@@ -204,7 +205,11 @@ export const notificationQueuedOutboxPayloadSchema = z.object({
   dispatchId: z.uuid().optional(),
   channel: notificationChannelSchema,
   templateId: z.uuid(),
-  templateKey: notificationSourceEventKeySchema,
+  // A channel test email has no source event of its own.
+  templateKey: z.union([
+    notificationSourceEventKeySchema,
+    z.literal(CHANNEL_TEST_EMAIL_TEMPLATE_KEY),
+  ]),
   membershipId: z.uuid(),
   sourceEventId: z.uuid(),
   renderedPayload: z

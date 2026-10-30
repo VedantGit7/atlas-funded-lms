@@ -69,7 +69,7 @@ export const DEFAULT_ACADEMY_NAME = "Your academy";
  * them were escaped, so any of those fields could inject markup into a
  * security email delivered to another user.
  */
-function escapeHtml(value: string): string {
+export function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
