@@ -314,32 +314,57 @@ describe("POST /api/v1/domains", () => {
     expect(insertTenantDomainMock).not.toHaveBeenCalled();
   });
 
-  it("does not require custom-domain entitlement for atlas subdomains", async () => {
+  // A platform subdomain goes live at once with no verification. A tenant
+  // admin who could name one could claim any hostname, such as another
+  // tenant's custom domain before that tenant adds it.
+  it.each(["tenant-a.localhost.test", "learn.other-school.com"])(
+    "refuses a platform subdomain (%s) from a tenant, writing nothing",
+    async (hostname) => {
+      mockCreateTenantDomain.mockImplementation(await getRealCreateTenantDomain());
+
+      const response = await POST(
+        createPostRequest({ hostname, type: "ATLAS_SUBDOMAIN", makePrimary: true }),
+      );
+      const body = (await response.json()) as { error: { code: string } };
+
+      expect(response.status).toBe(403);
+      expect(body.error.code).toBe("PERMISSION_DENIED");
+      expect(insertTenantDomainMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["a non-public name", "learn.localhost.test", 400],
+    ["an IP address", "10.0.0.5", 400],
+    ["the platform's own host", "platform.example.com", 409],
+  ])("refuses %s as a custom domain", async (_case, hostname, status) => {
+    vi.stubEnv("PLATFORM_HOST", "platform.example.com");
+    try {
+      mockCreateTenantDomain.mockImplementation(await getRealCreateTenantDomain());
+      const response = await POST(createPostRequest({ hostname, type: "CUSTOM_DOMAIN" }));
+      expect(response.status).toBe(status);
+      expect(insertTenantDomainMock).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("adds a custom domain pending and never primary, whatever was asked", async () => {
     mockCreateTenantDomain.mockImplementation(await getRealCreateTenantDomain());
-    insertTenantDomainMock.mockResolvedValueOnce({
-      id: "018f0000-0000-7000-8000-000000000030",
-      hostname: "tenant-a.localhost.test",
-      type: "ATLAS_SUBDOMAIN",
-      status: "ACTIVE",
-      is_primary: true,
-      verification_txt_name: null,
-      verification_txt_value: null,
-      failure_reason: null,
-      created_at: new Date("2025-01-01T00:00:00.000Z"),
-      updated_at: new Date("2025-01-01T00:00:00.000Z"),
-    });
 
     const response = await POST(
       createPostRequest({
-        hostname: "tenant-a.localhost.test",
-        type: "ATLAS_SUBDOMAIN",
+        hostname: "Learn.Example.com",
+        type: "CUSTOM_DOMAIN",
         makePrimary: true,
       }),
     );
 
     expect(response.status).toBe(200);
-    expect(findActiveEntitlementByKeyMock).not.toHaveBeenCalled();
-    expect(insertTenantDomainMock).toHaveBeenCalledTimes(1);
+    expect(insertTenantDomainMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ hostname: "learn.example.com", makePrimary: false }),
+    );
   });
 
   it("blocks duplicate hostnames", async () => {

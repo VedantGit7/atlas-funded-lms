@@ -1,6 +1,8 @@
 import type { TenantTx } from "@atlas/db";
 import { randomBytes } from "node:crypto";
 import { enforceEntitlement } from "@atlas/authorization";
+import { normalizePublicHostname } from "@atlas/core/domains/public-hostname";
+import { AtlasHttpError } from "@atlas/core/http/errors";
 import { auditWriter } from "@atlas/audit";
 import { outbox } from "@atlas/events";
 import { CreateDomainRequestSchema } from "../schemas/domains";
@@ -61,8 +63,50 @@ export async function createTenantDomain(
     requestId: string;
   },
   rawInput: unknown,
+  options: {
+    /**
+     * Trusted tooling only (tenant-config apply). A platform subdomain goes
+     * live at once with no verification, so a tenant admin who could name
+     * one could take any hostname, including another tenant's custom domain
+     * before that tenant adds it. Tenants add custom domains, which go live
+     * only once their TXT record is verified.
+     */
+    allowPlatformSubdomain?: boolean;
+    /** Names a tenant may never claim, such as the platform's own host. */
+    reservedHostnames?: readonly string[];
+  } = {},
 ) {
-  const input = CreateDomainRequestSchema.parse(rawInput);
+  const parsed = CreateDomainRequestSchema.parse(rawInput);
+
+  if (parsed.type === "ATLAS_SUBDOMAIN" && options.allowPlatformSubdomain !== true) {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 403,
+      message: "Platform subdomains are assigned by the platform. Add a custom domain instead.",
+    });
+  }
+
+  let input = parsed;
+  if (parsed.type === "CUSTOM_DOMAIN") {
+    const hostname = normalizePublicHostname(parsed.hostname);
+    if (!hostname) {
+      throw new AtlasHttpError({
+        code: "VALIDATION_ERROR",
+        status: 400,
+        message: "Enter a public domain name, such as academy.example.com.",
+      });
+    }
+    if (options.reservedHostnames?.includes(hostname)) {
+      throw new AtlasHttpError({
+        code: "VALIDATION_ERROR",
+        status: 409,
+        message: "That name belongs to the platform itself.",
+      });
+    }
+    // Pending until verified, so it cannot be primary yet: the primary route
+    // accepts only an active domain.
+    input = { ...parsed, hostname, makePrimary: false };
+  }
 
   if (input.type === "CUSTOM_DOMAIN") {
     await enforceEntitlement(tx, {

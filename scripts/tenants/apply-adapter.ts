@@ -301,11 +301,17 @@ async function applyTenantScopedConfiguration(
       `;
 
       if (existing.length === 0) {
-        await createTenantDomain(tx, serviceCtx, {
-          hostname: domainRecord.hostname,
-          type: domainRecord.type,
-          makePrimary: domainRecord.makePrimary,
-        });
+        await createTenantDomain(
+          tx,
+          serviceCtx,
+          {
+            hostname: domainRecord.hostname,
+            type: domainRecord.type,
+            makePrimary: domainRecord.makePrimary,
+          },
+          // Operator tooling: the manifests' local environments use platform subdomains.
+          { allowPlatformSubdomain: true },
+        );
       }
     }
 

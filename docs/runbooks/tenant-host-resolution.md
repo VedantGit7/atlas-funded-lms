@@ -39,6 +39,23 @@ resolver in `backend/packages/tenancy`, or the public bootstrap route.
 4. With the tenant known, the request runs in `withTenantTx`, where row-level
    security limits every tenant table to that tenant.
 
+## How a domain becomes verified
+
+Everything above relies on `ACTIVE` meaning the tenant was entitled to the
+name. Two kinds of domain get there differently:
+
+- **Platform subdomains (`ATLAS_SUBDOMAIN`)** are active as soon as they are
+  created, so only the platform creates them: provisioning
+  (`<slug>.<TENANT_BASE_DOMAIN>`) and operator tooling (`tenant-config:apply`,
+  which opts in explicitly). A tenant's `POST /api/v1/domains` refuses them.
+  Before 30 October 2026 it accepted any hostname as one, so a tenant admin
+  could have claimed another tenant's custom domain before that tenant added it.
+- **Custom domains (`CUSTOM_DOMAIN`)** are added pending and never primary,
+  with an `_atlas-verify.<hostname>` TXT record. Only public names are accepted,
+  never the platform's own host. A domain becomes active only when the platform
+  console's **Verify** finds the record (`platform-operator-access.md`, "On a
+  fresh environment"); only then can it be made primary.
+
 ## What an unauthenticated caller can learn
 
 A caller can send any `Host` value to the public origin, so assume every

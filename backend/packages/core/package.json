@@ -14,7 +14,8 @@
     "./config/runtime-environment": "./src/config/runtime-environment.ts",
     "./config/deployment-contract": "./src/config/deployment-contract.ts",
     "./config/scorm-content-keys": "./src/config/scorm-content-keys.ts",
-    "./text/safe-text": "./src/text/safe-text.ts"
+    "./text/safe-text": "./src/text/safe-text.ts",
+    "./domains/public-hostname": "./src/domains/public-hostname.ts"
   },
   "dependencies": {
     "uuid": "^14.0.0"

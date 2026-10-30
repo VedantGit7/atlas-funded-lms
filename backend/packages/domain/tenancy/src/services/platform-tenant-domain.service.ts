@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { PlatformTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
+import { normalizePublicHostname } from "@atlas/core/domains/public-hostname";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 
 type DomainCtx = {
@@ -24,19 +25,6 @@ type DomainRow = {
 /** TXT records as node:dns returns them: each record is a list of chunks. */
 export type ResolveTxt = (name: string) => Promise<string[][]>;
 
-// Names only a developer's machine or a private network resolves. A custom
-// domain is a real public name that the tenant proves it controls.
-const NON_PUBLIC_SUFFIXES = [
-  ".localhost",
-  ".test",
-  ".local",
-  ".internal",
-  ".invalid",
-  ".example",
-  ".lan",
-  ".home.arpa",
-];
-
 function conflict(message: string): never {
   throw new AtlasHttpError({ code: "VALIDATION_ERROR", status: 409, message });
 }
@@ -45,17 +33,10 @@ function invalid(message: string): never {
   throw new AtlasHttpError({ code: "VALIDATION_ERROR", status: 400, message });
 }
 
-/** A lowercase public DNS name: two or more labels, an alphabetic top-level label. */
+/** The custom domain as stored, or a 400 when it is not a public DNS name. */
 export function normalizeCustomHostname(raw: string): string {
-  const hostname = raw.trim().toLowerCase().replace(/\.$/, "");
-  const labels = hostname.split(".");
-  const valid =
-    hostname.length <= 253 &&
-    labels.length >= 2 &&
-    labels.every((label) => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label)) &&
-    /^[a-z]{2,63}$/.test(labels[labels.length - 1] ?? "") &&
-    !NON_PUBLIC_SUFFIXES.some((suffix) => `.${hostname}`.endsWith(suffix));
-  if (!valid) invalid("Enter a public domain name, such as academy.example.com.");
+  const hostname = normalizePublicHostname(raw);
+  if (!hostname) invalid("Enter a public domain name, such as academy.example.com.");
   return hostname;
 }
 
