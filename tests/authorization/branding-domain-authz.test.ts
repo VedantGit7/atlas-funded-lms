@@ -162,7 +162,22 @@ describe("custom domain entitlement gating", () => {
     expect(canMock).not.toHaveBeenCalled();
   });
 
-  it("does not require custom-domain entitlement for atlas subdomains", async () => {
+  it("refuses a platform subdomain unless trusted tooling opts in", async () => {
+    const createDomain = await getRealCreateTenantDomain();
+    const tx = { $queryRaw: vi.fn() } as unknown as TenantTx;
+    const ctx = {
+      tenantId: "018f0000-0000-7000-8000-000000000001",
+      actorMembershipId: "018f0000-0000-7000-8000-000000000010",
+      requestId: "req_atlas_subdomain_refused",
+    };
+
+    await expect(
+      createDomain(tx, ctx, { hostname: "learn.other-school.com", type: "ATLAS_SUBDOMAIN" }),
+    ).rejects.toMatchObject({ code: "PERMISSION_DENIED", status: 403 });
+    expect(insertTenantDomainMock).not.toHaveBeenCalled();
+  });
+
+  it("does not require custom-domain entitlement for tooling's platform subdomains", async () => {
     findActiveEntitlementByKeyMock.mockResolvedValue(null);
     insertTenantDomainMock.mockResolvedValue({
       id: "018f0000-0000-7000-8000-000000000030",
@@ -192,6 +207,7 @@ describe("custom domain entitlement gating", () => {
         type: "ATLAS_SUBDOMAIN",
         makePrimary: true,
       },
+      { allowPlatformSubdomain: true },
     );
 
     expect(findActiveEntitlementByKeyMock).not.toHaveBeenCalled();

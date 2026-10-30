@@ -48,6 +48,9 @@ export const POST = createTenantRoute<CreateDomainRequest, CreateDomainResponse>
       },
 
       input,
+
+      // A tenant adds custom domains only; platform subdomains are refused.
+      { reservedHostnames: [process.env["PLATFORM_HOST"]?.trim().toLowerCase() ?? ""] },
     );
   },
 });
