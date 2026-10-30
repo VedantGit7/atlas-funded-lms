@@ -27,7 +27,7 @@ vi.mock("@atlas/db", () => ({
   },
 }));
 vi.mock("@atlas/membership", () => ({}));
-vi.mock("@atlas/domain-branding/services/branding-read.service", () => ({}));
+vi.mock("@atlas/domain-branding/repositories/branding.repository", () => ({}));
 vi.mock("../../../backend/apps/api/src/server/notifications/notification.service", () => ({}));
 vi.mock("../../../backend/apps/api/src/server/system-email/system-email.service", () => ({}));
 vi.mock("../../../backend/apps/api/src/server/tenant-settings/tenant-settings.service", () => ({

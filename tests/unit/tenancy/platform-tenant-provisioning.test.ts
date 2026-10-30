@@ -18,6 +18,7 @@ const {
   insertProvisioningJobMock,
   updateProvisioningJobStatusMock,
   insertFallbackTenantDomainMock,
+  insertDefaultTenantBrandingMock,
   updateTenantStateMock,
   grantPlatformTenantEntitlementsMock,
   readPlatformTenantDetailMock,
@@ -34,6 +35,7 @@ const {
   updateProvisioningJobStatusMock: vi.fn(),
   grantPlatformTenantEntitlementsMock: vi.fn(),
   insertFallbackTenantDomainMock: vi.fn(),
+  insertDefaultTenantBrandingMock: vi.fn(),
   updateTenantStateMock: vi.fn(),
   readPlatformTenantDetailMock: vi.fn(),
   seedTenantSystemRolesFromCatalogueMock: vi.fn(),
@@ -58,6 +60,10 @@ vi.mock("@atlas/domain-tenancy/repositories/provisioning-job.repository", () => 
 
 vi.mock("@atlas/domain-tenancy/repositories/platform-tenant-domain.repository", () => ({
   insertFallbackTenantDomain: (...args: unknown[]) => insertFallbackTenantDomainMock(...args),
+}));
+
+vi.mock("@atlas/domain-tenancy/repositories/platform-tenant-branding.repository", () => ({
+  insertDefaultTenantBranding: (...args: unknown[]) => insertDefaultTenantBrandingMock(...args),
 }));
 
 vi.mock("@atlas/domain-tenancy/services/platform-tenant-entitlement.service", () => ({
@@ -234,6 +240,17 @@ describe("platform tenant provisioning", () => {
     expect(insertFallbackTenantDomainMock).toHaveBeenCalledWith(tx, {
       tenantId,
       hostname: "acme-learning.localhost.test",
+    });
+  });
+
+  it("gives the tenant a draft branding row named after it", async () => {
+    // Without the row every branding read failed with BRANDING_NOT_FOUND, and
+    // the tenant's security emails were dead-lettered (staging, 30 Oct 2026).
+    await provisionTenant(tx, ctx, validInput);
+
+    expect(insertDefaultTenantBrandingMock).toHaveBeenCalledWith(tx, {
+      tenantId,
+      displayName: validInput.displayName,
     });
   });
 

@@ -8,6 +8,7 @@ import {
 } from "../general-settings/general-settings-shared";
 import { SettingsSaveFooter, SettingTextField } from "../settings/settings-form-controls";
 import { ChannelSettingsShell } from "./ChannelSettingsShell";
+import { ChannelTestEmailSection } from "./ChannelTestEmailSection";
 
 type Data = { fromName: string; fromEmail: string; replyToEmail: string | null };
 
@@ -19,12 +20,15 @@ export function EmailChannelPanel({
   endpoint,
   idempotencyPrefix,
   initial,
+  showTestEmail = false,
 }: {
   title: string;
   description: string;
   endpoint: string;
   idempotencyPrefix: string;
   initial: Data;
+  /** Shows "Send a test email" (Transactional Email only). */
+  showTestEmail?: boolean;
 }) {
   const [fromName, setFromName] = useState(initial.fromName);
   const [fromEmail, setFromEmail] = useState(initial.fromEmail);
@@ -133,6 +137,8 @@ export function EmailChannelPanel({
         status={status}
         error={error}
       />
+
+      {showTestEmail ? <ChannelTestEmailSection unsavedChanges={dirty} /> : null}
     </ChannelSettingsShell>
   );
 }

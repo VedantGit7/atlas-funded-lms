@@ -11,7 +11,7 @@ import { THEME_PRESETS } from "../utils/theme-presets";
  * which the old `THEME_PRESETS[0]!` papered over. An empty catalogue would be a
  * build-time mistake, so fail loudly rather than render an untokenised shell.
  */
-function defaultPresetTokens() {
+export function defaultPresetTokens() {
   const preset = THEME_PRESETS[0];
   if (!preset) throw new Error("THEME_PRESETS is empty; no default branding tokens available.");
   return preset.tokens;

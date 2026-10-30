@@ -17,6 +17,7 @@ import {
   findTenantIdByProvisioningIdempotencyKey,
 } from "../repositories/provisioning-job.repository";
 import { insertFallbackTenantDomain } from "../repositories/platform-tenant-domain.repository";
+import { insertDefaultTenantBranding } from "../repositories/platform-tenant-branding.repository";
 import { grantPlatformTenantEntitlements } from "./platform-tenant-entitlement.service";
 import { readPlatformTenantDetail } from "./platform-tenant-read.service";
 import {
@@ -83,6 +84,11 @@ export async function provisionTenant(
   await insertFallbackTenantDomain(tx, {
     tenantId: tenant.id,
     hostname: fallbackHostname,
+  });
+
+  await insertDefaultTenantBranding(tx, {
+    tenantId: tenant.id,
+    displayName: input.displayName,
   });
 
   // Use the existing Sprint 1 seed helpers. Do not duplicate role logic.

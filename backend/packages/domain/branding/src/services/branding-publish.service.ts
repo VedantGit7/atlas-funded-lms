@@ -10,8 +10,9 @@ import {
   getTenantTheme,
   insertTenantThemeVersion,
   markThemePublished,
+  upsertTenantThemeDraft,
 } from "../repositories/theme.repository";
-import { mapBranding } from "./branding-read.service";
+import { defaultPresetTokens, mapBranding } from "./branding-read.service";
 
 export async function publishTenantBrandingAndTheme(
   tx: TenantTx,
@@ -22,10 +23,13 @@ export async function publishTenantBrandingAndTheme(
   },
 ) {
   const brandingBefore = await getTenantBranding(tx);
-  const themeBefore = await getTenantTheme(tx);
-
   if (!brandingBefore) throw new Error("BRANDING_NOT_FOUND");
-  if (!themeBefore) throw new Error("THEME_NOT_FOUND");
+
+  // A tenant that never saved a theme has no row: reads show the default
+  // preset, so publishing that preset is what the admin saw.
+  const themeBefore =
+    (await getTenantTheme(tx)) ??
+    (await upsertTenantThemeDraft(tx, { tokens: defaultPresetTokens() }));
 
   const brandingVersion = await insertTenantBrandingVersion(tx, {
     snapshot: brandingBefore,
