@@ -8,6 +8,8 @@ SEC-01 follow-up **2026-09-26**: removed unsupported certificate iframe sharing 
 
 SEC-01 reviewed **2026-09-20** during F13. Nonce wiring, explicit provider origins, privacy-reduced reporting and SCORM header isolation are now implemented locally. Enforcement remains opt-in pending the working F11 deployment and complete authenticated/provider/SCORM journey checks. The original owner and expiry remain unchanged. See [F13 remediation](../engineering/f13-csp-remediation.md) and [CSP rollout](../runbooks/content-security-policy.md).
 
+SEC-10 closed **2026-10-31**: node-forge 1.4.1 shipped and fixed GHSA-86w9-cpqp-85rv, together with five more high advisories published on 30 October (GHSA-7wch-p9px-956x, GHSA-jc66-7q78-782g, GHSA-8hrf-8g6f-7xwp, GHSA-hqq3-7jhf-c5jx, GHSA-5x38-2vff-x55p). The API now uses node-forge 1.4.2 and the suppression is removed, so no advisory is waived.
+
 SEC-10 opened **2026-10-02**: GHSA-86w9-cpqp-85rv was published against every released node-forge; reachability and suppression rationale are in the row below and in `pnpm-workspace.yaml`.
 
 SEC-09 reviewed **2026-09-20** during F12. Official npm metadata still reports `extract-zip@2.0.1` as latest, and an unfiltered audit of the updated lockfile returns only its two existing high advisories. The 12 previously unsuppressed entries are patched. SEC-09's owner, expiry and exact advisory exclusions are unchanged; see the [F12 report](../engineering/f12-dependency-remediation.md) for reachability and verification. A successful configured audit does not mean the unfiltered tree is free of advisories.

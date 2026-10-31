@@ -82,15 +82,9 @@ overrides:
 
 auditConfig:
   # Suppressed by advisory id, so any NEW advisory still fails security:check.
-  # The extract-zip pair (SEC-09) went with @lhci/cli, its only path in.
-  ignoreGhsas:
-    # SEC-10: node-forge RSA PKCS#1 v1.5 signature VERIFICATION accepts extra
-    # nested DigestAlgorithm elements (high). Unfixable today: 1.4.0 is the latest
-    # published release and the advisory's "patched >=1.4.1" does not exist yet.
-    # Atlas only SIGNS with node-forge (Apple Wallet pass PKCS#7 in
-    # certificate-wallet.service.ts); nothing verifies an RSA signature with it, and
-    # the unused web copy was removed. Remove this line when 1.4.1 ships.
-    - GHSA-86w9-cpqp-85rv
+  # The extract-zip pair (SEC-09) went with @lhci/cli, its only path in; the
+  # node-forge one (SEC-10) was fixed by upgrading to 1.4.2. Nothing is waived.
+  ignoreGhsas: []
 
 allowBuilds:
   "@prisma/client": true
