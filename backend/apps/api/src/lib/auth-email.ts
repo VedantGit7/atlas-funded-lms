@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { AuthEmail } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -54,7 +55,8 @@ export async function sendAuthEmails(args: {
         subject: content.subject,
         body: content.body,
         requestId: args.requestId,
-        idempotencyKey: `auth-email:${email.kind}:${email.token}`,
+        // Never derived from the single-use token, which is a credential.
+        idempotencyKey: `auth-email:${email.kind}:${randomUUID()}`,
         ...(sender.fromEmail ? { fromName: sender.fromName, fromEmail: sender.fromEmail } : {}),
         replyToEmail: sender.replyToEmail,
       });

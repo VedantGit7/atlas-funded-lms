@@ -19,7 +19,8 @@
     "./better-auth": "./src/better-auth.ts",
     "./better-auth-runtime": "./src/better-auth-runtime.ts",
     "./better-auth-flows": "./src/better-auth-flows.ts",
-    "./auth-principal.repository": "./src/auth-principal.repository.ts"
+    "./auth-principal.repository": "./src/auth-principal.repository.ts",
+    "./session-tokens": "./src/session-tokens.ts"
   },
   "scripts": {
     "build": "echo \"No auth build configured yet.\"",

@@ -5,7 +5,7 @@ import {
   AcceptInvitationRequestSchema,
   SetInvitationPasswordRequestSchema,
 } from "@atlas/contracts/domain-identity/schemas/invitation-public";
-import { extractAccessToken } from "@atlas/auth/session";
+import { extractAccessToken } from "@atlas/auth/session-tokens";
 import { PASSWORD_POLICY_REJECTION_MESSAGE } from "@atlas/auth/auth-errors";
 import { safeInvitationErrorMessage } from "../../../../../lib/auth-messages";
 import { ServerPublicApiError, serverPublicApi } from "../../../../../lib/server/public-auth-fetch";
