@@ -11,10 +11,17 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'atlas_platform') THEN
     CREATE ROLE atlas_platform NOINHERIT;
   END IF;
+
+  -- Better Auth's connections start as this role, and only it reads password
+  -- hashes, authenticator secrets and session tokens (migration 127,
+  -- docs/engineering/better-auth-design.md).
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'atlas_auth') THEN
+    CREATE ROLE atlas_auth NOLOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
+  END IF;
 END $$;
 
-GRANT USAGE ON SCHEMA public TO atlas_app, atlas_worker, atlas_platform;
-GRANT USAGE ON SCHEMA app TO atlas_app, atlas_worker, atlas_platform;
+GRANT USAGE ON SCHEMA public TO atlas_app, atlas_worker, atlas_platform, atlas_auth;
+GRANT USAGE ON SCHEMA app TO atlas_app, atlas_worker, atlas_platform, atlas_auth;
 
 DO $$
 BEGIN
@@ -22,6 +29,7 @@ BEGIN
     GRANT atlas_app TO atlas;
     GRANT atlas_worker TO atlas;
     GRANT atlas_platform TO atlas;
+    GRANT atlas_auth TO atlas;
   END IF;
 END $$;
 

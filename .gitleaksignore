@@ -24,3 +24,8 @@ faa7064ba89a60929ad5c20df732f2416154b2a0:tests/unit/web/internal-api-forwarding.
 1ab7bcfc6c59647a58ffb797029f4c8d5966460a:tests/unit/grading/grading-service.test.ts:generic-api-key:33
 1ab7bcfc6c59647a58ffb797029f4c8d5966460a:tests/integration/api/grading.test.ts:generic-api-key:169
 7ce790dd1a7e04e64dca24063755f931006139ee:tests/api/branding-publish.post.test.ts:generic-api-key:156
+
+# The literal Better Auth secret in the first version of the Better Auth schema
+# integration test, readable as plain English and used only against a local
+# test database. The test now generates its secret at runtime.
+6c114ebf954383f6ad779fe1faee1b3d01f9d12b:tests/integration/auth/better-auth-schema.test.ts:generic-api-key:93

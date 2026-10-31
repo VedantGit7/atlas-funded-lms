@@ -15,7 +15,8 @@
     "./password-policy": "./src/password-policy.ts",
     "./supabase-admin-users": "./src/supabase-admin-users.ts",
     "./platform-operators.repository": "./src/platform-operators.repository.ts",
-    "./mfa-enforcement": "./src/mfa-enforcement.ts"
+    "./mfa-enforcement": "./src/mfa-enforcement.ts",
+    "./better-auth": "./src/better-auth.ts"
   },
   "scripts": {
     "build": "echo \"No auth build configured yet.\"",
@@ -33,6 +34,7 @@
     "@atlas/core": "workspace:*",
     "@atlas/observability": "workspace:*",
     "@supabase/supabase-js": "^2.117.3",
+    "better-auth": "^1.7.14",
     "next": "^16.4.2",
     "zod": "^4.6.7"
   },

@@ -55,6 +55,10 @@ export const ModelName = {
   TenantUsageEvent: 'TenantUsageEvent',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
+  AuthSession: 'AuthSession',
+  AuthAccount: 'AuthAccount',
+  AuthVerification: 'AuthVerification',
+  AuthTwoFactor: 'AuthTwoFactor',
   PlatformOperator: 'PlatformOperator',
   AuthPrincipalRelinkRequest: 'AuthPrincipalRelinkRequest',
   Membership: 'Membership',
@@ -357,6 +361,9 @@ export const AuthPrincipalScalarFieldEnum = {
   supabase_user_id: 'supabase_user_id',
   email: 'email',
   email_normalized: 'email_normalized',
+  name: 'name',
+  email_verified: 'email_verified',
+  image: 'image',
   global_status: 'global_status',
   mfa_enabled: 'mfa_enabled',
   last_login_at: 'last_login_at',
@@ -365,6 +372,68 @@ export const AuthPrincipalScalarFieldEnum = {
 } as const
 
 export type AuthPrincipalScalarFieldEnum = (typeof AuthPrincipalScalarFieldEnum)[keyof typeof AuthPrincipalScalarFieldEnum]
+
+
+export const AuthSessionScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  token: 'token',
+  expires_at: 'expires_at',
+  ip_address: 'ip_address',
+  user_agent: 'user_agent',
+  assurance_level: 'assurance_level',
+  mfa_verified_at: 'mfa_verified_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthSessionScalarFieldEnum = (typeof AuthSessionScalarFieldEnum)[keyof typeof AuthSessionScalarFieldEnum]
+
+
+export const AuthAccountScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  account_id: 'account_id',
+  provider_id: 'provider_id',
+  password: 'password',
+  access_token: 'access_token',
+  refresh_token: 'refresh_token',
+  id_token: 'id_token',
+  access_token_expires_at: 'access_token_expires_at',
+  refresh_token_expires_at: 'refresh_token_expires_at',
+  scope: 'scope',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthAccountScalarFieldEnum = (typeof AuthAccountScalarFieldEnum)[keyof typeof AuthAccountScalarFieldEnum]
+
+
+export const AuthVerificationScalarFieldEnum = {
+  id: 'id',
+  identifier: 'identifier',
+  value: 'value',
+  expires_at: 'expires_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthVerificationScalarFieldEnum = (typeof AuthVerificationScalarFieldEnum)[keyof typeof AuthVerificationScalarFieldEnum]
+
+
+export const AuthTwoFactorScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  secret: 'secret',
+  backup_codes: 'backup_codes',
+  verified: 'verified',
+  failed_verification_count: 'failed_verification_count',
+  locked_until: 'locked_until',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthTwoFactorScalarFieldEnum = (typeof AuthTwoFactorScalarFieldEnum)[keyof typeof AuthTwoFactorScalarFieldEnum]
 
 
 export const PlatformOperatorScalarFieldEnum = {

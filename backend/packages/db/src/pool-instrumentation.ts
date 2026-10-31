@@ -17,7 +17,7 @@ function timing() {
 
 export interface PoolInstrumentationOptions {
   enabled: boolean;
-  poolName: "tenant" | "platform" | "usage";
+  poolName: "tenant" | "platform" | "usage" | "auth";
   emit?: (snapshot: PoolSnapshot) => void;
   now?: () => number;
 }
@@ -25,7 +25,7 @@ export interface PoolInstrumentationOptions {
 export interface PoolSnapshot {
   event: "db_pool_metrics";
   capturedAt: string;
-  pool: "tenant" | "platform" | "usage";
+  pool: "tenant" | "platform" | "usage" | "auth";
   pid: number;
   uptimeMs: number;
   acquisition: ReturnType<typeof timing>;

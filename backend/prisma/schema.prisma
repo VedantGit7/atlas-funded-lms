@@ -156,17 +156,26 @@ model TenantDomain {
   @@map("tenant_domains")
 }
 
+/// One row per person, and Better Auth's user table (docs/engineering/
+/// better-auth-design.md). `supabase_user_id` is empty for Better Auth users
+/// and goes away with Supabase (launch plan task 3.8).
 model AuthPrincipal {
   id               String    @id @db.Uuid
-  supabase_user_id String    @unique @db.Uuid
+  supabase_user_id String?   @unique @db.Uuid
   email            String    @unique
   email_normalized String    @unique
+  name             String    @default("")
+  email_verified   Boolean   @default(false)
+  image            String?
   global_status    String    @default("active")
   mfa_enabled      Boolean   @default(false)
   last_login_at    DateTime? @db.Timestamptz(6)
   created_at       DateTime  @default(now()) @db.Timestamptz(6)
   updated_at       DateTime  @updatedAt @db.Timestamptz(6)
 
+  auth_sessions           AuthSession[]
+  auth_accounts           AuthAccount[]
+  auth_two_factor         AuthTwoFactor?
   memberships             Membership[]
   platform_grants         PlatformOperator[]           @relation("PlatformOperatorPrincipal")
   platform_grants_made    PlatformOperator[]           @relation("PlatformOperatorGrantedBy")
@@ -175,6 +184,84 @@ model AuthPrincipal {
   relink_decisions        AuthPrincipalRelinkRequest[] @relation("RelinkRequestDecidedBy")
 
   @@map("auth_principals")
+}
+
+/// A Better Auth session. `token` is the cookie value without its signature.
+/// `assurance_level` and `mfa_verified_at` are ours: Better Auth records no
+/// assurance, and F01 needs to know whether this session passed a second
+/// factor. Read and written only as the `atlas_auth` role.
+model AuthSession {
+  id              String    @id @db.Uuid
+  user_id         String    @db.Uuid
+  token           String    @unique
+  expires_at      DateTime  @db.Timestamptz(6)
+  ip_address      String?
+  user_agent      String?
+  assurance_level String    @default("aal1")
+  mfa_verified_at DateTime? @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+
+  principal AuthPrincipal @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([expires_at])
+  @@map("auth_sessions")
+}
+
+/// A login method: `credential` (holds the password hash) or `google`.
+model AuthAccount {
+  id                       String    @id @db.Uuid
+  user_id                  String    @db.Uuid
+  account_id               String
+  provider_id              String
+  password                 String?
+  access_token             String?
+  refresh_token            String?
+  id_token                 String?
+  access_token_expires_at  DateTime? @db.Timestamptz(6)
+  refresh_token_expires_at DateTime? @db.Timestamptz(6)
+  scope                    String?
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @updatedAt @db.Timestamptz(6)
+
+  principal AuthPrincipal @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider_id, account_id])
+  @@index([user_id])
+  @@map("auth_accounts")
+}
+
+/// Short-lived values: email verification, password reset, one-time codes and
+/// the pending two-factor challenge.
+model AuthVerification {
+  id         String   @id @db.Uuid
+  identifier String
+  value      String
+  expires_at DateTime @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([identifier])
+  @@index([expires_at])
+  @@map("auth_verifications")
+}
+
+/// The authenticator secret and backup codes, both encrypted by Better Auth.
+model AuthTwoFactor {
+  id                        String    @id @db.Uuid
+  user_id                   String    @unique @db.Uuid
+  secret                    String
+  backup_codes              String
+  verified                  Boolean   @default(true)
+  failed_verification_count Int       @default(0)
+  locked_until              DateTime? @db.Timestamptz(6)
+  created_at                DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime  @updatedAt @db.Timestamptz(6)
+
+  principal AuthPrincipal @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("auth_two_factors")
 }
 
 /// H7: platform (cross-tenant) role grants.

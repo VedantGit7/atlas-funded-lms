@@ -401,6 +401,10 @@ export const ModelName = {
   TenantUsageEvent: 'TenantUsageEvent',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
+  AuthSession: 'AuthSession',
+  AuthAccount: 'AuthAccount',
+  AuthVerification: 'AuthVerification',
+  AuthTwoFactor: 'AuthTwoFactor',
   PlatformOperator: 'PlatformOperator',
   AuthPrincipalRelinkRequest: 'AuthPrincipalRelinkRequest',
   Membership: 'Membership',
@@ -647,7 +651,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantUsageEvent" | "tenantDomain" | "authPrincipal" | "platformOperator" | "authPrincipalRelinkRequest" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave" | "paymentRefundIntent" | "outboxDeliveryJob" | "reportDeliveryEffect" | "exportFileCleanupRequest"
+    modelProps: "tenant" | "tenantUsageEvent" | "tenantDomain" | "authPrincipal" | "authSession" | "authAccount" | "authVerification" | "authTwoFactor" | "platformOperator" | "authPrincipalRelinkRequest" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave" | "paymentRefundIntent" | "outboxDeliveryJob" | "reportDeliveryEffect" | "exportFileCleanupRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -944,6 +948,302 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AuthPrincipalCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AuthPrincipalCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuthSession: {
+      payload: Prisma.$AuthSessionPayload<ExtArgs>
+      fields: Prisma.AuthSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuthSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuthSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.AuthSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuthSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        findMany: {
+          args: Prisma.AuthSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>[]
+        }
+        create: {
+          args: Prisma.AuthSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        createMany: {
+          args: Prisma.AuthSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuthSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.AuthSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        update: {
+          args: Prisma.AuthSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuthSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuthSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuthSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuthSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.AuthSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthSession>
+        }
+        groupBy: {
+          args: Prisma.AuthSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuthSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthSessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuthAccount: {
+      payload: Prisma.$AuthAccountPayload<ExtArgs>
+      fields: Prisma.AuthAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuthAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuthAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.AuthAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuthAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>
+        }
+        findMany: {
+          args: Prisma.AuthAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>[]
+        }
+        create: {
+          args: Prisma.AuthAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>
+        }
+        createMany: {
+          args: Prisma.AuthAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuthAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.AuthAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>
+        }
+        update: {
+          args: Prisma.AuthAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuthAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuthAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuthAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuthAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.AuthAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthAccount>
+        }
+        groupBy: {
+          args: Prisma.AuthAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuthAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuthVerification: {
+      payload: Prisma.$AuthVerificationPayload<ExtArgs>
+      fields: Prisma.AuthVerificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuthVerificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuthVerificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>
+        }
+        findFirst: {
+          args: Prisma.AuthVerificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuthVerificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>
+        }
+        findMany: {
+          args: Prisma.AuthVerificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>[]
+        }
+        create: {
+          args: Prisma.AuthVerificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>
+        }
+        createMany: {
+          args: Prisma.AuthVerificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuthVerificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>[]
+        }
+        delete: {
+          args: Prisma.AuthVerificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>
+        }
+        update: {
+          args: Prisma.AuthVerificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuthVerificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuthVerificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuthVerificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuthVerificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthVerificationPayload>
+        }
+        aggregate: {
+          args: Prisma.AuthVerificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthVerification>
+        }
+        groupBy: {
+          args: Prisma.AuthVerificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthVerificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuthVerificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthVerificationCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuthTwoFactor: {
+      payload: Prisma.$AuthTwoFactorPayload<ExtArgs>
+      fields: Prisma.AuthTwoFactorFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuthTwoFactorFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuthTwoFactorFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>
+        }
+        findFirst: {
+          args: Prisma.AuthTwoFactorFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuthTwoFactorFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>
+        }
+        findMany: {
+          args: Prisma.AuthTwoFactorFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>[]
+        }
+        create: {
+          args: Prisma.AuthTwoFactorCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>
+        }
+        createMany: {
+          args: Prisma.AuthTwoFactorCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuthTwoFactorCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>[]
+        }
+        delete: {
+          args: Prisma.AuthTwoFactorDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>
+        }
+        update: {
+          args: Prisma.AuthTwoFactorUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuthTwoFactorDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuthTwoFactorUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuthTwoFactorUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuthTwoFactorUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthTwoFactorPayload>
+        }
+        aggregate: {
+          args: Prisma.AuthTwoFactorAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthTwoFactor>
+        }
+        groupBy: {
+          args: Prisma.AuthTwoFactorGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthTwoFactorGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuthTwoFactorCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthTwoFactorCountAggregateOutputType> | number
         }
       }
     }
@@ -18133,6 +18433,9 @@ export const AuthPrincipalScalarFieldEnum = {
   supabase_user_id: 'supabase_user_id',
   email: 'email',
   email_normalized: 'email_normalized',
+  name: 'name',
+  email_verified: 'email_verified',
+  image: 'image',
   global_status: 'global_status',
   mfa_enabled: 'mfa_enabled',
   last_login_at: 'last_login_at',
@@ -18141,6 +18444,68 @@ export const AuthPrincipalScalarFieldEnum = {
 } as const
 
 export type AuthPrincipalScalarFieldEnum = (typeof AuthPrincipalScalarFieldEnum)[keyof typeof AuthPrincipalScalarFieldEnum]
+
+
+export const AuthSessionScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  token: 'token',
+  expires_at: 'expires_at',
+  ip_address: 'ip_address',
+  user_agent: 'user_agent',
+  assurance_level: 'assurance_level',
+  mfa_verified_at: 'mfa_verified_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthSessionScalarFieldEnum = (typeof AuthSessionScalarFieldEnum)[keyof typeof AuthSessionScalarFieldEnum]
+
+
+export const AuthAccountScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  account_id: 'account_id',
+  provider_id: 'provider_id',
+  password: 'password',
+  access_token: 'access_token',
+  refresh_token: 'refresh_token',
+  id_token: 'id_token',
+  access_token_expires_at: 'access_token_expires_at',
+  refresh_token_expires_at: 'refresh_token_expires_at',
+  scope: 'scope',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthAccountScalarFieldEnum = (typeof AuthAccountScalarFieldEnum)[keyof typeof AuthAccountScalarFieldEnum]
+
+
+export const AuthVerificationScalarFieldEnum = {
+  id: 'id',
+  identifier: 'identifier',
+  value: 'value',
+  expires_at: 'expires_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthVerificationScalarFieldEnum = (typeof AuthVerificationScalarFieldEnum)[keyof typeof AuthVerificationScalarFieldEnum]
+
+
+export const AuthTwoFactorScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  secret: 'secret',
+  backup_codes: 'backup_codes',
+  verified: 'verified',
+  failed_verification_count: 'failed_verification_count',
+  locked_until: 'locked_until',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type AuthTwoFactorScalarFieldEnum = (typeof AuthTwoFactorScalarFieldEnum)[keyof typeof AuthTwoFactorScalarFieldEnum]
 
 
 export const PlatformOperatorScalarFieldEnum = {
@@ -22384,6 +22749,10 @@ export type GlobalOmitConfig = {
   tenantUsageEvent?: Prisma.TenantUsageEventOmit
   tenantDomain?: Prisma.TenantDomainOmit
   authPrincipal?: Prisma.AuthPrincipalOmit
+  authSession?: Prisma.AuthSessionOmit
+  authAccount?: Prisma.AuthAccountOmit
+  authVerification?: Prisma.AuthVerificationOmit
+  authTwoFactor?: Prisma.AuthTwoFactorOmit
   platformOperator?: Prisma.PlatformOperatorOmit
   authPrincipalRelinkRequest?: Prisma.AuthPrincipalRelinkRequestOmit
   membership?: Prisma.MembershipOmit

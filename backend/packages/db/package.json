@@ -7,6 +7,7 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./auth-client": "./src/auth-client.ts",
     "./global-db": "./src/global-db.ts",
     "./metering-client": "./src/metering-client.ts",
     "./with-tenant-tx": "./src/with-tenant-tx.ts",

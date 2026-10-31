@@ -34,9 +34,35 @@ export type TenantUsageEvent = Prisma.TenantUsageEventModel
 export type TenantDomain = Prisma.TenantDomainModel
 /**
  * Model AuthPrincipal
- * 
+ * One row per person, and Better Auth's user table (docs/engineering/
+ * better-auth-design.md). `supabase_user_id` is empty for Better Auth users
+ * and goes away with Supabase (launch plan task 3.8).
  */
 export type AuthPrincipal = Prisma.AuthPrincipalModel
+/**
+ * Model AuthSession
+ * A Better Auth session. `token` is the cookie value without its signature.
+ * `assurance_level` and `mfa_verified_at` are ours: Better Auth records no
+ * assurance, and F01 needs to know whether this session passed a second
+ * factor. Read and written only as the `atlas_auth` role.
+ */
+export type AuthSession = Prisma.AuthSessionModel
+/**
+ * Model AuthAccount
+ * A login method: `credential` (holds the password hash) or `google`.
+ */
+export type AuthAccount = Prisma.AuthAccountModel
+/**
+ * Model AuthVerification
+ * Short-lived values: email verification, password reset, one-time codes and
+ * the pending two-factor challenge.
+ */
+export type AuthVerification = Prisma.AuthVerificationModel
+/**
+ * Model AuthTwoFactor
+ * The authenticator secret and backup codes, both encrypted by Better Auth.
+ */
+export type AuthTwoFactor = Prisma.AuthTwoFactorModel
 /**
  * Model PlatformOperator
  * H7: platform (cross-tenant) role grants.
