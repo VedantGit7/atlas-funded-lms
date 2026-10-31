@@ -3,24 +3,29 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createSupabasePublicServerClient } from "@atlas/auth/supabase-server";
-import {
-  PASSWORD_POLICY_REJECTION_MESSAGE,
-  passwordPolicyRejection,
-} from "@atlas/auth/auth-errors";
-import { isPasswordBreached } from "@atlas/auth/password-policy";
+import { PASSWORD_POLICY_REJECTION_MESSAGE } from "@atlas/auth/auth-errors";
 import {
   PublicPasswordResetCompleteSchema,
   PublicPasswordResetRequestSchema,
+  type PublicPasswordResetCompleteResponse,
 } from "@atlas/contracts/domain-identity/schemas/public-auth";
 import { GENERIC_PASSWORD_RESET_MESSAGE } from "../../../../lib/auth-messages";
 import { readFormString } from "../../../../lib/server/form";
+import { ServerPublicApiError, serverPublicApi } from "../../../../lib/server/public-auth-fetch";
 import { resolveRequestOriginFromHeaders } from "../../../../lib/server/resolve-request-origin";
 
 export type ResetPasswordActionState = {
   ok: boolean;
   message: string;
   requestId: string;
+  /** The account has MFA: the form must ask for an authenticator code. */
+  mfaRequired?: boolean;
 };
+
+const MFA_REQUIRED_MESSAGE =
+  "Your account uses two-step verification. Enter the 6-digit code from your authenticator app to finish.";
+const MFA_INVALID_MESSAGE = "That code didn't work. Check your authenticator app and try again.";
+const RESET_FAILED_MESSAGE = "Unable to reset password. Request a new link.";
 
 async function getRequestOrigin(): Promise<string> {
   const headerList = await headers();
@@ -63,9 +68,13 @@ export async function completePasswordResetAction(
     password: readFormString(formData.get("password")),
     accessToken: readFormString(formData.get("accessToken")),
     refreshToken: readFormString(formData.get("refreshToken")),
+    mfaCode: readFormString(formData.get("mfaCode")),
   });
 
   if (!parsed.success) {
+    if (parsed.error.issues.some((issue) => issue.path[0] === "mfaCode")) {
+      return { ok: false, mfaRequired: true, message: MFA_INVALID_MESSAGE, requestId };
+    }
     return { ok: false, message: "Password must be at least 10 characters.", requestId };
   }
 
@@ -73,34 +82,39 @@ export async function completePasswordResetAction(
     return { ok: false, message: "Reset link is invalid or expired.", requestId };
   }
 
-  // Audit H6: a password known from a breach is refused before it is set.
-  if (await isPasswordBreached(parsed.data.password)) {
-    return { ok: false, message: PASSWORD_POLICY_REJECTION_MESSAGE, requestId };
-  }
-
+  // The API checks the password against breaches (audit H6), asks an account
+  // with MFA for its authenticator code (the recovery link signs in at aal1),
+  // and sends the "password changed" security email.
+  let status: PublicPasswordResetCompleteResponse["data"]["status"];
   try {
-    const supabase = createSupabasePublicServerClient();
-    const { error: sessionError } = await supabase.auth.setSession({
-      access_token: parsed.data.accessToken,
-      refresh_token: parsed.data.refreshToken ?? "",
+    const body = await serverPublicApi.resetPassword({
+      password: parsed.data.password,
+      accessToken: parsed.data.accessToken,
+      refreshToken: parsed.data.refreshToken,
+      mfaCode: parsed.data.mfaCode || undefined,
     });
-    if (sessionError) {
-      return { ok: false, message: "Reset link is invalid or expired.", requestId };
-    }
-
-    const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-
-    if (error) {
+    status = body.data.status;
+  } catch (error) {
+    if (error instanceof ServerPublicApiError) {
       return {
         ok: false,
         message:
-          passwordPolicyRejection(error)?.message ??
-          "Unable to reset password. Request a new link.",
-        requestId,
+          error.code === "VALIDATION_ERROR" && error.message === PASSWORD_POLICY_REJECTION_MESSAGE
+            ? PASSWORD_POLICY_REJECTION_MESSAGE
+            : error.code === "AUTH_REQUIRED"
+              ? "Reset link is invalid or expired."
+              : RESET_FAILED_MESSAGE,
+        requestId: error.requestId,
       };
     }
-  } catch {
-    return { ok: false, message: "Unable to reset password. Request a new link.", requestId };
+    return { ok: false, message: RESET_FAILED_MESSAGE, requestId };
+  }
+
+  if (status === "MFA_REQUIRED") {
+    return { ok: false, mfaRequired: true, message: MFA_REQUIRED_MESSAGE, requestId };
+  }
+  if (status === "MFA_INVALID") {
+    return { ok: false, mfaRequired: true, message: MFA_INVALID_MESSAGE, requestId };
   }
 
   redirect("/login");

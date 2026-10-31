@@ -136,5 +136,31 @@ export const PublicPasswordResetCompleteSchema = z
     password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
     accessToken: z.string().min(1).max(4000),
     refreshToken: z.string().max(4000).optional(),
+    /**
+     * Authenticator code, for accounts with MFA: the recovery link signs in at
+     * aal1 and Supabase only changes their password at aal2. Empty until the
+     * reset form asks for it.
+     */
+    mfaCode: z
+      .string()
+      .trim()
+      .refine((code) => code === "" || /^\d{6}$/.test(code), {
+        message: "Enter the 6-digit code from your authenticator app.",
+      })
+      .optional(),
   })
   .strict();
+
+/**
+ * RESET: the password changed. MFA_REQUIRED / MFA_INVALID: the account has
+ * MFA and the authenticator code was missing or did not verify; nothing changed.
+ */
+export const PublicPasswordResetCompleteResponseSchema = z.object({
+  data: z.object({
+    status: z.enum(["RESET", "MFA_REQUIRED", "MFA_INVALID"]),
+  }),
+});
+
+export type PublicPasswordResetCompleteResponse = z.infer<
+  typeof PublicPasswordResetCompleteResponseSchema
+>;
