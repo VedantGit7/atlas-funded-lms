@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { assertRedirectOnRequestHostFrom, createPublicRouteHandler } from "@atlas/api";
 import { resendSignupVerification } from "@atlas/auth";
+import { sendAuthEmails } from "../../../../../../lib/auth-email";
 import { PublicAuthResendRequestSchema, rejectClientTenantId } from "@atlas/domain-identity";
 import { routeMetadata } from "./route.metadata";
 
@@ -9,7 +10,7 @@ import { routeMetadata } from "./route.metadata";
  * regardless of whether the address exists or is already verified; rate limiting
  * is enforced by the public-auth tier plus Supabase's own per-email cooldown.
  */
-export const POST = createPublicRouteHandler(routeMetadata, async ({ req }) => {
+export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   const rawBody: unknown = await req.json();
   rejectClientTenantId(rawBody);
   const input = PublicAuthResendRequestSchema.parse(rawBody);
@@ -18,9 +19,15 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req }) => {
     ? assertRedirectOnRequestHostFrom(req.headers, input.emailRedirectTo, "emailRedirectTo")
     : undefined;
 
-  await resendSignupVerification({
+  const { emails } = await resendSignupVerification({
     email: input.email,
     ...(emailRedirectTo ? { emailRedirectTo } : {}),
+    req,
+  });
+  await sendAuthEmails({
+    req,
+    requestId,
+    emails: emails ?? [],
   });
 
   return NextResponse.json({

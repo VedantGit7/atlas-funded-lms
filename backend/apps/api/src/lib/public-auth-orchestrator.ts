@@ -1,5 +1,5 @@
 import { cookies, headers } from "next/headers";
-import { loginWithPassword, signupWithPassword, verifyMfaChallenge } from "@atlas/auth";
+import { signupWithPassword, verifyMfaChallenge } from "@atlas/auth";
 import { publicSignupInputSchema } from "@atlas/auth/schemas";
 import {
   applyAuthSessionToCookieStore,
@@ -16,7 +16,6 @@ import {
   resolveRequestHostFromHeaders,
 } from "@atlas/tenancy";
 import {
-  PublicLoginRequestSchema,
   PublicSignupRequestSchema,
   PublicAuthResponseSchema,
   buildPublicAuthResponse,
@@ -139,34 +138,6 @@ async function setSessionCookies(session: {
     expiresInSeconds: session.expiresIn,
     persistent,
   });
-}
-
-export async function orchestratePublicLogin(input: {
-  email: string;
-  password: string;
-}): Promise<PublicAuthApiResponse> {
-  const parsed = PublicLoginRequestSchema.parse(input);
-  const { host, requestId } = await resolveActiveTenantFromRequest();
-
-  const tenant = await lookupActiveTenant(host, requestId);
-  // Supabase verification with no pooled connection held.
-  const authResult = await loginWithPassword({ db: globalDbPerStatement, input: parsed });
-  const body = await buildResponse({
-    tenantId: tenant.tenantId,
-    requestId: tenant.requestId,
-    email: parsed.email,
-    serviceStatus: authResult.status,
-    mfaEnabled: authResult.identity.mfaEnabled,
-  });
-
-  await setSessionCookies({
-    accessToken: authResult.session.accessToken,
-    refreshToken: authResult.session.refreshToken,
-    expiresIn: authResult.session.expiresIn,
-    persistent: parsed.rememberMe ?? false,
-  });
-
-  return body;
 }
 
 export async function orchestratePublicMfaVerify(input: {

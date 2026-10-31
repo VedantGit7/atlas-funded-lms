@@ -1,8 +1,7 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createSupabasePublicServerClient } from "@atlas/auth/supabase-server";
 import { PASSWORD_POLICY_REJECTION_MESSAGE } from "@atlas/auth/auth-errors";
 import {
   PublicPasswordResetCompleteSchema,
@@ -12,7 +11,6 @@ import {
 import { GENERIC_PASSWORD_RESET_MESSAGE } from "../../../../lib/auth-messages";
 import { readFormString } from "../../../../lib/server/form";
 import { ServerPublicApiError, serverPublicApi } from "../../../../lib/server/public-auth-fetch";
-import { resolveRequestOriginFromHeaders } from "../../../../lib/server/resolve-request-origin";
 
 export type ResetPasswordActionState = {
   ok: boolean;
@@ -26,11 +24,6 @@ const MFA_REQUIRED_MESSAGE =
   "Your account uses two-step verification. Enter the 6-digit code from your authenticator app to finish.";
 const MFA_INVALID_MESSAGE = "That code didn't work. Check your authenticator app and try again.";
 const RESET_FAILED_MESSAGE = "Unable to reset password. Request a new link.";
-
-async function getRequestOrigin(): Promise<string> {
-  const headerList = await headers();
-  return resolveRequestOriginFromHeaders(headerList);
-}
 
 export async function requestPasswordResetAction(
   _prev: ResetPasswordActionState | null,
@@ -46,12 +39,8 @@ export async function requestPasswordResetAction(
   }
 
   try {
-    const supabase = createSupabasePublicServerClient();
-    const origin = await getRequestOrigin();
-
-    await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-      redirectTo: `${origin}/reset-password`,
-    });
+    // The API asks whichever login system this deployment uses to send the link.
+    await serverPublicApi.forgotPassword({ email: parsed.data.email });
   } catch {
     // Always return generic success to avoid email enumeration.
   }
@@ -64,10 +53,14 @@ export async function completePasswordResetAction(
   formData: FormData,
 ): Promise<ResetPasswordActionState> {
   const requestId = crypto.randomUUID();
+  // Supabase's link signs in a recovery session; Better Auth's carries a token.
+  const accessToken = readFormString(formData.get("accessToken"));
+  const token = readFormString(formData.get("token"));
   const parsed = PublicPasswordResetCompleteSchema.safeParse({
     password: readFormString(formData.get("password")),
-    accessToken: readFormString(formData.get("accessToken")),
+    ...(accessToken ? { accessToken } : {}),
     refreshToken: readFormString(formData.get("refreshToken")),
+    ...(token ? { token } : {}),
     mfaCode: readFormString(formData.get("mfaCode")),
   });
 
@@ -75,11 +68,10 @@ export async function completePasswordResetAction(
     if (parsed.error.issues.some((issue) => issue.path[0] === "mfaCode")) {
       return { ok: false, mfaRequired: true, message: MFA_INVALID_MESSAGE, requestId };
     }
+    if (parsed.error.issues.some((issue) => issue.path[0] === "token")) {
+      return { ok: false, message: "Reset link is invalid or expired.", requestId };
+    }
     return { ok: false, message: "Password must be at least 10 characters.", requestId };
-  }
-
-  if (!parsed.data.accessToken) {
-    return { ok: false, message: "Reset link is invalid or expired.", requestId };
   }
 
   // The API checks the password against breaches (audit H6), asks an account
@@ -89,8 +81,9 @@ export async function completePasswordResetAction(
   try {
     const body = await serverPublicApi.resetPassword({
       password: parsed.data.password,
-      accessToken: parsed.data.accessToken,
-      refreshToken: parsed.data.refreshToken,
+      ...(parsed.data.token
+        ? { token: parsed.data.token }
+        : { accessToken: parsed.data.accessToken, refreshToken: parsed.data.refreshToken }),
       mfaCode: parsed.data.mfaCode || undefined,
     });
     status = body.data.status;

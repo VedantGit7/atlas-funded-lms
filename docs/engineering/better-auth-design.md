@@ -155,10 +155,37 @@ Staging has one principal (checked 31 October 2026): the platform operator, who 
 
 There are no production accounts.
 
+## Task 3.2: password flows (as built, 31 October 2026)
+
+**A switch, off by default.** `AUTH_PROVIDER` is `supabase` unless set to `better-auth`. Better Auth needs `BETTER_AUTH_SECRET`, at least 32 characters, on the API, and the deployment check refuses anything else. It stays off on staging until 3.3 to 3.6 are done (task 5.1): until then the platform operator's authenticator sign-in has nowhere to go.
+
+**One path for "who is signed in".**
+
+- `requireSessionUser` and `resolveSessionPrincipal` (`@atlas/api/session-user`) answer for either system: tenant routes, `/me`, invitations, certificates and the platform guard.
+- A Better Auth session is checked once a minute per token, as the Supabase one is. A Better Auth user is the principal, so it's only read, and refused unless active.
+
+**The same routes and answers.** Sign-in, sign-up, email confirmation, resend, reset and change password keep their routes and responses. Each service function has a Better Auth branch. Two routes are new, so the web app no longer talks to Supabase for these:
+
+- `POST /api/v1/public/auth/forgot-password` asks either system for a reset link;
+- `POST /api/v1/public/auth/logout` deletes a Better Auth session and clears every session cookie.
+
+**Emails are ours.**
+
+- Better Auth's callbacks only record what it asked for (`captureAuthEmails`). The route then sends it (`apps/api/src/lib/auth-email.ts`) with the academy's name and its Transactional Email sender, on the host the person used.
+- Asking for an email outside a route that sends it throws, so nothing is silently not sent.
+- Links go to our pages: `/auth/confirm?token_hash=…&type=signup` verifies and signs in, as Supabase's link does; `/reset-password?token=…` asks for the new password.
+- Full academy branding is 3.6.
+
+**What differs from Supabase, on purpose:**
+
+- **Resetting a forgotten password** needs no authenticator code: it ends every session and starts none, and signing in still asks for the code.
+- **Changing the password** keeps this session and ends the others. Better Auth's own option would swap this session's token, and the change-password route can't set a new cookie.
+- **Sessions don't slide yet.** The session check can't rewrite the cookie, so a session lasts 30 days from sign-in. Sliding it means returning Better Auth's cookie from the web proxy: an open item.
+- **Placeholders are claimed at first sign-in.** An unclaimed principal is claimed when its owner first signs in with a proven address, in the session hook, because Better Auth's verify step doesn't say which user it updated. The hook checks for a platform grant, so `atlas_auth` may now read `platform_operators` (migration 128).
+
 ## Open items for the flow tasks
 
-- **3.2, unclaimed principals.** The integration sign-up API creates a principal with `global_status = 'unclaimed'` before its owner signs up. Better Auth refuses to sign up an email that already has a user. The sign-up route has to claim the placeholder: add the credential login method, verify the email, then mark it `active`. That's the rule `claimUnclaimedPrincipal` enforces today, including refusing a placeholder that carries a platform grant.
-- **3.2, the web proxy.** Protected pages can no longer read an expiry from the cookie. The proxy only checks that `atlas_session` exists, and an expired or revoked session gets the API's 401 and is sent to sign-in.
+- **Sliding sessions.** Pass Better Auth's refreshed cookie back through the web proxy, so a session used every day doesn't end 30 days after sign-in.
 - **3.3, Google account linking.** Link Google to an existing principal only when Google reports the email as verified and the principal's email is verified (`account.accountLinking.trustedProviders: ["google"]`).
 - **3.5, existing sessions after enrollment.** Turning on two-factor leaves the user's other sessions at `aal1`, which the gates already handle.
 - **3.7, test cleanup.** `scripts/db/purge-test-tenants.mjs` refuses to delete a test principal that any table still references, including `auth_sessions` and `auth_accounts`, whose rows are deleted with the principal anyway. Until it allows those, tests delete their own Better Auth rows, as `better-auth-schema.test.ts` does.

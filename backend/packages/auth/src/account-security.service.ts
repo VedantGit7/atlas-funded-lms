@@ -3,6 +3,9 @@ import { authRequired, passwordPolicyRejection } from "./auth-errors";
 import { assertPasswordNotBreached } from "./password-policy";
 import { createSupabasePublicServerClient } from "./supabase-server";
 import { requireSupabaseUserClient } from "./supabase-user-client";
+import { headers } from "next/headers";
+import { authRequestContextFromHeaders, changePasswordWithBetterAuth } from "./better-auth-flows";
+import { authProvider } from "./better-auth-runtime";
 
 function mapAuthError(): never {
   throw new AtlasHttpError({
@@ -13,6 +16,16 @@ function mapAuthError(): never {
 }
 
 export async function changePassword(args: { currentPassword: string; newPassword: string }) {
+  if (authProvider() === "better-auth") {
+    await assertPasswordNotBreached(args.newPassword);
+    const { email } = await changePasswordWithBetterAuth({
+      ctx: authRequestContextFromHeaders(new Headers(await headers())),
+      currentPassword: args.currentPassword,
+      newPassword: args.newPassword,
+    });
+    return { ok: true as const, email };
+  }
+
   const { supabase, email } = await requireSupabaseUserClient();
 
   // Check the current password on a client of its own. Signing in on the

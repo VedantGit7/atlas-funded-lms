@@ -96,6 +96,8 @@ describeWithDb("table privilege boundaries", () => {
       "SELECT",
       "UPDATE",
     ]);
+    // Claiming a placeholder checks it has no platform grant (migration 128).
+    expect(await privileges("platform_operators", "atlas_auth")).toEqual(["SELECT"]);
   });
 
   it("lets the platform role list and revoke sessions without reading a token or hash", async () => {

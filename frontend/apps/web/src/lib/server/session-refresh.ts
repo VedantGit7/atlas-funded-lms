@@ -1,5 +1,10 @@
 import type { NextRequest } from "next/server";
-import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "../auth-cookies";
+import {
+  ATLAS_ACCESS_TOKEN_COOKIE,
+  ATLAS_REFRESH_TOKEN_COOKIE,
+  ATLAS_SECURE_SESSION_COOKIE,
+  ATLAS_SESSION_COOKIE,
+} from "../auth-cookies";
 import { buildApiProxyHeaders, resolveEdgeClientIp } from "@atlas/core/http/api-proxy";
 import { resolveClientIpForInternalApi } from "./resolve-client-ip";
 import {
@@ -54,6 +59,11 @@ export function isAccessTokenExpired(token: string): boolean {
 }
 
 export function hasValidAccessToken(req: NextRequest): boolean {
+  // A Better Auth session is checked by the API on each request; there is
+  // nothing to refresh here.
+  if (req.cookies.has(ATLAS_SESSION_COOKIE) || req.cookies.has(ATLAS_SECURE_SESSION_COOKIE)) {
+    return true;
+  }
   const accessToken = req.cookies.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value;
   return Boolean(accessToken && !isAccessTokenExpired(accessToken));
 }

@@ -239,6 +239,19 @@ export function validateDeploymentConfiguration(
     value("NEXT_PUBLIC_SUPABASE_ANON_KEY") === value("SUPABASE_SERVICE_ROLE_KEY")
   )
     issues.push("NEXT_PUBLIC_SUPABASE_ANON_KEY must not expose the service-role key");
+  // Login system (launch plan phase 3): Supabase until task 5.1, then Better
+  // Auth, which runs in the API and signs its cookies with this secret.
+  const authProvider = value("AUTH_PROVIDER");
+  if (authProvider && authProvider !== "supabase" && authProvider !== "better-auth")
+    issues.push("AUTH_PROVIDER must be supabase or better-auth when configured");
+  if (
+    authProvider === "better-auth" &&
+    service === "api" &&
+    value("BETTER_AUTH_SECRET").length < 32
+  )
+    issues.push(
+      "BETTER_AUTH_SECRET must be at least 32 characters when AUTH_PROVIDER is better-auth",
+    );
   if (value("NEXT_PUBLIC_SUPABASE_ANON_KEY").startsWith("sb_secret_"))
     issues.push("NEXT_PUBLIC_SUPABASE_ANON_KEY must be a public key");
   const publicKey = value("NEXT_PUBLIC_SUPABASE_ANON_KEY");

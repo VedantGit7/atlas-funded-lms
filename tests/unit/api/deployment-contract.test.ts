@@ -188,6 +188,26 @@ describe("F05 deployment contract", () => {
       validateDeploymentConfiguration({ ...deploymentEnv(), API_PROXY_SECRET: "" }, "worker"),
     ).not.toThrow();
   });
+  it("accepts either login system, and only those (launch plan phase 3)", () => {
+    for (const AUTH_PROVIDER of [undefined, "supabase"])
+      expect(() =>
+        validateDeploymentConfiguration({ ...deploymentEnv(), AUTH_PROVIDER }),
+      ).not.toThrow();
+    expect(() =>
+      validateDeploymentConfiguration({ ...deploymentEnv(), AUTH_PROVIDER: "auth0" }),
+    ).toThrow(/AUTH_PROVIDER must be supabase or better-auth/);
+  });
+  it("requires a long Better Auth secret on the API when Better Auth is on", () => {
+    const betterAuth = { ...deploymentEnv(), AUTH_PROVIDER: "better-auth" };
+    expect(() =>
+      validateDeploymentConfiguration({ ...betterAuth, BETTER_AUTH_SECRET: "short" }, "api"),
+    ).toThrow(/BETTER_AUTH_SECRET must be at least 32 characters/);
+    expect(() =>
+      validateDeploymentConfiguration({ ...betterAuth, BETTER_AUTH_SECRET: "b".repeat(32) }, "api"),
+    ).not.toThrow();
+    // Only the API runs Better Auth.
+    expect(() => validateDeploymentConfiguration(betterAuth, "worker")).not.toThrow();
+  });
   it.each(["api", "worker", "web"] as const)(
     "refuses marketing email on %s while SMTP_HOST is ZeptoMail (launch plan 1.6)",
     (service) => {

@@ -12,6 +12,7 @@ import { applyAuthSessionToCookieStore, readSessionPersistence } from "./cookie-
 import { createSupabaseSessionVerificationClient } from "./supabase-server";
 import { authProviderUnavailable, authRequired } from "./auth-errors";
 import { refreshSessionFromRefreshToken } from "./public-auth.service";
+import type { BetterAuthSessionUser } from "./better-auth-runtime";
 
 export type SessionAssuranceLevel = "aal1" | "aal2" | null;
 
@@ -224,3 +225,12 @@ export async function requireSupabaseUser(req: Request) {
     throw verificationError(error);
   }
 }
+
+/**
+ * The signed-in user, from whichever login system this deployment uses
+ * (`AUTH_PROVIDER`, launch plan phase 3). A Better Auth user is the principal
+ * itself; a Supabase user is mirrored into one by `upsertAuthPrincipal`.
+ */
+export type SessionUser =
+  | ({ provider: "supabase" } & Awaited<ReturnType<typeof requireSupabaseUser>>)
+  | ({ provider: "better-auth" } & BetterAuthSessionUser);

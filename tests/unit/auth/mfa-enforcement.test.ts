@@ -87,6 +87,6 @@ describe("tenant MFA (H5)", () => {
     expect(pipeline).toContain("assertTenantMfa");
     // The flag must reach the pipeline from the session, or every route would
     // read as "no MFA" and the requirement would deny universally.
-    expect(pipeline).toContain("sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel");
+    expect(pipeline).toContain("sessionAssuranceLevel: sessionUser.sessionAssuranceLevel");
   });
 });

@@ -6,6 +6,13 @@ export const ATLAS_ACCESS_TOKEN_COOKIE = "atlas_access_token";
 export const ATLAS_REFRESH_TOKEN_COOKIE = "atlas_refresh_token";
 export const ATLAS_SESSION_PERSISTENT_COOKIE = "atlas_session_persistent";
 export const ATLAS_UI_MODE_COOKIE = "atlas_ui_mode";
+/**
+ * Better Auth's session cookie, replacing the access and refresh cookies when
+ * AUTH_PROVIDER is better-auth (docs/engineering/better-auth-design.md). On
+ * https Better Auth names it `__Secure-atlas_session`.
+ */
+export const ATLAS_SESSION_COOKIE = "atlas_session";
+export const ATLAS_SECURE_SESSION_COOKIE = `__Secure-${ATLAS_SESSION_COOKIE}`;
 
 export const REFRESH_TOKEN_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 

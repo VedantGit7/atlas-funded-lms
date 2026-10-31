@@ -134,8 +134,14 @@ export const PublicPasswordResetRequestSchema = z
 export const PublicPasswordResetCompleteSchema = z
   .object({
     password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
-    accessToken: z.string().min(1).max(4000),
+    /** Supabase: the session the recovery link signed in. Empty with Better Auth. */
+    accessToken: z.string().max(4000).optional(),
     refreshToken: z.string().max(4000).optional(),
+    /**
+     * Better Auth: the single-use token in the reset link (launch plan task
+     * 3.2). Empty with Supabase. One of the two must be present.
+     */
+    token: z.string().max(512).optional(),
     /**
      * Authenticator code, for accounts with MFA: the recovery link signs in at
      * aal1 and Supabase only changes their password at aal2. Empty until the
@@ -149,7 +155,11 @@ export const PublicPasswordResetCompleteSchema = z
       })
       .optional(),
   })
-  .strict();
+  .strict()
+  .refine((input) => Boolean(input.token) || Boolean(input.accessToken), {
+    message: "Reset link is invalid or expired.",
+    path: ["token"],
+  });
 
 /**
  * RESET: the password changed. MFA_REQUIRED / MFA_INVALID: the account has

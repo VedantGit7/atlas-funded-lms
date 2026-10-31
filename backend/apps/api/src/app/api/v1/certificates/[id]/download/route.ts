@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 
     // Supabase verification, then tenant and principal, each releasing its
     // connection before the tenant transaction (audit H3).
-    const { supabaseUser, tenant, principal } = await authenticateTenantRequest(req);
+    const { sessionUser, tenant, principal } = await authenticateTenantRequest(req);
     await enforceTenantRouteRateLimit({
       tenantId: tenant.tenantId,
       principalId: principal.id,
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         });
 
         return runProtectedTenantRouteHandler({
-          sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+          sessionAssuranceLevel: sessionUser.sessionAssuranceLevel,
           rateLimitEnforced: true,
           tx,
           ctx: {
