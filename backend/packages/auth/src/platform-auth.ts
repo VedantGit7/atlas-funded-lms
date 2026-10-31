@@ -5,7 +5,8 @@ import { resolvePlatformPermissionsForRole } from "@atlas/access/platform-role-p
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { assertPlatformMfa } from "./mfa-enforcement";
 import { findActivePlatformOperator } from "./platform-operators.repository";
-import { upsertAuthPrincipal } from "./auth-principal.repository";
+import { findActiveSessionPrincipal, upsertAuthPrincipal } from "./auth-principal.repository";
+import { authProvider, requireBetterAuthUser } from "./better-auth-runtime";
 import { requireSupabaseUser } from "./session";
 
 type QueryableDb = {
@@ -51,15 +52,23 @@ export async function requirePlatformPrincipal(args: {
    */
   allowMfaEnrollment?: boolean;
 }): Promise<PlatformPrincipal> {
-  const supabaseUser = await requireSupabaseUser(args.req);
-  const principal = await upsertAuthPrincipal({
-    db: args.db,
-    supabaseUserId: supabaseUser.supabaseUserId,
-    email: supabaseUser.email,
-    emailConfirmed: supabaseUser.emailConfirmed,
-    mfaEnabled: supabaseUser.mfaEnabled,
-    markLogin: false,
-  });
+  // The same switch as @atlas/api's resolveSessionPrincipal, kept here so the
+  // platform guard has no dependency on the API package.
+  const sessionUser =
+    authProvider() === "better-auth"
+      ? await requireBetterAuthUser(args.req)
+      : await requireSupabaseUser(args.req);
+  const principal =
+    "principalId" in sessionUser
+      ? await findActiveSessionPrincipal({ db: args.db, principalId: sessionUser.principalId })
+      : await upsertAuthPrincipal({
+          db: args.db,
+          supabaseUserId: sessionUser.supabaseUserId,
+          email: sessionUser.email,
+          emailConfirmed: sessionUser.emailConfirmed,
+          mfaEnabled: sessionUser.mfaEnabled,
+          markLogin: false,
+        });
 
   const platformPermissions = await loadPlatformPermissions(args.db, principal.id);
 
@@ -75,9 +84,9 @@ export async function requirePlatformPrincipal(args: {
   // operator learns "denied" rather than "you need MFA" — the second answer
   // would confirm that the account is a platform operator to anyone who can
   // reach the endpoint.
-  if (!(args.allowMfaEnrollment === true && !supabaseUser.mfaEnabled)) {
+  if (!(args.allowMfaEnrollment === true && !sessionUser.mfaEnabled)) {
     assertPlatformMfa({
-      sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+      sessionAssuranceLevel: sessionUser.sessionAssuranceLevel,
       principalId: principal.id,
     });
   }

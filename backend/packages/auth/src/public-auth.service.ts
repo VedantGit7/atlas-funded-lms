@@ -8,7 +8,16 @@ import {
   passwordPolicyRejection,
   signInRateLimited,
 } from "./auth-errors";
-import { upsertAuthPrincipal } from "./auth-principal.repository";
+import { findActiveSessionPrincipal, upsertAuthPrincipal } from "./auth-principal.repository";
+import {
+  authRequestContext,
+  resendVerificationWithBetterAuth,
+  signInWithBetterAuth,
+  signUpWithBetterAuth,
+  verifyEmailWithBetterAuth,
+} from "./better-auth-flows";
+import { authProvider } from "./better-auth-runtime";
+import type { AuthEmail } from "./better-auth";
 import { toSessionSafeIdentity } from "./auth-principal.service";
 import { assertPasswordNotBreached } from "./password-policy";
 
@@ -81,7 +90,33 @@ function readDisplayNameFromMetadata(metadata: SupabaseUserMetadata): string | n
   return trimmed.length > 0 ? trimmed : null;
 }
 
-export async function loginWithPassword(args: { db: QueryableDb; input: PublicLoginInput }) {
+export async function loginWithPassword(args: {
+  db: QueryableDb;
+  input: PublicLoginInput & { rememberMe?: boolean | undefined };
+  /** Required with Better Auth: its cookies and the request's host. */
+  req?: Request;
+}) {
+  if (authProvider() === "better-auth") {
+    if (!args.req) throw authProviderUnavailable();
+    const signIn = await signInWithBetterAuth({
+      db: args.db,
+      ctx: authRequestContext(args.req),
+      email: args.input.email,
+      password: args.input.password,
+      rememberMe: args.input.rememberMe ?? false,
+    });
+    const principal = await findActiveSessionPrincipal({
+      db: args.db,
+      principalId: signIn.principalId,
+    });
+    return {
+      status: "signed_in" as const,
+      identity: toSessionSafeIdentity(principal),
+      displayName: null,
+      session: signIn.cookies,
+    };
+  }
+
   const supabase = createSupabasePublicServerClient();
 
   const result = (await supabase.auth.signInWithPassword({
@@ -129,7 +164,43 @@ function throwMappedSignupError(error: {
   throw passwordPolicyRejection(error) ?? invalidCredentials();
 }
 
-export async function signupWithPassword(args: { db: QueryableDb; input: PublicSignupInput }) {
+export async function signupWithPassword(args: {
+  db: QueryableDb;
+  input: PublicSignupInput;
+  /** Required with Better Auth: the route sends the verification email. */
+  req?: Request;
+}): Promise<
+  | {
+      status: "verification_required";
+      identity: undefined;
+      session: undefined;
+      emails?: AuthEmail[];
+    }
+  | {
+      status: "signed_in";
+      identity: ReturnType<typeof toSessionSafeIdentity>;
+      session: { accessToken: string; refreshToken: string; expiresIn: number };
+      emails?: AuthEmail[];
+    }
+> {
+  if (authProvider() === "better-auth") {
+    if (!args.req) throw authProviderUnavailable();
+    await assertPasswordNotBreached(args.input.password);
+    const result = await signUpWithBetterAuth({
+      db: args.db,
+      ctx: authRequestContext(args.req),
+      email: args.input.email,
+      password: args.input.password,
+      ...(args.input.displayName ? { displayName: args.input.displayName.trim() } : {}),
+    });
+    return {
+      status: "verification_required" as const,
+      identity: undefined,
+      session: undefined,
+      emails: result.emails,
+    };
+  }
+
   const supabase = createSupabasePublicServerClient();
 
   const displayName = args.input.displayName?.trim();
@@ -223,7 +294,28 @@ export async function establishSessionFromTokenHash(args: {
   db: QueryableDb;
   tokenHash: string;
   type: EmailOtpType;
+  /** Required with Better Auth, whose link carries a verification token. */
+  req?: Request;
 }) {
+  if (authProvider() === "better-auth") {
+    if (!args.req) throw authProviderUnavailable();
+    const verified = await verifyEmailWithBetterAuth({
+      ctx: authRequestContext(args.req),
+      token: args.tokenHash,
+    });
+    if (!verified.principalId) throw invalidCredentials();
+    const principal = await findActiveSessionPrincipal({
+      db: args.db,
+      principalId: verified.principalId,
+    });
+    return {
+      status: "signed_in" as const,
+      identity: toSessionSafeIdentity(principal),
+      displayName: null,
+      session: verified.cookies,
+    };
+  }
+
   const supabase = createSupabasePublicServerClient();
 
   const { data, error } = await supabase.auth.verifyOtp({
@@ -481,7 +573,18 @@ export async function establishSessionFromTokens(args: {
 export async function resendSignupVerification(args: {
   email: string;
   emailRedirectTo?: string;
-}): Promise<{ ok: true }> {
+  /** Required with Better Auth: the route sends the email. */
+  req?: Request;
+}): Promise<{ ok: true; emails?: AuthEmail[] }> {
+  if (authProvider() === "better-auth") {
+    if (!args.req) return { ok: true as const, emails: [] };
+    const { emails } = await resendVerificationWithBetterAuth({
+      ctx: authRequestContext(args.req),
+      email: args.email,
+    });
+    return { ok: true as const, emails };
+  }
+
   const supabase = createSupabasePublicServerClient();
 
   await supabase.auth

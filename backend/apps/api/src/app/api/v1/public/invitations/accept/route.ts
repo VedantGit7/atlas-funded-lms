@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
-import { createPublicRouteHandler } from "@atlas/api";
-import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
+import { createPublicRouteHandler, requireSessionUser, resolveSessionPrincipal } from "@atlas/api";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { acceptInvitation } from "@atlas/membership";
@@ -21,16 +20,12 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
   const input = AcceptInvitationRequestSchema.parse(rawBody);
 
   const tenant = await withGlobalDb(async (db) => resolveTenantFromRequest({ req, db }));
-  const supabaseUser = await requireSupabaseUser(req);
+  const sessionUser = await requireSessionUser(req);
 
   const principal = await withGlobalDb(async (db) =>
-    upsertAuthPrincipal({
+    resolveSessionPrincipal({
       db,
-      supabaseUserId: supabaseUser.supabaseUserId,
-      email: supabaseUser.email,
-      emailConfirmed: supabaseUser.emailConfirmed,
-      mfaEnabled: supabaseUser.mfaEnabled,
-      markLogin: false,
+      user: sessionUser,
     }),
   );
 

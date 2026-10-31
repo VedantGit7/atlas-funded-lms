@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { createSupabaseAdminServerClient } from "@atlas/auth/supabase-server";
-import { extractAccessToken } from "@atlas/auth/session";
+import { extractAccessToken } from "@atlas/auth/session-tokens";
 import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { resolveTenantHostForInternalApi } from "./resolve-tenant-host";
 import { resolveClientIpForInternalApi } from "./resolve-client-ip";

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
-import { setAuthCookies } from "@atlas/auth";
+import { applyAuthSession } from "@atlas/auth";
 
 const tenantA = {
   tenantId: "018f0000-0000-7000-8000-000000000001",
@@ -63,7 +63,7 @@ vi.mock("@atlas/auth", async (importOriginal) => {
   return {
     ...actual,
     loginWithPassword: (...args: unknown[]) => mockLoginWithPassword(...args),
-    setAuthCookies: vi.fn(),
+    applyAuthSession: vi.fn(),
   };
 });
 
@@ -167,7 +167,7 @@ describe("POST /api/v1/public/auth/login", () => {
     expect(response.status).toBe(400);
     expect(body.error.code).toBe("VALIDATION_ERROR");
     expect(mockLoginWithPassword).not.toHaveBeenCalled();
-    expect(setAuthCookies).not.toHaveBeenCalled();
+    expect(applyAuthSession).not.toHaveBeenCalled();
   });
 
   it.each(["tenant-a.example.com", "platform.localhost"])(
@@ -184,7 +184,7 @@ describe("POST /api/v1/public/auth/login", () => {
       });
       expect(mockWithTenantTx).not.toHaveBeenCalled();
       expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
-      expect(setAuthCookies).not.toHaveBeenCalled();
+      expect(applyAuthSession).not.toHaveBeenCalled();
     },
   );
 
@@ -330,11 +330,13 @@ describe("POST /api/v1/public/auth/login", () => {
         createRequest({ email: "user@example.com", password: "password123", rememberMe: true }),
       );
       expect(tenantResponse.status).toBe(200);
-      expect(setAuthCookies).toHaveBeenLastCalledWith(
+      expect(applyAuthSession).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          accessToken: "access",
-          refreshToken: "refresh",
-          expiresInSeconds: 3600,
+          session: expect.objectContaining({
+            accessToken: "access",
+            refreshToken: "refresh",
+            expiresIn: 3600,
+          }) as unknown,
           persistent: true,
         }),
       );

@@ -6,6 +6,7 @@ import {
   resolveRequestTenant,
 } from "@atlas/api";
 import { publicSignupInputSchema, setAuthCookies, signupWithPassword } from "@atlas/auth";
+import { sendAuthEmails } from "../../../../../../lib/auth-email";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
@@ -61,6 +62,13 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       referralCode: input.referralCode,
       emailRedirectTo,
     }),
+    req,
+  });
+  // Better Auth leaves the verification email to us; Supabase sent its own.
+  await sendAuthEmails({
+    req,
+    requestId,
+    emails: result.emails ?? [],
   });
 
   const principalRows = await globalDbPerStatement.$queryRaw<{ id: string }[]>`

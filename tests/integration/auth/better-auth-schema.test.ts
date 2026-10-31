@@ -93,6 +93,8 @@ suite("Better Auth on the Atlas schema", () => {
       secret: randomBytes(32).toString("base64url"),
       allowedHosts: ["academy.localhost.test"],
       protocol: "http",
+      onAuthEmail: () => undefined,
+      hasActivePlatformGrant: () => Promise.resolve(false),
     });
   });
 

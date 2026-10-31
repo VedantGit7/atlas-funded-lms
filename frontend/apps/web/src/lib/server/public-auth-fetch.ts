@@ -140,10 +140,21 @@ export const serverPublicApi = {
       "public-invitation-accept",
     ),
 
+  forgotPassword: (body: { email: string }) =>
+    postJson<{ data: { ok: boolean } }>(
+      "/api/v1/public/auth/forgot-password",
+      body,
+      "public-forgot-password",
+    ),
+
+  logout: () =>
+    postJson<{ data: { ok: boolean } }>("/api/v1/public/auth/logout", {}, "public-logout"),
+
   resetPassword: (body: {
     password: string;
-    accessToken: string;
+    accessToken?: string | undefined;
     refreshToken?: string | undefined;
+    token?: string | undefined;
     mfaCode?: string | undefined;
   }) =>
     postJson<PublicPasswordResetCompleteResponse>(

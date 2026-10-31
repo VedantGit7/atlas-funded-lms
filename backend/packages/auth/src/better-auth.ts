@@ -3,11 +3,10 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { twoFactor } from "better-auth/plugins/two-factor";
 import { createUuidV7 } from "@atlas/core/id/uuid-v7";
 
-import { REFRESH_TOKEN_MAX_AGE_SECONDS } from "./cookie-names";
+import { ATLAS_SESSION_COOKIE, REFRESH_TOKEN_MAX_AGE_SECONDS } from "./cookie-names";
 import { NEW_PASSWORD_MIN_LENGTH } from "./password-policy";
 
-/** Replaces atlas_access_token and atlas_refresh_token (design note, section 1). */
-export const ATLAS_SESSION_COOKIE = "atlas_session";
+export { ATLAS_SESSION_COOKIE };
 
 /** Sessions slide: one used on a new day is extended, at most one write a day. */
 export const SESSION_EXPIRES_IN_SECONDS = REFRESH_TOKEN_MAX_AGE_SECONDS;
@@ -32,7 +31,25 @@ export type AtlasAuthOptions = {
   allowedHosts: string[];
   /** `http` only for local hosts; deployments are always https. */
   protocol?: "http" | "https";
+  /**
+   * Receives each verification and password-reset email Better Auth asks for.
+   * Our route sends it, with the academy's sender, after the call returns.
+   */
+  onAuthEmail?: (email: AuthEmail) => void;
+  /** Whether the principal holds an unrevoked platform grant (audit H6). */
+  hasActivePlatformGrant: (principalId: string) => Promise<boolean>;
 };
+
+/** An email Better Auth asked us to send. The token is single-use and expires. */
+export type AuthEmail = {
+  kind: "verify-email" | "reset-password";
+  email: string;
+  token: string;
+};
+
+function refuseUnsentEmail(): never {
+  throw new Error("Better Auth asked for an email outside a route that sends it");
+}
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -48,6 +65,7 @@ function normalizeEmail(email: string): string {
  */
 export function createAtlasAuth(options: AtlasAuthOptions) {
   const protocol = options.protocol ?? "https";
+  const onAuthEmail = options.onAuthEmail ?? refuseUnsentEmail;
 
   return betterAuth({
     appName: "Atlas LMS",
@@ -58,6 +76,9 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
     advanced: {
       database: { generateId: () => createUuidV7() },
       useSecureCookies: protocol === "https",
+      // Better Auth's own cookies (the pending two-factor challenge, "don't
+      // remember me") are named atlas.*; the session cookie is atlas_session.
+      cookiePrefix: "atlas",
       cookies: { session_token: { name: ATLAS_SESSION_COOKIE } },
     },
     emailAndPassword: {
@@ -65,6 +86,22 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
       // A principal is only created for an address its owner has proven (H6).
       requireEmailVerification: true,
       minPasswordLength: NEW_PASSWORD_MIN_LENGTH,
+      resetPasswordTokenExpiresIn: 60 * 60,
+      // A reset ends every session, so a stolen one doesn't outlive it.
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: ({ user, token }) => {
+        onAuthEmail({ kind: "reset-password", email: user.email, token });
+        return Promise.resolve();
+      },
+    },
+    emailVerification: {
+      sendOnSignUp: true,
+      autoSignInAfterVerification: true,
+      expiresIn: 60 * 60 * 24,
+      sendVerificationEmail: ({ user, token }) => {
+        onAuthEmail({ kind: "verify-email", email: user.email, token });
+        return Promise.resolve();
+      },
     },
     user: {
       modelName: "authPrincipal",
@@ -84,6 +121,13 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
         globalStatus: {
           type: "string",
           fieldName: "global_status",
+          required: false,
+          input: false,
+          returned: false,
+        },
+        lastLoginAt: {
+          type: "date",
+          fieldName: "last_login_at",
           required: false,
           input: false,
           returned: false,
@@ -179,11 +223,23 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
       session: {
         create: {
           before: async (session, ctx) => {
-            // A disabled or unclaimed principal gets no session. global_status
-            // is still read on every request, as it is today.
+            // A disabled principal gets no session. global_status is still read
+            // on every request, as it is today.
             const principal: Record<string, unknown> | null | undefined =
               await ctx?.context.internalAdapter.findUserById(session.userId);
-            if (!principal || principal["globalStatus"] !== "active") return false;
+            if (!principal) return false;
+            if (principal["globalStatus"] === "unclaimed") {
+              // A placeholder made before its owner signed up (audit H6) is
+              // claimed by its owner's first sign-in with a proven address,
+              // unless it carries a platform grant.
+              if (principal["emailVerified"] !== true) return false;
+              if (await options.hasActivePlatformGrant(session.userId)) return false;
+              await ctx?.context.internalAdapter.updateUser(session.userId, {
+                globalStatus: "active",
+              });
+            } else if (principal["globalStatus"] !== "active") {
+              return false;
+            }
 
             const secondFactor = ctx !== null && SECOND_FACTOR_SESSION_PATHS.has(ctx.path);
             return {
@@ -193,6 +249,11 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
                 mfaVerifiedAt: secondFactor ? new Date() : null,
               },
             };
+          },
+          after: async (session, ctx) => {
+            await ctx?.context.internalAdapter.updateUser(session.userId, {
+              lastLoginAt: new Date(),
+            });
           },
         },
       },

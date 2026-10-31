@@ -22,3 +22,7 @@ GRANT SELECT (id, user_id, expires_at, ip_address, user_agent, assurance_level,
 GRANT DELETE ON auth_sessions TO atlas_platform;
 GRANT SELECT (id, user_id, provider_id, created_at, updated_at)
   ON auth_accounts TO atlas_platform;
+
+-- Claiming an unclaimed principal checks it has no platform grant (migration 128).
+GRANT SELECT ON platform_operators TO atlas_auth;
+REVOKE INSERT, UPDATE, DELETE ON platform_operators FROM atlas_auth;

@@ -18,6 +18,7 @@ export {
   type RateLimitRedisClient,
 } from "./rate-limit-store";
 export { resolveClientIp } from "./client-ip";
+export { requireSessionUser, resolveSessionPrincipal } from "./session-user";
 export { createPublicRouteHandler, type PublicRouteMetadata } from "./public-route";
 export {
   authenticateTenantRequest,

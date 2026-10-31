@@ -5,7 +5,7 @@ import {
   resolveTenantFromRequest,
 } from "@atlas/tenancy";
 import { createPublicRouteHandler } from "@atlas/api";
-import { loginWithPassword, setAuthCookies } from "@atlas/auth";
+import { applyAuthSession, loginWithPassword } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
@@ -41,6 +41,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     const result = await loginWithPassword({
       db: loginPrincipalDb,
       input: { email: input.email, password: input.password },
+      req,
     });
 
     const status = result.identity.mfaEnabled ? "MFA_REQUIRED" : "AUTHENTICATED";
@@ -53,12 +54,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
     const response = NextResponse.json(body);
 
-    setAuthCookies({
-      response,
-      accessToken: result.session.accessToken,
-      refreshToken: result.session.refreshToken,
-      expiresInSeconds: result.session.expiresIn,
-    });
+    applyAuthSession({ response, session: result.session });
 
     return response;
   }
@@ -74,7 +70,9 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     input: {
       email: input.email,
       password: input.password,
+      rememberMe: input.rememberMe ?? false,
     },
+    req,
   });
 
   // Release global lookup work before requesting a connection for membership.
@@ -153,13 +151,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const response = NextResponse.json(body);
 
-  setAuthCookies({
-    response,
-    accessToken: result.session.accessToken,
-    refreshToken: result.session.refreshToken,
-    expiresInSeconds: result.session.expiresIn,
-    persistent: input.rememberMe ?? false,
-  });
+  applyAuthSession({ response, session: result.session, persistent: input.rememberMe ?? false });
 
   return response;
 });

@@ -9,6 +9,7 @@ export {
   PublicOAuthStartRequestSchema,
   PublicOAuthStartResponseSchema,
   PublicOAuthCallbackRequestSchema,
+  PublicPasswordResetRequestSchema,
   PublicPasswordResetCompleteSchema,
   PublicPasswordResetCompleteResponseSchema,
   type PublicPasswordResetCompleteResponse,

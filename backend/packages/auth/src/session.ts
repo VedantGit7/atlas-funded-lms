@@ -1,47 +1,16 @@
 import { createHash } from "node:crypto";
-import { cookies } from "next/headers";
 import { isAuthError, isAuthRetryableFetchError } from "@supabase/supabase-js";
 import { AtlasHttpError } from "@atlas/core/http/errors";
-import {
-  ATLAS_ACCESS_TOKEN_COOKIE,
-  ATLAS_REFRESH_TOKEN_COOKIE,
-  getBearerToken,
-  readCookieFromRequest,
-} from "./cookie-names";
 import { applyAuthSessionToCookieStore, readSessionPersistence } from "./cookie-store";
 import { createSupabaseSessionVerificationClient } from "./supabase-server";
 import { authProviderUnavailable, authRequired } from "./auth-errors";
 import { refreshSessionFromRefreshToken } from "./public-auth.service";
+import type { BetterAuthSessionUser } from "./better-auth-runtime";
+import { extractAccessToken, extractRefreshToken } from "./session-tokens";
 
 export type SessionAssuranceLevel = "aal1" | "aal2" | null;
 
-export async function extractAccessToken(req: Request): Promise<string | null> {
-  const bearer = getBearerToken(req);
-
-  if (bearer) {
-    return bearer;
-  }
-
-  const cookieToken = readCookieFromRequest(req, ATLAS_ACCESS_TOKEN_COOKIE);
-
-  if (cookieToken) {
-    return cookieToken;
-  }
-
-  const cookieStore = await cookies();
-  return cookieStore.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value ?? null;
-}
-
-export async function extractRefreshToken(req: Request): Promise<string | null> {
-  const cookieToken = readCookieFromRequest(req, ATLAS_REFRESH_TOKEN_COOKIE);
-
-  if (cookieToken) {
-    return cookieToken;
-  }
-
-  const cookieStore = await cookies();
-  return cookieStore.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value ?? null;
-}
+export { extractAccessToken, extractRefreshToken };
 
 type VerifiedUser = {
   supabaseUserId: string;
@@ -224,3 +193,12 @@ export async function requireSupabaseUser(req: Request) {
     throw verificationError(error);
   }
 }
+
+/**
+ * The signed-in user, from whichever login system this deployment uses
+ * (`AUTH_PROVIDER`, launch plan phase 3). A Better Auth user is the principal
+ * itself; a Supabase user is mirrored into one by `upsertAuthPrincipal`.
+ */
+export type SessionUser =
+  | ({ provider: "supabase" } & Awaited<ReturnType<typeof requireSupabaseUser>>)
+  | ({ provider: "better-auth" } & BetterAuthSessionUser);

@@ -170,6 +170,7 @@ export function PasswordResetForm() {
   const [recoveryTokens, setRecoveryTokens] = useState<{
     accessToken: string;
     refreshToken: string;
+    token: string;
   } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   // Once the account turns out to have MFA, the code stays asked for.
@@ -193,11 +194,21 @@ export function PasswordResetForm() {
       password: "",
       accessToken: "",
       refreshToken: "",
+      token: "",
       mfaCode: "",
     },
   });
 
   useEffect(() => {
+    // Better Auth's reset link carries a single-use ?token=; Supabase's puts
+    // the recovery session in the hash.
+    const resetToken = new URLSearchParams(window.location.search).get("token");
+    if (resetToken) {
+      setRecoveryTokens({ accessToken: "", refreshToken: "", token: resetToken });
+      completeForm.setValue("token", resetToken);
+      return;
+    }
+
     const hash = window.location.hash.startsWith("#")
       ? window.location.hash.slice(1)
       : window.location.hash;
@@ -210,6 +221,7 @@ export function PasswordResetForm() {
       const tokens = {
         accessToken,
         refreshToken: refreshToken ?? "",
+        token: "",
       };
       setRecoveryTokens(tokens);
       completeForm.setValue("accessToken", tokens.accessToken);
@@ -246,6 +258,7 @@ export function PasswordResetForm() {
         >
           <HiddenFormField control={completeForm.control} name="accessToken" />
           <HiddenFormField control={completeForm.control} name="refreshToken" />
+          <HiddenFormField control={completeForm.control} name="token" />
 
           <FormField
             control={completeForm.control}

@@ -1,4 +1,4 @@
-import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
+import { requireSessionUser, resolveSessionPrincipal } from "./session-user";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { resolveTenantFromRecentLookup, resolveTenantFromRequest } from "@atlas/tenancy";
 
@@ -49,21 +49,17 @@ export async function resolveRequestTenant(req: TenantRequest): Promise<Resolved
  * learns nothing about whether a tenant host exists.
  */
 export async function authenticateTenantRequest(req: TenantRequest): Promise<{
-  supabaseUser: Awaited<ReturnType<typeof requireSupabaseUser>>;
+  sessionUser: Awaited<ReturnType<typeof requireSessionUser>>;
   tenant: ResolvedRequestTenant;
-  principal: Awaited<ReturnType<typeof upsertAuthPrincipal>>;
+  principal: Awaited<ReturnType<typeof resolveSessionPrincipal>>;
 }> {
-  const supabaseUser = await requireSupabaseUser(req);
+  const sessionUser = await requireSessionUser(req);
   const { tenant, principal } = await withGlobalDb(async (db) => ({
     tenant: await resolveTenantFromRequest({ req, db }),
-    principal: await upsertAuthPrincipal({
+    principal: await resolveSessionPrincipal({
       db,
-      supabaseUserId: supabaseUser.supabaseUserId,
-      email: supabaseUser.email,
-      emailConfirmed: supabaseUser.emailConfirmed,
-      mfaEnabled: supabaseUser.mfaEnabled,
-      markLogin: false,
+      user: sessionUser,
     }),
   }));
-  return { supabaseUser, tenant, principal };
+  return { sessionUser, tenant, principal };
 }

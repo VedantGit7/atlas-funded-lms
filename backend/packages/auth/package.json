@@ -16,7 +16,11 @@
     "./supabase-admin-users": "./src/supabase-admin-users.ts",
     "./platform-operators.repository": "./src/platform-operators.repository.ts",
     "./mfa-enforcement": "./src/mfa-enforcement.ts",
-    "./better-auth": "./src/better-auth.ts"
+    "./better-auth": "./src/better-auth.ts",
+    "./better-auth-runtime": "./src/better-auth-runtime.ts",
+    "./better-auth-flows": "./src/better-auth-flows.ts",
+    "./auth-principal.repository": "./src/auth-principal.repository.ts",
+    "./session-tokens": "./src/session-tokens.ts"
   },
   "scripts": {
     "build": "echo \"No auth build configured yet.\"",
@@ -32,6 +36,7 @@
   "dependencies": {
     "@atlas/access": "workspace:*",
     "@atlas/core": "workspace:*",
+    "@atlas/db": "workspace:*",
     "@atlas/observability": "workspace:*",
     "@supabase/supabase-js": "^2.117.3",
     "better-auth": "^1.7.14",

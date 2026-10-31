@@ -11,7 +11,7 @@ import type { ResourceRef } from "@atlas/authorization";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import { attachRequestIdHeader, inferRouteGroup, runRouteLifecycle } from "@atlas/observability";
-import { requireSupabaseUser, upsertAuthPrincipal } from "@atlas/auth";
+import { requireSessionUser, resolveSessionPrincipal } from "./session-user";
 import type { SessionAssuranceLevel } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import type { TenantTx } from "@atlas/db";
@@ -343,7 +343,7 @@ export function createTenantRoute<
           // ---------------------------------------------------------------
           // Phase 1: no database connection held.
           //
-          // requireSupabaseUser makes up to three Supabase HTTPS calls. It used
+          // requireSessionUser makes up to three Supabase HTTPS calls. It used
           // to run inside withGlobalDb, pinning a pooled connection for the
           // duration of that network I/O. Input parsing is pure CPU and likewise
           // needs no connection.
@@ -353,8 +353,8 @@ export function createTenantRoute<
           // tenant-unavailable. That ordering is preferable anyway: it does not
           // disclose whether a tenant host exists to an anonymous caller.
           // ---------------------------------------------------------------
-          const supabaseUser = await measureRouteStage("authentication", () =>
-            requireSupabaseUser(req),
+          const sessionUser = await measureRouteStage("authentication", () =>
+            requireSessionUser(req),
           );
 
           let input: TInput;
@@ -398,13 +398,9 @@ export function createTenantRoute<
             withGlobalDb((db) =>
               measureRouteStage("global_work", async () => {
                 const resolvedTenant = await resolveTenantFromRequest({ req, db });
-                const resolvedPrincipal = await upsertAuthPrincipal({
+                const resolvedPrincipal = await resolveSessionPrincipal({
                   db,
-                  supabaseUserId: supabaseUser.supabaseUserId,
-                  email: supabaseUser.email,
-                  emailConfirmed: supabaseUser.emailConfirmed,
-                  mfaEnabled: supabaseUser.mfaEnabled,
-                  markLogin: false,
+                  user: sessionUser,
                 });
 
                 return { tenant: resolvedTenant, principal: resolvedPrincipal };
@@ -458,7 +454,7 @@ export function createTenantRoute<
                     metadata: config.metadata,
                     params: asParamRecord(params),
                     input,
-                    sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+                    sessionAssuranceLevel: sessionUser.sessionAssuranceLevel,
                     rateLimitEnforced: true,
                   };
                   // F03: every request, including a replay, uses current resource,

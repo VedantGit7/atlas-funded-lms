@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPublicRouteHandler, globalDbPerStatement, resolveRequestTenant } from "@atlas/api";
-import { establishSessionFromTokenHash, setAuthCookies } from "@atlas/auth";
+import { establishSessionFromTokenHash, applyAuthSession } from "@atlas/auth";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
@@ -30,6 +30,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     db: globalDbPerStatement,
     tokenHash: input.tokenHash,
     type: input.type,
+    req,
   });
 
   const principalRows = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
@@ -99,12 +100,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const response = NextResponse.json(body);
 
-  setAuthCookies({
-    response,
-    accessToken: result.session.accessToken,
-    refreshToken: result.session.refreshToken,
-    expiresInSeconds: result.session.expiresIn,
-  });
+  applyAuthSession({ response, session: result.session });
 
   return response;
 });

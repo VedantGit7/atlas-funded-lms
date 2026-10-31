@@ -27,7 +27,7 @@ const signedInResult = {
 const {
   mockResolveTenant,
   mockEstablishSessionFromTokenHash,
-  mockSetAuthCookies,
+  mockApplyAuthSession,
   mockBuildPublicAuthResponse,
   mockGlobalQueryRaw,
   mockWithGlobalDb,
@@ -40,7 +40,7 @@ const {
   return {
     mockResolveTenant: vi.fn(),
     mockEstablishSessionFromTokenHash: vi.fn(),
-    mockSetAuthCookies: vi.fn(),
+    mockApplyAuthSession: vi.fn(),
     mockBuildPublicAuthResponse: vi.fn(),
     mockGlobalQueryRaw,
     mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) =>
@@ -77,7 +77,7 @@ vi.mock("@atlas/auth", async (importOriginal) => {
     ...actual,
     establishSessionFromTokenHash: (...args: unknown[]) =>
       mockEstablishSessionFromTokenHash(...args),
-    setAuthCookies: (...args: unknown[]) => mockSetAuthCookies(...args),
+    applyAuthSession: (...args: unknown[]) => mockApplyAuthSession(...args),
   };
 });
 
@@ -160,11 +160,13 @@ describe("POST /api/v1/public/auth/confirm", () => {
         displayName: "Atlas User",
       }),
     );
-    expect(mockSetAuthCookies).toHaveBeenCalledWith(
+    expect(mockApplyAuthSession).toHaveBeenCalledWith(
       expect.objectContaining({
-        accessToken: "access",
-        refreshToken: "refresh",
-        expiresInSeconds: 3600,
+        session: expect.objectContaining({
+          accessToken: "access",
+          refreshToken: "refresh",
+          expiresIn: 3600,
+        }) as unknown,
       }),
     );
     expect(body).toEqual({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
@@ -176,7 +178,7 @@ describe("POST /api/v1/public/auth/confirm", () => {
     await POST(createRequest(validBody));
 
     expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
-    expect(mockSetAuthCookies).toHaveBeenCalled();
+    expect(mockApplyAuthSession).toHaveBeenCalled();
   });
 
   it("rejects a request missing the token hash", async () => {

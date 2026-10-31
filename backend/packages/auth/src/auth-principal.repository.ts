@@ -1,6 +1,11 @@
 import { createUuidV7 } from "@atlas/core/id/uuid-v7";
 
-import { accountDisabled, accountReviewRequired, emailNotVerified } from "./auth-errors";
+import {
+  accountDisabled,
+  accountReviewRequired,
+  authRequired,
+  emailNotVerified,
+} from "./auth-errors";
 import type { AuthPrincipalBridge } from "./types";
 
 type QueryableDb = {
@@ -420,4 +425,24 @@ async function recordRelinkRequest(
       attempt_count = auth_principal_relink_requests.attempt_count + 1
 
   `;
+}
+
+/**
+ * The principal behind a Better Auth session. A Better Auth user is the
+ * principal itself, so nothing is mirrored: it is read, and refused unless
+ * active, so disabling an account takes effect on the next request.
+ */
+export async function findActiveSessionPrincipal(args: {
+  db: QueryableDb;
+  principalId: string;
+}): Promise<AuthPrincipalBridge> {
+  const rows = await args.db.$queryRaw<PrincipalRow[]>`
+    select id::text, email, email_normalized, global_status, mfa_enabled, last_login_at
+    from auth_principals
+    where id = ${args.principalId}::uuid
+  `;
+  const principal = rows[0];
+  if (!principal) throw authRequired();
+  if (principal.global_status !== "active") throw accountDisabled();
+  return mapPrincipalRow(principal);
 }

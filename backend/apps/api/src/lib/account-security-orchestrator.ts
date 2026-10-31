@@ -84,7 +84,8 @@ export async function emitSecurityNotification(
 export async function notifyPasswordReset(args: {
   host: string;
   requestId: string;
-  supabaseUserId: string;
+  /** Supabase reset: its user; Better Auth reset: the principal itself. */
+  who: { supabaseUserId: string } | { principalId: string };
   email: string;
 }): Promise<void> {
   try {
@@ -94,13 +95,17 @@ export async function notifyPasswordReset(args: {
     if (!tenant || tenant.tenantState !== "ACTIVE") return;
 
     // A global table: read on its own connection, never inside the tenant transaction.
-    const principals = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
-      select id::text
-      from auth_principals
-      where supabase_user_id = ${args.supabaseUserId}::uuid
-      limit 1
-    `;
-    const principalId = principals[0]?.id;
+    const principalId =
+      "principalId" in args.who
+        ? args.who.principalId
+        : (
+            await globalDbPerStatement.$queryRaw<{ id: string }[]>`
+              select id::text
+              from auth_principals
+              where supabase_user_id = ${args.who.supabaseUserId}::uuid
+              limit 1
+            `
+          )[0]?.id;
     if (!principalId) return;
 
     await withTenantTx(

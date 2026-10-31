@@ -95,3 +95,33 @@ export function setAuthCookies(args: {
     args.response.cookies.delete(ATLAS_SESSION_PERSISTENT_COOKIE);
   }
 }
+
+/** A new session from either login system (`AUTH_PROVIDER`). */
+export type IssuedAuthSession =
+  | { accessToken: string; refreshToken: string; expiresIn?: number }
+  | { setCookies: string[] };
+
+/**
+ * Sets the cookies for a new session. A Supabase session becomes the Atlas
+ * access and refresh cookies; Better Auth already wrote its own Set-Cookie
+ * headers (atlas_session, or a pending two-factor challenge), which are passed on.
+ */
+export function applyAuthSession(args: {
+  response: NextResponse;
+  session: IssuedAuthSession;
+  persistent?: boolean;
+}): void {
+  if ("setCookies" in args.session) {
+    for (const cookie of args.session.setCookies) {
+      args.response.headers.append("set-cookie", cookie);
+    }
+    return;
+  }
+  setAuthCookies({
+    response: args.response,
+    accessToken: args.session.accessToken,
+    refreshToken: args.session.refreshToken,
+    ...(args.session.expiresIn !== undefined ? { expiresInSeconds: args.session.expiresIn } : {}),
+    ...(args.persistent !== undefined ? { persistent: args.persistent } : {}),
+  });
+}

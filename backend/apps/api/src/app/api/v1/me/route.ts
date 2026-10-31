@@ -1,5 +1,6 @@
 import { enforceIngressRateLimit } from "@atlas/api/rate-limit";
 import { measureRouteStage } from "@atlas/api/route-stage-timings";
+import { requireSessionUser, resolveSessionPrincipal } from "@atlas/api/session-user";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
@@ -11,7 +12,7 @@ import {
   type RouteMetadata,
 } from "@atlas/api";
 import { createTenantResourceRef } from "@atlas/authorization";
-import { requireSupabaseUser, toSessionSafeIdentity, upsertAuthPrincipal } from "@atlas/auth";
+import { toSessionSafeIdentity } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import {
@@ -55,18 +56,14 @@ export async function GET(req: NextRequest) {
     await enforceIngressRateLimit({ req, plane: "tenant", requestId });
     // Verify the remote session before acquiring a database connection, then
     // release global identity work before the tenant transaction checks out one.
-    const supabaseUser = await measureRouteStage("authentication", () => requireSupabaseUser(req));
+    const sessionUser = await measureRouteStage("authentication", () => requireSessionUser(req));
     const { tenant, principal } = await measureRouteStage("global_total", () =>
       withGlobalDb((db) =>
         measureRouteStage("global_work", async () => {
           const tenant = await resolveTenantFromRequest({ req, db });
-          const principal = await upsertAuthPrincipal({
+          const principal = await resolveSessionPrincipal({
             db,
-            supabaseUserId: supabaseUser.supabaseUserId,
-            email: supabaseUser.email,
-            emailConfirmed: supabaseUser.emailConfirmed,
-            mfaEnabled: supabaseUser.mfaEnabled,
-            markLogin: false,
+            user: sessionUser,
           });
           return { tenant, principal };
         }),
@@ -96,7 +93,7 @@ export async function GET(req: NextRequest) {
             });
 
             return runProtectedTenantRouteHandler({
-              sessionAssuranceLevel: supabaseUser.sessionAssuranceLevel,
+              sessionAssuranceLevel: sessionUser.sessionAssuranceLevel,
               rateLimitEnforced: true,
               tx,
               ctx: {
