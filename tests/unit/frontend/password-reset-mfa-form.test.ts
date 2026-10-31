@@ -47,10 +47,17 @@ it("asks for the authenticator code when the reset answers that the account has 
     });
     await act(async () => {
       container.querySelector("form")?.requestSubmit();
-      await new Promise((resolve) => setTimeout(resolve, 50));
     });
+    // Validation loads the schema lazily, so the submit settles on its own time.
+    await vi.waitFor(
+      async () => {
+        await act(async () => {});
+        expect(mocks.complete).toHaveBeenCalledTimes(1);
+        expect(container.textContent).toContain("Authenticator code");
+      },
+      { timeout: 5_000 },
+    );
 
-    expect(mocks.complete).toHaveBeenCalledTimes(1);
     const sent = mocks.complete.mock.calls[0]?.[1] as FormData;
     expect(sent.get("password")).toBe("a-new-strong-password");
     expect(sent.get("accessToken")).toBe("fixture-access");
