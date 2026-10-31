@@ -21,6 +21,7 @@ import {
 import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
+import { OtpInput } from "../../login/_components/OtpInput";
 import {
   completePasswordResetAction,
   requestPasswordResetAction,
@@ -171,6 +172,11 @@ export function PasswordResetForm() {
     refreshToken: string;
   } | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  // Once the account turns out to have MFA, the code stays asked for.
+  const [mfaRequired, setMfaRequired] = useState(false);
+  if (completeState.mfaRequired && !mfaRequired) {
+    setMfaRequired(true);
+  }
 
   const requestForm = useLazyZodForm({
     schema: loadPublicPasswordResetRequestSchema,
@@ -187,6 +193,7 @@ export function PasswordResetForm() {
       password: "",
       accessToken: "",
       refreshToken: "",
+      mfaCode: "",
     },
   });
 
@@ -272,6 +279,30 @@ export function PasswordResetForm() {
               </FormItem>
             )}
           />
+
+          {mfaRequired ? (
+            <FormField
+              control={completeForm.control}
+              name="mfaCode"
+              render={({ field }) => (
+                <FormItem className="space-y-0 pt-2">
+                  <FormLabel className={fieldLabelClass}>Authenticator code</FormLabel>
+                  <FormControl>
+                    <OtpInput
+                      value={field.value ?? ""}
+                      onChange={field.onChange}
+                      length={6}
+                      autoFocus
+                      disabled={completePending || completeForm.formState.isSubmitting}
+                      invalid={Boolean(completeState.mfaRequired && field.value)}
+                      ariaLabel="Authenticator verification code"
+                    />
+                  </FormControl>
+                  <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
+                </FormItem>
+              )}
+            />
+          ) : null}
 
           {completeState.message ? (
             <p

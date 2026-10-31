@@ -1,4 +1,10 @@
+import { globalDbPerStatement } from "@atlas/api";
 import type { TenantTx } from "@atlas/db";
+import { withGlobalDb } from "@atlas/db/global-db";
+import { withTenantTx } from "@atlas/db/with-tenant-tx";
+import { findMembershipByPrincipal } from "@atlas/membership";
+import { structuredLogger } from "@atlas/observability/logger";
+import { lookupTenantFromHost } from "@atlas/tenancy";
 import { recordAuditChange } from "../server/audit-change";
 import { publishSecurityEvent } from "../server/notifications/security-notification.service";
 import type { SecurityNotificationEventKey } from "../server/notifications/security-notification.events";
@@ -66,4 +72,65 @@ export async function emitSecurityNotification(
     email: args.email,
     siteUrl,
   });
+}
+
+/**
+ * After "forgot password" changes a password: the same security email as an
+ * in-app change, to the person's membership in the academy whose site the
+ * reset ran on. A reset on a host with no academy (the platform console), or
+ * by someone with no active membership there, has nobody to tell. The password
+ * has already changed, so a failure here is logged, never thrown.
+ */
+export async function notifyPasswordReset(args: {
+  host: string;
+  requestId: string;
+  supabaseUserId: string;
+  email: string;
+}): Promise<void> {
+  try {
+    const tenant = await withGlobalDb((db) =>
+      lookupTenantFromHost({ host: args.host, requestId: args.requestId, db }),
+    );
+    if (!tenant || tenant.tenantState !== "ACTIVE") return;
+
+    // A global table: read on its own connection, never inside the tenant transaction.
+    const principals = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
+      select id::text
+      from auth_principals
+      where supabase_user_id = ${args.supabaseUserId}::uuid
+      limit 1
+    `;
+    const principalId = principals[0]?.id;
+    if (!principalId) return;
+
+    await withTenantTx(
+      { tenantId: tenant.tenantId, requestId: args.requestId, allowAnonymousTenantRead: true },
+      async (tx) => {
+        const membership = await findMembershipByPrincipal({
+          tx,
+          tenantId: tenant.tenantId,
+          authPrincipalId: principalId,
+        });
+        if (membership?.status !== "ACTIVE") return;
+
+        await emitSecurityNotification(
+          tx,
+          {
+            tenantId: tenant.tenantId,
+            actorMembershipId: membership.id,
+            requestId: args.requestId,
+          },
+          { eventType: "security.password_changed", email: args.email },
+        );
+      },
+    );
+  } catch (error) {
+    structuredLogger.warn({
+      message: "Could not send the password-changed email after a password reset",
+      module: "auth",
+      eventType: "auth.password_reset_notice_failed",
+      requestId: args.requestId,
+      detail: error instanceof Error ? error.message.slice(0, 300) : String(error).slice(0, 300),
+    });
+  }
 }

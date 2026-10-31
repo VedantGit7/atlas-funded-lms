@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   loginWithPassword,
+  resetPasswordWithRecoverySession,
   setPasswordFromInvitationSession,
   signupWithPassword,
 } from "../../../backend/packages/auth/src/public-auth.service";
@@ -19,6 +20,8 @@ const mocks = vi.hoisted(() => ({
   upsert: vi.fn(),
   redirect: vi.fn(),
   setInvitationPassword: vi.fn(),
+  resetPassword: vi.fn(),
+  mfa: { listFactors: vi.fn(), challengeAndVerify: vi.fn() },
 }));
 vi.mock("../../../backend/packages/auth/src/supabase-server", () => ({
   createSupabasePublicServerClient: () => ({ auth: mocks }),
@@ -35,7 +38,10 @@ vi.mock("../../../backend/packages/auth/src/auth-principal.repository", () => ({
 vi.mock("next/headers", () => ({ cookies: vi.fn(), headers: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: mocks.redirect }));
 vi.mock("../../../frontend/apps/web/src/lib/server/public-auth-fetch", () => ({
-  serverPublicApi: { setInvitationPassword: mocks.setInvitationPassword },
+  serverPublicApi: {
+    setInvitationPassword: mocks.setInvitationPassword,
+    resetPassword: mocks.resetPassword,
+  },
   ServerPublicApiError: class extends Error {
     constructor(
       public code: string,
@@ -90,6 +96,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   mocks.setSession.mockResolvedValue({ error: null });
   mocks.signInWithPassword.mockResolvedValue({ error: null });
+  mocks.mfa.listFactors.mockResolvedValue({ data: { totp: [], phone: [] }, error: null });
   mocks.redirect.mockImplementation(() => {
     throw new Error("NEXT_REDIRECT");
   });
@@ -162,14 +169,29 @@ describe("safe password policy rejection handling", () => {
     });
   }
 
-  it("reset explains weak_password without redirecting or exposing provider text", async () => {
+  it("reset service explains weak_password without exposing provider text", async () => {
     mocks.updateUser.mockResolvedValue(rejected("weak_password"));
+    await expect(
+      resetPasswordWithRecoverySession({
+        accessToken: "fixture-access",
+        refreshToken: "fixture-refresh",
+        password: "new-password",
+      }),
+    ).rejects.toMatchObject({ code: "VALIDATION_ERROR", message: safeMessage });
+  });
+
+  it("reset action shows the API's policy rejection without redirecting", async () => {
+    mocks.resetPassword.mockRejectedValue(
+      new ServerPublicApiError("VALIDATION_ERROR", 400, "req-policy", safeMessage),
+    );
     await expect(reset()).resolves.toMatchObject({ ok: false, message: safeMessage });
     expect(mocks.redirect).not.toHaveBeenCalled();
   });
 
-  it("reset keeps unknown provider errors generic", async () => {
-    mocks.updateUser.mockResolvedValue(rejected("unknown_error"));
+  it("reset action keeps other API errors generic", async () => {
+    mocks.resetPassword.mockRejectedValue(
+      new ServerPublicApiError("INTERNAL_ERROR", 500, "req-internal", providerMessage),
+    );
     await expect(reset()).resolves.toMatchObject({
       ok: false,
       message: "Unable to reset password. Request a new link.",
@@ -177,19 +199,19 @@ describe("safe password policy rejection handling", () => {
     expect(mocks.redirect).not.toHaveBeenCalled();
   });
 
-  it("reset rejects an invalid recovery session before attempting to change the password", async () => {
-    mocks.setSession.mockResolvedValue(rejected("weak_password"));
-    mocks.updateUser.mockResolvedValue({ error: null });
+  it("reset action reports an invalid recovery session as an expired link", async () => {
+    mocks.resetPassword.mockRejectedValue(
+      new ServerPublicApiError("AUTH_REQUIRED", 401, "req-auth", "Invalid email or password"),
+    );
     await expect(reset()).resolves.toMatchObject({
       ok: false,
       message: "Reset link is invalid or expired.",
     });
-    expect(mocks.updateUser).not.toHaveBeenCalled();
     expect(mocks.redirect).not.toHaveBeenCalled();
   });
 
   it("successful reset lets Next's redirect escape instead of presenting a failure", async () => {
-    mocks.updateUser.mockResolvedValue({ error: null });
+    mocks.resetPassword.mockResolvedValue({ data: { status: "RESET" } });
     await expect(reset()).rejects.toThrow("NEXT_REDIRECT");
     expect(mocks.redirect).toHaveBeenCalledExactlyOnceWith("/login");
   });

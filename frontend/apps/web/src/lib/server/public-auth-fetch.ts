@@ -4,6 +4,7 @@ import type {
   PublicAuthApiResponse,
   SetInvitationPasswordApiResponse,
 } from "../api/public-client";
+import type { PublicPasswordResetCompleteResponse } from "@atlas/contracts/domain-identity/schemas/public-auth";
 import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { applySetCookieHeaders } from "./apply-set-cookie-headers";
 import { resolveCookieHeaderForInternalApi } from "./resolve-request-cookies";
@@ -137,6 +138,18 @@ export const serverPublicApi = {
       "/api/v1/public/invitations/accept",
       body,
       "public-invitation-accept",
+    ),
+
+  resetPassword: (body: {
+    password: string;
+    accessToken: string;
+    refreshToken?: string | undefined;
+    mfaCode?: string | undefined;
+  }) =>
+    postJson<PublicPasswordResetCompleteResponse>(
+      "/api/v1/public/auth/reset-password",
+      body,
+      "public-password-reset",
     ),
 
   setInvitationPassword: (body: {

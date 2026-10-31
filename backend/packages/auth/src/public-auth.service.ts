@@ -335,6 +335,74 @@ export async function setPasswordFromInvitationSession(args: {
   };
 }
 
+export type RecoveryPasswordResetResult =
+  | { status: "RESET"; supabaseUserId: string; email: string }
+  | { status: "MFA_REQUIRED" }
+  | { status: "MFA_INVALID" };
+
+/**
+ * Completes "forgot password" with the session the recovery email link signed
+ * in. That session is aal1, and Supabase changes the password of an account
+ * with a verified factor only at aal2, so such an account verifies its
+ * authenticator code first. Nothing changes until the code verifies.
+ */
+export async function resetPasswordWithRecoverySession(args: {
+  accessToken: string;
+  refreshToken: string;
+  password: string;
+  mfaCode?: string | undefined;
+}): Promise<RecoveryPasswordResetResult> {
+  const supabase = createSupabasePublicServerClient();
+
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token: args.accessToken,
+    refresh_token: args.refreshToken,
+  });
+
+  if (sessionError) {
+    throw invalidCredentials();
+  }
+
+  await assertPasswordNotBreached(args.password);
+
+  const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
+  if (factorsError) {
+    throw invalidCredentials();
+  }
+
+  // `totp` lists verified TOTP factors only.
+  const factor = factors.totp[0];
+  if (factor) {
+    if (!args.mfaCode) {
+      return { status: "MFA_REQUIRED" };
+    }
+    const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: factor.id,
+      code: args.mfaCode,
+    });
+    if (verifyError) {
+      return { status: "MFA_INVALID" };
+    }
+  }
+
+  const { data: updated, error: updateError } = await supabase.auth.updateUser({
+    password: args.password,
+  });
+
+  if (updateError) {
+    if (updateError.code === "insufficient_aal") {
+      return { status: "MFA_REQUIRED" };
+    }
+    throw passwordPolicyRejection(updateError) ?? invalidCredentials();
+  }
+
+  if (!updated.user.email) {
+    throw invalidCredentials();
+  }
+
+  return { status: "RESET", supabaseUserId: updated.user.id, email: updated.user.email };
+}
+
 export async function refreshSessionFromRefreshToken(args: { refreshToken: string }) {
   const supabase = createSupabasePublicServerClient();
 
