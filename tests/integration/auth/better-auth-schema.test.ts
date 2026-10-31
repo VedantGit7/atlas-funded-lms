@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { authPrisma, closeAuthPrismaForTests } from "@atlas/db/auth-client";
@@ -90,7 +90,7 @@ suite("Better Auth on the Atlas schema", () => {
     startedAt = new Date();
     auth = createAtlasAuth({
       prisma: authPrisma(process.env.DATABASE_URL),
-      secret: "integration-test-secret-at-least-32-characters",
+      secret: randomBytes(32).toString("base64url"),
       allowedHosts: ["academy.localhost.test"],
       protocol: "http",
     });
