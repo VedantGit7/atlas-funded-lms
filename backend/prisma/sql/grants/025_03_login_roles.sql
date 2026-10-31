@@ -63,6 +63,12 @@ END $$;
 GRANT atlas_app TO atlas_app_login;
 GRANT atlas_platform TO atlas_platform_login;
 
+-- The API's Better Auth pool starts its connections as atlas_auth (the `role`
+-- startup parameter), so the login may switch to it. Without INHERIT, ordinary
+-- queries on this login never get its privileges: password hashes and session
+-- tokens stay out of reach of tenant code (docs/engineering/better-auth-design.md).
+GRANT atlas_auth TO atlas_app_login WITH INHERIT FALSE, SET TRUE;
+
 -- Explicitly ensure the app login does not hold platform membership, in case an
 -- earlier setup granted it.
 DO $$
