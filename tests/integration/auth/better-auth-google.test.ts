@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
+import { removeBetterAuthTestRows } from "../../helpers/better-auth-cleanup";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { withGlobalDb } from "@atlas/db/global-db";
@@ -40,7 +41,6 @@ const perStatement = {
 };
 
 let owner: Client;
-let startedAt: Date;
 const savedEnv: Record<string, string | undefined> = {};
 /** Who Google says signed in, for the next token exchange. */
 let googleProfile: { sub: string; email: string; email_verified: boolean; name: string };
@@ -131,7 +131,6 @@ suite("Better Auth Google sign-in", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    startedAt = new Date();
     for (const key of [
       "AUTH_PROVIDER",
       "BETTER_AUTH_SECRET",
@@ -171,10 +170,7 @@ suite("Better Auth Google sign-in", () => {
   });
 
   afterAll(async () => {
-    await owner.query("delete from auth_principals where email_normalized like $1", [
-      `${emailPrefix}%`,
-    ]);
-    await owner.query("delete from auth_verifications where created_at >= $1", [startedAt]);
+    await removeBetterAuthTestRows(owner, emailPrefix);
     await owner.end();
     Object.assign(process.env, savedEnv);
     for (const [key, value] of Object.entries(savedEnv)) {

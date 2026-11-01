@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
-import { sendTenantInvitationEmail } from "@atlas/auth";
+import { authProvider, sendTenantInvitationEmail } from "@atlas/auth";
+import type { TenantTx } from "@atlas/db";
+import { sendInvitationEmail } from "../../lib/auth-email";
 
 function isLocalHost(host: string): boolean {
   const name = host.split(":")[0] ?? "";
@@ -43,6 +45,8 @@ export async function sendMembershipInvitationEmail(args: {
   requestId: string;
   to: string;
   inviteToken: string;
+  /** The academy's transaction the invite was written in (audit H3). */
+  tx?: TenantTx;
 }): Promise<void> {
   const origin = (await resolveRequestOrigin()) ?? process.env["PUBLIC_SITE_URL"] ?? null;
 
@@ -60,6 +64,18 @@ export async function sendMembershipInvitationEmail(args: {
       to: args.to,
       inviteUrl,
     });
+  }
+
+  if (authProvider() === "better-auth") {
+    // Our own email, with the academy's branding (launch plan task 3.6).
+    await sendInvitationEmail({
+      tenantId: args.tenantId,
+      requestId: args.requestId,
+      to: args.to,
+      inviteUrl,
+      ...(args.tx ? { tx: args.tx } : {}),
+    });
+    return;
   }
 
   await sendTenantInvitationEmail({

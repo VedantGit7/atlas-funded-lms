@@ -19,6 +19,7 @@ export const POST = createTenantRoute<Record<string, never>, ResendInviteRespons
 
     await sendMembershipInvitationEmail({
       tenantId: ctx.tenantId,
+      tx,
       requestId: ctx.requestId,
       to: data.invitedEmail,
       inviteToken,

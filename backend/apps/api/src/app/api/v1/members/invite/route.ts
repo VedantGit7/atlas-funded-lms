@@ -45,6 +45,7 @@ export const POST = createTenantRoute<InviteBody, InviteResponse>({
 
     await sendMembershipInvitationEmail({
       tenantId: ctx.tenantId,
+      tx,
       requestId: ctx.requestId,
       to: data.invitedEmail,
       inviteToken,

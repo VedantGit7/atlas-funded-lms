@@ -166,7 +166,7 @@ export const serverPublicApi = {
   setInvitationPassword: (body: {
     token: string;
     password: string;
-    accessToken: string;
+    accessToken?: string | undefined;
     refreshToken?: string | undefined;
   }) =>
     postJson<SetInvitationPasswordApiResponse>(

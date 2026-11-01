@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import {
+  DEFAULT_BRAND_COLOR,
   authEmailLink,
   buildAuthEmail,
   requestOrigin,
+  safeBrandColor,
 } from "../../../backend/apps/api/src/lib/auth-email";
 import { hasValidAccessToken } from "../../../frontend/apps/web/src/lib/server/session-refresh";
 
@@ -93,4 +95,49 @@ describe("web proxy session check", () => {
     expect(hasValidAccessToken(page())).toBe(false);
     expect(hasValidAccessToken(page("atlas_access_token=not-a-jwt"))).toBe(false);
   });
+});
+
+describe("academy-branded auth emails (launch plan 3.6)", () => {
+  const brand = {
+    origin: "https://academy.example.com",
+    academyName: "Northwind Academy",
+    logoUrl: "https://files.example.com/logo.png",
+    primaryColor: "#0EA5E9",
+    supportEmail: "help@academy.example.com",
+  };
+
+  it("shows the academy's logo, colour and support address around the action", () => {
+    const { subject, body } = buildAuthEmail(
+      { kind: "invitation", email: "new@example.test", token: "invite-token" },
+      brand,
+    );
+    expect(subject).toBe("You're invited to join Northwind Academy");
+    expect(body).toContain('<img src="https://files.example.com/logo.png" alt="Northwind Academy"');
+    expect(body).toContain("background:#0EA5E9");
+    expect(body).toContain('href="https://academy.example.com/invite/accept?token=invite-token"');
+    expect(body).toContain("mailto:help@academy.example.com");
+  });
+
+  it("falls back to the name, the default colour and no support line", () => {
+    const { body } = buildAuthEmail(
+      { kind: "magic-link", email: "a@example.test", token: "t" },
+      { origin: brand.origin, academyName: "Northwind Academy" },
+    );
+    expect(body).not.toContain("<img");
+    expect(body).toContain(">Northwind Academy</span>");
+    expect(body).toContain(`background:${DEFAULT_BRAND_COLOR}`);
+    expect(body).not.toContain("mailto:");
+  });
+
+  it.each(["red;}</style><script>", "url(javascript:x)", "#12345", "rgb(1,2,3)"])(
+    "never puts the theme value %s into the styles",
+    (primaryColor) => {
+      expect(safeBrandColor(primaryColor)).toBe(DEFAULT_BRAND_COLOR);
+      const { body } = buildAuthEmail(
+        { kind: "magic-link", email: "a@example.test", token: "t" },
+        { origin: brand.origin, academyName: "A", primaryColor },
+      );
+      expect(body).not.toContain(primaryColor);
+    },
+  );
 });

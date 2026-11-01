@@ -78,10 +78,12 @@ export async function setInvitationPasswordAction(
   _prev: AcceptInvitationActionState | null,
   formData: FormData,
 ): Promise<AcceptInvitationActionState> {
+  // Supabase's invitation link carries a session; Better Auth's doesn't.
+  const accessToken = readFormString(formData.get("accessToken"));
   const parsed = SetInvitationPasswordRequestSchema.safeParse({
     token: readFormString(formData.get("token")),
     password: readFormString(formData.get("password")),
-    accessToken: readFormString(formData.get("accessToken")),
+    ...(accessToken ? { accessToken } : {}),
     refreshToken: readFormString(formData.get("refreshToken")),
   });
 

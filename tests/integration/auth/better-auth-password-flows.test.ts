@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
+import { removeBetterAuthTestRows } from "../../helpers/better-auth-cleanup";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { withGlobalDb } from "@atlas/db/global-db";
@@ -39,7 +40,6 @@ const perStatement = {
 };
 
 let owner: Client;
-let startedAt: Date;
 const savedEnv: Record<string, string | undefined> = {};
 
 function request(cookie?: string): Request {
@@ -95,7 +95,6 @@ suite("Better Auth password flows", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    startedAt = new Date();
     for (const key of ["AUTH_PROVIDER", "BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
     process.env["AUTH_PROVIDER"] = "better-auth";
     process.env["BETTER_AUTH_SECRET"] = randomBytes(32).toString("base64url");
@@ -107,10 +106,7 @@ suite("Better Auth password flows", () => {
   });
 
   afterAll(async () => {
-    await owner.query("delete from auth_principals where email_normalized like $1", [
-      `${emailPrefix}%`,
-    ]);
-    await owner.query("delete from auth_verifications where created_at >= $1", [startedAt]);
+    await removeBetterAuthTestRows(owner, emailPrefix);
     await owner.end();
     // Restore the environment the suite started with.
     Object.assign(process.env, savedEnv);

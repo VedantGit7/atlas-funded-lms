@@ -809,3 +809,69 @@ export async function disableTwoFactor(args: { ctx: AuthRequestContext }): Promi
   await context.internalAdapter.updateUser(session.user.id, { twoFactorEnabled: false });
   forgetBetterAuthSession(args.ctx.cookie);
 }
+
+/**
+ * Whether an invited address can already sign in (launch plan task 3.6). The
+ * invitation page asks for a password when it can't, and to sign in when it can.
+ */
+export async function invitedAccountState(email: string): Promise<"none" | "exists"> {
+  const context = await getAtlasAuth().$context;
+  const found = await context.internalAdapter.findUserByEmail(email, { includeAccounts: true });
+  return found && found.accounts.length > 0 ? "exists" : "none";
+}
+
+/**
+ * Finishes an invitation for someone who can't sign in yet: the invitation
+ * link was sent to this address, which proves it, so the account is created
+ * verified (or, for a principal with no login method, such as an unclaimed
+ * placeholder, given one), with the chosen password, and signed in.
+ * An address that can already sign in is refused: that person signs in and
+ * accepts, so nobody's password is replaced from an invitation.
+ */
+export async function createAccountFromInvitation(args: {
+  ctx: AuthRequestContext;
+  email: string;
+  password: string;
+}): Promise<{ principalId: string; cookies: BetterAuthCookies }> {
+  const auth = getAtlasAuth();
+  const context = await auth.$context;
+  const found = await context.internalAdapter.findUserByEmail(args.email, {
+    includeAccounts: true,
+  });
+  if (found && found.accounts.length > 0) {
+    throw new AtlasHttpError({
+      code: "ALREADY_MEMBER",
+      status: 409,
+      message: "This email already has an account. Sign in to accept the invitation.",
+    });
+  }
+
+  const user =
+    found?.user ??
+    (await context.internalAdapter.createUser(
+      { email: args.email, name: "", emailVerified: true },
+      // An academy invitation, accepted by setting a password.
+      { method: "email-password" },
+    ));
+  if (!user.emailVerified) {
+    await context.internalAdapter.updateUser(user.id, { emailVerified: true });
+  }
+  await context.internalAdapter.linkAccount({
+    userId: user.id,
+    providerId: "credential",
+    accountId: user.id,
+    password: await context.password.hash(args.password),
+  });
+
+  try {
+    const { headers } = await auth.api.signInEmail({
+      body: { email: args.email, password: args.password, rememberMe: true },
+      headers: headersFor(args.ctx),
+      returnHeaders: true,
+    });
+    return { principalId: user.id, cookies: cookiesFrom(headers) };
+  } catch {
+    // A disabled principal, or one awaiting a platform decision: refused here as at sign-in.
+    throw accountDisabled();
+  }
+}

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
+import { createPublicRouteHandler, requireSessionUser, resolveRequestTenant } from "@atlas/api";
+import { authProvider, invitedAccountState } from "@atlas/auth";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { invalidInvitation, previewInvitation } from "@atlas/membership";
 import {
@@ -36,8 +37,21 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
     throw invalidInvitation();
   }
 
+  // Who's signed in here, read by the API so the web app needn't ask the
+  // login system itself. Nobody signed in is an answer, not an error.
+  const signedInEmail = await requireSessionUser(req)
+    .then((user) => user.email.trim().toLowerCase())
+    .catch(() => null);
+
   const body = PreviewInvitationResponseSchema.parse({
-    data: preview,
+    data: {
+      ...preview,
+      signedInEmail,
+      // Better Auth: no account yet means the page can set a password now.
+      ...(authProvider() === "better-auth"
+        ? { account: await invitedAccountState(preview.invitedEmail) }
+        : {}),
+    },
   });
 
   return NextResponse.json(body);
