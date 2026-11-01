@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
+import { removeBetterAuthTestRows } from "../../helpers/better-auth-cleanup";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { authPrisma, closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { ATLAS_SESSION_COOKIE, createAtlasAuth, type AtlasAuth } from "@atlas/auth/better-auth";
@@ -20,7 +21,6 @@ const freshEmail = () => `${emailPrefix}${randomUUID().slice(0, 12)}@Example.tes
 
 let owner: Client;
 let auth: AtlasAuth;
-let startedAt: Date;
 
 function headersFor(host: string, cookie?: string): Headers {
   const headers = new Headers({ host, origin: `http://${host}` });
@@ -87,7 +87,6 @@ suite("Better Auth on the Atlas schema", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    startedAt = new Date();
     auth = createAtlasAuth({
       prisma: authPrisma(process.env.DATABASE_URL),
       secret: randomBytes(32).toString("base64url"),
@@ -99,10 +98,7 @@ suite("Better Auth on the Atlas schema", () => {
   });
 
   afterAll(async () => {
-    await owner.query("delete from auth_principals where email_normalized like $1", [
-      `${emailPrefix}%`,
-    ]);
-    await owner.query("delete from auth_verifications where created_at >= $1", [startedAt]);
+    await removeBetterAuthTestRows(owner, emailPrefix);
     await owner.end();
     await closeAuthPrismaForTests();
   });

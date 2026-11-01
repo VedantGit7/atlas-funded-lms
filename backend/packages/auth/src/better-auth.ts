@@ -56,19 +56,24 @@ export const OAUTH_DONE_PATH = "/auth/oauth/done";
 export const OAUTH_LINKED_PATH = "/auth/oauth/linked";
 export const OAUTH_ERROR_PATH = "/auth/oauth/error";
 
-/** An email Better Auth asked us to send. The token is single-use and expires. */
+/**
+ * An auth email for the API to send. The token is single-use and expires.
+ * Better Auth asks for all but invitation, which an academy admin sends.
+ */
 export type AuthEmail = {
   /**
    * verify-email: confirm a new account's address. verify-new-email: confirm
    * the new address of an email change. confirm-email-change: ask the current
    * address to approve a change. magic-link: sign in without a password.
+   * invitation: join an academy (the token is the membership's invite token).
    */
   kind:
     | "verify-email"
     | "verify-new-email"
     | "confirm-email-change"
     | "magic-link"
-    | "reset-password";
+    | "reset-password"
+    | "invitation";
   email: string;
   token: string;
   /** For confirm-email-change: the address the account would move to. */

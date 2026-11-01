@@ -18,6 +18,7 @@ export default async function InviteAcceptPage({ searchParams }: InviteAcceptPag
         signedInEmail={context.signedInEmail}
         invitedEmail={context.invitedEmail}
         inviteValid={context.inviteValid}
+        inviteAccount={context.inviteAccount}
       />
     </Suspense>
   );

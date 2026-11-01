@@ -283,6 +283,31 @@ The "MFA enabled/disabled" security emails are unchanged.
 
 **For task 5.1:** clear `mfa_enabled` for principals with no `auth_two_factors` row (see "Moving the staging accounts"). The owner then sets up the authenticator again from the console's first-time setup.
 
+## Task 3.6: invitations and branded emails (as built, 1 November 2026)
+
+**Every auth email carries the academy's branding.** One layout (`apps/api/src/lib/auth-email.ts`):
+
+- its published light-background logo (only a confirmed upload, audit M8), or its name;
+- a bar and button in its theme's primary colour;
+- the message, and the link again as text for mail clients that hide buttons;
+- its support address, when one is set.
+
+It's used for sign-up verification, sign-in links, password resets, both email-change steps and invitations, sent from the academy's Transactional Email sender. The theme colour reaches the styles only as a plain hex value, because it's an admin's input; anything else uses the default.
+
+**Invitations, behind `AUTH_PROVIDER`.**
+
+- With Better Auth there is no Supabase invite: the API sends its own branded invitation from the academy, linking to `/invite/accept?token=…`.
+- A failed send still answers 503 and rolls back the new token.
+- The console's owner invitation reads the academy's branding in the academy's own scope.
+
+**Accepting.**
+
+- The page asks the API's invitation preview who is signed in, and, with Better Auth, whether the invited address can already sign in.
+- **Can't sign in yet:** the person sets a password straight away. The invitation proves the address, because it was emailed there. The account is created verified and signed in, or a placeholder with no login method gets its first one and is claimed.
+- **Can sign in:** the person signs in and accepts. Nobody's password is replaced from an invitation.
+
+**One change outside the switch.** The web app used to ask Supabase directly who was signed in on the invitation page. Now the API's preview answers, for either system. That works on staging today and is one less Supabase call to remove in 3.8.
+
 ## Open items for the flow tasks
 
 - **Sliding sessions.** Pass Better Auth's refreshed cookie back through the web proxy, so a session used every day doesn't end 30 days after sign-in.

@@ -1,9 +1,7 @@
-import { headers } from "next/headers";
-import { createSupabaseAdminServerClient } from "@atlas/auth/supabase-server";
-import { extractAccessToken } from "@atlas/auth/session-tokens";
 import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { resolveTenantHostForInternalApi } from "./resolve-tenant-host";
 import { resolveClientIpForInternalApi } from "./resolve-client-ip";
+import { resolveCookieHeaderForInternalApi } from "./resolve-request-cookies";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -12,29 +10,31 @@ export type InviteAcceptContext = {
   signedInEmail: string | null;
   invitedEmail: string | null;
   inviteValid: boolean;
+  /**
+   * Better Auth (launch plan task 3.6): "none" when the invited address can't
+   * sign in yet, so the page sets a password; "exists" when it should sign in.
+   * Null with Supabase, whose invitation link carries its own session.
+   */
+  inviteAccount: "none" | "exists" | null;
 };
 
-async function readSignedInEmail(): Promise<string | null> {
-  const headerList = await headers();
-  const request = new Request("https://placeholder.local", {
-    headers: { cookie: headerList.get("cookie") ?? "" },
-  });
-  const accessToken = await extractAccessToken(request);
+type InvitePreview = Omit<InviteAcceptContext, "isAuthenticated">;
 
-  if (!accessToken) {
-    return null;
-  }
+const INVALID: InvitePreview = {
+  invitedEmail: null,
+  inviteValid: false,
+  signedInEmail: null,
+  inviteAccount: null,
+};
 
-  const supabase = createSupabaseAdminServerClient();
-  const result = await supabase.auth.getUser(accessToken);
-
-  return result.data.user?.email?.trim().toLowerCase() ?? null;
-}
-
-async function readInvitePreview(
-  token: string,
-): Promise<{ invitedEmail: string | null; inviteValid: boolean }> {
+/**
+ * The invitation, and who is signed in on this browser, from the API. It reads
+ * the session itself, so this page works with either login system and never
+ * asks one directly.
+ */
+async function readInvitePreview(token: string): Promise<InvitePreview> {
   const forwardedHost = await resolveTenantHostForInternalApi();
+  const cookieHeader = await resolveCookieHeaderForInternalApi();
   const url = new URL("/api/v1/public/invitations/preview", API_INTERNAL_URL);
   url.searchParams.set("token", token);
 
@@ -43,7 +43,7 @@ async function readInvitePreview(
       method: "GET",
       headers: buildApiProxyHeaders(
         forwardedHost,
-        undefined,
+        cookieHeader ? { cookie: cookieHeader } : undefined,
         process.env,
         await resolveClientIpForInternalApi(),
       ),
@@ -53,19 +53,25 @@ async function readInvitePreview(
     });
 
     if (!response.ok) {
-      return { invitedEmail: null, inviteValid: false };
+      return INVALID;
     }
 
     const payload = (await response.json()) as {
-      data?: { invitedEmail?: string };
+      data?: {
+        invitedEmail?: string;
+        signedInEmail?: string | null;
+        account?: "none" | "exists";
+      };
     };
 
     return {
       invitedEmail: payload.data?.invitedEmail?.trim().toLowerCase() ?? null,
       inviteValid: true,
+      signedInEmail: payload.data?.signedInEmail?.trim().toLowerCase() ?? null,
+      inviteAccount: payload.data?.account ?? null,
     };
   } catch {
-    return { invitedEmail: null, inviteValid: false };
+    return INVALID;
   }
 }
 
@@ -73,23 +79,9 @@ export async function loadInviteAcceptContext(
   token: string | undefined,
 ): Promise<InviteAcceptContext> {
   if (!token) {
-    return {
-      isAuthenticated: false,
-      signedInEmail: null,
-      invitedEmail: null,
-      inviteValid: false,
-    };
+    return { isAuthenticated: false, ...INVALID };
   }
 
-  const [signedInEmail, preview] = await Promise.all([
-    readSignedInEmail(),
-    readInvitePreview(token),
-  ]);
-
-  return {
-    isAuthenticated: Boolean(signedInEmail),
-    signedInEmail,
-    invitedEmail: preview.invitedEmail,
-    inviteValid: preview.inviteValid,
-  };
+  const preview = await readInvitePreview(token);
+  return { isAuthenticated: Boolean(preview.signedInEmail), ...preview };
 }

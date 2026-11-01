@@ -42,6 +42,12 @@ type InviteAcceptCardProps = Readonly<{
   signedInEmail: string | null;
   invitedEmail: string | null;
   inviteValid: boolean;
+  /**
+   * Better Auth (launch plan task 3.6): whether the invited address can sign
+   * in yet. "none" shows the password form; "exists" asks the person to sign
+   * in. Null with Supabase, whose invitation link carries its own session.
+   */
+  inviteAccount?: "none" | "exists" | null;
 }>;
 
 type InviteSession = {
@@ -207,6 +213,7 @@ export function InviteAcceptCard({
   signedInEmail,
   invitedEmail,
   inviteValid,
+  inviteAccount = null,
 }: InviteAcceptCardProps) {
   const [acceptState, acceptAction, acceptPending] = useActionState(
     acceptInvitationAction,
@@ -233,8 +240,13 @@ export function InviteAcceptCard({
       // Strip the tokens from the address bar so they aren't left in history.
       window.history.replaceState(null, "", window.location.pathname + window.location.search);
     }
+    // Better Auth's invitation link carries no session: the API says instead
+    // whether this address already has an account to sign in with.
+    else if (inviteAccount === "exists") {
+      setExistingAccount(true);
+    }
     setHashChecked(true);
-  }, []);
+  }, [inviteAccount]);
 
   const mismatch = useMemo(
     () => emailsMismatch(signedInEmail, invitedEmail),
@@ -294,7 +306,8 @@ export function InviteAcceptCard({
 
   // Primary path: the email link delivered an invited session. Let the invitee
   // set a password and finish — this takes over from any prior session.
-  if (inviteSession) {
+  const setPasswordHere = Boolean(inviteSession) || (inviteValid && inviteAccount === "none");
+  if (setPasswordHere) {
     return (
       <CardShell labelledBy="invite-set-password-title">
         <h2 id="invite-set-password-title" className={`mb-2 ${headlineClass}`}>
@@ -337,8 +350,12 @@ export function InviteAcceptCard({
 
         <form action={passwordAction} className="mt-6 space-y-5">
           <input type="hidden" name="token" value={token} />
-          <input type="hidden" name="accessToken" value={inviteSession.accessToken} />
-          <input type="hidden" name="refreshToken" value={inviteSession.refreshToken} />
+          {inviteSession ? (
+            <>
+              <input type="hidden" name="accessToken" value={inviteSession.accessToken} />
+              <input type="hidden" name="refreshToken" value={inviteSession.refreshToken} />
+            </>
+          ) : null}
 
           <div className="space-y-2">
             <label htmlFor="invite-password" className={labelClass}>

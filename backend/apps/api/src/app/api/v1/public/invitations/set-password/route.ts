@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
 import { createPublicRouteHandler, globalDbPerStatement } from "@atlas/api";
-import { setAuthCookies, setPasswordFromInvitationSession } from "@atlas/auth";
+import {
+  applyAuthSession,
+  assertPasswordNotBreached,
+  authProvider,
+  authRequestContext,
+  createAccountFromInvitation,
+  findActiveSessionPrincipal,
+  setPasswordFromInvitationSession,
+  type IssuedAuthSession,
+} from "@atlas/auth";
+import { AtlasHttpError } from "@atlas/core/http/errors";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { acceptInvitation } from "@atlas/membership";
+import { acceptInvitation, invalidInvitation, previewInvitation } from "@atlas/membership";
 import {
   SetInvitationPasswordRequestSchema,
   SetInvitationPasswordResponseSchema,
@@ -32,14 +42,44 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const tenant = await withGlobalDb(async (db) => resolveTenantFromRequest({ req, db }));
 
-  // Supabase round trips run with no pooled connection held (audit H3), and a
-  // refused re-registration keeps its relink request for review (audit H6).
-  const { principal, session } = await setPasswordFromInvitationSession({
-    db: globalDbPerStatement,
-    accessToken: input.accessToken,
-    refreshToken: input.refreshToken ?? "",
-    password: input.password,
-  });
+  let principal: { id: string; emailNormalized: string; mfaEnabled: boolean };
+  let session: IssuedAuthSession;
+  if (authProvider() === "better-auth") {
+    // The invitation itself proves the address: it was emailed there. An
+    // address that can already sign in is asked to (launch plan task 3.6).
+    const preview = await withTenantTx(
+      { tenantId: tenant.tenantId, requestId, allowAnonymousTenantRead: true },
+      async (tx) => previewInvitation({ tx, tenantId: tenant.tenantId, token: input.token }),
+    );
+    if (!preview) throw invalidInvitation();
+    await assertPasswordNotBreached(input.password);
+    const created = await createAccountFromInvitation({
+      ctx: authRequestContext(req),
+      email: preview.invitedEmail,
+      password: input.password,
+    });
+    principal = await findActiveSessionPrincipal({
+      db: globalDbPerStatement,
+      principalId: created.principalId,
+    });
+    session = created.cookies;
+  } else {
+    if (!input.accessToken) {
+      throw new AtlasHttpError({
+        code: "INVALID_INVITATION",
+        status: 400,
+        message: "Open the link in your invitation email to set your password.",
+      });
+    }
+    // Supabase round trips run with no pooled connection held (audit H3), and a
+    // refused re-registration keeps its relink request for review (audit H6).
+    ({ principal, session } = await setPasswordFromInvitationSession({
+      db: globalDbPerStatement,
+      accessToken: input.accessToken,
+      refreshToken: input.refreshToken ?? "",
+      password: input.password,
+    }));
+  }
 
   const result = await withTenantTx(
     {
@@ -83,12 +123,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const response = NextResponse.json(body);
 
-  setAuthCookies({
-    response,
-    accessToken: session.accessToken,
-    refreshToken: session.refreshToken,
-    expiresInSeconds: session.expiresIn,
-  });
+  applyAuthSession({ response, session });
 
   return response;
 });
