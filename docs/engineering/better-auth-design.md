@@ -222,6 +222,35 @@ Behind the same `AUTH_PROVIDER` switch, with the Google client from `GOOGLE_CLIE
 - add the staging client's ID and secret to the API's environment (`provider.env`, through hidden prompts);
 - an academy on a custom domain needs that domain's `/auth/callback/google` added to the Google client before Google sign-in works there.
 
+## Task 3.4: email links, and phone removed (as built, 1 November 2026)
+
+Behind the same `AUTH_PROVIDER` switch. The product sends **links**, not codes to type, so Better Auth's magic-link plugin is used rather than its email-code one.
+
+**Sign-in links ("Email me a sign-in link").**
+
+- Existing accounts only (`disableSignUp`): signing up still needs a password.
+- Better Auth would email a link to any address and refuse it only when opened. That would let anyone have us email anyone, so the API checks for the account first and sends nothing otherwise. The answer is the same either way.
+- The link (`/auth/confirm?token_hash=…&type=magiclink`) works once, within 10 minutes. The token is stored hashed, so the database alone can't sign anyone in.
+- Opening it marks the address verified and starts an `aal1` session. The session hook still refuses a disabled principal and claims a placeholder (H6).
+
+**Email change: two steps, like Supabase's secure email change.**
+
+1. The current address gets a link to approve the change, which names the new address.
+2. Opening it sends the new address its own verification link; nothing has changed yet, and the confirm page says to check the inbox.
+3. Opening that one moves the account to the new address, verified.
+
+- A change to an address that already has an account gets the same answer and no email.
+- The "email changed" security email goes out when the change is asked for, as before.
+- Its emails are sent on the request's own transaction connection (H3).
+
+**Phone is gone, not ported** (sign-in by phone and phone two-factor are deferred):
+
+- the `/me/security/phone` routes, `startPhoneChange` and `verifyPhoneChange`, and their schemas;
+- the "Phone number" settings form;
+- phone factors in the two-factor list.
+
+The security events that don't involve phone are unchanged.
+
 ## Open items for the flow tasks
 
 - **Sliding sessions.** Pass Better Auth's refreshed cookie back through the web proxy, so a session used every day doesn't end 30 days after sign-in.

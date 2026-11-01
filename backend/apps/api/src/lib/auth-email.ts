@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { AuthEmail } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
+import type { TenantTx } from "@atlas/db";
 import { getTenantBranding } from "@atlas/domain-branding/repositories/branding.repository";
 import { structuredLogger } from "@atlas/observability/logger";
 import { lookupTenantFromHost, resolveRequestHostFromHeaders } from "@atlas/tenancy";
@@ -30,6 +31,11 @@ export async function sendAuthEmails(args: {
   req: Request;
   requestId: string;
   emails: AuthEmail[];
+  /**
+   * A route already inside the academy's transaction passes it, so the sender
+   * is read on that connection rather than a second one (audit H3).
+   */
+  tenant?: { tx: TenantTx; tenantId: string };
 }): Promise<void> {
   if (args.emails.length === 0) return;
   const host = resolveRequestHostFromHeaders(args.req.headers);
@@ -45,7 +51,9 @@ export async function sendAuthEmails(args: {
   }
 
   try {
-    const sender = await resolveSender(host, args.requestId);
+    const sender = args.tenant
+      ? await senderFor(args.tenant.tx, args.tenant.tenantId)
+      : await resolveSender(host, args.requestId);
     const origin = requestOrigin(args.req);
     for (const email of args.emails) {
       const content = buildAuthEmail(email, { origin, ...sender });
@@ -95,18 +103,21 @@ async function resolveSender(host: string, requestId: string): Promise<Sender> {
   }
   return withTenantTx(
     { tenantId: tenant.tenantId, requestId, allowAnonymousTenantRead: true },
-    async (tx) => {
-      const branding = await getTenantBranding(tx);
-      const channel = await readTenantEmailChannel(tx, "transactionalEmail");
-      return {
-        tenantId: tenant.tenantId,
-        academyName:
-          branding?.public_name?.trim() || branding?.display_name.trim() || DEFAULT_ACADEMY_NAME,
-        ...channelSender(channel),
-        replyToEmail: channel.replyToEmail,
-      };
-    },
+    (tx) => senderFor(tx, tenant.tenantId),
   );
+}
+
+/** The academy's name and Transactional Email sender, read in its transaction. */
+async function senderFor(tx: TenantTx, tenantId: string): Promise<Sender> {
+  const branding = await getTenantBranding(tx);
+  const channel = await readTenantEmailChannel(tx, "transactionalEmail");
+  return {
+    tenantId,
+    academyName:
+      branding?.public_name?.trim() || branding?.display_name.trim() || DEFAULT_ACADEMY_NAME,
+    ...channelSender(channel),
+    replyToEmail: channel.replyToEmail,
+  };
 }
 
 /**
@@ -125,22 +136,29 @@ export function requestOrigin(req: Request, env: NodeJS.ProcessEnv = process.env
   return `${env["NODE_ENV"] === "production" ? "https" : "http"}://${host}${port}`;
 }
 
+/** Which confirm-page type each email's link carries, for the API's confirm route. */
+const CONFIRM_TYPE: Partial<Record<AuthEmail["kind"], string>> = {
+  "verify-email": "signup",
+  "verify-new-email": "email_change",
+  "confirm-email-change": "email_change",
+  "magic-link": "magiclink",
+};
+
 /**
  * Links land on our own pages, never on Better Auth's handler, which isn't
- * mounted: /auth/confirm verifies the email and signs in, as Supabase's
- * links do, and /reset-password asks for the new password.
+ * mounted: /auth/confirm verifies the token and signs in, as Supabase's links
+ * do, and /reset-password asks for the new password.
  */
 export function authEmailLink(email: AuthEmail, origin: string): string {
-  const url =
-    email.kind === "verify-email"
-      ? new URL("/auth/confirm", origin)
-      : new URL("/reset-password", origin);
-  if (email.kind === "verify-email") {
-    url.searchParams.set("token_hash", email.token);
-    url.searchParams.set("type", "signup");
-  } else {
+  const type = CONFIRM_TYPE[email.kind];
+  if (!type) {
+    const url = new URL("/reset-password", origin);
     url.searchParams.set("token", email.token);
+    return url.toString();
   }
+  const url = new URL("/auth/confirm", origin);
+  url.searchParams.set("token_hash", email.token);
+  url.searchParams.set("type", type);
   return url.toString();
 }
 
@@ -150,22 +168,51 @@ export function buildAuthEmail(
 ): { subject: string; body: string } {
   const name = escapeHtml(args.academyName);
   const link = escapeHtml(authEmailLink(email, args.origin));
-  if (email.kind === "verify-email") {
-    return {
-      subject: `Confirm your email for ${args.academyName}`,
-      body: [
-        `<p>Confirm your email address to finish creating your ${name} account.</p>`,
-        `<p><a href="${link}">Confirm my email</a></p>`,
-        "<p>The link works once and expires in 24 hours. If you didn't sign up, you can ignore this email.</p>",
-      ].join(""),
-    };
+  switch (email.kind) {
+    case "verify-email":
+      return {
+        subject: `Confirm your email for ${args.academyName}`,
+        body: [
+          `<p>Confirm your email address to finish creating your ${name} account.</p>`,
+          `<p><a href="${link}">Confirm my email</a></p>`,
+          "<p>The link works once and expires in 24 hours. If you didn't sign up, you can ignore this email.</p>",
+        ].join(""),
+      };
+    case "magic-link":
+      return {
+        subject: `Your ${args.academyName} sign-in link`,
+        body: [
+          `<p>Use this link to sign in to ${name}.</p>`,
+          `<p><a href="${link}">Sign in</a></p>`,
+          "<p>The link works once and expires in 10 minutes. If you didn't ask for it, you can ignore this email.</p>",
+        ].join(""),
+      };
+    case "confirm-email-change":
+      return {
+        subject: `Approve the new email for your ${args.academyName} account`,
+        body: [
+          `<p>Someone asked to change the email address of your ${name} account to <strong>${escapeHtml(email.newEmail ?? "a new address")}</strong>.</p>`,
+          `<p><a href="${link}">Approve the change</a></p>`,
+          "<p>We'll then send a link to the new address, and the change happens when it's opened. If you didn't ask for this, ignore this email and change your password: your email stays as it is.</p>",
+        ].join(""),
+      };
+    case "verify-new-email":
+      return {
+        subject: `Confirm your new email for ${args.academyName}`,
+        body: [
+          `<p>Confirm this address to finish moving your ${name} account to it.</p>`,
+          `<p><a href="${link}">Confirm my new email</a></p>`,
+          "<p>The link works once and expires in 24 hours. If you didn't ask for this, you can ignore this email.</p>",
+        ].join(""),
+      };
+    case "reset-password":
+      return {
+        subject: `Reset your ${args.academyName} password`,
+        body: [
+          `<p>Someone asked to reset the password for your ${name} account.</p>`,
+          `<p><a href="${link}">Choose a new password</a></p>`,
+          "<p>The link works once and expires in 1 hour. If you didn't ask for this, you can ignore this email: your password hasn't changed.</p>",
+        ].join(""),
+      };
   }
-  return {
-    subject: `Reset your ${args.academyName} password`,
-    body: [
-      `<p>Someone asked to reset the password for your ${name} account.</p>`,
-      `<p><a href="${link}">Choose a new password</a></p>`,
-      "<p>The link works once and expires in 1 hour. If you didn't ask for this, you can ignore this email: your password hasn't changed.</p>",
-    ].join(""),
-  };
 }

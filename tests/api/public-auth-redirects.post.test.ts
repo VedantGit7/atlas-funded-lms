@@ -31,7 +31,7 @@ function createRequest(path: string, body: object) {
 describe("public auth redirects", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSendMagicLink.mockResolvedValue(undefined);
+    mockSendMagicLink.mockResolvedValue({ ok: true });
     mockStartOAuthSignIn.mockResolvedValue({
       url: "https://accounts.example.com/o/oauth2",
       codeVerifier: "verifier",
@@ -49,6 +49,7 @@ describe("public auth redirects", () => {
     expect(mockSendMagicLink).toHaveBeenCalledWith({
       email: "user@example.com",
       emailRedirectTo: "https://tenant-a.example.com/auth/confirm",
+      req: expect.anything() as unknown,
     });
   });
 

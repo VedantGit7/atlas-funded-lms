@@ -1,4 +1,4 @@
-import { ChangePasswordForm, ChangeEmailForm, PhoneForm } from "./account-security-forms";
+import { ChangePasswordForm, ChangeEmailForm } from "./account-security-forms";
 import { ConnectedAccounts, SignOutOtherSessionsCard } from "./ConnectedAccounts";
 import { MfaManager } from "./MfaManager";
 
@@ -16,8 +16,6 @@ export function AccountSecuritySection({
       <ChangePasswordForm />
       <hr className="border-[var(--acct-border)]" />
       <ChangeEmailForm />
-      <hr className="border-[var(--acct-border)]" />
-      <PhoneForm />
       <hr className="border-[var(--acct-border)]" />
       <MfaManager highlight={highlightMfa} continuePath={continuePath} />
       <hr className="border-[var(--acct-border)]" />
