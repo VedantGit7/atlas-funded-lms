@@ -14,6 +14,31 @@ function apiRequest(headers: Record<string, string>): Request {
 }
 
 describe("Better Auth email links", () => {
+  it.each([
+    ["magic-link", "magiclink"],
+    ["confirm-email-change", "email_change"],
+    ["verify-new-email", "email_change"],
+  ] as const)("sends a %s link to the confirm page as type %s", (kind, type) => {
+    expect(
+      authEmailLink({ kind, email: "a@example.test", token: "t" }, "https://academy.example.com"),
+    ).toBe(`https://academy.example.com/auth/confirm?token_hash=t&type=${type}`);
+  });
+
+  it("asks the current address to approve an email change, naming the new one", () => {
+    const email = buildAuthEmail(
+      {
+        kind: "confirm-email-change",
+        email: "old@example.test",
+        token: "t",
+        newEmail: "new<x>@example.test",
+      },
+      { origin: "https://academy.example.com", academyName: "Academy" },
+    );
+    expect(email.subject).toBe("Approve the new email for your Academy account");
+    expect(email.body).toContain("new&lt;x&gt;@example.test");
+    expect(email.body).toContain("type=email_change");
+  });
+
   it("sends verification to our confirm page, which signs in as Supabase's link does", () => {
     expect(
       authEmailLink(

@@ -49,8 +49,6 @@ export {
 export {
   ChangePasswordRequestSchema,
   ChangeEmailRequestSchema,
-  ChangePhoneRequestSchema,
-  VerifyPhoneRequestSchema,
   MfaEnrollResponseSchema,
   MfaVerifyRequestSchema,
   MfaStepUpRequestSchema,

@@ -5,9 +5,11 @@ import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   PublicAuthConfirmRequestSchema,
+  PublicAuthResponseSchema,
   rejectClientTenantId,
   buildPublicAuthResponse,
 } from "@atlas/domain-identity";
+import { sendAuthEmails } from "../../../../../../lib/auth-email";
 import { applyReferralForNewMembership } from "../../../../../../server/sales-referrals/sales-referrals.service";
 import { routeMetadata } from "./route.metadata";
 
@@ -32,6 +34,18 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     type: input.type,
     req,
   });
+
+  // Better Auth: the current address approved an email change, and the new
+  // address is sent its verification link. Nothing is signed in yet.
+  if (result.status === "email_change_pending") {
+    await sendAuthEmails({ req, requestId, emails: result.emails });
+    return NextResponse.json(
+      PublicAuthResponseSchema.parse({
+        data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null },
+      }),
+    );
+  }
+  if (result.emails?.length) await sendAuthEmails({ req, requestId, emails: result.emails });
 
   const principalRows = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
     select id::text

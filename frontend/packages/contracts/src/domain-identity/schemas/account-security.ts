@@ -15,19 +15,6 @@ export const ChangeEmailRequestSchema = z
   })
   .strict();
 
-export const ChangePhoneRequestSchema = z
-  .object({
-    phone: z.string().min(8).max(20),
-  })
-  .strict();
-
-export const VerifyPhoneRequestSchema = z
-  .object({
-    phone: z.string().min(8).max(20),
-    token: z.string().min(4).max(10),
-  })
-  .strict();
-
 export const MfaEnrollResponseSchema = z.object({
   data: z.object({
     factorId: z.string(),

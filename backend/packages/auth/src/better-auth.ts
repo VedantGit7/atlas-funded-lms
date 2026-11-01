@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { magicLink } from "better-auth/plugins/magic-link";
 import { twoFactor } from "better-auth/plugins/two-factor";
 import { createUuidV7 } from "@atlas/core/id/uuid-v7";
 
@@ -57,10 +58,38 @@ export const OAUTH_ERROR_PATH = "/auth/oauth/error";
 
 /** An email Better Auth asked us to send. The token is single-use and expires. */
 export type AuthEmail = {
-  kind: "verify-email" | "reset-password";
+  /**
+   * verify-email: confirm a new account's address. verify-new-email: confirm
+   * the new address of an email change. confirm-email-change: ask the current
+   * address to approve a change. magic-link: sign in without a password.
+   */
+  kind:
+    | "verify-email"
+    | "verify-new-email"
+    | "confirm-email-change"
+    | "magic-link"
+    | "reset-password";
   email: string;
   token: string;
+  /** For confirm-email-change: the address the account would move to. */
+  newEmail?: string;
 };
+
+/**
+ * Better Auth's verification token is a JWT; one for an email change names the
+ * new address (`updateTo`). Read for the email's wording only, never trusted:
+ * Better Auth verifies the token when the link is opened.
+ */
+function isEmailChangeToken(token: string): boolean {
+  try {
+    const payload: unknown = JSON.parse(
+      Buffer.from(token.split(".")[1] ?? "", "base64url").toString("utf8"),
+    );
+    return typeof payload === "object" && payload !== null && "updateTo" in payload;
+  } catch {
+    return false;
+  }
+}
 
 function refuseUnsentEmail(): never {
   throw new Error("Better Auth asked for an email outside a route that sends it");
@@ -115,12 +144,25 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
       autoSignInAfterVerification: true,
       expiresIn: 60 * 60 * 24,
       sendVerificationEmail: ({ user, token }) => {
-        onAuthEmail({ kind: "verify-email", email: user.email, token });
+        onAuthEmail({
+          kind: isEmailChangeToken(token) ? "verify-new-email" : "verify-email",
+          email: user.email,
+          token,
+        });
         return Promise.resolve();
       },
     },
     user: {
       modelName: "authPrincipal",
+      // Two steps, like Supabase's secure email change: the current address
+      // approves, then the new one is verified, and only then does it change.
+      changeEmail: {
+        enabled: true,
+        sendChangeEmailConfirmation: ({ user, newEmail, token }) => {
+          onAuthEmail({ kind: "confirm-email-change", email: user.email, token, newEmail });
+          return Promise.resolve();
+        },
+      },
       fields: {
         emailVerified: "email_verified",
         createdAt: "created_at",
@@ -225,6 +267,17 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
         }
       : {}),
     plugins: [
+      // Sign-in links for existing accounts; signing up still needs a password.
+      // The token is stored hashed, so the database alone can't sign anyone in.
+      magicLink({
+        disableSignUp: true,
+        expiresIn: 60 * 10,
+        storeToken: "hashed",
+        sendMagicLink: ({ email, token }) => {
+          onAuthEmail({ kind: "magic-link", email, token });
+          return Promise.resolve();
+        },
+      }),
       twoFactor({
         issuer: "Atlas LMS",
         schema: {

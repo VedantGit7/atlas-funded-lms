@@ -209,31 +209,134 @@ export async function signUpWithBetterAuth(args: {
 export async function verifyEmailWithBetterAuth(args: {
   ctx: AuthRequestContext;
   token: string;
-}): Promise<{ principalId: string | null; cookies: BetterAuthCookies }> {
+}): Promise<{ principalId: string | null; cookies: BetterAuthCookies; emails: AuthEmail[] }> {
   const auth = getAtlasAuth();
   let cookies: BetterAuthCookies;
+  let emails: AuthEmail[];
   try {
-    const { headers } = await auth.api.verifyEmail({
-      query: { token: args.token },
-      headers: headersFor(args.ctx),
-      returnHeaders: true,
-    });
-    cookies = cookiesFrom(headers);
+    // The approval step of an email change asks for one more email: the
+    // verification link for the new address.
+    const captured = await captureAuthEmails(() =>
+      auth.api.verifyEmail({
+        query: { token: args.token },
+        headers: headersFor(args.ctx),
+        returnHeaders: true,
+      }),
+    );
+    cookies = cookiesFrom(captured.result.headers);
+    emails = captured.emails;
   } catch {
     // Expired or forged: the same answer as Supabase's verifyOtp failure.
     throw invalidCredentials();
   }
+  return { principalId: await sessionPrincipal(args.ctx, cookies), cookies, emails };
+}
 
+/** The principal of the session a Better Auth response just set, if it set one. */
+async function sessionPrincipal(
+  ctx: AuthRequestContext,
+  cookies: BetterAuthCookies,
+): Promise<string | null> {
   const sessionCookie = cookies.setCookies
     .map((cookie) => cookie.split(";")[0] ?? "")
     .filter((pair) => pair && !pair.endsWith("="))
     .join("; ");
-  if (!sessionCookie) return { principalId: null, cookies };
-  const session = await auth.api.getSession({
-    headers: headersFor({ ...args.ctx, cookie: sessionCookie }),
+  if (!sessionCookie) return null;
+  const session = await getAtlasAuth().api.getSession({
+    headers: headersFor({ ...ctx, cookie: sessionCookie }),
     query: { disableCookieCache: true, disableRefresh: true },
   });
-  return { principalId: session?.user.id ?? null, cookies };
+  return session?.user.id ?? null;
+}
+
+/**
+ * Emails a sign-in link (launch plan task 3.4). Existing accounts only, and
+ * the same answer either way: an unknown address gets nothing.
+ */
+export async function requestMagicLinkWithBetterAuth(args: {
+  ctx: AuthRequestContext;
+  email: string;
+}): Promise<{ emails: AuthEmail[] }> {
+  try {
+    // Better Auth sends the link to any address and refuses it only when it's
+    // opened (disableSignUp), which would let anyone have us email anyone.
+    const context = await getAtlasAuth().$context;
+    if (!(await context.internalAdapter.findUserByEmail(args.email))) return { emails: [] };
+
+    const { emails } = await captureAuthEmails(() =>
+      getAtlasAuth().api.signInMagicLink({
+        body: { email: args.email, callbackURL: OAUTH_DONE_PATH },
+        headers: headersFor(args.ctx),
+      }),
+    );
+    return { emails };
+  } catch {
+    return { emails: [] };
+  }
+}
+
+/**
+ * Opens a sign-in link: Better Auth checks the single-use token, marks the
+ * address verified, and starts an aal1 session, which the session hook may
+ * refuse (a disabled principal) or use to claim a placeholder (audit H6).
+ */
+export async function verifyMagicLinkWithBetterAuth(args: {
+  ctx: AuthRequestContext;
+  token: string;
+}): Promise<{ principalId: string; cookies: BetterAuthCookies }> {
+  let response: Response;
+  try {
+    response = await getAtlasAuth().api.magicLinkVerify({
+      query: {
+        token: args.token,
+        callbackURL: OAUTH_DONE_PATH,
+        errorCallbackURL: OAUTH_ERROR_PATH,
+      },
+      headers: headersFor(args.ctx),
+      asResponse: true,
+    });
+  } catch {
+    throw invalidCredentials();
+  }
+  const target = new URL(response.headers.get("location") ?? "", "http://callback.invalid");
+  const cookies = cookiesFrom(response.headers);
+  const principalId =
+    target.pathname === OAUTH_DONE_PATH ? await sessionPrincipal(args.ctx, cookies) : null;
+  // Expired, used, or forged, or no session for this principal.
+  if (!principalId) throw invalidCredentials();
+  return { principalId, cookies };
+}
+
+/**
+ * Starts an email change: the current address gets a link to approve it, and
+ * only then is the new address sent its own verification link. The answer is
+ * the same when the new address already has an account, which gets nothing.
+ */
+export async function changeEmailWithBetterAuth(args: {
+  ctx: AuthRequestContext;
+  newEmail: string;
+}): Promise<{ email: string; emails: AuthEmail[] }> {
+  const auth = getAtlasAuth();
+  const current = await auth.api.getSession({
+    headers: headersFor(args.ctx),
+    query: { disableCookieCache: true, disableRefresh: true },
+  });
+  if (!current) throw authRequired();
+  try {
+    const { emails } = await captureAuthEmails(() =>
+      auth.api.changeEmail({
+        body: { newEmail: args.newEmail, callbackURL: "/" },
+        headers: headersFor(args.ctx),
+      }),
+    );
+    return { email: current.user.email, emails };
+  } catch {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Unable to complete this security action. Please try again.",
+    });
+  }
 }
 
 /** Uniform, like Supabase's resend: never says whether the address exists. */

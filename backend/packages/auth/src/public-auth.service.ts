@@ -15,6 +15,7 @@ import {
   signInWithBetterAuth,
   signUpWithBetterAuth,
   verifyEmailWithBetterAuth,
+  verifyMagicLinkWithBetterAuth,
 } from "./better-auth-flows";
 import { authProvider } from "./better-auth-runtime";
 import type { AuthEmail } from "./better-auth";
@@ -299,11 +300,33 @@ export async function establishSessionFromTokenHash(args: {
 }) {
   if (authProvider() === "better-auth") {
     if (!args.req) throw authProviderUnavailable();
-    const verified = await verifyEmailWithBetterAuth({
-      ctx: authRequestContext(args.req),
-      token: args.tokenHash,
-    });
-    if (!verified.principalId) throw invalidCredentials();
+    const ctx = authRequestContext(args.req);
+
+    // A sign-in link (launch plan task 3.4).
+    if (args.type === "magiclink" || args.type === "email") {
+      const signedIn = await verifyMagicLinkWithBetterAuth({ ctx, token: args.tokenHash });
+      const principal = await findActiveSessionPrincipal({
+        db: args.db,
+        principalId: signedIn.principalId,
+      });
+      return {
+        status: "signed_in" as const,
+        identity: toSessionSafeIdentity(principal),
+        displayName: null,
+        session: signedIn.cookies,
+        emails: [] as AuthEmail[],
+      };
+    }
+
+    // A new account's address, or either step of an email change.
+    const verified = await verifyEmailWithBetterAuth({ ctx, token: args.tokenHash });
+    if (!verified.principalId) {
+      // The current address approved an email change; the new one is next.
+      if (verified.emails.length > 0) {
+        return { status: "email_change_pending" as const, emails: verified.emails };
+      }
+      throw invalidCredentials();
+    }
     const principal = await findActiveSessionPrincipal({
       db: args.db,
       principalId: verified.principalId,
@@ -313,6 +336,7 @@ export async function establishSessionFromTokenHash(args: {
       identity: toSessionSafeIdentity(principal),
       displayName: null,
       session: verified.cookies,
+      emails: verified.emails,
     };
   }
 

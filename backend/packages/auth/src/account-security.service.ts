@@ -5,14 +5,18 @@ import { createSupabasePublicServerClient } from "./supabase-server";
 import { requireSupabaseUserClient } from "./supabase-user-client";
 import { headers } from "next/headers";
 import {
+  authRequestContext,
   authRequestContextFromHeaders,
+  changeEmailWithBetterAuth,
   changePasswordWithBetterAuth,
+  requestMagicLinkWithBetterAuth,
   listLoginMethods,
   startGoogleLink,
   unlinkLoginMethod,
 } from "./better-auth-flows";
 import { applySetCookiesToCookieStore } from "./cookie-store";
 import { authProvider } from "./better-auth-runtime";
+import type { AuthEmail } from "./better-auth";
 
 function mapAuthError(): never {
   throw new AtlasHttpError({
@@ -20,6 +24,10 @@ function mapAuthError(): never {
     status: 400,
     message: "Unable to complete this security action. Please try again.",
   });
+}
+
+async function betterAuthContext() {
+  return authRequestContextFromHeaders(new Headers(await headers()));
 }
 
 export async function changePassword(args: { currentPassword: string; newPassword: string }) {
@@ -62,7 +70,19 @@ export async function changePassword(args: { currentPassword: string; newPasswor
   return { ok: true as const, email };
 }
 
-export async function changeEmail(args: { newEmail: string; emailRedirectTo?: string }) {
+export async function changeEmail(args: {
+  newEmail: string;
+  emailRedirectTo?: string;
+}): Promise<{ ok: true; email: string; emails?: AuthEmail[] }> {
+  if (authProvider() === "better-auth") {
+    // The route sends these: the current address approves the change first.
+    const result = await changeEmailWithBetterAuth({
+      ctx: await betterAuthContext(),
+      newEmail: args.newEmail,
+    });
+    return { ok: true as const, email: result.email, emails: result.emails };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
 
   const { error } = await supabase.auth.updateUser(
@@ -77,33 +97,6 @@ export async function changeEmail(args: { newEmail: string; emailRedirectTo?: st
   return { ok: true as const, email: args.newEmail };
 }
 
-export async function startPhoneChange(args: { phone: string }) {
-  const { supabase } = await requireSupabaseUserClient();
-
-  const { error } = await supabase.auth.updateUser({ phone: args.phone });
-  if (error) {
-    mapAuthError();
-  }
-
-  return { ok: true as const };
-}
-
-export async function verifyPhoneChange(args: { phone: string; token: string }) {
-  const { supabase } = await requireSupabaseUserClient();
-
-  const { error } = await supabase.auth.verifyOtp({
-    phone: args.phone,
-    token: args.token,
-    type: "phone_change",
-  });
-
-  if (error) {
-    mapAuthError();
-  }
-
-  return { ok: true as const };
-}
-
 export async function listMfaFactors() {
   const { supabase } = await requireSupabaseUserClient();
   const { data, error } = await supabase.auth.mfa.listFactors();
@@ -111,7 +104,8 @@ export async function listMfaFactors() {
     mapAuthError();
   }
 
-  const factors = [...data.totp, ...data.phone].map((factor) => ({
+  // Phone two-factor is deferred with phone sign-in (launch plan task 3.4).
+  const factors = data.totp.map((factor) => ({
     id: factor.id,
     factorType: factor.factor_type,
     status: factor.status,
@@ -243,10 +237,6 @@ export async function signOutOtherSessions() {
   return { ok: true as const };
 }
 
-async function betterAuthContext() {
-  return authRequestContextFromHeaders(new Headers(await headers()));
-}
-
 export async function listLinkedIdentities() {
   if (authProvider() === "better-auth") {
     const methods = await listLoginMethods({ ctx: await betterAuthContext() });
@@ -337,7 +327,21 @@ export async function unlinkIdentity(args: { identityId: string }) {
   return { ok: true as const };
 }
 
-export async function sendMagicLink(args: { email: string; emailRedirectTo?: string }) {
+export async function sendMagicLink(args: {
+  email: string;
+  emailRedirectTo?: string;
+  /** Required with Better Auth: the route sends the link. */
+  req?: Request;
+}): Promise<{ ok: true; emails?: AuthEmail[] }> {
+  if (authProvider() === "better-auth") {
+    if (!args.req) return { ok: true as const, emails: [] };
+    const { emails } = await requestMagicLinkWithBetterAuth({
+      ctx: authRequestContext(args.req),
+      email: args.email,
+    });
+    return { ok: true as const, emails };
+  }
+
   const supabase = (await import("./supabase-server")).createSupabasePublicServerClient();
 
   const { error } = await supabase.auth.signInWithOtp(

@@ -61,6 +61,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return toVerifyEmail("expired");
   }
 
+  // Better Auth's email change: the current address approved it, and the
+  // new address now has its own link to open.
+  if (type === "email_change" && result.status === "EMAIL_VERIFICATION_REQUIRED") {
+    return toVerifyEmail("sent");
+  }
+
   const authenticated = result.status === "AUTHENTICATED" || result.status === "INVITED_MEMBERSHIP";
 
   let destination: URL;
