@@ -775,8 +775,8 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1(mobx@6.16.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       mobx-state-tree:
-        specifier: ^7.3.1
-        version: 7.3.1(mobx@6.16.1)(typescript@6.0.3)
+        specifier: ^9.0.0
+        version: 9.0.0(mobx@6.16.1)(typescript@6.0.3)
       motion:
         specifier: ^12.42.2
         version: 12.42.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2549,6 +2549,7 @@ packages:
   '@smithy/core@3.25.0':
     resolution: {integrity: sha512-TTD6el7tvKyafkXBf7XO3jLOE+qVxOTrLjp/fEGiV3BMfUHK/LfdYlQO9YgZvzxC7kqA3H/IhJXNqQgnbgjb7A==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.4.0':
     resolution: {integrity: sha512-pPQmNdEvMJttv9z2kdYxoui83p/nr32zjMf0aMfmzmGmFEgKXUfy0vXiNg0fx4R5XLQzmJBLM9Wg0guEq2/q8A==}
@@ -4382,10 +4383,10 @@ packages:
       react-native:
         optional: true
 
-  mobx-state-tree@7.3.1:
-    resolution: {integrity: sha512-SxX7BBWOCN7AdzHzjLAJcMsyUoIPlFy9zOtsfLFRUhB7IviIYGTYYccv9OFSOatLjh7nJwzZ5U3XDRlmbCrtfQ==}
+  mobx-state-tree@9.0.0:
+    resolution: {integrity: sha512-jhO/vYk4syfqQKNLLPTbY0C+/N4HA14cLcizDPMS4qndWo+HKGJN+JMJ5c2BEi5LmbtVLZkWRNeOgvMSQ8H5tg==}
     peerDependencies:
-      mobx: ^6.3.0
+      mobx: ^7.0.0
 
   mobx@6.16.1:
     resolution: {integrity: sha512-syNcDdX3KT+Jq3je6eGjBhuc24Z68td2VG0zNFqRswaE433D9SNH5VRy/xrGbJsUixfppLLccXhAW9JSf6n+SQ==}
@@ -8961,7 +8962,7 @@ snapshots:
     optionalDependencies:
       react-dom: 19.2.7(react@19.2.7)
 
-  mobx-state-tree@7.3.1(mobx@6.16.1)(typescript@6.0.3):
+  mobx-state-tree@9.0.0(mobx@6.16.1)(typescript@6.0.3):
     dependencies:
       mobx: 6.16.1
       ts-essentials: 9.4.2(typescript@6.0.3)
