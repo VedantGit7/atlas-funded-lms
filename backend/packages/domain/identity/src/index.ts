@@ -49,6 +49,7 @@ export {
 export {
   ChangePasswordRequestSchema,
   ChangeEmailRequestSchema,
+  MfaEnrollRequestSchema,
   MfaEnrollResponseSchema,
   MfaVerifyRequestSchema,
   MfaStepUpRequestSchema,

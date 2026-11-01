@@ -1,10 +1,7 @@
 import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { enforceMfaAttemptRateLimit } from "@atlas/api/rate-limit";
-import {
-  applyAuthSessionToCookieStore,
-  readSessionPersistenceFromStore,
-} from "@atlas/auth/cookie-store";
+import { applyVerifiedSessionToCookieStore } from "@atlas/auth/cookie-store";
 import { stepUpMfa } from "@atlas/auth";
 import { AccountSecurityOkResponseSchema, MfaStepUpRequestSchema } from "@atlas/domain-identity";
 import { securityMutationMetadata } from "../../route.metadata";
@@ -32,12 +29,7 @@ export const POST = createTenantRoute<
       requestId: ctx.requestId,
     });
     const { session } = await stepUpMfa({ code: input.code, factorId: input.factorId });
-    await applyAuthSessionToCookieStore({
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-      expiresInSeconds: session.expiresIn,
-      persistent: await readSessionPersistenceFromStore(),
-    });
+    await applyVerifiedSessionToCookieStore(session);
     return { data: { ok: true as const } };
   },
 });

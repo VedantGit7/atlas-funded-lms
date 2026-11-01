@@ -1,9 +1,6 @@
 import { createPlatformRoute } from "@atlas/api/create-platform-route";
 import { enforcePlatformMfaAttemptRateLimit } from "@atlas/api/rate-limit";
-import {
-  applyAuthSessionToCookieStore,
-  readSessionPersistenceFromStore,
-} from "@atlas/auth/cookie-store";
+import { applyVerifiedSessionToCookieStore } from "@atlas/auth/cookie-store";
 import { verifyMfaEnrollment } from "@atlas/auth";
 import { AccountSecurityOkResponseSchema, MfaVerifyRequestSchema } from "@atlas/domain-identity";
 import { mfaMutationMetadata } from "../route.metadata";
@@ -23,12 +20,7 @@ export const POST = createPlatformRoute({
       requestId: ctx.requestId,
     });
     const { session } = await verifyMfaEnrollment({ factorId: body.factorId, code: body.code });
-    await applyAuthSessionToCookieStore({
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-      expiresInSeconds: session.expiresIn,
-      persistent: await readSessionPersistenceFromStore(),
-    });
+    await applyVerifiedSessionToCookieStore(session);
     return { data: { ok: true as const } };
   },
 });

@@ -251,9 +251,40 @@ Behind the same `AUTH_PROVIDER` switch. The product sends **links**, not codes t
 
 The security events that don't involve phone are unchanged.
 
+## Task 3.5: two-factor (as built, 1 November 2026)
+
+Behind the same `AUTH_PROVIDER` switch. One authenticator per principal (`auth_two_factors`), with ten backup codes; phone two-factor stays deferred. The F01 and H4 rules are unchanged: what counts is the session's own `assurance_level`.
+
+**Setting up** (security settings, and the platform console's first-time setup).
+
+- Better Auth makes the secret and the backup codes, both encrypted at rest. The API turns its `otpauth://` URI into the QR image the settings page already shows.
+- The ten backup codes are shown once, under the QR code.
+- An account that signs in with a password confirms it first (`allowPasswordless`: a Google-only account isn't asked). The page asks for it only when the API says so, so Supabase mode looks the same.
+- The first code from the app replaces the session with an `aal2` one, as before (H4).
+
+**Signing in.**
+
+- A password sign-in stops at the challenge (Better Auth's `two_factor` cookie, no session yet). The app's code, or a backup code, then gives an `aal2` session.
+- Google and sign-in links start `aal1` sessions. The same code step raises them to `aal2` in place.
+
+**Step-up** (`/me/security/mfa/step-up`, the dialog for MFA_REQUIRED).
+
+- Better Auth accepts a code during an existing session but changes nothing, so our code marks this session `aal2` with `mfa_verified_at`, and empties the one-minute cache for it.
+- The cookie stays the same.
+- A backup code works here too, and is used up.
+
+**Removing the authenticator.**
+
+- Only from an `aal2` session. Otherwise it answers MFA_REQUIRED, and the existing step-up dialog asks for a code first.
+- This is stronger than Better Auth's own rule, which asks for the password: a stolen password alone can't turn two-factor off.
+- It removes the backup codes too and clears `mfa_enabled`.
+
+The "MFA enabled/disabled" security emails are unchanged.
+
+**For task 5.1:** clear `mfa_enabled` for principals with no `auth_two_factors` row (see "Moving the staging accounts"). The owner then sets up the authenticator again from the console's first-time setup.
+
 ## Open items for the flow tasks
 
 - **Sliding sessions.** Pass Better Auth's refreshed cookie back through the web proxy, so a session used every day doesn't end 30 days after sign-in.
-- **3.5, existing sessions after enrollment.** Turning on two-factor leaves the user's other sessions at `aal1`, which the gates already handle.
 - **3.7, test cleanup.** `scripts/db/purge-test-tenants.mjs` refuses to delete a test principal that any table still references, including `auth_sessions` and `auth_accounts`, whose rows are deleted with the principal anyway. Until it allows those, tests delete their own Better Auth rows, as `better-auth-schema.test.ts` does.
 - **After launch, cleanup.** Better Auth deletes expired verification rows when it reads them, but expired sessions stay. Add a periodic delete of expired `auth_sessions` and `auth_verifications` rows to the API.

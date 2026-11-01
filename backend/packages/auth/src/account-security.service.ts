@@ -1,3 +1,4 @@
+import QRCode from "qrcode";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { authRequired, passwordPolicyRejection } from "./auth-errors";
 import { assertPasswordNotBreached } from "./password-policy";
@@ -9,6 +10,10 @@ import {
   authRequestContextFromHeaders,
   changeEmailWithBetterAuth,
   changePasswordWithBetterAuth,
+  disableTwoFactor,
+  enableTwoFactor,
+  listTwoFactorFactors,
+  verifySecondFactor,
   requestMagicLinkWithBetterAuth,
   listLoginMethods,
   startGoogleLink,
@@ -98,6 +103,10 @@ export async function changeEmail(args: {
 }
 
 export async function listMfaFactors() {
+  if (authProvider() === "better-auth") {
+    return { factors: await listTwoFactorFactors({ ctx: await betterAuthContext() }) };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
   const { data, error } = await supabase.auth.mfa.listFactors();
   if (error) {
@@ -115,7 +124,22 @@ export async function listMfaFactors() {
   return { factors };
 }
 
-export async function enrollMfaTotp() {
+export async function enrollMfaTotp(args: { password?: string | undefined } = {}) {
+  if (authProvider() === "better-auth") {
+    const enabled = await enableTwoFactor({
+      ctx: await betterAuthContext(),
+      password: args.password,
+    });
+    return {
+      factorId: enabled.factorId,
+      // Better Auth gives the otpauth:// URI; the settings page shows a QR image.
+      qrCode: await QRCode.toDataURL(enabled.uri, { margin: 1, width: 240 }),
+      secret: enabled.secret,
+      uri: enabled.uri,
+      backupCodes: enabled.backupCodes,
+    };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: "totp",
@@ -134,8 +158,14 @@ export async function enrollMfaTotp() {
   };
 }
 
-/** A session that completed MFA (aal2), to be set as the caller's cookies. */
-export type MfaVerifiedSession = { accessToken: string; refreshToken: string; expiresIn: number };
+/**
+ * A session that completed MFA (aal2), to be set as the caller's cookies:
+ * Supabase's tokens, or Better Auth's Set-Cookie headers (none when the
+ * session was stepped up in place).
+ */
+export type MfaVerifiedSession =
+  | { accessToken: string; refreshToken: string; expiresIn: number }
+  | { setCookies: string[] };
 
 async function verifiedSession(
   supabase: Awaited<ReturnType<typeof requireSupabaseUserClient>>["supabase"],
@@ -163,7 +193,15 @@ function invalidMfaCode(): AtlasHttpError {
  * otherwise someone who enrolls in order to reach a step-up action still holds
  * an aal1 session and is challenged again (audit H4).
  */
-export async function verifyMfaEnrollment(args: { factorId: string; code: string }) {
+export async function verifyMfaEnrollment(args: {
+  factorId: string;
+  code: string;
+}): Promise<{ ok: true; session: MfaVerifiedSession }> {
+  if (authProvider() === "better-auth") {
+    const verified = await verifySecondFactor({ ctx: await betterAuthContext(), code: args.code });
+    return { ok: true as const, session: verified.cookies };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
 
   const challenge = await supabase.auth.mfa.challenge({ factorId: args.factorId });
@@ -189,7 +227,16 @@ export async function verifyMfaEnrollment(args: { factorId: string; code: string
  * factor, returning the aal2 session (audit H4). Routes that declare
  * `mfa: "required"` accept the session from then on.
  */
-export async function stepUpMfa(args: { code: string; factorId?: string | undefined }) {
+export async function stepUpMfa(args: {
+  code: string;
+  factorId?: string | undefined;
+}): Promise<{ session: MfaVerifiedSession }> {
+  if (authProvider() === "better-auth") {
+    // A backup code works here too; the session is marked aal2 in place.
+    const verified = await verifySecondFactor({ ctx: await betterAuthContext(), code: args.code });
+    return { session: verified.cookies };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
   const { data, error } = await supabase.auth.mfa.listFactors();
   if (error) {
@@ -220,6 +267,12 @@ export async function stepUpMfa(args: { code: string; factorId?: string | undefi
 }
 
 export async function unenrollMfaFactor(args: { factorId: string }) {
+  if (authProvider() === "better-auth") {
+    // One factor per principal: removing it also removes the backup codes.
+    await disableTwoFactor({ ctx: await betterAuthContext() });
+    return { ok: true as const };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
   const { error } = await supabase.auth.mfa.unenroll({ factorId: args.factorId });
   if (error) {

@@ -53,7 +53,11 @@ export function MfaManager({
     factorId: string;
     qrCode: string;
     secret: string;
+    backupCodes: string[];
   } | null>(null);
+  // Better Auth asks an account that has a password to confirm it first.
+  const [passwordNeeded, setPasswordNeeded] = useState(false);
+  const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -82,14 +86,29 @@ export function MfaManager({
       const { MfaQrCode } = await import("./MfaQrCode");
       setQrCode(() => MfaQrCode);
       const response = await clientApi.post<{
-        data: { factorId: string; qrCode: string; secret: string; uri: string };
-      }>(api.factors, {}, "mfa-enroll");
+        data: {
+          factorId: string;
+          qrCode: string;
+          secret: string;
+          uri: string;
+          backupCodes?: string[];
+        };
+      }>(api.factors, password ? { password } : {}, "mfa-enroll");
       setEnroll({
         factorId: response.data.factorId,
         qrCode: response.data.qrCode,
         secret: response.data.secret,
+        backupCodes: response.data.backupCodes ?? [],
       });
+      setPasswordNeeded(false);
+      setPassword("");
     } catch (error) {
+      if (
+        error instanceof ClientApiError &&
+        error.message === "Enter your current password to set up an authenticator app."
+      ) {
+        setPasswordNeeded(true);
+      }
       setMessage(formatError(error));
     } finally {
       enrolling.current = false;
@@ -199,6 +218,34 @@ export function MfaManager({
           </ul>
         ) : null}
 
+        {passwordNeeded && !enroll ? (
+          <form
+            className="space-y-3 border-t border-[var(--acct-border)] pt-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void startEnroll();
+            }}
+          >
+            <label className={classes.label} htmlFor="mfa-current-password">
+              Current password
+            </label>
+            <input
+              id="mfa-current-password"
+              type="password"
+              autoComplete="current-password"
+              className={classes.field}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              required
+            />
+            <button type="submit" className={classes.primaryButton} disabled={busy}>
+              {busy ? "Checking…" : "Continue"}
+            </button>
+          </form>
+        ) : null}
+
         {enroll && QrCode ? (
           <form
             className="space-y-3 border-t border-[var(--acct-border)] pt-4"
@@ -209,6 +256,20 @@ export function MfaManager({
           >
             <QrCode qrCode={enroll.qrCode} />
             <p className={classes.helper}>Manual key: {enroll.secret}</p>
+            {enroll.backupCodes.length > 0 ? (
+              <div className="space-y-2 rounded-lg border border-[var(--acct-border)] p-4">
+                <p className="text-sm font-semibold text-[var(--acct-on-surface)]">Backup codes</p>
+                <p className={classes.helper}>
+                  Save these somewhere safe. Each one signs you in once if you lose your phone, and
+                  you won&apos;t see them again.
+                </p>
+                <ul className="grid grid-cols-2 gap-2 font-mono text-sm text-[var(--acct-on-surface)]">
+                  {enroll.backupCodes.map((backupCode) => (
+                    <li key={backupCode}>{backupCode}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <input
               type="text"
               inputMode="numeric"

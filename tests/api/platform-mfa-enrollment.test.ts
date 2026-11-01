@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   listMfaFactors: vi.fn(),
   enrollMfaTotp: vi.fn(),
   verifyMfaEnrollment: vi.fn(),
-  applyAuthSessionToCookieStore: vi.fn(),
+  applyVerifiedSessionToCookieStore: vi.fn(),
   withGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
   withPlatformScope: vi.fn((_ctx: unknown, _reason: string, fn: (tx: unknown) => unknown) =>
     fn({ $queryRaw: vi.fn() }),
@@ -23,7 +23,7 @@ vi.mock("@atlas/auth", async (importOriginal) => ({
   verifyMfaEnrollment: mocks.verifyMfaEnrollment,
 }));
 vi.mock("@atlas/auth/cookie-store", () => ({
-  applyAuthSessionToCookieStore: mocks.applyAuthSessionToCookieStore,
+  applyVerifiedSessionToCookieStore: mocks.applyVerifiedSessionToCookieStore,
   readSessionPersistenceFromStore: () => Promise.resolve(true),
 }));
 vi.mock("@atlas/db/global-db", () => ({
@@ -105,8 +105,8 @@ describe("platform MFA enrollment routes", () => {
     );
     expect(response.status).toBe(200);
     expect(mocks.verifyMfaEnrollment).toHaveBeenCalledWith({ factorId, code: "123456" });
-    expect(mocks.applyAuthSessionToCookieStore).toHaveBeenCalledWith(
-      expect.objectContaining({ accessToken: "at", refreshToken: "rt", expiresInSeconds: 3600 }),
+    expect(mocks.applyVerifiedSessionToCookieStore).toHaveBeenCalledWith(
+      expect.objectContaining({ accessToken: "at", refreshToken: "rt", expiresIn: 3600 }),
     );
   });
 

@@ -165,3 +165,21 @@ export async function applySetCookiesToCookieStore(setCookies: string[]): Promis
     );
   }
 }
+
+/**
+ * Sets the cookies for a session that just passed a second factor: Supabase's
+ * aal2 tokens (keeping "remember me"), or Better Auth's new session cookie.
+ * A Better Auth session stepped up in place sets nothing.
+ */
+export async function applyVerifiedSessionToCookieStore(session: IssuedAuthSession): Promise<void> {
+  if ("setCookies" in session) {
+    await applySetCookiesToCookieStore(session.setCookies);
+    return;
+  }
+  await applyAuthSessionToCookieStore({
+    accessToken: session.accessToken,
+    refreshToken: session.refreshToken,
+    ...(session.expiresIn !== undefined ? { expiresInSeconds: session.expiresIn } : {}),
+    persistent: await readSessionPersistenceFromStore(),
+  });
+}
