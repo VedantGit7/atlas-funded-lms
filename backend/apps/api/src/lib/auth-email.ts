@@ -55,8 +55,9 @@ export async function sendAuthEmails(args: {
         subject: content.subject,
         body: content.body,
         requestId: args.requestId,
-        // Never derived from the single-use token, which is a credential.
-        idempotencyKey: `auth-email:${email.kind}:${randomUUID()}`,
+        // Nothing from the email Better Auth asked for: its token is a
+        // credential, and the provider hashes this key into the Message-ID.
+        idempotencyKey: `auth-email:${randomUUID()}`,
         ...(sender.fromEmail ? { fromName: sender.fromName, fromEmail: sender.fromEmail } : {}),
         replyToEmail: sender.replyToEmail,
       });
