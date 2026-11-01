@@ -194,22 +194,7 @@ const SOCIAL_PROVIDERS = [
       </svg>
     ),
   },
-  {
-    id: "apple",
-    label: "Apple",
-    icon: (
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        aria-hidden
-        focusable="false"
-      >
-        <path d="M17.05 12.54c-.02-2.07 1.69-3.06 1.77-3.11-.96-1.41-2.46-1.6-2.99-1.62-1.27-.13-2.49.75-3.13.75-.65 0-1.64-.73-2.7-.71-1.39.02-2.67.81-3.38 2.05-1.44 2.5-.37 6.2 1.04 8.23.69.99 1.51 2.1 2.58 2.06 1.04-.04 1.43-.67 2.69-.67 1.25 0 1.6.67 2.7.65 1.11-.02 1.82-1.01 2.5-2.01.79-1.15 1.11-2.27 1.13-2.33-.02-.01-2.17-.83-2.19-3.31zM15.02 6.2c.57-.69.96-1.65.85-2.6-.82.03-1.82.55-2.41 1.23-.53.61-.99 1.58-.87 2.51.91.07 1.85-.46 2.43-1.14z" />
-      </svg>
-    ),
-  },
+  // Apple sign-in is deferred (launch plan, "Later: Apple sign-in").
 ] as const;
 
 export function LoginForm() {
@@ -565,7 +550,7 @@ export function LoginForm() {
         <span className="h-px flex-1 bg-[var(--fba-bdr)]" />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         {SOCIAL_PROVIDERS.map((provider) => (
           <a
             key={provider.id}

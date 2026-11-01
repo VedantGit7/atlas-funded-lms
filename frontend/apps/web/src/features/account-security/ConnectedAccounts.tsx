@@ -42,7 +42,7 @@ export function ConnectedAccounts() {
     });
   }, [load]);
 
-  async function linkProvider(provider: "google" | "apple") {
+  async function linkProvider(provider: "google") {
     setBusy(true);
     setMessage(null);
     try {
@@ -73,7 +73,9 @@ export function ConnectedAccounts() {
   }
 
   const linkedProviders = new Set(identities.map((identity) => identity.provider));
-  const providers: Array<"google" | "apple"> = ["google", "apple"];
+  // Apple sign-in is deferred (launch plan, "Later: Apple sign-in"); an Apple
+  // login method linked before still lists, labelled, and can be removed.
+  const providers: Array<"google"> = ["google"];
 
   return (
     <SecuritySection

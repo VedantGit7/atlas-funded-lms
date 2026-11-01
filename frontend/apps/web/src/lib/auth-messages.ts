@@ -31,6 +31,10 @@ const IDENTITY_BLOCK_MESSAGES = {
   EMAIL_NOT_VERIFIED: "Verify your email address using the link we sent you, then sign in.",
   ACCOUNT_REVIEW_REQUIRED:
     "This email belongs to an earlier account. For your security, support must confirm the change before you can sign in. Contact support to continue.",
+  // Google sign-in for an address that already has an account it can't be
+  // linked to yet; Google has proven the person controls the address.
+  ACCOUNT_NOT_LINKED:
+    "This email already has an account. Sign in with your password, then connect Google from your security settings.",
 } as const;
 
 export type IdentityBlockCode = keyof typeof IDENTITY_BLOCK_MESSAGES;
@@ -40,6 +44,7 @@ const IDENTITY_BLOCK_QUERY: Record<IdentityBlockCode, string> = {
   ACCOUNT_DISABLED: "account_disabled",
   EMAIL_NOT_VERIFIED: "email_not_verified",
   ACCOUNT_REVIEW_REQUIRED: "account_review",
+  ACCOUNT_NOT_LINKED: "account_not_linked",
 };
 
 export function isIdentityBlockCode(code: string | null | undefined): code is IdentityBlockCode {

@@ -4,7 +4,14 @@ import { assertPasswordNotBreached } from "./password-policy";
 import { createSupabasePublicServerClient } from "./supabase-server";
 import { requireSupabaseUserClient } from "./supabase-user-client";
 import { headers } from "next/headers";
-import { authRequestContextFromHeaders, changePasswordWithBetterAuth } from "./better-auth-flows";
+import {
+  authRequestContextFromHeaders,
+  changePasswordWithBetterAuth,
+  listLoginMethods,
+  startGoogleLink,
+  unlinkLoginMethod,
+} from "./better-auth-flows";
+import { applySetCookiesToCookieStore } from "./cookie-store";
 import { authProvider } from "./better-auth-runtime";
 
 function mapAuthError(): never {
@@ -236,7 +243,23 @@ export async function signOutOtherSessions() {
   return { ok: true as const };
 }
 
+async function betterAuthContext() {
+  return authRequestContextFromHeaders(new Headers(await headers()));
+}
+
 export async function listLinkedIdentities() {
+  if (authProvider() === "better-auth") {
+    const methods = await listLoginMethods({ ctx: await betterAuthContext() });
+    return {
+      identities: methods.map((method) => ({
+        id: method.id,
+        provider: method.provider,
+        email: null,
+        createdAt: method.createdAt,
+      })),
+    };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
   const {
     data: { user },
@@ -261,6 +284,15 @@ export async function startLinkIdentity(args: {
   provider: "google" | "apple";
   redirectTo: string;
 }) {
+  if (authProvider() === "better-auth") {
+    // Apple is deferred (launch plan, "Later: Apple sign-in").
+    if (args.provider !== "google") mapAuthError();
+    const start = await startGoogleLink({ ctx: await betterAuthContext() });
+    // The signed state cookie Google's callback is checked against.
+    await applySetCookiesToCookieStore(start.cookies.setCookies);
+    return { url: start.url };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
 
   const { data, error } = await supabase.auth.linkIdentity({
@@ -276,6 +308,11 @@ export async function startLinkIdentity(args: {
 }
 
 export async function unlinkIdentity(args: { identityId: string }) {
+  if (authProvider() === "better-auth") {
+    await unlinkLoginMethod({ ctx: await betterAuthContext(), id: args.identityId });
+    return { ok: true as const };
+  }
+
   const { supabase } = await requireSupabaseUserClient();
   const {
     data: { user },

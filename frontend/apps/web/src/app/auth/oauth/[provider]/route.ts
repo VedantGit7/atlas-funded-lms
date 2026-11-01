@@ -10,7 +10,8 @@ import {
 } from "../oauth-shared";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
-const VALID_PROVIDERS = new Set(["google", "apple"]);
+// Apple is deferred (launch plan, "Later: Apple sign-in").
+const VALID_PROVIDERS = new Set(["google"]);
 const OAUTH_COOKIE_MAX_AGE_SECONDS = 60 * 10;
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
@@ -27,7 +28,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   const callbackUrl = `${origin}/auth/callback`;
 
   let providerUrl: string;
-  let codeVerifier: string;
+  let codeVerifier: string | undefined;
+  let apiSetCookies: string[];
   const browserHost =
     req.headers.get(ATLAS_INTERNAL_TENANT_HOST_HEADER) ?? req.headers.get("host") ?? "";
 
@@ -56,12 +58,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
       data?: { url?: string; codeVerifier?: string };
     };
 
-    if (!payload.data?.url || !payload.data.codeVerifier) {
+    if (!payload.data?.url) {
       throw new Error("oauth_start_malformed");
     }
 
     providerUrl = payload.data.url;
+    // Supabase returns a PKCE verifier to keep; Better Auth sets its own
+    // signed state cookie instead, passed on to the browser below.
     codeVerifier = payload.data.codeVerifier;
+    apiSetCookies =
+      typeof apiRes.headers.getSetCookie === "function" ? apiRes.headers.getSetCookie() : [];
   } catch {
     return NextResponse.redirect(`${loginUrl}?error=oauth`);
   }
@@ -76,10 +82,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     maxAge: OAUTH_COOKIE_MAX_AGE_SECONDS,
   };
 
-  response.cookies.set(OAUTH_VERIFIER_COOKIE, codeVerifier, cookieOptions);
+  if (codeVerifier) response.cookies.set(OAUTH_VERIFIER_COOKIE, codeVerifier, cookieOptions);
   response.cookies.set(OAUTH_REMEMBER_COOKIE, remember ? "1" : "0", cookieOptions);
   if (next) {
     response.cookies.set(OAUTH_NEXT_COOKIE, next, cookieOptions);
+  }
+
+  // Appended last: response.cookies changes rebuild the Set-Cookie header.
+  for (const header of apiSetCookies) {
+    response.headers.append("set-cookie", header);
   }
 
   return response;
