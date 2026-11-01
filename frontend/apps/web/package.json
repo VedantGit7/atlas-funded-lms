@@ -37,7 +37,7 @@
     "lucide-react": "^1.21.0",
     "mobx": "^6.16.1",
     "mobx-react-lite": "^4.1.1",
-    "mobx-state-tree": "^7.3.1",
+    "mobx-state-tree": "^9.0.0",
     "motion": "^12.42.2",
     "next": "^16.4.2",
     "posthog-js": "^1.438.9",
