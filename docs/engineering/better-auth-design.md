@@ -183,10 +183,48 @@ There are no production accounts.
 - **Sessions don't slide yet.** The session check can't rewrite the cookie, so a session lasts 30 days from sign-in. Sliding it means returning Better Auth's cookie from the web proxy: an open item.
 - **Placeholders are claimed at first sign-in.** An unclaimed principal is claimed when its owner first signs in with a proven address, in the session hook, because Better Auth's verify step doesn't say which user it updated. The hook checks for a platform grant, so `atlas_auth` may now read `platform_operators` (migration 128).
 
+## Task 3.3: Google sign-in and login methods (as built, 1 November 2026)
+
+Behind the same `AUTH_PROVIDER` switch, with the Google client from `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. The deployment check needs both or neither.
+
+**The redirect.**
+
+- Better Auth's routes sit under `/auth` (`basePath`), so Google returns to `https://<academy>/auth/callback/google`, the address registered on both Google clients in task 0.4.
+- That web route (`/auth/callback/[provider]`) passes the code, Google's `state`, and the browser's cookies to `POST /api/v1/public/auth/oauth/callback`.
+- Better Auth checks the state against its signed `atlas.state` cookie, which the start route passed to the browser. A callback without that cookie is refused.
+- Supabase's flow keeps `/auth/callback`; both use one handler (`app/auth/oauth/oauth-callback.ts`).
+
+**Linking, as the design asked.**
+
+- A Google sign-in reaches an existing account with the same address only when Google has verified the address and so have we.
+- Google is deliberately not a "trusted provider": Better Auth would then link even when Google hasn't verified the address.
+- An unverified local account answers `ACCOUNT_NOT_LINKED` (409): sign in with the password, then connect Google from the security settings. This stops someone who signed up with another person's address, and never verified it, from gaining that person's Google sign-in.
+
+**New accounts.**
+
+- A new address Google has verified gets a principal and an `aal1` session.
+- One Google hasn't verified gets our verification email and no session (audit H6).
+
+**Login methods.**
+
+- The security settings list the principal's login methods (the password one reads as "email"), start linking Google (the state cookie is set through Next's cookie store), and remove one.
+- Better Auth refuses to remove the last way to sign in.
+- `session.freshAge` is 0: our routes decide what is sensitive (H4). Otherwise Better Auth's own freshness rule refused to unlink a day after sign-in.
+
+**Unchanged:**
+
+- **The platform console:** it offers no Google sign-in, because its Google clients register academy addresses only.
+- **Apple is hidden:** its sign-in and sign-up buttons and its "connect" option are gone. An Apple login method linked before still lists and can be removed.
+- **"Keep me signed in" off:** this drops the session cookie's lifetime, as with Supabase.
+
+**For task 5.1:**
+
+- add the staging client's ID and secret to the API's environment (`provider.env`, through hidden prompts);
+- an academy on a custom domain needs that domain's `/auth/callback/google` added to the Google client before Google sign-in works there.
+
 ## Open items for the flow tasks
 
 - **Sliding sessions.** Pass Better Auth's refreshed cookie back through the web proxy, so a session used every day doesn't end 30 days after sign-in.
-- **3.3, Google account linking.** Link Google to an existing principal only when Google reports the email as verified and the principal's email is verified (`account.accountLinking.trustedProviders: ["google"]`).
 - **3.5, existing sessions after enrollment.** Turning on two-factor leaves the user's other sessions at `aal1`, which the gates already handle.
 - **3.7, test cleanup.** `scripts/db/purge-test-tenants.mjs` refuses to delete a test principal that any table still references, including `auth_sessions` and `auth_accounts`, whose rows are deleted with the principal anyway. Until it allows those, tests delete their own Better Auth rows, as `better-auth-schema.test.ts` does.
 - **After launch, cleanup.** Better Auth deletes expired verification rows when it reads them, but expired sessions stay. Add a periodic delete of expired `auth_sessions` and `auth_verifications` rows to the API.

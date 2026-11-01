@@ -252,6 +252,10 @@ export function validateDeploymentConfiguration(
     issues.push(
       "BETTER_AUTH_SECRET must be at least 32 characters when AUTH_PROVIDER is better-auth",
     );
+  // Google sign-in (launch plan 0.4 and 3.3): a client ID without its secret,
+  // or the reverse, would fail at the first sign-in instead of at deploy.
+  if (Boolean(value("GOOGLE_CLIENT_ID")) !== Boolean(value("GOOGLE_CLIENT_SECRET")))
+    issues.push("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together");
   if (value("NEXT_PUBLIC_SUPABASE_ANON_KEY").startsWith("sb_secret_"))
     issues.push("NEXT_PUBLIC_SUPABASE_ANON_KEY must be a public key");
   const publicKey = value("NEXT_PUBLIC_SUPABASE_ANON_KEY");

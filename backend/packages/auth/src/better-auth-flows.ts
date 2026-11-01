@@ -10,7 +10,12 @@ import {
   PASSWORD_POLICY_REJECTION_MESSAGE,
   signInRateLimited,
 } from "./auth-errors";
-import type { AuthEmail } from "./better-auth";
+import {
+  OAUTH_DONE_PATH,
+  OAUTH_ERROR_PATH,
+  OAUTH_LINKED_PATH,
+  type AuthEmail,
+} from "./better-auth";
 import {
   betterAuthHeaders,
   captureAuthEmails,
@@ -346,5 +351,166 @@ export async function signOutWithBetterAuth(args: {
     return cookiesFrom(headers);
   } catch {
     return { setCookies: [] };
+  }
+}
+
+/**
+ * Google sign-in and login-method linking (launch plan task 3.3). Google sends
+ * the person back to /auth/callback/google on the academy's host; the web app
+ * passes the code, the state and Better Auth's signed state cookie here.
+ */
+export type SocialStart = { url: string; cookies: BetterAuthCookies };
+
+export async function startGoogleSignIn(args: { ctx: AuthRequestContext }): Promise<SocialStart> {
+  try {
+    const { headers, response } = await getAtlasAuth().api.signInSocial({
+      body: {
+        provider: "google",
+        callbackURL: OAUTH_DONE_PATH,
+        errorCallbackURL: OAUTH_ERROR_PATH,
+        disableRedirect: true,
+      },
+      headers: headersFor(args.ctx),
+      returnHeaders: true,
+    });
+    if (!("url" in response) || !response.url) throw authProviderUnavailable();
+    return { url: response.url, cookies: cookiesFrom(headers) };
+  } catch (error) {
+    if (error instanceof AtlasHttpError) throw error;
+    // Google isn't configured for this environment, or Better Auth refused.
+    throw authProviderUnavailable();
+  }
+}
+
+/** Starts linking Google to the signed-in principal; the callback adds the login method. */
+export async function startGoogleLink(args: { ctx: AuthRequestContext }): Promise<SocialStart> {
+  try {
+    const { headers, response } = await getAtlasAuth().api.linkSocialAccount({
+      body: {
+        provider: "google",
+        callbackURL: OAUTH_LINKED_PATH,
+        errorCallbackURL: OAUTH_ERROR_PATH,
+        disableRedirect: true,
+      },
+      headers: headersFor(args.ctx),
+      returnHeaders: true,
+    });
+    if (!response.url) throw authProviderUnavailable();
+    return { url: response.url, cookies: cookiesFrom(headers) };
+  } catch (error) {
+    if (error instanceof AtlasHttpError) throw error;
+    if (statusOf(error) === 401) throw authRequired();
+    throw authProviderUnavailable();
+  }
+}
+
+export type GoogleCallback =
+  | { kind: "signed_in"; principalId: string; cookies: BetterAuthCookies; emails: AuthEmail[] }
+  | { kind: "linked"; cookies: BetterAuthCookies; emails: AuthEmail[] };
+
+/** The reason Better Auth gave, as a stable error for the web app's sign-in page. */
+function socialSignInRefused(reason: string): AtlasHttpError {
+  if (reason === "email_not_verified") return emailNotVerified();
+  return new AtlasHttpError({
+    code: reason === "account_not_linked" ? "ACCOUNT_NOT_LINKED" : "AUTH_REQUIRED",
+    status: reason === "account_not_linked" ? 409 : 401,
+    message:
+      reason === "account_not_linked"
+        ? "This email already has an account. Sign in with your password, then connect Google from your security settings."
+        : "Google sign-in did not complete. Please try again.",
+  });
+}
+
+/**
+ * Finishes a Google redirect: Better Auth checks the state against its signed
+ * cookie, exchanges the code, then signs in, links to a matching verified
+ * account, creates one, or links Google to the person who started a link. It
+ * answers with a redirect to one of our marker paths, which says which.
+ */
+export async function completeGoogleCallback(args: {
+  ctx: AuthRequestContext;
+  code: string;
+  state: string;
+}): Promise<GoogleCallback> {
+  const auth = getAtlasAuth();
+  const { result: response, emails } = await captureAuthEmails(() =>
+    auth.api.callbackOAuth({
+      method: "GET",
+      params: { id: "google" },
+      query: { code: args.code, state: args.state },
+      headers: headersFor(args.ctx),
+      asResponse: true,
+    }),
+  );
+  const location = response.headers.get("location") ?? "";
+  const target = new URL(location, "http://callback.invalid");
+  const cookies = cookiesFrom(response.headers);
+
+  if (target.pathname === OAUTH_LINKED_PATH) return { kind: "linked", cookies, emails };
+  if (target.pathname !== OAUTH_DONE_PATH) {
+    throw socialSignInRefused(target.searchParams.get("error") ?? "unknown");
+  }
+
+  const sessionCookie = cookies.setCookies
+    .map((cookie) => cookie.split(";")[0] ?? "")
+    .filter((pair) => pair && !pair.endsWith("="))
+    .join("; ");
+  const session = sessionCookie
+    ? await auth.api.getSession({
+        headers: headersFor({ ...args.ctx, cookie: sessionCookie }),
+        query: { disableCookieCache: true, disableRefresh: true },
+      })
+    : null;
+  if (!session) throw socialSignInRefused("unable_to_create_session");
+  return { kind: "signed_in", principalId: session.user.id, cookies, emails };
+}
+
+export type LoginMethod = { id: string; provider: string; createdAt: string | null };
+
+/** The principal's login methods; the password one reads as "email", as with Supabase. */
+export async function listLoginMethods(args: { ctx: AuthRequestContext }): Promise<LoginMethod[]> {
+  try {
+    const accounts = await getAtlasAuth().api.listUserAccounts({ headers: headersFor(args.ctx) });
+    return accounts.map((account) => ({
+      id: account.id,
+      provider: account.providerId === "credential" ? "email" : account.providerId,
+      createdAt: new Date(account.createdAt).toISOString(),
+    }));
+  } catch (error) {
+    if (statusOf(error) === 401) throw authRequired();
+    throw authProviderUnavailable();
+  }
+}
+
+/**
+ * Removes a login method. Better Auth refuses to remove the last one, so a
+ * person can always sign in.
+ */
+export async function unlinkLoginMethod(args: {
+  ctx: AuthRequestContext;
+  id: string;
+}): Promise<void> {
+  const methods = await listLoginMethods({ ctx: args.ctx });
+  if (!methods.some((method) => method.id === args.id)) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Unable to complete this security action. Please try again.",
+    });
+  }
+  try {
+    await getAtlasAuth().api.unlinkAccount({
+      body: { accountId: args.id },
+      headers: headersFor(args.ctx),
+    });
+  } catch (error) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message:
+        errorCode(error) === "FAILED_TO_UNLINK_LAST_ACCOUNT"
+          ? "This is your only way to sign in. Add another before removing it."
+          : "Unable to complete this security action. Please try again.",
+    });
   }
 }

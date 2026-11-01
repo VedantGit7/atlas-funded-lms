@@ -34,14 +34,21 @@ export const PublicOAuthStartRequestSchema = z
 export const PublicOAuthStartResponseSchema = z.object({
   data: z.object({
     url: z.url(),
-    codeVerifier: z.string().min(1),
+    /**
+     * Supabase's PKCE verifier, for the web app to keep until the callback.
+     * Better Auth keeps its own and sets a signed state cookie instead.
+     */
+    codeVerifier: z.string().min(1).optional(),
   }),
 });
 
 export const PublicOAuthCallbackRequestSchema = z
   .object({
     code: z.string().min(1).max(4000),
-    codeVerifier: z.string().min(1).max(4000),
+    /** Supabase: the verifier from the start. */
+    codeVerifier: z.string().min(1).max(4000).optional(),
+    /** Better Auth: Google's state parameter, checked against its signed cookie. */
+    state: z.string().min(1).max(500).optional(),
     redirectTo: z.string().max(300).optional(),
     rememberMe: z.boolean().optional(),
   })

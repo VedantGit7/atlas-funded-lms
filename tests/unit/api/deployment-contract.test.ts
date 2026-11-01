@@ -197,6 +197,18 @@ describe("F05 deployment contract", () => {
       validateDeploymentConfiguration({ ...deploymentEnv(), AUTH_PROVIDER: "auth0" }),
     ).toThrow(/AUTH_PROVIDER must be supabase or better-auth/);
   });
+  it("needs the Google client ID and secret together (launch plan 3.3)", () => {
+    expect(() =>
+      validateDeploymentConfiguration({ ...deploymentEnv(), GOOGLE_CLIENT_ID: "id" }),
+    ).toThrow(/GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together/);
+    expect(() =>
+      validateDeploymentConfiguration({
+        ...deploymentEnv(),
+        GOOGLE_CLIENT_ID: "id",
+        GOOGLE_CLIENT_SECRET: "secret",
+      }),
+    ).not.toThrow();
+  });
   it("requires a long Better Auth secret on the API when Better Auth is on", () => {
     const betterAuth = { ...deploymentEnv(), AUTH_PROVIDER: "better-auth" };
     expect(() =>

@@ -38,7 +38,22 @@ export type AtlasAuthOptions = {
   onAuthEmail?: (email: AuthEmail) => void;
   /** Whether the principal holds an unrevoked platform grant (audit H6). */
   hasActivePlatformGrant: (principalId: string) => Promise<boolean>;
+  /** The Google OAuth client for this environment (launch plan 0.4); none on the platform. */
+  google?: { clientId: string; clientSecret: string } | undefined;
 };
+
+/**
+ * Better Auth's routes sit under /auth, so Google's redirect address is
+ * `https://<academy>/auth/callback/google`, the one registered on the Google
+ * clients (decision doc, "Google sign-in"). The web app's route of that name
+ * hands the callback to the API.
+ */
+export const BETTER_AUTH_BASE_PATH = "/auth";
+
+/** Where Better Auth sends a finished social sign-in or link; the API reads the redirect. */
+export const OAUTH_DONE_PATH = "/auth/oauth/done";
+export const OAUTH_LINKED_PATH = "/auth/oauth/linked";
+export const OAUTH_ERROR_PATH = "/auth/oauth/error";
 
 /** An email Better Auth asked us to send. The token is single-use and expires. */
 export type AuthEmail = {
@@ -71,6 +86,7 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
     appName: "Atlas LMS",
     secret: options.secret,
     baseURL: { allowedHosts: options.allowedHosts, protocol },
+    basePath: BETTER_AUTH_BASE_PATH,
     database: prismaAdapter(options.prisma, { provider: "postgresql", transaction: true }),
     telemetry: { enabled: false },
     advanced: {
@@ -137,6 +153,10 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
     session: {
       modelName: "authSession",
       expiresIn: SESSION_EXPIRES_IN_SECONDS,
+      // Our routes decide what is sensitive (MFA step-up, audit H4), not the
+      // session's age: otherwise unlinking a login method failed a day after
+      // sign-in.
+      freshAge: 0,
       updateAge: SESSION_UPDATE_AGE_SECONDS,
       fields: {
         userId: "user_id",
@@ -165,6 +185,10 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
     account: {
       modelName: "authAccount",
       encryptOAuthTokens: true,
+      // Google signs in to an existing account only when Google has verified
+      // the address and so have we (requireLocalEmailVerified, the default).
+      // Listing Google as trusted would skip Google's half of that.
+      accountLinking: { enabled: true, trustedProviders: [], allowDifferentEmails: false },
       fields: {
         userId: "user_id",
         accountId: "account_id",
@@ -186,6 +210,20 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
         updatedAt: "updated_at",
       },
     },
+    ...(options.google
+      ? {
+          socialProviders: {
+            google: {
+              clientId: options.google.clientId,
+              clientSecret: options.google.clientSecret,
+              prompt: "select_account" as const,
+              // A new account from an address Google hasn't verified gets no
+              // session (audit H6): Better Auth sends our verification email.
+              requireEmailVerification: true,
+            },
+          },
+        }
+      : {}),
     plugins: [
       twoFactor({
         issuer: "Atlas LMS",

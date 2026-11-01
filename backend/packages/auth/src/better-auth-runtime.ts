@@ -66,6 +66,10 @@ export function getAtlasAuth(env: NodeJS.ProcessEnv = process.env): AtlasAuth {
       if (!box) throw new Error("Better Auth asked for an email outside captureAuthEmails");
       box.push(email);
     },
+    google:
+      env["GOOGLE_CLIENT_ID"] && env["GOOGLE_CLIENT_SECRET"]
+        ? { clientId: env["GOOGLE_CLIENT_ID"], clientSecret: env["GOOGLE_CLIENT_SECRET"] }
+        : undefined,
     hasActivePlatformGrant: async (principalId) =>
       (await prisma.platformOperator.count({
         where: { auth_principal_id: principalId, revoked_at: null },
