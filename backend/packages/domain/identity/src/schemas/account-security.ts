@@ -15,12 +15,36 @@ export const ChangeEmailRequestSchema = z
   })
   .strict();
 
+/**
+ * A code from the authenticator app, or one of the backup codes Better Auth
+ * issues with it ("abcde-12345"; launch plan task 3.5).
+ */
+export const SecondFactorCodeSchema = z
+  .string()
+  .trim()
+  .regex(
+    /^(\d{6}|[A-Za-z0-9]{5}-?[A-Za-z0-9]{5})$/,
+    "Enter the 6-digit code from your authenticator app, or a backup code.",
+  );
+
+/**
+ * Setting up an authenticator. With Better Auth, an account that signs in
+ * with a password confirms it first; Supabase doesn't ask.
+ */
+export const MfaEnrollRequestSchema = z
+  .object({
+    password: z.string().max(200).optional(),
+  })
+  .strict();
+
 export const MfaEnrollResponseSchema = z.object({
   data: z.object({
     factorId: z.string(),
     qrCode: z.string(),
     secret: z.string(),
     uri: z.string(),
+    /** Better Auth: ten single-use codes, shown once, for when the app isn't to hand. */
+    backupCodes: z.array(z.string()).optional(),
   }),
 });
 
@@ -34,7 +58,7 @@ export const MfaVerifyRequestSchema = z
 /** Step-up: complete MFA for this session with an enrolled factor (audit H4). */
 export const MfaStepUpRequestSchema = z
   .object({
-    code: z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your authenticator app."),
+    code: SecondFactorCodeSchema,
     factorId: z.string().min(1).optional(),
   })
   .strict();

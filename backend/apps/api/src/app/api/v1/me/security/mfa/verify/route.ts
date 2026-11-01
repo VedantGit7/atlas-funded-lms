@@ -1,10 +1,7 @@
 import type { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
 import { enforceMfaAttemptRateLimit } from "@atlas/api/rate-limit";
-import {
-  applyAuthSessionToCookieStore,
-  readSessionPersistenceFromStore,
-} from "@atlas/auth/cookie-store";
+import { applyVerifiedSessionToCookieStore } from "@atlas/auth/cookie-store";
 import { verifyMfaEnrollment } from "@atlas/auth";
 import { AccountSecurityOkResponseSchema, MfaVerifyRequestSchema } from "@atlas/domain-identity";
 import { emitSecurityNotification } from "../../../../../../../lib/account-security-orchestrator";
@@ -28,12 +25,7 @@ export const POST = createTenantRoute<
     const { session } = await verifyMfaEnrollment({ factorId: input.factorId, code: input.code });
     // Verifying the new factor also completed MFA for this session: keep that
     // aal2 session, so a step-up that needed enrollment is satisfied (audit H4).
-    await applyAuthSessionToCookieStore({
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
-      expiresInSeconds: session.expiresIn,
-      persistent: await readSessionPersistenceFromStore(),
-    });
+    await applyVerifiedSessionToCookieStore(session);
 
     const emailRows = await tx.$queryRaw<Array<{ email: string }>>`
       select ap.email

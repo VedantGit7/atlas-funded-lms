@@ -280,6 +280,9 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
       }),
       twoFactor({
         issuer: "Atlas LMS",
+        // A Google-only account has no password to confirm; one with a
+        // password still confirms it to set up an authenticator.
+        allowPasswordless: true,
         schema: {
           user: { fields: { twoFactorEnabled: "mfa_enabled" } },
           twoFactor: {

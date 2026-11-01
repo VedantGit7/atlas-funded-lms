@@ -1,5 +1,13 @@
 import { cookies, headers } from "next/headers";
-import { signupWithPassword, verifyMfaChallenge } from "@atlas/auth";
+import {
+  applySetCookiesToCookieStore,
+  authProvider,
+  authRequestContextFromHeaders,
+  findActiveSessionPrincipal,
+  signupWithPassword,
+  verifyMfaChallenge,
+  verifySecondFactor,
+} from "@atlas/auth";
 import { publicSignupInputSchema } from "@atlas/auth/schemas";
 import {
   applyAuthSessionToCookieStore,
@@ -144,25 +152,44 @@ export async function orchestratePublicMfaVerify(input: {
   code: string;
 }): Promise<PublicAuthApiResponse> {
   const { host, requestId } = await resolveActiveTenantFromRequest();
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value;
-  const refreshToken = cookieStore.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value;
 
-  if (!accessToken || !refreshToken) {
-    throw new Error("no_pending_session");
+  let email: string;
+  if (authProvider() === "better-auth") {
+    // The pending challenge from a password sign-in (Better Auth's two_factor
+    // cookie), or an aal1 session from Google or a sign-in link: either way
+    // an aal2 session is left behind (launch plan task 3.5).
+    const verified = await verifySecondFactor({
+      ctx: authRequestContextFromHeaders(new Headers(await headers())),
+      code: input.code,
+    });
+    await applySetCookiesToCookieStore(verified.cookies.setCookies);
+    const principal = await findActiveSessionPrincipal({
+      db: globalDbPerStatement,
+      principalId: verified.principalId,
+    });
+    email = principal.email;
+  } else {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value;
+    const refreshToken = cookieStore.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value;
+
+    if (!accessToken || !refreshToken) {
+      throw new Error("no_pending_session");
+    }
+
+    const verified = await verifyMfaChallenge({
+      accessToken,
+      refreshToken,
+      code: input.code,
+    });
+
+    await setSessionCookies({
+      accessToken: verified.session.accessToken,
+      refreshToken: verified.session.refreshToken,
+      expiresIn: verified.session.expiresIn,
+    });
+    email = verified.user.email;
   }
-
-  const verified = await verifyMfaChallenge({
-    accessToken,
-    refreshToken,
-    code: input.code,
-  });
-
-  await setSessionCookies({
-    accessToken: verified.session.accessToken,
-    refreshToken: verified.session.refreshToken,
-    expiresIn: verified.session.expiresIn,
-  });
 
   // Platform plane has no tenant/membership; a verified challenge is sufficient
   // to enter the platform console (authorization is enforced by the shell gate).
@@ -179,7 +206,7 @@ export async function orchestratePublicMfaVerify(input: {
   const body = await buildResponse({
     tenantId: tenant.tenantId,
     requestId: tenant.requestId,
-    email: verified.user.email,
+    email,
     serviceStatus: "signed_in",
     // The challenge above already satisfies the MFA requirement for this
     // session, so the membership/redirect resolution below must not

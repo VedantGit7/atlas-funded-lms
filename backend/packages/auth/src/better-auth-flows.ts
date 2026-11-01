@@ -617,3 +617,195 @@ export async function unlinkLoginMethod(args: {
     });
   }
 }
+
+/**
+ * Two-factor with an authenticator app and backup codes (launch plan task
+ * 3.5). Better Auth keeps one factor per principal in auth_two_factors.
+ */
+export type TwoFactorFactor = {
+  id: string;
+  factorType: "totp";
+  status: "verified" | "unverified";
+  friendlyName: string;
+};
+
+async function currentSession(ctx: AuthRequestContext) {
+  const session = await getAtlasAuth().api.getSession({
+    headers: headersFor(ctx),
+    query: { disableCookieCache: true, disableRefresh: true },
+  });
+  if (!session) throw authRequired();
+  return session;
+}
+
+type TwoFactorRow = { id: string; verified?: boolean | null };
+
+async function twoFactorRow(principalId: string): Promise<TwoFactorRow | null> {
+  const context = await getAtlasAuth().$context;
+  return context.adapter.findOne<TwoFactorRow>({
+    model: "twoFactor",
+    where: [{ field: "userId", value: principalId }],
+  });
+}
+
+export async function listTwoFactorFactors(args: {
+  ctx: AuthRequestContext;
+}): Promise<TwoFactorFactor[]> {
+  const session = await currentSession(args.ctx);
+  const row = await twoFactorRow(session.user.id);
+  if (!row) return [];
+  return [
+    {
+      id: row.id,
+      factorType: "totp",
+      status: row.verified === false ? "unverified" : "verified",
+      friendlyName: "Authenticator app",
+    },
+  ];
+}
+
+function mfaCodeRejected(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 400,
+    message: "That code didn't work. Check your authenticator app and try again.",
+  });
+}
+
+/**
+ * Starts setting up an authenticator: a new secret and ten backup codes, both
+ * encrypted at rest. An account that signs in with a password confirms it
+ * first; one that only uses Google isn't asked (allowPasswordless).
+ */
+export async function enableTwoFactor(args: {
+  ctx: AuthRequestContext;
+  password?: string | undefined;
+}): Promise<{ factorId: string; uri: string; secret: string; backupCodes: string[] }> {
+  const session = await currentSession(args.ctx);
+  let response: { totpURI: string; backupCodes: string[] };
+  try {
+    const enabled = await getAtlasAuth().api.enableTwoFactor({
+      body: { ...(args.password ? { password: args.password } : {}) },
+      headers: headersFor(args.ctx),
+    });
+    // The email-code method isn't configured, so this is always TOTP.
+    if (!("totpURI" in enabled)) throw authProviderUnavailable();
+    response = enabled;
+  } catch (error) {
+    if (error instanceof AtlasHttpError) throw error;
+    const code = errorCode(error);
+    if (code === "INVALID_PASSWORD") {
+      throw new AtlasHttpError({
+        code: "VALIDATION_ERROR",
+        status: 400,
+        message: "Enter your current password to set up an authenticator app.",
+      });
+    }
+    if (code === "TOTP_ALREADY_ENABLED") {
+      throw new AtlasHttpError({
+        code: "VALIDATION_ERROR",
+        status: 409,
+        message: "An authenticator app is already set up. Remove it first to set up another.",
+      });
+    }
+    throw authProviderUnavailable();
+  }
+  const row = await twoFactorRow(session.user.id);
+  if (!row) throw authProviderUnavailable();
+  return {
+    factorId: row.id,
+    uri: response.totpURI,
+    secret: new URL(response.totpURI).searchParams.get("secret") ?? "",
+    backupCodes: response.backupCodes,
+  };
+}
+
+/** Six digits from the app, or a backup code. */
+export function isAuthenticatorCode(code: string): boolean {
+  return /^\d{6}$/.test(code.trim());
+}
+
+/**
+ * Checks an authenticator or backup code in any of the three places it's
+ * asked for, and leaves an aal2 session behind:
+ *
+ * - finishing setup: Better Auth replaces the session with a new one, which
+ *   the session hook marks aal2;
+ * - signing in: a pending challenge (Better Auth's two_factor cookie) becomes
+ *   an aal2 session the same way;
+ * - stepping up: Better Auth accepts the code but changes nothing, so this
+ *   session is marked aal2 here (audit H4).
+ *
+ * Returns the cookies to set; none when the session was stepped up in place.
+ */
+export async function verifySecondFactor(args: {
+  ctx: AuthRequestContext;
+  code: string;
+}): Promise<{ cookies: BetterAuthCookies; principalId: string }> {
+  const auth = getAtlasAuth();
+  const code = args.code.trim();
+  let headers: Headers;
+  try {
+    const result = isAuthenticatorCode(code)
+      ? await auth.api.verifyTOTP({
+          body: { code },
+          headers: headersFor(args.ctx),
+          returnHeaders: true,
+        })
+      : await auth.api.verifyBackupCode({
+          body: { code },
+          headers: headersFor(args.ctx),
+          returnHeaders: true,
+        });
+    headers = result.headers;
+  } catch (error) {
+    if (statusOf(error) === 429 || errorCode(error) === "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE") {
+      throw signInRateLimited();
+    }
+    throw mfaCodeRejected();
+  }
+
+  const cookies = cookiesFrom(headers);
+  const newSession = cookies.setCookies.some((cookie) =>
+    /^(__Secure-)?atlas_session=[^;]+/.test(cookie),
+  );
+  if (newSession) {
+    const principalId = await sessionPrincipal(args.ctx, cookies);
+    if (!principalId) throw mfaCodeRejected();
+    forgetBetterAuthSession(args.ctx.cookie);
+    return { cookies, principalId };
+  }
+
+  // Step-up: the same session, now past a second factor.
+  const session = await currentSession(args.ctx);
+  const context = await auth.$context;
+  await context.internalAdapter.updateSession(session.session.token, {
+    assuranceLevel: "aal2",
+    mfaVerifiedAt: new Date(),
+  });
+  forgetBetterAuthSession(args.ctx.cookie);
+  return { cookies: { setCookies: [] }, principalId: session.user.id };
+}
+
+/**
+ * Removes the authenticator and backup codes. Asked for from an aal2 session
+ * only: the client opens the step-up dialog on MFA_REQUIRED, as for other
+ * sensitive actions (audit H4), so a stolen password alone can't remove it.
+ */
+export async function disableTwoFactor(args: { ctx: AuthRequestContext }): Promise<void> {
+  const session = await currentSession(args.ctx);
+  if (session.session.assuranceLevel !== "aal2") {
+    throw new AtlasHttpError({
+      code: "MFA_REQUIRED",
+      status: 403,
+      message: "Confirm with your authenticator app to continue.",
+    });
+  }
+  const context = await getAtlasAuth().$context;
+  await context.adapter.deleteMany({
+    model: "twoFactor",
+    where: [{ field: "userId", value: session.user.id }],
+  });
+  await context.internalAdapter.updateUser(session.user.id, { twoFactorEnabled: false });
+  forgetBetterAuthSession(args.ctx.cookie);
+}

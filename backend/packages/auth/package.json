@@ -41,9 +41,11 @@
     "@supabase/supabase-js": "^2.117.3",
     "better-auth": "^1.7.14",
     "next": "^16.4.2",
+    "qrcode": "^1.5.4",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.0.0",
+    "@types/qrcode": "^1.5.6"
   }
 }
