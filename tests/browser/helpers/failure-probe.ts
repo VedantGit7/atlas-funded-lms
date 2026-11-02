@@ -10,10 +10,7 @@ export async function installFailureProbe(
 ): Promise<void> {
   const fault = process.env["E2E_FAILURE_PROBE"];
   if (!fault) return;
-  assertIsolatedFixtureTarget({
-    databaseUrl: process.env["E2E_OWNER_DATABASE_URL"],
-    authUrl: process.env["SUPABASE_URL"],
-  });
+  assertIsolatedFixtureTarget({ databaseUrl: process.env["E2E_OWNER_DATABASE_URL"] });
   if (fault === "completion-not-saved") {
     await page.route("**/api/v1/lessons/*/progress", async (route) => {
       const request = route.request();

@@ -5,7 +5,7 @@ import pg from "pg";
 import { assertIsolatedFixtureTarget } from "./isolated-target.mjs";
 
 const databaseUrl = process.env.E2E_OWNER_DATABASE_URL ?? process.env.DATABASE_URL;
-assertIsolatedFixtureTarget({ databaseUrl, authUrl: process.env.SUPABASE_URL });
+assertIsolatedFixtureTarget({ databaseUrl });
 const path = process.env.E2E_SCENARIO_PATH;
 if (!path) throw new Error("E2E_SCENARIO_PATH is required");
 const db = new pg.Client({ connectionString: databaseUrl });

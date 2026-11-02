@@ -12,9 +12,9 @@ const state = vi.hoisted(() => ({
   committed: vi.fn(),
   fallback: vi.fn(),
 }));
-vi.mock("@atlas/auth", () => ({
-  requireSupabaseUser: async () => ({ supabaseUserId: "user-a", email: "a@example.test" }),
-  upsertAuthPrincipal: async () => ({ id: "principal-a" }),
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: async () => ({ principalId: "principal-a", email: "a@example.test" }),
+  resolveSessionPrincipal: async () => ({ id: "principal-a" }),
 }));
 vi.mock("@atlas/db/global-db", () => ({ withGlobalDb: (fn: (db: object) => unknown) => fn({}) }));
 vi.mock("@atlas/db/with-tenant-tx", () => ({

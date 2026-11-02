@@ -10,8 +10,8 @@ const adminMembershipId = "018f0000-0000-7000-8000-000000000010";
 
 const {
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockRequireActiveMembership,
   mockCan,
   mockListRoles,
@@ -20,8 +20,8 @@ const {
   mockWithTenantTx,
 } = vi.hoisted(() => ({
   mockResolveTenant: vi.fn(),
-  mockRequireSupabaseUser: vi.fn(),
-  mockUpsertAuthPrincipal: vi.fn(),
+  mockRequireSessionUser: vi.fn(),
+  mockResolveSessionPrincipal: vi.fn(),
   mockRequireActiveMembership: vi.fn(),
   mockCan: vi.fn(),
   mockListRoles: vi.fn(),
@@ -52,14 +52,10 @@ vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/membership", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -95,14 +91,14 @@ import { GET, POST } from "../../../backend/apps/api/src/app/api/v1/roles/route"
 describe("roles API", () => {
   beforeEach(() => {
     mockResolveTenant.mockResolvedValue(tenantA);
-    mockRequireSupabaseUser.mockResolvedValue({
-      supabaseUserId: "supabase-user",
+    mockRequireSessionUser.mockResolvedValue({
+      principalId: "supabase-user",
       email: "admin@example.com",
       mfaEnabled: true,
       // Creating and editing roles requires a session that completed MFA (audit H4).
       sessionAssuranceLevel: "aal2",
     });
-    mockUpsertAuthPrincipal.mockResolvedValue({ id: "principal-id" });
+    mockResolveSessionPrincipal.mockResolvedValue({ id: "principal-id" });
     mockRequireActiveMembership.mockResolvedValue({ membershipId: adminMembershipId });
     mockCan.mockResolvedValue({ allowed: true, permission: "role.read", reason: "ALLOWED" });
     mockListRoles.mockResolvedValue({
@@ -165,8 +161,8 @@ describe("roles API", () => {
   it("refuses to create a role from a password-only session (audit H4)", async () => {
     mockCreateRole.mockClear();
     mockCan.mockResolvedValue({ allowed: true, permission: "role.create", reason: "ALLOWED" });
-    mockRequireSupabaseUser.mockResolvedValue({
-      supabaseUserId: "supabase-user",
+    mockRequireSessionUser.mockResolvedValue({
+      principalId: "supabase-user",
       email: "admin@example.com",
       mfaEnabled: true,
       sessionAssuranceLevel: "aal1",

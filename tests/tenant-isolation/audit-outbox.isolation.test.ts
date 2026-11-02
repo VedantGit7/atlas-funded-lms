@@ -14,8 +14,8 @@ const {
   realWithTenantTx,
   platformScopeTestMode,
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockRequireActiveMembership,
   mockCan,
   mockReadTenantAuditLog,
@@ -34,8 +34,8 @@ const {
     realWithTenantTx: db.withTenantTx,
     platformScopeTestMode,
     mockResolveTenant: vi.fn(),
-    mockRequireSupabaseUser: vi.fn(),
-    mockUpsertAuthPrincipal: vi.fn(),
+    mockRequireSessionUser: vi.fn(),
+    mockResolveSessionPrincipal: vi.fn(),
     mockRequireActiveMembership: vi.fn(),
     mockCan: vi.fn(),
     mockReadTenantAuditLog: vi.fn(),
@@ -64,14 +64,10 @@ vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/auth/platform-auth", () => ({
   requirePlatformPrincipal: (...args: unknown[]) => mockRequirePlatformPrincipal(...args),
@@ -419,8 +415,8 @@ describe("audit and outbox tenant isolation", () => {
 
   beforeEach(() => {
     mockResolveTenant.mockReset();
-    mockRequireSupabaseUser.mockReset();
-    mockUpsertAuthPrincipal.mockReset();
+    mockRequireSessionUser.mockReset();
+    mockResolveSessionPrincipal.mockReset();
     mockRequireActiveMembership.mockReset();
     mockCan.mockReset();
     mockReadTenantAuditLog.mockReset();
@@ -431,12 +427,12 @@ describe("audit and outbox tenant isolation", () => {
     mockWithPlatformScope.mockClear();
 
     mockResolveTenant.mockResolvedValue(tenantAHost);
-    mockRequireSupabaseUser.mockResolvedValue({
-      supabaseUserId: "018f0000-0000-7000-8000-000000000001",
+    mockRequireSessionUser.mockResolvedValue({
+      principalId: "018f0000-0000-7000-8000-000000000001",
       email: "admin@tenant-a.example.com",
       mfaEnabled: false,
     });
-    mockUpsertAuthPrincipal.mockResolvedValue({
+    mockResolveSessionPrincipal.mockResolvedValue({
       id: "018f0000-0000-7000-8000-000000000099",
       email: "admin@tenant-a.example.com",
     });

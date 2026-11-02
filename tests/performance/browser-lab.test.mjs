@@ -41,7 +41,6 @@ test("missing routes, measurements and interactions fail lab coverage", () => {
 test("mobile lab mutations are restricted to explicit disposable local stack", () => {
   assertLocalLabTarget(
     "http://fundedbeyond.localhost:3100",
-    "http://127.0.0.1:54326",
     "postgres://user:pass@127.0.0.1:15436/atlas_lms_e2e",
   );
   for (const target of [
@@ -51,11 +50,7 @@ test("mobile lab mutations are restricted to explicit disposable local stack", (
     "http://localhost:3100/path",
   ]) {
     assert.throws(() =>
-      assertLocalLabTarget(
-        target,
-        "http://127.0.0.1:54326",
-        "postgres://user:pass@127.0.0.1:15436/atlas_lms_e2e",
-      ),
+      assertLocalLabTarget(target, "postgres://user:pass@127.0.0.1:15436/atlas_lms_e2e"),
     );
   }
 });

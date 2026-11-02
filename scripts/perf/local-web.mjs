@@ -51,7 +51,7 @@ export function localWebEnvironment(inherited = process.env) {
   );
   env.DIRECT_DATABASE_URL = env.DATABASE_URL;
   delete env.E2E_OWNER_DATABASE_URL;
-  assertIsolatedFixtureTarget({ databaseUrl: env.DATABASE_URL, authUrl: env.SUPABASE_URL });
+  assertIsolatedFixtureTarget({ databaseUrl: env.DATABASE_URL });
   return env;
 }
 

@@ -10,6 +10,16 @@ import { PROTECTED_TENANT_SLUGS } from "./test-tenant-slugs.mjs";
 const quote = (value) => '"' + value.replaceAll('"', '""') + '"';
 
 /** Delete only database-recorded IDs for one explicitly authorized disposable run. */
+/** Better Auth's per-principal login state, deleted with the principal (ON DELETE CASCADE). */
+const LOGIN_STATE_TABLES = new Set(["auth_sessions", "auth_accounts", "auth_two_factors"]);
+function isLoginState(reference) {
+  return (
+    reference.schema_name === "public" &&
+    LOGIN_STATE_TABLES.has(reference.table_name) &&
+    reference.on_delete === "c"
+  );
+}
+
 export async function purgeTestTenants(options = {}) {
   const env = options.env ?? process.env;
   const config = cleanupConfiguration(env);
@@ -87,9 +97,12 @@ export async function purgeTestTenants(options = {}) {
     if (apply && owned.length) {
       // The row locks also block new FK references until commit. Inspect every
       // referencing key: CASCADE and SET NULL are not protective delete errors.
+      // The one exception is the principal's own login state, which Better Auth
+      // keeps in its own tables and which goes with the principal by design
+      // (launch plan task 3.7): sessions, login methods and the authenticator.
       const references = (
         await client.query(`SELECT n.nspname AS schema_name, c.relname AS table_name,
-        fk.conname AS constraint_name, array_agg(child.attname::text ORDER BY key.ordinality) AS child_columns,
+        fk.conname AS constraint_name, fk.confdeltype::text AS on_delete, array_agg(child.attname::text ORDER BY key.ordinality) AS child_columns,
         array_agg(parent.attname::text ORDER BY key.ordinality) AS parent_columns
         FROM pg_constraint fk JOIN pg_class c ON c.oid=fk.conrelid
         JOIN pg_namespace n ON n.oid=c.relnamespace
@@ -98,7 +111,7 @@ export async function purgeTestTenants(options = {}) {
         JOIN pg_attribute parent ON parent.attrelid=fk.confrelid AND parent.attnum=key.parent_num
         WHERE fk.contype='f' AND fk.confrelid='public.auth_principals'::regclass
         GROUP BY fk.oid,n.nspname,c.relname,fk.conname ORDER BY n.nspname,c.relname,fk.conname`)
-      ).rows;
+      ).rows.filter((reference) => !isLoginState(reference));
       for (const reference of references) {
         const match = reference.child_columns
           .map(

@@ -2,11 +2,8 @@ import { describe, expect, it } from "vitest";
 import { assertIsolatedFixtureTarget } from "../../../scripts/e2e/isolated-target.mjs";
 
 describe("F16 isolated browser fixture target", () => {
-  const valid = {
-    databaseUrl: "postgres://atlas:test@127.0.0.1:15436/atlas_lms_e2e",
-    authUrl: "http://127.0.0.1:54326",
-  };
-  it("allows only explicit local disposable database and auth targets", () => {
+  const valid = { databaseUrl: "postgres://atlas:test@127.0.0.1:15436/atlas_lms_e2e" };
+  it("allows only explicit local disposable databases", () => {
     expect(() => assertIsolatedFixtureTarget(valid)).not.toThrow();
     expect(() =>
       assertIsolatedFixtureTarget({
@@ -22,8 +19,6 @@ describe("F16 isolated browser fixture target", () => {
     { databaseUrl: "postgres://atlas:test@localhost/atlas_lms_e2e?host=hosted.example" },
     { databaseUrl: "postgres://atlas:test@localhost/atlas_lms_e2e?dbname=production" },
     { databaseUrl: "postgres://atlas:test@localhost/atlas_lms_e2e?port=5432" },
-    { authUrl: "https://example.supabase.co" },
-    { authUrl: "http://127.0.0.1.attacker.test:54326" },
   ])("rejects targets outside the isolated boundary: %j", (change) => {
     expect(() => assertIsolatedFixtureTarget({ ...valid, ...change })).toThrow();
   });

@@ -1,15 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  meOutputSchema,
-  requireSupabaseUser,
-  toSessionSafeIdentity,
-  upsertAuthPrincipal,
-} from "@atlas/auth";
+import { meOutputSchema, toSessionSafeIdentity } from "@atlas/auth";
+import { requireSessionUser, resolveSessionPrincipal } from "@atlas/api/session-user";
 import { resolveTenantFromRequest } from "@atlas/tenancy";
+import { requireBetterAuthUser } from "../../../backend/packages/auth/src/better-auth-runtime";
 
-vi.mock("../../../backend/packages/auth/src/session", () => ({
-  extractAccessToken: vi.fn(),
-  requireSupabaseUser: vi.fn(),
+// Better Auth's session check is stubbed; the seam resolves the principal from the db.
+vi.mock("../../../backend/packages/auth/src/better-auth-runtime", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  authProvider: () => "better-auth",
+  requireBetterAuthUser: vi.fn(),
 }));
 
 describe("GET /api/v1/me assembly", () => {
@@ -39,28 +38,24 @@ describe("GET /api/v1/me assembly", () => {
         ]),
     };
 
-    vi.mocked(requireSupabaseUser).mockResolvedValue({
-      supabaseUserId: "018f0000-0000-7000-8000-000000000001",
+    vi.mocked(requireBetterAuthUser).mockResolvedValue({
+      principalId: "018f0000-0000-7000-8000-000000000010",
       email: "user@example.com",
+      emailConfirmed: true,
       mfaEnabled: false,
+      sessionAssuranceLevel: "aal1",
     });
 
     const req = new Request("https://tenant-a.example.com/api/v1/me", {
       headers: {
         host: "tenant-a.example.com",
-        authorization: "Bearer access-token",
+        cookie: "atlas_session=opaque.signature",
       },
     });
 
     const tenant = await resolveTenantFromRequest({ req, db });
-    const supabaseUser = await requireSupabaseUser(req);
-    const principal = await upsertAuthPrincipal({
-      db,
-      supabaseUserId: supabaseUser.supabaseUserId,
-      email: supabaseUser.email,
-      mfaEnabled: supabaseUser.mfaEnabled,
-      markLogin: false,
-    });
+    const user = await requireSessionUser(req);
+    const principal = await resolveSessionPrincipal({ db, user });
 
     const body = meOutputSchema.parse({
       data: {
@@ -79,16 +74,16 @@ describe("GET /api/v1/me assembly", () => {
       emailNormalized: "user@example.com",
     });
     expect(body.data.identity).not.toHaveProperty("id");
-    expect(body.data.identity).not.toHaveProperty("supabaseUserId");
+    expect(body.data.identity).not.toHaveProperty("principalId");
   });
 
   it("requires authentication for /me", async () => {
     const { authRequired } = await import("@atlas/auth");
 
-    vi.mocked(requireSupabaseUser).mockRejectedValue(authRequired());
+    vi.mocked(requireBetterAuthUser).mockRejectedValue(authRequired());
 
     await expect(
-      requireSupabaseUser(
+      requireSessionUser(
         new Request("https://tenant-a.example.com/api/v1/me", {
           headers: { host: "tenant-a.example.com" },
         }),

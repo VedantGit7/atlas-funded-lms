@@ -71,9 +71,9 @@ function assertServiceEnvironment(env) {
     )
       throw new Error("Service database must use its scoped role on the isolated local database.");
   }
-  for (const key of ["SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL"])
-    if (env[key] !== "http://127.0.0.1:54326")
-      throw new Error("Service auth must use the isolated local auth port.");
+  // Login is Better Auth, in the isolated database checked above.
+  if (env.AUTH_PROVIDER !== "better-auth")
+    throw new Error("Service auth must be Better Auth on the isolated local database.");
   if (env.E2E_OWNER_DATABASE_URL)
     throw new Error("Service must not receive the owner database URL.");
 }

@@ -8,9 +8,8 @@ import { localEnv } from "../e2e/local-env.mjs";
 export const PRIVATE_CONFIG_PATH = resolve(
   ".test-results/performance-2026-09-26/capacity-private.json",
 );
-export function assertCapacityTarget({ databaseUrl, authUrl, acknowledged }) {
-  const db = new URL(databaseUrl),
-    auth = new URL(authUrl);
+export function assertCapacityTarget({ databaseUrl, acknowledged }) {
+  const db = new URL(databaseUrl);
   if (
     acknowledged !== true ||
     !["postgres:", "postgresql:"].includes(db.protocol) ||
@@ -19,16 +18,10 @@ export function assertCapacityTarget({ databaseUrl, authUrl, acknowledged }) {
     db.pathname !== "/atlas_lms_e2e" ||
     db.username !== "atlas" ||
     db.search ||
-    db.hash ||
-    auth.origin !== "http://127.0.0.1:54326" ||
-    auth.pathname !== "/" ||
-    auth.search ||
-    auth.hash ||
-    auth.username ||
-    auth.password
+    db.hash
   )
     throw new Error(
-      "Capacity fixtures require the explicitly acknowledged isolated local database and auth ports.",
+      "Capacity fixtures require the explicitly acknowledged isolated local database.",
     );
 }
 export function makeCapacityConfig(fixture) {
@@ -60,18 +53,18 @@ export function makeCapacityConfig(fixture) {
 
 export async function seedCapacity({ acknowledged = false } = {}) {
   const env = localEnv();
-  assertCapacityTarget({ databaseUrl: env.DATABASE_URL, authUrl: env.SUPABASE_URL, acknowledged });
-  const [{ default: pg }, { createClient }, { readFileSync }] = await Promise.all([
-    import("pg"),
-    import("@supabase/supabase-js"),
-    import("node:fs"),
-  ]);
+  assertCapacityTarget({ databaseUrl: env.DATABASE_URL, acknowledged });
+  // The logins are Better Auth's (launch plan task 3.7), so this runs under tsx.
+  const [{ default: pg }, { upsertFixtureLogin }, { authPrisma }, { readFileSync }] =
+    await Promise.all([
+      import("pg"),
+      import("../e2e/better-auth-fixture-logins"),
+      import("@atlas/db/auth-client"),
+      import("node:fs"),
+    ]);
   const fixture = JSON.parse(readFileSync(env.E2E_SCENARIO_PATH, "utf8"));
   const config = makeCapacityConfig(fixture);
   const db = new pg.Client({ connectionString: env.DATABASE_URL });
-  const auth = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
   await db.connect();
   try {
     const checked = await db.query(
@@ -84,37 +77,14 @@ export async function seedCapacity({ acknowledged = false } = {}) {
     // Write before creating identities so even a partial seed retains its credentials.
     mkdirSync(dirname(PRIVATE_CONFIG_PATH), { recursive: true });
     writeFileSync(PRIVATE_CONFIG_PATH, `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });
-    const existing = new Map();
-    for (let page = 1; page <= 10; page++) {
-      const listed = await auth.auth.admin.listUsers({ page, perPage: 1000 });
-      if (listed.error) throw new Error("Could not inspect isolated auth fixtures.");
-      for (const user of listed.data.users) existing.set(user.email, user.id);
-      if (listed.data.users.length < 1000) break;
-      if (page === 10) throw new Error("Unexpectedly large isolated fixture user directory.");
-    }
     for (const user of config.users) {
-      const previous = existing.get(user.email);
-      const seeded = previous
-        ? await auth.auth.admin.updateUserById(previous, {
-            password: user.password,
-            email_confirm: true,
-          })
-        : await auth.auth.admin.createUser({
-            email: user.email,
-            password: user.password,
-            email_confirm: true,
-          });
-      if (seeded.error || !seeded.data.user?.id)
-        throw new Error("Could not seed a disposable auth identity.");
+      // Creates the login, or resets its password; the principal keeps its id.
+      const principalId = await upsertFixtureLogin(user.email, user.password);
       await db.query("BEGIN");
       try {
-        const principal = await db.query(
-          `insert into auth_principals(id,supabase_user_id,email,email_normalized,global_status,created_at,updated_at) values($1,$2,$3,lower($3),'active',now(),now()) on conflict(email_normalized) do update set supabase_user_id=excluded.supabase_user_id,email=excluded.email,global_status='active',updated_at=now() returning id`,
-          [randomUUID(), seeded.data.user.id, user.email],
-        );
         const member = await db.query(
           `insert into memberships(id,tenant_id,auth_principal_id,status,joined_at,created_at,updated_at) values($1,$2,$3,'ACTIVE',now(),now(),now()) on conflict(tenant_id,auth_principal_id) do update set status='ACTIVE',updated_at=now() returning id`,
-          [randomUUID(), tenantId, principal.rows[0].id],
+          [randomUUID(), tenantId, principalId],
         );
         await db.query(
           `insert into user_roles(id,tenant_id,membership_id,role_id,created_at) values($1,$2,$3,$4,now()) on conflict(tenant_id,membership_id,role_id) do nothing`,
@@ -134,6 +104,7 @@ export async function seedCapacity({ acknowledged = false } = {}) {
     return { learners: 200, configPath: PRIVATE_CONFIG_PATH };
   } finally {
     await db.end();
+    await authPrisma().$disconnect();
   }
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

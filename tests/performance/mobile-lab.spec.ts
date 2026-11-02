@@ -57,11 +57,7 @@ test("synthetic mobile lab collects critical learner routes with real interactio
   browser,
 }) => {
   const baseURL = requiredCredential("E2E_TENANT_BASE_URL");
-  assertLocalLabTarget(
-    baseURL,
-    requiredCredential("SUPABASE_URL"),
-    requiredCredential("DATABASE_URL"),
-  );
+  assertLocalLabTarget(baseURL, requiredCredential("DATABASE_URL"));
   const fixture = scenario();
   const coursePath = `/courses/${fixture.courseId}`;
   const lessonPath = `${coursePath}/lessons/${fixture.lessonId}`;

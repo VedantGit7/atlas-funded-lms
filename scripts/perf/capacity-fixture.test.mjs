@@ -4,7 +4,6 @@ import { assertCapacityTarget, makeCapacityConfig } from "./capacity-fixture.mjs
 
 const target = {
   databaseUrl: "postgres://atlas@127.0.0.1:15436/atlas_lms_e2e",
-  authUrl: "http://127.0.0.1:54326",
   acknowledged: true,
 };
 test("capacity seeding accepts only the explicitly acknowledged isolated target", () => {
@@ -13,8 +12,6 @@ test("capacity seeding accepts only the explicitly acknowledged isolated target"
     { acknowledged: false },
     { databaseUrl: target.databaseUrl.replace("15436", "5432") },
     { databaseUrl: target.databaseUrl.replace("atlas_lms_e2e", "production") },
-    { authUrl: "https://example.com" },
-    { authUrl: "http://127.0.0.1:54327" },
     { databaseUrl: `${target.databaseUrl}?host=remote` },
   ])
     assert.throws(() => assertCapacityTarget({ ...target, ...change }));

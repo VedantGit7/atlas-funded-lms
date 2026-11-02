@@ -57,16 +57,15 @@ Each run uses fresh report paths, rejects runner-level errors and multiple/retri
 
 ## Running locally
 
-From the repository root, use the dedicated disposable stack:
+From the repository root, use the dedicated disposable stack. Login is Better Auth, whose accounts live in this database, so there is no auth service to start (launch plan task 3.7):
 
 ```powershell
 docker compose -f scripts/e2e/local-stack.compose.yml up -d database
 node scripts/e2e/setup-local.mjs
-docker compose -f scripts/e2e/local-stack.compose.yml up -d auth gateway
-# Wait until this health check succeeds before seeding users.
-Invoke-RestMethod http://127.0.0.1:54326/auth/v1/health
 node scripts/e2e/local-run.mjs seed
 ```
+
+The seed creates each journey user's password login and, for the admin and platform users, a verified authenticator, through the Better Auth flows. It and the API share the fixture `BETTER_AUTH_SECRET` from `scripts/e2e/local-env.mjs`, which encrypts those authenticators. The runner also reserves every key in the apps' dotenv files, so a developer's hosted settings can't fill gaps in the fixture.
 
 Run `node scripts/e2e/local-run.mjs api` and `node scripts/e2e/local-run.mjs web` in separate terminals. Then run `node scripts/e2e/local-run.mjs test --workers=1`. Before another complete run, run `node scripts/e2e/local-run.mjs scenarios`. Run `node scripts/e2e/local-run.mjs probes` for failure sensitivity. This runner uses a separate Next build directory and process-local hostname resolution, without editing the machine's hosts file.
 

@@ -1140,16 +1140,12 @@ jobs:
       # configured origin, not the API transport hostname.
       PLATFORM_HOST: platform.localhost
       E2E_PLATFORM_BASE_URL: http://platform.localhost:3000
-      # The auth stack is local (supabase/config.toml), so these are the Supabase
-      # CLI's well-known development keys rather than secrets. They are published
-      # constants, identical on every machine, and grant nothing outside this
-      # runner. Using a hosted project here would mean four secrets to maintain
-      # and a suite no fork could run.
+      # Login is Better Auth (launch plan task 3.7), whose accounts live in this
+      # job's database, so there is no auth service to start and no hosted
+      # project or secret to maintain: a fork runs the same suite. The secret
+      # Better Auth signs with is generated per run, below.
+      AUTH_PROVIDER: better-auth
       E2E_SEED_PASSWORD: e2e-Journey-Password-1
-      SUPABASE_URL: http://127.0.0.1:54321
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
-      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
@@ -1189,20 +1185,20 @@ jobs:
       - run: pnpm exec tsx --tsconfig backend/apps/api/tsconfig.json scripts/tenants/apply.ts --tenant fundedbeyond
       - run: pnpm exec tsx --tsconfig backend/apps/api/tsconfig.json scripts/tenants/apply.ts --tenant second-smoke-academy
 
-      # Login goes through Supabase `signInWithPassword`, so the journeys need a
-      # running auth stack. This starts GoTrue locally from supabase/config.toml
-      # -- no hosted project, no secrets, and a fork can run the same suite.
-      - uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3
-        with:
-          version: 2.117.0
-      - name: Start local Supabase auth stack
-        run: supabase start
+      # Better Auth signs sessions and encrypts the journey users' authenticators
+      # with this; the seed and the API must share it. Random per run, and masked.
+      - name: Generate the Better Auth secret
+        run: |
+          secret=$(openssl rand -hex 32)
+          echo "::add-mask::$secret"
+          echo "BETTER_AUTH_SECRET=$secret" >> "$GITHUB_ENV"
 
-      # Creates the Supabase users the authenticated journeys log in as, and the
+      # Creates the logins the authenticated journeys use (and the admin and
+      # platform users' authenticators) through the Better Auth flows, and the
       # membership plus role that authorizes them. Idempotent, so re-running the
       # job is safe.
       - name: Seed journey users
-        run: node scripts/e2e/seed-browser-users.mjs
+        run: pnpm exec tsx --tsconfig backend/apps/api/tsconfig.json scripts/e2e/seed-browser-users.mjs
 
       - name: Seed stateful journey scenarios
         run: node scripts/e2e/seed-browser-scenarios.mjs
@@ -1220,7 +1216,7 @@ jobs:
         run: pnpm test:scorm-browser
       - name: Browser journeys and accessibility
         run: |
-          # Two dev servers, Chromium, Postgres and the Supabase auth stack share this runner,
+          # Two dev servers, Chromium and Postgres share this runner,
           # and journeys have failed on dropped proxy connections that neither server logged.
           # Memory snapshots go straight into this log: a cancelled job uploads no artifacts.
           echo "[runner] cpus=$(nproc)"
@@ -1239,17 +1235,6 @@ jobs:
         run: |
           sudo dmesg -T 2>/dev/null | grep -iE "out of memory|oom-kill|killed process" ||
             echo "No kernel out-of-memory kills recorded."
-      - name: Summarize local auth responses
-        if: ${{ failure() || cancelled() }}
-        run: |
-          # The API reports every Supabase sign-in failure as invalid credentials, so a rejected
-          # journey login cannot tell a wrong password from a rate limit (sign-ins are capped per
-          # IP in supabase/config.toml). Counts of method, path and status only, never bodies.
-          container=$(docker ps --format '{{.Names}}' | grep -m1 '^supabase_auth_' || true)
-          if [ -z "$container" ]; then echo "No local auth container is running."; exit 0; fi
-          docker logs "$container" 2>&1 |
-            jq -Rr 'fromjson? | select(.path != null and .status != null) | "\(.method) \(.path) \(.status)"' |
-            sort | uniq -c | sort -rn | head -n 30
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: ${{ always() }}
         with:

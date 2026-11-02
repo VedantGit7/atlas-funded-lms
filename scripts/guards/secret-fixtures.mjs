@@ -41,13 +41,6 @@ const approvedDatabaseFixtures = new Map([
     ]),
   ],
   [
-    "scripts/e2e/local-stack.compose.yml",
-    new Set([
-      // Same disposable Compose stack, private database service and auth DB.
-      "c71a802001bc75f6a6db8a0a921c84b53bb8faac11e9600cec102ca56ebdad00",
-    ]),
-  ],
-  [
     "scripts/perf/microbenchmark-guard.test.mjs",
     new Set([
       // Synthetic loopback fixture and prod.example rejection input; no I/O.

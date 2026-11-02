@@ -12,9 +12,14 @@ const mocks = vi.hoisted(() => ({
   handler: vi.fn(),
 }));
 
-vi.mock("../../../backend/packages/auth/src/session", () => ({ requireSupabaseUser: mocks.user }));
+// Better Auth's path, for the platform guard and (through the session seam) tenant routes alike.
+vi.mock("../../../backend/packages/auth/src/better-auth-runtime", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  authProvider: () => "better-auth",
+  requireBetterAuthUser: mocks.user,
+}));
 vi.mock("../../../backend/packages/auth/src/auth-principal.repository", () => ({
-  upsertAuthPrincipal: mocks.principal,
+  findActiveSessionPrincipal: mocks.principal,
 }));
 vi.mock("../../../backend/packages/auth/src/platform-operators.repository", () => ({
   findActivePlatformOperator: mocks.operator,
@@ -58,7 +63,7 @@ import { requirePlatformPrincipal } from "@atlas/auth/platform-auth";
 
 function authenticatedSession(sessionAssuranceLevel: "aal1" | "aal2" | null | undefined) {
   return {
-    supabaseUserId: "user-1",
+    principalId: "principal-1",
     email: "operator@example.com",
     mfaEnabled: true,
     sessionAssuranceLevel,

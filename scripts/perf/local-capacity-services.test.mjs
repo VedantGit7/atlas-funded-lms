@@ -83,7 +83,7 @@ test("an unexpected database or auth target fails before spawn", () => {
   for (const change of [
     { DATABASE_URL: "postgres://atlas_app_login@remote.example:15436/atlas_lms_e2e" },
     { PLATFORM_DATABASE_URL: "postgres://atlas@127.0.0.1:15436/atlas_lms_e2e" },
-    { SUPABASE_URL: "http://127.0.0.1:54321" },
+    { AUTH_PROVIDER: "supabase" },
   ]) {
     const deps = dependencies();
     const original = deps.environmentFactory;

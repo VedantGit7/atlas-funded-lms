@@ -15,14 +15,14 @@ const state = vi.hoisted(() => ({
   handler: vi.fn(),
   query: vi.fn(),
 }));
-vi.mock("@atlas/auth", () => ({
-  requireSupabaseUser: async () => ({
-    supabaseUserId: "user-a",
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: async () => ({
+    principalId: "principal-a",
     email: "a@example.test",
     mfaEnabled: true,
     sessionAssuranceLevel: state.aal,
   }),
-  upsertAuthPrincipal: async () => ({ id: "principal-a" }),
+  resolveSessionPrincipal: async () => ({ id: "principal-a" }),
 }));
 vi.mock("@atlas/db/global-db", () => ({ withGlobalDb: (fn: (db: object) => unknown) => fn({}) }));
 vi.mock("@atlas/db/with-tenant-tx", () => ({

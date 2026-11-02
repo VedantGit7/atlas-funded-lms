@@ -1,13 +1,9 @@
-import { createHmac } from "node:crypto";
 import { resolve } from "node:path";
 
 // Public, disposable Docker fixture credentials. Never used for hosted services.
+// The Better Auth secret encrypts the fixtures' authenticators; the seed and
+// the API must share it, so it is fixed rather than generated per process.
 const secret = "atlas-f16-local-auth-secret-only-32-characters";
-function jwt(role) {
-  const enc = (value) => Buffer.from(JSON.stringify(value)).toString("base64url");
-  const body = `${enc({ alg: "HS256", typ: "JWT" })}.${enc({ role, iss: "supabase", iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 86400 })}`;
-  return `${body}.${createHmac("sha256", secret).update(body).digest("base64url")}`;
-}
 export const ownerUrl = "postgres://atlas:atlas_e2e_only_password@127.0.0.1:15436/atlas_lms_e2e";
 export function localEnv() {
   return {
@@ -15,12 +11,8 @@ export function localEnv() {
     DIRECT_DATABASE_URL: ownerUrl,
     PLATFORM_DATABASE_URL: ownerUrl,
     E2E_OWNER_DATABASE_URL: ownerUrl,
-    SUPABASE_URL: "http://127.0.0.1:54326",
-    NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54326",
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: jwt("anon"),
-    SUPABASE_ANON_KEY: jwt("anon"),
-    SUPABASE_SERVICE_ROLE_KEY: jwt("service_role"),
-    SUPABASE_JWT_SECRET: secret,
+    AUTH_PROVIDER: "better-auth",
+    BETTER_AUTH_SECRET: secret,
     E2E_SEED_PASSWORD: "Atlas-e2e-disposable-Password-1",
     E2E_TENANT_SLUG: "fundedbeyond",
     TENANT_BASE_DOMAIN: "localhost",

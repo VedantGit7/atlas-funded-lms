@@ -15,7 +15,8 @@ test("local production web cannot inherit hosted service endpoints or privileged
   assert.equal(env.NODE_OPTIONS, undefined);
   assert.equal(env.NODE_ENV, "production");
   assert.equal(env.ATLAS_PERF_BUILD, "1");
-  assert.equal(env.NEXT_PUBLIC_SUPABASE_URL, "http://127.0.0.1:54326");
+  assert.ok(!env.NEXT_PUBLIC_SUPABASE_URL);
+  assert.equal(env.AUTH_PROVIDER, "better-auth");
   assert.match(env.DATABASE_URL, /atlas_app_login:.*@127\.0\.0\.1:15436\/atlas_lms_e2e/);
   assert.match(
     env.PLATFORM_DATABASE_URL,

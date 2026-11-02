@@ -15,25 +15,13 @@ vi.mock("pg", () => ({
     },
   },
 }));
-vi.mock("@supabase/supabase-js", () => ({
-  createClient: () => ({
-    auth: {
-      admin: {
-        createUser: async () => ({ data: { user: { id: "auth-user" } }, error: null }),
-        mfa: { listFactors: async () => ({ data: { factors: [] }, error: null }) },
-      },
-      signInWithPassword: async () => ({ error: null }),
-      signOut: async () => ({}),
-      mfa: {
-        enroll: async () => ({
-          data: { id: "factor", totp: { secret: "GEZDGNBVGY3TQOJQ" } },
-          error: null,
-        }),
-        challengeAndVerify: async () => ({ error: null }),
-      },
-    },
-  }),
+// The Better Auth half (logins and authenticators) has its own database test;
+// this covers the platform grant around it.
+vi.mock("../../../scripts/e2e/better-auth-fixture-logins", () => ({
+  upsertFixtureLogin: async () => "fixture-principal",
+  enrolFixtureAuthenticator: async () => "GEZDGNBVGY3TQOJQ",
 }));
+vi.mock("@atlas/db/auth-client", () => ({ authPrisma: () => ({ $disconnect: async () => {} }) }));
 
 const originalArgv = process.argv;
 // The script has an explicit CLI entry point; run it entirely against in-memory
@@ -46,10 +34,8 @@ describe("explicit platform browser fixture grants (F02)", () => {
     vi.clearAllMocks();
     fixture.history = [];
     process.argv = ["node", "seed-browser-users.mjs", "--tenant=test-tenant"];
-    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://localhost:54321");
-    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "fixture-service-key");
     vi.stubEnv("DATABASE_URL", "postgres://localhost/atlas_lms_e2e");
-    vi.stubEnv("SUPABASE_URL", "http://localhost:54321");
+    vi.stubEnv("BETTER_AUTH_SECRET", "fixture-better-auth-secret-of-32-chars");
     vi.stubEnv("E2E_CREDENTIALS_PATH", "");
     vi.stubEnv("E2E_SEED_PASSWORD", "fixture-password");
     vi.stubEnv("GITHUB_ENV", "");

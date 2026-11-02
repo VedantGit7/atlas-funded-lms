@@ -117,7 +117,7 @@ export async function poolEvidenceFromFile(path) {
 
 export async function collectLocalTelemetry(logPaths) {
   const env = localEnv();
-  assertIsolatedFixtureTarget({ databaseUrl: ownerUrl, authUrl: env.SUPABASE_URL });
+  assertIsolatedFixtureTarget({ databaseUrl: ownerUrl });
   const fixture = JSON.parse(readFileSync(env.E2E_SCENARIO_PATH, "utf8"));
   if (!/^[\da-f-]{36}$/i.test(fixture.tenantId))
     throw new Error("Missing disposable tenant fixture");

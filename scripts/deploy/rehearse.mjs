@@ -3,8 +3,9 @@
 //
 // Runs the real web, API and worker services from deploy/coolify/compose.yaml,
 // built from the current source and running in deployed mode. They run against
-// Postgres over verified TLS, Redis, and GoTrue behind TLS, with a throwaway
-// local CA standing in for Coolify's. The database is provisioned and seeded
+// Postgres over verified TLS and Redis, with a throwaway local CA standing in
+// for Coolify's, and sign in with Better Auth (launch plan task 3.7), whose
+// accounts live in that database. The database is provisioned and seeded
 // by the browser-test scripts. Then it checks that a learner can log in
 // through the web, that a course page renders for them, and that the worker
 // completes sweeps. It also checks that marketing email is refused, as the
@@ -35,7 +36,6 @@ const certs = resolve(output, "certs").replaceAll("\\", "/");
 const composeEnvFile = resolve(output, "compose.env");
 const project = "atlas-rehearsal";
 const local = localEnv();
-const authUrl = "https://auth.atlas.internal:8443";
 const webPort = 3200;
 const clientIp = "203.0.113.10";
 
@@ -70,7 +70,7 @@ function run(command, args, { env = process.env, log } = {}) {
     throw new Error(`${command} ${args.join(" ")} failed${log ? ` (see ${output}/${log})` : ""}`);
 }
 
-/** A throwaway CA and server certificates for the two TLS endpoints. */
+/** A throwaway CA and a server certificate for Postgres's TLS endpoint. */
 function makeCertificates() {
   rmSync(certs, { recursive: true, force: true });
   mkdirSync(certs, { recursive: true });
@@ -83,15 +83,14 @@ function makeCertificates() {
     'printf "basicConstraints=critical,CA:TRUE\\nkeyUsage=critical,keyCertSign,cRLSign\\nsubjectKeyIdentifier=hash\\n" > ca.ext',
     'openssl req -new -newkey rsa:2048 -nodes -subj "/CN=Atlas rehearsal CA" -keyout ca.key -out ca.csr',
     "openssl x509 -req -in ca.csr -signkey ca.key -days 7 -extfile ca.ext -out ca.crt",
-    "for host in database.atlas.internal auth.atlas.internal; do",
-    '  openssl req -newkey rsa:2048 -nodes -subj "/CN=$host" -keyout $host.key -out $host.csr',
-    '  printf "subjectAltName=DNS:%s\\nextendedKeyUsage=serverAuth\\n" $host > $host.ext',
-    "  openssl x509 -req -in $host.csr -CA ca.crt -CAkey ca.key -CAcreateserial -days 7 -extfile $host.ext -out $host.crt",
-    "done",
-    "openssl verify -x509_strict -CAfile ca.crt database.atlas.internal.crt auth.atlas.internal.crt",
+    "host=database.atlas.internal",
+    'openssl req -newkey rsa:2048 -nodes -subj "/CN=$host" -keyout $host.key -out $host.csr',
+    'printf "subjectAltName=DNS:%s\\nextendedKeyUsage=serverAuth\\n" $host > $host.ext',
+    "openssl x509 -req -in $host.csr -CA ca.crt -CAkey ca.key -CAcreateserial -days 7 -extfile $host.ext -out $host.crt",
+    "openssl verify -x509_strict -CAfile ca.crt $host.crt",
     "chmod 644 *.crt *.key",
   ].join("\n");
-  // Kong's image is already part of the stack and ships the openssl CLI.
+  // The stack's Postgres image, with the openssl CLI it doesn't ship.
   run("docker", [
     "run",
     "--rm",
@@ -101,17 +100,20 @@ function makeCertificates() {
     "sh",
     "-v",
     `${certs}:/out`,
-    "public.ecr.aws/supabase/kong:2.8.1",
+    "postgres:16-alpine",
     "-c",
-    script,
+    `apk add --no-cache --quiet openssl\n${script}`,
   ]);
 }
 
 function buildImages() {
+  // The compose file still requires the Supabase settings until task 3.8;
+  // they're the synthetic ones, and nothing answers there.
+  const synthetic = deploymentEnv();
   const publicSettings = [
     "APP_ENV=staging",
-    `NEXT_PUBLIC_SUPABASE_URL=${authUrl}`,
-    `NEXT_PUBLIC_SUPABASE_ANON_KEY=${local.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+    `NEXT_PUBLIC_SUPABASE_URL=${synthetic.NEXT_PUBLIC_SUPABASE_URL}`,
+    `NEXT_PUBLIC_SUPABASE_ANON_KEY=${synthetic.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
   ];
   writeFileSync(resolve(output, "api-build.env"), `${publicSettings.join("\n")}\n`);
   writeFileSync(
@@ -162,9 +164,9 @@ function writeComposeEnv(tenantHost) {
     DATABASE_URL: runtime("atlas_app_login", local.ATLAS_APP_LOGIN_PASSWORD),
     PLATFORM_DATABASE_URL: runtime("atlas_platform_login", local.ATLAS_PLATFORM_LOGIN_PASSWORD),
     RATE_LIMIT_REDIS_URL: "redis://redis:6379",
-    NEXT_PUBLIC_SUPABASE_URL: authUrl,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: local.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    SUPABASE_SERVICE_ROLE_KEY: local.SUPABASE_SERVICE_ROLE_KEY,
+    // The seed enrolled the admin's authenticator with this secret.
+    AUTH_PROVIDER: "better-auth",
+    BETTER_AUTH_SECRET: local.BETTER_AUTH_SECRET,
     REHEARSAL_CERTS: certs,
   };
   const lines = Object.entries(settings)
@@ -292,19 +294,7 @@ try {
   const provisionEnv = { ...process.env, ...local };
   run(process.execPath, ["scripts/e2e/setup-local.mjs"], { env: provisionEnv, log: "setup.log" });
 
-  // GoTrue needs its database and role, which setup-local.mjs creates.
-  step("Starting GoTrue and Kong (TLS), then seeding");
-  up(["auth", "gateway"]);
-  await waitFor(
-    "GoTrue",
-    () =>
-      fetch("http://127.0.0.1:54326/auth/v1/health", {
-        headers: { apikey: local.SUPABASE_ANON_KEY },
-      })
-        .then((response) => response.ok)
-        .catch(() => false),
-    90,
-  );
+  step("Seeding journey users and scenarios");
   run(process.execPath, ["scripts/e2e/local-run.mjs", "seed"], {
     env: provisionEnv,
     log: "seed.log",
