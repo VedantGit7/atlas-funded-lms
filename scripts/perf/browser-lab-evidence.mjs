@@ -33,7 +33,7 @@ export function assertLabCoverage(samples, routes) {
     throw new Error(`Incomplete synthetic mobile lab evidence: ${failures.join("; ")}`);
 }
 
-export function assertLocalLabTarget(baseUrl, authUrl, databaseUrl) {
+export function assertLocalLabTarget(baseUrl, databaseUrl) {
   const target = new URL(baseUrl);
   if (
     target.protocol !== "http:" ||
@@ -50,5 +50,5 @@ export function assertLocalLabTarget(baseUrl, authUrl, databaseUrl) {
     )
   )
     throw new Error("Mobile lab requires the explicit isolated localhost:3100 fixture stack.");
-  assertIsolatedFixtureTarget({ authUrl, databaseUrl });
+  assertIsolatedFixtureTarget({ databaseUrl });
 }

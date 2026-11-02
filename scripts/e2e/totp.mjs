@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 
-/** RFC 6238 SHA-1, six digits, 30-second period (Supabase authenticator defaults). */
+/** RFC 6238 SHA-1, six digits, 30-second period (authenticator app defaults). */
 export function totp(secret, timestamp = Date.now()) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const normalized = secret.toUpperCase().replace(/=+$/, "");

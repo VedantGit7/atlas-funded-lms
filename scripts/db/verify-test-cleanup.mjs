@@ -60,6 +60,7 @@ try {
     CREATE TABLE append_only(id uuid PRIMARY KEY,tenant_id uuid REFERENCES tenants(id));
     CREATE TABLE global_ref(id uuid PRIMARY KEY,principal_id uuid REFERENCES auth_principals(id));
     CREATE TABLE cascade_ref(id uuid PRIMARY KEY,principal_id uuid REFERENCES auth_principals(id) ON DELETE CASCADE);
+    CREATE TABLE auth_sessions(id uuid PRIMARY KEY,user_id uuid REFERENCES auth_principals(id) ON DELETE CASCADE);
     CREATE FUNCTION forbid_delete() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'append-only'; END $$;
     CREATE TRIGGER append_only_guard BEFORE DELETE ON append_only FOR EACH ROW EXECUTE FUNCTION forbid_delete();
     CREATE ROLE f20_fixture LOGIN PASSWORD 'atlas_f20_fixture_only';
@@ -181,6 +182,24 @@ try {
   );
   await admin.query("DELETE FROM cascade_ref WHERE principal_id=$1", [cascadeFixture.principalId]);
   await cascadeRun.cleanup();
+  // A principal's own Better Auth login state goes with it rather than refusing cleanup.
+  const sessionRun = await startTestCleanupRun(config);
+  const sessionWriter = await tracked(sessionRun);
+  const sessionFixture = await tenant(sessionWriter);
+  await sessionWriter.end();
+  await admin.query("INSERT INTO auth_sessions(id,user_id) VALUES($1,$2)", [
+    randomUUID(),
+    sessionFixture.principalId,
+  ]);
+  await sessionRun.cleanup();
+  assert.equal(
+    (
+      await admin.query("SELECT count(*)::int AS n FROM auth_sessions WHERE user_id=$1", [
+        sessionFixture.principalId,
+      ])
+    ).rows[0].n,
+    0,
+  );
   // Cleanup failures must roll back all prior child and tenant deletes.
   const failed = await startTestCleanupRun(config);
   const writer = await tracked(failed);

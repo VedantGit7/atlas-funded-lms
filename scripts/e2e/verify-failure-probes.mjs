@@ -118,7 +118,7 @@ function sourceLocations(errors, spec) {
 
 // The probe's own dev servers log to its output, which is otherwise discarded: it can carry
 // anything. Only the route shape and error code of the API's structured `route.failure` lines
-// may leave it — enough to tell a login Supabase rejected from an API error or no API call at all.
+// may leave it — enough to tell a rejected login from an API error or no API call at all.
 function serverFailures(output) {
   const failures = [];
   for (const line of output.split("\n")) {
@@ -265,10 +265,7 @@ let servers = { handles: [] };
 
 persist("running");
 try {
-  assertIsolatedFixtureTarget({
-    databaseUrl: process.env.E2E_OWNER_DATABASE_URL,
-    authUrl: process.env.SUPABASE_URL,
-  });
+  assertIsolatedFixtureTarget({ databaseUrl: process.env.E2E_OWNER_DATABASE_URL });
   if (ownServers) {
     current = { stage: "servers" };
     persist("running");

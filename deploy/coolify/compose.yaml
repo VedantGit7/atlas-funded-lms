@@ -111,10 +111,16 @@ services:
       APP_ENV: ${APP_ENV:?}
       APP_URL: ${APP_URL:?}
       ATLAS_SERVICE_RUNTIME: managed-node
+      # The login system (launch plan phase 3): Supabase until staging switches
+      # in task 5.1. Better Auth needs its secret; Google sign-in is optional.
+      AUTH_PROVIDER: ${AUTH_PROVIDER:-supabase}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
       BETTER_STACK_WORKER_HEARTBEAT_URL: ${BETTER_STACK_WORKER_HEARTBEAT_URL:?}
       CERTIFICATE_OPEN_BADGE: ${CERTIFICATE_OPEN_BADGE:-false}
       CRON_SECRET: ${CRON_SECRET:?}
       DATABASE_URL: ${DATABASE_URL:?}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       INTERNAL_WORKER_SECRET: ${INTERNAL_WORKER_SECRET:?}
       LEARNER_BILLING_ENC_KEY: ${LEARNER_BILLING_ENC_KEY:?}
       # Off until marketing email has its own provider: the SMTP agent is ZeptoMail,

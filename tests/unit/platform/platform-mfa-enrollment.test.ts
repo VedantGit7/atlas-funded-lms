@@ -11,16 +11,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  */
 
 const mocks = vi.hoisted(() => ({
-  requireSupabaseUser: vi.fn(),
-  upsertAuthPrincipal: vi.fn(),
+  requireBetterAuthUser: vi.fn(),
+  findActiveSessionPrincipal: vi.fn(),
   findActivePlatformOperator: vi.fn(),
 }));
 
-vi.mock("../../../backend/packages/auth/src/session", () => ({
-  requireSupabaseUser: mocks.requireSupabaseUser,
+// The guard's Better Auth path (launch plan task 3.7).
+vi.mock("../../../backend/packages/auth/src/better-auth-runtime", () => ({
+  authProvider: () => "better-auth",
+  requireBetterAuthUser: mocks.requireBetterAuthUser,
 }));
 vi.mock("../../../backend/packages/auth/src/auth-principal.repository", () => ({
-  upsertAuthPrincipal: mocks.upsertAuthPrincipal,
+  findActiveSessionPrincipal: mocks.findActiveSessionPrincipal,
 }));
 vi.mock("../../../backend/packages/auth/src/platform-operators.repository", () => ({
   findActivePlatformOperator: mocks.findActivePlatformOperator,
@@ -33,8 +35,8 @@ const db = { $queryRaw: vi.fn() };
 const req = new NextRequest("https://platform.example.com/api/v1/platform/me/security/mfa");
 
 function signedIn(args: { mfaEnabled: boolean; aal: "aal1" | "aal2" }) {
-  mocks.requireSupabaseUser.mockResolvedValue({
-    supabaseUserId: "018f0000-0000-7000-8000-000000000020",
+  mocks.requireBetterAuthUser.mockResolvedValue({
+    principalId,
     email: "operator@example.test",
     emailConfirmed: true,
     mfaEnabled: args.mfaEnabled,
@@ -54,7 +56,7 @@ async function codeOf(promise: Promise<unknown>): Promise<string> {
 describe("requirePlatformPrincipal with allowMfaEnrollment", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.upsertAuthPrincipal.mockResolvedValue({ id: principalId });
+    mocks.findActiveSessionPrincipal.mockResolvedValue({ id: principalId });
     mocks.findActivePlatformOperator.mockResolvedValue({
       id: "grant",
       authPrincipalId: principalId,

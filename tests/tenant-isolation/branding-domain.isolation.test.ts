@@ -10,8 +10,8 @@ import { createTenantIsolationFixture, tenantCtx } from "./tenant-isolation-fixt
 const {
   realWithTenantTx,
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockRequireActiveMembership,
   mockCan,
   mockReadTenantBranding,
@@ -25,8 +25,8 @@ const {
   return {
     realWithTenantTx: db.withTenantTx,
     mockResolveTenant: vi.fn(),
-    mockRequireSupabaseUser: vi.fn(),
-    mockUpsertAuthPrincipal: vi.fn(),
+    mockRequireSessionUser: vi.fn(),
+    mockResolveSessionPrincipal: vi.fn(),
     mockRequireActiveMembership: vi.fn(),
     mockCan: vi.fn(),
     mockReadTenantBranding: vi.fn(),
@@ -57,14 +57,10 @@ vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/membership", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -333,14 +329,14 @@ function createTenantHostRequest(hostname: string, path: string, tenantBId: stri
 
 function setupTenantAApiMocks() {
   mockResolveTenant.mockResolvedValue(tenantAContext);
-  mockRequireSupabaseUser.mockResolvedValue({
-    supabaseUserId: "018f0000-0000-7000-8000-000000000001",
+  mockRequireSessionUser.mockResolvedValue({
+    principalId: "018f0000-0000-7000-8000-000000000001",
     email: "admin@tenant-a.example.com",
     mfaEnabled: true,
     // Domain changes require a session that completed MFA (audit H4).
     sessionAssuranceLevel: "aal2",
   });
-  mockUpsertAuthPrincipal.mockResolvedValue({
+  mockResolveSessionPrincipal.mockResolvedValue({
     id: "018f0000-0000-7000-8000-000000000098",
     email: "admin@tenant-a.example.com",
   });

@@ -4,15 +4,31 @@ import { parse } from "dotenv";
 import { localEnv } from "./local-env.mjs";
 import { resolve } from "node:path";
 const env = { ...process.env, ...localEnv() };
+// Next reads the apps' dotenv files for anything unset. Reserve their keys so
+// a developer's hosted settings can't fill gaps in this fixture, as in CI,
+// which has none of these files.
+for (const directory of [".", "frontend/apps/web", "backend/apps/api"])
+  for (const name of [".env", ".env.local", ".env.development", ".env.development.local"]) {
+    const path = resolve(directory, name);
+    if (existsSync(path))
+      for (const key of Object.keys(parse(readFileSync(path)))) if (!(key in env)) env[key] = "";
+  }
 const [command, ...args] = process.argv.slice(2);
 if (!["seed", "scenarios", "api", "web", "test", "probes"].includes(command))
   throw new Error("Usage: local-run.mjs seed|scenarios|api|web|test|probes");
 if (command === "seed" || command === "scenarios") {
+  // The user seed signs in through the Better Auth flows, so it runs under tsx.
   if (command === "seed")
-    execFileSync(process.execPath, ["scripts/e2e/seed-browser-users.mjs"], {
-      env,
-      stdio: "inherit",
-    });
+    execFileSync(
+      process.execPath,
+      [
+        "node_modules/tsx/dist/cli.mjs",
+        "--tsconfig",
+        "backend/apps/api/tsconfig.json",
+        "scripts/e2e/seed-browser-users.mjs",
+      ],
+      { env, stdio: "inherit" },
+    );
   Object.assign(env, parse(readFileSync(env.E2E_CREDENTIALS_PATH)));
   execFileSync(process.execPath, ["scripts/e2e/seed-browser-scenarios.mjs"], {
     env,

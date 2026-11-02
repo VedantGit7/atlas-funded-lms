@@ -143,7 +143,6 @@ function runFixture(t, mode = "valid") {
     env: {
       ...process.env,
       E2E_OWNER_DATABASE_URL: "postgresql://127.0.0.1:5432/atlas_lms_ci",
-      SUPABASE_URL: "http://127.0.0.1:54321",
       E2E_PRIVATE_CANARY: sentinel,
       // The fake Playwright needs no servers; a real run (BROWSER_E2E=1) starts them once.
       BROWSER_E2E: "",

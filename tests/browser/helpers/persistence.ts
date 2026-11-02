@@ -5,8 +5,7 @@ import { requiredCredential } from "./env";
 /** Inspect only the tenant just created by the browser, without reading invite secrets. */
 export async function provisionedTenantPersistence(tenantId: string) {
   const databaseUrl = requiredCredential("E2E_OWNER_DATABASE_URL");
-  const authUrl = process.env["SUPABASE_URL"] ?? requiredCredential("NEXT_PUBLIC_SUPABASE_URL");
-  assertIsolatedFixtureTarget({ databaseUrl, authUrl });
+  assertIsolatedFixtureTarget({ databaseUrl });
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
   try {
@@ -40,8 +39,7 @@ export async function foreignPersistenceSnapshot(
   certificateId: string,
 ) {
   const databaseUrl = requiredCredential("E2E_OWNER_DATABASE_URL");
-  const authUrl = process.env["SUPABASE_URL"] ?? requiredCredential("NEXT_PUBLIC_SUPABASE_URL");
-  assertIsolatedFixtureTarget({ databaseUrl, authUrl });
+  assertIsolatedFixtureTarget({ databaseUrl });
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
   try {

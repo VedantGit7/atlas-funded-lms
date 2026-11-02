@@ -33,7 +33,7 @@
     "test:browser": "playwright test",
     "browser:serve:api": "pnpm --filter @atlas/api-app build && pnpm --filter @atlas/api-app start",
     "browser:serve:web": "pnpm --filter @atlas/web build && pnpm --filter @atlas/web start",
-    "e2e:seed-users": "dotenv -e .env.local -- node scripts/e2e/seed-browser-users.mjs",
+    "e2e:seed-users": "dotenv -e .env.local -- tsx --tsconfig backend/apps/api/tsconfig.json scripts/e2e/seed-browser-users.mjs",
     "test:browser:update-snapshots": "playwright test --update-snapshots",
     "ci:frontend-api-closure": "node scripts/ci/check-frontend-api-closure.mjs",
     "ci:frontend-api-closure:strict": "node scripts/ci/check-frontend-api-closure.mjs --strict",

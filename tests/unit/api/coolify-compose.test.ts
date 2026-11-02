@@ -94,12 +94,29 @@ describe("Coolify compose topology", () => {
     ).not.toThrow();
   });
 
+  it("starts the API on Supabase by default, and on Better Auth once it's chosen", () => {
+    expect(resolveEnvironment("api").AUTH_PROVIDER).toBe("supabase");
+    const betterAuth = resolveEnvironment("api", {
+      ...settings,
+      AUTH_PROVIDER: "better-auth",
+      BETTER_AUTH_SECRET: "b".repeat(32),
+    });
+    expect(betterAuth).toMatchObject({ AUTH_PROVIDER: "better-auth" });
+    expect(() => validateDeploymentStartup("api", betterAuth)).not.toThrow();
+    expect(() =>
+      validateDeploymentStartup("api", { ...betterAuth, BETTER_AUTH_SECRET: "" }),
+    ).toThrow(/BETTER_AUTH_SECRET/);
+  });
+
   it("keeps each service's credentials to what it uses", () => {
     const env = (service: DeploymentService) => Object.keys(coolify(service).environment);
     // The worker never proxies to the API; only the API signs SCORM reads.
     expect(env("worker")).not.toContain("API_PROXY_SECRET");
     expect(env("worker")).not.toContain("SCORM_CONTENT_SIGNING_KEYS");
     expect(env("web")).not.toContain("SCORM_CONTENT_SIGNING_KEYS");
+    // Only the API signs sessions and decrypts authenticators.
+    expect(env("web")).not.toContain("BETTER_AUTH_SECRET");
+    expect(env("worker")).not.toContain("BETTER_AUTH_SECRET");
     // Migration and owner logins never reach a runtime container.
     for (const service of services)
       for (const key of ["DIRECT_DATABASE_URL", "MIGRATION_DATABASE_URL", "PRISMA_MIGRATION_URL"])

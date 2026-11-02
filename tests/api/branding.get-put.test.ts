@@ -33,8 +33,8 @@ const putBody = {
 
 const {
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockRequireActiveMembership,
   mockCan,
   mockReadTenantBranding,
@@ -43,8 +43,8 @@ const {
   mockWithTenantTx,
 } = vi.hoisted(() => ({
   mockResolveTenant: vi.fn(),
-  mockRequireSupabaseUser: vi.fn(),
-  mockUpsertAuthPrincipal: vi.fn(),
+  mockRequireSessionUser: vi.fn(),
+  mockResolveSessionPrincipal: vi.fn(),
   mockRequireActiveMembership: vi.fn(),
   mockCan: vi.fn(),
   mockReadTenantBranding: vi.fn(),
@@ -73,14 +73,10 @@ vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/membership", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -147,12 +143,12 @@ function createPutRequest(
 
 function setupAuthenticatedAdmin() {
   mockResolveTenant.mockResolvedValue(tenantA);
-  mockRequireSupabaseUser.mockResolvedValue({
-    supabaseUserId: "018f0000-0000-7000-8000-000000000099",
+  mockRequireSessionUser.mockResolvedValue({
+    principalId: "018f0000-0000-7000-8000-000000000099",
     email: "admin@example.com",
     mfaEnabled: false,
   });
-  mockUpsertAuthPrincipal.mockResolvedValue({
+  mockResolveSessionPrincipal.mockResolvedValue({
     id: "018f0000-0000-7000-8000-000000000098",
     email: "admin@example.com",
   });

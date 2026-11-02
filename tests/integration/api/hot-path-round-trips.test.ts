@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import pg from "pg";
-import type * as AtlasAuth from "@atlas/auth";
 import { NextRequest } from "next/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { withTenantTx, type TenantTx } from "@atlas/db";
@@ -21,16 +20,18 @@ import {
  * Audit §3.1–3.2: database round trips on the authenticated hot path and the
  * exam runner. Against a remote database every statement costs one network
  * round trip while a pooled connection is held, so the counts here are the
- * latency and capacity budget, asserted here. Supabase Auth is stubbed: it is
- * not a database round trip, and its cost is covered by the session cache
- * tests. HOT_PATH_SAMPLES=100 also reports local latency.
+ * latency and capacity budget, asserted here. Login is Better Auth (launch
+ * plan task 3.7); its session check is stubbed, since the session cache tests
+ * cover its cost, and the principal is read from the database as in
+ * production. HOT_PATH_SAMPLES=100 also reports local latency.
  */
-const supabaseUser = vi.hoisted(() => ({ current: null as null | Record<string, unknown> }));
-vi.mock("@atlas/auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof AtlasAuth>()),
-  requireSupabaseUser: vi.fn(async () => {
-    if (!supabaseUser.current) throw new Error("no stub user");
-    return supabaseUser.current;
+const sessionUser = vi.hoisted(() => ({ current: null as null | Record<string, unknown> }));
+vi.mock("../../../backend/packages/auth/src/better-auth-runtime", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  authProvider: () => "better-auth",
+  requireBetterAuthUser: vi.fn(async () => {
+    if (!sessionUser.current) throw new Error("no stub user");
+    return sessionUser.current;
   }),
 }));
 
@@ -97,13 +98,13 @@ suite("hot-path database round trips (audit §3.1–3.2)", () => {
     );
     const [principal] = await withTenantTx(
       { tenantId: course.tenantId, requestId: randomUUID(), allowAnonymousTenantRead: true },
-      (tx) => tx.$queryRaw<Array<{ supabase_user_id: string; email: string }>>`
-        select supabase_user_id::text, email from auth_principals where id = ${course.principalId}::uuid
+      (tx) => tx.$queryRaw<Array<{ email: string }>>`
+        select email from auth_principals where id = ${course.principalId}::uuid
       `,
     );
     if (!principal) throw new Error("fixture principal missing");
-    supabaseUser.current = {
-      supabaseUserId: principal.supabase_user_id,
+    sessionUser.current = {
+      principalId: course.principalId,
       email: principal.email,
       emailConfirmed: true,
       mfaEnabled: false,

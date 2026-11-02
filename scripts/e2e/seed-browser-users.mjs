@@ -6,25 +6,27 @@
  * the users, and in CI because nothing had ever set the credentials — so the
  * suite reported green while proving nothing about a logged-in page.
  *
- * Login goes through Supabase `signInWithPassword`, so a journey user is two
- * rows in two systems: a Supabase auth user (the password) and a tenant
- * membership with a role (the authorization). This creates both, idempotently,
- * so a pipeline can run it on every job and a contributor can run it once.
+ * Login goes through Better Auth (launch plan task 3.7), so a journey user is
+ * a principal that signs in with a password (and, for the admin and platform
+ * journeys, a verified authenticator) plus a tenant membership with a role
+ * (the authorization). This creates both, idempotently, so a pipeline can run
+ * it on every job and a contributor can run it once.
  *
- * Usage:
+ * Usage (it imports the Better Auth flows, so it runs under tsx):
  *   node scripts/e2e/local-run.mjs seed # use the isolated local stack
  *   pnpm e2e:seed-users -- --print-env  # also print the E2E_* lines to export
  *
- * Requires SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL), SUPABASE_SERVICE_ROLE_KEY
- * and DATABASE_URL. It requires an explicit tenant slug and guarded local targets so it can
- * never be pointed at a production tenant by accident.
+ * Requires DATABASE_URL and BETTER_AUTH_SECRET, the same secret the API runs
+ * with, which encrypts the authenticators. It requires an explicit tenant slug
+ * and a guarded local database so it can never be pointed at a production
+ * tenant by accident.
  */
 
 import { randomUUID } from "node:crypto";
 import { appendFileSync, writeFileSync } from "node:fs";
 import { assertIsolatedFixtureTarget } from "./isolated-target.mjs";
-import { totp } from "./totp.mjs";
-import { createClient } from "@supabase/supabase-js";
+import { authPrisma } from "@atlas/db/auth-client";
+import { enrolFixtureAuthenticator, upsertFixtureLogin } from "./better-auth-fixture-logins";
 import pg from "pg";
 
 const args = process.argv.slice(2);
@@ -68,14 +70,13 @@ function fail(message) {
   process.exit(1);
 }
 
-const supabaseUrl = process.env["SUPABASE_URL"] ?? process.env["NEXT_PUBLIC_SUPABASE_URL"];
-const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
 const databaseUrl = process.env["DATABASE_URL"];
 
-if (!supabaseUrl) fail("SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) is not set.");
-if (!serviceRoleKey) fail("SUPABASE_SERVICE_ROLE_KEY is not set.");
 if (!databaseUrl) fail("DATABASE_URL is not set.");
-assertIsolatedFixtureTarget({ databaseUrl, authUrl: supabaseUrl });
+if (!process.env["BETTER_AUTH_SECRET"]) {
+  fail("BETTER_AUTH_SECRET is not set. Use the one the API runs with, or its sign-ins fail.");
+}
+assertIsolatedFixtureTarget({ databaseUrl });
 if (!tenantSlug) {
   fail(
     "No tenant given. Pass --tenant=<slug> or set E2E_TENANT_SLUG. " +
@@ -89,45 +90,13 @@ if (!passwordFromEnv) {
   );
 }
 
-const supabase = createClient(supabaseUrl, serviceRoleKey, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
-
 /** The email a journey user logs in with, namespaced by tenant. */
 function emailFor(user) {
   return `${user.local}+${tenantSlug}@atlas-e2e.test`;
 }
 
-/**
- * Create the Supabase auth user, or update the password if it already exists.
- * Idempotent so a pipeline can call this on every run.
- */
-async function upsertAuthUser(email) {
-  const created = await supabase.auth.admin.createUser({
-    email,
-    password: passwordFromEnv,
-    email_confirm: true,
-  });
-
-  if (!created.error) return created.data.user.id;
-
-  // Already present: find it and reset the password so the credential the
-  // pipeline holds is always the one that works.
-  const listed = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  if (listed.error) fail(`could not list Supabase users: ${listed.error.message}`);
-
-  const existing = listed.data.users.find((candidate) => candidate.email === email);
-  if (!existing)
-    fail(`could not create or find the Supabase user ${email}: ${created.error.message}`);
-
-  const updated = await supabase.auth.admin.updateUserById(existing.id, {
-    password: passwordFromEnv,
-    email_confirm: true,
-  });
-  if (updated.error) fail(`could not reset the password for ${email}: ${updated.error.message}`);
-
-  return existing.id;
-}
+/** Any host does for seeding; the journeys sign in on their own. */
+const SEED_HOST = `${tenantSlug}.localhost`;
 
 const client = new pg.Client({ connectionString: databaseUrl });
 await client.connect();
@@ -145,7 +114,7 @@ try {
 
   for (const user of USERS) {
     const email = emailFor(user);
-    const authUserId = await upsertAuthUser(email);
+    const principalId = await upsertFixtureLogin(email, passwordFromEnv);
     const userTenant = user.tenantSlug
       ? (await client.query("select id::text as id from tenants where slug=$1", [user.tenantSlug]))
           .rows[0]?.id
@@ -154,32 +123,13 @@ try {
 
     if (user.role === "admin" || user.role === null) {
       // Real enrollment and verification: the resulting session must be AAL2.
-      const current = await supabase.auth.admin.mfa.listFactors({ userId: authUserId });
-      if (current.error) throw current.error;
-      for (const factor of current.data.factors) {
-        const removed = await supabase.auth.admin.mfa.deleteFactor({
-          userId: authUserId,
-          id: factor.id,
-        });
-        if (removed.error) throw removed.error;
-      }
-      const actor = createClient(supabaseUrl, serviceRoleKey, {
-        auth: { autoRefreshToken: false, persistSession: false },
+      const secret = await enrolFixtureAuthenticator({
+        principalId,
+        email,
+        password: passwordFromEnv,
+        host: SEED_HOST,
       });
-      const login = await actor.auth.signInWithPassword({ email, password: passwordFromEnv });
-      if (login.error) throw login.error;
-      const enrolled = await actor.auth.mfa.enroll({
-        factorType: "totp",
-        friendlyName: "Disposable browser fixture",
-      });
-      if (enrolled.error) throw enrolled.error;
-      const verified = await actor.auth.mfa.challengeAndVerify({
-        factorId: enrolled.data.id,
-        code: totp(enrolled.data.totp.secret),
-      });
-      if (verified.error) throw verified.error;
-      lines.push(`${user.envPrefix}_TOTP_SECRET=${enrolled.data.totp.secret}`);
-      await actor.auth.signOut();
+      lines.push(`${user.envPrefix}_TOTP_SECRET=${secret}`);
     }
 
     let roleId = null;
@@ -195,31 +145,6 @@ try {
         );
       }
     }
-
-    // auth_principals is global, not tenant-scoped: one Supabase identity, one
-    // row, reused by every tenant the person belongs to.
-    //
-    // The conflict target is the email, not supabase_user_id, because the email
-    // is the stable identifier and the Supabase id is not. Recreating the local
-    // auth stack issues new user ids for the same people; keying on the id then
-    // missed the existing row and hit the unique constraint on the email
-    // instead, which is a failure this script exists to avoid. Re-pointing the
-    // id is the correct repair.
-    const principal = await client.query(
-      `insert into auth_principals (
-         id, supabase_user_id, email, email_normalized, global_status, created_at, updated_at
-       )
-       values ($1::uuid, $2::uuid, $3, lower($3), 'active', now(), now())
-       on conflict (email_normalized)
-       do update set
-         supabase_user_id = excluded.supabase_user_id,
-         email = excluded.email,
-         global_status = 'active',
-         updated_at = now()
-       returning id::text as id`,
-      [randomUUID(), authUserId, email],
-    );
-    const principalId = principal.rows[0].id;
 
     if (roleId !== null) {
       const membership = await client.query(
@@ -309,4 +234,6 @@ try {
   console.log(`\nSeeded ${USERS.length} journey users for tenant "${tenantSlug}".`);
 } finally {
   await client.end();
+  // Better Auth's own pool, or the process waits on its idle connections.
+  await authPrisma().$disconnect();
 }

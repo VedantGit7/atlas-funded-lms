@@ -308,8 +308,41 @@ It's used for sign-up verification, sign-in links, password resets, both email-c
 
 **One change outside the switch.** The web app used to ask Supabase directly who was signed in on the invitation page. Now the API's preview answers, for either system. That works on staging today and is one less Supabase call to remove in 3.8.
 
+## Task 3.7: tests off the local Supabase stack (as built, 2 November 2026)
+
+**The browser journeys sign in with Better Auth.** CI's browser job no longer starts a local Supabase stack. It runs with `AUTH_PROVIDER=better-auth` and a `BETTER_AUTH_SECRET` generated per run and masked, so there is still no hosted project or repository secret, and a fork runs the same suite.
+
+- **Seeding:** `scripts/e2e/seed-browser-users.mjs` creates each journey user's password login through Better Auth (`scripts/e2e/better-auth-fixture-logins.ts`). For the admin and platform users it also sets up a real authenticator: sign in, set up the app, confirm it with a code.
+  - It's idempotent and keeps each principal's id, so memberships and grants from an earlier run still apply.
+  - It imports the flows, so it runs under tsx.
+  - It and the API must share the secret, which encrypts the authenticators.
+- **The local stack** (`scripts/e2e/local-stack.compose.yml`) is now only Postgres. The same goes for the performance tools and the deploy rehearsal, which reused it.
+  - The capacity fixture's 200 learners are Better Auth logins.
+  - The rehearsal runs the API with `AUTH_PROVIDER=better-auth`, the configuration staging moves to in task 5.1.
+  - The local runner reserves every key in the apps' dotenv files, as CI has none, so a developer's hosted settings can't fill gaps.
+- **One journey read a Supabase cookie.** J09 checked that a role change applies to the same session by comparing `atlas_access_token`; it now compares `atlas_session`.
+- **Checked locally:** the whole suite ran on the local stack with no Supabase settings at all. Every journey passed, including the admin and platform authenticator challenges. Journeys that change state need `local-run.mjs scenarios` before a rerun. The `-win32` login screenshots are older than the Linux ones CI compares against, so the two dark-mode comparisons differ on Windows; that's unrelated to this change.
+
+**The deploy compose file passes the login settings to the API.** `AUTH_PROVIDER` (default `supabase`), `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are optional, so staging is unchanged. Without them, task 5.1 couldn't switch. Only the API receives the secret.
+
+**Route tests use the provider-neutral session seam.**
+
+- About 30 route and isolation tests mocked `requireSupabaseUser` and `upsertAuthPrincipal`. They now mock `@atlas/api/session-user` (`requireSessionUser`, `resolveSessionPrincipal`), which stays after Supabase goes.
+- The platform guard's tests take its Better Auth path.
+- The `/me` assembly and hot-path round-trip tests resolve the principal through the real seam, from the database. The hot path is 11 statements, within its budget of 12.
+
+**Left for 3.8.** The tests that remain on Supabase test Supabase's own implementation, and go with it:
+
+- the token session and its refresh;
+- the H6 mirroring and relinking of Supabase users;
+- Supabase's MFA, password and OAuth calls;
+- the Supabase configuration checks.
+
+Each of those behaviours already has a Better Auth test from tasks 3.2 to 3.6.
+
+**Test cleanup.** `scripts/db/purge-test-tenants.mjs` now deletes a test principal's own Better Auth login state with it: its sessions, login methods and authenticator, whose keys cascade. Any other reference, cascading or not, still refuses the cleanup. `verify-test-cleanup.mjs` covers this.
+
 ## Open items for the flow tasks
 
 - **Sliding sessions.** Pass Better Auth's refreshed cookie back through the web proxy, so a session used every day doesn't end 30 days after sign-in.
-- **3.7, test cleanup.** `scripts/db/purge-test-tenants.mjs` refuses to delete a test principal that any table still references, including `auth_sessions` and `auth_accounts`, whose rows are deleted with the principal anyway. Until it allows those, tests delete their own Better Auth rows, as `better-auth-schema.test.ts` does.
 - **After launch, cleanup.** Better Auth deletes expired verification rows when it reads them, but expired sessions stay. Add a periodic delete of expired `auth_sessions` and `auth_verifications` rows to the API.

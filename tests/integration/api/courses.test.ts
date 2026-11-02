@@ -11,8 +11,8 @@ const learnerMembershipId = "018f0000-0000-7000-8000-000000000020";
 
 const {
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockRequireActiveMembership,
   mockCan,
   mockListPublishedCourses,
@@ -22,8 +22,8 @@ const {
   mockWithTenantTx,
 } = vi.hoisted(() => ({
   mockResolveTenant: vi.fn(),
-  mockRequireSupabaseUser: vi.fn(),
-  mockUpsertAuthPrincipal: vi.fn(),
+  mockRequireSessionUser: vi.fn(),
+  mockResolveSessionPrincipal: vi.fn(),
   mockRequireActiveMembership: vi.fn(),
   mockCan: vi.fn(),
   mockListPublishedCourses: vi.fn(),
@@ -39,14 +39,10 @@ vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/membership", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -104,12 +100,12 @@ const publishedCourseId = "018f0000-0000-7000-8000-000000000030";
 describe("courses API integration", () => {
   beforeEach(() => {
     mockResolveTenant.mockResolvedValue(tenantA);
-    mockRequireSupabaseUser.mockResolvedValue({
-      supabaseUserId: "supabase-user",
+    mockRequireSessionUser.mockResolvedValue({
+      principalId: "supabase-user",
       email: "learner@example.com",
       mfaEnabled: false,
     });
-    mockUpsertAuthPrincipal.mockResolvedValue({ id: "principal-id" });
+    mockResolveSessionPrincipal.mockResolvedValue({ id: "principal-id" });
     mockRequireActiveMembership.mockResolvedValue({ membershipId: learnerMembershipId });
     mockCan.mockResolvedValue({ allowed: true, permission: "course.read", reason: "ALLOWED" });
     mockListPublishedCourses.mockResolvedValue({

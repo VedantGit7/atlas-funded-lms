@@ -47,14 +47,14 @@ const fixture = vi.hoisted(() => {
   };
 });
 
-vi.mock("@atlas/auth", () => ({
-  requireSupabaseUser: async () => ({
-    supabaseUserId: "user-1",
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: async () => ({
+    principalId: "principal-1",
     email: "operator@example.com",
     mfaEnabled: true,
     sessionAssuranceLevel: "aal2",
   }),
-  upsertAuthPrincipal: async () => ({ id: "principal-1" }),
+  resolveSessionPrincipal: async () => ({ id: "principal-1" }),
 }));
 vi.mock("@atlas/db", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),

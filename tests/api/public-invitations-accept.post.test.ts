@@ -13,8 +13,8 @@ const tenantA = {
 
 const {
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockAcceptInvitation,
   mockReadMembershipRoleKeys,
   mockWithGlobalDb,
@@ -22,8 +22,8 @@ const {
   mockRejectClientTenantId,
 } = vi.hoisted(() => ({
   mockResolveTenant: vi.fn(),
-  mockRequireSupabaseUser: vi.fn(),
-  mockUpsertAuthPrincipal: vi.fn(),
+  mockRequireSessionUser: vi.fn(),
+  mockResolveSessionPrincipal: vi.fn(),
   mockAcceptInvitation: vi.fn(),
   mockReadMembershipRoleKeys: vi.fn(),
   mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn() })),
@@ -37,14 +37,10 @@ vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/membership", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -90,12 +86,12 @@ describe("POST /api/v1/public/invitations/accept", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveTenant.mockResolvedValue(tenantA);
-    mockRequireSupabaseUser.mockResolvedValue({
-      supabaseUserId: "supabase-user",
+    mockRequireSessionUser.mockResolvedValue({
+      principalId: "supabase-user",
       email: "invitee@example.com",
       mfaEnabled: false,
     });
-    mockUpsertAuthPrincipal.mockResolvedValue({
+    mockResolveSessionPrincipal.mockResolvedValue({
       id: "principal-a",
       emailNormalized: "invitee@example.com",
     });

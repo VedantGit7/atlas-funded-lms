@@ -8,9 +8,9 @@ const mocks = vi.hoisted(() => ({
   hit: vi.fn(),
   membership: vi.fn(),
 }));
-vi.mock("@atlas/auth", () => ({
-  requireSupabaseUser: mocks.user,
-  upsertAuthPrincipal: async () => ({ id: "principal-a" }),
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: mocks.user,
+  resolveSessionPrincipal: async () => ({ id: "principal-a" }),
 }));
 vi.mock("@atlas/auth/platform-auth", () => ({ requirePlatformPrincipal: mocks.platform }));
 vi.mock("@atlas/db/global-db", () => ({ withGlobalDb: (fn: (db: object) => unknown) => fn({}) }));
@@ -95,7 +95,7 @@ beforeEach(() => {
   vi.stubEnv("REDIS_URL", "");
   vi.stubEnv("RATE_LIMIT_REDIS_URL", "");
   mocks.user.mockResolvedValue({
-    supabaseUserId: "user-a",
+    principalId: "principal-a",
     email: "a@example.test",
     mfaEnabled: true,
     sessionAssuranceLevel: "aal2",

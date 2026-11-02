@@ -5,6 +5,12 @@ import { requiredCredential } from "../helpers/env";
 import { waitForHydration } from "../helpers/hydration";
 import { scenario } from "../helpers/scenario";
 
+/**
+ * Better Auth's session cookie (launch plan task 3.7). It has no `__Secure-`
+ * prefix here because the journeys run over plain HTTP.
+ */
+const SESSION_COOKIE = "atlas_session";
+
 test.describe("J09 tenant admin role management", () => {
   test("grants and revokes a role with persisted membership changes", async ({
     page,
@@ -22,10 +28,10 @@ test.describe("J09 tenant admin role management", () => {
         requiredCredential("E2E_ROLE_TARGET_PASSWORD"),
         "/courses",
       );
-      const accessToken = (await targetContext.cookies()).find(
-        (cookie) => cookie.name === "atlas_access_token",
+      const sessionToken = (await targetContext.cookies()).find(
+        (cookie) => cookie.name === SESSION_COOKIE,
       )?.value;
-      expect(Boolean(accessToken)).toBe(true);
+      expect(Boolean(sessionToken)).toBe(true);
       const title = `Role permission control ${randomUUID()}`;
       const deniedBefore = await target.request.post("/api/v1/courses", {
         data: { title },
@@ -129,10 +135,11 @@ test.describe("J09 tenant admin role management", () => {
       expect(deniedAfter.status()).toBe(403);
       expect(await deniedAfter.json()).toMatchObject({ error: { code: "PERMISSION_DENIED" } });
       const currentToken = (await targetContext.cookies()).find(
-        (cookie) => cookie.name === "atlas_access_token",
+        (cookie) => cookie.name === SESSION_COOKIE,
       )?.value;
-      // Compare booleans so a failed assertion never writes a bearer token into test output.
-      expect(currentToken === accessToken).toBe(true);
+      // The role change applied to the same session, without signing in again.
+      // Compare booleans so a failed assertion never writes a session token into test output.
+      expect(currentToken === sessionToken).toBe(true);
     } finally {
       await targetContext.close();
     }

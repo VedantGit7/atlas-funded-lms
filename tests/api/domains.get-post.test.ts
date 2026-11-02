@@ -32,8 +32,8 @@ const createdCustomDomain = domainsPayload.data[0];
 
 const {
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockRequireActiveMembership,
   mockCan,
   mockReadTenantDomains,
@@ -45,8 +45,8 @@ const {
   findActiveEntitlementByKeyMock,
 } = vi.hoisted(() => ({
   mockResolveTenant: vi.fn(),
-  mockRequireSupabaseUser: vi.fn(),
-  mockUpsertAuthPrincipal: vi.fn(),
+  mockRequireSessionUser: vi.fn(),
+  mockResolveSessionPrincipal: vi.fn(),
   mockRequireActiveMembership: vi.fn(),
   mockCan: vi.fn(),
   mockReadTenantDomains: vi.fn(),
@@ -82,14 +82,10 @@ vi.mock("@atlas/tenancy", () => ({
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/membership", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -162,14 +158,14 @@ import { GET, POST } from "../../backend/apps/api/src/app/api/v1/domains/route";
 
 function setupAuthenticatedAdmin(permission: string) {
   mockResolveTenant.mockResolvedValue(tenantA);
-  mockRequireSupabaseUser.mockResolvedValue({
-    supabaseUserId: "018f0000-0000-7000-8000-000000000099",
+  mockRequireSessionUser.mockResolvedValue({
+    principalId: "018f0000-0000-7000-8000-000000000099",
     email: "admin@example.com",
     mfaEnabled: true,
     // Domain changes require a session that completed MFA (audit H4).
     sessionAssuranceLevel: "aal2",
   });
-  mockUpsertAuthPrincipal.mockResolvedValue({
+  mockResolveSessionPrincipal.mockResolvedValue({
     id: "018f0000-0000-7000-8000-000000000098",
     email: "admin@example.com",
   });
@@ -276,8 +272,8 @@ describe("POST /api/v1/domains", () => {
   });
 
   it("refuses a password-only session: adding a domain requires step-up MFA (audit H4)", async () => {
-    mockRequireSupabaseUser.mockResolvedValue({
-      supabaseUserId: "018f0000-0000-7000-8000-000000000099",
+    mockRequireSessionUser.mockResolvedValue({
+      principalId: "018f0000-0000-7000-8000-000000000099",
       email: "admin@example.com",
       mfaEnabled: true,
       sessionAssuranceLevel: "aal1",

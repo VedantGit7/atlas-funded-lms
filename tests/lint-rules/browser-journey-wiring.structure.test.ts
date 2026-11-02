@@ -94,24 +94,28 @@ describe("browser journey wiring", () => {
     expect(workflows).toContain("E2E_REQUIRE_AUTH_JOURNEYS");
   });
 
-  it("passes the Supabase configuration the login flow needs", () => {
-    // Login goes through Supabase signInWithPassword; without these the seeded
-    // users cannot authenticate and every journey fails at the login form.
+  it("logs in with Better Auth, with the secret the seed and the API share", () => {
+    // The seed enrolls the admin and platform users' authenticators with
+    // BETTER_AUTH_SECRET and the API decrypts them with it; without the same
+    // value in both, every MFA journey fails at the challenge (launch plan 3.7).
     for (const variable of [
-      "SUPABASE_SERVICE_ROLE_KEY",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "AUTH_PROVIDER: better-auth",
+      "BETTER_AUTH_SECRET=",
       "E2E_SEED_PASSWORD",
     ]) {
       expect(workflows).toContain(variable);
     }
+    // The seed imports the Better Auth flows, so it runs under tsx.
+    expect(workflows).toContain(
+      "tsx --tsconfig backend/apps/api/tsconfig.json scripts/e2e/seed-browser-users.mjs",
+    );
   });
 
-  it("starts the auth stack it points those variables at", () => {
-    // Configuration without a server is the gap this caught once already: the
-    // local stack was added and verified, the workflow kept pointing at a hosted
-    // project's secrets, and nothing failed because the variables were present.
-    // Naming an endpoint is not the same as running one.
-    expect(workflows).toContain("supabase start");
+  it("starts no separate auth service", () => {
+    // Better Auth's accounts live in the job's own database. A local Supabase
+    // stack here would be a second login system the journeys never use.
+    expect(workflows).not.toContain("supabase start");
+    expect(workflows).not.toContain("supabase/setup-cli");
   });
 
   it("requires comparisons against committed Linux screenshots", () => {
@@ -125,10 +129,12 @@ describe("browser journey wiring", () => {
     expect(snapshots.filter((name) => name.endsWith("-linux.png"))).toHaveLength(4);
   });
 
-  it("does not reintroduce a hosted Supabase dependency", () => {
+  it("does not depend on a hosted auth project", () => {
     // A fork cannot supply repository secrets, and a suite only the owner can
-    // run is most of the way back to a suite nobody runs.
+    // run is most of the way back to a suite nobody runs. The Better Auth
+    // secret is generated in the job for the same reason.
     expect(workflows).not.toMatch(/secrets\.E2E_SUPABASE/);
+    expect(workflows).not.toMatch(/secrets\.BETTER_AUTH_SECRET/);
   });
 });
 

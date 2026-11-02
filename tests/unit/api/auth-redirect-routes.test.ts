@@ -17,9 +17,9 @@ const mocks = vi.hoisted(() => ({
   notify: vi.fn(),
 }));
 
-vi.mock("../../../backend/packages/auth/src/session", () => ({ requireSupabaseUser: mocks.user }));
-vi.mock("../../../backend/packages/auth/src/auth-principal.repository", () => ({
-  upsertAuthPrincipal: mocks.principal,
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: mocks.user,
+  resolveSessionPrincipal: mocks.principal,
 }));
 vi.mock("@atlas/auth", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -73,7 +73,7 @@ describe("auth redirects on tenant routes", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mocks.user.mockResolvedValue({
-      supabaseUserId: "user-1",
+      principalId: "principal-1",
       email: "learner@example.com",
       mfaEnabled: false,
       sessionAssuranceLevel: "aal1",

@@ -189,6 +189,8 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
 
    `CERTIFICATE_OPEN_BADGE`, `MARKETING_EMAIL_ENABLED`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `false`, `0.05`, `587`).
 
+   The login system is `AUTH_PROVIDER`, `supabase` by default, and only the API receives it. Switching to `better-auth` (launch plan task 5.1) also needs `BETTER_AUTH_SECRET`, at least 32 characters, generated like the other internal secrets; the API refuses to start without it. Google sign-in additionally needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, both or neither.
+
    **Keep the values off screens and out of chat.** Each environment's complete list lives on the server as `/root/atlas/<env>/coolify.env` (mode 600). It is assembled from three root-only files in the same folder:
    - `runtime.env`: the database URLs, from the bootstrap ("Databases and migrations");
    - `provider.env`: the credentials from outside services, typed at hidden prompts on an admin's machine and sent over ssh's input;
@@ -304,10 +306,11 @@ It prints and saves a JSON report (`backup-restore-drill.json`) with the backup'
 `pnpm deploy:rehearse` runs this file's web, API and worker services on your machine, the way a Coolify server would. It needs Docker. With `-- --skip-build`, which reuses the `atlas-*:rehearsal` images, it takes about 2 minutes. Building the three images first adds 20 minutes or more on a cold Docker cache, and needs most of Docker's memory: run nothing else heavy alongside it.
 
 - **What it runs:** the real services from `deploy/coolify/compose.yaml`, in staging mode, on images built from your working tree. `deploy/rehearsal/compose.yaml` adds only what the server would provide:
-  - PostgreSQL and the GoTrue gateway, both behind TLS, signed by a throwaway CA mounted where Coolify's CA goes;
+  - PostgreSQL behind TLS, signed by a throwaway CA mounted where Coolify's CA goes;
   - Redis;
   - a loopback port, `127.0.0.1:3200`, to reach web.
 - **What it provisions:** the database, with the browser-test scripts (`scripts/e2e/setup-local.mjs`, then `local-run.mjs seed`).
+- **How it signs in:** with Better Auth (`AUTH_PROVIDER=better-auth` and the fixture `BETTER_AUTH_SECRET`), the configuration staging switches to in launch plan task 5.1. The compose file still requires the Supabase settings until task 3.8; the rehearsal gives it the synthetic ones, and nothing answers there.
 - **What it checks:**
   - all three services report healthy;
   - a seeded learner logs in through web;

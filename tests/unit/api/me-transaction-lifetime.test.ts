@@ -26,9 +26,11 @@ vi.mock("@atlas/api/rate-limit", () => ({ enforceIngressRateLimit: mocks.ingress
 vi.mock("@atlas/tenancy", () => ({ resolveTenantFromRequest: mocks.resolveTenant }));
 vi.mock("@atlas/db/global-db", () => ({ withGlobalDb: mocks.global }));
 vi.mock("@atlas/db/with-tenant-tx", () => ({ withTenantTx: mocks.tenant }));
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: mocks.user,
+  resolveSessionPrincipal: mocks.principal,
+}));
 vi.mock("@atlas/auth", () => ({
-  requireSupabaseUser: mocks.user,
-  upsertAuthPrincipal: mocks.principal,
   toSessionSafeIdentity: () => ({
     authenticated: true,
     email: "learner@example.test",
@@ -71,7 +73,7 @@ beforeEach(() => {
     state.authDepths.push(state.globalDepth);
     state.order.push("authenticate");
     return {
-      supabaseUserId: "supabase-user",
+      principalId: "principal-id",
       email: "learner@example.test",
       mfaEnabled: true,
       sessionAssuranceLevel: "aal2",

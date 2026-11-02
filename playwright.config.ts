@@ -119,9 +119,8 @@ export default defineConfig({
         },
         {
           // NEXT_PUBLIC_* values are inlined at build time, so this build has to
-          // run with the same Supabase configuration the journeys authenticate
-          // against. Building first and configuring later would ship the wrong
-          // auth endpoint into the client bundle.
+          // run with the journeys' own configuration. Building first and
+          // configuring later would ship the wrong settings into the client bundle.
           command: webServer.command,
           url: webServer.url,
           env: webServer.env,

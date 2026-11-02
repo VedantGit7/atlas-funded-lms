@@ -24,8 +24,8 @@ const {
   mockWithTenantTx,
   mockWithPlatformScope,
   mockResolveTenant,
-  mockRequireSupabaseUser,
-  mockUpsertAuthPrincipal,
+  mockRequireSessionUser,
+  mockResolveSessionPrincipal,
   mockRequireActiveMembership,
   mockCan,
   mockListTenantEntitlements,
@@ -63,8 +63,8 @@ const {
       },
     ),
     mockResolveTenant: vi.fn(),
-    mockRequireSupabaseUser: vi.fn(),
-    mockUpsertAuthPrincipal: vi.fn(),
+    mockRequireSessionUser: vi.fn(),
+    mockResolveSessionPrincipal: vi.fn(),
     mockRequireActiveMembership: vi.fn(),
     mockCan: vi.fn(),
     mockListTenantEntitlements: vi.fn(),
@@ -75,14 +75,10 @@ vi.mock("@atlas/auth/platform-auth", () => ({
   requirePlatformPrincipal: (...args: unknown[]) => mockRequirePlatformPrincipal(...args),
 }));
 
-vi.mock("@atlas/auth", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    requireSupabaseUser: (...args: unknown[]) => mockRequireSupabaseUser(...args),
-    upsertAuthPrincipal: (...args: unknown[]) => mockUpsertAuthPrincipal(...args),
-  };
-});
+vi.mock("@atlas/api/session-user", () => ({
+  requireSessionUser: (...args: unknown[]) => mockRequireSessionUser(...args),
+  resolveSessionPrincipal: (...args: unknown[]) => mockResolveSessionPrincipal(...args),
+}));
 
 vi.mock("@atlas/membership", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -548,8 +544,8 @@ describe("platform provisioning tenant isolation (routes)", () => {
     mockWithTenantTx.mockClear();
     mockWithPlatformScope.mockClear();
     mockResolveTenant.mockReset();
-    mockRequireSupabaseUser.mockReset();
-    mockUpsertAuthPrincipal.mockReset();
+    mockRequireSessionUser.mockReset();
+    mockResolveSessionPrincipal.mockReset();
     mockRequireActiveMembership.mockReset();
     mockCan.mockReset();
     mockListTenantEntitlements.mockReset();
@@ -578,12 +574,12 @@ describe("platform provisioning tenant isolation (routes)", () => {
       tenantSlug: "tenant-a",
       tenantState: "ACTIVE",
     });
-    mockRequireSupabaseUser.mockResolvedValue({
-      supabaseUserId: "018f0000-0000-7000-8000-000000000001",
+    mockRequireSessionUser.mockResolvedValue({
+      principalId: "018f0000-0000-7000-8000-000000000001",
       email: "admin@tenant-a.example.com",
       mfaEnabled: false,
     });
-    mockUpsertAuthPrincipal.mockResolvedValue({
+    mockResolveSessionPrincipal.mockResolvedValue({
       id: "018f0000-0000-7000-8000-000000000099",
       email: "admin@tenant-a.example.com",
     });

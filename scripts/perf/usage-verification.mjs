@@ -42,11 +42,7 @@ export function reconcileUsage(before, after, report) {
 
 export async function snapshotLocalUsage() {
   const env = localEnv();
-  assertCapacityTarget({
-    databaseUrl: env.DATABASE_URL,
-    authUrl: env.SUPABASE_URL,
-    acknowledged: true,
-  });
+  assertCapacityTarget({ databaseUrl: env.DATABASE_URL, acknowledged: true });
   const fixture = JSON.parse(readFileSync(env.E2E_SCENARIO_PATH, "utf8"));
   if (!/^[0-9a-f-]{36}$/i.test(fixture.tenantId))
     throw new Error("Missing isolated tenant fixture");
