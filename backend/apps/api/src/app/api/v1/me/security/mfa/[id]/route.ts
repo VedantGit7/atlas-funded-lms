@@ -16,9 +16,9 @@ export const DELETE = createTenantRoute<
   metadata: securityMutationMetadata,
   params: mfaParamsSchema,
   output: AccountSecurityOkResponseSchema,
-  handler: async ({ tx, ctx, params }) => {
-    const factorId: string = params.id;
-    await unenrollMfaFactor({ factorId });
+  handler: async ({ tx, ctx }) => {
+    // One authenticator per principal; the id names it for the client.
+    await unenrollMfaFactor();
 
     const emailRows = await tx.$queryRaw<Array<{ email: string }>>`
       select ap.email

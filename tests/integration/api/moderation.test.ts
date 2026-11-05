@@ -28,11 +28,10 @@ async function seedModeratorMembership(
   await withTenantTx(authoringTenantTx(fixture), async (tx) => {
     await tx.$executeRaw`
       insert into auth_principals (
-        id, supabase_user_id, email, email_normalized, global_status, created_at, updated_at
+        id, email, email_normalized, global_status, created_at, updated_at
       )
       values (
         ${moderatorPrincipalId}::uuid,
-        ${randomUUID()}::uuid,
         ${`moderator-${moderatorMembershipId.slice(0, 8)}@example.test`},
         ${`moderator-${moderatorMembershipId.slice(0, 8)}@example.test`},
         'active',

@@ -99,7 +99,7 @@ export async function loginWithCredentials(
     const message = await page.getByRole("alert").first().innerText();
     // Same reasoning: the verifier keeps no message text, so each known rejection fails on its
     // own line. J02's probe was rejected 2.6-2.7 s in with "Invalid email or password", which
-    // the API then answered for a Supabase rate limit or outage too; those now have their own.
+    // the API then answered for a rate limit or outage too; those now have their own.
     if (message.includes("Too many sign-in attempts")) {
       throw new Error(`Login was rate limited by the auth service: ${message}`);
     }

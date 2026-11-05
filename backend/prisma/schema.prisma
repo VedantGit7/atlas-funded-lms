@@ -157,11 +157,9 @@ model TenantDomain {
 }
 
 /// One row per person, and Better Auth's user table (docs/engineering/
-/// better-auth-design.md). `supabase_user_id` is empty for Better Auth users
-/// and goes away with Supabase (launch plan task 3.8).
+/// better-auth-design.md).
 model AuthPrincipal {
   id               String    @id @db.Uuid
-  supabase_user_id String?   @unique @db.Uuid
   email            String    @unique
   email_normalized String    @unique
   name             String    @default("")
@@ -177,11 +175,9 @@ model AuthPrincipal {
   auth_accounts           AuthAccount[]
   auth_two_factor         AuthTwoFactor?
   memberships             Membership[]
-  platform_grants         PlatformOperator[]           @relation("PlatformOperatorPrincipal")
-  platform_grants_made    PlatformOperator[]           @relation("PlatformOperatorGrantedBy")
-  platform_grants_revoked PlatformOperator[]           @relation("PlatformOperatorRevokedBy")
-  relink_requests         AuthPrincipalRelinkRequest[] @relation("RelinkRequestPrincipal")
-  relink_decisions        AuthPrincipalRelinkRequest[] @relation("RelinkRequestDecidedBy")
+  platform_grants         PlatformOperator[] @relation("PlatformOperatorPrincipal")
+  platform_grants_made    PlatformOperator[] @relation("PlatformOperatorGrantedBy")
+  platform_grants_revoked PlatformOperator[] @relation("PlatformOperatorRevokedBy")
 
   @@map("auth_principals")
 }
@@ -288,29 +284,6 @@ model PlatformOperator {
 
   @@index([role_key])
   @@map("platform_operators")
-}
-
-/// H6: a confirmed email signed in under a different Supabase user than the
-/// principal it belongs to. Only a platform approval moves the principal.
-model AuthPrincipalRelinkRequest {
-  id                         String    @id @default(uuid()) @db.Uuid
-  auth_principal_id          String    @db.Uuid
-  previous_supabase_user_id  String    @db.Uuid
-  requested_supabase_user_id String    @db.Uuid
-  email_normalized           String
-  status                     String    @default("pending")
-  attempt_count              Int       @default(1)
-  requested_at               DateTime  @default(now()) @db.Timestamptz(6)
-  last_seen_at               DateTime  @default(now()) @db.Timestamptz(6)
-  decided_at                 DateTime? @db.Timestamptz(6)
-  decided_by_principal_id    String?   @db.Uuid
-  decision_reason            String?
-  revoked_platform_grant_id  String?   @db.Uuid
-
-  principal  AuthPrincipal  @relation("RelinkRequestPrincipal", fields: [auth_principal_id], references: [id], onDelete: Cascade)
-  decided_by AuthPrincipal? @relation("RelinkRequestDecidedBy", fields: [decided_by_principal_id], references: [id], onDelete: SetNull)
-
-  @@map("auth_principal_relink_requests")
 }
 
 model Membership {

@@ -28,19 +28,16 @@ function rangeResponse(lines: string[], status = 200) {
 }
 
 describe("new password policy (audit H6)", () => {
-  it("uses one minimum everywhere a password is set, including Supabase config", () => {
+  it("uses one minimum everywhere a password is set, including Better Auth's", () => {
     expect(NEW_PASSWORD_MIN_LENGTH).toBe(10);
     expect(CONTRACT_MIN_LENGTH).toBe(NEW_PASSWORD_MIN_LENGTH);
     expect(FRONTEND_CONTRACT_MIN_LENGTH).toBe(NEW_PASSWORD_MIN_LENGTH);
     const config = readFileSync(
-      resolve(import.meta.dirname, "../../../supabase/config.toml"),
+      resolve(import.meta.dirname, "../../../backend/packages/auth/src/better-auth.ts"),
       "utf8",
     );
-    expect(config).toMatch(
-      new RegExp(`^minimum_password_length = ${String(NEW_PASSWORD_MIN_LENGTH)}$`, "m"),
-    );
-    expect(config).toMatch(/^enable_confirmations = true$/m);
-    expect(config).toMatch(/^secure_password_change = true$/m);
+    expect(config).toContain("minPasswordLength: NEW_PASSWORD_MIN_LENGTH");
+    expect(config).toContain("requireEmailVerification: true");
   });
 
   it("rejects a nine-character password wherever one is set, but still lets it sign in", () => {

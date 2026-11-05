@@ -4,14 +4,10 @@ import { createPublicRouteHandler, globalDbPerStatement } from "@atlas/api";
 import {
   applyAuthSession,
   assertPasswordNotBreached,
-  authProvider,
   authRequestContext,
   createAccountFromInvitation,
   findActiveSessionPrincipal,
-  setPasswordFromInvitationSession,
-  type IssuedAuthSession,
 } from "@atlas/auth";
-import { AtlasHttpError } from "@atlas/core/http/errors";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { acceptInvitation, invalidInvitation, previewInvitation } from "@atlas/membership";
@@ -26,14 +22,15 @@ import {
 import { routeMetadata } from "./route.metadata";
 
 /**
- * Completes an invitation: the invitee arrives with the session minted by the
- * invitation email link, chooses a password, and we (1) set that password on
- * their account, (2) activate their membership, and (3) issue Atlas session
- * cookies — so they finish fully signed in as their own account, never as
- * whoever was previously signed in on the device.
+ * Completes an invitation for someone who can't sign in yet: they choose a
+ * password, and we (1) create their account with it, verified, because the
+ * invitation was emailed to that address, (2) activate their membership, and
+ * (3) sign them in, so they finish as their own account, never as whoever was
+ * signed in on the device before. An address that can already sign in is
+ * asked to (launch plan task 3.6).
  *
- * Global principal upsert and tenant membership activation run in separate
- * transactions so the membership FK can see the committed auth_principals row.
+ * The account and the membership are written in separate transactions, so the
+ * membership's foreign key sees the committed auth_principals row.
  */
 export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   const rawBody: unknown = await req.json();
@@ -42,44 +39,21 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const tenant = await withGlobalDb(async (db) => resolveTenantFromRequest({ req, db }));
 
-  let principal: { id: string; emailNormalized: string; mfaEnabled: boolean };
-  let session: IssuedAuthSession;
-  if (authProvider() === "better-auth") {
-    // The invitation itself proves the address: it was emailed there. An
-    // address that can already sign in is asked to (launch plan task 3.6).
-    const preview = await withTenantTx(
-      { tenantId: tenant.tenantId, requestId, allowAnonymousTenantRead: true },
-      async (tx) => previewInvitation({ tx, tenantId: tenant.tenantId, token: input.token }),
-    );
-    if (!preview) throw invalidInvitation();
-    await assertPasswordNotBreached(input.password);
-    const created = await createAccountFromInvitation({
-      ctx: authRequestContext(req),
-      email: preview.invitedEmail,
-      password: input.password,
-    });
-    principal = await findActiveSessionPrincipal({
-      db: globalDbPerStatement,
-      principalId: created.principalId,
-    });
-    session = created.cookies;
-  } else {
-    if (!input.accessToken) {
-      throw new AtlasHttpError({
-        code: "INVALID_INVITATION",
-        status: 400,
-        message: "Open the link in your invitation email to set your password.",
-      });
-    }
-    // Supabase round trips run with no pooled connection held (audit H3), and a
-    // refused re-registration keeps its relink request for review (audit H6).
-    ({ principal, session } = await setPasswordFromInvitationSession({
-      db: globalDbPerStatement,
-      accessToken: input.accessToken,
-      refreshToken: input.refreshToken ?? "",
-      password: input.password,
-    }));
-  }
+  const preview = await withTenantTx(
+    { tenantId: tenant.tenantId, requestId, allowAnonymousTenantRead: true },
+    async (tx) => previewInvitation({ tx, tenantId: tenant.tenantId, token: input.token }),
+  );
+  if (!preview) throw invalidInvitation();
+  await assertPasswordNotBreached(input.password);
+  const created = await createAccountFromInvitation({
+    ctx: authRequestContext(req),
+    email: preview.invitedEmail,
+    password: input.password,
+  });
+  const principal = await findActiveSessionPrincipal({
+    db: globalDbPerStatement,
+    principalId: created.principalId,
+  });
 
   const result = await withTenantTx(
     {
@@ -123,7 +97,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const response = NextResponse.json(body);
 
-  applyAuthSession({ response, session });
+  applyAuthSession({ response, session: created.cookies });
 
   return response;
 });

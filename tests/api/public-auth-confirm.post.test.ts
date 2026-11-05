@@ -20,8 +20,8 @@ const signedInResult = {
     mfaEnabled: false,
     globalStatus: "ACTIVE",
   },
-  displayName: "Atlas User",
-  session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+  session: { setCookies: ["atlas_session=new.signature; Path=/; HttpOnly"] },
+  emails: [],
 };
 
 const {
@@ -157,17 +157,10 @@ describe("POST /api/v1/public/auth/confirm", () => {
         tenantId: tenantA.tenantId,
         authPrincipalId: "principal-id",
         email: "user@example.com",
-        displayName: "Atlas User",
       }),
     );
     expect(mockApplyAuthSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        session: expect.objectContaining({
-          accessToken: "access",
-          refreshToken: "refresh",
-          expiresIn: 3600,
-        }) as unknown,
-      }),
+      expect.objectContaining({ session: signedInResult.session }),
     );
     expect(body).toEqual({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
   });

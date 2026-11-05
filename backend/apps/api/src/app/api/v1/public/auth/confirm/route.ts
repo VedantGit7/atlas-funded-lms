@@ -15,13 +15,13 @@ import { routeMetadata } from "./route.metadata";
 
 /**
  * Completes email verification for self-service signup. The SSR confirm route
- * forwards the single-use `token_hash` from the verification link here; we
- * verify it with Supabase (token-hash/PKCE flow), provision the open learner
- * membership for this tenant, and issue the Atlas session cookies — the same end
- * state as a first login.
+ * forwards the single-use token from the verification link here; we verify it
+ * with Better Auth, provision the open learner membership for this tenant, and
+ * set the session cookie — the same end state as a first login. Sign-in links
+ * and both steps of an email change come here too.
  */
 export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
-  // One pooled connection at a time, none during the Supabase round trip (audit H3).
+  // One pooled connection at a time, none during the verification (audit H3).
   const tenant = await resolveRequestTenant(req);
 
   const rawBody: unknown = await req.json();
@@ -35,8 +35,8 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     req,
   });
 
-  // Better Auth: the current address approved an email change, and the new
-  // address is sent its verification link. Nothing is signed in yet.
+  // The current address approved an email change, and the new address is sent
+  // its verification link. Nothing is signed in yet.
   if (result.status === "email_change_pending") {
     await sendAuthEmails({ req, requestId, emails: result.emails });
     return NextResponse.json(
@@ -45,7 +45,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       }),
     );
   }
-  if (result.emails?.length) await sendAuthEmails({ req, requestId, emails: result.emails });
+  if (result.emails.length) await sendAuthEmails({ req, requestId, emails: result.emails });
 
   const principalRows = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
     select id::text
@@ -77,7 +77,6 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
           tenantId: tenant.tenantId,
           authPrincipalId: principalId,
           email: result.identity.emailNormalized,
-          displayName: result.displayName,
         });
 
         membership = await findMembershipByPrincipal({

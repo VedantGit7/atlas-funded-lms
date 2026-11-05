@@ -20,7 +20,7 @@ import {
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
 
 /**
- * Launch plan task 3.5 against Postgres, with AUTH_PROVIDER=better-auth:
+ * Launch plan task 3.5 against Postgres:
  * setting up an authenticator, the sign-in challenge, backup codes, step-up
  * and removal, and the session assurance F01 relies on.
  */
@@ -110,8 +110,7 @@ suite("Better Auth two-factor", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    for (const key of ["AUTH_PROVIDER", "BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
-    process.env["AUTH_PROVIDER"] = "better-auth";
+    for (const key of ["BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
     process.env["BETTER_AUTH_SECRET"] = randomBytes(32).toString("base64url");
   });
 

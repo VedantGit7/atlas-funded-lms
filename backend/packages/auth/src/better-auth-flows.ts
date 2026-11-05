@@ -26,10 +26,9 @@ import { readRequestCookieHeader } from "./cookie-names";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 
 /**
- * Better Auth versions of the password flows (launch plan task 3.2;
- * docs/engineering/better-auth-design.md). Each answers like the Supabase flow
- * it replaces, so the routes keep their responses, and returns the cookies
- * Better Auth set for the route to pass on.
+ * The sign-in flows on Better Auth (launch plan tasks 3.2 to 3.6;
+ * docs/engineering/better-auth-design.md). Each keeps the routes' responses
+ * and returns the cookies Better Auth set for the route to pass on.
  */
 
 /** Cookies for the route to set: the session, or a pending two-factor challenge. */
@@ -130,7 +129,7 @@ export async function signInWithBetterAuth(args: {
     if (code === "EMAIL_NOT_VERIFIED") throw emailNotVerified();
     if (status === 429) throw signInRateLimited();
     if (status === 401 || code === "INVALID_EMAIL_OR_PASSWORD") throw invalidCredentials();
-    // The session hook refuses a disabled principal; say so, as Supabase sign-in does.
+    // The session hook refuses a disabled principal; say so.
     const principal = await principalByEmail(args.db, args.email).catch(() => null);
     if (principal && principal.global_status === "disabled") throw accountDisabled();
     throw authProviderUnavailable();
@@ -226,7 +225,7 @@ export async function verifyEmailWithBetterAuth(args: {
     cookies = cookiesFrom(captured.result.headers);
     emails = captured.emails;
   } catch {
-    // Expired or forged: the same answer as Supabase's verifyOtp failure.
+    // Expired or forged: one answer for both.
     throw invalidCredentials();
   }
   return { principalId: await sessionPrincipal(args.ctx, cookies), cookies, emails };
@@ -339,7 +338,7 @@ export async function changeEmailWithBetterAuth(args: {
   }
 }
 
-/** Uniform, like Supabase's resend: never says whether the address exists. */
+/** Uniform: never says whether the address exists. */
 export async function resendVerificationWithBetterAuth(args: {
   ctx: AuthRequestContext;
   email: string;
@@ -458,6 +457,22 @@ export async function signOutWithBetterAuth(args: {
 }
 
 /**
+ * Ends every other session of the signed-in principal, keeping this one. A
+ * session ended elsewhere stops working on other processes within the
+ * verified-session cache's minute, as a sign-out does.
+ */
+export async function signOutOtherSessionsWithBetterAuth(args: {
+  ctx: AuthRequestContext;
+}): Promise<void> {
+  try {
+    await getAtlasAuth().api.revokeOtherSessions({ headers: headersFor(args.ctx) });
+  } catch (error) {
+    if (statusOf(error) === 401) throw authRequired();
+    throw authProviderUnavailable();
+  }
+}
+
+/**
  * Google sign-in and login-method linking (launch plan task 3.3). Google sends
  * the person back to /auth/callback/google on the academy's host; the web app
  * passes the code, the state and Better Auth's signed state cookie here.
@@ -570,7 +585,7 @@ export async function completeGoogleCallback(args: {
 
 export type LoginMethod = { id: string; provider: string; createdAt: string | null };
 
-/** The principal's login methods; the password one reads as "email", as with Supabase. */
+/** The principal's login methods; the password one reads as "email". */
 export async function listLoginMethods(args: { ctx: AuthRequestContext }): Promise<LoginMethod[]> {
   try {
     const accounts = await getAtlasAuth().api.listUserAccounts({ headers: headersFor(args.ctx) });

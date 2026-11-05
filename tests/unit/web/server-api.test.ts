@@ -97,67 +97,24 @@ describe("serverApi", () => {
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
-  it("refreshes session and retries once after a 401", async () => {
-    const futureExp = Math.floor(Date.now() / 1000) + 3600;
-    const payload = Buffer.from(JSON.stringify({ exp: futureExp })).toString("base64url");
-    const validAccessToken = `header.${payload}.signature`;
-
+  it("leaves a 401 to the caller: a session is never refreshed here", async () => {
     mockCookies.mockResolvedValue({ getAll: () => [], get: () => undefined });
     mockHeaders.mockResolvedValue(
       new Headers({
         host: "tenant-a.localhost.test",
-        "x-atlas-internal-cookie": `atlas_access_token=${validAccessToken}; atlas_refresh_token=refresh-token`,
+        "x-atlas-internal-cookie": "atlas_session=opaque.signature",
       }),
     );
-
-    let gamificationCalls = 0;
-    mockFetch.mockImplementation(async (url: string) => {
-      if (url.includes("/api/v1/public/auth/refresh")) {
-        return {
-          ok: true,
-          status: 200,
-          text: async () => "",
-          headers: {
-            getSetCookie: () => ["atlas_access_token=fresh-token; Path=/; HttpOnly"],
-          },
-        };
-      }
-
-      if (url.includes("/api/v1/me/gamification")) {
-        gamificationCalls += 1;
-        if (gamificationCalls === 1) {
-          return jsonResponse(
-            {
-              error: {
-                code: "AUTH_REQUIRED",
-                message: "Unauthorized",
-                requestId: "req-auth",
-              },
-            },
-            { ok: false, status: 401 },
-          );
-        }
-        return jsonResponse({ data: { ok: true } });
-      }
-
-      return jsonResponse({ data: { ok: true } });
-    });
+    mockFetch.mockResolvedValue(
+      jsonResponse(
+        { error: { code: "AUTH_REQUIRED", message: "Unauthorized", requestId: "req-auth" } },
+        { ok: false, status: 401 },
+      ),
+    );
 
     const { serverApi } = await import("../../../frontend/apps/web/src/lib/server-api");
-    const result = await serverApi.get<{ data: { ok: boolean } }>("/api/v1/me/gamification");
-
-    expect(result.data.ok).toBe(true);
-    expect(gamificationCalls).toBe(2);
-    expect(
-      mockFetch.mock.calls.some(([calledUrl]) =>
-        String(calledUrl).includes("/api/v1/public/auth/refresh"),
-      ),
-    ).toBe(true);
-
-    const retryCall = mockFetch.mock.calls.find(([calledUrl]) =>
-      String(calledUrl).includes("/api/v1/me/gamification"),
-    );
-    expect(retryCall).toBeTruthy();
+    await expect(serverApi.get("/api/v1/me/gamification")).rejects.toMatchObject({ status: 401 });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("throws ServerApiError for failed responses", async () => {

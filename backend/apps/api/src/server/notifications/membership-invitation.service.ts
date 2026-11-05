@@ -1,5 +1,4 @@
 import { headers } from "next/headers";
-import { authProvider, sendTenantInvitationEmail } from "@atlas/auth";
 import type { TenantTx } from "@atlas/db";
 import { sendInvitationEmail } from "../../lib/auth-email";
 
@@ -18,8 +17,7 @@ function isLocalHost(host: string): boolean {
  * Resolve the origin the admin is actually inviting from (tenant host + port),
  * not a DB/config default. The web proxy forwards the browser host on
  * `x-atlas-tenant-host` (and `x-forwarded-host`), so invites sent from
- * `fundedbeyond.localhost.test:3000` redirect back to that exact host. This is
- * what keeps the Supabase `redirect_to` inside the tenant's allow-listed URLs.
+ * `fundedbeyond.localhost.test:3000` link back to that exact host.
  */
 async function resolveRequestOrigin(): Promise<string | null> {
   const headerList = await headers();
@@ -66,20 +64,12 @@ export async function sendMembershipInvitationEmail(args: {
     });
   }
 
-  if (authProvider() === "better-auth") {
-    // Our own email, with the academy's branding (launch plan task 3.6).
-    await sendInvitationEmail({
-      tenantId: args.tenantId,
-      requestId: args.requestId,
-      to: args.to,
-      inviteUrl,
-      ...(args.tx ? { tx: args.tx } : {}),
-    });
-    return;
-  }
-
-  await sendTenantInvitationEmail({
-    email: args.to,
+  // Our own email, with the academy's branding (launch plan task 3.6).
+  await sendInvitationEmail({
+    tenantId: args.tenantId,
+    requestId: args.requestId,
+    to: args.to,
     inviteUrl,
+    ...(args.tx ? { tx: args.tx } : {}),
   });
 }

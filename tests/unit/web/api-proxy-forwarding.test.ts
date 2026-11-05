@@ -115,15 +115,15 @@ describe("F11 authenticated web-to-API host forwarding", () => {
     expect(upstreamHeaders(response).get("x-forwarded-host")).toBe("tenant.example.com");
   });
 
-  it("refuses deployed web API forwarding when its secret is missing", async () => {
+  it("refuses deployed web API forwarding when its secret is missing", () => {
     vi.stubEnv("API_PROXY_SECRET", "");
-    await expect(
+    expect(() =>
       webProxy(
         new NextRequest("https://tenant.example.com/api/v1/me", {
           headers: { host: "tenant.example.com" },
         }),
       ),
-    ).rejects.toThrow("API_PROXY_SECRET is required");
+    ).toThrow("API_PROXY_SECRET is required");
   });
 
   it("preserves binary upload bytes and session headers through the actual API ingress", async () => {

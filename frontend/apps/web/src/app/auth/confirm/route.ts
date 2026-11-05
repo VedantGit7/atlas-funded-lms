@@ -4,15 +4,11 @@ import { resolveRequestOrigin } from "../../../lib/server/resolve-request-origin
 import { withSignupCompleteMarker } from "../../../features/marketing/snippet-scope";
 import { identityBlockQueryValue, isIdentityBlockCode } from "../../../lib/auth-messages";
 
-// Supabase email-verification links point here with a single-use `token_hash`
-// (token-hash / PKCE SSR flow). We verify it server-side via the internal API,
-// forward the issued session cookies onto the redirect, and send the user on.
-// No session tokens in the URL and no client-side hash parsing that can hang.
-//
-// Email template (Supabase dashboard → Auth → Email Templates → Confirm signup):
-//   <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=signup">Confirm</a>
-// where {{ .RedirectTo }} is the per-tenant `emailRedirectTo` we pass at signup
-// (https://<tenant>/auth/confirm), which must be in Supabase's Redirect URLs.
+// The academy's auth emails (sign-up verification, sign-in links, both email
+// change steps) point here with a single-use `token_hash` and its `type`
+// (apps/api/src/lib/auth-email.ts). We verify it server-side via the internal
+// API, forward the issued session cookie onto the redirect, and send the user
+// on. No session in the URL and no client-side parsing that can hang.
 
 export const dynamic = "force-dynamic";
 

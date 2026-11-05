@@ -13,7 +13,7 @@
  *     handler — under rising concurrency. That is precisely the shape C6 broke,
  *     and the shape that determines how many simultaneous requests the process
  *     can hold before the connection pool starves.
- *   - It does **not** measure HTTP, TLS, serialisation, Supabase round-trips, or
+ *   - It does **not** measure HTTP, TLS, serialisation, the session check, or
  *     the network. Those sit outside the pool and would only lower the number.
  *   - Run against a developer machine it establishes a **local regression
  *     baseline**, not a production capacity bound. Production numbers require

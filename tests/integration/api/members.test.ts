@@ -71,7 +71,7 @@ describe("GET /api/v1/members", () => {
   beforeEach(() => {
     mockResolveTenant.mockResolvedValue(tenantA);
     mockRequireSessionUser.mockResolvedValue({
-      principalId: "supabase-user",
+      principalId: "principal-id",
       email: "admin@example.com",
       mfaEnabled: false,
     });

@@ -221,9 +221,6 @@ export function SignupForm() {
               ...(typeof values.referralCode === "string"
                 ? { referralCode: values.referralCode }
                 : {}),
-              ...(typeof values.emailRedirectTo === "string"
-                ? { emailRedirectTo: values.emailRedirectTo }
-                : {}),
             };
             formAction(valuesToFormData(formValues));
           })(event);

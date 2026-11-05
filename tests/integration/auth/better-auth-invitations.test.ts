@@ -17,7 +17,7 @@ import {
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
 
 /**
- * Launch plan task 3.6 against Postgres, with AUTH_PROVIDER=better-auth: an
+ * Launch plan task 3.6 against Postgres: an
  * invitee with no account sets a password and is signed in; an address that
  * can already sign in is asked to; a placeholder gets its first login method.
  */
@@ -64,8 +64,7 @@ suite("Better Auth invitations", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    for (const key of ["AUTH_PROVIDER", "BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
-    process.env["AUTH_PROVIDER"] = "better-auth";
+    for (const key of ["BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
     process.env["BETTER_AUTH_SECRET"] = randomBytes(32).toString("base64url");
   });
 
@@ -132,9 +131,9 @@ suite("Better Auth invitations", () => {
     const email = freshEmail();
     const placeholderId = randomUUID();
     await owner.query(
-      `insert into auth_principals (id, supabase_user_id, email, email_normalized, global_status, updated_at)
-       values ($1, $2, $3, $3, 'unclaimed', now())`,
-      [placeholderId, randomUUID(), email],
+      `insert into auth_principals (id, email, email_normalized, global_status, updated_at)
+       values ($1, $2, $2, 'unclaimed', now())`,
+      [placeholderId, email],
     );
     expect(await invitedAccountState(email)).toBe("none");
 

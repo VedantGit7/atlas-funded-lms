@@ -28,7 +28,6 @@ function createIdempotencyKey(prefix: string): string {
 async function request<T>(
   path: string,
   init: RequestInit & { idempotencyKey?: string; body?: BodyInit | null },
-  allowRefreshRetry = true,
   allowStepUp = true,
 ): Promise<T> {
   const headers = new Headers(init.headers);
@@ -46,17 +45,6 @@ async function request<T>(
     headers,
     credentials: "same-origin",
   });
-
-  if (response.status === 401 && allowRefreshRetry) {
-    const refreshResponse = await fetch("/api/v1/public/auth/refresh", {
-      method: "POST",
-      credentials: "same-origin",
-    });
-
-    if (refreshResponse.ok) {
-      return request<T>(path, init, false, allowStepUp);
-    }
-  }
 
   const rawBody = await response.text();
   let body: unknown;
@@ -85,7 +73,7 @@ async function request<T>(
       envelope.error?.code === "MFA_REQUIRED" &&
       (await requestMfaStepUp(envelope.error.message ?? ""))
     ) {
-      return request<T>(path, init, allowRefreshRetry, false);
+      return request<T>(path, init, false);
     }
     throw new ClientApiError(
       envelope.error?.code ?? "UNKNOWN_ERROR",

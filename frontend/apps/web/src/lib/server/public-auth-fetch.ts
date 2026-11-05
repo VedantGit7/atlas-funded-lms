@@ -120,10 +120,9 @@ export const serverPublicApi = {
     displayName: string;
     inviteToken?: string;
     referralCode?: string;
-    emailRedirectTo?: string;
   }) => postJson<PublicAuthApiResponse>("/api/v1/public/auth/signup", body, "public-signup"),
 
-  resend: (body: { email: string; emailRedirectTo?: string }) =>
+  resend: (body: { email: string }) =>
     postJson<{ data: { ok: boolean; message: string } }>(
       "/api/v1/public/auth/resend",
       body,
@@ -150,25 +149,14 @@ export const serverPublicApi = {
   logout: () =>
     postJson<{ data: { ok: boolean } }>("/api/v1/public/auth/logout", {}, "public-logout"),
 
-  resetPassword: (body: {
-    password: string;
-    accessToken?: string | undefined;
-    refreshToken?: string | undefined;
-    token?: string | undefined;
-    mfaCode?: string | undefined;
-  }) =>
+  resetPassword: (body: { password: string; token: string }) =>
     postJson<PublicPasswordResetCompleteResponse>(
       "/api/v1/public/auth/reset-password",
       body,
       "public-password-reset",
     ),
 
-  setInvitationPassword: (body: {
-    token: string;
-    password: string;
-    accessToken?: string | undefined;
-    refreshToken?: string | undefined;
-  }) =>
+  setInvitationPassword: (body: { token: string; password: string }) =>
     postJson<SetInvitationPasswordApiResponse>(
       "/api/v1/public/invitations/set-password",
       body,

@@ -104,7 +104,6 @@
     "ci:tenant-resource-registry": "tsx scripts/ci/check-tenant-resource-registry.ts",
     "ci:forbidden-scope": "pnpm check:forbidden-scope",
     "security:check": "node scripts/security/check.mjs",
-    "security:supabase-auth": "node scripts/security/verify-supabase-auth-config.mjs",
     "test:rls": "dotenv -e .env.test -- vitest run tests/tenant-isolation/rls-direct-query.test.ts tests/tenant-isolation/transaction-pooling.test.ts tests/db",
     "test:storage": "dotenv -e .env.test -- vitest run tests/security/storage-secret-leakage.test.ts tests/tenant-isolation/storage-key-isolation.test.ts",
     "release:suite": "node scripts/release/run-suite.mjs",
@@ -137,7 +136,6 @@
     "test:architecture": "node --test scripts/guards/server-authority.test.mjs scripts/sync-contracts.test.mjs scripts/guards/generated-output.test.mjs scripts/guards/local-font-assets.test.mjs scripts/guards/check-secrets.test.mjs scripts/e2e/verify-failure-probes.test.mjs scripts/e2e/browser-servers.test.mjs deploy/managed-node/build-worker.test.mjs deploy/managed-node/build-migrate-seed.test.mjs deploy/managed-node/dockerfile.test.mjs deploy/managed-node/healthcheck.test.mjs",
     "test:performance-tooling": "node --test scripts/perf/*.test.mjs tests/performance/*.test.mjs",
     "test:reliability-tooling": "node --test scripts/release/restore-drill.test.mjs scripts/release/backup-restore-drill.test.mjs scripts/reliability/alerts-rollback-verifiers.test.mjs scripts/reliability/seed-restore-fixture.test.mjs scripts/db/migration-verification.test.mjs",
-    "test:supabase-security": "node scripts/security/verify-f19-event-trigger.mjs",
     "test:scorm-browser": "node scripts/security/verify-scorm-runtime-bridge.mjs",
     "db:proctoring-integrity:check": "node scripts/db/check-proctoring-integrity.mjs",
     "db:tenant-fk:check": "node scripts/db/check-tenant-fk-integrity.mjs",
@@ -176,7 +174,6 @@
     "@atlas/db": "workspace:*",
     "@atlas/release-readiness": "workspace:*",
     "@atlas/tenant-config": "workspace:*",
-    "@supabase/supabase-js": "^2.117.3",
     "uuid": "^14.0.0"
   }
 }

@@ -20,7 +20,7 @@ describe("session-safe identity projection", () => {
       globalStatus: "active",
     });
     expect(identity).not.toHaveProperty("id");
-    expect(identity).not.toHaveProperty("supabaseUserId");
+    expect(identity).not.toHaveProperty("principalId");
     expect(identity).not.toHaveProperty("lastLoginAt");
   });
 });

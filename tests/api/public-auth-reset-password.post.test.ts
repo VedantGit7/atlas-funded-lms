@@ -31,7 +31,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock("@atlas/auth", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  resetPasswordWithRecoverySession: (...args: unknown[]) => mocks.reset(...args),
+  resetPasswordWithBetterAuth: (...args: unknown[]) => mocks.reset(...args),
 }));
 vi.mock("@atlas/tenancy", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -74,22 +74,13 @@ function request(body: object, host = "tenant-a.example.com") {
   });
 }
 
-const body = {
-  password: "a-new-strong-password",
-  accessToken: "recovery-access",
-  refreshToken: "recovery-refresh",
-};
+const body = { password: "a-new-strong-password", token: "reset-token" };
 
 describe("POST /api/v1/public/auth/reset-password", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.reset.mockResolvedValue({
-      status: "RESET",
-      supabaseUserId: "user-1",
-      email: "owner@example.test",
-    });
+    mocks.reset.mockResolvedValue({ principalId: "principal-1", email: "owner@example.test" });
     mocks.lookupTenantFromHost.mockResolvedValue(tenantA);
-    mocks.globalQueryRaw.mockResolvedValue([{ id: "principal-1" }]);
     mocks.findMembership.mockResolvedValue({ id: "membership-1", status: "ACTIVE" });
     mocks.txQueryRaw.mockResolvedValue([{ hostname: "tenant-a.example.com" }]);
     mocks.publishSecurityEvent.mockResolvedValue(undefined);
@@ -97,16 +88,16 @@ describe("POST /api/v1/public/auth/reset-password", () => {
   });
 
   it("resets and sends the password-changed email to the academy membership", async () => {
-    const response = await POST(request({ ...body, mfaCode: "123456" }));
+    const response = await POST(request(body));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ data: { status: "RESET" } });
-    expect(mocks.reset).toHaveBeenCalledExactlyOnceWith({
-      accessToken: "recovery-access",
-      refreshToken: "recovery-refresh",
-      password: "a-new-strong-password",
-      mfaCode: "123456",
-    });
+    expect(mocks.reset).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ token: "reset-token", password: "a-new-strong-password" }),
+    );
+    expect(mocks.findMembership).toHaveBeenCalledWith(
+      expect.objectContaining({ authPrincipalId: "principal-1" }),
+    );
     expect(mocks.withTenantTx.mock.calls[0]?.[0]).toMatchObject({ tenantId: tenantA.tenantId });
     expect(mocks.recordAuditChange).toHaveBeenCalledWith(
       expect.anything(),
@@ -124,19 +115,6 @@ describe("POST /api/v1/public/auth/reset-password", () => {
       },
     );
   });
-
-  it.each(["MFA_REQUIRED", "MFA_INVALID"] as const)(
-    "answers %s and sends no email, because nothing changed",
-    async (status) => {
-      mocks.reset.mockResolvedValue({ status });
-      const response = await POST(request(body));
-
-      expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ data: { status } });
-      expect(mocks.lookupTenantFromHost).not.toHaveBeenCalled();
-      expect(mocks.publishSecurityEvent).not.toHaveBeenCalled();
-    },
-  );
 
   it("sends no email for a reset on a host with no academy", async () => {
     mocks.lookupTenantFromHost.mockResolvedValue(null);
@@ -166,8 +144,8 @@ describe("POST /api/v1/public/auth/reset-password", () => {
     );
   });
 
-  it("refuses an authenticator code that is not six digits", async () => {
-    const response = await POST(request({ ...body, mfaCode: "12ab" }));
+  it("refuses a reset without the link's token", async () => {
+    const response = await POST(request({ password: body.password }));
 
     expect(response.status).toBe(400);
     expect(mocks.reset).not.toHaveBeenCalled();

@@ -16,7 +16,7 @@ import {
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
 
 /**
- * Launch plan task 3.4 against Postgres, with AUTH_PROVIDER=better-auth:
+ * Launch plan task 3.4 against Postgres:
  * sign-in links and the two-step email change, through the same confirm
  * service the /auth/confirm page uses. Emails are captured, not sent.
  */
@@ -78,8 +78,7 @@ suite("Better Auth email links", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    for (const key of ["AUTH_PROVIDER", "BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
-    process.env["AUTH_PROVIDER"] = "better-auth";
+    for (const key of ["BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
     process.env["BETTER_AUTH_SECRET"] = randomBytes(32).toString("base64url");
   });
 

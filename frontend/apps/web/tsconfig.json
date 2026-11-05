@@ -31,7 +31,6 @@
       "@atlas/tenant-theme": ["frontend/apps/web/src/lib/tenant-theme.ts"],
       "@atlas/auth/cookies": ["backend/packages/auth/src/cookies.ts"],
       "@atlas/auth/session": ["backend/packages/auth/src/session.ts"],
-      "@atlas/auth/supabase-server": ["backend/packages/auth/src/supabase-server.ts"],
       "@atlas/core": ["backend/packages/core/src/index.ts"],
       "@atlas/core/*": ["backend/packages/core/src/*"],
       "@atlas/db": ["backend/packages/db/src/index.ts"],

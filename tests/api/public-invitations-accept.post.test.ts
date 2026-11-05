@@ -87,7 +87,7 @@ describe("POST /api/v1/public/invitations/accept", () => {
     vi.clearAllMocks();
     mockResolveTenant.mockResolvedValue(tenantA);
     mockRequireSessionUser.mockResolvedValue({
-      principalId: "supabase-user",
+      principalId: "principal-id",
       email: "invitee@example.com",
       mfaEnabled: false,
     });

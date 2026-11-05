@@ -5,9 +5,8 @@ import { resolvePlatformPermissionsForRole } from "@atlas/access/platform-role-p
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { assertPlatformMfa } from "./mfa-enforcement";
 import { findActivePlatformOperator } from "./platform-operators.repository";
-import { findActiveSessionPrincipal, upsertAuthPrincipal } from "./auth-principal.repository";
-import { authProvider, requireBetterAuthUser } from "./better-auth-runtime";
-import { requireSupabaseUser } from "./session";
+import { findActiveSessionPrincipal } from "./auth-principal.repository";
+import { requireBetterAuthUser } from "./better-auth-runtime";
 
 type QueryableDb = {
   $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
@@ -52,23 +51,13 @@ export async function requirePlatformPrincipal(args: {
    */
   allowMfaEnrollment?: boolean;
 }): Promise<PlatformPrincipal> {
-  // The same switch as @atlas/api's resolveSessionPrincipal, kept here so the
-  // platform guard has no dependency on the API package.
-  const sessionUser =
-    authProvider() === "better-auth"
-      ? await requireBetterAuthUser(args.req)
-      : await requireSupabaseUser(args.req);
-  const principal =
-    "principalId" in sessionUser
-      ? await findActiveSessionPrincipal({ db: args.db, principalId: sessionUser.principalId })
-      : await upsertAuthPrincipal({
-          db: args.db,
-          supabaseUserId: sessionUser.supabaseUserId,
-          email: sessionUser.email,
-          emailConfirmed: sessionUser.emailConfirmed,
-          mfaEnabled: sessionUser.mfaEnabled,
-          markLogin: false,
-        });
+  // As @atlas/api's session seam does, kept here so the platform guard has no
+  // dependency on the API package.
+  const sessionUser = await requireBetterAuthUser(args.req);
+  const principal = await findActiveSessionPrincipal({
+    db: args.db,
+    principalId: sessionUser.principalId,
+  });
 
   const platformPermissions = await loadPlatformPermissions(args.db, principal.id);
 

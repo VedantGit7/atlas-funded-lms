@@ -5,7 +5,6 @@ import { ServerApiError, type ApiErrorBody } from "./errors";
 import { buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { resolveCookieHeaderForInternalApi } from "../server/resolve-request-cookies";
 import { resolveTenantHostForInternalApi } from "../server/resolve-tenant-host";
-import { refreshSessionCookieHeader } from "../server/session-refresh";
 import { resolveClientIpForInternalApi } from "../server/resolve-client-ip";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
@@ -27,10 +26,6 @@ function isTransientGetError(error: unknown): boolean {
   return true;
 }
 
-type RequestOptions = {
-  cookieHeader?: string;
-};
-
 async function buildInternalApiRequest(
   path: string,
 ): Promise<{ url: string; forwardedHost: string }> {
@@ -42,9 +37,9 @@ async function buildInternalApiRequest(
   };
 }
 
-async function request<T>(path: string, init?: RequestInit, options?: RequestOptions): Promise<T> {
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const { url, forwardedHost } = await buildInternalApiRequest(path);
-  const cookie = options?.cookieHeader ?? (await resolveCookieHeaderForInternalApi());
+  const cookie = await resolveCookieHeaderForInternalApi();
   const requestHeaders = buildApiProxyHeaders(
     forwardedHost,
     init?.headers,
@@ -89,22 +84,6 @@ async function request<T>(path: string, init?: RequestInit, options?: RequestOpt
   return parsed as T;
 }
 
-async function tryRefreshCookieHeader(
-  currentCookie: string,
-  options?: { force?: boolean },
-): Promise<string | null> {
-  try {
-    const tenantHost = await resolveTenantHostForInternalApi();
-    const refreshed = await refreshSessionCookieHeader(currentCookie, tenantHost, options);
-    if (!refreshed || refreshed === currentCookie) {
-      return null;
-    }
-    return refreshed;
-  } catch {
-    return null;
-  }
-}
-
 export const serverApi = {
   // Dev note: right after a dev-server restart, a request can land mid-compile
   // of a dependent route/middleware and spuriously resolve to no tenant. A short
@@ -112,29 +91,13 @@ export const serverApi = {
   // a no-op cost in production where routes are already built.
   get: async <T>(path: string): Promise<T> => {
     const maxAttempts = 5;
-    let cookieOverride: string | undefined;
-    let authRetried = false;
     let lastError: unknown;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        return await request<T>(
-          path,
-          undefined,
-          cookieOverride !== undefined ? { cookieHeader: cookieOverride } : undefined,
-        );
+        return await request<T>(path);
       } catch (error) {
         lastError = error;
-
-        if (error instanceof ServerApiError && error.status === 401 && !authRetried) {
-          const baseCookie = cookieOverride ?? (await resolveCookieHeaderForInternalApi());
-          const refreshed = await tryRefreshCookieHeader(baseCookie, { force: true });
-          if (refreshed) {
-            cookieOverride = refreshed;
-            authRetried = true;
-            continue;
-          }
-        }
 
         if (isTransientGetError(error) && attempt < maxAttempts - 1) {
           await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));

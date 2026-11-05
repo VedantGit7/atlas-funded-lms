@@ -22,9 +22,8 @@ import { readTenantEmailChannel } from "../server/tenant-settings/tenant-setting
 
 /**
  * Sends the verification and password-reset emails Better Auth asked for
- * (launch plan task 3.2; docs/engineering/better-auth-design.md). Supabase
- * sent these itself, with one sender and one set of templates for every
- * academy. Here each goes from the academy whose site it was asked on, with
+ * (launch plan task 3.2; docs/engineering/better-auth-design.md). Each goes
+ * from the academy whose site it was asked on, with
  * that academy's name and Transactional Email sender, and its link points
  * back to the same host. Each carries the academy's branding (task 3.6): its
  * logo, primary colour and support address, in one layout.
@@ -188,9 +187,8 @@ const CONFIRM_TYPE: Partial<Record<AuthEmail["kind"], string>> = {
 
 /**
  * Links land on our own pages, never on Better Auth's handler, which isn't
- * mounted: /auth/confirm verifies the token and signs in, as Supabase's links
- * do, /reset-password asks for the new password, and /invite/accept opens an
- * invitation.
+ * mounted: /auth/confirm verifies the token and signs in, /reset-password asks
+ * for the new password, and /invite/accept opens an invitation.
  */
 export function authEmailLink(email: AuthEmail, origin: string): string {
   if (email.kind === "invitation") {
@@ -322,8 +320,8 @@ export function buildAuthEmail(
 
 /**
  * Sends an academy invitation from the academy itself, with its branding
- * (launch plan task 3.6). With Supabase, Supabase sent it. Unlike the other
- * auth emails a failure is the admin's to see, so it throws: the caller's
+ * (launch plan task 3.6). Unlike the other auth emails a failure is the
+ * admin's to see, so it throws: the caller's
  * transaction then rolls back the new invite token and the old one stays valid.
  */
 export async function sendInvitationEmail(args: {
@@ -344,8 +342,8 @@ export async function sendInvitationEmail(args: {
       requestId: args.requestId,
       detail: error instanceof Error ? error.message : "unknown",
     });
-    // 503, not 502, as the Supabase path answers: a proxy may replace a 502
-    // with its own page (staging, 30 October 2026).
+    // 503, not 502: a proxy may replace a 502 with its own page (staging,
+    // 30 October 2026).
     throw new AtlasHttpError({
       code: "SERVICE_UNAVAILABLE",
       status: 503,

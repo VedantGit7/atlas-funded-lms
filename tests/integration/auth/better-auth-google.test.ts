@@ -20,7 +20,7 @@ import {
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
 
 /**
- * Launch plan task 3.3 against Postgres, with AUTH_PROVIDER=better-auth:
+ * Launch plan task 3.3 against Postgres:
  * Google sign-in, linking and unlinking. Google's token endpoint is the one
  * network call Better Auth makes; the test answers it with an ID token for
  * the person it wants Google to report. Google can't be reached from a local
@@ -131,15 +131,9 @@ suite("Better Auth Google sign-in", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    for (const key of [
-      "AUTH_PROVIDER",
-      "BETTER_AUTH_SECRET",
-      "GOOGLE_CLIENT_ID",
-      "GOOGLE_CLIENT_SECRET",
-    ]) {
+    for (const key of ["BETTER_AUTH_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]) {
       savedEnv[key] = process.env[key];
     }
-    process.env["AUTH_PROVIDER"] = "better-auth";
     process.env["BETTER_AUTH_SECRET"] = randomBytes(32).toString("base64url");
     process.env["GOOGLE_CLIENT_ID"] = "test-client-id";
     process.env["GOOGLE_CLIENT_SECRET"] = randomBytes(16).toString("base64url");

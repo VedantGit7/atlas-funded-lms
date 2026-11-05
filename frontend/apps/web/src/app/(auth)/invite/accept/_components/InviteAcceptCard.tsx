@@ -43,54 +43,12 @@ type InviteAcceptCardProps = Readonly<{
   invitedEmail: string | null;
   inviteValid: boolean;
   /**
-   * Better Auth (launch plan task 3.6): whether the invited address can sign
-   * in yet. "none" shows the password form; "exists" asks the person to sign
-   * in. Null with Supabase, whose invitation link carries its own session.
+   * Whether the invited address can sign in yet (launch plan task 3.6). "none"
+   * shows the password form; "exists" asks the person to sign in. Null when
+   * the invitation couldn't be read.
    */
   inviteAccount?: "none" | "exists" | null;
 }>;
-
-type InviteSession = {
-  accessToken: string;
-  refreshToken: string;
-  type: string | null;
-};
-
-// Invitation links land here with the invited account's session in the URL hash
-// (Supabase implicit flow for invite / magic-link). We read it once on mount so
-// the invitee finishes as their own account, regardless of who was signed in.
-const INVITE_HASH_TYPES = new Set(["invite", "magiclink", "signup", "recovery"]);
-
-// An email that already has an account gets a sign-in link (magiclink) rather
-// than an invite. That person signs in to accept: setting a password from the
-// link fails for anyone with MFA, whose link session is only aal1, and would
-// replace a password they already have (staging, 30 October 2026).
-const EXISTING_ACCOUNT_HASH_TYPE = "magiclink";
-
-function readInviteSessionFromHash(): InviteSession | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const rawHash = window.location.hash.startsWith("#")
-    ? window.location.hash.slice(1)
-    : window.location.hash;
-
-  if (!rawHash) {
-    return null;
-  }
-
-  const params = new URLSearchParams(rawHash);
-  const accessToken = params.get("access_token");
-  const refreshToken = params.get("refresh_token");
-  const type = params.get("type");
-
-  if (!accessToken || (type && !INVITE_HASH_TYPES.has(type))) {
-    return null;
-  }
-
-  return { accessToken, refreshToken: refreshToken ?? "", type };
-}
 
 function emailsMismatch(signedInEmail: string | null, invitedEmail: string | null): boolean {
   return Boolean(signedInEmail && invitedEmail && signedInEmail !== invitedEmail);
@@ -223,30 +181,11 @@ export function InviteAcceptCard({
     setInvitationPasswordAction,
     initialState,
   );
-  const [inviteSession, setInviteSession] = useState<InviteSession | null>(null);
-  const [existingAccount, setExistingAccount] = useState(false);
-  const [hashChecked, setHashChecked] = useState(false);
+  // An address that can already sign in signs in to accept, so no password is
+  // replaced from an invitation.
+  const existingAccount = inviteAccount === "exists";
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
-
-  useEffect(() => {
-    const session = readInviteSessionFromHash();
-    if (session) {
-      if (session.type === EXISTING_ACCOUNT_HASH_TYPE) {
-        setExistingAccount(true);
-      } else {
-        setInviteSession(session);
-      }
-      // Strip the tokens from the address bar so they aren't left in history.
-      window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
-    // Better Auth's invitation link carries no session: the API says instead
-    // whether this address already has an account to sign in with.
-    else if (inviteAccount === "exists") {
-      setExistingAccount(true);
-    }
-    setHashChecked(true);
-  }, [inviteAccount]);
 
   const mismatch = useMemo(
     () => emailsMismatch(signedInEmail, invitedEmail),
@@ -304,9 +243,9 @@ export function InviteAcceptCard({
     );
   }
 
-  // Primary path: the email link delivered an invited session. Let the invitee
-  // set a password and finish — this takes over from any prior session.
-  const setPasswordHere = Boolean(inviteSession) || (inviteValid && inviteAccount === "none");
+  // Primary path: the invited address has no account yet. Let the invitee set
+  // a password and finish, which takes over from any prior session.
+  const setPasswordHere = inviteValid && inviteAccount === "none";
   if (setPasswordHere) {
     return (
       <CardShell labelledBy="invite-set-password-title">
@@ -350,12 +289,6 @@ export function InviteAcceptCard({
 
         <form action={passwordAction} className="mt-6 space-y-5">
           <input type="hidden" name="token" value={token} />
-          {inviteSession ? (
-            <>
-              <input type="hidden" name="accessToken" value={inviteSession.accessToken} />
-              <input type="hidden" name="refreshToken" value={inviteSession.refreshToken} />
-            </>
-          ) : null}
 
           <div className="space-y-2">
             <label htmlFor="invite-password" className={labelClass}>
@@ -395,19 +328,6 @@ export function InviteAcceptCard({
             {passwordPending ? "Setting up your account..." : "Set password and continue"}
           </button>
         </form>
-      </CardShell>
-    );
-  }
-
-  // Wait for the one-shot hash read before deciding which fallback to show, so a
-  // valid invite link never briefly flashes the sign-in prompt.
-  if (!hashChecked) {
-    return (
-      <CardShell labelledBy="invite-loading">
-        <h2 id="invite-loading" className="sr-only">
-          Loading invitation
-        </h2>
-        <p className={bodyClass}>Loading invitation...</p>
       </CardShell>
     );
   }

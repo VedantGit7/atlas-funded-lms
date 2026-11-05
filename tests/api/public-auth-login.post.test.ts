@@ -118,12 +118,7 @@ describe("POST /api/v1/public/auth/login", () => {
     mockLoginWithPassword.mockResolvedValue({
       status: "signed_in",
       identity: { mfaEnabled: false },
-      displayName: null,
-      session: {
-        accessToken: "access",
-        refreshToken: "refresh",
-        expiresIn: 3600,
-      },
+      session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
     });
     mockFindMembership.mockResolvedValue({
       id: "membership-a",
@@ -207,7 +202,7 @@ describe("POST /api/v1/public/auth/login", () => {
     mockLoginWithPassword.mockResolvedValueOnce({
       status: "signed_in",
       identity: { mfaEnabled: true },
-      session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+      session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
     });
 
     const response = await POST(
@@ -226,8 +221,7 @@ describe("POST /api/v1/public/auth/login", () => {
     mockLoginWithPassword.mockResolvedValue({
       status: "signed_in",
       identity: { mfaEnabled: false },
-      displayName: "Verified Learner",
-      session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+      session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
     });
     mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
     mockFindMembership
@@ -247,7 +241,6 @@ describe("POST /api/v1/public/auth/login", () => {
         tenantId: tenantA.tenantId,
         authPrincipalId: "principal-id",
         email: "learner@example.com",
-        displayName: "Verified Learner",
       }),
     );
     expect(body).toEqual({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
@@ -273,8 +266,7 @@ describe("POST /api/v1/public/auth/login", () => {
     mockLoginWithPassword.mockResolvedValue({
       status: "signed_in",
       identity: { mfaEnabled: true },
-      displayName: null,
-      session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+      session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
     });
     mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
     mockFindMembership.mockResolvedValue(null);
@@ -313,15 +305,14 @@ describe("POST /api/v1/public/auth/login", () => {
     });
     mockLoginWithPassword.mockImplementation(
       async ({ db }: { db: { $queryRaw: (query: TemplateStringsArray) => Promise<unknown> } }) => {
-        // The real service first waits for Supabase, then mirrors its verified principal.
+        // The real service first checks the password, then reads the principal.
         expect(held).toBe(0);
         await Promise.resolve();
         await db.$queryRaw`select verified_principal`;
         return {
           status: "signed_in",
           identity: { mfaEnabled: false },
-          displayName: null,
-          session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+          session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
         };
       },
     );
@@ -332,12 +323,7 @@ describe("POST /api/v1/public/auth/login", () => {
       expect(tenantResponse.status).toBe(200);
       expect(applyAuthSession).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          session: expect.objectContaining({
-            accessToken: "access",
-            refreshToken: "refresh",
-            expiresIn: 3600,
-          }) as unknown,
-          persistent: true,
+          session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
         }),
       );
       const platformResponse = await POST(
@@ -401,8 +387,7 @@ describe("POST /api/v1/public/auth/login", () => {
         return {
           status: "signed_in",
           identity: { mfaEnabled: false },
-          displayName: null,
-          session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
+          session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
         };
       },
     );

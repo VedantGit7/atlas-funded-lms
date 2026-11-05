@@ -29,10 +29,6 @@ const secretPatterns = [
     pattern: /-----BEGIN (RSA |EC |OPENSSH |)?PRIVATE KEY-----/,
   },
   {
-    name: "Supabase service role JWT-like value",
-    pattern: /SUPABASE_SERVICE_ROLE_KEY\s*=\s*eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/,
-  },
-  {
     name: "Database URL",
     pattern: /postgres(ql)?:\/\/[^"'`\s]+:[^"'`\s]+@[^"'`\s]+/,
   },

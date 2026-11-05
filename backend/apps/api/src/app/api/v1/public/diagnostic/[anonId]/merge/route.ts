@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Supabase first with no connection held, then tenant and principal on one
+    // The session check first, then tenant and principal on one
     // released connection, then the tenant transaction (audit H3).
     const { tenant, principal } = await authenticateTenantRequest(req);
 

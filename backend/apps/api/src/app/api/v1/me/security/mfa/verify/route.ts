@@ -22,7 +22,7 @@ export const POST = createTenantRoute<
       actorId: ctx.actorMembershipId,
       requestId: ctx.requestId,
     });
-    const { session } = await verifyMfaEnrollment({ factorId: input.factorId, code: input.code });
+    const { session } = await verifyMfaEnrollment({ code: input.code });
     // Verifying the new factor also completed MFA for this session: keep that
     // aal2 session, so a step-up that needed enrollment is satisfied (audit H4).
     await applyVerifiedSessionToCookieStore(session);

@@ -1,19 +1,10 @@
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import {
   applySetCookiesToCookieStore,
-  authProvider,
   authRequestContextFromHeaders,
   findActiveSessionPrincipal,
-  signupWithPassword,
-  verifyMfaChallenge,
   verifySecondFactor,
 } from "@atlas/auth";
-import { publicSignupInputSchema } from "@atlas/auth/schemas";
-import {
-  applyAuthSessionToCookieStore,
-  readSessionPersistenceFromStore,
-} from "@atlas/auth/cookie-store";
-import { ATLAS_ACCESS_TOKEN_COOKIE, ATLAS_REFRESH_TOKEN_COOKIE } from "@atlas/auth/cookies";
 import { globalDbPerStatement } from "@atlas/api";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -24,16 +15,12 @@ import {
   resolveRequestHostFromHeaders,
 } from "@atlas/tenancy";
 import {
-  PublicSignupRequestSchema,
   PublicAuthResponseSchema,
   buildPublicAuthResponse,
   type PublicAuthStatus,
 } from "@atlas/domain-identity";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
-import {
-  applyReferralForNewMembership,
-  stashReferralCodeForSignup,
-} from "../server/sales-referrals/sales-referrals.service";
+import { applyReferralForNewMembership } from "../server/sales-referrals/sales-referrals.service";
 import type { PublicAuthApiResponse } from "./public-auth-types";
 
 async function resolveActiveTenantFromRequest() {
@@ -132,64 +119,24 @@ async function buildResponse(args: {
   );
 }
 
-async function setSessionCookies(session: {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  persistent?: boolean;
-}): Promise<void> {
-  const persistent = session.persistent ?? (await readSessionPersistenceFromStore());
-
-  await applyAuthSessionToCookieStore({
-    accessToken: session.accessToken,
-    refreshToken: session.refreshToken,
-    expiresInSeconds: session.expiresIn,
-    persistent,
-  });
-}
-
 export async function orchestratePublicMfaVerify(input: {
   code: string;
 }): Promise<PublicAuthApiResponse> {
   const { host, requestId } = await resolveActiveTenantFromRequest();
 
-  let email: string;
-  if (authProvider() === "better-auth") {
-    // The pending challenge from a password sign-in (Better Auth's two_factor
-    // cookie), or an aal1 session from Google or a sign-in link: either way
-    // an aal2 session is left behind (launch plan task 3.5).
-    const verified = await verifySecondFactor({
-      ctx: authRequestContextFromHeaders(new Headers(await headers())),
-      code: input.code,
-    });
-    await applySetCookiesToCookieStore(verified.cookies.setCookies);
-    const principal = await findActiveSessionPrincipal({
-      db: globalDbPerStatement,
-      principalId: verified.principalId,
-    });
-    email = principal.email;
-  } else {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get(ATLAS_ACCESS_TOKEN_COOKIE)?.value;
-    const refreshToken = cookieStore.get(ATLAS_REFRESH_TOKEN_COOKIE)?.value;
-
-    if (!accessToken || !refreshToken) {
-      throw new Error("no_pending_session");
-    }
-
-    const verified = await verifyMfaChallenge({
-      accessToken,
-      refreshToken,
-      code: input.code,
-    });
-
-    await setSessionCookies({
-      accessToken: verified.session.accessToken,
-      refreshToken: verified.session.refreshToken,
-      expiresIn: verified.session.expiresIn,
-    });
-    email = verified.user.email;
-  }
+  // The pending challenge from a password sign-in (Better Auth's two_factor
+  // cookie), or an aal1 session from Google or a sign-in link: either way an
+  // aal2 session is left behind (launch plan task 3.5).
+  const verified = await verifySecondFactor({
+    ctx: authRequestContextFromHeaders(new Headers(await headers())),
+    code: input.code,
+  });
+  await applySetCookiesToCookieStore(verified.cookies.setCookies);
+  const principal = await findActiveSessionPrincipal({
+    db: globalDbPerStatement,
+    principalId: verified.principalId,
+  });
+  const email = principal.email;
 
   // Platform plane has no tenant/membership; a verified challenge is sufficient
   // to enter the platform console (authorization is enforced by the shell gate).
@@ -213,59 +160,6 @@ export async function orchestratePublicMfaVerify(input: {
     // re-trigger the MFA_REQUIRED gate.
     mfaEnabled: false,
   });
-
-  return body;
-}
-
-export async function orchestratePublicSignup(input: {
-  email: string;
-  password: string;
-  displayName: string;
-  inviteToken?: string;
-  referralCode?: string;
-}): Promise<PublicAuthApiResponse> {
-  const parsed = PublicSignupRequestSchema.parse(input);
-  const { host, requestId } = await resolveActiveTenantFromRequest();
-
-  const tenant = await lookupActiveTenant(host, requestId);
-
-  const referralCode = parsed.referralCode;
-  if (referralCode) {
-    await withTenantTx(
-      {
-        tenantId: tenant.tenantId,
-        requestId: tenant.requestId,
-        allowAnonymousTenantRead: true,
-      },
-      async (tx) => {
-        await stashReferralCodeForSignup(tx, {
-          emailNormalized: parsed.email,
-          referralCode,
-        });
-      },
-    );
-  }
-
-  const authResult = await signupWithPassword({
-    db: globalDbPerStatement,
-    input: publicSignupInputSchema.parse(parsed),
-  });
-
-  const body = await buildResponse({
-    tenantId: tenant.tenantId,
-    requestId: tenant.requestId,
-    email: parsed.email,
-    serviceStatus: authResult.status,
-    mfaEnabled: authResult.identity?.mfaEnabled ?? false,
-  });
-
-  if (authResult.session) {
-    await setSessionCookies({
-      accessToken: authResult.session.accessToken,
-      refreshToken: authResult.session.refreshToken,
-      expiresIn: authResult.session.expiresIn,
-    });
-  }
 
   return body;
 }

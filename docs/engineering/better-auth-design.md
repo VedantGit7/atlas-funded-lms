@@ -342,6 +342,53 @@ Each of those behaviours already has a Better Auth test from tasks 3.2 to 3.6.
 
 **Test cleanup.** `scripts/db/purge-test-tenants.mjs` now deletes a test principal's own Better Auth login state with it: its sessions, login methods and authenticator, whose keys cascade. Any other reference, cascading or not, still refuses the cleanup. `verify-test-cleanup.mjs` covers this.
 
+## Task 3.8: Supabase removed (as built, 5 November 2026)
+
+Better Auth is the only login system. `AUTH_PROVIDER` is gone, along with every Supabase path it chose between, so the sections above that say "behind `AUTH_PROVIDER`" describe how each flow arrived.
+
+**Order.** Staging moved to Better Auth first, on the build that still had both systems (5 November). Then this change merged, so its deploy changed no behaviour there. Its migration also clears `mfa_enabled` for any account without a Better Auth authenticator, so an environment that skipped that step behaves the same.
+
+**What the staging switch found (#259, `ad7eea9e`).** Signing in succeeded but the console said "Platform access denied", and the authenticator code was refused. The web re-sets the cookies the API's auth routes return, and it kept only their Max-Age. On https Better Auth names them `__Secure-atlas_session` and `__Secure-atlas.two_factor`, and a browser refuses a `__Secure-` cookie without Secure, so neither cookie was kept. The value was also encoded a second time. Local runs use http, where the names have no prefix, so no test had seen it. `parseForwardedSetCookie` now keeps each cookie's Secure, SameSite, Path and lifetime and decodes the value once; `tests/unit/frontend/forwarded-auth-cookies.test.ts` checks it through Next's own serializer. With that deployed, the platform owner set up an authenticator and signed in to both hosts.
+
+**What went.**
+
+- **The auth package:**
+  - Supabase's clients, the token session and its refresh;
+  - the H6 mirroring of Supabase users (`upsertAuthPrincipal`);
+  - the Supabase admin and invitation calls, and the PKCE OAuth start and callback.
+- **Session cookies.** `atlas_access_token`, `atlas_refresh_token` and `atlas_session_persistent`, with:
+  - the API's `/public/auth/refresh` route;
+  - the web's token refresh in the proxy and in both API clients;
+  - the Supabase OAuth callback at `/auth/callback`, and its verifier cookie.
+- **Relinking.** A principal is Better Auth's user, so there's no second id to rebind. Migration 129 drops `auth_principals.supabase_user_id` and `auth_principal_relink_requests`, and redefines the H6 guard with only its status rule. The platform console keeps account lookup and disable/enable.
+- **Request fields only Supabase read.**
+  - The confirmation `emailRedirectTo`, and with it `redirect-target.ts`, since our emails build their links from the request's host.
+  - OAuth's `redirectTo` and `codeVerifier`.
+  - The recovery session and MFA step on password reset: Better Auth's reset token is enough, and an account with MFA still needs its code to sign in.
+- **Configuration.**
+  - The `NEXT_PUBLIC_SUPABASE_*` and `SUPABASE_*` settings, with their checks in `deployment-contract.ts`, the compose file and the CSP.
+  - `BETTER_AUTH_SECRET` is now required on the API.
+  - The `@supabase/supabase-js` dependency, `supabase/` with its F19 migration and CI job, and `verify-supabase-auth-config.mjs`.
+
+**Fixed on the way.** Three places still checked only Supabase's cookie, so with Better Auth they misread a signed-in person as anonymous:
+
+- **Code snippets:** the snippets route would have run an academy's snippets for signed-in staff (audit H5).
+- **Invitations:** the accept action refused every signed-in invitee.
+- **Optional fetches:** the layout's session hint skipped them.
+
+`signOutOtherSessions` also had no Better Auth version; it does now.
+
+**First operator on a fresh environment.** There's no dashboard to create a sign-in in. The database owner creates the account, verified, and grants it. The operator then sets a password with "Forgot password?" on the platform host, which gives an account with no login method its first password (docs/runbooks/platform-operator-access.md). An integration test covers that reset.
+
+**Tests.** The tests of Supabase's own code went with it. Their behaviour has Better Auth tests from tasks 3.2 to 3.6, plus new ones:
+
+- how sign-in failures are classified;
+- the guard's status rule against Postgres;
+- account review without relinking;
+- the first-password reset.
+
+The web actions' handling of a password-policy refusal kept its tests.
+
 ## Open items for the flow tasks
 
 - **Sliding sessions.** Pass Better Auth's refreshed cookie back through the web proxy, so a session used every day doesn't end 30 days after sign-in.

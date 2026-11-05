@@ -129,17 +129,9 @@ export function ChangeEmailForm() {
     setBusy(true);
     setMessage(null);
     try {
-      const emailRedirectTo =
-        typeof window !== "undefined" ? `${window.location.origin}/auth/confirm` : undefined;
-      await clientApi.post(
-        "/api/v1/me/security/email",
-        {
-          newEmail,
-          ...(emailRedirectTo ? { emailRedirectTo } : {}),
-        },
-        "change-email",
-        { silent: true },
-      );
+      await clientApi.post("/api/v1/me/security/email", { newEmail }, "change-email", {
+        silent: true,
+      });
       setMessage("Confirmation sent to your new email address.");
       setNewEmail("");
     } catch (error) {

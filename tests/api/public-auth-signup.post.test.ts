@@ -60,7 +60,6 @@ vi.mock("@atlas/auth", async (importOriginal) => {
   return {
     ...actual,
     signupWithPassword: (...args: unknown[]) => mockSignupWithPassword(...args),
-    setAuthCookies: vi.fn(),
   };
 });
 
@@ -112,11 +111,7 @@ describe("POST /api/v1/public/auth/signup", () => {
       created: true,
       status: "ACTIVE",
     });
-    mockSignupWithPassword.mockResolvedValue({
-      status: "verification_required",
-      identity: { mfaEnabled: false },
-      session: undefined,
-    });
+    mockSignupWithPassword.mockResolvedValue({ status: "verification_required", emails: [] });
     mockBuildPublicAuthResponse.mockResolvedValue({
       data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null },
     });
@@ -154,61 +149,10 @@ describe("POST /api/v1/public/auth/signup", () => {
     expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
   });
 
-  it("provisions a learner membership when signup returns an immediate session", async () => {
-    mockSignupWithPassword.mockResolvedValue({
-      status: "signed_in",
-      identity: { mfaEnabled: false },
-      session: { accessToken: "access", refreshToken: "refresh", expiresIn: 3600 },
-    });
-    mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
-    mockFindMembership
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ id: "new-membership", status: "ACTIVE" });
-    mockBuildPublicAuthResponse.mockResolvedValue({
-      data: { status: "AUTHENTICATED", redirectTo: "/" },
-    });
-
-    const response = await POST(
-      createRequest({
-        email: "user@example.com",
-        password: "password123",
-        displayName: "Atlas User",
-      }),
-    );
-    const body: unknown = await response.json();
-
-    expect(mockEnsureSelfServiceLearnerMembership).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tenantId: tenantA.tenantId,
-        authPrincipalId: "principal-id",
-        email: "user@example.com",
-        displayName: "Atlas User",
-      }),
-    );
-    expect(body).toEqual({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
-  });
-
-  it("forwards the tenant emailRedirectTo to the signup service", async () => {
-    await POST(
-      createRequest({
-        email: "user@example.com",
-        password: "password123",
-        displayName: "Atlas User",
-        emailRedirectTo: "https://tenant-a.example.com/auth/confirm",
-      }),
-    );
-
-    expect(mockSignupWithPassword).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: expect.objectContaining({
-          emailRedirectTo: "https://tenant-a.example.com/auth/confirm",
-        }),
-      }),
-    );
-  });
-
+  // The verification link always leads back to this academy: the API builds it
+  // from the request's host, so a client can't name one.
   it.each(["https://tenant-b.example.com/auth/confirm", "https://evil.example/auth/confirm"])(
-    "refuses a confirmation link that would lead to %s, before creating anything",
+    "refuses a client-chosen confirmation link (%s), before creating anything",
     async (emailRedirectTo) => {
       const response = await POST(
         createRequest({

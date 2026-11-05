@@ -164,15 +164,13 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
    - Coolify writes the resource's files to `/data/coolify/applications/<uuid>/` only at the first deploy. Until then the resource shows **Exited**.
 2. **Publish the environment's images.** In GitHub, give the environment the `API_BUILD_ENV` and `WEB_BUILD_ENV` secrets, then run "Publish images" for the commit (`managed-node-runtime.md`, "Publishing"). Environment names ignore case, so the workflow's `production` is the `Production` environment Vercel created. Both secrets hold the same dotenv text:
 
-   | Setting                         | Staging                                                                                                                 |
-   | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-   | `APP_ENV`                       | `staging`                                                                                                               |
-   | `PLATFORM_HOST`                 | `staging-platform.fundedbeyond.com`                                                                                     |
-   | `APP_URL`                       | `https://staging-academy.fundedbeyond.com`                                                                              |
-   | `API_INTERNAL_URL`              | `http://api.atlas.internal:3001`                                                                                        |
-   | `NEXT_PUBLIC_SUPABASE_URL`      | The staging Supabase project's URL (project `acfkhlnrlnlignkqpxhc`)                                                     |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | That project's legacy anon key, the key type the rehearsal tests (Supabase → API Keys)                                  |
-   | `NEXT_PUBLIC_SENTRY_DSN`        | The `atlas-lms` Sentry project's DSN (EU region). Browser Sentry (`src/observability/browser-sentry.ts`) reports to it. |
+   | Setting                  | Staging                                                                                                                 |
+   | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+   | `APP_ENV`                | `staging`                                                                                                               |
+   | `PLATFORM_HOST`          | `staging-platform.fundedbeyond.com`                                                                                     |
+   | `APP_URL`                | `https://staging-academy.fundedbeyond.com`                                                                              |
+   | `API_INTERNAL_URL`       | `http://api.atlas.internal:3001`                                                                                        |
+   | `NEXT_PUBLIC_SENTRY_DSN` | The `atlas-lms` Sentry project's DSN (EU region). Browser Sentry (`src/observability/browser-sentry.ts`) reports to it. |
 
    **Registry access:** none. The packages are public, like the repository (`managed-node-runtime.md`, "Pulling").
 
@@ -189,7 +187,7 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
 
    `CERTIFICATE_OPEN_BADGE`, `MARKETING_EMAIL_ENABLED`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `false`, `0.05`, `587`).
 
-   The login system is `AUTH_PROVIDER`, `supabase` by default, and only the API receives it. Switching to `better-auth` (launch plan task 5.1) also needs `BETTER_AUTH_SECRET`, at least 32 characters, generated like the other internal secrets; the API refuses to start without it. Google sign-in additionally needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, both or neither.
+   Sign-in is Better Auth, in the API. It needs `BETTER_AUTH_SECRET`, at least 32 characters, generated like the other internal secrets; only the API receives it, and it refuses to start without it. Rotating it signs everyone out and makes existing authenticators unreadable, so generate it once per environment. Google sign-in additionally needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, both or neither.
 
    **Keep the values off screens and out of chat.** Each environment's complete list lives on the server as `/root/atlas/<env>/coolify.env` (mode 600). It is assembled from three root-only files in the same folder:
    - `runtime.env`: the database URLs, from the bootstrap ("Databases and migrations");
@@ -310,7 +308,7 @@ It prints and saves a JSON report (`backup-restore-drill.json`) with the backup'
   - Redis;
   - a loopback port, `127.0.0.1:3200`, to reach web.
 - **What it provisions:** the database, with the browser-test scripts (`scripts/e2e/setup-local.mjs`, then `local-run.mjs seed`).
-- **How it signs in:** with Better Auth (`AUTH_PROVIDER=better-auth` and the fixture `BETTER_AUTH_SECRET`), the configuration staging switches to in launch plan task 5.1. The compose file still requires the Supabase settings until task 3.8; the rehearsal gives it the synthetic ones, and nothing answers there.
+- **How it signs in:** with Better Auth and the fixture `BETTER_AUTH_SECRET` from `scripts/e2e/local-env.mjs`, which the seed encrypted the admin's authenticator with.
 - **What it checks:**
   - all three services report healthy;
   - a seeded learner logs in through web;

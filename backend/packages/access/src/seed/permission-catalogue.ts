@@ -51,8 +51,7 @@ export const PERMISSIONS: readonly PermissionDefinition[] = [
   },
   {
     key: "platform.identity.manage",
-    description:
-      "Review blocked re-registrations (relink requests) and disable or re-enable accounts",
+    description: "Find accounts and disable or re-enable them",
     resourceType: "auth_principal",
     platformOnly: true,
   },

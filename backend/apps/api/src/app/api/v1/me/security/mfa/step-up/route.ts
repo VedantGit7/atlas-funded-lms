@@ -12,8 +12,8 @@ type MfaStepUpBody = z.output<typeof MfaStepUpRequestSchema>;
  * POST /api/v1/me/security/mfa/step-up
  *
  * Completes MFA for the current session with an enrolled authenticator, so
- * routes that declare `mfa: "required"` accept it (audit H4). The aal2 session
- * Supabase returns replaces the caller's cookies, preserving "remember me".
+ * routes that declare `mfa: "required"` accept it (audit H4). The session is
+ * marked aal2 in place, so no new cookie is needed.
  */
 export const POST = createTenantRoute<
   MfaStepUpBody,
@@ -28,7 +28,7 @@ export const POST = createTenantRoute<
       actorId: ctx.actorMembershipId,
       requestId: ctx.requestId,
     });
-    const { session } = await stepUpMfa({ code: input.code, factorId: input.factorId });
+    const { session } = await stepUpMfa({ code: input.code });
     await applyVerifiedSessionToCookieStore(session);
     return { data: { ok: true as const } };
   },

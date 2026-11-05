@@ -55,7 +55,7 @@ describe("auth request/response schemas", () => {
     });
 
     expect(parsed.data.identity).not.toHaveProperty("id");
-    expect(parsed.data.identity).not.toHaveProperty("supabaseUserId");
+    expect(parsed.data.identity).not.toHaveProperty("principalId");
   });
 
   it("accepts verification-required auth output without identity", () => {

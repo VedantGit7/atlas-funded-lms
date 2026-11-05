@@ -7,7 +7,7 @@ import {
   requestOrigin,
   safeBrandColor,
 } from "../../../backend/apps/api/src/lib/auth-email";
-import { hasValidAccessToken } from "../../../frontend/apps/web/src/lib/server/session-refresh";
+import { hasSessionCookie } from "../../../frontend/apps/web/src/lib/server/session-refresh";
 
 /** Launch plan task 3.2: the emails Better Auth leaves to us, and the web proxy's session check. */
 
@@ -41,7 +41,7 @@ describe("Better Auth email links", () => {
     expect(email.body).toContain("type=email_change");
   });
 
-  it("sends verification to our confirm page, which signs in as Supabase's link does", () => {
+  it("sends verification to our confirm page, which verifies and signs in", () => {
     expect(
       authEmailLink(
         { kind: "verify-email", email: "a@example.test", token: "tok en" },
@@ -86,14 +86,14 @@ describe("web proxy session check", () => {
     });
   }
 
-  it("treats a Better Auth session cookie as signed in; the API's 401 decides the rest", () => {
-    expect(hasValidAccessToken(page("atlas_session=opaque.signature"))).toBe(true);
-    expect(hasValidAccessToken(page("__Secure-atlas_session=opaque.signature"))).toBe(true);
+  it("treats a session cookie as signed in; the API's 401 decides the rest", () => {
+    expect(hasSessionCookie(page("atlas_session=opaque.signature"))).toBe(true);
+    expect(hasSessionCookie(page("__Secure-atlas_session=opaque.signature"))).toBe(true);
   });
 
-  it("still needs an unexpired access token without one", () => {
-    expect(hasValidAccessToken(page())).toBe(false);
-    expect(hasValidAccessToken(page("atlas_access_token=not-a-jwt"))).toBe(false);
+  it("sends a request without one to sign in", () => {
+    expect(hasSessionCookie(page())).toBe(false);
+    expect(hasSessionCookie(page("atlas_ui_mode=dark"))).toBe(false);
   });
 });
 

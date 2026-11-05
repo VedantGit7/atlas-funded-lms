@@ -3,12 +3,7 @@ import { ATLAS_CLIENT_IP_HEADER, buildApiProxyHeaders } from "@atlas/core/http/a
 import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolvePostAuthRedirect } from "@/lib/auth/safe-redirect";
 import { identityBlockQueryValue, isIdentityBlockCode } from "@/lib/auth-messages";
-import {
-  OAUTH_NEXT_COOKIE,
-  OAUTH_REMEMBER_COOKIE,
-  OAUTH_VERIFIER_COOKIE,
-  resolveRequestOrigin,
-} from "./oauth-shared";
+import { OAUTH_NEXT_COOKIE, OAUTH_REMEMBER_COOKIE, resolveRequestOrigin } from "./oauth-shared";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -20,7 +15,6 @@ type CallbackApiResponse = {
 };
 
 function clearOAuthCookies(response: NextResponse): NextResponse {
-  response.cookies.delete(OAUTH_VERIFIER_COOKIE);
   response.cookies.delete(OAUTH_REMEMBER_COOKIE);
   response.cookies.delete(OAUTH_NEXT_COOKIE);
   return response;
@@ -44,14 +38,10 @@ function resolveDestination(
 }
 
 /**
- * Finishes a provider redirect: hands the code to the API with what it needs
- * to check it, then sends the person on with the session cookies the API set.
- *
- * - Supabase returns to /auth/callback with a code; the PKCE verifier the
- *   start route kept is in a cookie.
- * - Better Auth has Google return to /auth/callback/google with a code and a
- *   state; the API checks the state against Better Auth's signed cookie, so
- *   the browser's cookies go along (launch plan task 3.3).
+ * Finishes Google's redirect to /auth/callback/google: hands the code and the
+ * state to the API, which checks the state against Better Auth's signed
+ * cookie, so the browser's cookies go along (launch plan task 3.3). Then sends
+ * the person on with the session cookie the API set.
  */
 export async function handleOAuthCallback(req: NextRequest): Promise<NextResponse> {
   const origin = resolveRequestOrigin(req);
@@ -60,11 +50,10 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");
   const providerError = req.nextUrl.searchParams.get("error");
-  const codeVerifier = req.cookies.get(OAUTH_VERIFIER_COOKIE)?.value;
   const rememberMe = req.cookies.get(OAUTH_REMEMBER_COOKIE)?.value === "1";
   const clientNext = req.cookies.get(OAUTH_NEXT_COOKIE)?.value ?? null;
 
-  if (providerError || !code || (!codeVerifier && !state)) {
+  if (providerError || !code || !state) {
     return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=oauth`));
   }
 
@@ -79,9 +68,7 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
         {
           "content-type": "application/json",
           "idempotency-key": `public-oauth-callback-${crypto.randomUUID()}`,
-          ...(state && req.headers.get("cookie")
-            ? { cookie: req.headers.get("cookie") ?? "" }
-            : {}),
+          ...(req.headers.get("cookie") ? { cookie: req.headers.get("cookie") ?? "" } : {}),
         },
         process.env,
         req.headers.get(ATLAS_CLIENT_IP_HEADER) ?? "unknown",
@@ -89,8 +76,7 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
       redirect: "error",
       body: JSON.stringify({
         code,
-        ...(codeVerifier ? { codeVerifier } : {}),
-        ...(state ? { state } : {}),
+        state,
         rememberMe,
         ...(clientNext ? { redirectTo: clientNext } : {}),
       }),
@@ -101,8 +87,8 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
   }
 
   if (!apiRes.ok) {
-    // A provider sign-in can reach an account that is disabled or awaiting
-    // relink review (audit H6); say so instead of "try again".
+    // A provider sign-in can reach an account that is disabled; say so
+    // instead of "try again".
     const failure = (await apiRes.json().catch(() => null)) as {
       error?: { code?: string };
     } | null;
@@ -126,8 +112,7 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
   // response.cookies mutations rebuild that header and would discard them.
   const response = clearOAuthCookies(NextResponse.redirect(`${origin}${destination}`));
 
-  // Relay the auth session cookies (access/refresh) set by the API onto the
-  // browser redirect.
+  // Relay the session cookie the API set onto the browser redirect.
   const setCookies =
     typeof apiRes.headers.getSetCookie === "function" ? apiRes.headers.getSetCookie() : [];
   for (const header of setCookies) {

@@ -8,15 +8,15 @@ const replayStore = createPlatformIdempotencyStore();
 const mocks = vi.hoisted(() => ({
   requirePlatformPrincipal: vi.fn(),
   issueTenantOwnerInvitation: vi.fn(),
-  sendTenantInvitationEmail: vi.fn(),
+  sendInvitationEmail: vi.fn(),
 }));
 
 vi.mock("@atlas/auth/platform-auth", () => ({
   requirePlatformPrincipal: (...args: unknown[]) => mocks.requirePlatformPrincipal(...args),
 }));
-vi.mock("@atlas/auth", async (importOriginal) => ({
+vi.mock("../../backend/apps/api/src/lib/auth-email", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  sendTenantInvitationEmail: mocks.sendTenantInvitationEmail,
+  sendInvitationEmail: mocks.sendInvitationEmail,
 }));
 vi.mock("@atlas/domain-tenancy", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -52,7 +52,7 @@ function request(headers: Record<string, string> = {}) {
       headers: {
         host: "platform.example.com",
         origin: "https://platform.example.com",
-        authorization: "Bearer platform-token",
+        cookie: "atlas_session=platform.signature",
         "content-type": "application/json",
         "idempotency-key": "idem_owner_invitation_test",
         [ATLAS_PLATFORM_REASON_HEADER]: "Launch plan 2.6 staging tenant owner",
@@ -88,8 +88,11 @@ describe("POST /api/v1/platform/tenants/:id/owner-invitation", () => {
     expect(mocks.requirePlatformPrincipal).toHaveBeenCalledWith(
       expect.objectContaining({ requiredPermission: "platform.tenant.manage" }),
     );
-    expect(mocks.sendTenantInvitationEmail).toHaveBeenCalledWith({
-      email: "owner@example.test",
+    // From the academy, with its branding, read in the academy's own scope.
+    expect(mocks.sendInvitationEmail).toHaveBeenCalledWith({
+      tenantId,
+      requestId: expect.any(String) as unknown,
+      to: "owner@example.test",
       inviteUrl,
     });
     expect(body.data).toEqual({
@@ -104,6 +107,6 @@ describe("POST /api/v1/platform/tenants/:id/owner-invitation", () => {
     const response = await POST(request({ [ATLAS_PLATFORM_REASON_HEADER]: "" }), context);
     expect(response.status).toBe(400);
     expect(mocks.issueTenantOwnerInvitation).not.toHaveBeenCalled();
-    expect(mocks.sendTenantInvitationEmail).not.toHaveBeenCalled();
+    expect(mocks.sendInvitationEmail).not.toHaveBeenCalled();
   });
 });

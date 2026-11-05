@@ -61,13 +61,13 @@ describe("GET /api/v1/public/marketing/integrations/snippets (audit H5)", () => 
       tenant: { tenantId },
       principal: { id: "principal-1" },
     });
-    await GET(request("atlas_access_token=token"));
+    await GET(request("atlas_session=token.sig"));
     expect(mocks.forViewer).toHaveBeenCalledWith({}, { tenantId, principalId: "principal-1" });
   });
 
   it("serves nothing when a presented session cannot be verified", async () => {
     mocks.authenticate.mockRejectedValue(new Error("expired"));
-    const response = await GET(request("atlas_access_token=stale"));
+    const response = await GET(request("atlas_session=stale.sig"));
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       data: { siteBodyHtml: null, orderTrackingHtml: null, signupTrackingHtml: null },

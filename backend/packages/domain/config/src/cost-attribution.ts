@@ -74,10 +74,8 @@ export const COST_DRIVERS: readonly CostDriverDefinition[] = [
     label: "Active members",
     unit: "active member",
     quantity: (usage) => usage.activeMembers,
-    suggestion: {
-      unitCostUsd: 0.00325,
-      source: "Supabase Pro, $0.00325 per monthly active user beyond the 100,000 included.",
-    },
+    // No suggestion: sign-in runs on our own server, with no per-user price.
+    suggestion: null,
   },
   {
     key: "email_sent",

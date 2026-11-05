@@ -128,18 +128,6 @@ jobs:
     timeout-minutes: 45
     needs: install
     services:
-      supabase-security-postgres:
-        image: postgres:17-alpine
-        env:
-          POSTGRES_PASSWORD: atlas_f19_disposable_only
-          POSTGRES_DB: atlas_f19_verification
-        ports:
-          - 15439:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres -d atlas_f19_verification"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
       cleanup-boundary-postgres:
         image: postgres:17-alpine
         env:
@@ -182,7 +170,6 @@ jobs:
         run: pnpm db:generate:ci
       - run: pnpm test:architecture
       - run: pnpm test:reliability-tooling
-      - run: pnpm test:supabase-security
       - run: pnpm test:cleanup-boundary
       - run: pnpm test:cleanup-postgres
       - run: pnpm test:proctoring-integrity
@@ -1140,11 +1127,10 @@ jobs:
       # configured origin, not the API transport hostname.
       PLATFORM_HOST: platform.localhost
       E2E_PLATFORM_BASE_URL: http://platform.localhost:3000
-      # Login is Better Auth (launch plan task 3.7), whose accounts live in this
-      # job's database, so there is no auth service to start and no hosted
-      # project or secret to maintain: a fork runs the same suite. The secret
-      # Better Auth signs with is generated per run, below.
-      AUTH_PROVIDER: better-auth
+      # Login is Better Auth, whose accounts live in this job's database, so
+      # there is no auth service to start and no hosted project or secret to
+      # maintain: a fork runs the same suite. The secret Better Auth signs with
+      # is generated per run, below.
       E2E_SEED_PASSWORD: e2e-Journey-Password-1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

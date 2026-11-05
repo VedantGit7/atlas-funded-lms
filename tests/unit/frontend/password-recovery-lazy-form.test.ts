@@ -31,12 +31,8 @@ class RecoveryBoundary extends Component<{ children?: ReactNode }, { failed: boo
   }
 }
 
-it("mounts the actual recovery form without a render loop and retains recovery tokens", async () => {
-  window.history.replaceState(
-    {},
-    "",
-    "/reset-password#type=recovery&access_token=fixture-access&refresh_token=fixture-refresh",
-  );
+it("mounts the actual reset form without a render loop and retains the link's token", async () => {
+  window.history.replaceState({}, "", "/reset-password?token=fixture-reset-token");
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
@@ -59,11 +55,8 @@ it("mounts the actual recovery form without a render loop and retains recovery t
   try {
     await act(() => root.render(screen()));
     expect(container.textContent).toContain("Choose a new password");
-    expect(container.querySelector<HTMLInputElement>('input[name="accessToken"]')?.value).toBe(
-      "fixture-access",
-    );
-    expect(container.querySelector<HTMLInputElement>('input[name="refreshToken"]')?.value).toBe(
-      "fixture-refresh",
+    expect(container.querySelector<HTMLInputElement>('input[name="token"]')?.value).toBe(
+      "fixture-reset-token",
     );
     await act(() => root.render(screen()));
     expect(container.textContent).toContain("Choose a new password");

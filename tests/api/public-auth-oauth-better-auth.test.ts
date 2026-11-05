@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 /**
- * Launch plan task 3.3: the OAuth routes with AUTH_PROVIDER=better-auth. The
+ * Launch plan task 3.3: the Google sign-in routes. The
  * Google flows themselves run against Postgres in
  * tests/integration/auth/better-auth-google.test.ts.
  */
@@ -16,7 +16,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@atlas/auth", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  authProvider: () => "better-auth",
   startGoogleSignIn: (...args: unknown[]) => mocks.startGoogle(...args),
   completeGoogleCallback: (...args: unknown[]) => mocks.completeGoogle(...args),
 }));
@@ -55,7 +54,7 @@ function request(path: string, body: object, host = "academy.localhost.test") {
 
 const sessionCookie = "atlas_session=token.sig; Max-Age=2592000; Path=/; HttpOnly; SameSite=Lax";
 
-describe("POST /api/v1/public/auth/oauth/start with Better Auth", () => {
+describe("POST /api/v1/public/auth/oauth/start", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.startGoogle.mockResolvedValue({
@@ -68,7 +67,6 @@ describe("POST /api/v1/public/auth/oauth/start with Better Auth", () => {
     const response = await start(
       request("/api/v1/public/auth/oauth/start", {
         provider: "google",
-        redirectTo: "http://academy.localhost.test/auth/callback",
       }),
     );
 
@@ -84,7 +82,6 @@ describe("POST /api/v1/public/auth/oauth/start with Better Auth", () => {
     const response = await start(
       request("/api/v1/public/auth/oauth/start", {
         provider: "apple",
-        redirectTo: "http://academy.localhost.test/auth/callback",
       }),
     );
     expect(response.status).toBe(400);
@@ -93,18 +90,14 @@ describe("POST /api/v1/public/auth/oauth/start with Better Auth", () => {
 
   it("offers no Google sign-in on the platform console", async () => {
     const response = await start(
-      request(
-        "/api/v1/public/auth/oauth/start",
-        { provider: "google", redirectTo: "http://platform.localhost/auth/callback" },
-        "platform.localhost",
-      ),
+      request("/api/v1/public/auth/oauth/start", { provider: "google" }, "platform.localhost"),
     );
     expect(response.status).toBe(400);
     expect(mocks.startGoogle).not.toHaveBeenCalled();
   });
 });
 
-describe("POST /api/v1/public/auth/oauth/callback with Better Auth", () => {
+describe("POST /api/v1/public/auth/oauth/callback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.sendAuthEmails.mockResolvedValue(undefined);
@@ -177,10 +170,8 @@ describe("POST /api/v1/public/auth/oauth/callback with Better Auth", () => {
   });
 
   it("refuses a callback without Google's state", async () => {
-    const response = await callback(
-      request("/api/v1/public/auth/oauth/callback", { code: "c", codeVerifier: "v" }),
-    );
-    expect(response.status).toBe(401);
+    const response = await callback(request("/api/v1/public/auth/oauth/callback", { code: "c" }));
+    expect(response.status).toBe(400);
     expect(mocks.completeGoogle).not.toHaveBeenCalled();
   });
 });

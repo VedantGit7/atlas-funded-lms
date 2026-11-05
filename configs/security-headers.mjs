@@ -78,7 +78,6 @@ export function buildDocumentCsp(nonce, env = process.env, { sameOriginFrame = f
   if (env.CSP_ENFORCE && !["0", "1"].includes(env.CSP_ENFORCE))
     throw new Error("CSP_ENFORCE must be 0 or 1");
   const dev = localDevelopment(env);
-  const supabase = providerOrigin(env, "NEXT_PUBLIC_SUPABASE_URL");
   const sentry = providerOrigin(env, "NEXT_PUBLIC_SENTRY_DSN", { dsn: true });
   const posthog = env.NEXT_PUBLIC_POSTHOG_KEY?.trim()
     ? providerOrigin(
@@ -122,7 +121,6 @@ export function buildDocumentCsp(nonce, env = process.env, { sameOriginFrame = f
       "data:",
       "blob:",
       ...storage,
-      ...supabase,
       ...posthog,
       ...extra("CSP_IMAGE_ORIGINS"),
     ]),
@@ -130,8 +128,6 @@ export function buildDocumentCsp(nonce, env = process.env, { sameOriginFrame = f
     "font-src 'self' data:",
     directive("connect-src", [
       "'self'",
-      ...supabase,
-      ...supabase.map((origin) => origin.replace(/^http/, "ws")),
       ...sentry,
       ...posthog,
       ...posthogAssets,

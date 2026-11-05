@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     await enforceIngressRateLimit({ req, plane: "tenant", requestId });
     const { id: certificateId } = certificateParamsSchema.parse(await context.params);
 
-    // Supabase verification, then tenant and principal, each releasing its
+    // The session check, then tenant and principal, each releasing its
     // connection before the tenant transaction (audit H3).
     const { sessionUser, tenant, principal } = await authenticateTenantRequest(req);
     await enforceTenantRouteRateLimit({

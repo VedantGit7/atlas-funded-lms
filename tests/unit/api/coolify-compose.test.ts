@@ -94,18 +94,11 @@ describe("Coolify compose topology", () => {
     ).not.toThrow();
   });
 
-  it("starts the API on Supabase by default, and on Better Auth once it's chosen", () => {
-    expect(resolveEnvironment("api").AUTH_PROVIDER).toBe("supabase");
-    const betterAuth = resolveEnvironment("api", {
-      ...settings,
-      AUTH_PROVIDER: "better-auth",
-      BETTER_AUTH_SECRET: "b".repeat(32),
-    });
-    expect(betterAuth).toMatchObject({ AUTH_PROVIDER: "better-auth" });
-    expect(() => validateDeploymentStartup("api", betterAuth)).not.toThrow();
-    expect(() =>
-      validateDeploymentStartup("api", { ...betterAuth, BETTER_AUTH_SECRET: "" }),
-    ).toThrow(/BETTER_AUTH_SECRET/);
+  it("gives the API the Better Auth secret Coolify must hold", () => {
+    expect(coolify("api").environment.BETTER_AUTH_SECRET).toBe("${BETTER_AUTH_SECRET:?}");
+    expect(() => resolveEnvironment("api", { ...settings, BETTER_AUTH_SECRET: "" })).toThrow(
+      /BETTER_AUTH_SECRET/,
+    );
   });
 
   it("keeps each service's credentials to what it uses", () => {

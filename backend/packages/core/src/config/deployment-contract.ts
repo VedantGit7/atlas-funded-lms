@@ -176,7 +176,6 @@ export function validateDeploymentConfiguration(
         }
         seenParameters.add(parameter);
       }
-      const role = login.split(".")[0] ?? ""; // Supabase pooler logins may suffix the project ref.
       if (
         !["postgres:", "postgresql:"].includes(parsed.protocol) ||
         !parsed.hostname ||
@@ -187,8 +186,8 @@ export function validateDeploymentConfiguration(
       )
         throw new Error();
       if (
-        ["postgres", "atlas", "atlas_app", "atlas_platform", "supabase_admin"].includes(
-          role.toLowerCase(),
+        ["postgres", "atlas", "atlas_app", "atlas_platform", "atlas_auth"].includes(
+          login.toLowerCase(),
         )
       )
         issues.push(`${key} must use a dedicated runtime login, not an owner or group role`);
@@ -231,58 +230,13 @@ export function validateDeploymentConfiguration(
     issues.push("API_INTERNAL_URL must use HTTPS outside an explicit local/private transport");
   for (const key of ["PUBLIC_SITE_URL", "CERTIFICATE_PUBLIC_BASE_URL"])
     if (value(key)) url(key, ["https:"], true);
-  url("NEXT_PUBLIC_SUPABASE_URL", ["https:"], true);
-  requireValue("NEXT_PUBLIC_SUPABASE_ANON_KEY");
-  requireValue("SUPABASE_SERVICE_ROLE_KEY");
-  if (
-    value("NEXT_PUBLIC_SUPABASE_ANON_KEY") &&
-    value("NEXT_PUBLIC_SUPABASE_ANON_KEY") === value("SUPABASE_SERVICE_ROLE_KEY")
-  )
-    issues.push("NEXT_PUBLIC_SUPABASE_ANON_KEY must not expose the service-role key");
-  // Login system (launch plan phase 3): Supabase until task 5.1, then Better
-  // Auth, which runs in the API and signs its cookies with this secret.
-  const authProvider = value("AUTH_PROVIDER");
-  if (authProvider && authProvider !== "supabase" && authProvider !== "better-auth")
-    issues.push("AUTH_PROVIDER must be supabase or better-auth when configured");
-  if (
-    authProvider === "better-auth" &&
-    service === "api" &&
-    value("BETTER_AUTH_SECRET").length < 32
-  )
-    issues.push(
-      "BETTER_AUTH_SECRET must be at least 32 characters when AUTH_PROVIDER is better-auth",
-    );
+  // Login (docs/engineering/better-auth-design.md): Better Auth runs in the API,
+  // signs its cookies and encrypts authenticators with this secret.
+  if (service === "api") secret("BETTER_AUTH_SECRET");
   // Google sign-in (launch plan 0.4 and 3.3): a client ID without its secret,
   // or the reverse, would fail at the first sign-in instead of at deploy.
   if (Boolean(value("GOOGLE_CLIENT_ID")) !== Boolean(value("GOOGLE_CLIENT_SECRET")))
     issues.push("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together");
-  if (value("NEXT_PUBLIC_SUPABASE_ANON_KEY").startsWith("sb_secret_"))
-    issues.push("NEXT_PUBLIC_SUPABASE_ANON_KEY must be a public key");
-  const publicKey = value("NEXT_PUBLIC_SUPABASE_ANON_KEY");
-  if (publicKey && !publicKey.startsWith("sb_publishable_")) {
-    try {
-      const segments = publicKey.split(".");
-      if (segments.length !== 3 || !segments[1]) throw new Error();
-      const payload: unknown = JSON.parse(Buffer.from(segments[1], "base64url").toString("utf8"));
-      if (
-        !payload ||
-        typeof payload !== "object" ||
-        !("role" in payload) ||
-        payload.role !== "anon"
-      )
-        throw new Error();
-    } catch {
-      issues.push(
-        "NEXT_PUBLIC_SUPABASE_ANON_KEY must be a publishable key or legacy anon key, never a privileged JWT",
-      );
-    }
-  }
-  if (
-    value("SUPABASE_URL") &&
-    value("SUPABASE_URL").replace(/\/$/, "") !==
-      value("NEXT_PUBLIC_SUPABASE_URL").replace(/\/$/, "")
-  )
-    issues.push("SUPABASE_URL must match NEXT_PUBLIC_SUPABASE_URL when both are configured");
 
   for (const key of ["CRON_SECRET", "INTERNAL_WORKER_SECRET", "OBSERVABILITY_HASH_SALT"])
     secret(key);

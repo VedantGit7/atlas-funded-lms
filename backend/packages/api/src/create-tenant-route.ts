@@ -343,10 +343,10 @@ export function createTenantRoute<
           // ---------------------------------------------------------------
           // Phase 1: no database connection held.
           //
-          // requireSessionUser makes up to three Supabase HTTPS calls. It used
-          // to run inside withGlobalDb, pinning a pooled connection for the
-          // duration of that network I/O. Input parsing is pure CPU and likewise
-          // needs no connection.
+          // requireSessionUser reads the session on Better Auth's own small
+          // pool, so it holds none of the main pool's connections (authentication
+          // used to be network I/O inside withGlobalDb, pinning one). Input
+          // parsing is pure CPU and likewise needs no connection.
           //
           // Note this moves authentication ahead of tenant resolution, so an
           // unauthenticated request to an unknown host now fails 401 rather than

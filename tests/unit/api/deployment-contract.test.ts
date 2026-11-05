@@ -188,15 +188,6 @@ describe("F05 deployment contract", () => {
       validateDeploymentConfiguration({ ...deploymentEnv(), API_PROXY_SECRET: "" }, "worker"),
     ).not.toThrow();
   });
-  it("accepts either login system, and only those (launch plan phase 3)", () => {
-    for (const AUTH_PROVIDER of [undefined, "supabase"])
-      expect(() =>
-        validateDeploymentConfiguration({ ...deploymentEnv(), AUTH_PROVIDER }),
-      ).not.toThrow();
-    expect(() =>
-      validateDeploymentConfiguration({ ...deploymentEnv(), AUTH_PROVIDER: "auth0" }),
-    ).toThrow(/AUTH_PROVIDER must be supabase or better-auth/);
-  });
   it("needs the Google client ID and secret together (launch plan 3.3)", () => {
     expect(() =>
       validateDeploymentConfiguration({ ...deploymentEnv(), GOOGLE_CLIENT_ID: "id" }),
@@ -209,16 +200,19 @@ describe("F05 deployment contract", () => {
       }),
     ).not.toThrow();
   });
-  it("requires a long Better Auth secret on the API when Better Auth is on", () => {
-    const betterAuth = { ...deploymentEnv(), AUTH_PROVIDER: "better-auth" };
+  it("requires a strong Better Auth secret on the API", () => {
     expect(() =>
-      validateDeploymentConfiguration({ ...betterAuth, BETTER_AUTH_SECRET: "short" }, "api"),
-    ).toThrow(/BETTER_AUTH_SECRET must be at least 32 characters/);
-    expect(() =>
-      validateDeploymentConfiguration({ ...betterAuth, BETTER_AUTH_SECRET: "b".repeat(32) }, "api"),
-    ).not.toThrow();
+      validateDeploymentConfiguration({ ...deploymentEnv(), BETTER_AUTH_SECRET: "" }, "api"),
+    ).toThrow(/BETTER_AUTH_SECRET/);
+    for (const BETTER_AUTH_SECRET of ["short", "b".repeat(40)])
+      expect(() =>
+        validateDeploymentConfiguration({ ...deploymentEnv(), BETTER_AUTH_SECRET }, "api"),
+      ).toThrow(/BETTER_AUTH_SECRET must be a strong non-development secret/);
+    expect(() => validateDeploymentConfiguration(deploymentEnv(), "api")).not.toThrow();
     // Only the API runs Better Auth.
-    expect(() => validateDeploymentConfiguration(betterAuth, "worker")).not.toThrow();
+    expect(() =>
+      validateDeploymentConfiguration({ ...deploymentEnv(), BETTER_AUTH_SECRET: "" }, "worker"),
+    ).not.toThrow();
   });
   it.each(["api", "worker", "web"] as const)(
     "refuses marketing email on %s while SMTP_HOST is ZeptoMail (launch plan 1.6)",
@@ -306,30 +300,13 @@ describe("F05 deployment contract", () => {
       "postgresql://atlas_app_login:other-password@other.example.test/atlas";
     expect(() => validateDeploymentConfiguration(env)).toThrow(/separate database roles/);
   });
-  it.each(["postgres", "atlas", "supabase_admin"])(
-    "rejects privileged database login %s",
-    (login) => {
-      expect(() =>
-        validateDeploymentConfiguration({
-          ...deploymentEnv(),
-          DATABASE_URL: `postgresql://${login}:private@db.example.test/atlas`,
-        }),
-      ).toThrow(/dedicated runtime login/);
-    },
-  );
-  it("rejects a server secret in the public Supabase slot", () => {
+  it.each(["postgres", "atlas", "atlas_auth"])("rejects privileged database login %s", (login) => {
     expect(() =>
       validateDeploymentConfiguration({
         ...deploymentEnv(),
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_secret_not-public",
+        DATABASE_URL: `postgresql://${login}:private@db.example.test/atlas`,
       }),
-    ).toThrow(/public key/);
-  });
-  it("rejects privileged legacy keys even after server key rotation", () => {
-    const key = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ role: "service_role" })).toString("base64url")}.synthetic`;
-    expect(() =>
-      validateDeploymentConfiguration({ ...deploymentEnv(), NEXT_PUBLIC_SUPABASE_ANON_KEY: key }),
-    ).toThrow(/privileged JWT/);
+    ).toThrow(/dedicated runtime login/);
   });
   it("rejects missing database TLS", () => {
     expect(() =>

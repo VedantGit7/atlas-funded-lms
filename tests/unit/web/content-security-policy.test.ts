@@ -7,12 +7,9 @@ import * as policy from "../../../configs/security-headers.mjs";
 import { config, proxy } from "../../../frontend/apps/web/src/proxy";
 import { ThemeInitScript } from "../../../frontend/apps/web/src/components/ThemeInitScript";
 
-const session = vi.hoisted(() => ({ valid: true, refreshed: false }));
+const session = vi.hoisted(() => ({ valid: true }));
 vi.mock("../../../frontend/apps/web/src/lib/server/session-refresh", () => ({
-  hasValidAccessToken: () => session.valid,
-  tryRefreshSessionForProxy: async () => (session.refreshed ? new Response() : null),
-  mergeRequestCookieHeader: () => "atlas=refreshed",
-  forwardRefreshedSessionCookies: vi.fn(),
+  hasSessionCookie: () => session.valid,
 }));
 
 const nonce = "abcdefghijklmnopqrstuvwx";
@@ -29,7 +26,6 @@ const build = (
 afterEach(() => {
   vi.unstubAllEnvs();
   session.valid = true;
-  session.refreshed = false;
 });
 
 describe("F13 document CSP", () => {
@@ -96,7 +92,6 @@ describe("F13 document CSP", () => {
   it("derives exact configured provider origins without leaking Sentry keys or URL paths", () => {
     const csp = build(nonce, {
       NODE_ENV: "production",
-      NEXT_PUBLIC_SUPABASE_URL: "https://project.supabase.co",
       NEXT_PUBLIC_SENTRY_DSN: "https://public-key@o123.ingest.sentry.io/42",
       NEXT_PUBLIC_POSTHOG_KEY: "public-project-key",
       NEXT_PUBLIC_POSTHOG_HOST: "https://eu.i.posthog.com",
@@ -105,8 +100,6 @@ describe("F13 document CSP", () => {
       CSP_FRAME_ORIGINS: "https://video.example.com",
     });
     for (const origin of [
-      "https://project.supabase.co",
-      "wss://project.supabase.co",
       "https://o123.ingest.sentry.io",
       "https://eu.i.posthog.com",
       "https://account123.r2.cloudflarestorage.com",
@@ -207,17 +200,21 @@ describe("F13 document CSP", () => {
     expect(response.headers.get("cache-control")).toContain("no-store");
   });
 
-  it("keeps rendering nonce and refreshed cookies on the protected refresh path", async () => {
+  it("keeps the rendering nonce and the session cookie on a signed-in protected route", async () => {
     vi.stubEnv("CSP_ENFORCE", "1");
-    session.valid = false;
-    session.refreshed = true;
-    const response = await proxy(new NextRequest("https://tenant.example.com/admin"));
+    const response = await proxy(
+      new NextRequest("https://tenant.example.com/admin", {
+        headers: { cookie: "atlas_session=opaque.signature" },
+      }),
+    );
     const value = response.headers.get("x-middleware-request-x-nonce");
     expect(response.headers.get("content-security-policy")).toContain(`'nonce-${value}'`);
     expect(response.headers.get("x-middleware-request-content-security-policy")).toBe(
       response.headers.get("content-security-policy"),
     );
-    expect(response.headers.get("x-middleware-request-cookie")).toBe("atlas=refreshed");
+    expect(response.headers.get("x-middleware-request-cookie")).toBe(
+      "atlas_session=opaque.signature",
+    );
   });
 
   it("does not attach the web document policy to API/SCORM rewrites", async () => {

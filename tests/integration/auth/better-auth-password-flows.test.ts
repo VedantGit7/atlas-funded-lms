@@ -20,7 +20,7 @@ import { authRequestContext } from "@atlas/auth/better-auth-flows";
 import { requireSessionUser, resolveSessionPrincipal } from "@atlas/api/session-user";
 
 /**
- * Launch plan task 3.2 against Postgres, with AUTH_PROVIDER=better-auth: the
+ * Launch plan task 3.2 against Postgres: the
  * password flows the routes call, end to end through Better Auth and our
  * tables. Emails are captured, not sent; their tokens drive the next step.
  */
@@ -95,8 +95,7 @@ suite("Better Auth password flows", () => {
   beforeAll(async () => {
     owner = new Client({ connectionString: process.env.DATABASE_URL });
     await owner.connect();
-    for (const key of ["AUTH_PROVIDER", "BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
-    process.env["AUTH_PROVIDER"] = "better-auth";
+    for (const key of ["BETTER_AUTH_SECRET"]) savedEnv[key] = process.env[key];
     process.env["BETTER_AUTH_SECRET"] = randomBytes(32).toString("base64url");
   });
 
@@ -110,7 +109,6 @@ suite("Better Auth password flows", () => {
     await owner.end();
     // Restore the environment the suite started with.
     Object.assign(process.env, savedEnv);
-    if (savedEnv["AUTH_PROVIDER"] === undefined) delete process.env["AUTH_PROVIDER"];
     if (savedEnv["BETTER_AUTH_SECRET"] === undefined) delete process.env["BETTER_AUTH_SECRET"];
     setAtlasAuthForTests(undefined);
     await closeAuthPrismaForTests();
@@ -147,7 +145,6 @@ suite("Better Auth password flows", () => {
 
     const user = await requireSessionUser(request(cookie));
     expect(user).toMatchObject({
-      provider: "better-auth",
       email,
       emailConfirmed: true,
       mfaEnabled: false,
@@ -195,9 +192,9 @@ suite("Better Auth password flows", () => {
     const email = freshEmail();
     const placeholderId = randomUUID();
     await owner.query(
-      `insert into auth_principals (id, supabase_user_id, email, email_normalized, global_status, updated_at)
-       values ($1, $2, $3, $3, 'unclaimed', now())`,
-      [placeholderId, randomUUID(), email],
+      `insert into auth_principals (id, email, email_normalized, global_status, updated_at)
+       values ($1, $2, $2, 'unclaimed', now())`,
+      [placeholderId, email],
     );
 
     const { principalId } = await signUpAndVerify(email);
@@ -242,6 +239,38 @@ suite("Better Auth password flows", () => {
         password: "yet-another-password",
       }),
     ).rejects.toMatchObject({ status: 401 });
+  });
+
+  it("gives an account with no login method its first password through a reset", async () => {
+    // How a fresh environment's first platform operator gets a password, and
+    // how an account that signed in with Supabase gets one back (launch plan
+    // 3.8; docs/runbooks/platform-operator-access.md).
+    const email = freshEmail();
+    const principalId = randomUUID();
+    await owner.query(
+      `insert into auth_principals (id, email, email_normalized, email_verified, global_status, updated_at)
+       values ($1, $2, $2, true, 'active', now())`,
+      [principalId, email],
+    );
+
+    const { emails } = await requestPasswordResetWithBetterAuth({
+      ctx: authRequestContext(request()),
+      email,
+    });
+    await expect(
+      resetPasswordWithBetterAuth({
+        ctx: authRequestContext(request()),
+        token: tokenOf(emails, "reset-password"),
+        password: NEW_PASSWORD,
+      }),
+    ).resolves.toEqual({ principalId, email });
+    await expect(
+      loginWithPassword({
+        db: perStatement,
+        input: { email, password: NEW_PASSWORD },
+        req: request(),
+      }),
+    ).resolves.toMatchObject({ status: "signed_in" });
   });
 
   it("sends no reset email for an unknown address, and answers the same", async () => {

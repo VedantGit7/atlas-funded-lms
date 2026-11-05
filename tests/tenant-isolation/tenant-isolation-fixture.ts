@@ -100,7 +100,6 @@ export async function createTenantIsolationFixture(): Promise<TenantIsolationFix
         await tx.$executeRaw`
           INSERT INTO auth_principals (
             id,
-            supabase_user_id,
             email,
             email_normalized,
             global_status,
@@ -109,7 +108,6 @@ export async function createTenantIsolationFixture(): Promise<TenantIsolationFix
           )
           VALUES (
             ${tenant.principalId}::uuid,
-            ${randomUUID()}::uuid,
             ${`${tenant.slug}@example.test`},
             ${`${tenant.slug}@example.test`},
             'active',

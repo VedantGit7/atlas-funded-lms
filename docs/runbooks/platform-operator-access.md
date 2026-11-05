@@ -57,9 +57,7 @@ The initial grantor is null because no application operator exists yet; the exec
 
 A new environment has no tenant, so the first operator gets an account, a grant and MFA without one.
 
-1. **Create the sign-in.** In the environment's Supabase project, open **Authentication → Users → Add user → Create new user**. Enter the operator's email and a strong password, and tick **Auto Confirm User**.
-2. **Sign in on the platform host** (`https://<PLATFORM_HOST>/login`). The sign-in records the account in `auth_principals`. The console then answers "Platform access denied", because there is no grant yet.
-3. **Grant it.** As the database owner, find the principal and run the bootstrap above with its id. On Coolify, the owner's URL is in `/root/atlas/<env>/migrate.env` ("Databases and migrations" in `coolify-deployment.md`):
+1. **Create the account and grant it.** As the database owner, create the operator's account, verified, then run the bootstrap above with its id. On Coolify, the owner's URL is in `/root/atlas/<env>/migrate.env` ("Databases and migrations" in `coolify-deployment.md`):
 
    ```bash
    ENV=staging
@@ -70,8 +68,13 @@ A new environment has no tenant, so the first operator gets an account, a grant 
    ```
 
    ```sql
-   SELECT id, global_status FROM auth_principals WHERE email_normalized = lower('<email>');
+   INSERT INTO auth_principals (id, email, email_normalized, email_verified, global_status, updated_at)
+   VALUES (gen_random_uuid(), lower('<email>'), lower('<email>'), true, 'active', now())
+   RETURNING id;
    ```
+
+2. **Set the password.** On the platform host (`https://<PLATFORM_HOST>/login`), the operator uses **Forgot password?** and follows the emailed link. The reset gives an account with no login method its first password. Nobody else learns it: there is no password to type at the database or into chat.
+3. **Sign in on the platform host.** The console then asks for MFA.
 
 4. **Set up MFA in the console.** Reload `https://<PLATFORM_HOST>/platform`. With a grant but no verified factor, the console shows **Set up multi-factor authentication**: scan the code, enter the 6-digit code, then continue. Verifying the factor completes MFA for that session.
 
@@ -83,7 +86,7 @@ A new environment has no tenant, so the first operator gets an account, a grant 
    2. In the hostname's DNS (Cloudflare), create that TXT record: name `_atlas-verify.<hostname>`, the value shown. Also point the hostname at the server (`coolify-deployment.md`, "TLS and DNS").
    3. **Verify.** The API looks the record up through public resolvers. A match makes the domain active, so requests for it reach the tenant. Otherwise the reason is shown, and Verify can be repeated once DNS has published the record.
    4. **Make primary**, so invitation and email links use it.
-7. **Invite the owner** once the tenant's primary domain is active: open the tenant, then **Lifecycle → Send owner invitation**, with a reason. The owner gets an email (Supabase's invitation, or a sign-in link for an existing account) that opens `https://<primary domain>/invite/accept`. Sending again replaces the link. The action refuses while the tenant is not active, has no active primary domain (or only a local one outside development), or has no pending owner invitation.
+7. **Invite the owner** once the tenant's primary domain is active: open the tenant, then **Lifecycle → Send owner invitation**, with a reason. The owner gets the academy's invitation email, which opens `https://<primary domain>/invite/accept`: someone without an account sets a password there, and an existing account signs in to accept. Sending again replaces the link. The action refuses while the tenant is not active, has no active primary domain (or only a local one outside development), or has no pending owner invitation.
 
 ## Recovery when operator history exists
 
@@ -131,4 +134,4 @@ This code change does not retroactively remove legacy memberships. Completing th
 
 ## Grants and account changes (audit H6)
 
-A grant belongs to an account, not to an email address. A sign-in never carries a grant to a different Supabase user: approving a relink in the platform console revokes the account's grant, and a disabled account's grant confers nothing while it stays disabled. See [identity and account review](identity-and-account-review.md).
+A grant belongs to an account, not to an email address. An unclaimed placeholder that carries a grant is never claimed by a sign-in, and a disabled account's grant confers nothing while it stays disabled. See [identity and account review](identity-and-account-review.md).

@@ -19,7 +19,7 @@ export const POST = createPlatformRoute({
       principalId: ctx.platformPrincipalId,
       requestId: ctx.requestId,
     });
-    const { session } = await verifyMfaEnrollment({ factorId: body.factorId, code: body.code });
+    const { session } = await verifyMfaEnrollment({ code: body.code });
     await applyVerifiedSessionToCookieStore(session);
     return { data: { ok: true as const } };
   },

@@ -35,11 +35,10 @@ async function insertMembership(args: {
 }): Promise<void> {
   await args.tx.$executeRaw`
     insert into auth_principals (
-      id, supabase_user_id, email, email_normalized, global_status, created_at, updated_at
+      id, email, email_normalized, global_status, created_at, updated_at
     )
     values (
       ${args.principalId}::uuid,
-      ${randomUUID()}::uuid,
       ${`member-${args.membershipId.slice(0, 8)}@example.test`},
       ${`member-${args.membershipId.slice(0, 8)}@example.test`},
       'active',

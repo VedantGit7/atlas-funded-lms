@@ -9,24 +9,13 @@ type PerformLogoutOptions = {
 };
 
 /**
- * Ends the Atlas session on this device. Clears the httpOnly auth cookies the
- * server uses for `/api/v1/me`, then best-effort clears the Supabase browser
- * session and client caches.
+ * Ends the Atlas session on this device: the API deletes the session and the
+ * httpOnly cookie is cleared, then the client caches are.
  */
 export async function performAtlasLogout(options: PerformLogoutOptions = {}): Promise<string> {
   const redirectTo = options.redirectTo ?? "/login";
 
   await clearAtlasAuthSession();
-
-  try {
-    // The learner shell needs the auth SDK only after a sign-out request.
-    const { createSupabaseBrowserClient } = await import("../supabase/browser");
-    const supabase = createSupabaseBrowserClient();
-    await supabase.auth.signOut();
-  } catch {
-    // Auth cookies are already cleared; Supabase sign-out is best-effort.
-  }
-
   clearClientDataCache("logout");
 
   return redirectTo;

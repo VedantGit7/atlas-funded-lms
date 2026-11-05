@@ -112,8 +112,7 @@ suite("Better Auth on the Atlas schema", () => {
 
     expect(user.id).toMatch(UUID_V7);
     const { rows } = await owner.query(
-      `select email, email_normalized, name, email_verified, global_status, mfa_enabled,
-              supabase_user_id
+      `select email, email_normalized, name, email_verified, global_status, mfa_enabled
          from auth_principals where id = $1`,
       [user.id],
     );
@@ -124,7 +123,6 @@ suite("Better Auth on the Atlas schema", () => {
       email_verified: false,
       global_status: "active",
       mfa_enabled: false,
-      supabase_user_id: null,
     });
 
     const accounts = await owner.query(

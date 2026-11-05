@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPublicRouteHandler, requireSessionUser, resolveRequestTenant } from "@atlas/api";
-import { authProvider, invitedAccountState } from "@atlas/auth";
+import { invitedAccountState } from "@atlas/auth";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { invalidInvitation, previewInvitation } from "@atlas/membership";
 import {
@@ -47,10 +47,8 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
     data: {
       ...preview,
       signedInEmail,
-      // Better Auth: no account yet means the page can set a password now.
-      ...(authProvider() === "better-auth"
-        ? { account: await invitedAccountState(preview.invitedEmail) }
-        : {}),
+      // No account yet means the page can set a password now.
+      account: await invitedAccountState(preview.invitedEmail),
     },
   });
 

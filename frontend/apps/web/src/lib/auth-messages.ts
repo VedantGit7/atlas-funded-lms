@@ -29,8 +29,6 @@ const IDENTITY_BLOCK_MESSAGES = {
   ACCOUNT_DISABLED:
     "This account has been disabled. Contact support if you think this is a mistake.",
   EMAIL_NOT_VERIFIED: "Verify your email address using the link we sent you, then sign in.",
-  ACCOUNT_REVIEW_REQUIRED:
-    "This email belongs to an earlier account. For your security, support must confirm the change before you can sign in. Contact support to continue.",
   // Google sign-in for an address that already has an account it can't be
   // linked to yet; Google has proven the person controls the address.
   ACCOUNT_NOT_LINKED:
@@ -43,7 +41,6 @@ export type IdentityBlockCode = keyof typeof IDENTITY_BLOCK_MESSAGES;
 const IDENTITY_BLOCK_QUERY: Record<IdentityBlockCode, string> = {
   ACCOUNT_DISABLED: "account_disabled",
   EMAIL_NOT_VERIFIED: "email_not_verified",
-  ACCOUNT_REVIEW_REQUIRED: "account_review",
   ACCOUNT_NOT_LINKED: "account_not_linked",
 };
 

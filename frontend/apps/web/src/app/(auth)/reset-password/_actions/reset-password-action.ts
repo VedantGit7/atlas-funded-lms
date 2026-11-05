@@ -1,12 +1,10 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PASSWORD_POLICY_REJECTION_MESSAGE } from "@atlas/auth/auth-errors";
 import {
   PublicPasswordResetCompleteSchema,
   PublicPasswordResetRequestSchema,
-  type PublicPasswordResetCompleteResponse,
 } from "@atlas/contracts/domain-identity/schemas/public-auth";
 import { GENERIC_PASSWORD_RESET_MESSAGE } from "../../../../lib/auth-messages";
 import { readFormString } from "../../../../lib/server/form";
@@ -16,13 +14,8 @@ export type ResetPasswordActionState = {
   ok: boolean;
   message: string;
   requestId: string;
-  /** The account has MFA: the form must ask for an authenticator code. */
-  mfaRequired?: boolean;
 };
 
-const MFA_REQUIRED_MESSAGE =
-  "Your account uses two-step verification. Enter the 6-digit code from your authenticator app to finish.";
-const MFA_INVALID_MESSAGE = "That code didn't work. Check your authenticator app and try again.";
 const RESET_FAILED_MESSAGE = "Unable to reset password. Request a new link.";
 
 export async function requestPasswordResetAction(
@@ -39,7 +32,7 @@ export async function requestPasswordResetAction(
   }
 
   try {
-    // The API asks whichever login system this deployment uses to send the link.
+    // The API sends the link, from the academy.
     await serverPublicApi.forgotPassword({ email: parsed.data.email });
   } catch {
     // Always return generic success to avoid email enumeration.
@@ -53,40 +46,27 @@ export async function completePasswordResetAction(
   formData: FormData,
 ): Promise<ResetPasswordActionState> {
   const requestId = crypto.randomUUID();
-  // Supabase's link signs in a recovery session; Better Auth's carries a token.
-  const accessToken = readFormString(formData.get("accessToken"));
-  const token = readFormString(formData.get("token"));
+  // The link carries a single-use token (launch plan task 3.2).
   const parsed = PublicPasswordResetCompleteSchema.safeParse({
     password: readFormString(formData.get("password")),
-    ...(accessToken ? { accessToken } : {}),
-    refreshToken: readFormString(formData.get("refreshToken")),
-    ...(token ? { token } : {}),
-    mfaCode: readFormString(formData.get("mfaCode")),
+    token: readFormString(formData.get("token")),
   });
 
   if (!parsed.success) {
-    if (parsed.error.issues.some((issue) => issue.path[0] === "mfaCode")) {
-      return { ok: false, mfaRequired: true, message: MFA_INVALID_MESSAGE, requestId };
-    }
     if (parsed.error.issues.some((issue) => issue.path[0] === "token")) {
       return { ok: false, message: "Reset link is invalid or expired.", requestId };
     }
     return { ok: false, message: "Password must be at least 10 characters.", requestId };
   }
 
-  // The API checks the password against breaches (audit H6), asks an account
-  // with MFA for its authenticator code (the recovery link signs in at aal1),
-  // and sends the "password changed" security email.
-  let status: PublicPasswordResetCompleteResponse["data"]["status"];
+  // The API checks the password against breaches (audit H6), ends every
+  // session, and sends the "password changed" security email. An account with
+  // MFA still needs its code at the next sign-in.
   try {
-    const body = await serverPublicApi.resetPassword({
+    await serverPublicApi.resetPassword({
       password: parsed.data.password,
-      ...(parsed.data.token
-        ? { token: parsed.data.token }
-        : { accessToken: parsed.data.accessToken, refreshToken: parsed.data.refreshToken }),
-      mfaCode: parsed.data.mfaCode || undefined,
+      token: parsed.data.token,
     });
-    status = body.data.status;
   } catch (error) {
     if (error instanceof ServerPublicApiError) {
       return {
@@ -103,18 +83,5 @@ export async function completePasswordResetAction(
     return { ok: false, message: RESET_FAILED_MESSAGE, requestId };
   }
 
-  if (status === "MFA_REQUIRED") {
-    return { ok: false, mfaRequired: true, message: MFA_REQUIRED_MESSAGE, requestId };
-  }
-  if (status === "MFA_INVALID") {
-    return { ok: false, mfaRequired: true, message: MFA_INVALID_MESSAGE, requestId };
-  }
-
   redirect("/login");
-}
-
-export async function clearRecoverySessionAction(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete("atlas_access_token");
-  cookieStore.delete("atlas_refresh_token");
 }

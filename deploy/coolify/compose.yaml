@@ -40,8 +40,6 @@ services:
       # Off until marketing email has its own provider: the SMTP agent is ZeptoMail,
       # which allows only transactional mail.
       MARKETING_EMAIL_ENABLED: ${MARKETING_EMAIL_ENABLED:-false}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?}
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?}
       # The per-request CSP reads this at runtime to admit the browser's Sentry
       # reports. It is the same DSN the web image was built with.
       NEXT_PUBLIC_SENTRY_DSN: ${SENTRY_DSN:?}
@@ -64,7 +62,6 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:?}
       STORAGE_PROVIDER: r2
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?}
       # Cloudflare sets this header and the firewall admits only Cloudflare.
       TRUSTED_CLIENT_IP_HEADER: cf-connecting-ip
       TRUSTED_PROXY_HOPS: "0"
@@ -111,10 +108,9 @@ services:
       APP_ENV: ${APP_ENV:?}
       APP_URL: ${APP_URL:?}
       ATLAS_SERVICE_RUNTIME: managed-node
-      # The login system (launch plan phase 3): Supabase until staging switches
-      # in task 5.1. Better Auth needs its secret; Google sign-in is optional.
-      AUTH_PROVIDER: ${AUTH_PROVIDER:-supabase}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
+      # Better Auth signs sessions and encrypts authenticators with this.
+      # Google sign-in is optional.
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?}
       BETTER_STACK_WORKER_HEARTBEAT_URL: ${BETTER_STACK_WORKER_HEARTBEAT_URL:?}
       CERTIFICATE_OPEN_BADGE: ${CERTIFICATE_OPEN_BADGE:-false}
       CRON_SECRET: ${CRON_SECRET:?}
@@ -126,8 +122,6 @@ services:
       # Off until marketing email has its own provider: the SMTP agent is ZeptoMail,
       # which allows only transactional mail.
       MARKETING_EMAIL_ENABLED: ${MARKETING_EMAIL_ENABLED:-false}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?}
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?}
       NOTIFICATION_EMAIL_FROM: ${NOTIFICATION_EMAIL_FROM:?}
       NOTIFICATION_EMAIL_PROVIDER: smtp
       OBSERVABILITY_HASH_SALT: ${OBSERVABILITY_HASH_SALT:?}
@@ -149,7 +143,6 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:?}
       STORAGE_PROVIDER: r2
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?}
     volumes:
       # Created on the server when SSL is turned on for Coolify's PostgreSQL.
       - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
@@ -197,8 +190,6 @@ services:
       # Off until marketing email has its own provider: the SMTP agent is ZeptoMail,
       # which allows only transactional mail.
       MARKETING_EMAIL_ENABLED: ${MARKETING_EMAIL_ENABLED:-false}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?}
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?}
       NOTIFICATION_EMAIL_FROM: ${NOTIFICATION_EMAIL_FROM:?}
       NOTIFICATION_EMAIL_PROVIDER: smtp
       OBSERVABILITY_HASH_SALT: ${OBSERVABILITY_HASH_SALT:?}
@@ -221,7 +212,6 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:?}
       STORAGE_PROVIDER: r2
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?}
     volumes:
       # Created on the server when SSL is turned on for Coolify's PostgreSQL.
       - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro

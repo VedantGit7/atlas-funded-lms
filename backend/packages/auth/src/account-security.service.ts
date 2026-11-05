@@ -1,9 +1,6 @@
 import QRCode from "qrcode";
 import { AtlasHttpError } from "@atlas/core/http/errors";
-import { authRequired, passwordPolicyRejection } from "./auth-errors";
 import { assertPasswordNotBreached } from "./password-policy";
-import { createSupabasePublicServerClient } from "./supabase-server";
-import { requireSupabaseUserClient } from "./supabase-user-client";
 import { headers } from "next/headers";
 import {
   authRequestContext,
@@ -16,11 +13,11 @@ import {
   verifySecondFactor,
   requestMagicLinkWithBetterAuth,
   listLoginMethods,
+  signOutOtherSessionsWithBetterAuth,
   startGoogleLink,
   unlinkLoginMethod,
 } from "./better-auth-flows";
 import { applySetCookiesToCookieStore } from "./cookie-store";
-import { authProvider } from "./better-auth-runtime";
 import type { AuthEmail } from "./better-auth";
 
 function mapAuthError(): never {
@@ -36,156 +33,50 @@ async function betterAuthContext() {
 }
 
 export async function changePassword(args: { currentPassword: string; newPassword: string }) {
-  if (authProvider() === "better-auth") {
-    await assertPasswordNotBreached(args.newPassword);
-    const { email } = await changePasswordWithBetterAuth({
-      ctx: authRequestContextFromHeaders(new Headers(await headers())),
-      currentPassword: args.currentPassword,
-      newPassword: args.newPassword,
-    });
-    return { ok: true as const, email };
-  }
-
-  const { supabase, email } = await requireSupabaseUserClient();
-
-  // Check the current password on a client of its own. Signing in on the
-  // user's client would swap its session for a new one at aal1, and Supabase
-  // then refuses the update for anyone with MFA (insufficient_aal; staging, 30
-  // October 2026). The check's own session is signed out straight away.
-  const verifier = createSupabasePublicServerClient();
-  const signIn = await verifier.auth.signInWithPassword({
-    email,
-    password: args.currentPassword,
-  });
-
-  if (signIn.error) {
-    mapAuthError();
-  }
-  await verifier.auth.signOut({ scope: "local" });
-
   await assertPasswordNotBreached(args.newPassword);
-
-  const { error } = await supabase.auth.updateUser({ password: args.newPassword });
-  if (error) {
-    const rejection = passwordPolicyRejection(error);
-    if (rejection) throw rejection;
-    mapAuthError();
-  }
-
+  const { email } = await changePasswordWithBetterAuth({
+    ctx: await betterAuthContext(),
+    currentPassword: args.currentPassword,
+    newPassword: args.newPassword,
+  });
   return { ok: true as const, email };
 }
 
 export async function changeEmail(args: {
   newEmail: string;
-  emailRedirectTo?: string;
-}): Promise<{ ok: true; email: string; emails?: AuthEmail[] }> {
-  if (authProvider() === "better-auth") {
-    // The route sends these: the current address approves the change first.
-    const result = await changeEmailWithBetterAuth({
-      ctx: await betterAuthContext(),
-      newEmail: args.newEmail,
-    });
-    return { ok: true as const, email: result.email, emails: result.emails };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-
-  const { error } = await supabase.auth.updateUser(
-    { email: args.newEmail },
-    args.emailRedirectTo ? { emailRedirectTo: args.emailRedirectTo } : undefined,
-  );
-
-  if (error) {
-    mapAuthError();
-  }
-
-  return { ok: true as const, email: args.newEmail };
+}): Promise<{ ok: true; email: string; emails: AuthEmail[] }> {
+  // The route sends these: the current address approves the change first.
+  const result = await changeEmailWithBetterAuth({
+    ctx: await betterAuthContext(),
+    newEmail: args.newEmail,
+  });
+  return { ok: true as const, email: result.email, emails: result.emails };
 }
 
 export async function listMfaFactors() {
-  if (authProvider() === "better-auth") {
-    return { factors: await listTwoFactorFactors({ ctx: await betterAuthContext() }) };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-  const { data, error } = await supabase.auth.mfa.listFactors();
-  if (error) {
-    mapAuthError();
-  }
-
-  // Phone two-factor is deferred with phone sign-in (launch plan task 3.4).
-  const factors = data.totp.map((factor) => ({
-    id: factor.id,
-    factorType: factor.factor_type,
-    status: factor.status,
-    friendlyName: factor.friendly_name ?? null,
-  }));
-
-  return { factors };
+  return { factors: await listTwoFactorFactors({ ctx: await betterAuthContext() }) };
 }
 
 export async function enrollMfaTotp(args: { password?: string | undefined } = {}) {
-  if (authProvider() === "better-auth") {
-    const enabled = await enableTwoFactor({
-      ctx: await betterAuthContext(),
-      password: args.password,
-    });
-    return {
-      factorId: enabled.factorId,
-      // Better Auth gives the otpauth:// URI; the settings page shows a QR image.
-      qrCode: await QRCode.toDataURL(enabled.uri, { margin: 1, width: 240 }),
-      secret: enabled.secret,
-      uri: enabled.uri,
-      backupCodes: enabled.backupCodes,
-    };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-  const { data, error } = await supabase.auth.mfa.enroll({
-    factorType: "totp",
-    friendlyName: "Authenticator app",
+  const enabled = await enableTwoFactor({
+    ctx: await betterAuthContext(),
+    password: args.password,
   });
-
-  if (error) {
-    mapAuthError();
-  }
-
   return {
-    factorId: data.id,
-    qrCode: data.totp.qr_code,
-    secret: data.totp.secret,
-    uri: data.totp.uri,
+    factorId: enabled.factorId,
+    // Better Auth gives the otpauth:// URI; the settings page shows a QR image.
+    qrCode: await QRCode.toDataURL(enabled.uri, { margin: 1, width: 240 }),
+    secret: enabled.secret,
+    uri: enabled.uri,
+    backupCodes: enabled.backupCodes,
   };
 }
 
 /**
- * A session that completed MFA (aal2), to be set as the caller's cookies:
- * Supabase's tokens, or Better Auth's Set-Cookie headers (none when the
- * session was stepped up in place).
+ * The Set-Cookie headers for a session that completed MFA (aal2); none when
+ * the session was stepped up in place.
  */
-export type MfaVerifiedSession =
-  | { accessToken: string; refreshToken: string; expiresIn: number }
-  | { setCookies: string[] };
-
-async function verifiedSession(
-  supabase: Awaited<ReturnType<typeof requireSupabaseUserClient>>["supabase"],
-): Promise<MfaVerifiedSession> {
-  const { data, error } = await supabase.auth.getSession();
-  if (error || !data.session) mapAuthError();
-  return {
-    accessToken: data.session.access_token,
-    refreshToken: data.session.refresh_token,
-    expiresIn: data.session.expires_in,
-  };
-}
-
-function invalidMfaCode(): AtlasHttpError {
-  return new AtlasHttpError({
-    code: "VALIDATION_ERROR",
-    status: 400,
-    message: "That code didn't work. Check your authenticator app and try again.",
-  });
-}
+export type MfaVerifiedSession = { setCookies: string[] };
 
 /**
  * Verifies a newly enrolled factor. Verification also completes MFA for this
@@ -194,218 +85,66 @@ function invalidMfaCode(): AtlasHttpError {
  * an aal1 session and is challenged again (audit H4).
  */
 export async function verifyMfaEnrollment(args: {
-  factorId: string;
   code: string;
 }): Promise<{ ok: true; session: MfaVerifiedSession }> {
-  if (authProvider() === "better-auth") {
-    const verified = await verifySecondFactor({ ctx: await betterAuthContext(), code: args.code });
-    return { ok: true as const, session: verified.cookies };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-
-  const challenge = await supabase.auth.mfa.challenge({ factorId: args.factorId });
-  if (challenge.error) {
-    mapAuthError();
-  }
-
-  const verify = await supabase.auth.mfa.verify({
-    factorId: args.factorId,
-    challengeId: challenge.data.id,
-    code: args.code,
-  });
-
-  if (verify.error) {
-    throw invalidMfaCode();
-  }
-
-  return { ok: true as const, session: await verifiedSession(supabase) };
+  const verified = await verifySecondFactor({ ctx: await betterAuthContext(), code: args.code });
+  return { ok: true as const, session: verified.cookies };
 }
 
 /**
- * Step-up: completes MFA for the current session with an already-verified
- * factor, returning the aal2 session (audit H4). Routes that declare
- * `mfa: "required"` accept the session from then on.
+ * Step-up: completes MFA for the current session, returning the aal2 session
+ * (audit H4). Routes that declare `mfa: "required"` accept the session from
+ * then on. A backup code works here too; the session is marked aal2 in place.
  */
-export async function stepUpMfa(args: {
-  code: string;
-  factorId?: string | undefined;
-}): Promise<{ session: MfaVerifiedSession }> {
-  if (authProvider() === "better-auth") {
-    // A backup code works here too; the session is marked aal2 in place.
-    const verified = await verifySecondFactor({ ctx: await betterAuthContext(), code: args.code });
-    return { session: verified.cookies };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-  const { data, error } = await supabase.auth.mfa.listFactors();
-  if (error) {
-    mapAuthError();
-  }
-
-  // `totp` lists verified TOTP factors only; unverified enrollments cannot step up.
-  const factor = args.factorId
-    ? data.totp.find((candidate) => candidate.id === args.factorId)
-    : data.totp[0];
-  if (!factor) {
-    throw new AtlasHttpError({
-      code: "VALIDATION_ERROR",
-      status: 409,
-      message: "Set up an authenticator app before continuing.",
-    });
-  }
-
-  const verify = await supabase.auth.mfa.challengeAndVerify({
-    factorId: factor.id,
-    code: args.code,
-  });
-  if (verify.error) {
-    throw invalidMfaCode();
-  }
-
-  return { session: await verifiedSession(supabase) };
+export async function stepUpMfa(args: { code: string }): Promise<{ session: MfaVerifiedSession }> {
+  const verified = await verifySecondFactor({ ctx: await betterAuthContext(), code: args.code });
+  return { session: verified.cookies };
 }
 
-export async function unenrollMfaFactor(args: { factorId: string }) {
-  if (authProvider() === "better-auth") {
-    // One factor per principal: removing it also removes the backup codes.
-    await disableTwoFactor({ ctx: await betterAuthContext() });
-    return { ok: true as const };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-  const { error } = await supabase.auth.mfa.unenroll({ factorId: args.factorId });
-  if (error) {
-    mapAuthError();
-  }
+/** One factor per principal: removing it also removes the backup codes. */
+export async function unenrollMfaFactor() {
+  await disableTwoFactor({ ctx: await betterAuthContext() });
   return { ok: true as const };
 }
 
 export async function signOutOtherSessions() {
-  const { supabase } = await requireSupabaseUserClient();
-  const { error } = await supabase.auth.signOut({ scope: "others" });
-  if (error) {
-    mapAuthError();
-  }
+  await signOutOtherSessionsWithBetterAuth({ ctx: await betterAuthContext() });
   return { ok: true as const };
 }
 
 export async function listLinkedIdentities() {
-  if (authProvider() === "better-auth") {
-    const methods = await listLoginMethods({ ctx: await betterAuthContext() });
-    return {
-      identities: methods.map((method) => ({
-        id: method.id,
-        provider: method.provider,
-        email: null,
-        createdAt: method.createdAt,
-      })),
-    };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    throw authRequired();
-  }
-
-  const identities = (user.identities ?? []).map((identity) => ({
-    id: identity.id,
-    provider: identity.provider,
-    email: (identity.identity_data?.["email"] as string | undefined) ?? null,
-    createdAt: identity.created_at ?? null,
-  }));
-
-  return { identities };
+  const methods = await listLoginMethods({ ctx: await betterAuthContext() });
+  return {
+    identities: methods.map((method) => ({
+      id: method.id,
+      provider: method.provider,
+      email: null,
+      createdAt: method.createdAt,
+    })),
+  };
 }
 
-export async function startLinkIdentity(args: {
-  provider: "google" | "apple";
-  redirectTo: string;
-}) {
-  if (authProvider() === "better-auth") {
-    // Apple is deferred (launch plan, "Later: Apple sign-in").
-    if (args.provider !== "google") mapAuthError();
-    const start = await startGoogleLink({ ctx: await betterAuthContext() });
-    // The signed state cookie Google's callback is checked against.
-    await applySetCookiesToCookieStore(start.cookies.setCookies);
-    return { url: start.url };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-
-  const { data, error } = await supabase.auth.linkIdentity({
-    provider: args.provider,
-    options: { redirectTo: args.redirectTo },
-  });
-
-  if (error || !data.url) {
-    mapAuthError();
-  }
-
-  return { url: data.url };
+export async function startLinkIdentity(args: { provider: "google" | "apple" }) {
+  // Apple is deferred (launch plan, "Later: Apple sign-in").
+  if (args.provider !== "google") mapAuthError();
+  const start = await startGoogleLink({ ctx: await betterAuthContext() });
+  // The signed state cookie Google's callback is checked against.
+  await applySetCookiesToCookieStore(start.cookies.setCookies);
+  return { url: start.url };
 }
 
 export async function unlinkIdentity(args: { identityId: string }) {
-  if (authProvider() === "better-auth") {
-    await unlinkLoginMethod({ ctx: await betterAuthContext(), id: args.identityId });
-    return { ok: true as const };
-  }
-
-  const { supabase } = await requireSupabaseUserClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    throw authRequired();
-  }
-
-  const identity = (user.identities ?? []).find((item) => item.id === args.identityId);
-  if (!identity) {
-    mapAuthError();
-  }
-
-  const { error } = await supabase.auth.unlinkIdentity(identity);
-
-  if (error) {
-    mapAuthError();
-  }
-
+  await unlinkLoginMethod({ ctx: await betterAuthContext(), id: args.identityId });
   return { ok: true as const };
 }
 
 export async function sendMagicLink(args: {
   email: string;
-  emailRedirectTo?: string;
-  /** Required with Better Auth: the route sends the link. */
-  req?: Request;
-}): Promise<{ ok: true; emails?: AuthEmail[] }> {
-  if (authProvider() === "better-auth") {
-    if (!args.req) return { ok: true as const, emails: [] };
-    const { emails } = await requestMagicLinkWithBetterAuth({
-      ctx: authRequestContext(args.req),
-      email: args.email,
-    });
-    return { ok: true as const, emails };
-  }
-
-  const supabase = (await import("./supabase-server")).createSupabasePublicServerClient();
-
-  const { error } = await supabase.auth.signInWithOtp(
-    args.emailRedirectTo
-      ? { email: args.email, options: { emailRedirectTo: args.emailRedirectTo } }
-      : { email: args.email },
-  );
-
-  if (error) {
-    mapAuthError();
-  }
-
-  return { ok: true as const };
+  req: Request;
+}): Promise<{ ok: true; emails: AuthEmail[] }> {
+  const { emails } = await requestMagicLinkWithBetterAuth({
+    ctx: authRequestContext(args.req),
+    email: args.email,
+  });
+  return { ok: true as const, emails };
 }

@@ -35,8 +35,7 @@ export type TenantDomain = Prisma.TenantDomainModel
 /**
  * Model AuthPrincipal
  * One row per person, and Better Auth's user table (docs/engineering/
- * better-auth-design.md). `supabase_user_id` is empty for Better Auth users
- * and goes away with Supabase (launch plan task 3.8).
+ * better-auth-design.md).
  */
 export type AuthPrincipal = Prisma.AuthPrincipalModel
 /**
@@ -72,12 +71,6 @@ export type AuthTwoFactor = Prisma.AuthTwoFactorModel
  * Revocation is a soft revoke so grant history survives an audit question.
  */
 export type PlatformOperator = Prisma.PlatformOperatorModel
-/**
- * Model AuthPrincipalRelinkRequest
- * H6: a confirmed email signed in under a different Supabase user than the
- * principal it belongs to. Only a platform approval moves the principal.
- */
-export type AuthPrincipalRelinkRequest = Prisma.AuthPrincipalRelinkRequestModel
 /**
  * Model Membership
  * 
