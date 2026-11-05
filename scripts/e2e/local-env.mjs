@@ -11,7 +11,6 @@ export function localEnv() {
     DIRECT_DATABASE_URL: ownerUrl,
     PLATFORM_DATABASE_URL: ownerUrl,
     E2E_OWNER_DATABASE_URL: ownerUrl,
-    AUTH_PROVIDER: "better-auth",
     BETTER_AUTH_SECRET: secret,
     E2E_SEED_PASSWORD: "Atlas-e2e-disposable-Password-1",
     E2E_TENANT_SLUG: "fundedbeyond",

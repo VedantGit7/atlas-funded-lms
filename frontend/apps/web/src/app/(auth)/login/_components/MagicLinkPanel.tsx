@@ -20,12 +20,7 @@ export function MagicLinkPanel() {
     setBusy(true);
     setMessage(null);
     try {
-      const emailRedirectTo = `${window.location.origin}/auth/confirm`;
-      await clientApi.post(
-        "/api/v1/public/auth/magic-link",
-        { email, emailRedirectTo },
-        "magic-link",
-      );
+      await clientApi.post("/api/v1/public/auth/magic-link", { email }, "magic-link");
       setMessage("If an account exists for this email, a sign-in link has been sent.");
       setOpen(false);
     } catch (error) {

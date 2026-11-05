@@ -18,9 +18,7 @@ import {
 import { applyReferralForNewMembership } from "../../../../../../server/sales-referrals/sales-referrals.service";
 import { routeMetadata } from "./route.metadata";
 
-// loginWithPassword verifies with Supabase before mirroring the principal.
-// Acquire a connection only for the mirror's atomic UPDATE or INSERT ON CONFLICT,
-// not for its network wait. Neither statement requires a shared transaction.
+// One connection per statement: none is held while the password is checked.
 const loginPrincipalDb: Parameters<typeof loginWithPassword>[0]["db"] = {
   $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T> {
     return withGlobalDb((db) => db.$queryRaw<T>(query, ...values));
@@ -31,8 +29,8 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
   const host = resolveRequestHostFromHeaders(req.headers);
 
   // Platform plane (e.g. platform.localhost) never resolves a tenant. Platform
-  // operators authenticate against Supabase here; platform authorization is
-  // enforced separately by the platform console shell gate.
+  // operators sign in here; platform authorization is enforced separately by
+  // the platform console shell gate.
   if (resolvePlatformHost(host)) {
     const rawBody: unknown = await req.json();
     rejectClientTenantId(rawBody);
@@ -114,7 +112,6 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
           tenantId: tenant.tenantId,
           authPrincipalId: principalId,
           email: input.email,
-          displayName: result.displayName,
         });
 
         membership = await findMembershipByPrincipal({
@@ -151,7 +148,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
 
   const response = NextResponse.json(body);
 
-  applyAuthSession({ response, session: result.session, persistent: input.rememberMe ?? false });
+  applyAuthSession({ response, session: result.session });
 
   return response;
 });

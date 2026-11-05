@@ -55,23 +55,15 @@ describe("POST /api/v1/public/auth/resend", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveTenant.mockResolvedValue(tenantA);
-    mockResendSignupVerification.mockResolvedValue({ ok: true });
+    mockResendSignupVerification.mockResolvedValue({ ok: true, emails: [] });
   });
 
-  it("forwards the email and tenant redirect to the resend service", async () => {
-    const response = await POST(
-      createRequest({
-        email: "User@Example.com",
-        emailRedirectTo: "https://tenant-a.example.com/auth/confirm",
-      }),
-    );
+  it("forwards the normalised email to the resend service", async () => {
+    const response = await POST(createRequest({ email: "User@Example.com" }));
 
     expect(response.status).toBe(200);
     expect(mockResendSignupVerification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        email: "user@example.com",
-        emailRedirectTo: "https://tenant-a.example.com/auth/confirm",
-      }),
+      expect.objectContaining({ email: "user@example.com" }),
     );
   });
 
@@ -97,8 +89,10 @@ describe("POST /api/v1/public/auth/resend", () => {
     expect(mockResendSignupVerification).not.toHaveBeenCalled();
   });
 
+  // The link always leads back to this academy: the API builds it from the
+  // request's host, so a client can't name one.
   it.each(["https://tenant-b.example.com/auth/confirm", "https://evil.example/auth/confirm"])(
-    "refuses a link that would lead to %s, and sends nothing",
+    "refuses a client-chosen link (%s), and sends nothing",
     async (emailRedirectTo) => {
       const response = await POST(createRequest({ email: "user@example.com", emailRedirectTo }));
       const body = (await response.json()) as { error: { code: string } };

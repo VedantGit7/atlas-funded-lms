@@ -15,8 +15,7 @@ import type * as Prisma from "../internal/prismaNamespace"
 /**
  * Model AuthPrincipal
  * One row per person, and Better Auth's user table (docs/engineering/
- * better-auth-design.md). `supabase_user_id` is empty for Better Auth users
- * and goes away with Supabase (launch plan task 3.8).
+ * better-auth-design.md).
  */
 export type AuthPrincipalModel = runtime.Types.Result.DefaultSelection<Prisma.$AuthPrincipalPayload>
 
@@ -28,7 +27,6 @@ export type AggregateAuthPrincipal = {
 
 export type AuthPrincipalMinAggregateOutputType = {
   id: string | null
-  supabase_user_id: string | null
   email: string | null
   email_normalized: string | null
   name: string | null
@@ -43,7 +41,6 @@ export type AuthPrincipalMinAggregateOutputType = {
 
 export type AuthPrincipalMaxAggregateOutputType = {
   id: string | null
-  supabase_user_id: string | null
   email: string | null
   email_normalized: string | null
   name: string | null
@@ -58,7 +55,6 @@ export type AuthPrincipalMaxAggregateOutputType = {
 
 export type AuthPrincipalCountAggregateOutputType = {
   id: number
-  supabase_user_id: number
   email: number
   email_normalized: number
   name: number
@@ -75,7 +71,6 @@ export type AuthPrincipalCountAggregateOutputType = {
 
 export type AuthPrincipalMinAggregateInputType = {
   id?: true
-  supabase_user_id?: true
   email?: true
   email_normalized?: true
   name?: true
@@ -90,7 +85,6 @@ export type AuthPrincipalMinAggregateInputType = {
 
 export type AuthPrincipalMaxAggregateInputType = {
   id?: true
-  supabase_user_id?: true
   email?: true
   email_normalized?: true
   name?: true
@@ -105,7 +99,6 @@ export type AuthPrincipalMaxAggregateInputType = {
 
 export type AuthPrincipalCountAggregateInputType = {
   id?: true
-  supabase_user_id?: true
   email?: true
   email_normalized?: true
   name?: true
@@ -193,7 +186,6 @@ export type AuthPrincipalGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 
 export type AuthPrincipalGroupByOutputType = {
   id: string
-  supabase_user_id: string | null
   email: string
   email_normalized: string
   name: string
@@ -229,7 +221,6 @@ export type AuthPrincipalWhereInput = {
   OR?: Prisma.AuthPrincipalWhereInput[]
   NOT?: Prisma.AuthPrincipalWhereInput | Prisma.AuthPrincipalWhereInput[]
   id?: Prisma.UuidFilter<"AuthPrincipal"> | string
-  supabase_user_id?: Prisma.UuidNullableFilter<"AuthPrincipal"> | string | null
   email?: Prisma.StringFilter<"AuthPrincipal"> | string
   email_normalized?: Prisma.StringFilter<"AuthPrincipal"> | string
   name?: Prisma.StringFilter<"AuthPrincipal"> | string
@@ -247,13 +238,10 @@ export type AuthPrincipalWhereInput = {
   platform_grants?: Prisma.PlatformOperatorListRelationFilter
   platform_grants_made?: Prisma.PlatformOperatorListRelationFilter
   platform_grants_revoked?: Prisma.PlatformOperatorListRelationFilter
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestListRelationFilter
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestListRelationFilter
 }
 
 export type AuthPrincipalOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  supabase_user_id?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   email_normalized?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -271,13 +259,10 @@ export type AuthPrincipalOrderByWithRelationInput = {
   platform_grants?: Prisma.PlatformOperatorOrderByRelationAggregateInput
   platform_grants_made?: Prisma.PlatformOperatorOrderByRelationAggregateInput
   platform_grants_revoked?: Prisma.PlatformOperatorOrderByRelationAggregateInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestOrderByRelationAggregateInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestOrderByRelationAggregateInput
 }
 
 export type AuthPrincipalWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  supabase_user_id?: string
   email?: string
   email_normalized?: string
   AND?: Prisma.AuthPrincipalWhereInput | Prisma.AuthPrincipalWhereInput[]
@@ -298,13 +283,10 @@ export type AuthPrincipalWhereUniqueInput = Prisma.AtLeast<{
   platform_grants?: Prisma.PlatformOperatorListRelationFilter
   platform_grants_made?: Prisma.PlatformOperatorListRelationFilter
   platform_grants_revoked?: Prisma.PlatformOperatorListRelationFilter
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestListRelationFilter
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestListRelationFilter
-}, "id" | "supabase_user_id" | "email" | "email_normalized">
+}, "id" | "email" | "email_normalized">
 
 export type AuthPrincipalOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  supabase_user_id?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrder
   email_normalized?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -325,7 +307,6 @@ export type AuthPrincipalScalarWhereWithAggregatesInput = {
   OR?: Prisma.AuthPrincipalScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AuthPrincipalScalarWhereWithAggregatesInput | Prisma.AuthPrincipalScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"AuthPrincipal"> | string
-  supabase_user_id?: Prisma.UuidNullableWithAggregatesFilter<"AuthPrincipal"> | string | null
   email?: Prisma.StringWithAggregatesFilter<"AuthPrincipal"> | string
   email_normalized?: Prisma.StringWithAggregatesFilter<"AuthPrincipal"> | string
   name?: Prisma.StringWithAggregatesFilter<"AuthPrincipal"> | string
@@ -340,7 +321,6 @@ export type AuthPrincipalScalarWhereWithAggregatesInput = {
 
 export type AuthPrincipalCreateInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -358,13 +338,10 @@ export type AuthPrincipalCreateInput = {
   platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -382,13 +359,10 @@ export type AuthPrincipalUncheckedCreateInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -406,13 +380,10 @@ export type AuthPrincipalUpdateInput = {
   platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -430,13 +401,10 @@ export type AuthPrincipalUncheckedUpdateInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalCreateManyInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -451,7 +419,6 @@ export type AuthPrincipalCreateManyInput = {
 
 export type AuthPrincipalUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -466,7 +433,6 @@ export type AuthPrincipalUpdateManyMutationInput = {
 
 export type AuthPrincipalUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -481,7 +447,6 @@ export type AuthPrincipalUncheckedUpdateManyInput = {
 
 export type AuthPrincipalCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  supabase_user_id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   email_normalized?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -496,7 +461,6 @@ export type AuthPrincipalCountOrderByAggregateInput = {
 
 export type AuthPrincipalMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  supabase_user_id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   email_normalized?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -511,7 +475,6 @@ export type AuthPrincipalMaxOrderByAggregateInput = {
 
 export type AuthPrincipalMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  supabase_user_id?: Prisma.SortOrder
   email?: Prisma.SortOrder
   email_normalized?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -622,36 +585,6 @@ export type AuthPrincipalUpdateOneWithoutPlatform_grants_revokedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grants_revokedInput, Prisma.AuthPrincipalUpdateWithoutPlatform_grants_revokedInput>, Prisma.AuthPrincipalUncheckedUpdateWithoutPlatform_grants_revokedInput>
 }
 
-export type AuthPrincipalCreateNestedOneWithoutRelink_requestsInput = {
-  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_requestsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_requestsInput>
-  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutRelink_requestsInput
-  connect?: Prisma.AuthPrincipalWhereUniqueInput
-}
-
-export type AuthPrincipalCreateNestedOneWithoutRelink_decisionsInput = {
-  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_decisionsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_decisionsInput>
-  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutRelink_decisionsInput
-  connect?: Prisma.AuthPrincipalWhereUniqueInput
-}
-
-export type AuthPrincipalUpdateOneRequiredWithoutRelink_requestsNestedInput = {
-  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_requestsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_requestsInput>
-  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutRelink_requestsInput
-  upsert?: Prisma.AuthPrincipalUpsertWithoutRelink_requestsInput
-  connect?: Prisma.AuthPrincipalWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AuthPrincipalUpdateToOneWithWhereWithoutRelink_requestsInput, Prisma.AuthPrincipalUpdateWithoutRelink_requestsInput>, Prisma.AuthPrincipalUncheckedUpdateWithoutRelink_requestsInput>
-}
-
-export type AuthPrincipalUpdateOneWithoutRelink_decisionsNestedInput = {
-  create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_decisionsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_decisionsInput>
-  connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutRelink_decisionsInput
-  upsert?: Prisma.AuthPrincipalUpsertWithoutRelink_decisionsInput
-  disconnect?: Prisma.AuthPrincipalWhereInput | boolean
-  delete?: Prisma.AuthPrincipalWhereInput | boolean
-  connect?: Prisma.AuthPrincipalWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AuthPrincipalUpdateToOneWithWhereWithoutRelink_decisionsInput, Prisma.AuthPrincipalUpdateWithoutRelink_decisionsInput>, Prisma.AuthPrincipalUncheckedUpdateWithoutRelink_decisionsInput>
-}
-
 export type AuthPrincipalCreateNestedOneWithoutMembershipsInput = {
   create?: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutMembershipsInput, Prisma.AuthPrincipalUncheckedCreateWithoutMembershipsInput>
   connectOrCreate?: Prisma.AuthPrincipalCreateOrConnectWithoutMembershipsInput
@@ -670,7 +603,6 @@ export type AuthPrincipalUpdateOneWithoutMembershipsNestedInput = {
 
 export type AuthPrincipalCreateWithoutAuth_sessionsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -687,13 +619,10 @@ export type AuthPrincipalCreateWithoutAuth_sessionsInput = {
   platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutAuth_sessionsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -710,8 +639,6 @@ export type AuthPrincipalUncheckedCreateWithoutAuth_sessionsInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutAuth_sessionsInput = {
@@ -732,7 +659,6 @@ export type AuthPrincipalUpdateToOneWithWhereWithoutAuth_sessionsInput = {
 
 export type AuthPrincipalUpdateWithoutAuth_sessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -749,13 +675,10 @@ export type AuthPrincipalUpdateWithoutAuth_sessionsInput = {
   platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutAuth_sessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -772,13 +695,10 @@ export type AuthPrincipalUncheckedUpdateWithoutAuth_sessionsInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalCreateWithoutAuth_accountsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -795,13 +715,10 @@ export type AuthPrincipalCreateWithoutAuth_accountsInput = {
   platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutAuth_accountsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -818,8 +735,6 @@ export type AuthPrincipalUncheckedCreateWithoutAuth_accountsInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutAuth_accountsInput = {
@@ -840,7 +755,6 @@ export type AuthPrincipalUpdateToOneWithWhereWithoutAuth_accountsInput = {
 
 export type AuthPrincipalUpdateWithoutAuth_accountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -857,13 +771,10 @@ export type AuthPrincipalUpdateWithoutAuth_accountsInput = {
   platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutAuth_accountsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -880,13 +791,10 @@ export type AuthPrincipalUncheckedUpdateWithoutAuth_accountsInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalCreateWithoutAuth_two_factorInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -903,13 +811,10 @@ export type AuthPrincipalCreateWithoutAuth_two_factorInput = {
   platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutAuth_two_factorInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -926,8 +831,6 @@ export type AuthPrincipalUncheckedCreateWithoutAuth_two_factorInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutAuth_two_factorInput = {
@@ -948,7 +851,6 @@ export type AuthPrincipalUpdateToOneWithWhereWithoutAuth_two_factorInput = {
 
 export type AuthPrincipalUpdateWithoutAuth_two_factorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -965,13 +867,10 @@ export type AuthPrincipalUpdateWithoutAuth_two_factorInput = {
   platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutAuth_two_factorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -988,13 +887,10 @@ export type AuthPrincipalUncheckedUpdateWithoutAuth_two_factorInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalCreateWithoutPlatform_grantsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1011,13 +907,10 @@ export type AuthPrincipalCreateWithoutPlatform_grantsInput = {
   memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
   platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutPlatform_grantsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1034,8 +927,6 @@ export type AuthPrincipalUncheckedCreateWithoutPlatform_grantsInput = {
   memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutPlatform_grantsInput = {
@@ -1045,7 +936,6 @@ export type AuthPrincipalCreateOrConnectWithoutPlatform_grantsInput = {
 
 export type AuthPrincipalCreateWithoutPlatform_grants_madeInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1062,13 +952,10 @@ export type AuthPrincipalCreateWithoutPlatform_grants_madeInput = {
   memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
   platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
   platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutPlatform_grants_madeInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1085,8 +972,6 @@ export type AuthPrincipalUncheckedCreateWithoutPlatform_grants_madeInput = {
   memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
   platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutPlatform_grants_madeInput = {
@@ -1096,7 +981,6 @@ export type AuthPrincipalCreateOrConnectWithoutPlatform_grants_madeInput = {
 
 export type AuthPrincipalCreateWithoutPlatform_grants_revokedInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1113,13 +997,10 @@ export type AuthPrincipalCreateWithoutPlatform_grants_revokedInput = {
   memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
   platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutPlatform_grants_revokedInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1136,8 +1017,6 @@ export type AuthPrincipalUncheckedCreateWithoutPlatform_grants_revokedInput = {
   memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
   platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutPlatform_grants_revokedInput = {
@@ -1158,7 +1037,6 @@ export type AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grantsInput = {
 
 export type AuthPrincipalUpdateWithoutPlatform_grantsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1175,13 +1053,10 @@ export type AuthPrincipalUpdateWithoutPlatform_grantsInput = {
   memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutPlatform_grantsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1198,8 +1073,6 @@ export type AuthPrincipalUncheckedUpdateWithoutPlatform_grantsInput = {
   memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUpsertWithoutPlatform_grants_madeInput = {
@@ -1215,7 +1088,6 @@ export type AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grants_madeInput = 
 
 export type AuthPrincipalUpdateWithoutPlatform_grants_madeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1232,13 +1104,10 @@ export type AuthPrincipalUpdateWithoutPlatform_grants_madeInput = {
   memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
   platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutPlatform_grants_madeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1255,8 +1124,6 @@ export type AuthPrincipalUncheckedUpdateWithoutPlatform_grants_madeInput = {
   memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
   platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUpsertWithoutPlatform_grants_revokedInput = {
@@ -1272,7 +1139,6 @@ export type AuthPrincipalUpdateToOneWithWhereWithoutPlatform_grants_revokedInput
 
 export type AuthPrincipalUpdateWithoutPlatform_grants_revokedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1289,13 +1155,10 @@ export type AuthPrincipalUpdateWithoutPlatform_grants_revokedInput = {
   memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
   platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutPlatform_grants_revokedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1312,229 +1175,10 @@ export type AuthPrincipalUncheckedUpdateWithoutPlatform_grants_revokedInput = {
   memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
   platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
-}
-
-export type AuthPrincipalCreateWithoutRelink_requestsInput = {
-  id: string
-  supabase_user_id?: string | null
-  email: string
-  email_normalized: string
-  name?: string
-  email_verified?: boolean
-  image?: string | null
-  global_status?: string
-  mfa_enabled?: boolean
-  last_login_at?: Date | string | null
-  created_at?: Date | string
-  updated_at?: Date | string
-  auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutPrincipalInput
-  auth_accounts?: Prisma.AuthAccountCreateNestedManyWithoutPrincipalInput
-  auth_two_factor?: Prisma.AuthTwoFactorCreateNestedOneWithoutPrincipalInput
-  memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
-  platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
-  platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
-  platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
-}
-
-export type AuthPrincipalUncheckedCreateWithoutRelink_requestsInput = {
-  id: string
-  supabase_user_id?: string | null
-  email: string
-  email_normalized: string
-  name?: string
-  email_verified?: boolean
-  image?: string | null
-  global_status?: string
-  mfa_enabled?: boolean
-  last_login_at?: Date | string | null
-  created_at?: Date | string
-  updated_at?: Date | string
-  auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutPrincipalInput
-  auth_accounts?: Prisma.AuthAccountUncheckedCreateNestedManyWithoutPrincipalInput
-  auth_two_factor?: Prisma.AuthTwoFactorUncheckedCreateNestedOneWithoutPrincipalInput
-  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
-  platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
-  platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
-  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
-}
-
-export type AuthPrincipalCreateOrConnectWithoutRelink_requestsInput = {
-  where: Prisma.AuthPrincipalWhereUniqueInput
-  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_requestsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_requestsInput>
-}
-
-export type AuthPrincipalCreateWithoutRelink_decisionsInput = {
-  id: string
-  supabase_user_id?: string | null
-  email: string
-  email_normalized: string
-  name?: string
-  email_verified?: boolean
-  image?: string | null
-  global_status?: string
-  mfa_enabled?: boolean
-  last_login_at?: Date | string | null
-  created_at?: Date | string
-  updated_at?: Date | string
-  auth_sessions?: Prisma.AuthSessionCreateNestedManyWithoutPrincipalInput
-  auth_accounts?: Prisma.AuthAccountCreateNestedManyWithoutPrincipalInput
-  auth_two_factor?: Prisma.AuthTwoFactorCreateNestedOneWithoutPrincipalInput
-  memberships?: Prisma.MembershipCreateNestedManyWithoutAuth_principalInput
-  platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
-  platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
-  platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-}
-
-export type AuthPrincipalUncheckedCreateWithoutRelink_decisionsInput = {
-  id: string
-  supabase_user_id?: string | null
-  email: string
-  email_normalized: string
-  name?: string
-  email_verified?: boolean
-  image?: string | null
-  global_status?: string
-  mfa_enabled?: boolean
-  last_login_at?: Date | string | null
-  created_at?: Date | string
-  updated_at?: Date | string
-  auth_sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutPrincipalInput
-  auth_accounts?: Prisma.AuthAccountUncheckedCreateNestedManyWithoutPrincipalInput
-  auth_two_factor?: Prisma.AuthTwoFactorUncheckedCreateNestedOneWithoutPrincipalInput
-  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutAuth_principalInput
-  platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
-  platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
-  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-}
-
-export type AuthPrincipalCreateOrConnectWithoutRelink_decisionsInput = {
-  where: Prisma.AuthPrincipalWhereUniqueInput
-  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_decisionsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_decisionsInput>
-}
-
-export type AuthPrincipalUpsertWithoutRelink_requestsInput = {
-  update: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutRelink_requestsInput, Prisma.AuthPrincipalUncheckedUpdateWithoutRelink_requestsInput>
-  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_requestsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_requestsInput>
-  where?: Prisma.AuthPrincipalWhereInput
-}
-
-export type AuthPrincipalUpdateToOneWithWhereWithoutRelink_requestsInput = {
-  where?: Prisma.AuthPrincipalWhereInput
-  data: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutRelink_requestsInput, Prisma.AuthPrincipalUncheckedUpdateWithoutRelink_requestsInput>
-}
-
-export type AuthPrincipalUpdateWithoutRelink_requestsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  global_status?: Prisma.StringFieldUpdateOperationsInput | string
-  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_sessions?: Prisma.AuthSessionUpdateManyWithoutPrincipalNestedInput
-  auth_accounts?: Prisma.AuthAccountUpdateManyWithoutPrincipalNestedInput
-  auth_two_factor?: Prisma.AuthTwoFactorUpdateOneWithoutPrincipalNestedInput
-  memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
-  platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
-  platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
-  platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
-}
-
-export type AuthPrincipalUncheckedUpdateWithoutRelink_requestsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  global_status?: Prisma.StringFieldUpdateOperationsInput | string
-  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutPrincipalNestedInput
-  auth_accounts?: Prisma.AuthAccountUncheckedUpdateManyWithoutPrincipalNestedInput
-  auth_two_factor?: Prisma.AuthTwoFactorUncheckedUpdateOneWithoutPrincipalNestedInput
-  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
-  platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
-  platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
-  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
-}
-
-export type AuthPrincipalUpsertWithoutRelink_decisionsInput = {
-  update: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutRelink_decisionsInput, Prisma.AuthPrincipalUncheckedUpdateWithoutRelink_decisionsInput>
-  create: Prisma.XOR<Prisma.AuthPrincipalCreateWithoutRelink_decisionsInput, Prisma.AuthPrincipalUncheckedCreateWithoutRelink_decisionsInput>
-  where?: Prisma.AuthPrincipalWhereInput
-}
-
-export type AuthPrincipalUpdateToOneWithWhereWithoutRelink_decisionsInput = {
-  where?: Prisma.AuthPrincipalWhereInput
-  data: Prisma.XOR<Prisma.AuthPrincipalUpdateWithoutRelink_decisionsInput, Prisma.AuthPrincipalUncheckedUpdateWithoutRelink_decisionsInput>
-}
-
-export type AuthPrincipalUpdateWithoutRelink_decisionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  global_status?: Prisma.StringFieldUpdateOperationsInput | string
-  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_sessions?: Prisma.AuthSessionUpdateManyWithoutPrincipalNestedInput
-  auth_accounts?: Prisma.AuthAccountUpdateManyWithoutPrincipalNestedInput
-  auth_two_factor?: Prisma.AuthTwoFactorUpdateOneWithoutPrincipalNestedInput
-  memberships?: Prisma.MembershipUpdateManyWithoutAuth_principalNestedInput
-  platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
-  platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
-  platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-}
-
-export type AuthPrincipalUncheckedUpdateWithoutRelink_decisionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  email_verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  global_status?: Prisma.StringFieldUpdateOperationsInput | string
-  mfa_enabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  auth_sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutPrincipalNestedInput
-  auth_accounts?: Prisma.AuthAccountUncheckedUpdateManyWithoutPrincipalNestedInput
-  auth_two_factor?: Prisma.AuthTwoFactorUncheckedUpdateOneWithoutPrincipalNestedInput
-  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutAuth_principalNestedInput
-  platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
-  platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
-  platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
 }
 
 export type AuthPrincipalCreateWithoutMembershipsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1551,13 +1195,10 @@ export type AuthPrincipalCreateWithoutMembershipsInput = {
   platform_grants?: Prisma.PlatformOperatorCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalUncheckedCreateWithoutMembershipsInput = {
   id: string
-  supabase_user_id?: string | null
   email: string
   email_normalized: string
   name?: string
@@ -1574,8 +1215,6 @@ export type AuthPrincipalUncheckedCreateWithoutMembershipsInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutPrincipalInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutGranted_byInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedCreateNestedManyWithoutRevoked_byInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutPrincipalInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedCreateNestedManyWithoutDecided_byInput
 }
 
 export type AuthPrincipalCreateOrConnectWithoutMembershipsInput = {
@@ -1596,7 +1235,6 @@ export type AuthPrincipalUpdateToOneWithWhereWithoutMembershipsInput = {
 
 export type AuthPrincipalUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1613,13 +1251,10 @@ export type AuthPrincipalUpdateWithoutMembershipsInput = {
   platform_grants?: Prisma.PlatformOperatorUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUpdateManyWithoutDecided_byNestedInput
 }
 
 export type AuthPrincipalUncheckedUpdateWithoutMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  supabase_user_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.StringFieldUpdateOperationsInput | string
   email_normalized?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1636,8 +1271,6 @@ export type AuthPrincipalUncheckedUpdateWithoutMembershipsInput = {
   platform_grants?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutPrincipalNestedInput
   platform_grants_made?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutGranted_byNestedInput
   platform_grants_revoked?: Prisma.PlatformOperatorUncheckedUpdateManyWithoutRevoked_byNestedInput
-  relink_requests?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutPrincipalNestedInput
-  relink_decisions?: Prisma.AuthPrincipalRelinkRequestUncheckedUpdateManyWithoutDecided_byNestedInput
 }
 
 
@@ -1652,8 +1285,6 @@ export type AuthPrincipalCountOutputType = {
   platform_grants: number
   platform_grants_made: number
   platform_grants_revoked: number
-  relink_requests: number
-  relink_decisions: number
 }
 
 export type AuthPrincipalCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1663,8 +1294,6 @@ export type AuthPrincipalCountOutputTypeSelect<ExtArgs extends runtime.Types.Ext
   platform_grants?: boolean | AuthPrincipalCountOutputTypeCountPlatform_grantsArgs
   platform_grants_made?: boolean | AuthPrincipalCountOutputTypeCountPlatform_grants_madeArgs
   platform_grants_revoked?: boolean | AuthPrincipalCountOutputTypeCountPlatform_grants_revokedArgs
-  relink_requests?: boolean | AuthPrincipalCountOutputTypeCountRelink_requestsArgs
-  relink_decisions?: boolean | AuthPrincipalCountOutputTypeCountRelink_decisionsArgs
 }
 
 /**
@@ -1719,24 +1348,9 @@ export type AuthPrincipalCountOutputTypeCountPlatform_grants_revokedArgs<ExtArgs
   where?: Prisma.PlatformOperatorWhereInput
 }
 
-/**
- * AuthPrincipalCountOutputType without action
- */
-export type AuthPrincipalCountOutputTypeCountRelink_requestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AuthPrincipalRelinkRequestWhereInput
-}
-
-/**
- * AuthPrincipalCountOutputType without action
- */
-export type AuthPrincipalCountOutputTypeCountRelink_decisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AuthPrincipalRelinkRequestWhereInput
-}
-
 
 export type AuthPrincipalSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  supabase_user_id?: boolean
   email?: boolean
   email_normalized?: boolean
   name?: boolean
@@ -1754,14 +1368,11 @@ export type AuthPrincipalSelect<ExtArgs extends runtime.Types.Extensions.Interna
   platform_grants?: boolean | Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs>
   platform_grants_made?: boolean | Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs>
   platform_grants_revoked?: boolean | Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs>
-  relink_requests?: boolean | Prisma.AuthPrincipal$relink_requestsArgs<ExtArgs>
-  relink_decisions?: boolean | Prisma.AuthPrincipal$relink_decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.AuthPrincipalCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["authPrincipal"]>
 
 export type AuthPrincipalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  supabase_user_id?: boolean
   email?: boolean
   email_normalized?: boolean
   name?: boolean
@@ -1776,7 +1387,6 @@ export type AuthPrincipalSelectCreateManyAndReturn<ExtArgs extends runtime.Types
 
 export type AuthPrincipalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  supabase_user_id?: boolean
   email?: boolean
   email_normalized?: boolean
   name?: boolean
@@ -1791,7 +1401,6 @@ export type AuthPrincipalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
 
 export type AuthPrincipalSelectScalar = {
   id?: boolean
-  supabase_user_id?: boolean
   email?: boolean
   email_normalized?: boolean
   name?: boolean
@@ -1804,7 +1413,7 @@ export type AuthPrincipalSelectScalar = {
   updated_at?: boolean
 }
 
-export type AuthPrincipalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "supabase_user_id" | "email" | "email_normalized" | "name" | "email_verified" | "image" | "global_status" | "mfa_enabled" | "last_login_at" | "created_at" | "updated_at", ExtArgs["result"]["authPrincipal"]>
+export type AuthPrincipalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "email_normalized" | "name" | "email_verified" | "image" | "global_status" | "mfa_enabled" | "last_login_at" | "created_at" | "updated_at", ExtArgs["result"]["authPrincipal"]>
 export type AuthPrincipalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   auth_sessions?: boolean | Prisma.AuthPrincipal$auth_sessionsArgs<ExtArgs>
   auth_accounts?: boolean | Prisma.AuthPrincipal$auth_accountsArgs<ExtArgs>
@@ -1813,8 +1422,6 @@ export type AuthPrincipalInclude<ExtArgs extends runtime.Types.Extensions.Intern
   platform_grants?: boolean | Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs>
   platform_grants_made?: boolean | Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs>
   platform_grants_revoked?: boolean | Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs>
-  relink_requests?: boolean | Prisma.AuthPrincipal$relink_requestsArgs<ExtArgs>
-  relink_decisions?: boolean | Prisma.AuthPrincipal$relink_decisionsArgs<ExtArgs>
   _count?: boolean | Prisma.AuthPrincipalCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AuthPrincipalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1830,12 +1437,9 @@ export type $AuthPrincipalPayload<ExtArgs extends runtime.Types.Extensions.Inter
     platform_grants: Prisma.$PlatformOperatorPayload<ExtArgs>[]
     platform_grants_made: Prisma.$PlatformOperatorPayload<ExtArgs>[]
     platform_grants_revoked: Prisma.$PlatformOperatorPayload<ExtArgs>[]
-    relink_requests: Prisma.$AuthPrincipalRelinkRequestPayload<ExtArgs>[]
-    relink_decisions: Prisma.$AuthPrincipalRelinkRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    supabase_user_id: string | null
     email: string
     email_normalized: string
     name: string
@@ -2247,8 +1851,6 @@ export interface Prisma__AuthPrincipalClient<T, Null = never, ExtArgs extends ru
   platform_grants<T extends Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$platform_grantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformOperatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   platform_grants_made<T extends Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$platform_grants_madeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformOperatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   platform_grants_revoked<T extends Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$platform_grants_revokedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlatformOperatorPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  relink_requests<T extends Prisma.AuthPrincipal$relink_requestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$relink_requestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthPrincipalRelinkRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  relink_decisions<T extends Prisma.AuthPrincipal$relink_decisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuthPrincipal$relink_decisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthPrincipalRelinkRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2279,7 +1881,6 @@ export interface Prisma__AuthPrincipalClient<T, Null = never, ExtArgs extends ru
  */
 export interface AuthPrincipalFieldRefs {
   readonly id: Prisma.FieldRef<"AuthPrincipal", 'String'>
-  readonly supabase_user_id: Prisma.FieldRef<"AuthPrincipal", 'String'>
   readonly email: Prisma.FieldRef<"AuthPrincipal", 'String'>
   readonly email_normalized: Prisma.FieldRef<"AuthPrincipal", 'String'>
   readonly name: Prisma.FieldRef<"AuthPrincipal", 'String'>
@@ -2843,54 +2444,6 @@ export type AuthPrincipal$platform_grants_revokedArgs<ExtArgs extends runtime.Ty
   take?: number
   skip?: number
   distinct?: Prisma.PlatformOperatorScalarFieldEnum | Prisma.PlatformOperatorScalarFieldEnum[]
-}
-
-/**
- * AuthPrincipal.relink_requests
- */
-export type AuthPrincipal$relink_requestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AuthPrincipalRelinkRequest
-   */
-  select?: Prisma.AuthPrincipalRelinkRequestSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AuthPrincipalRelinkRequest
-   */
-  omit?: Prisma.AuthPrincipalRelinkRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AuthPrincipalRelinkRequestInclude<ExtArgs> | null
-  where?: Prisma.AuthPrincipalRelinkRequestWhereInput
-  orderBy?: Prisma.AuthPrincipalRelinkRequestOrderByWithRelationInput | Prisma.AuthPrincipalRelinkRequestOrderByWithRelationInput[]
-  cursor?: Prisma.AuthPrincipalRelinkRequestWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AuthPrincipalRelinkRequestScalarFieldEnum | Prisma.AuthPrincipalRelinkRequestScalarFieldEnum[]
-}
-
-/**
- * AuthPrincipal.relink_decisions
- */
-export type AuthPrincipal$relink_decisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AuthPrincipalRelinkRequest
-   */
-  select?: Prisma.AuthPrincipalRelinkRequestSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AuthPrincipalRelinkRequest
-   */
-  omit?: Prisma.AuthPrincipalRelinkRequestOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AuthPrincipalRelinkRequestInclude<ExtArgs> | null
-  where?: Prisma.AuthPrincipalRelinkRequestWhereInput
-  orderBy?: Prisma.AuthPrincipalRelinkRequestOrderByWithRelationInput | Prisma.AuthPrincipalRelinkRequestOrderByWithRelationInput[]
-  cursor?: Prisma.AuthPrincipalRelinkRequestWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AuthPrincipalRelinkRequestScalarFieldEnum | Prisma.AuthPrincipalRelinkRequestScalarFieldEnum[]
 }
 
 /**

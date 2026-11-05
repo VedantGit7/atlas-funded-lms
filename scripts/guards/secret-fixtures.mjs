@@ -48,13 +48,6 @@ const approvedDatabaseFixtures = new Map([
       "7eb891735d0d78f65cd5e9c70747e938cf1473322e2d9bd66ee4e70d6c81141a",
     ]),
   ],
-  [
-    "scripts/security/verify-f19-event-trigger.mjs",
-    new Set([
-      // Fixed loopback:15439/atlas_f19_verification target, identity checked.
-      "3a0266e784e0b165c8ae5bba16fdd4f07239cfde424422cb8f9f2042dbf68e1f",
-    ]),
-  ],
 ]);
 
 export function isApprovedDatabaseFixture(path, literal) {

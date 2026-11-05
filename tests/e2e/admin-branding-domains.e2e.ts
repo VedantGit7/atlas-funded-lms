@@ -70,7 +70,6 @@ async function seedActiveAdminMembership(tenantId: string) {
       await tx.$executeRaw`
         INSERT INTO auth_principals (
           id,
-          supabase_user_id,
           email,
           email_normalized,
           global_status,
@@ -79,7 +78,6 @@ async function seedActiveAdminMembership(tenantId: string) {
         )
         VALUES (
           ${principalId}::uuid,
-          ${randomUUID()}::uuid,
           ${`admin-${runId}@example.test`},
           ${`admin-${runId}@example.test`},
           'active',

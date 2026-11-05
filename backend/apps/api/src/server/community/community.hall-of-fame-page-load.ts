@@ -11,7 +11,7 @@ export async function loadHallOfFamePageData() {
   const requestId = getOrCreateRequestId(headerList);
   const req = new Request("http://local", { headers: headerList });
 
-  // Supabase with no connection held, then tenant and principal on a released
+  // The session check first, then tenant and principal on a released
   // connection, then the tenant transaction (audit H3).
   const { tenant, principal } = await authenticateTenantRequest(req);
 

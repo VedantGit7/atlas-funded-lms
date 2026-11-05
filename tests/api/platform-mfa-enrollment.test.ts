@@ -24,7 +24,6 @@ vi.mock("@atlas/auth", async (importOriginal) => ({
 }));
 vi.mock("@atlas/auth/cookie-store", () => ({
   applyVerifiedSessionToCookieStore: mocks.applyVerifiedSessionToCookieStore,
-  readSessionPersistenceFromStore: () => Promise.resolve(true),
 }));
 vi.mock("@atlas/db/global-db", () => ({
   withGlobalDb: (fn: (db: unknown) => unknown) => mocks.withGlobalDb(fn),
@@ -46,7 +45,7 @@ function request(path: string, init: { method?: string; body?: unknown } = {}) {
     headers: {
       host: "platform.example.com",
       origin: "https://platform.example.com",
-      authorization: "Bearer platform-token",
+      cookie: "atlas_session=platform.signature",
       "content-type": "application/json",
     },
     ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
@@ -81,6 +80,7 @@ describe("platform MFA enrollment routes", () => {
       qrCode: "<svg/>",
       secret: "JBSWY3DPEHPK3PXP",
       uri: "otpauth://totp/Atlas:operator?secret=JBSWY3DPEHPK3PXP",
+      backupCodes: ["abcde-12345"],
     });
     const response = await POST(
       request("/api/v1/platform/me/security/mfa", { method: "POST", body: {} }),
@@ -95,7 +95,7 @@ describe("platform MFA enrollment routes", () => {
   });
 
   it("verifies the factor and keeps the aal2 session it produced", async () => {
-    const session = { accessToken: "at", refreshToken: "rt", expiresIn: 3600 };
+    const session = { setCookies: ["atlas_session=aal2.signature; Path=/; HttpOnly"] };
     mocks.verifyMfaEnrollment.mockResolvedValue({ ok: true, session });
     const response = await VERIFY(
       request("/api/v1/platform/me/security/mfa/verify", {
@@ -104,10 +104,8 @@ describe("platform MFA enrollment routes", () => {
       }),
     );
     expect(response.status).toBe(200);
-    expect(mocks.verifyMfaEnrollment).toHaveBeenCalledWith({ factorId, code: "123456" });
-    expect(mocks.applyVerifiedSessionToCookieStore).toHaveBeenCalledWith(
-      expect.objectContaining({ accessToken: "at", refreshToken: "rt", expiresIn: 3600 }),
-    );
+    expect(mocks.verifyMfaEnrollment).toHaveBeenCalledWith({ code: "123456" });
+    expect(mocks.applyVerifiedSessionToCookieStore).toHaveBeenCalledWith(session);
   });
 
   it("answers the principal check's refusal unchanged", async () => {

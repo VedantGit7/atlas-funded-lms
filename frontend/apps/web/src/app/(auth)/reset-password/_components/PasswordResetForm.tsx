@@ -21,7 +21,6 @@ import {
 import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
-import { OtpInput } from "../../login/_components/OtpInput";
 import {
   completePasswordResetAction,
   requestPasswordResetAction,
@@ -167,17 +166,9 @@ export function PasswordResetForm() {
     completePasswordResetAction,
     initialState,
   );
-  const [recoveryTokens, setRecoveryTokens] = useState<{
-    accessToken: string;
-    refreshToken: string;
-    token: string;
-  } | null>(null);
+  // The single-use token from the reset link (launch plan task 3.2).
+  const [resetToken, setResetToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  // Once the account turns out to have MFA, the code stays asked for.
-  const [mfaRequired, setMfaRequired] = useState(false);
-  if (completeState.mfaRequired && !mfaRequired) {
-    setMfaRequired(true);
-  }
 
   const requestForm = useLazyZodForm({
     schema: loadPublicPasswordResetRequestSchema,
@@ -192,44 +183,19 @@ export function PasswordResetForm() {
     errorField: "password",
     defaultValues: {
       password: "",
-      accessToken: "",
-      refreshToken: "",
       token: "",
-      mfaCode: "",
     },
   });
 
   useEffect(() => {
-    // Better Auth's reset link carries a single-use ?token=; Supabase's puts
-    // the recovery session in the hash.
-    const resetToken = new URLSearchParams(window.location.search).get("token");
-    if (resetToken) {
-      setRecoveryTokens({ accessToken: "", refreshToken: "", token: resetToken });
-      completeForm.setValue("token", resetToken);
-      return;
-    }
-
-    const hash = window.location.hash.startsWith("#")
-      ? window.location.hash.slice(1)
-      : window.location.hash;
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
-    const type = params.get("type");
-
-    if (type === "recovery" && accessToken) {
-      const tokens = {
-        accessToken,
-        refreshToken: refreshToken ?? "",
-        token: "",
-      };
-      setRecoveryTokens(tokens);
-      completeForm.setValue("accessToken", tokens.accessToken);
-      completeForm.setValue("refreshToken", tokens.refreshToken);
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (token) {
+      setResetToken(token);
+      completeForm.setValue("token", token);
     }
   }, [completeForm]);
 
-  if (recoveryTokens) {
+  if (resetToken) {
     return (
       <Form {...completeForm}>
         <div className="mb-8 flex flex-col items-center text-center">
@@ -256,8 +222,6 @@ export function PasswordResetForm() {
             })(event);
           }}
         >
-          <HiddenFormField control={completeForm.control} name="accessToken" />
-          <HiddenFormField control={completeForm.control} name="refreshToken" />
           <HiddenFormField control={completeForm.control} name="token" />
 
           <FormField
@@ -292,30 +256,6 @@ export function PasswordResetForm() {
               </FormItem>
             )}
           />
-
-          {mfaRequired ? (
-            <FormField
-              control={completeForm.control}
-              name="mfaCode"
-              render={({ field }) => (
-                <FormItem className="space-y-0 pt-2">
-                  <FormLabel className={fieldLabelClass}>Authenticator code</FormLabel>
-                  <FormControl>
-                    <OtpInput
-                      value={field.value ?? ""}
-                      onChange={field.onChange}
-                      length={6}
-                      autoFocus
-                      disabled={completePending || completeForm.formState.isSubmitting}
-                      invalid={Boolean(completeState.mfaRequired && field.value)}
-                      ariaLabel="Authenticator verification code"
-                    />
-                  </FormControl>
-                  <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
-                </FormItem>
-              )}
-            />
-          ) : null}
 
           {completeState.message ? (
             <p

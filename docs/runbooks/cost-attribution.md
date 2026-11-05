@@ -49,7 +49,7 @@ screen says so.
 ## Setting it up
 
 1. Enter a **unit rate** for each driver you pay per unit for. The editor suggests a published
-   price (R2, Supabase, SES, Cloudflare for SaaS); check it against your own invoice before saving.
+   price (R2, SES, Cloudflare for SaaS); check it against your own invoice before saving.
    Leave **API requests** unset on a fixed-price server -- put the server in fixed costs instead.
 2. Add each **fixed monthly bill** with the key it is shared by.
 3. Record the source (invoice, plan name) in the note field. It is stored with the rate.

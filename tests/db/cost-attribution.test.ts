@@ -65,9 +65,9 @@ describeWithDb("per-tenant cost attribution", () => {
     await owner.connect();
 
     await owner.query(
-      `insert into auth_principals (id, supabase_user_id, email, email_normalized, updated_at)
-       values ($1::uuid, $2::uuid, $3, $3, now())`,
-      [principalId, randomUUID(), `cost-attr-${principalId.slice(0, 8)}@example.test`],
+      `insert into auth_principals (id, email, email_normalized, updated_at)
+       values ($1::uuid, $2, $2, now())`,
+      [principalId, `cost-attr-${principalId.slice(0, 8)}@example.test`],
     );
 
     for (const [id, name] of [

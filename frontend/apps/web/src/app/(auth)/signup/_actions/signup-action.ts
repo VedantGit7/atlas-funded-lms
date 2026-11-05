@@ -6,7 +6,6 @@ import { PublicSignupRequestSchema } from "@atlas/contracts/domain-identity/sche
 import { GENERIC_SIGNUP_ERROR_MESSAGE } from "../../../../lib/auth-messages";
 import { readFormString } from "../../../../lib/server/form";
 import { serverPublicApi, ServerPublicApiError } from "../../../../lib/server/public-auth-fetch";
-import { resolveTenantEmailRedirect } from "../../../../lib/server/tenant-email-redirect";
 
 export type SignupActionState = {
   ok: boolean;
@@ -43,14 +42,12 @@ export async function signupAction(
 
   try {
     const { email, password, displayName, inviteToken, referralCode } = parsed.data;
-    const emailRedirectTo = await resolveTenantEmailRedirect();
     const body = await serverPublicApi.signup({
       email,
       password,
       displayName,
       ...(inviteToken ? { inviteToken } : {}),
       ...(referralCode ? { referralCode } : {}),
-      ...(emailRedirectTo ? { emailRedirectTo } : {}),
     });
 
     if (body.data.status === "EMAIL_VERIFICATION_REQUIRED") {

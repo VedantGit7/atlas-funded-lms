@@ -13,7 +13,6 @@ const reviewedFiles = [
   "scripts/db/verify-test-cleanup.mjs",
   "scripts/e2e/local-env.mjs",
   "scripts/perf/microbenchmark-guard.test.mjs",
-  "scripts/security/verify-f19-event-trigger.mjs",
 ];
 
 function fixture(t) {

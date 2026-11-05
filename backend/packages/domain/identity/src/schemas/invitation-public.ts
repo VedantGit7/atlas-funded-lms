@@ -34,12 +34,11 @@ export const PreviewInvitationResponseSchema = z.object({
     /** Who is signed in on this browser, so the page can spot the wrong account. */
     signedInEmail: z.email().nullable().optional(),
     /**
-     * Better Auth (launch plan task 3.6): whether the invited address already
-     * has a way to sign in. "none" lets the page set a password straight away;
-     * "exists" asks the person to sign in. Absent with Supabase, whose
-     * invitation link carries its own session.
+     * Whether the invited address already has a way to sign in (launch plan
+     * task 3.6). "none" lets the page set a password straight away; "exists"
+     * asks the person to sign in.
      */
-    account: z.enum(["none", "exists"]).optional(),
+    account: z.enum(["none", "exists"]),
   }),
 });
 
@@ -47,9 +46,6 @@ export const SetInvitationPasswordRequestSchema = z
   .object({
     token: z.string().min(20).max(500),
     password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
-    /** Supabase: the session from the invitation link. Absent with Better Auth. */
-    accessToken: z.string().min(1).max(4000).optional(),
-    refreshToken: z.string().max(4000).optional(),
   })
   .strict();
 

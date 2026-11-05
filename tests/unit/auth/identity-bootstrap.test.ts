@@ -8,10 +8,6 @@ import {
   isIdentityBlockCode,
   safeInvitationErrorMessage,
 } from "../../../frontend/apps/web/src/lib/auth-messages";
-import {
-  REQUIRED_MIN_PASSWORD_LENGTH,
-  evaluateSupabaseAuthConfig,
-} from "../../../scripts/security/verify-supabase-auth-config.mjs";
 
 describe("membership gate refuses disabled accounts (audit H6)", () => {
   afterEach(() => {
@@ -63,7 +59,7 @@ describe("membership gate refuses disabled accounts (audit H6)", () => {
 });
 
 describe("sign-in messages for identity refusals", () => {
-  it.each(["ACCOUNT_DISABLED", "EMAIL_NOT_VERIFIED", "ACCOUNT_REVIEW_REQUIRED"] as const)(
+  it.each(["ACCOUNT_DISABLED", "EMAIL_NOT_VERIFIED", "ACCOUNT_NOT_LINKED"] as const)(
     "names the next step for %s and round-trips it through the login URL",
     (code) => {
       expect(isIdentityBlockCode(code)).toBe(true);
@@ -80,37 +76,5 @@ describe("sign-in messages for identity refusals", () => {
     expect(identityBlockMessage(undefined)).toBeNull();
     expect(identityBlockMessageFromQuery("<script>alert(1)</script>")).toBeNull();
     expect(identityBlockMessageFromQuery("oauth")).toBeNull();
-  });
-});
-
-describe("hosted Supabase Auth policy check", () => {
-  const compliant = {
-    mailer_autoconfirm: false,
-    password_min_length: REQUIRED_MIN_PASSWORD_LENGTH,
-    security_update_password_require_reauthentication: true,
-    password_hibp_enabled: true,
-  };
-
-  it("accepts a compliant project", () => {
-    expect(evaluateSupabaseAuthConfig(compliant)).toEqual({ errors: [], warnings: [] });
-  });
-
-  it.each([
-    ["mailer_autoconfirm", true],
-    ["password_min_length", 6],
-    ["password_min_length", undefined],
-    ["security_update_password_require_reauthentication", false],
-  ])("rejects %s = %s", (key, value) => {
-    const { errors } = evaluateSupabaseAuthConfig({ ...compliant, [key]: value });
-    expect(errors).toHaveLength(1);
-  });
-
-  it("warns, and only fails when asked, without Supabase leaked-password protection", () => {
-    const config = { ...compliant, password_hibp_enabled: false };
-    expect(evaluateSupabaseAuthConfig(config)).toMatchObject({
-      errors: [],
-      warnings: [expect.any(String)],
-    });
-    expect(evaluateSupabaseAuthConfig(config, { requireHibp: true }).errors).toHaveLength(1);
   });
 });

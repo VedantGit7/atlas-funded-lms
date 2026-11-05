@@ -71,9 +71,10 @@ function assertServiceEnvironment(env) {
     )
       throw new Error("Service database must use its scoped role on the isolated local database.");
   }
-  // Login is Better Auth, in the isolated database checked above.
-  if (env.AUTH_PROVIDER !== "better-auth")
-    throw new Error("Service auth must be Better Auth on the isolated local database.");
+  // Login is Better Auth, in the isolated database checked above, with the
+  // fixture secret the seed encrypted the authenticators with.
+  if (!env.BETTER_AUTH_SECRET)
+    throw new Error("Service auth needs the isolated fixture's BETTER_AUTH_SECRET.");
   if (env.E2E_OWNER_DATABASE_URL)
     throw new Error("Service must not receive the owner database URL.");
 }

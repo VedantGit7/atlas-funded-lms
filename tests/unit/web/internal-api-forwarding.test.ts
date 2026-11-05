@@ -16,7 +16,6 @@ vi.mock(
   async () => import("../../../frontend/apps/web/src/lib/http-headers"),
 );
 vi.mock("@atlas/auth/session", () => ({ extractAccessToken: vi.fn(async () => null) }));
-vi.mock("@atlas/auth/supabase-server", () => ({ createSupabaseAdminServerClient: vi.fn() }));
 
 const key = "synthetic-internal-forwarding-key-0123456789";
 
@@ -74,26 +73,6 @@ describe("F11 internal API callers carry authenticated browser context", () => {
     expectForwarding();
   });
 
-  it.each(["server", "proxy"])("authenticates %s session refresh", async (caller) => {
-    const { refreshSessionCookieHeader, tryRefreshSessionForProxy } =
-      await import("../../../frontend/apps/web/src/lib/server/session-refresh");
-    if (caller === "server") {
-      await refreshSessionCookieHeader("atlas_refresh_token=refresh", "tenant.example.com");
-    } else {
-      await tryRefreshSessionForProxy(
-        new NextRequest("https://tenant.example.com/profile", {
-          headers: {
-            host: "tenant.example.com",
-            cookie: "atlas_refresh_token=refresh",
-            "x-forwarded-for": "198.51.100.42",
-            "x-atlas-client-ip": "192.0.2.99",
-          },
-        }),
-      );
-    }
-    expectForwarding();
-  });
-
   it("authenticates invitation preview", async () => {
     const { loadInviteAcceptContext } =
       await import("../../../frontend/apps/web/src/lib/server/load-invite-accept-context");
@@ -107,38 +86,38 @@ describe("F11 internal API callers carry authenticated browser context", () => {
       mocks.fetch.mockResolvedValue(
         Response.json(
           { data: { status: "AUTHENTICATED", redirectTo: "/profile" } },
-          { headers: { "set-cookie": "atlas_access_token=new-session; Path=/; HttpOnly; Secure" } },
+          { headers: { "set-cookie": "atlas_session=new-session; Path=/; HttpOnly; Secure" } },
         ),
       );
-      const { GET } = await import("../../../frontend/apps/web/src/app/auth/callback/route");
+      const { GET } =
+        await import("../../../frontend/apps/web/src/app/auth/callback/[provider]/route");
       const response = await GET(
-        new NextRequest("https://tenant.example.com/auth/callback?code=synthetic", {
+        new NextRequest("https://tenant.example.com/auth/callback/google?code=synthetic&state=s1", {
           headers: {
             host: transportHost,
             // The web proxy replaces this header from the original browser Host.
             "x-atlas-tenant-host": "tenant.example.com",
             "x-atlas-client-ip": "198.51.100.42",
             "x-forwarded-proto": "https",
-            cookie: "atlas_oauth_verifier=verifier; atlas_oauth_remember=1",
+            cookie: "atlas_oauth_remember=1",
             "x-atlas-proxy-key": "forged-key",
           },
         }),
+        { params: Promise.resolve({ provider: "google" }) },
       );
 
       expectForwarding();
       expect(response.headers.get("location")).toBe("https://tenant.example.com/profile");
       expect(response.headers.getSetCookie()).toContain(
-        "atlas_access_token=new-session; Path=/; HttpOnly; Secure",
+        "atlas_session=new-session; Path=/; HttpOnly; Secure",
       );
       expect(response.headers.get("x-atlas-proxy-key")).toBeNull();
     },
   );
 
-  it("authenticates OAuth start and keeps the browser callback origin", async () => {
+  it("authenticates OAuth start and sends the browser to the provider", async () => {
     mocks.fetch.mockResolvedValue(
-      Response.json({
-        data: { url: "https://auth.example.com/authorize", codeVerifier: "verifier" },
-      }),
+      Response.json({ data: { url: "https://auth.example.com/authorize" } }),
     );
     const { GET } = await import("../../../frontend/apps/web/src/app/auth/oauth/[provider]/route");
     const response = await GET(
@@ -149,8 +128,9 @@ describe("F11 internal API callers carry authenticated browser context", () => {
     );
 
     expectForwarding();
-    expect(JSON.parse(mocks.fetch.mock.calls[0]?.[1]?.body as string)).toMatchObject({
-      redirectTo: "https://tenant.example.com/auth/callback",
+    expect(JSON.parse(mocks.fetch.mock.calls[0]?.[1]?.body as string)).toEqual({
+      provider: "google",
+      rememberMe: false,
     });
     expect(response.headers.get("location")).toBe("https://auth.example.com/authorize");
   });

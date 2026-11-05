@@ -92,7 +92,7 @@ describe("roles API", () => {
   beforeEach(() => {
     mockResolveTenant.mockResolvedValue(tenantA);
     mockRequireSessionUser.mockResolvedValue({
-      principalId: "supabase-user",
+      principalId: "principal-id",
       email: "admin@example.com",
       mfaEnabled: true,
       // Creating and editing roles requires a session that completed MFA (audit H4).
@@ -162,7 +162,7 @@ describe("roles API", () => {
     mockCreateRole.mockClear();
     mockCan.mockResolvedValue({ allowed: true, permission: "role.create", reason: "ALLOWED" });
     mockRequireSessionUser.mockResolvedValue({
-      principalId: "supabase-user",
+      principalId: "principal-id",
       email: "admin@example.com",
       mfaEnabled: true,
       sessionAssuranceLevel: "aal1",

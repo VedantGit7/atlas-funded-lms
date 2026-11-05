@@ -10,17 +10,6 @@ import {
   readRequestCookieHeader,
 } from "./cookie-names";
 
-/**
- * Which login system this deployment uses (launch plan, phase 3). Supabase
- * until every flow has moved and been checked on staging (task 5.1); then
- * Better Auth, and the setting goes with Supabase in task 3.8.
- */
-export type AuthProvider = "supabase" | "better-auth";
-
-export function authProvider(env: NodeJS.ProcessEnv = process.env): AuthProvider {
-  return env["AUTH_PROVIDER"] === "better-auth" ? "better-auth" : "supabase";
-}
-
 export const BETTER_AUTH_SECRET_MIN_LENGTH = 32;
 
 const mailbox = new AsyncLocalStorage<AuthEmail[]>();
@@ -122,8 +111,8 @@ export type BetterAuthSessionUser = {
 };
 
 /**
- * Better Auth's answer for a session, reused for up to a minute, as the
- * Supabase check is (audit §3.1). A signed-out session keeps working on this
+ * Better Auth's answer for a session, reused for up to a minute (audit
+ * §3.1). A signed-out session keeps working on this
  * process for up to that long unless it was signed out here; disabling an
  * account is immediate, because global_status is read on every request.
  */

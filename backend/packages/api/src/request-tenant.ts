@@ -6,7 +6,8 @@ import { resolveTenantFromRecentLookup, resolveTenantFromRequest } from "@atlas/
  * The connection discipline of `createTenantRoute`, for routes that cannot use it
  * (public pages, webhooks, file downloads, auth flows). Audit H3.
  *
- * 1. Network work (Supabase, request bodies, providers) with no connection held.
+ * 1. The session check and network work (request bodies, providers) with no
+ *    connection of the main pool held.
  * 2. Global lookups on one short-lived connection, released on return.
  * 3. Only then the tenant transaction, on a second connection.
  *
@@ -20,9 +21,8 @@ export type ResolvedRequestTenant = Awaited<ReturnType<typeof resolveTenantFromR
 
 /**
  * A global-db handle that takes a connection per statement, for auth flows
- * that verify with Supabase and then mirror the principal: the principal
- * upsert is one atomic statement, and the network wait before it must not pin
- * a pooled connection. Not for multi-statement work that needs one transaction.
+ * whose statements are each atomic and whose waits in between must not pin a
+ * pooled connection. Not for multi-statement work that needs one transaction.
  */
 export const globalDbPerStatement = {
   $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T> {
@@ -43,7 +43,7 @@ export async function resolveRequestTenant(req: TenantRequest): Promise<Resolved
 }
 
 /**
- * Phases 1 and 2 for signed-in routes: Supabase verification with no
+ * Phases 1 and 2 for signed-in routes: the session check with no main-pool
  * connection held, then tenant and principal on one released connection.
  * Authentication runs first, as in `createTenantRoute`, so an anonymous caller
  * learns nothing about whether a tenant host exists.

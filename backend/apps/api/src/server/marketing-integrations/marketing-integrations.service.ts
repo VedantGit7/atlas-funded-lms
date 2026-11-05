@@ -527,15 +527,14 @@ export async function runIntegrationSignUpAction(tx: TenantTx, ctx: ServiceCtx, 
   let created = false;
 
   if (!principalId) {
-    // A placeholder until the learner signs up: no Supabase user holds this
-    // random id, and the first sign-in with this email *confirmed* claims the
-    // row (audit H6). 'active' would make it look bound to a real account.
+    // A placeholder until the learner signs up: it has no login method, and
+    // the first sign-in with this email *confirmed* claims the row (audit H6).
+    // 'active' would make it look bound to a real account.
     const idRows = await tx.$queryRawUnsafe<Array<{ id: string }>>(
       `
       insert into auth_principals (
-        id, supabase_user_id, email, email_normalized, global_status, mfa_enabled
+        id, email, email_normalized, global_status, mfa_enabled
       ) values (
-        gen_random_uuid(),
         gen_random_uuid(),
         $1,
         $1,

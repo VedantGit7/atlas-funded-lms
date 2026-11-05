@@ -4,7 +4,7 @@ import {
   createPublicRouteHandler,
   resolveRequestTenant,
 } from "@atlas/api";
-import { extractAccessToken, extractRefreshToken } from "@atlas/auth";
+import { extractSessionToken } from "@atlas/auth/session-tokens";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import {
   getPublicMarketingIntegrationSnippetsForViewer,
@@ -22,12 +22,10 @@ export const dynamic = "force-dynamic";
  * Anonymous visitors and learners get the tenant's snippets; signed-in staff get
  * none, because a snippet runs with the viewer's authority on this origin. A
  * session that is presented but cannot be verified gets none too: an expired
- * admin token must not be mistaken for an anonymous visitor.
+ * admin session must not be mistaken for an anonymous visitor.
  */
 export const GET = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
-  const presentsSession = Boolean(
-    (await extractAccessToken(req)) ?? (await extractRefreshToken(req)),
-  );
+  const presentsSession = Boolean(await extractSessionToken(req));
   let viewer: { tenantId: string; principalId: string | null };
   if (presentsSession) {
     try {

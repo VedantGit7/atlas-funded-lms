@@ -17,12 +17,7 @@ import {
   SPOOFABLE_TENANT_HEADERS,
 } from "./lib/http-headers";
 import { createRequestId, stripClientSuppliedRequestIds } from "./lib/request-id";
-import {
-  forwardRefreshedSessionCookies,
-  hasValidAccessToken,
-  mergeRequestCookieHeader,
-  tryRefreshSessionForProxy,
-} from "./lib/server/session-refresh";
+import { hasSessionCookie } from "./lib/server/session-refresh";
 
 const PROTECTED_ROUTE_PREFIXES = [
   "/admin",
@@ -95,7 +90,7 @@ function buildForwardedRequestHeaders(
   return requestHeaders;
 }
 
-export async function proxy(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isApi = pathname === "/api" || pathname.startsWith("/api/");
   const sameOriginFrame = /^\/f\/[^/]+\/?$/.test(pathname);
@@ -117,39 +112,18 @@ export async function proxy(req: NextRequest) {
     return response;
   };
 
-  if (isProtectedRoute(pathname) && !hasValidAccessToken(req)) {
-    const refreshResponse = await tryRefreshSessionForProxy(req);
-
-    if (!refreshResponse) {
-      const loginUrl = req.nextUrl.clone();
-      loginUrl.pathname = "/login";
-      loginUrl.search = "";
-      loginUrl.searchParams.set("next", `${pathname}${req.nextUrl.search}`);
-      return secureResponse(NextResponse.redirect(loginUrl));
-    }
-
-    const cookieHeader = mergeRequestCookieHeader(req, refreshResponse);
-    const requestHeaders = buildForwardedRequestHeaders(req, cookieHeader, documentCsp);
-    const requestId = requestHeaders.get(ATLAS_INTERNAL_REQUEST_ID_HEADER) ?? createRequestId();
-
-    const res = NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-
-    forwardRefreshedSessionCookies(res.headers, refreshResponse);
-    res.headers.set(ATLAS_INTERNAL_REQUEST_ID_HEADER, requestId);
-    return secureResponse(res);
+  if (isProtectedRoute(pathname) && !hasSessionCookie(req)) {
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+    loginUrl.searchParams.set("next", `${pathname}${req.nextUrl.search}`);
+    return secureResponse(NextResponse.redirect(loginUrl));
   }
 
-  const refreshResponse = await tryRefreshSessionForProxy(req);
-  const cookieHeader = refreshResponse
-    ? mergeRequestCookieHeader(req, refreshResponse)
-    : req.cookies
-        .getAll()
-        .map((cookie) => `${cookie.name}=${cookie.value}`)
-        .join("; ");
+  const cookieHeader = req.cookies
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join("; ");
 
   const requestHeaders = buildForwardedRequestHeaders(req, cookieHeader, documentCsp);
   const requestId = requestHeaders.get(ATLAS_INTERNAL_REQUEST_ID_HEADER) ?? createRequestId();
@@ -159,10 +133,6 @@ export async function proxy(req: NextRequest) {
       headers: requestHeaders,
     },
   });
-
-  if (refreshResponse) {
-    forwardRefreshedSessionCookies(res.headers, refreshResponse);
-  }
 
   res.headers.set(ATLAS_INTERNAL_REQUEST_ID_HEADER, requestId);
   return secureResponse(res);

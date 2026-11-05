@@ -1,5 +1,4 @@
 import { createPlatformRoute } from "@atlas/api/create-platform-route";
-import { authProvider, sendTenantInvitationEmail } from "@atlas/auth";
 import { sendInvitationEmail } from "../../../../../../../lib/auth-email";
 import { issueTenantOwnerInvitation } from "@atlas/domain-tenancy";
 import {
@@ -33,18 +32,14 @@ export const POST = createPlatformRoute({
       { allowLocalHostnames: appEnv !== "staging" && appEnv !== "production" },
     );
 
-    if (authProvider() === "better-auth") {
-      // With the academy's own branding, read in its scope rather than this
-      // platform transaction's (launch plan task 3.6).
-      await sendInvitationEmail({
-        tenantId: params.id,
-        requestId: ctx.requestId,
-        to: invitation.email,
-        inviteUrl: invitation.inviteUrl,
-      });
-    } else {
-      await sendTenantInvitationEmail({ email: invitation.email, inviteUrl: invitation.inviteUrl });
-    }
+    // With the academy's own branding, read in its scope rather than this
+    // platform transaction's (launch plan task 3.6).
+    await sendInvitationEmail({
+      tenantId: params.id,
+      requestId: ctx.requestId,
+      to: invitation.email,
+      inviteUrl: invitation.inviteUrl,
+    });
 
     return {
       data: {

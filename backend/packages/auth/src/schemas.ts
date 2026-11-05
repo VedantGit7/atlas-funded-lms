@@ -18,7 +18,6 @@ export const publicSignupInputSchema = z.object({
       .regex(/^[A-Za-z0-9_-]+$/)
       .optional(),
   ),
-  emailRedirectTo: z.url().max(500).optional(),
 });
 
 export const publicLoginInputSchema = z.object({

@@ -11,9 +11,9 @@ export type InviteAcceptContext = {
   invitedEmail: string | null;
   inviteValid: boolean;
   /**
-   * Better Auth (launch plan task 3.6): "none" when the invited address can't
-   * sign in yet, so the page sets a password; "exists" when it should sign in.
-   * Null with Supabase, whose invitation link carries its own session.
+   * "none" when the invited address can't sign in yet, so the page sets a
+   * password; "exists" when it should sign in (launch plan task 3.6). Null when
+   * the invitation couldn't be read.
    */
   inviteAccount: "none" | "exists" | null;
 };

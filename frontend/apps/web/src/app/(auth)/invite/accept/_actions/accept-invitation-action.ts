@@ -5,7 +5,7 @@ import {
   AcceptInvitationRequestSchema,
   SetInvitationPasswordRequestSchema,
 } from "@atlas/contracts/domain-identity/schemas/invitation-public";
-import { extractAccessToken } from "@atlas/auth/session-tokens";
+import { extractSessionToken } from "@atlas/auth/session-tokens";
 import { PASSWORD_POLICY_REJECTION_MESSAGE } from "@atlas/auth/auth-errors";
 import { safeInvitationErrorMessage } from "../../../../../lib/auth-messages";
 import { ServerPublicApiError, serverPublicApi } from "../../../../../lib/server/public-auth-fetch";
@@ -39,9 +39,7 @@ export async function acceptInvitationAction(
   const req = new Request("https://placeholder.local", {
     headers: { cookie: headerList.get("cookie") ?? "" },
   });
-  const accessToken = await extractAccessToken(req);
-
-  if (!accessToken) {
+  if (!(await extractSessionToken(req))) {
     return {
       ok: false,
       message: safeInvitationErrorMessage("AUTH_REQUIRED"),
@@ -78,13 +76,9 @@ export async function setInvitationPasswordAction(
   _prev: AcceptInvitationActionState | null,
   formData: FormData,
 ): Promise<AcceptInvitationActionState> {
-  // Supabase's invitation link carries a session; Better Auth's doesn't.
-  const accessToken = readFormString(formData.get("accessToken"));
   const parsed = SetInvitationPasswordRequestSchema.safeParse({
     token: readFormString(formData.get("token")),
     password: readFormString(formData.get("password")),
-    ...(accessToken ? { accessToken } : {}),
-    refreshToken: readFormString(formData.get("refreshToken")),
   });
 
   if (!parsed.success) {

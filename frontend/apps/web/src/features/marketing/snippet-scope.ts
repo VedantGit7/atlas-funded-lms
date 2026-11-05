@@ -4,9 +4,9 @@
  * Snippets are arbitrary HTML and script from tenant marketing settings,
  * executed in the app's own origin. They are for public and learner pages
  * (tracking pixels, chat widgets). They must never run where staff work, nor
- * on any page that collects credentials: Supabase accounts span tenants, so a
- * password typed into one tenant's sign-in page also opens that person's
- * account everywhere else.
+ * on any page that collects credentials: accounts span tenants, so a password
+ * typed into one tenant's sign-in page also opens that person's account
+ * everywhere else.
  *
  * Every top-level route must be listed in exactly one of these sets;
  * tests/lint-rules/marketing-snippet-scope.structure.test.ts enforces it, so a

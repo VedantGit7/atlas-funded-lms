@@ -51,9 +51,9 @@ async function insertLearner(
   await withTenantTx(tenantCtx(tenant), async (tx) => {
     await tx.$executeRaw`
       insert into auth_principals (
-        id, supabase_user_id, email, email_normalized, created_at, updated_at
+        id, email, email_normalized, created_at, updated_at
       )
-      values (${principalId}::uuid, ${randomUUID()}::uuid, ${uniqueEmail},
+      values (${principalId}::uuid, ${uniqueEmail},
               ${uniqueEmail.toLowerCase()}, now(), now())
     `;
     await tx.$executeRaw`

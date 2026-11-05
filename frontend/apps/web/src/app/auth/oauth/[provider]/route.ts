@@ -2,12 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ATLAS_CLIENT_IP_HEADER, buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolveSafeRedirectPath } from "@/lib/auth/safe-redirect";
-import {
-  OAUTH_NEXT_COOKIE,
-  OAUTH_REMEMBER_COOKIE,
-  OAUTH_VERIFIER_COOKIE,
-  resolveRequestOrigin,
-} from "../oauth-shared";
+import { OAUTH_NEXT_COOKIE, OAUTH_REMEMBER_COOKIE, resolveRequestOrigin } from "../oauth-shared";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 // Apple is deferred (launch plan, "Later: Apple sign-in").
@@ -25,10 +20,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
 
   const remember = req.nextUrl.searchParams.get("remember") === "1";
   const next = resolveSafeRedirectPath(req.nextUrl.searchParams.get("next"));
-  const callbackUrl = `${origin}/auth/callback`;
 
   let providerUrl: string;
-  let codeVerifier: string | undefined;
   let apiSetCookies: string[];
   const browserHost =
     req.headers.get(ATLAS_INTERNAL_TENANT_HOST_HEADER) ?? req.headers.get("host") ?? "";
@@ -46,7 +39,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
         req.headers.get(ATLAS_CLIENT_IP_HEADER) ?? "unknown",
       ),
       redirect: "error",
-      body: JSON.stringify({ provider, redirectTo: callbackUrl, rememberMe: remember }),
+      body: JSON.stringify({ provider, rememberMe: remember }),
       cache: "no-store",
     });
 
@@ -54,18 +47,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
       throw new Error("oauth_start_failed");
     }
 
-    const payload = (await apiRes.json()) as {
-      data?: { url?: string; codeVerifier?: string };
-    };
+    const payload = (await apiRes.json()) as { data?: { url?: string } };
 
     if (!payload.data?.url) {
       throw new Error("oauth_start_malformed");
     }
 
     providerUrl = payload.data.url;
-    // Supabase returns a PKCE verifier to keep; Better Auth sets its own
-    // signed state cookie instead, passed on to the browser below.
-    codeVerifier = payload.data.codeVerifier;
+    // Better Auth's signed state cookie, passed on to the browser below.
     apiSetCookies =
       typeof apiRes.headers.getSetCookie === "function" ? apiRes.headers.getSetCookie() : [];
   } catch {
@@ -82,7 +71,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     maxAge: OAUTH_COOKIE_MAX_AGE_SECONDS,
   };
 
-  if (codeVerifier) response.cookies.set(OAUTH_VERIFIER_COOKIE, codeVerifier, cookieOptions);
   response.cookies.set(OAUTH_REMEMBER_COOKIE, remember ? "1" : "0", cookieOptions);
   if (next) {
     response.cookies.set(OAUTH_NEXT_COOKIE, next, cookieOptions);

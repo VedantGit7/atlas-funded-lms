@@ -60,7 +60,6 @@ export const ModelName = {
   AuthVerification: 'AuthVerification',
   AuthTwoFactor: 'AuthTwoFactor',
   PlatformOperator: 'PlatformOperator',
-  AuthPrincipalRelinkRequest: 'AuthPrincipalRelinkRequest',
   Membership: 'Membership',
   MemberProfile: 'MemberProfile',
   MemberNotificationPreference: 'MemberNotificationPreference',
@@ -358,7 +357,6 @@ export type TenantDomainScalarFieldEnum = (typeof TenantDomainScalarFieldEnum)[k
 
 export const AuthPrincipalScalarFieldEnum = {
   id: 'id',
-  supabase_user_id: 'supabase_user_id',
   email: 'email',
   email_normalized: 'email_normalized',
   name: 'name',
@@ -451,25 +449,6 @@ export const PlatformOperatorScalarFieldEnum = {
 } as const
 
 export type PlatformOperatorScalarFieldEnum = (typeof PlatformOperatorScalarFieldEnum)[keyof typeof PlatformOperatorScalarFieldEnum]
-
-
-export const AuthPrincipalRelinkRequestScalarFieldEnum = {
-  id: 'id',
-  auth_principal_id: 'auth_principal_id',
-  previous_supabase_user_id: 'previous_supabase_user_id',
-  requested_supabase_user_id: 'requested_supabase_user_id',
-  email_normalized: 'email_normalized',
-  status: 'status',
-  attempt_count: 'attempt_count',
-  requested_at: 'requested_at',
-  last_seen_at: 'last_seen_at',
-  decided_at: 'decided_at',
-  decided_by_principal_id: 'decided_by_principal_id',
-  decision_reason: 'decision_reason',
-  revoked_platform_grant_id: 'revoked_platform_grant_id'
-} as const
-
-export type AuthPrincipalRelinkRequestScalarFieldEnum = (typeof AuthPrincipalRelinkRequestScalarFieldEnum)[keyof typeof AuthPrincipalRelinkRequestScalarFieldEnum]
 
 
 export const MembershipScalarFieldEnum = {

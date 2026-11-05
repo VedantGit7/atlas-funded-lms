@@ -8,7 +8,6 @@ export type AtlasErrorCode =
   // a re-registered email waits for a platform operator to review the link.
   | "ACCOUNT_DISABLED"
   | "EMAIL_NOT_VERIFIED"
-  | "ACCOUNT_REVIEW_REQUIRED"
   // 409. A Google sign-in reached an account with the same email that Google
   // or Atlas hasn't verified, so it isn't linked: sign in with the password,
   // then connect Google from the security settings (launch plan task 3.3).

@@ -6,8 +6,6 @@ import { isCoverageOutputPath } from "../guards/source-paths.mjs";
 // below scanned directories that no longer exist, so this guard passed while
 // inspecting no SQL at all.
 const approvedSqlDirectories = [
-  // Supabase Auth's hosted database has separate migration history from the LMS.
-  "supabase/migrations/",
   "backend/prisma/migrations/",
   "backend/prisma/sql/setup/",
   "backend/prisma/sql/functions/",
@@ -19,7 +17,7 @@ const approvedSqlDirectories = [
   "backend/prisma/sql/test-only/",
 ];
 
-const roots = ["backend", "frontend", "scripts", "tests", "supabase"];
+const roots = ["backend", "frontend", "scripts", "tests"];
 const failures = [];
 
 function walkFiles(directory) {

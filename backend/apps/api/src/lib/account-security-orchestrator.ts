@@ -1,4 +1,3 @@
-import { globalDbPerStatement } from "@atlas/api";
 import type { TenantTx } from "@atlas/db";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -84,8 +83,7 @@ export async function emitSecurityNotification(
 export async function notifyPasswordReset(args: {
   host: string;
   requestId: string;
-  /** Supabase reset: its user; Better Auth reset: the principal itself. */
-  who: { supabaseUserId: string } | { principalId: string };
+  principalId: string;
   email: string;
 }): Promise<void> {
   try {
@@ -94,19 +92,7 @@ export async function notifyPasswordReset(args: {
     );
     if (!tenant || tenant.tenantState !== "ACTIVE") return;
 
-    // A global table: read on its own connection, never inside the tenant transaction.
-    const principalId =
-      "principalId" in args.who
-        ? args.who.principalId
-        : (
-            await globalDbPerStatement.$queryRaw<{ id: string }[]>`
-              select id::text
-              from auth_principals
-              where supabase_user_id = ${args.who.supabaseUserId}::uuid
-              limit 1
-            `
-          )[0]?.id;
-    if (!principalId) return;
+    const principalId = args.principalId;
 
     await withTenantTx(
       { tenantId: tenant.tenantId, requestId: args.requestId, allowAnonymousTenantRead: true },

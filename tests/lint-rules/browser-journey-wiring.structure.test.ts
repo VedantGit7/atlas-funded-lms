@@ -98,24 +98,13 @@ describe("browser journey wiring", () => {
     // The seed enrolls the admin and platform users' authenticators with
     // BETTER_AUTH_SECRET and the API decrypts them with it; without the same
     // value in both, every MFA journey fails at the challenge (launch plan 3.7).
-    for (const variable of [
-      "AUTH_PROVIDER: better-auth",
-      "BETTER_AUTH_SECRET=",
-      "E2E_SEED_PASSWORD",
-    ]) {
+    for (const variable of ["BETTER_AUTH_SECRET=", "E2E_SEED_PASSWORD"]) {
       expect(workflows).toContain(variable);
     }
     // The seed imports the Better Auth flows, so it runs under tsx.
     expect(workflows).toContain(
       "tsx --tsconfig backend/apps/api/tsconfig.json scripts/e2e/seed-browser-users.mjs",
     );
-  });
-
-  it("starts no separate auth service", () => {
-    // Better Auth's accounts live in the job's own database. A local Supabase
-    // stack here would be a second login system the journeys never use.
-    expect(workflows).not.toContain("supabase start");
-    expect(workflows).not.toContain("supabase/setup-cli");
   });
 
   it("requires comparisons against committed Linux screenshots", () => {
@@ -133,7 +122,6 @@ describe("browser journey wiring", () => {
     // A fork cannot supply repository secrets, and a suite only the owner can
     // run is most of the way back to a suite nobody runs. The Better Auth
     // secret is generated in the job for the same reason.
-    expect(workflows).not.toMatch(/secrets\.E2E_SUPABASE/);
     expect(workflows).not.toMatch(/secrets\.BETTER_AUTH_SECRET/);
   });
 });

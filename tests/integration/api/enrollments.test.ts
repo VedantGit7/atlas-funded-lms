@@ -86,7 +86,7 @@ describe("POST /api/v1/enrollments", () => {
   beforeEach(() => {
     mockResolveTenant.mockResolvedValue(tenantA);
     mockRequireSessionUser.mockResolvedValue({
-      principalId: "supabase-user",
+      principalId: "principal-id",
       email: "learner@example.com",
       mfaEnabled: false,
     });

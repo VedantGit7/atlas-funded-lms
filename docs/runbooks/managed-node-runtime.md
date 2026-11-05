@@ -53,7 +53,7 @@ Readiness against `/readyz` remains the managed host's concern.
 | API    | `ghcr.io/vedantgit7/atlas-api:<environment>-<sha>` | Once per environment                              |
 | Web    | `ghcr.io/vedantgit7/atlas-web:<environment>-<sha>` | Once per environment                              |
 
-**Why the API is built per environment:** Next fixes every `NEXT_PUBLIC_*` value into the **API** build too, not only the web's. The shared auth and observability packages read `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `NEXT_PUBLIC_SENTRY_DSN`. A built API contains those values as literal text, so an API image built for staging keeps staging's values in production. The same holds for the web build, which also fixes `API_INTERNAL_URL`.
+**Why the API is built per environment:** Next fixes every `NEXT_PUBLIC_*` value into the **API** build too, not only the web's. The shared observability package reads `NEXT_PUBLIC_SENTRY_DSN`. A built API contains those values as literal text, so an API image built for staging keeps staging's values in production. The same holds for the web build, which also fixes `API_INTERNAL_URL`.
 
 **Build settings:**
 

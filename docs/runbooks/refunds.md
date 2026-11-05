@@ -2,7 +2,7 @@
 
 ## Rollout
 
-Apply migration `20260920010000_108_refund_intents` through the normal Prisma deployment process before deploying the API, web app and worker together. The migration adds a payment-order unique index and a tenant-scoped refund table; schedule it with the normal database backup and lock-impact review. Preserve the migration's forced RLS and narrow grants when applying baseline SQL. Do not expose this table through anonymous/authenticated Supabase roles.
+Apply migration `20260920010000_108_refund_intents` through the normal Prisma deployment process before deploying the API, web app and worker together. The migration adds a payment-order unique index and a tenant-scoped refund table; schedule it with the normal database backup and lock-impact review. Preserve the migration's forced RLS and narrow grants when applying baseline SQL. Do not grant this table to any role beyond the migration's own narrow grants.
 
 The existing outbox worker now also runs the `payment-refunds` processor. A web/API-only deployment accepts requests but cannot send or reconcile them. Verify worker health and credentials for each tenant's original gateway. Refund submission deliberately refuses fallback to a different gateway or replacement gateway ID. Credential rotation must retain access to the same provider account.
 

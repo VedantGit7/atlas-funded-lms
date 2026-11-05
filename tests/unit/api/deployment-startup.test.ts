@@ -37,8 +37,6 @@ describe("F05 startup rejects incomplete deployment configuration", () => {
       "PLATFORM_HOST",
       "API_INTERNAL_URL",
       "API_PROXY_SECRET",
-      "NEXT_PUBLIC_SUPABASE_URL",
-      "SUPABASE_SERVICE_ROLE_KEY",
       "CRON_SECRET",
       "INTERNAL_WORKER_SECRET",
       "LEARNER_BILLING_ENC_KEY",

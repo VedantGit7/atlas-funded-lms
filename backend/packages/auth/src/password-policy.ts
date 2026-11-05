@@ -8,11 +8,8 @@ import { PASSWORD_POLICY_REJECTION_MESSAGE } from "./auth-errors";
  * H6). Sign-in never applies it, so an older, shorter password still signs in
  * until its owner changes it.
  *
- * The same minimum is configured in Supabase Auth (`supabase/config.toml`
- * locally, verified on the hosted project by
- * `scripts/security/verify-supabase-auth-config.mjs`). It is repeated here
- * because the hosted setting is a dashboard toggle that can drift, and because
- * Supabase's own leaked-password check needs a paid plan.
+ * Better Auth is configured with the same minimum (`minPasswordLength` in
+ * better-auth.ts); the breach check below is ours alone.
  */
 export const NEW_PASSWORD_MIN_LENGTH = 10;
 

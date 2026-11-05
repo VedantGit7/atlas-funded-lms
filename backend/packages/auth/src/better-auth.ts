@@ -4,13 +4,13 @@ import { magicLink } from "better-auth/plugins/magic-link";
 import { twoFactor } from "better-auth/plugins/two-factor";
 import { createUuidV7 } from "@atlas/core/id/uuid-v7";
 
-import { ATLAS_SESSION_COOKIE, REFRESH_TOKEN_MAX_AGE_SECONDS } from "./cookie-names";
+import { ATLAS_SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "./cookie-names";
 import { NEW_PASSWORD_MIN_LENGTH } from "./password-policy";
 
 export { ATLAS_SESSION_COOKIE };
 
 /** Sessions slide: one used on a new day is extended, at most one write a day. */
-export const SESSION_EXPIRES_IN_SECONDS = REFRESH_TOKEN_MAX_AGE_SECONDS;
+export const SESSION_EXPIRES_IN_SECONDS = SESSION_MAX_AGE_SECONDS;
 export const SESSION_UPDATE_AGE_SECONDS = 60 * 60 * 24;
 
 /**
@@ -159,8 +159,8 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
     },
     user: {
       modelName: "authPrincipal",
-      // Two steps, like Supabase's secure email change: the current address
-      // approves, then the new one is verified, and only then does it change.
+      // Two steps: the current address approves, then the new one is
+      // verified, and only then does it change.
       changeEmail: {
         enabled: true,
         sendChangeEmailConfirmation: ({ user, newEmail, token }) => {

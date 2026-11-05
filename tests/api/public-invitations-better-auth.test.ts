@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 /**
- * Launch plan task 3.6: the invitation preview and set-password routes with
- * AUTH_PROVIDER=better-auth. The account flows run against Postgres in
+ * Launch plan task 3.6: the invitation preview and set-password routes. The
+ * account flows run against Postgres in
  * tests/integration/auth/better-auth-invitations.test.ts.
  */
 
@@ -11,7 +11,6 @@ const TENANT_ID = "018f0000-0000-7000-8000-000000000001";
 const TOKEN = "invite-token-0123456789abcdef";
 
 const mocks = vi.hoisted(() => ({
-  provider: "better-auth" as "supabase" | "better-auth",
   previewInvitation: vi.fn(),
   acceptInvitation: vi.fn(),
   invitedAccountState: vi.fn(),
@@ -22,7 +21,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@atlas/auth", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  authProvider: () => mocks.provider,
   invitedAccountState: (...args: unknown[]) => mocks.invitedAccountState(...args),
   createAccountFromInvitation: (...args: unknown[]) => mocks.createAccount(...args),
   findActiveSessionPrincipal: (...args: unknown[]) => mocks.findPrincipal(...args),
@@ -64,10 +62,9 @@ function request(path: string, body?: object) {
   });
 }
 
-describe("invitations with Better Auth", () => {
+describe("invitations", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.provider = "better-auth";
     mocks.previewInvitation.mockResolvedValue({ invitedEmail: "invitee@example.test" });
     mocks.sessionUser.mockRejectedValue(new Error("no session"));
     mocks.invitedAccountState.mockResolvedValue("none");
@@ -127,19 +124,6 @@ describe("invitations with Better Auth", () => {
     );
 
     expect(response.status).toBeGreaterThanOrEqual(400);
-    expect(mocks.createAccount).not.toHaveBeenCalled();
-  });
-
-  it("still needs the link's session with Supabase", async () => {
-    mocks.provider = "supabase";
-    const response = await setPassword(
-      request("/api/v1/public/invitations/set-password", {
-        token: TOKEN,
-        password: "a-new-strong-password",
-      }),
-    );
-
-    expect(response.status).toBe(400);
     expect(mocks.createAccount).not.toHaveBeenCalled();
   });
 });

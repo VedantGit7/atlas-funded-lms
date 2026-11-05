@@ -170,7 +170,6 @@ async function seedOwnerMembershipAndConfig(
   await tx.$executeRaw`
     INSERT INTO auth_principals (
       id,
-      supabase_user_id,
       email,
       email_normalized,
       global_status,
@@ -179,7 +178,6 @@ async function seedOwnerMembershipAndConfig(
     )
     VALUES (
       ${ownerPrincipalId}::uuid,
-      ${randomUUID()}::uuid,
       ${`${tenant.slug}-owner@example.test`},
       ${`${tenant.slug}-owner@example.test`},
       'active',

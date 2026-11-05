@@ -1,5 +1,15 @@
 # F19 — Supabase security findings
 
+> **Retired (launch plan task 3.8, November 2026).** Atlas no longer uses Supabase:
+> sign-in is Better Auth, in the application's own database
+> (docs/engineering/better-auth-design.md). The hosted projects these findings were
+> about hold no Atlas data or users. The `supabase/` migration this remediation
+> applied, its `test:supabase-security` check and CI job, and
+> `security:supabase-auth` were removed with the rest of Supabase. Leaked-password
+> protection, the open item below, is now the application's own breach check on every
+> password write (docs/runbooks/identity-and-account-review.md, "Passwords"). What
+> follows is the record of the remediation as it was.
+
 Updated 20 September 2026. **The database permission findings are fixed on the connected hosted project. Leaked-password protection remains blocked by the organization's Free plan. F19 is partially complete.**
 
 ### Recheck — 26 September 2026

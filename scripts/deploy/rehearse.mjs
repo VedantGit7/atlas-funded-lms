@@ -107,14 +107,7 @@ function makeCertificates() {
 }
 
 function buildImages() {
-  // The compose file still requires the Supabase settings until task 3.8;
-  // they're the synthetic ones, and nothing answers there.
-  const synthetic = deploymentEnv();
-  const publicSettings = [
-    "APP_ENV=staging",
-    `NEXT_PUBLIC_SUPABASE_URL=${synthetic.NEXT_PUBLIC_SUPABASE_URL}`,
-    `NEXT_PUBLIC_SUPABASE_ANON_KEY=${synthetic.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-  ];
+  const publicSettings = ["APP_ENV=staging"];
   writeFileSync(resolve(output, "api-build.env"), `${publicSettings.join("\n")}\n`);
   writeFileSync(
     resolve(output, "web-build.env"),
@@ -165,7 +158,6 @@ function writeComposeEnv(tenantHost) {
     PLATFORM_DATABASE_URL: runtime("atlas_platform_login", local.ATLAS_PLATFORM_LOGIN_PASSWORD),
     RATE_LIMIT_REDIS_URL: "redis://redis:6379",
     // The seed enrolled the admin's authenticator with this secret.
-    AUTH_PROVIDER: "better-auth",
     BETTER_AUTH_SECRET: local.BETTER_AUTH_SECRET,
     REHEARSAL_CERTS: certs,
   };

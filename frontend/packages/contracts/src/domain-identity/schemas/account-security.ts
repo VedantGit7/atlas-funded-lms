@@ -11,7 +11,6 @@ export const ChangePasswordRequestSchema = z
 export const ChangeEmailRequestSchema = z
   .object({
     newEmail: z.email().transform((value) => value.trim().toLowerCase()),
-    emailRedirectTo: z.url().max(500).optional(),
   })
   .strict();
 
@@ -28,8 +27,8 @@ export const SecondFactorCodeSchema = z
   );
 
 /**
- * Setting up an authenticator. With Better Auth, an account that signs in
- * with a password confirms it first; Supabase doesn't ask.
+ * Setting up an authenticator. An account that signs in with a password
+ * confirms it first; one that only uses Google isn't asked.
  */
 export const MfaEnrollRequestSchema = z
   .object({
@@ -43,8 +42,8 @@ export const MfaEnrollResponseSchema = z.object({
     qrCode: z.string(),
     secret: z.string(),
     uri: z.string(),
-    /** Better Auth: ten single-use codes, shown once, for when the app isn't to hand. */
-    backupCodes: z.array(z.string()).optional(),
+    /** Ten single-use codes, shown once, for when the app isn't to hand. */
+    backupCodes: z.array(z.string()),
   }),
 });
 
@@ -92,7 +91,6 @@ export const IdentitiesListResponseSchema = z.object({
 export const LinkIdentityRequestSchema = z
   .object({
     provider: PublicOAuthProviderSchema,
-    redirectTo: z.url().max(500),
   })
   .strict();
 
@@ -105,7 +103,6 @@ export const LinkIdentityResponseSchema = z.object({
 export const MagicLinkRequestSchema = z
   .object({
     email: z.email().transform((value) => value.trim().toLowerCase()),
-    emailRedirectTo: z.url().max(500).optional(),
   })
   .strict();
 
