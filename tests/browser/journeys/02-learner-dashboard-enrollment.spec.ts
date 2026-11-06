@@ -72,6 +72,19 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
       data: { id: fixture.courseId, enrollmentStatus: "enrolled" },
     });
 
+    // Opening the lesson saves progress once: it marks the lesson in progress
+    // and keeps its position. The page used to save a made-up position + 30 s
+    // every ~1.75 s for as long as it stayed open (launch plan 5.1, staging).
+    let visitSaves = 0;
+    page.on("request", (request) => {
+      if (
+        new URL(request.url()).pathname === progressPath &&
+        request.method() === "POST" &&
+        request.postDataJSON()?.completed === false
+      ) {
+        visitSaves += 1;
+      }
+    });
     const firstProgressResponse = page.waitForResponse(
       (response) =>
         new URL(response.url()).pathname === progressPath &&
@@ -90,14 +103,12 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     expect(firstSaved.data.positionSeconds).toBe(
       firstProgress.request().postDataJSON().positionSeconds,
     );
-    // Timer callbacks may be delayed on a busy CI runner. Verify real partial
-    // progress and its submitted position rather than one exact wall-clock tick.
-    expect(firstSaved.data.positionSeconds).toBeGreaterThanOrEqual(30);
-    expect(firstSaved.data.positionSeconds).toBeLessThan(600);
-    expect(firstSaved.data.progressPct).toBeGreaterThanOrEqual(5);
     expect(firstSaved.data.progressPct).toBeLessThan(100);
+    // Staying on the lesson must not save again.
+    await page.waitForTimeout(5_000);
+    expect(visitSaves).toBe(1);
 
-    // Leaving the player stops its timer; the next read must come from storage.
+    // The next read must come from storage.
     await page.goto(coursePath);
     const savedLesson = await page.request.get(`/api/v1/lessons/${fixture.lessonId}`);
     expect(savedLesson.status()).toBe(200);
@@ -105,8 +116,7 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
       data: { progress: { status: string; progressPct: number; positionSeconds: number } };
     };
     expect(savedBody.data.progress.status).toBe("in_progress");
-    expect(savedBody.data.progress.progressPct).toBeGreaterThanOrEqual(5);
-    expect(savedBody.data.progress.positionSeconds).toBeGreaterThanOrEqual(30);
+    expect(savedBody.data.progress.positionSeconds).toBe(firstSaved.data.positionSeconds);
     await page.locator(`a[href="${lessonPath}"]`).click();
     await expect(
       page.getByText(`Resume at ${savedBody.data.progress.positionSeconds}s`, { exact: true }),

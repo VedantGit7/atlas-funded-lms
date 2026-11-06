@@ -94,11 +94,7 @@ export async function recordLessonProgress(
         existingStatus,
       );
 
-  const status = resolveProgressStatus({
-    existingStatus,
-    completed,
-    progressPct: nextPct,
-  });
+  const status = resolveProgressStatus({ existingStatus, completed });
 
   const completedAt =
     status === "completed"
