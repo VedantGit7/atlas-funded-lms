@@ -348,6 +348,10 @@ Better Auth is the only login system. `AUTH_PROVIDER` is gone, along with every 
 
 **Order.** Staging moved to Better Auth first, on the build that still had both systems (5 November). Then this change merged, so its deploy changed no behaviour there. Its migration also clears `mfa_enabled` for any account without a Better Auth authenticator, so an environment that skipped that step behaves the same.
 
+**On staging.** #260 merged as `a228fe1c`. Migration 129 and `verify` ran on staging the same day: `supabase_user_id` and `auth_principal_relink_requests` are gone, and the one account with an authenticator keeps `mfa_enabled`. The Supabase settings and `AUTH_PROVIDER` were removed from staging's environment.
+
+**What the rollout got wrong.** For about three minutes between the migration (15:06 UTC) and the new containers (15:09), every signed-in API request on staging failed with "Authentication service unavailable" (Sentry ATLAS-LMS-A). The old release's Better Auth looks sessions up through Prisma, which selects every column, and `supabase_user_id` was already gone. That broke the rule that a release's migrations keep the previous release working. On an environment with users, a dropped column goes in the release after the one that stops reading it.
+
 **What the staging switch found (#259, `ad7eea9e`).** Signing in succeeded but the console said "Platform access denied", and the authenticator code was refused. The web re-sets the cookies the API's auth routes return, and it kept only their Max-Age. On https Better Auth names them `__Secure-atlas_session` and `__Secure-atlas.two_factor`, and a browser refuses a `__Secure-` cookie without Secure, so neither cookie was kept. The value was also encoded a second time. Local runs use http, where the names have no prefix, so no test had seen it. `parseForwardedSetCookie` now keeps each cookie's Secure, SameSite, Path and lifetime and decodes the value once; `tests/unit/frontend/forwarded-auth-cookies.test.ts` checks it through Next's own serializer. With that deployed, the platform owner set up an authenticator and signed in to both hosts.
 
 **What went.**

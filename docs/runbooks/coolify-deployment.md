@@ -60,7 +60,7 @@ Set on the production server on 29 October 2026. Check after any proxy change or
 
 ## TLS and DNS
 
-Visitors reach the server only through Cloudflare (the firewall allows ports 80 and 443 from Cloudflare's ranges only). The decision behind this is in the hosting decision doc, section 4.
+Visitors reach the server only through Cloudflare. The staging addresses arrive through a **Cloudflare Tunnel** (below). Until the production addresses move to it too, the firewall still allows ports 80 and 443 from Cloudflare's ranges only. The decision behind this is in the hosting decision doc, section 4.
 
 - **Edge:** Cloudflare's Universal SSL covers every name one level under `fundedbeyond.com`.
 - **Origin:** a **Cloudflare Origin CA certificate** in Traefik covers the four LMS addresses: `academy`, `platform`, `staging-academy` and `staging-platform`.
@@ -106,11 +106,11 @@ Visitors reach the server only through Cloudflare (the firewall allows ports 80 
 
 **Cloudflare settings for the LMS addresses.** The zone also serves the company site and email, so these settings are scoped to the LMS addresses. The zone-wide SSL mode (Full) and Always Use HTTPS (off) stay as they are.
 
-| Setting        | Where                                                     | Value                                                                                                                                             |
-| -------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DNS            | DNS → Records                                             | A record per address → `201.18.202.220`, **proxied**. The `*` wildcard (Porkbun's forwarding) stays; an explicit record takes precedence over it. |
-| SSL mode       | Rules → Configuration Rules, `LMS staging: Full (strict)` | `(http.host in {"staging-academy.fundedbeyond.com" "staging-platform.fundedbeyond.com"})` → SSL **Full (strict)**                                 |
-| HTTPS redirect | Rules → Redirect Rules, `LMS staging: HTTP to HTTPS`      | `(http.host in {...the same names...} and not ssl)` → dynamic `concat("https://", http.host, http.request.uri.path)`, 301, preserve query string  |
+| Setting        | Where                                                     | Value                                                                                                                                                                                                                                   |
+| -------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DNS            | DNS → Records                                             | Staging: a proxied CNAME to the tunnel, created by its routes (below). Production until it moves: A record → `201.18.202.220`, **proxied**. The `*` wildcard (Porkbun's forwarding) stays; an explicit record takes precedence over it. |
+| SSL mode       | Rules → Configuration Rules, `LMS staging: Full (strict)` | `(http.host in {"staging-academy.fundedbeyond.com" "staging-platform.fundedbeyond.com"})` → SSL **Full (strict)**                                                                                                                       |
+| HTTPS redirect | Rules → Redirect Rules, `LMS staging: HTTP to HTTPS`      | `(http.host in {...the same names...} and not ssl)` → dynamic `concat("https://", http.host, http.request.uri.path)`, 301, preserve query string                                                                                        |
 
 **At launch,** add `academy.fundedbeyond.com` and `platform.fundedbeyond.com` to both rules, in the same change as their DNS records. Until then they must stay out: `academy` currently reaches Porkbun's redirect through the wildcard, and Full (strict) would break it.
 
@@ -123,7 +123,59 @@ curl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" "http://staging-academ
 
 - **HTTPS:** expect the app's response, or Traefik's "Site not available" page (503) when nothing is deployed for that address.
 - **HTTP:** expect a 301 to the same path and query on `https://`.
-- **Cloudflare errors:** a 526 means Cloudflare rejected the origin certificate (it doesn't cover the name, or it expired). A 525 means the TLS handshake with Traefik failed.
+- **Cloudflare errors:** a 526 means Cloudflare rejected the origin certificate (it doesn't cover the name, or it expired). A 525 means the TLS handshake with Traefik failed. Through the tunnel, a 502 means `cloudflared` couldn't reach Traefik or rejected its certificate (its log says which).
+
+## Cloudflare Tunnel
+
+**Why.** On the free plan, Cloudflare often serves visitors in India from Singapore, Tokyo or even Boston. Each new connection from there to this server crossed the public internet to Mumbai, and some never arrived or broke mid-handshake: intermittent 525 and 520 errors, 15-second stalls and 6-second responses (Sentry ATLAS-LMS-B, 5 November 2026). The server and the firewall were fine. With the tunnel, `cloudflared` on the server keeps four outbound connections open to Cloudflare's Mumbai locations, and requests travel to it over Cloudflare's network. After the switch, 120 of 120 test requests through Boston, Singapore, Tokyo and Hong Kong succeeded, none slower than 2 seconds.
+
+**What runs.** One tunnel for the server, `atlas-hostinger-mumbai` (Cloudflare → **Zero Trust → Networks → Tunnels**). `cloudflared` runs from `/root/atlas/tunnel` with [`deploy/cloudflare-tunnel/compose.yaml`](../../deploy/cloudflare-tunnel/compose.yaml), outside Coolify, on Coolify's `coolify` network:
+
+| File in `/root/atlas/tunnel` | What it is                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| `compose.yaml`               | A copy of the repository's file. The image is pinned by digest.                                  |
+| `tunnel.env`                 | `TUNNEL_TOKEN=…`, mode 600. Written through a hidden prompt; never print it.                     |
+| `ca-bundle.crt`              | The server's public roots plus Cloudflare's Origin CA root, so `cloudflared` can verify Traefik. |
+| `origin_ca_rsa_root.pem`     | Cloudflare's Origin CA root (RSA), from `developers.cloudflare.com/ssl/static/`.                 |
+
+**Routes** (the tunnel's **Published application routes**), one per address:
+
+- **Service URL:** `https://coolify-proxy:443`. That is Traefik, on the Docker network.
+- **TLS:** **Match SNI to Host** on, so Traefik picks the right site and certificate. **No TLS Verify** stays off: `cloudflared` checks the Origin certificate against `ca-bundle.crt`.
+- Adding a route creates its DNS record, a proxied CNAME to `<tunnel id>.cfargotunnel.com`. Delete the address's A record first, or Cloudflare refuses the route.
+
+The Configuration Rule's SSL mode doesn't apply to tunnel traffic. The HTTP-to-HTTPS Redirect Rule still does. Visitor IPs are unchanged: the app reads `CF-Connecting-IP` (`TRUSTED_CLIENT_IP_HEADER`), which the tunnel passes through.
+
+**Setting it up on a new server** (or replacing the token):
+
+1. Create the tunnel in the dashboard (connector type **Cloudflared**) and copy only the `eyJ…` token from its Docker command. Don't run that command.
+2. On the server, create `/root/atlas/tunnel` (mode 700), copy `compose.yaml` there, and build the CA bundle:
+
+   ```bash
+   cd /root/atlas/tunnel
+   curl -fsS -o origin_ca_rsa_root.pem https://developers.cloudflare.com/ssl/static/origin_ca_rsa_root.pem
+   cat /etc/ssl/certs/ca-certificates.crt origin_ca_rsa_root.pem > ca-bundle.crt
+   echo | openssl s_client -connect 127.0.0.1:443 -servername staging-academy.fundedbeyond.com \
+     -CAfile ca-bundle.crt -verify_hostname staging-academy.fundedbeyond.com 2>/dev/null | grep 'Verify return code'   # expect 0 (ok)
+   ```
+
+3. Write `tunnel.env` from a hidden prompt on your machine, sending it over SSH's input:
+
+   ```powershell
+   $t = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'Tunnel token')).Password
+   "TUNNEL_TOKEN=$t" | ssh root@201.18.202.220 "umask 077; sed '1s/^\xEF\xBB\xBF//' | tr -d '\r' > /root/atlas/tunnel/tunnel.env"; $t = $null
+   ```
+
+4. `docker compose -f /root/atlas/tunnel/compose.yaml up -d`. Its log should show four `Registered tunnel connection` lines with `location=bom…`.
+5. Add the routes, one address at a time.
+
+**Checking it:** `docker compose -f /root/atlas/tunnel/compose.yaml logs --since 1h cloudflared | grep -E ' (ERR|WRN) '` should print nothing. `Updated to new configuration` lines show the routes it received. To confirm no visitor traffic uses the open ports, `tcpdump -ni eth0 'tcp dst port 443 and tcp[tcpflags] & tcp-syn != 0'` should stay silent while you browse.
+
+**Updating `cloudflared`:** change the tag and digest in the repository's `compose.yaml`, copy it to the server, `docker compose up -d`. The four connections drop and reconnect within seconds, so expect a few failed requests.
+
+**Rolling back an address:** delete its route, and recreate its A record → `201.18.202.220`, proxied. That works only while ports 80 and 443 are open.
+
+**Still to do:** move `academy` and `platform` to the tunnel at launch, then remove the "HTTP/HTTPS from Cloudflare" rules from `scripts/deploy/hostinger-firewall.mjs` so no web ports are open at all. Also rebuild `ca-bundle.crt` after the server's CA certificates change (`ca-certificates` updates). A stale bundle still verifies the Origin certificate, so this isn't urgent.
 
 ## Server access and firewall
 

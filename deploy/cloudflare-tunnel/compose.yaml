@@ -1,0 +1,40 @@
+# Cloudflare Tunnel for the Hostinger server (docs/runbooks/coolify-deployment.md,
+# "Cloudflare Tunnel").
+#
+# cloudflared keeps outbound connections open to Cloudflare's nearest
+# locations, so a request that reaches any Cloudflare location travels to this
+# server over Cloudflare's network instead of a new connection across the
+# public internet. It forwards each published hostname to Coolify's Traefik
+# over HTTPS, sending the hostname as SNI, and checks Traefik's certificate (a
+# Cloudflare Origin CA certificate) against ca-bundle.crt: the public roots
+# plus Cloudflare's Origin CA root.
+#
+# Runs from /root/atlas/tunnel on the server, next to two files that are not in
+# the repository:
+#   tunnel.env     TUNNEL_TOKEN=... (mode 600), from the Cloudflare dashboard
+#   ca-bundle.crt  built by the runbook
+#
+#   docker compose -f /root/atlas/tunnel/compose.yaml up -d
+name: atlas-tunnel
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.1@sha256:a15a3b50b8dabd57ac2090e9484c0247dba9dfa1f0df4d298d4317f9d69eb2d5
+    command: ["tunnel", "--no-autoupdate", "--metrics", "0.0.0.0:2000", "run"]
+    env_file: [./tunnel.env]
+    environment:
+      SSL_CERT_FILE: /etc/atlas/ca-bundle.crt
+    volumes:
+      - ./ca-bundle.crt:/etc/atlas/ca-bundle.crt:ro
+    networks: [coolify]
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+networks:
+  coolify:
+    external: true
