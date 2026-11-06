@@ -307,6 +307,40 @@ export async function updateCourseStatusForWorkflow(args: {
   `;
 }
 
+/**
+ * Publishes a course's unpublished modules and lessons when the course itself is
+ * approved. Learners only see modules and lessons marked PUBLISHED, and the
+ * studio has no per-item publish control, so approval is what makes the content
+ * visible. A course can only be edited in DRAFT, so later edits go through
+ * review again and are published by the next approval. Deleted and ARCHIVED
+ * items are left as they are.
+ */
+export async function publishCourseContentForWorkflow(args: {
+  tx: Tx;
+  courseId: string;
+}): Promise<{ modulesPublished: number; lessonsPublished: number }> {
+  const modulesPublished = await args.tx.$executeRaw`
+    update course_modules
+    set status = 'PUBLISHED'::"PublishStatus",
+        updated_at = now()
+    where course_id = ${args.courseId}::uuid
+      and deleted_at is null
+      and status in ('DRAFT'::"PublishStatus", 'REVIEW'::"PublishStatus")
+  `;
+  const lessonsPublished = await args.tx.$executeRaw`
+    update lessons l
+    set status = 'PUBLISHED'::"PublishStatus",
+        updated_at = now()
+    from course_modules m
+    where l.module_id = m.id
+      and m.course_id = ${args.courseId}::uuid
+      and m.deleted_at is null
+      and l.deleted_at is null
+      and l.status in ('DRAFT'::"PublishStatus", 'REVIEW'::"PublishStatus")
+  `;
+  return { modulesPublished, lessonsPublished };
+}
+
 export async function findAssessmentForWorkflow(args: { tx: Tx; assessmentId: string }): Promise<{
   id: string;
   title: string;
