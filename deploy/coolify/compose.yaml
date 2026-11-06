@@ -109,14 +109,14 @@ services:
       APP_URL: ${APP_URL:?}
       ATLAS_SERVICE_RUNTIME: managed-node
       # Better Auth signs sessions and encrypts authenticators with this.
-      # Google sign-in is optional.
+      # The sign-in page always offers Google, so its client is required too.
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?}
       BETTER_STACK_WORKER_HEARTBEAT_URL: ${BETTER_STACK_WORKER_HEARTBEAT_URL:?}
       CERTIFICATE_OPEN_BADGE: ${CERTIFICATE_OPEN_BADGE:-false}
       CRON_SECRET: ${CRON_SECRET:?}
       DATABASE_URL: ${DATABASE_URL:?}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?}
       INTERNAL_WORKER_SECRET: ${INTERNAL_WORKER_SECRET:?}
       LEARNER_BILLING_ENC_KEY: ${LEARNER_BILLING_ENC_KEY:?}
       # Off until marketing email has its own provider: the SMTP agent is ZeptoMail,

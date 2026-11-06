@@ -43,6 +43,13 @@ export class R2StorageProvider implements StorageProvider {
       requestChecksumCalculation: "WHEN_REQUIRED",
       responseChecksumValidation: "WHEN_REQUIRED",
       endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+      // Path-style addresses (`<account>.r2.cloudflarestorage.com/<bucket>/<key>`)
+      // keep signed URLs on the one host the page CSP allows for storage
+      // (configs/security-headers.mjs). The default puts the bucket in the
+      // host name, which `connect-src` and `img-src` don't match, so the
+      // browser refused every direct upload (launch plan 5.1, staging,
+      // 6 November 2026). The bucket's CORS rule accepts both styles.
+      forcePathStyle: true,
       credentials: {
         accessKeyId,
         secretAccessKey,

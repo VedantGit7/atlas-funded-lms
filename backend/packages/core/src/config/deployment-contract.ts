@@ -237,6 +237,12 @@ export function validateDeploymentConfiguration(
   // or the reverse, would fail at the first sign-in instead of at deploy.
   if (Boolean(value("GOOGLE_CLIENT_ID")) !== Boolean(value("GOOGLE_CLIENT_SECRET")))
     issues.push("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together");
+  // The academy's sign-in page always offers Google, so the API needs its
+  // client. Staging had none, and every "Continue with Google" failed with an
+  // internal error (launch plan 5.1, 6 November 2026).
+  if (service === "api")
+    for (const key of ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"])
+      if (!value(key)) issues.push(`${key} is required: the sign-in page offers Google`);
 
   for (const key of ["CRON_SECRET", "INTERNAL_WORKER_SECRET", "OBSERVABILITY_HASH_SALT"])
     secret(key);

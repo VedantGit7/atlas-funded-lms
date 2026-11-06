@@ -190,7 +190,10 @@ describe("F05 deployment contract", () => {
   });
   it("needs the Google client ID and secret together (launch plan 3.3)", () => {
     expect(() =>
-      validateDeploymentConfiguration({ ...deploymentEnv(), GOOGLE_CLIENT_ID: "id" }),
+      validateDeploymentConfiguration(
+        { ...deploymentEnv(), GOOGLE_CLIENT_ID: "id", GOOGLE_CLIENT_SECRET: "" },
+        "web",
+      ),
     ).toThrow(/GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together/);
     expect(() =>
       validateDeploymentConfiguration({
@@ -199,6 +202,15 @@ describe("F05 deployment contract", () => {
         GOOGLE_CLIENT_SECRET: "secret",
       }),
     ).not.toThrow();
+  });
+  it("requires the Google client on the API, which the sign-in page always offers (5.1)", () => {
+    for (const key of ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"])
+      expect(() =>
+        validateDeploymentConfiguration({ ...deploymentEnv(), [key]: "" }, "api"),
+      ).toThrow(new RegExp(`${key} is required`));
+    const withoutGoogle = { ...deploymentEnv(), GOOGLE_CLIENT_ID: "", GOOGLE_CLIENT_SECRET: "" };
+    expect(() => validateDeploymentConfiguration(withoutGoogle, "web")).not.toThrow();
+    expect(() => validateDeploymentConfiguration(withoutGoogle, "worker")).not.toThrow();
   });
   it("requires a strong Better Auth secret on the API", () => {
     expect(() =>

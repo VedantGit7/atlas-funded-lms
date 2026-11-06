@@ -157,6 +157,7 @@ export async function main(): Promise<number> {
         sweep.scheduledReportRunsEnqueued > 0 ||
         sweep.certificatesExpired > 0 ||
         sweep.fxRatesRefreshed > 0 ||
+        sweep.abandonedUploadsPurged > 0 ||
         sweep.errors.length > 0
       ) {
         log("info", "worker.sweep.completed", {
@@ -168,6 +169,7 @@ export async function main(): Promise<number> {
           scheduledReportRunsEnqueued: sweep.scheduledReportRunsEnqueued,
           certificatesExpired: sweep.certificatesExpired,
           fxRatesRefreshed: sweep.fxRatesRefreshed,
+          abandonedUploadsPurged: sweep.abandonedUploadsPurged,
           delivered: sweep.delivered,
           failed: sweep.failed,
           skipped: sweep.skipped,

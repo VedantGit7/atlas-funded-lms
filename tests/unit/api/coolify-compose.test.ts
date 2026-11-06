@@ -101,6 +101,13 @@ describe("Coolify compose topology", () => {
     );
   });
 
+  it("makes Coolify hold the API's Google client, which the sign-in page always offers", () => {
+    for (const key of ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]) {
+      expect(coolify("api").environment[key]).toBe(`\${${key}:?}`);
+      expect(() => resolveEnvironment("api", { ...settings, [key]: "" })).toThrow(new RegExp(key));
+    }
+  });
+
   it("keeps each service's credentials to what it uses", () => {
     const env = (service: DeploymentService) => Object.keys(coolify(service).environment);
     // The worker never proxies to the API; only the API signs SCORM reads.
