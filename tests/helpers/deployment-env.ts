@@ -28,6 +28,8 @@ export function deploymentEnv(): NodeJS.ProcessEnv {
     PUBLIC_SITE_URL: "",
     CERTIFICATE_PUBLIC_BASE_URL: "https://learn.example.test",
     BETTER_AUTH_SECRET: Buffer.from("synthetic Better Auth signing secret").toString("hex"),
+    GOOGLE_CLIENT_ID: "synthetic-google-client-id",
+    GOOGLE_CLIENT_SECRET: "synthetic-google-client-value",
     CRON_SECRET: "f270994c918cdbe90b3a847736cdd189612d49275e39e58b",
     INTERNAL_WORKER_SECRET: "ae352175d723ab180457b68256a69d3f1abe7d330c640aeb",
     API_PROXY_SECRET: "36f54a9e62e782e52ca45d21d8b5d7b894c181b9aad08a73",

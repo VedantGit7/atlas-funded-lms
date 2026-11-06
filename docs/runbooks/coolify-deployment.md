@@ -239,7 +239,7 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
 
    `CERTIFICATE_OPEN_BADGE`, `MARKETING_EMAIL_ENABLED`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `false`, `0.05`, `587`).
 
-   Sign-in is Better Auth, in the API. It needs `BETTER_AUTH_SECRET`, at least 32 characters, generated like the other internal secrets; only the API receives it, and it refuses to start without it. Rotating it signs everyone out and makes existing authenticators unreadable, so generate it once per environment. Google sign-in additionally needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, both or neither.
+   Sign-in is Better Auth, in the API. It needs `BETTER_AUTH_SECRET`, at least 32 characters, generated like the other internal secrets; only the API receives it, and it refuses to start without it. Rotating it signs everyone out and makes existing authenticators unreadable, so generate it once per environment. The API also needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, the environment's Google OAuth client (launch plan 0.4), and refuses to start without them: the sign-in page always offers Google. Its redirect URI is `https://<academy host>/auth/callback/google`.
 
    **Keep the values off screens and out of chat.** Each environment's complete list lives on the server as `/root/atlas/<env>/coolify.env` (mode 600). It is assembled from three root-only files in the same folder:
    - `runtime.env`: the database URLs, from the bootstrap ("Databases and migrations");

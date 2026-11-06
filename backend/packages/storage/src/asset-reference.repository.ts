@@ -84,6 +84,39 @@ export async function updatePendingAssetReferenceSizeBytes(
   `;
 }
 
+/**
+ * Uploads that were signed but never confirmed, older than `before`. A signed
+ * upload URL lasts minutes, so these will never complete.
+ */
+export async function listAbandonedPendingUploads(
+  tx: TenantTx,
+  input: { before: Date; limit: number },
+): Promise<Array<{ id: string; bucket: string; object_key: string }>> {
+  return tx.$queryRaw<Array<{ id: string; bucket: string; object_key: string }>>`
+    SELECT id::text, bucket, object_key
+    FROM storage_references
+    WHERE tenant_id = app.current_tenant_id()
+      AND status = 'PENDING_UPLOAD'
+      AND created_at < ${input.before}
+    ORDER BY created_at
+    LIMIT ${input.limit}
+  `;
+}
+
+/** Marks abandoned uploads deleted, once their objects are gone. */
+export async function markAbandonedUploadsDeleted(tx: TenantTx, ids: string[]): Promise<number> {
+  if (ids.length === 0) return 0;
+  return tx.$executeRaw`
+    UPDATE storage_references
+    SET status = 'DELETED',
+        deleted_at = now(),
+        updated_at = now()
+    WHERE id = ANY(${ids}::uuid[])
+      AND tenant_id = app.current_tenant_id()
+      AND status = 'PENDING_UPLOAD'
+  `;
+}
+
 export async function findAssetReferenceById(
   tx: TenantTx,
   assetReferenceId: string,

@@ -13,6 +13,7 @@ import {
 } from "@atlas/domain-config/services/fx.service";
 import { purgeExpiredAttributionEvents } from "@atlas/domain/sales-marketing/attribution-retention";
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
+import { purgeAbandonedUploads } from "@atlas/storage/abandoned-upload-purge";
 import { OUTBOX_PROCESSORS, type OutboxProcessor } from "./outbox-processors";
 import { drainTenantUsageEvents } from "@atlas/api/tenant-usage-meter";
 
@@ -70,6 +71,8 @@ export type SweepResult = {
   certificatesExpired: number;
   /** Tenants whose FX rates were refreshed this sweep (daily; formerly a cron, audit M5). */
   fxRatesRefreshed: number;
+  /** Signed uploads never confirmed, removed a day later (launch plan 5.1). */
+  abandonedUploadsPurged: number;
 };
 
 export async function listAllRetentionTenantIds(): Promise<string[]> {
@@ -120,6 +123,7 @@ const RETENTION_COUNTERS: Record<
   | "scheduledReportRunsEnqueued"
   | "certificatesExpired"
   | "fxRatesRefreshed"
+  | "abandonedUploadsPurged"
 > = {
   "usage-meter-drain": "usageEventsProcessed",
   "export-file-purge": "exportFilesPurged",
@@ -130,6 +134,7 @@ const RETENTION_COUNTERS: Record<
   "report-schedule-tick": "scheduledReportRunsEnqueued",
   "certificate-expiry": "certificatesExpired",
   "fx-rate-refresh": "fxRatesRefreshed",
+  "abandoned-upload-purge": "abandonedUploadsPurged",
 };
 
 export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
@@ -230,6 +235,26 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
         }),
     },
     {
+      // Signed uploads never confirmed: the object, if any bytes arrived, then
+      // the pending reference (launch plan 5.1). Inactive tenants too, since
+      // their storage costs the same.
+      name: "abandoned-upload-purge",
+      includeInactiveTenants: true,
+      run: async ({ tenantId, requestId }) => {
+        const storage = getStorageProvider();
+        const outcome = await withTenantTx(
+          { tenantId, requestId, allowAnonymousTenantRead: true },
+          async (tx) =>
+            purgeAbandonedUploads(tx, ({ bucket, key }) => storage.deleteObject({ bucket, key })),
+        );
+        if (outcome.failed)
+          throw new Error(
+            `${outcome.failed} abandoned upload deletion(s) failed; references retained for retry.`,
+          );
+        return outcome.deleted;
+      },
+    },
+    {
       // A no-op for every tenant that has not opted in, which is the default.
       // This task visits active tenants only; deletion follows their setting.
       name: "attribution-events-purge",
@@ -273,6 +298,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     scheduledReportRunsEnqueued: 0,
     certificatesExpired: 0,
     fxRatesRefreshed: 0,
+    abandonedUploadsPurged: 0,
   };
 
   const tenantIds = await listTenants();

@@ -145,6 +145,21 @@ export function createPlatformRoute<
           // connections at once and deadlocked the pool at DATABASE_POOL_MAX
           // concurrent requests. Operator routes are exactly the ones that must
           // keep working during an incident, so they get the same treatment.
+          //
+          // First connection: principal resolution, released before the scope
+          // transaction opens. It runs before any input is read, so a caller
+          // who isn't an operator gets 401/403 rather than validation errors
+          // that describe the route's inputs (launch plan 5.1, 6 November 2026).
+          const platformPrincipal = await withGlobalDb(
+            async (db) =>
+              await requirePlatformPrincipal({
+                req,
+                db,
+                requiredPermission: config.metadata.permission,
+                allowMfaEnrollment: config.metadata.mfa === "enrollment",
+              }),
+          );
+
           const reason =
             config.metadata.reasonRequired === true
               ? readPlatformReason(req)
@@ -163,18 +178,6 @@ export function createPlatformRoute<
                 ) as InferParams<TParams>)
               : ({} as InferParams<TParams>);
           const body = config.body != null ? await readBodyInput(req, config.body) : ({} as TBody);
-
-          // First connection: principal resolution, released before the scope
-          // transaction opens.
-          const platformPrincipal = await withGlobalDb(
-            async (db) =>
-              await requirePlatformPrincipal({
-                req,
-                db,
-                requiredPermission: config.metadata.permission,
-                allowMfaEnrollment: config.metadata.mfa === "enrollment",
-              }),
-          );
 
           const ctx: PlatformRouteContext = {
             platformPrincipalId: platformPrincipal.platformPrincipalId,
