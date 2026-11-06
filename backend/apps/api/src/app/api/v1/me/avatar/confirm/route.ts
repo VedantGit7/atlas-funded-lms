@@ -14,7 +14,9 @@ type ConfirmAvatarBody = z.output<typeof confirmAvatarBodySchema>;
 
 const confirmAvatarResponseSchema = z.object({
   data: z.object({
-    avatarUrl: z.url().nullable(),
+    // A public R2 URL, or this app's /api/v1/public/avatars/<id> when there's
+    // no public endpoint.
+    avatarUrl: z.string().min(1),
   }),
 });
 
@@ -26,15 +28,14 @@ export const POST = createTenantRoute<
   body: confirmAvatarBodySchema,
   output: confirmAvatarResponseSchema,
   handler: async ({ tx, ctx, input }) => {
+    // The member's own upload only; the avatars it replaces are deleted.
     const { avatarUrl } = await confirmMemberAvatarUpload(
       tx,
       { tenantId: ctx.tenantId },
-      { assetReferenceId: input.assetReferenceId },
+      { assetReferenceId: input.assetReferenceId, membershipId: ctx.actorMembershipId },
     );
 
-    if (avatarUrl) {
-      await updateMemberProfile(tx, ctx, ctx.actorMembershipId, { avatarUrl });
-    }
+    await updateMemberProfile(tx, ctx, ctx.actorMembershipId, { avatarUrl });
 
     return { data: { avatarUrl } };
   },

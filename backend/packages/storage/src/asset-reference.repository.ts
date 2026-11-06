@@ -84,6 +84,41 @@ export async function updatePendingAssetReferenceSizeBytes(
   `;
 }
 
+/** A member's confirmed avatar images, newest first. */
+export async function listMemberAvatarReferences(
+  tx: TenantTx,
+  membershipId: string,
+): Promise<Array<{ id: string; bucket: string; object_key: string }>> {
+  return tx.$queryRaw<Array<{ id: string; bucket: string; object_key: string }>>`
+    SELECT id::text, bucket, object_key
+    FROM storage_references
+    WHERE tenant_id = app.current_tenant_id()
+      AND purpose = 'member.avatar'
+      AND resource_type = 'member_profile'
+      AND resource_id = ${membershipId}::uuid
+      AND status = 'READY'
+    ORDER BY created_at DESC
+  `;
+}
+
+/** A confirmed, public-safe avatar image of the current tenant, or null. */
+export async function findReadyMemberAvatar(
+  tx: TenantTx,
+  assetReferenceId: string,
+): Promise<StorageReferenceRow | null> {
+  const rows = await tx.$queryRaw<StorageReferenceRow[]>`
+    SELECT *
+    FROM storage_references
+    WHERE id = ${assetReferenceId}::uuid
+      AND tenant_id = app.current_tenant_id()
+      AND purpose = 'member.avatar'
+      AND visibility = 'public-safe'
+      AND status = 'READY'
+    LIMIT 1
+  `;
+  return rows[0] ?? null;
+}
+
 /**
  * Uploads that were signed but never confirmed, older than `before`. A signed
  * upload URL lasts minutes, so these will never complete.
