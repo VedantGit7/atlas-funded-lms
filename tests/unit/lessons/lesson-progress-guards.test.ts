@@ -27,13 +27,21 @@ describe("lesson progress guards", () => {
   });
 
   it("resolves completed status idempotently", () => {
-    expect(
-      resolveProgressStatus({
-        existingStatus: "completed",
-        completed: false,
-        progressPct: 50,
-      }),
-    ).toBe("completed");
+    expect(resolveProgressStatus({ existingStatus: "completed", completed: false })).toBe(
+      "completed",
+    );
+  });
+
+  it("marks an opened lesson in progress even at 0%", () => {
+    expect(resolveProgressStatus({ existingStatus: "not_started", completed: false })).toBe(
+      "in_progress",
+    );
+    expect(resolveProgressStatus({ existingStatus: "in_progress", completed: false })).toBe(
+      "in_progress",
+    );
+    expect(resolveProgressStatus({ existingStatus: "not_started", completed: true })).toBe(
+      "completed",
+    );
   });
 
   it("detects first completion", () => {

@@ -46,20 +46,22 @@ export function shouldAdvanceProgressPct(
   return Math.max(existingPct, nextPct);
 }
 
+/**
+ * The status after a progress save. A save that isn't a completion means the
+ * learner opened the lesson, so it's in progress even at 0%: the lesson page
+ * saves once per visit and the embedded player reports no position yet.
+ * "not_started" is a lesson with no progress row (launch plan 5.1, 6 November
+ * 2026).
+ */
 export function resolveProgressStatus(args: {
   existingStatus: ProgressStatus;
   completed: boolean;
-  progressPct: number;
 }): ProgressStatus {
   if (args.existingStatus === "completed" || args.completed) {
     return "completed";
   }
 
-  if (args.progressPct > 0) {
-    return "in_progress";
-  }
-
-  return "not_started";
+  return "in_progress";
 }
 
 export function isFirstCompletion(args: {
