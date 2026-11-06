@@ -33,6 +33,10 @@ const IDENTITY_BLOCK_MESSAGES = {
   // linked to yet; Google has proven the person controls the address.
   ACCOUNT_NOT_LINKED:
     "This email already has an account. Sign in with your password, then connect Google from your security settings.",
+  // Signed in, but no membership here and none could be created, for example
+  // an account with an authenticator that hasn't entered its code yet.
+  NO_ACTIVE_MEMBERSHIP:
+    "You don't have access to this academy yet. Sign in with your password, or contact the academy.",
 } as const;
 
 export type IdentityBlockCode = keyof typeof IDENTITY_BLOCK_MESSAGES;
@@ -42,6 +46,7 @@ const IDENTITY_BLOCK_QUERY: Record<IdentityBlockCode, string> = {
   ACCOUNT_DISABLED: "account_disabled",
   EMAIL_NOT_VERIFIED: "email_not_verified",
   ACCOUNT_NOT_LINKED: "account_not_linked",
+  NO_ACTIVE_MEMBERSHIP: "no_access",
 };
 
 export function isIdentityBlockCode(code: string | null | undefined): code is IdentityBlockCode {
