@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createPublicRouteHandler, globalDbPerStatement, resolveRequestTenant } from "@atlas/api";
 import { establishSessionFromTokenHash, applyAuthSession } from "@atlas/auth";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   PublicAuthConfirmRequestSchema,
   PublicAuthResponseSchema,
@@ -10,7 +9,7 @@ import {
   buildPublicAuthResponse,
 } from "@atlas/domain-identity";
 import { sendAuthEmails } from "../../../../../../lib/auth-email";
-import { applyReferralForNewMembership } from "../../../../../../server/sales-referrals/sales-referrals.service";
+import { resolveSignInMembership } from "../../../../../../lib/sign-in-membership";
 import { routeMetadata } from "./route.metadata";
 
 /**
@@ -62,51 +61,19 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
-      let membership = principalId
-        ? await findMembershipByPrincipal({
-            tx,
-            tenantId: tenant.tenantId,
-            authPrincipalId: principalId,
-          })
-        : null;
-      let pendingInvitation: { id: string; status: "INVITED" } | null = null;
-
-      if (!result.identity.mfaEnabled && principalId && !membership) {
-        const provisioned = await ensureSelfServiceLearnerMembership({
-          tx,
-          tenantId: tenant.tenantId,
-          authPrincipalId: principalId,
-          email: result.identity.emailNormalized,
-        });
-
-        membership = await findMembershipByPrincipal({
-          tx,
-          tenantId: tenant.tenantId,
-          authPrincipalId: principalId,
-        });
-
-        // An invitation to this email is waiting: answer INVITED_MEMBERSHIP so
-        // the person goes on to accept it, rather than "no access".
-        if (!membership && provisioned?.status === "INVITED") {
-          pendingInvitation = { id: provisioned.membershipId, status: "INVITED" };
-        }
-
-        if (provisioned?.created && membership) {
-          await applyReferralForNewMembership(tx, {
-            refereeMembershipId: membership.id,
-            emailNormalized: result.identity.emailNormalized,
-          });
-        }
-      }
+      const membership = await resolveSignInMembership(tx, {
+        tenantId: tenant.tenantId,
+        principalId,
+        email: result.identity.emailNormalized,
+        provision: !result.identity.mfaEnabled,
+      });
 
       return buildPublicAuthResponse({
         tx,
         tenantId: tenant.tenantId,
         serviceStatus: result.status,
         mfaEnabled: result.identity.mfaEnabled,
-        membership: membership
-          ? { id: membership.id, status: membership.status }
-          : pendingInvitation,
+        membership,
       });
     },
   );

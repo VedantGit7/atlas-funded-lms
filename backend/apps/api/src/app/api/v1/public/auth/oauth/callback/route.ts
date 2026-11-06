@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { resolvePlatformHost, resolveRequestHostFromHeaders } from "@atlas/tenancy";
-import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
+import { createPublicRouteHandler, globalDbPerStatement, resolveRequestTenant } from "@atlas/api";
 import { applyAuthSession, authRequestContext, completeGoogleCallback } from "@atlas/auth";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { findMembershipByPrincipal } from "@atlas/membership";
 import {
   PublicOAuthCallbackRequestSchema,
   PublicAuthResponseSchema,
@@ -12,6 +11,7 @@ import {
   buildPublicAuthResponse,
 } from "@atlas/domain-identity";
 import { sendAuthEmails } from "../../../../../../../lib/auth-email";
+import { resolveSignInMembership } from "../../../../../../../lib/sign-in-membership";
 import { routeMetadata } from "./route.metadata";
 
 /** Where a person who linked Google from their security settings goes back to. */
@@ -76,6 +76,20 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       : forBrowserSessionOnly(result.cookies.setCookies),
   };
 
+  // A global table: read on its own connection, never inside the tenant
+  // transaction. Self-service sign-up needs the normalized email (an
+  // invitation is matched by it) and waits for an account with an
+  // authenticator to clear its code, which a Google session doesn't.
+  const principalRows = await globalDbPerStatement.$queryRaw<
+    Array<{ email_normalized: string; mfa_enabled: boolean }>
+  >`
+    select email_normalized, mfa_enabled
+    from auth_principals
+    where id = ${principalId}::uuid
+    limit 1
+  `;
+  const principal = principalRows[0];
+
   const body = await withTenantTx(
     {
       tenantId: tenant.tenantId,
@@ -83,11 +97,12 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
-      const membership = principalId
-        ? await findMembershipByPrincipal({
-            tx,
+      const membership = principal
+        ? await resolveSignInMembership(tx, {
             tenantId: tenant.tenantId,
-            authPrincipalId: principalId,
+            principalId,
+            email: principal.email_normalized,
+            provision: !principal.mfa_enabled,
           })
         : null;
 
@@ -98,7 +113,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         // A session from Google is aal1, so routes that need MFA still ask for
         // the code (docs/engineering/better-auth-design.md).
         mfaEnabled: false,
-        membership: membership ? { id: membership.id, status: membership.status } : null,
+        membership,
       });
     },
   );

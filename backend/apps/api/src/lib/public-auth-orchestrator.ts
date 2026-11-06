@@ -8,7 +8,6 @@ import {
 import { globalDbPerStatement } from "@atlas/api";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   lookupTenantFromHost,
   resolvePlatformHost,
@@ -20,8 +19,8 @@ import {
   type PublicAuthStatus,
 } from "@atlas/domain-identity";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
-import { applyReferralForNewMembership } from "../server/sales-referrals/sales-referrals.service";
 import type { PublicAuthApiResponse } from "./public-auth-types";
+import { resolveSignInMembership } from "./sign-in-membership";
 
 async function resolveActiveTenantFromRequest() {
   const headerList = await headers();
@@ -66,54 +65,21 @@ async function buildResponse(args: {
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
-      let membership = principalId
-        ? await findMembershipByPrincipal({
-            tx,
-            tenantId: args.tenantId,
-            authPrincipalId: principalId,
-          })
-        : null;
-      let pendingInvitation: { id: string; status: "INVITED" } | null = null;
-
-      // Open self-service signup: a fully authenticated user (including one who
-      // just cleared an MFA challenge) with no membership becomes an ACTIVE
-      // learner. `args.mfaEnabled` is false here once MFA has been satisfied.
-      if (args.serviceStatus === "signed_in" && !args.mfaEnabled && principalId && !membership) {
-        const provisioned = await ensureSelfServiceLearnerMembership({
-          tx,
-          tenantId: args.tenantId,
-          authPrincipalId: principalId,
-          email: args.email,
-        });
-
-        membership = await findMembershipByPrincipal({
-          tx,
-          tenantId: args.tenantId,
-          authPrincipalId: principalId,
-        });
-
-        // An invitation to this email is waiting: answer INVITED_MEMBERSHIP so
-        // the person goes on to accept it, rather than "no access".
-        if (!membership && provisioned?.status === "INVITED") {
-          pendingInvitation = { id: provisioned.membershipId, status: "INVITED" };
-        }
-
-        if (provisioned?.created && membership) {
-          await applyReferralForNewMembership(tx, {
-            refereeMembershipId: membership.id,
-            emailNormalized: args.email,
-          });
-        }
-      }
+      // A fully authenticated user, including one who just cleared an MFA
+      // challenge (`args.mfaEnabled` is false once it's satisfied), may sign up.
+      const membership = await resolveSignInMembership(tx, {
+        tenantId: args.tenantId,
+        principalId,
+        email: args.email,
+        provision: args.serviceStatus === "signed_in" && !args.mfaEnabled,
+      });
 
       return buildPublicAuthResponse({
         tx,
         tenantId: args.tenantId,
         serviceStatus: args.serviceStatus,
         mfaEnabled: args.mfaEnabled,
-        membership: membership
-          ? { id: membership.id, status: membership.status }
-          : pendingInvitation,
+        membership,
       });
     },
   );

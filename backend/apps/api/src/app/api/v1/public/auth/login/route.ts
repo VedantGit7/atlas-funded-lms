@@ -8,14 +8,13 @@ import { createPublicRouteHandler } from "@atlas/api";
 import { applyAuthSession, loginWithPassword } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { findMembershipByPrincipal, ensureSelfServiceLearnerMembership } from "@atlas/membership";
 import {
   PublicLoginRequestSchema,
   PublicAuthResponseSchema,
   rejectClientTenantId,
   buildPublicAuthResponse,
 } from "@atlas/domain-identity";
-import { applyReferralForNewMembership } from "../../../../../../server/sales-referrals/sales-referrals.service";
+import { resolveSignInMembership } from "../../../../../../lib/sign-in-membership";
 import { routeMetadata } from "./route.metadata";
 
 // One connection per statement: none is held while the password is checked.
@@ -91,57 +90,21 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
-      let membership = principalId
-        ? await findMembershipByPrincipal({
-            tx,
-            tenantId: tenant.tenantId,
-            authPrincipalId: principalId,
-          })
-        : null;
-      let pendingInvitation: { id: string; status: "INVITED" } | null = null;
-
-      // Open self-service signup: a verified user signing in for the first
-      // time with no membership becomes an ACTIVE learner. Gated on a fully
-      // authenticated (non-MFA-pending) session so we never provision before
-      // a required MFA challenge is satisfied.
-      // `loginWithPassword` resolves only on a completed password sign-in
-      // and throws otherwise, so its status is always "signed_in" here.
-      if (!result.identity.mfaEnabled && principalId && !membership) {
-        const provisioned = await ensureSelfServiceLearnerMembership({
-          tx,
-          tenantId: tenant.tenantId,
-          authPrincipalId: principalId,
-          email: input.email,
-        });
-
-        membership = await findMembershipByPrincipal({
-          tx,
-          tenantId: tenant.tenantId,
-          authPrincipalId: principalId,
-        });
-
-        // An invitation to this email is waiting: answer INVITED_MEMBERSHIP so
-        // the person goes on to accept it, rather than "no access".
-        if (!membership && provisioned?.status === "INVITED") {
-          pendingInvitation = { id: provisioned.membershipId, status: "INVITED" };
-        }
-
-        if (provisioned?.created && membership) {
-          await applyReferralForNewMembership(tx, {
-            refereeMembershipId: membership.id,
-            emailNormalized: input.email,
-          });
-        }
-      }
+      // `loginWithPassword` resolves only on a completed password sign-in and
+      // throws otherwise, so sign-up waits only for a pending MFA challenge.
+      const membership = await resolveSignInMembership(tx, {
+        tenantId: tenant.tenantId,
+        principalId,
+        email: input.email,
+        provision: !result.identity.mfaEnabled,
+      });
 
       return buildPublicAuthResponse({
         tx,
         tenantId: tenant.tenantId,
         serviceStatus: result.status,
         mfaEnabled: result.identity.mfaEnabled,
-        membership: membership
-          ? { id: membership.id, status: membership.status }
-          : pendingInvitation,
+        membership,
       });
     },
   );

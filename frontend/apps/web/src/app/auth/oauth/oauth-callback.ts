@@ -105,7 +105,10 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
   );
 
   if (!destination) {
-    return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=oauth`));
+    // Signed in but with no membership here: say so rather than blame Google.
+    const status = payload.data?.status;
+    const errorParam = isIdentityBlockCode(status) ? identityBlockQueryValue(status) : "oauth";
+    return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=${errorParam}`));
   }
 
   // Clear temporary cookies before appending the API's raw Set-Cookie headers;

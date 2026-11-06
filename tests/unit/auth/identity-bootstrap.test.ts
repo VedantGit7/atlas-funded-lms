@@ -59,16 +59,18 @@ describe("membership gate refuses disabled accounts (audit H6)", () => {
 });
 
 describe("sign-in messages for identity refusals", () => {
-  it.each(["ACCOUNT_DISABLED", "EMAIL_NOT_VERIFIED", "ACCOUNT_NOT_LINKED"] as const)(
-    "names the next step for %s and round-trips it through the login URL",
-    (code) => {
-      expect(isIdentityBlockCode(code)).toBe(true);
-      const message = identityBlockMessage(code);
-      expect(message).toBeTruthy();
-      expect(identityBlockMessageFromQuery(identityBlockQueryValue(code))).toBe(message);
-      expect(safeInvitationErrorMessage(code)).toBe(message);
-    },
-  );
+  it.each([
+    "ACCOUNT_DISABLED",
+    "EMAIL_NOT_VERIFIED",
+    "ACCOUNT_NOT_LINKED",
+    "NO_ACTIVE_MEMBERSHIP",
+  ] as const)("names the next step for %s and round-trips it through the login URL", (code) => {
+    expect(isIdentityBlockCode(code)).toBe(true);
+    const message = identityBlockMessage(code);
+    expect(message).toBeTruthy();
+    expect(identityBlockMessageFromQuery(identityBlockQueryValue(code))).toBe(message);
+    expect(safeInvitationErrorMessage(code)).toBe(message);
+  });
 
   it("ignores anything else, so a crafted ?error= cannot inject text", () => {
     expect(isIdentityBlockCode("AUTH_REQUIRED")).toBe(false);

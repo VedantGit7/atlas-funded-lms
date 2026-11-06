@@ -12,6 +12,10 @@ const mocks = vi.hoisted(() => ({
   completeGoogle: vi.fn(),
   sendAuthEmails: vi.fn(),
   findMembership: vi.fn(),
+  ensureLearner: vi.fn(),
+  applyReferral: vi.fn(),
+  principalRows: vi.fn(),
+  buildResponse: vi.fn(),
 }));
 
 vi.mock("@atlas/auth", async (importOriginal) => ({
@@ -23,6 +27,7 @@ vi.mock("@atlas/api", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   resolveRequestTenant: () =>
     Promise.resolve({ tenantId: "018f0000-0000-7000-8000-000000000001", requestId: "r" }),
+  globalDbPerStatement: { $queryRaw: (...args: unknown[]) => mocks.principalRows(...args) },
 }));
 vi.mock("@atlas/db/with-tenant-tx", () => ({
   withTenantTx: (_ctx: unknown, fn: (tx: unknown) => unknown) => fn({}),
@@ -30,11 +35,18 @@ vi.mock("@atlas/db/with-tenant-tx", () => ({
 vi.mock("@atlas/membership", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   findMembershipByPrincipal: (...args: unknown[]) => mocks.findMembership(...args),
+  ensureSelfServiceLearnerMembership: (...args: unknown[]) => mocks.ensureLearner(...args),
 }));
+vi.mock(
+  "../../backend/apps/api/src/server/sales-referrals/sales-referrals.service",
+  async (importOriginal) => ({
+    ...(await importOriginal<Record<string, unknown>>()),
+    applyReferralForNewMembership: (...args: unknown[]) => mocks.applyReferral(...args),
+  }),
+);
 vi.mock("@atlas/domain-identity", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
-  buildPublicAuthResponse: () =>
-    Promise.resolve({ data: { status: "AUTHENTICATED", redirectTo: "/" } }),
+  buildPublicAuthResponse: (...args: unknown[]) => mocks.buildResponse(...args),
 }));
 vi.mock("../../backend/apps/api/src/lib/auth-email", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -102,6 +114,64 @@ describe("POST /api/v1/public/auth/oauth/callback", () => {
     vi.clearAllMocks();
     mocks.sendAuthEmails.mockResolvedValue(undefined);
     mocks.findMembership.mockResolvedValue({ id: "membership-1", status: "ACTIVE" });
+    mocks.principalRows.mockResolvedValue([
+      { email_normalized: "learner@example.test", mfa_enabled: false },
+    ]);
+    mocks.applyReferral.mockResolvedValue(undefined);
+    mocks.buildResponse.mockResolvedValue({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
+  });
+
+  // Launch plan 5.1 (staging, 6 November 2026): a new person who signed up with
+  // Google got an account but no membership, and was turned away.
+  it("makes a new person who signs up with Google a learner, as password sign-up does", async () => {
+    mocks.completeGoogle.mockResolvedValue({
+      kind: "signed_in",
+      principalId: "principal-new",
+      cookies: { setCookies: [sessionCookie] },
+      emails: [],
+    });
+    mocks.findMembership
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: "membership-new", status: "ACTIVE" });
+    mocks.ensureLearner.mockResolvedValue({
+      membershipId: "membership-new",
+      status: "ACTIVE",
+      created: true,
+    });
+
+    const response = await callback(
+      request("/api/v1/public/auth/oauth/callback", { code: "c", state: "s1" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mocks.ensureLearner).toHaveBeenCalledWith(
+      expect.objectContaining({ authPrincipalId: "principal-new", email: "learner@example.test" }),
+    );
+    expect(mocks.applyReferral).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ refereeMembershipId: "membership-new" }),
+    );
+    expect(mocks.buildResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ membership: { id: "membership-new", status: "ACTIVE" } }),
+    );
+  });
+
+  it("doesn't sign up an account with an authenticator until it has entered its code", async () => {
+    mocks.completeGoogle.mockResolvedValue({
+      kind: "signed_in",
+      principalId: "principal-mfa",
+      cookies: { setCookies: [sessionCookie] },
+      emails: [],
+    });
+    mocks.principalRows.mockResolvedValue([
+      { email_normalized: "mfa@example.test", mfa_enabled: true },
+    ]);
+    mocks.findMembership.mockResolvedValue(null);
+
+    await callback(request("/api/v1/public/auth/oauth/callback", { code: "c", state: "s1" }));
+
+    expect(mocks.ensureLearner).not.toHaveBeenCalled();
+    expect(mocks.buildResponse).toHaveBeenCalledWith(expect.objectContaining({ membership: null }));
   });
 
   it("signs in and sets a browser-session cookie when 'keep me signed in' is off", async () => {
