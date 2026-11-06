@@ -14,6 +14,7 @@ import {
   listPendingWorkflowItems,
   listWorkflowDefinitions as listWorkflowDefinitionsRepo,
   listWorkflowHistoryForTarget,
+  publishCourseContentForWorkflow,
   updateAssessmentStatusForWorkflow,
   updateCourseStatusForWorkflow,
   updateLearningPathStatusForWorkflow,
@@ -259,6 +260,13 @@ async function actOnCourseWorkflow(
     status: nextStatus,
   });
 
+  // Learners see only PUBLISHED modules and lessons, and approval is the only
+  // step that publishes them (5.1 acceptance, 6 November 2026).
+  const contentPublished =
+    input.action === "approve"
+      ? await publishCourseContentForWorkflow({ tx, courseId: pending.targetId })
+      : null;
+
   await auditWriter.write(
     tx,
     {
@@ -278,6 +286,7 @@ async function actOnCourseWorkflow(
         workflowDefinitionId: pending.workflowDefinitionId,
         fromState: "REVIEW",
         toState: nextStatus,
+        ...(contentPublished ?? {}),
       },
     },
   );

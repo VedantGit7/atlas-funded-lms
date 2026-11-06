@@ -5,6 +5,9 @@ import { submitAssessmentForReview } from "../../../backend/apps/api/src/server/
 import { submitCourseForReview } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
 import { createCourseModule } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
 import { findCourseAuthProjection } from "../../../backend/apps/api/src/server/courses/courses.repository";
+import { getPublishedCourseModules } from "../../../backend/apps/api/src/server/courses/courses.service";
+import { createLesson } from "../../../backend/apps/api/src/server/lessons/lessons.service";
+import { createLessonBodySchema } from "../../../backend/apps/api/src/server/lessons/lesson-schemas";
 import {
   submitLearningPathForReview,
   updateLearningPath,
@@ -18,6 +21,7 @@ import {
   authoringTenantTx,
   createCourseAuthoringFixture,
   instructorCtx,
+  learnerCtx,
 } from "../../fixtures/course-authoring-fixture";
 import {
   createAssessmentFixture,
@@ -82,6 +86,53 @@ describeWithDb("workflow integration", () => {
     });
   });
 
+  // 5.1 staging acceptance (6 November 2026): a course built in the studio and
+  // approved showed its learners "no published module outline", because nothing
+  // ever published its modules and lessons. Build it through the studio services,
+  // not a fixture that inserts published rows, and check what a learner sees.
+  it("publishes the course's modules and lessons on approval, so learners see them", async () => {
+    const fixture = await createCourseAuthoringFixture();
+    const instructor = instructorCtx(fixture, "req_approve_content");
+    const admin = adminCtx(fixture, "req_approve_content_admin");
+
+    const submitted = await withTenantTx(authoringTenantTx(fixture), async (tx) => {
+      const module = await createCourseModule(tx, instructor, fixture.draftCourseId, {
+        title: "Visible Module",
+      });
+      await createLesson(
+        tx,
+        instructor,
+        module.data.id,
+        createLessonBodySchema.parse({
+          title: "Visible Lesson",
+          videoProvider: "youtube",
+          videoUrl: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+        }),
+      );
+      return submitCourseForReview(tx, instructor, fixture.draftCourseId, { reason: "Ready" });
+    });
+
+    await withTenantTx(authoringTenantTx(fixture, fixture.adminMembershipId), async (tx) =>
+      actOnWorkflowTransition(tx, admin, submitted.data.workflowTransitionId, {
+        action: "approve",
+        comment: "Approved",
+      }),
+    );
+
+    const learnerView = await withTenantTx(
+      authoringTenantTx(fixture, fixture.learnerMembershipId),
+      async (tx) =>
+        getPublishedCourseModules(
+          tx,
+          learnerCtx(fixture, "req_approve_content_learner"),
+          fixture.draftCourseId,
+        ),
+    );
+    const visible = learnerView.data.items.find((item) => item.title === "Visible Module");
+    expect(visible).toBeDefined();
+    expect(visible?.lessonCount).toBe(1);
+  });
+
   it("returns review course to draft with comment", async () => {
     const fixture = await createCourseAuthoringFixture();
     const instructor = instructorCtx(fixture, "req_return_course");
@@ -102,6 +153,17 @@ describeWithDb("workflow integration", () => {
     );
 
     expect(returned.data.targetStatus).toBe("DRAFT");
+
+    // Returning a course publishes nothing: its new module stays a draft.
+    const moduleStatus = await withTenantTx(
+      authoringTenantTx(fixture, fixture.adminMembershipId),
+      async (tx) =>
+        tx.$queryRaw<Array<{ status: string }>>`
+          select status::text from course_modules
+          where course_id = ${fixture.draftCourseId}::uuid and title = 'Return Module'
+        `,
+    );
+    expect(moduleStatus.map((row) => row.status)).toEqual(["DRAFT"]);
   });
 
   it("returns conflict when workflow already acted on", async () => {
