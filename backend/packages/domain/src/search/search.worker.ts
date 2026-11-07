@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   communityPostCreatedPayloadSchema,
   coursePublishedPayloadSchema,
+  courseUnpublishedPayloadSchema,
   SEARCH_REINDEX_REQUESTED_EVENT,
 } from "./search.events";
 
@@ -175,6 +176,7 @@ export const searchOutboxHandlers = [
 export const SEARCH_OUTBOX_EVENTS = [
   SEARCH_REINDEX_REQUESTED_EVENT,
   "course.published",
+  "course.unpublished",
   "community.post.created",
   "certificate.issued",
   "certificate.revoked",
@@ -184,6 +186,9 @@ export const SEARCH_OUTBOX_EVENTS = [
 export function validateSearchEventPayload(eventType: string, payload: unknown): void {
   if (eventType === "course.published") {
     coursePublishedPayloadSchema.parse(payload);
+  }
+  if (eventType === "course.unpublished") {
+    courseUnpublishedPayloadSchema.parse(payload);
   }
   if (eventType === "community.post.created") {
     communityPostCreatedPayloadSchema.parse(payload);

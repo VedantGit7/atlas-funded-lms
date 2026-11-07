@@ -8,6 +8,8 @@ import {
   ChevronDown,
   ChevronRight,
   Copy,
+  Eye,
+  EyeOff,
   MoreHorizontal,
   Package,
   Plus,
@@ -16,15 +18,27 @@ import {
 import type { z } from "zod";
 import { DropdownMenu, type DropdownMenuItem } from "@atlas/design-system";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
-import type { studioModuleOutlineItemSchema } from "@atlas/contracts/courses/course-authoring-schemas";
+import type {
+  publishStatusStudioSchema,
+  studioModuleOutlineItemSchema,
+} from "@atlas/contracts/courses/course-authoring-schemas";
 import type { studioLessonOutlineItemSchema } from "@atlas/contracts/lessons/lesson-schemas";
 import { AddChapterDialog } from "./add-chapter-dialog";
 import { builderHelperClassName } from "./course-builder-shared";
 import { courseDetailMutedTextClassName } from "./course-detail-shared";
+import {
+  canChangeContentVisibility,
+  contentVisibilityNotice,
+  isContentHidden,
+  updateLessonVisibility,
+  updateModuleVisibility,
+  visibilityActionLabel,
+} from "./content-visibility";
 import { DeleteModuleDialog } from "./delete-module-dialog";
 import { DeleteLessonDialog } from "../lessons/delete-lesson-dialog";
 import {
   formatSectionSummary,
+  hiddenContentBadge,
   resolveLessonBadges,
   resolveLessonDisplayType,
   resolveLessonTypeOption,
@@ -34,9 +48,11 @@ import { MoveLessonSectionDialog } from "./move-lesson-section-dialog";
 
 type ModuleItem = z.infer<typeof studioModuleOutlineItemSchema>;
 type LessonOutlineItem = z.infer<typeof studioLessonOutlineItemSchema>;
+type PublishStatus = z.infer<typeof publishStatusStudioSchema>;
 
 type CourseChaptersSidebarProps = {
   courseId: string;
+  courseStatus: PublishStatus;
   modules: ModuleItem[];
   editable: boolean;
   selectedLessonId?: string | null;
@@ -110,6 +126,7 @@ function LessonStatusBadges({ lesson }: { lesson: LessonOutlineItem }) {
 
 export function CourseChaptersSidebar({
   courseId,
+  courseStatus,
   modules,
   editable,
   selectedLessonId = null,
@@ -127,6 +144,10 @@ export function CourseChaptersSidebar({
   const [deleteLessonState, setDeleteLessonState] = useState<DeleteLessonState>(null);
   const [moveLessonState, setMoveLessonState] = useState<MoveLessonState>(null);
   const [busyLessonId, setBusyLessonId] = useState<string | null>(null);
+  const [busyModuleId, setBusyModuleId] = useState<string | null>(null);
+  const visibilityChangeable = canChangeContentVisibility(courseStatus);
+  const visibilityNotice = modules.length > 0 ? contentVisibilityNotice(courseStatus) : null;
+  const showActionMenus = editable || visibilityChangeable;
   const [expandedModuleIds, setExpandedModuleIds] = useState<Set<string>>(
     () => new Set(modules[0]?.id ? [modules[0].id] : []),
   );
@@ -226,6 +247,65 @@ export function CourseChaptersSidebar({
     }
   }
 
+  async function toggleModuleVisibility(module: ModuleItem) {
+    setBusyModuleId(module.id);
+    setError(null);
+    try {
+      const result = await updateModuleVisibility({
+        moduleId: module.id,
+        visible: isContentHidden(module.status),
+        courseStatus,
+      });
+      onChanged(
+        modules.map((item) => (item.id === module.id ? { ...item, status: result.status } : item)),
+      );
+    } catch (visibilityError) {
+      setError(formatError(visibilityError));
+    } finally {
+      setBusyModuleId(null);
+    }
+  }
+
+  async function toggleLessonVisibility(moduleId: string, lesson: LessonOutlineItem) {
+    setBusyLessonId(lesson.id);
+    setError(null);
+    try {
+      const result = await updateLessonVisibility({
+        lessonId: lesson.id,
+        visible: isContentHidden(lesson.status),
+        courseStatus,
+      });
+      setLessonsByModule((current) => ({
+        ...current,
+        [moduleId]: (current[moduleId] ?? []).map((item) =>
+          item.id === lesson.id ? { ...item, status: result.status } : item,
+        ),
+      }));
+    } catch (visibilityError) {
+      setError(formatError(visibilityError));
+    } finally {
+      setBusyLessonId(null);
+    }
+  }
+
+  function visibilityMenuItem(args: {
+    hidden: boolean;
+    busy: boolean;
+    onSelect: () => void;
+  }): DropdownMenuItem {
+    return {
+      key: "visibility",
+      label: visibilityActionLabel(args.hidden),
+      icon: args.hidden ? (
+        <Eye className="h-4 w-4" aria-hidden="true" />
+      ) : (
+        <EyeOff className="h-4 w-4" aria-hidden="true" />
+      ),
+      disabled: args.busy || !visibilityChangeable,
+      onSelect: args.onSelect,
+    };
+  }
+
   async function handleLessonDeletedFromSidebar(moduleId: string, lessonId: string) {
     await loadModuleLessons(moduleId, true);
     await refreshModules();
@@ -237,10 +317,18 @@ export function CourseChaptersSidebar({
     lesson: LessonOutlineItem,
     moduleLessons: LessonOutlineItem[],
   ): DropdownMenuItem[] {
-    const disabled = busyLessonId === lesson.id || !editable;
+    const busy = busyLessonId === lesson.id;
+    const disabled = busy || !editable;
     const bottomPosition = moduleLessons.length;
 
     return [
+      visibilityMenuItem({
+        hidden: isContentHidden(lesson.status),
+        busy,
+        onSelect: () => {
+          void toggleLessonVisibility(module.id, lesson);
+        },
+      }),
       {
         key: "move-section",
         label: "Move To Another Section",
@@ -300,6 +388,13 @@ export function CourseChaptersSidebar({
 
   function sectionMenuItems(module: ModuleItem): DropdownMenuItem[] {
     return [
+      visibilityMenuItem({
+        hidden: isContentHidden(module.status),
+        busy: busyModuleId === module.id,
+        onSelect: () => {
+          void toggleModuleVisibility(module);
+        },
+      }),
       {
         key: "add-lesson",
         label: "Add lesson",
@@ -334,6 +429,14 @@ export function CourseChaptersSidebar({
         {error ? (
           <p role="alert" className="px-4 py-3 text-sm text-[var(--admin-danger)]">
             {error}
+          </p>
+        ) : null}
+
+        {visibilityNotice ? (
+          <p
+            className={`${builderHelperClassName} border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5`}
+          >
+            {visibilityNotice}
           </p>
         ) : null}
 
@@ -392,9 +495,25 @@ export function CourseChaptersSidebar({
                     </button>
 
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">
-                        {moduleIndex + 1}. {module.title}
-                      </p>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <p
+                          className={[
+                            "truncate text-sm font-semibold",
+                            isContentHidden(module.status)
+                              ? "text-[var(--admin-on-surface-variant)]"
+                              : "text-[var(--admin-on-surface)]",
+                          ].join(" ")}
+                        >
+                          {moduleIndex + 1}. {module.title}
+                        </p>
+                        {isContentHidden(module.status) ? (
+                          <span
+                            className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${hiddenContentBadge.className}`}
+                          >
+                            {hiddenContentBadge.label}
+                          </span>
+                        ) : null}
+                      </div>
                       {!isScorm ? (
                         <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
                           {sectionSummary}
@@ -411,7 +530,8 @@ export function CourseChaptersSidebar({
                         className="mr-1 h-4 w-4 shrink-0 text-[var(--admin-outline)]"
                         aria-hidden="true"
                       />
-                    ) : editable ? (
+                    ) : null}
+                    {showActionMenus ? (
                       <DropdownMenu
                         label={`Actions for ${module.title}`}
                         align="end"
@@ -471,7 +591,7 @@ export function CourseChaptersSidebar({
 
                                   <LessonStatusBadges lesson={lesson} />
 
-                                  {editable ? (
+                                  {showActionMenus ? (
                                     <DropdownMenu
                                       label={`Actions for ${lesson.title}`}
                                       align="end"

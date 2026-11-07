@@ -143,6 +143,31 @@ export async function loadModuleParentCourseResourceRef(args: {
   });
 }
 
+/**
+ * The module's course, for routes whose permission decides who may act on it.
+ * Unlike `loadModuleParentCourseResourceRef` it doesn't require the actor to
+ * have made the course, so `course.publish` lets the course's instructor act and
+ * roles that bypass resource checks (admins, owners) too.
+ */
+export async function loadModuleCourseResourceRef(args: {
+  tx: TenantTx;
+  ctx: LoaderCtx;
+  moduleId: string;
+}) {
+  const module = await findModuleWithCourse({ tx: args.tx, moduleId: args.moduleId });
+
+  if (!module || module.tenantId !== args.ctx.tenantId) {
+    throw moduleNotFound();
+  }
+
+  return loadCourseResourceRef({
+    tx: args.tx,
+    ctx: args.ctx,
+    courseId: module.courseId,
+    requirePublished: false,
+  });
+}
+
 export async function loadCourseForEnrollmentResourceRef(args: {
   tx: TenantTx;
   ctx: LoaderCtx;

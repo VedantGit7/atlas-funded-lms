@@ -1,7 +1,10 @@
 import { can } from "@atlas/authorization";
 import type { SearchSourceAdapter } from "@atlas/domain/search/search-source-registry";
 import { registerSearchSourceAdapter } from "@atlas/domain/search/search-source-registry";
-import { coursePublishedPayloadSchema } from "@atlas/domain/search/search.events";
+import {
+  coursePublishedPayloadSchema,
+  courseUnpublishedPayloadSchema,
+} from "@atlas/domain/search/search.events";
 import { communityPostCreatedPayloadSchema } from "@atlas/domain/search/search.events";
 import { certificateIssuedOutboxPayloadSchema } from "../certificates/certificate.dto";
 import { certificateRepository } from "../certificates/certificate.repository";
@@ -29,10 +32,18 @@ function extractStructuredBodyText(bodyJson: unknown): string {
 const courseSearchAdapter: SearchSourceAdapter = {
   sourceContext: "learning",
   sourceType: "course",
-  supportedEvents: ["course.published"],
+  // Publishing indexes the course; unpublishing re-reads it, finds it no longer
+  // PUBLISHED, and the worker removes the entry.
+  supportedEvents: ["course.published", "course.unpublished"],
   resolveSourceIdFromEvent(eventType, payload) {
-    if (eventType !== "course.published") return null;
-    const parsed = coursePublishedPayloadSchema.safeParse(payload);
+    const schema =
+      eventType === "course.published"
+        ? coursePublishedPayloadSchema
+        : eventType === "course.unpublished"
+          ? courseUnpublishedPayloadSchema
+          : null;
+    if (!schema) return null;
+    const parsed = schema.safeParse(payload);
     return parsed.success ? parsed.data.courseId : null;
   },
   async buildIndexProjection(tx, _ctx, sourceId) {

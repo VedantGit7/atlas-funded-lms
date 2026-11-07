@@ -19,6 +19,14 @@ export const coursePublishedPayloadSchema = z
   })
   .loose();
 
+/** A live course taken offline; search drops it (its projection is empty unless PUBLISHED). */
+export const courseUnpublishedPayloadSchema = z
+  .object({
+    courseId: z.uuid(),
+    unpublishedAt: z.iso.datetime(),
+  })
+  .loose();
+
 export const communityPostCreatedPayloadSchema = z
   .object({
     postId: z.uuid(),

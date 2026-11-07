@@ -6,13 +6,38 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { z } from "zod";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
-import type { studioCourseDetailSchema } from "@atlas/contracts/courses/course-authoring-schemas";
+import { ConfirmDialog } from "../../../components/patterns/ConfirmDialog";
+import type {
+  courseUnpublishPreviewResponseSchema,
+  courseUnpublishResponseSchema,
+  studioCourseDetailSchema,
+} from "@atlas/contracts/courses/course-authoring-schemas";
 import { inlineExpandClassName } from "./admin-form-dropdown-shared";
+import { unpublishWarning } from "./content-visibility";
 import { builderHelperClassName, statusBannerClassName } from "./course-builder-shared";
 import { CourseSettingsFormFooter } from "./course-settings-shared";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 type PublishVisibility = "live" | "unpublished";
+type UnpublishPreview = z.infer<typeof courseUnpublishPreviewResponseSchema>["data"];
+type UnpublishResult = z.infer<typeof courseUnpublishResponseSchema>["data"];
+
+async function fetchUnpublishPreview(courseId: string): Promise<UnpublishPreview> {
+  const response = await clientApi.get<{ data: UnpublishPreview }>(
+    `/api/v1/courses/${courseId}/unpublish`,
+  );
+  return response.data;
+}
+
+async function unpublishCourse(courseId: string): Promise<UnpublishResult> {
+  const response = await clientApi.post<{ data: UnpublishResult }>(
+    `/api/v1/courses/${courseId}/unpublish`,
+    {},
+    "course-unpublish",
+    { successMessage: "Course unpublished. It is back in draft." },
+  );
+  return response.data;
+}
 
 type CourseSettingsPublishCoursePanelProps = {
   course: CourseDetail;
@@ -168,6 +193,9 @@ export function CourseSettingsPublishCoursePanel({
   const savedVisibility = useMemo(() => visibilityFromStatus(course.status), [course.status]);
   const [visibility, setVisibility] = useState<PublishVisibility>(savedVisibility);
   const [error, setError] = useState<string | null>(null);
+  const [confirmUnpublish, setConfirmUnpublish] = useState<{ activeEnrollments: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     setVisibility(visibilityFromStatus(course.status));
@@ -212,17 +240,14 @@ export function CourseSettingsPublishCoursePanel({
         return course.status;
       }
 
-      throw new ClientApiError(
-        "NOT_IMPLEMENTED",
-        400,
-        "",
-        "Unpublish is not available yet. Remove this course from Associated Contents before unpublishing.",
-      );
+      const response = await unpublishCourse(course.id);
+      return response.status;
     },
     onMutate: () => {
       setError(null);
     },
     onSuccess: (status) => {
+      setConfirmUnpublish(null);
       if (status !== course.status) {
         onCourseChange({ ...course, status });
       }
@@ -230,20 +255,41 @@ export function CourseSettingsPublishCoursePanel({
       router.refresh();
     },
     onError: (submitError) => {
+      setConfirmUnpublish(null);
       setError(formatError(submitError));
     },
   });
 
+  const previewMutation = useMutation({
+    mutationFn: () => fetchUnpublishPreview(course.id),
+    onMutate: () => {
+      setError(null);
+    },
+    onSuccess: (preview) => {
+      if (!preview.canUnpublish) {
+        setError("Only a live course can be unpublished. Refresh to see its current status.");
+        return;
+      }
+      setConfirmUnpublish({ activeEnrollments: preview.activeEnrollments });
+    },
+    onError: (previewError) => {
+      setError(formatError(previewError));
+    },
+  });
+
+  const busy = saveMutation.isPending || previewMutation.isPending;
   const isDirty = visibility !== savedVisibility;
-  const saveDisabled = !isDirty || saveMutation.isPending;
+  const saveDisabled = !isDirty || busy;
   const saveLabel =
     visibility === "live"
       ? saveMutation.isPending
         ? "Publishing…"
         : "Publish"
-      : saveMutation.isPending
-        ? "Unpublishing…"
-        : "Unpublish";
+      : previewMutation.isPending
+        ? "Checking…"
+        : saveMutation.isPending
+          ? "Unpublishing…"
+          : "Unpublish";
 
   function handleCancel() {
     setVisibility(savedVisibility);
@@ -252,6 +298,10 @@ export function CourseSettingsPublishCoursePanel({
 
   function handleSave() {
     if (saveDisabled) return;
+    if (visibility === "unpublished" && course.status === "PUBLISHED") {
+      previewMutation.mutate();
+      return;
+    }
     saveMutation.mutate(visibility);
   }
 
@@ -269,19 +319,23 @@ export function CourseSettingsPublishCoursePanel({
       <CoursePublishVisibilityRadioGroup
         value={visibility}
         savedValue={savedVisibility}
-        disabled={saveMutation.isPending}
+        disabled={busy}
         onChange={setVisibility}
       />
 
       <p className={`${builderHelperClassName} mt-6 leading-relaxed`}>
-        Note: To unpublish a course, you must remove course from{" "}
+        {course.status === "DRAFT"
+          ? "Publishing sends the course for review. It goes live for learners once a reviewer approves it."
+          : "Unpublishing takes a live course back to draft so you can edit it. Enrolled learners keep their enrollment and progress, but can't open the course until it is approved again."}{" "}
+        To hide one section or lesson instead, use its menu in the{" "}
         <Link
-          href={`/studio/courses/${courseId}/settings?section=associated-contents`}
+          href={`/studio/courses/${courseId}/editor`}
           prefetch={false}
           className="font-semibold text-[var(--admin-primary)] underline-offset-2 transition-colors hover:text-[var(--admin-primary-strong)] hover:underline"
         >
-          Associated Contents
+          course editor
         </Link>
+        .
       </p>
 
       <CourseSettingsFormFooter
@@ -289,8 +343,23 @@ export function CourseSettingsPublishCoursePanel({
         onCancel={handleCancel}
         saving={saveMutation.isPending}
         saveDisabled={saveDisabled}
-        cancelDisabled={saveMutation.isPending || !isDirty}
+        cancelDisabled={busy || !isDirty}
         saveLabel={saveLabel}
+      />
+
+      <ConfirmDialog
+        open={confirmUnpublish !== null}
+        title="Unpublish this course?"
+        description={unpublishWarning(confirmUnpublish?.activeEnrollments ?? 0)}
+        confirmLabel="Unpublish"
+        destructive
+        busy={saveMutation.isPending}
+        onConfirm={() => {
+          saveMutation.mutate("unpublished");
+        }}
+        onCancel={() => {
+          setConfirmUnpublish(null);
+        }}
       />
     </div>
   );

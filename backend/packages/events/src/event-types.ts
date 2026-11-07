@@ -12,6 +12,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "domain.changed",
   "course.submitted_for_review",
   "course.published",
+  "course.unpublished",
   "course.module.scorm_processing_requested",
   "workflow.transitioned",
   "learning.enrollment.created",
