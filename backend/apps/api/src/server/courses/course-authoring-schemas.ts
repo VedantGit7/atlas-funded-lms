@@ -287,3 +287,40 @@ export const courseDetailQuerySchema = z
   .strict();
 
 export type CourseDetailQuery = z.output<typeof courseDetailQuerySchema>;
+
+/** Show or hide a module or lesson (course-visibility.service.ts). */
+export const contentVisibilityBodySchema = mutationBodySchema({
+  visible: z.boolean(),
+});
+
+export const contentVisibilityResponseSchema = z.object({
+  data: z.object({
+    id: z.uuid(),
+    status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+    visible: z.boolean(),
+  }),
+});
+
+/** Take a live course offline: back to draft until it's approved again. */
+export const courseUnpublishBodySchema = mutationBodySchema({
+  reason: z.string().trim().max(1000).nullable().optional(),
+});
+
+export const courseUnpublishResponseSchema = z.object({
+  data: z.object({
+    id: z.uuid(),
+    status: z.literal("DRAFT"),
+    activeEnrollments: z.number().int().min(0),
+    unpublishedAt: z.iso.datetime(),
+  }),
+});
+
+/** What unpublishing would do, for the studio's confirmation. */
+export const courseUnpublishPreviewResponseSchema = z.object({
+  data: z.object({
+    id: z.uuid(),
+    status: publishStatusStudioSchema,
+    canUnpublish: z.boolean(),
+    activeEnrollments: z.number().int().min(0),
+  }),
+});

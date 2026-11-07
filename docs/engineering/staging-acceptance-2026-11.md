@@ -4,7 +4,7 @@ The acceptance checks in [`deployment-topology.md`](../runbooks/deployment-topol
 
 - **Hosts:** `staging-academy.fundedbeyond.com` (tenant `fundedbeyond`) and `staging-platform.fundedbeyond.com`, both through the Cloudflare Tunnel.
 - **Release under test:** `23795d1db721` (#264), deployed 6 November 2026 12:58. Earlier results on `960cb9090bf5` (#263) say so.
-- **Status:** in progress.
+- **Status:** done, 7 November 2026. Two items remain open and aren't code (see "Found, not fixed yet").
 
 ## Test data
 
@@ -50,7 +50,7 @@ Made through the app on 6 November 2026, not inserted into the database:
 
 Fixes 5 to 8 are in #266 (`a5bbeb45`); the upload check above confirms 5 on staging.
 
-9. **Avatars never showed, and removing one didn't delete it.** Without a public R2 endpoint (`R2_PUBLIC_ENDPOINT`, unset on staging) a confirmed avatar got no address, so confirm didn't even attach it to the profile; removing an avatar cleared only the profile link, and replacing one kept the old file, both in storage for good; and confirm didn't check whose upload it was. Fixed on branch `fix/member-avatar-delivery`: the profile stores a lasting app address, `/api/v1/public/avatars/<id>`, which redirects to a short-lived signed URL for a ready, public-safe raster image of the same academy (404 otherwise); confirm accepts only the member's own upload and deletes the avatars it replaces; removing deletes them all.
+9. **Avatars never showed, and removing one didn't delete it.** Without a public R2 endpoint (`R2_PUBLIC_ENDPOINT`, unset on staging) a confirmed avatar got no address, so confirm didn't even attach it to the profile; removing an avatar cleared only the profile link, and replacing one kept the old file, both in storage for good; and confirm didn't check whose upload it was. Fixed in #267 (`d5eaf4ac`), confirmed on staging (18:31 UTC, 6 Nov): the profile stores `/api/v1/public/avatars/f4b2dbda-…`, which redirects, and the image loads with no CSP violation; an unknown or deleted avatar's address answers 404. Confirming it retired the earlier test avatar, and removing it deleted both files from R2 (`NoSuchKey`) and marked both references deleted (`req_48b6c4bb…`). The fix: the profile stores a lasting app address, `/api/v1/public/avatars/<id>`, which redirects to a short-lived signed URL for a ready, public-safe raster image of the same academy (404 otherwise); confirm accepts only the member's own upload and deletes the avatars it replaces; removing deletes them all.
 
 ## Found, not fixed yet
 

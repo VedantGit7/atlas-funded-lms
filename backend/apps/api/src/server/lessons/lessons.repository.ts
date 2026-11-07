@@ -596,6 +596,24 @@ export async function listPublishedLessonsForModule(args: {
   }));
 }
 
+/**
+ * Sets a lesson's status for "Show" and "Hide" in the studio. Hidden is
+ * ARCHIVED, which learners don't see and course approval leaves alone.
+ */
+export async function setLessonStatus(args: {
+  tx: Tx;
+  lessonId: string;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+}): Promise<void> {
+  await args.tx.$executeRaw`
+    update lessons
+    set status = ${args.status}::"PublishStatus",
+        updated_at = now()
+    where id = ${args.lessonId}::uuid
+      and deleted_at is null
+  `;
+}
+
 const ARCHIVED_LESSON_POSITION_OFFSET = 1_000_000;
 
 async function allocateArchivedLessonPosition(args: { tx: Tx; moduleId: string }): Promise<number> {

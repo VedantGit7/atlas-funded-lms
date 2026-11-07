@@ -74,7 +74,7 @@ export function clearSearchSourceAdaptersForTests(): void {
 export const REGISTERED_SEARCH_SOURCE_TYPES = ["course", "post", "certificate"] as const;
 
 export const SEARCH_SOURCE_EVENT_BINDINGS = {
-  course: ["course.published"] as const,
+  course: ["course.published", "course.unpublished"] as const,
   post: ["community.post.created"] as const,
   certificate: ["certificate.issued", "certificate.revoked"] as const,
   moderation: ["moderation.decided"] as const,

@@ -57,6 +57,14 @@ export function formatSectionSummary(lessons: LessonOutlineItem[]): string {
   return `${String(lessonCount)} ${lessonLabel} • ${String(quizCount)} ${quizLabel}`;
 }
 
+/** Shown on a section or lesson hidden from learners (stored as ARCHIVED). */
+export const hiddenContentBadge: LessonOutlineBadge = {
+  key: "hidden",
+  label: "Hidden",
+  className:
+    "border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)]",
+};
+
 export function resolveLessonBadges(lesson: LessonOutlineItem): LessonOutlineBadge[] {
   const badges: LessonOutlineBadge[] = [];
 
@@ -75,6 +83,8 @@ export function resolveLessonBadges(lesson: LessonOutlineItem): LessonOutlineBad
       label: "Unpublished",
       className: "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",
     });
+  } else if (lesson.status === "ARCHIVED") {
+    badges.push(hiddenContentBadge);
   } else if (lesson.status === "REVIEW") {
     badges.push({
       key: "review",

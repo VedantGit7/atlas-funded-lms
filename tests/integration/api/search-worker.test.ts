@@ -50,6 +50,48 @@ describeWithDb("search worker", () => {
     expect(entry?.title).toBe("Worker Course Alpha");
   });
 
+  it("removes the course's entry on course.unpublished", async () => {
+    const fixture = await createCourseAuthoringFixture();
+    const ctx = {
+      tenantId: fixture.tenantId,
+      actorMembershipId: fixture.adminMembershipId,
+      requestId: "req_worker_unpublish",
+    };
+
+    await withTenantTx(authoringTenantTx(fixture, fixture.adminMembershipId), async (tx) => {
+      await tx.$executeRaw`
+        update courses
+        set status = 'PUBLISHED', title = 'Worker Course Unpublished', updated_at = now()
+        where id = ${fixture.draftCourseId}::uuid
+      `;
+      await processSearchSourceEvent(tx, ctx, {
+        id: randomUUID(),
+        eventType: "course.published",
+        payload: { courseId: fixture.draftCourseId, publishedAt: new Date().toISOString() },
+      });
+
+      await tx.$executeRaw`
+        update courses set status = 'DRAFT', updated_at = now()
+        where id = ${fixture.draftCourseId}::uuid
+      `;
+      await processSearchSourceEvent(tx, ctx, {
+        id: randomUUID(),
+        eventType: "course.unpublished",
+        payload: { courseId: fixture.draftCourseId, unpublishedAt: new Date().toISOString() },
+      });
+    });
+
+    const entry = await withTenantTx(authoringTenantTx(fixture), async (tx) =>
+      searchRepository.findIndexEntryByIdentity(tx, {
+        sourceContext: "learning",
+        sourceType: "course",
+        sourceId: fixture.draftCourseId,
+      }),
+    );
+
+    expect(entry).toBeNull();
+  });
+
   it("replay keeps same index identity without duplicate rows", async () => {
     const fixture = await createCourseAuthoringFixture();
 

@@ -68,6 +68,7 @@ export function CourseEditor({ initialCourse, initialModules }: CourseEditorProp
       <aside className="flex min-h-0 w-full shrink-0 flex-col border-t border-[var(--admin-border)] bg-[var(--admin-surface)] lg:w-[min(100%,340px)] lg:border-l lg:border-t-0 xl:w-[320px]">
         <CourseChaptersSidebar
           courseId={initialCourse.id}
+          courseStatus={initialCourse.status}
           modules={modules}
           editable={editable}
           selectedLessonId={selectedLessonId}

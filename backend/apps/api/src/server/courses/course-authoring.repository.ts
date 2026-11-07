@@ -310,6 +310,25 @@ export async function updateCourseRecord(args: {
   `;
 }
 
+/**
+ * Sets a module's status for "Show" and "Hide" in the studio. Hidden is
+ * ARCHIVED: learners see only PUBLISHED modules, and approving a course
+ * publishes only DRAFT and REVIEW ones, so a hidden module stays hidden.
+ */
+export async function setCourseModuleStatus(args: {
+  tx: Tx;
+  moduleId: string;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+}): Promise<void> {
+  await args.tx.$executeRaw`
+    update course_modules
+    set status = ${args.status}::"PublishStatus",
+        updated_at = now()
+    where id = ${args.moduleId}::uuid
+      and deleted_at is null
+  `;
+}
+
 export async function archiveCourseRecord(args: { tx: Tx; courseId: string }): Promise<void> {
   await args.tx.$executeRaw`
     update courses
