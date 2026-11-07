@@ -5,7 +5,24 @@ import { mkdtempSync, readFileSync, writeFileSync, unlinkSync, rmdirSync } from 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
-import { validateConfig, summarize, requestJson, runWorkload } from "./http-workload.mjs";
+import {
+  benchmarkClientAddress,
+  validateConfig,
+  summarize,
+  requestJson,
+  runWorkload,
+} from "./http-workload.mjs";
+
+/** Calls `onStart` as each measured phase begins (its first progress report). */
+function onPhaseStart(onStart) {
+  let current = null;
+  return (progress) => {
+    if (progress.phase !== "setup" && progress.phase !== current) {
+      current = progress.phase;
+      onStart(progress.phase);
+    }
+  };
+}
 
 test("a rejected CLI run invalidates old successful evidence", () => {
   const folder = mkdtempSync(join(tmpdir(), "atlas-f17-"));
@@ -179,8 +196,10 @@ test("phase boundaries stop scheduling requests and record incomplete journeys",
     p.users = 1;
   });
   const result = await runWorkload(c, {
+    onProgress: onPhaseStart(() => {
+      phaseStarted = performance.now();
+    }),
     request: async ({ path }) => {
-      if (path.endsWith("/refresh")) phaseStarted = performance.now();
       if (!path.endsWith("/login") && !path.endsWith("/enrollments")) {
         starts.push(performance.now() - phaseStarted);
         await new Promise((resolve) => setTimeout(resolve, 400));
@@ -200,7 +219,7 @@ test("bounded drain finishes admitted journeys without starting another journey 
   });
   const result = await runWorkload(c, {
     request: async ({ path }) => {
-      if (!path.endsWith("/login") && !path.endsWith("/enrollments") && !path.endsWith("/refresh"))
+      if (!path.endsWith("/login") && !path.endsWith("/enrollments"))
         await new Promise((resolve) => setTimeout(resolve, 250));
       return { ms: 250, ok: true, status: 200, reason: null };
     },
@@ -224,8 +243,10 @@ test("drain deadline cancels a stuck request and rejects capacity even after ear
   });
   let identities = 0;
   const result = await runWorkload(c, {
+    onProgress: onPhaseStart(() => {
+      identities = 0;
+    }),
     request: async ({ path, signal }) => {
-      if (path.endsWith("/refresh")) identities = 0;
       if (path.endsWith("/me") && ++identities === 2) {
         await new Promise((resolve) => signal.addEventListener("abort", resolve, { once: true }));
         return { ms: 1000, ok: false, status: 0, reason: "phase-deadline" };
@@ -250,8 +271,10 @@ test("a successful final response beyond the hard deadline cannot pass", async (
   });
   let reads = 0;
   const result = await runWorkload(c, {
+    onProgress: onPhaseStart(() => {
+      reads = 0;
+    }),
     request: async ({ path }) => {
-      if (path.endsWith("/refresh")) reads = 0;
       if (path.endsWith("/lessons/lesson") && ++reads === 2)
         await new Promise((resolve) => setTimeout(resolve, 1300));
       return { ms: 1300, ok: true, status: 200, reason: null };
@@ -260,23 +283,6 @@ test("a successful final response beyond the hard deadline cannot pass", async (
   assert.equal(result.passed, false);
   assert.equal(result.performancePassed, false);
   assert.ok(result.phases.every((p) => p.deadlineOverruns === 1 && p.incompleteJourneys === 1));
-});
-
-test("refresh completing during drain cannot admit a journey", async () => {
-  const c = { ...config(), drainMs: 1000 };
-  c.phases.forEach((p) => {
-    p.users = 1;
-  });
-  let identities = 0;
-  const result = await runWorkload(c, {
-    request: async ({ path }) => {
-      if (path.endsWith("/refresh")) await new Promise((resolve) => setTimeout(resolve, 1100));
-      if (path.endsWith("/me")) identities++;
-      return { ms: 1100, ok: true, status: 200, reason: null };
-    },
-  });
-  assert.equal(identities, 0);
-  assert.equal(result.passed, false);
 });
 
 test("explicit disposable local endurance allows 200 actors and a real two-hour soak without sizing claims", () => {
@@ -301,8 +307,7 @@ test("explicit disposable local endurance allows 200 actors and a real two-hour 
     { disposableFixtures: false },
     { build: "" },
     { origin: "https://example.com" },
-    { refreshIntervalMs: 999 },
-    { refreshIntervalMs: 900001 },
+    { refreshIntervalMs: 300000 },
     { phases: c.phases.map((p) => ({ ...p, seconds: 7201 })) },
   ])
     assert.throws(() => validateConfig({ ...c, ...patch }));
@@ -325,9 +330,8 @@ test("streaming metrics retain every sample beyond the former 250000 cap with bo
   assert.ok(storage < 10000);
 });
 
-test("refresh rotates each actor sequentially inside a phase and reports elapsed coverage", async () => {
+test("each actor sends one request at a time inside a phase and reports elapsed coverage", async () => {
   const c = config();
-  c.refreshIntervalMs = 1000;
   c.phases.forEach((p) => {
     p.seconds = 2;
     p.users = 1;
@@ -344,26 +348,94 @@ test("refresh rotates each actor sequentially inside a phase and reports elapsed
   });
   assert.equal(result.passed, true);
   for (const phase of result.phases) {
-    assert.ok(phase.byOperation.refresh.attempts >= 2);
+    assert.equal(phase.byOperation.refresh, undefined);
+    assert.ok(phase.byOperation.identity.attempts >= 2);
     assert.equal(phase.actorsCompletedDuration, 1);
     assert.equal(phase.durationCompleted, true);
     assert.ok(phase.elapsedMs >= 2000);
   }
 });
 
-test("an actor lost on refresh makes requested concurrency coverage fail", async () => {
+test("a session the API stops accepting fails the run", async () => {
   const result = await runWorkload(config(), {
     request: async ({ path }) => ({
       ms: 1,
-      ok: !path.endsWith("/refresh"),
-      status: path.endsWith("/refresh") ? 401 : 200,
+      ok: !path.endsWith("/me"),
+      status: path.endsWith("/me") ? 401 : 200,
       reason: null,
     }),
   });
   assert.equal(result.passed, false);
-  assert.ok(
-    result.phases.every((p) => p.durationCompleted === false && p.actorsCompletedDuration === 0),
+  assert.ok(result.phases.every((p) => p.requests.statuses["401"] > 0));
+});
+
+const stagingConfig = (users = 500) => ({
+  ...config(),
+  mode: "staging",
+  origin: "https://staging.example.test",
+  build: "staging-release",
+  disposableFixtures: true,
+  clientAddressHeader: "cf-connecting-ip",
+  users: Array.from({ length: users }, (_, i) => ({
+    email: `learner${i}@example.test`,
+    password: "secret",
+  })),
+  phases: [
+    { name: "warmup", users: 100, seconds: 120 },
+    { name: "sustained", users: 300, seconds: 900 },
+    { name: "burst", users, seconds: 300 },
+    { name: "endurance", users: 300, seconds: 7200 },
+  ],
+});
+
+test("staging runs reach the 500-learner launch peak and no further", () => {
+  const approved = "https://staging.example.test";
+  assert.doesNotThrow(() => validateConfig(stagingConfig(), approved));
+  assert.throws(() => validateConfig(stagingConfig(501), approved));
+  assert.throws(() =>
+    validateConfig({ ...config(), clientAddressHeader: "cf-connecting-ip" }, approved),
   );
+  assert.throws(() =>
+    validateConfig({ ...stagingConfig(), clientAddressHeader: "x-forwarded-for" }, approved),
+  );
+});
+
+test("each learner gets its own benchmark-range client address", () => {
+  const addresses = Array.from({ length: 500 }, (_, i) => benchmarkClientAddress(i));
+  assert.equal(new Set(addresses).size, 500);
+  assert.ok(addresses.every((a) => /^198\.(18|19)\.\d{1,3}\.\d{1,3}$/.test(a)));
+  assert.equal(addresses[0], "198.18.0.1");
+  assert.equal(addresses[250], "198.18.1.1");
+  assert.throws(() => benchmarkClientAddress(-1));
+});
+
+test("the client address goes out per actor, and the Better Auth session cookie is kept", async () => {
+  const seen = [];
+  const server = createServer((req, res) => {
+    seen.push({ address: req.headers["cf-connecting-ip"], cookie: req.headers.cookie ?? "" });
+    res.writeHead(200, {
+      "content-type": "application/json",
+      "set-cookie": [
+        "__Secure-atlas_session=session-value; Path=/; Secure; HttpOnly",
+        "unrelated=ignored; Path=/",
+      ],
+    });
+    res.end(JSON.stringify({ data: { ok: true } }));
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const jar = new Map();
+    const clientAddress = { header: "cf-connecting-ip", value: benchmarkClientAddress(7) };
+    await requestJson({ origin, path: "/login", jar, timeoutMs: 1000, clientAddress });
+    await requestJson({ origin, path: "/me", jar, timeoutMs: 1000, clientAddress });
+    assert.deepEqual([...jar.keys()], ["__Secure-atlas_session"]);
+    assert.equal(seen[0].address, "198.18.0.8");
+    assert.equal(seen[1].cookie, "__Secure-atlas_session=session-value");
+  } finally {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+  }
 });
 
 test("fixture proxy credentials are local-only and transmitted per distinct actor without evidence leaks", async () => {

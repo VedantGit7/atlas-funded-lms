@@ -31,14 +31,23 @@ export function validateConfig(c, approvedOrigin = process.env.PERF_APPROVED_STA
   }
   if (typeof c.build !== "string" || !c.build.trim() || c.build.length > 120)
     throw new Error("Build provenance is required");
-  const maxUsers = c.mode === "local-smoke" ? 5 : 200;
+  // Staging reaches the planned launch peak (500 learners at once, decided
+  // 7 November 2026); the local lab stays at its 200-learner workstation limit.
+  const maxUsers = c.mode === "local-smoke" ? 5 : c.mode === "staging" ? 500 : 200;
   const maxSeconds = c.mode === "local-smoke" ? 60 : 7200;
   if (!integer(c.pacingMs, 100, 60000) || !integer(c.timeoutMs, 100, 120000))
     throw new Error("Invalid pacing/timeout");
   if (!integer(c.drainMs ?? 0, 0, 120000))
     throw new Error("Phase drain must be bounded between zero and two minutes");
-  if (!integer(c.refreshIntervalMs ?? 300000, 1000, 900000))
-    throw new Error("Refresh interval must be between one second and fifteen minutes");
+  // Better Auth sessions are database sessions with no refresh route (launch
+  // plan 3.8); a leftover refresh setting means the configuration is stale.
+  if (c.refreshIntervalMs !== undefined)
+    throw new Error("Sessions are not refreshed; remove refreshIntervalMs");
+  if (
+    c.clientAddressHeader !== undefined &&
+    (c.mode !== "staging" || c.clientAddressHeader !== "cf-connecting-ip")
+  )
+    throw new Error("Per-learner client addresses are only for the on-server staging run");
   if (!integer(c.setupPacingMs ?? c.pacingMs, 100, 60000)) throw new Error("Invalid setup pacing");
   if (
     c.fixtureProxyToken !== undefined &&
@@ -82,6 +91,22 @@ export function validateConfig(c, approvedOrigin = process.env.PERF_APPROVED_STA
     throw new Error("A fixture position aligned with the lesson percentage precision is required");
   return c;
 }
+
+/**
+ * A distinct client address per learner, from the RFC 2544 benchmarking range
+ * (198.18.0.0/15), so it can never collide with a real visitor. The staging run
+ * sends it in the header the web edge trusts (`cf-connecting-ip`) from inside
+ * the server, where only Cloudflare's tunnel otherwise reaches the proxy: each
+ * learner then gets its own per-IP rate-limit budget, as real learners on
+ * their own connections would. Through Cloudflare the header is overwritten.
+ */
+export function benchmarkClientAddress(actorIndex) {
+  if (!integer(actorIndex, 0, 249 * 512)) throw new Error("Actor index out of range");
+  return `198.${18 + Math.floor(actorIndex / (250 * 256))}.${Math.floor(actorIndex / 250) % 256}.${(actorIndex % 250) + 1}`;
+}
+
+/** Session cookies the harness keeps: Better Auth's, plain over http and `__Secure-` over https. */
+const SESSION_COOKIES = new Set(["atlas_session", "__Secure-atlas_session"]);
 
 function latency(samples) {
   if (!samples.length) return null;
@@ -179,6 +204,7 @@ export async function requestJson({
   timeoutMs,
   signal,
   fixtureProxy,
+  clientAddress,
   check = (value) => value?.data != null,
 }) {
   const url = new URL(path, origin);
@@ -210,6 +236,7 @@ export async function requestJson({
               "x-atlas-perf-actor": String(fixtureProxy.actor),
             }
           : {}),
+        ...(clientAddress ? { [clientAddress.header]: clientAddress.value } : {}),
       },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
@@ -233,8 +260,7 @@ export async function requestJson({
       const first = cookie.split(";")[0];
       const index = first.indexOf("=");
       const name = first.slice(0, index);
-      if (["atlas_access_token", "atlas_refresh_token", "atlas_session_persistent"].includes(name))
-        jar.set(name, first.slice(index + 1));
+      if (SESSION_COOKIES.has(name)) jar.set(name, first.slice(index + 1));
     }
     return { ms: performance.now() - start, status, ok: true, reason: null };
   } catch {
@@ -278,6 +304,14 @@ export async function runWorkload(
       timeoutMs: c.timeoutMs,
       ...(c.fixtureProxyToken
         ? { fixtureProxy: { token: c.fixtureProxyToken, actor: actor.index } }
+        : {}),
+      ...(c.clientAddressHeader
+        ? {
+            clientAddress: {
+              header: c.clientAddressHeader,
+              value: benchmarkClientAddress(actor.index),
+            },
+          }
         : {}),
       ...options,
     })),
@@ -357,31 +391,9 @@ export async function runWorkload(
         await Promise.all(
           actors.slice(0, phase.users).map(async (actor, actorIndex) => {
             try {
-              let nextRefresh = 0;
               // Atlas stores percentage progress, so the fixture must choose an exactly representable position.
               const position = c.fixture.positionSeconds;
               while (performance.now() < deadline) {
-                if (performance.now() >= nextRefresh) {
-                  const refresh = await send(actor, "refresh", "/api/v1/public/auth/refresh", {
-                    signal,
-                    method: "POST",
-                    body: {},
-                    check: (b) => b?.data?.refreshed === true,
-                  });
-                  if (refresh.reason === "phase-deadline") {
-                    cancelledRequests++;
-                    break;
-                  }
-                  record(refresh);
-                  if (performance.now() >= hardDeadline) {
-                    deadlineOverruns++;
-                    break;
-                  }
-                  if (!refresh.ok) return;
-                  nextRefresh = performance.now() + (c.refreshIntervalMs ?? 300000);
-                }
-                // Refresh may finish during drain; never admit a new journey after the load window.
-                if (performance.now() >= deadline) break;
                 const begin = performance.now();
                 let ok = true;
                 let incomplete = false;
@@ -523,7 +535,7 @@ export async function runWorkload(
     mode: c.mode,
     origin: c.origin,
     build: c.build,
-    planningTarget: { sustained: 100, burst: 200 },
+    planningTarget: Object.fromEntries(c.phases.map((p) => [p.name, p.users])),
     capacityVerified: false,
     slo: c.slo ? { requestP95Ms: c.slo.requestP95Ms, journeyP95Ms: c.slo.journeyP95Ms } : null,
     performancePassed: c.slo
@@ -531,7 +543,6 @@ export async function runWorkload(
       : null,
     pacingMs: c.pacingMs,
     setupPacingMs: c.setupPacingMs ?? c.pacingMs,
-    refreshIntervalMs: c.refreshIntervalMs ?? 300000,
     model:
       "closed-loop distinct authenticated learners; think time follows each journey; setup measured separately",
     setup: summarize(setup),
@@ -550,15 +561,7 @@ export async function runWorkload(
         "Attach matching process pool metrics and worker backlog evidence; absence is not zero.",
     },
     coverage: {
-      measured: [
-        "login",
-        "refresh",
-        "identity",
-        "course",
-        "lesson",
-        "progress-save",
-        "progress-read",
-      ],
+      measured: ["login", "identity", "course", "lesson", "progress-save", "progress-read"],
       excluded: [
         "quiz lifecycle",
         "uploads",
