@@ -88,7 +88,8 @@ export function buildMetadataPatch(input: {
 
 async function queryStudioCourses(args: {
   tx: Tx;
-  ownerMembershipId: string;
+  /** Null lists every course in the tenant (admins and owners). */
+  ownerMembershipId: string | null;
   limit: number;
   cursor: { createdAt: Date; id: string } | null;
   q: string | null;
@@ -117,7 +118,7 @@ async function queryStudioCourses(args: {
         c.created_at
       from courses c
       where c.deleted_at is null
-        and c.created_by_membership_id = ${common.ownerMembershipId}::uuid
+        and (${common.ownerMembershipId}::uuid is null or c.created_by_membership_id = ${common.ownerMembershipId}::uuid)
         and (${common.status}::text is null or c.status::text = ${common.status})
         and (${common.q}::text is null or c.title ilike ${common.q} or coalesce(c.description, '') ilike ${common.q})
       order by c.title asc, c.id asc
@@ -138,7 +139,7 @@ async function queryStudioCourses(args: {
         c.created_at
       from courses c
       where c.deleted_at is null
-        and c.created_by_membership_id = ${common.ownerMembershipId}::uuid
+        and (${common.ownerMembershipId}::uuid is null or c.created_by_membership_id = ${common.ownerMembershipId}::uuid)
         and (${common.status}::text is null or c.status::text = ${common.status})
         and (${common.q}::text is null or c.title ilike ${common.q} or coalesce(c.description, '') ilike ${common.q})
       order by c.title desc, c.id desc
@@ -158,7 +159,7 @@ async function queryStudioCourses(args: {
       c.created_at
     from courses c
     where c.deleted_at is null
-      and c.created_by_membership_id = ${common.ownerMembershipId}::uuid
+      and (${common.ownerMembershipId}::uuid is null or c.created_by_membership_id = ${common.ownerMembershipId}::uuid)
       and (${common.status}::text is null or c.status::text = ${common.status})
       and (${common.q}::text is null or c.title ilike ${common.q} or coalesce(c.description, '') ilike ${common.q})
       and (
@@ -172,7 +173,7 @@ async function queryStudioCourses(args: {
 
 export async function listStudioCoursesPaginated(args: {
   tx: Tx;
-  ownerMembershipId: string;
+  ownerMembershipId: string | null;
   query: StudioCourseListQuery;
 }) {
   const limit = args.query.limit;

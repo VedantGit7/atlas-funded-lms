@@ -71,6 +71,20 @@ function formatError(error: unknown): string {
   return "Failed to update course visibility.";
 }
 
+/** What publishing or unpublishing does from the course's current status. */
+export function publishNote(status: CourseDetail["status"]): string {
+  switch (status) {
+    case "DRAFT":
+      return "Publishing sends the course for review. It goes live for learners once a reviewer approves it.";
+    case "REVIEW":
+      return "This course is in review. It goes live for learners once a reviewer approves it.";
+    case "PUBLISHED":
+      return "Unpublishing takes a live course back to draft so you can edit it. Enrolled learners keep their enrollment and progress, but can't open the course until it is approved again.";
+    default:
+      return "This course is archived, so it can't be published or unpublished.";
+  }
+}
+
 function visibilityFromStatus(status: CourseDetail["status"]): PublishVisibility {
   return status === "PUBLISHED" ? "live" : "unpublished";
 }
@@ -232,6 +246,7 @@ export function CourseSettingsPublishCoursePanel({
           `/api/v1/courses/${course.id}/publish`,
           {},
           "course-publish",
+          { successMessage: "Course submitted for review" },
         );
         return response.data.status;
       }
@@ -324,10 +339,7 @@ export function CourseSettingsPublishCoursePanel({
       />
 
       <p className={`${builderHelperClassName} mt-6 leading-relaxed`}>
-        {course.status === "DRAFT"
-          ? "Publishing sends the course for review. It goes live for learners once a reviewer approves it."
-          : "Unpublishing takes a live course back to draft so you can edit it. Enrolled learners keep their enrollment and progress, but can't open the course until it is approved again."}{" "}
-        To hide one section or lesson instead, use its menu in the{" "}
+        {publishNote(course.status)} To hide one section or lesson instead, use its menu in the{" "}
         <Link
           href={`/studio/courses/${courseId}/editor`}
           prefetch={false}

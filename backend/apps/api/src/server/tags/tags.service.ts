@@ -45,6 +45,7 @@ import {
   validateTagIdsExist,
   type TagRow,
 } from "./tags.repository";
+import { canManageCourse } from "../courses/course-studio-access";
 
 type ServiceCtx = {
   tenantId: string;
@@ -77,7 +78,12 @@ async function requireOwnedLesson(tx: TenantTx, ctx: ServiceCtx, lessonId: strin
     throw lessonNotFound();
   }
 
-  if (lesson.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: lesson.courseId,
+      createdByMembershipId: lesson.createdByMembershipId,
+    }))
+  ) {
     throw lessonNotFound();
   }
 
@@ -91,7 +97,12 @@ async function requireOwnedCourse(tx: TenantTx, ctx: ServiceCtx, courseId: strin
     throw courseNotFound();
   }
 
-  if (course.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: course.id,
+      createdByMembershipId: course.createdByMembershipId,
+    }))
+  ) {
     throw courseNotFound();
   }
 

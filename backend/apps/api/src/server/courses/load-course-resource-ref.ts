@@ -6,6 +6,7 @@ import { findCourseAuthProjection, findEnrollmentForMembership } from "./courses
 import { findLessonWithModuleAndCourse } from "../lessons/lessons.repository";
 import { lessonNotFound } from "../lessons/lessons.errors";
 import { createResourceProjection } from "../resource-projection";
+import { canManageCourse } from "./course-studio-access";
 
 type LoaderCtx = {
   tenantId: string;
@@ -131,7 +132,12 @@ export async function loadModuleParentCourseResourceRef(args: {
     throw moduleNotFound();
   }
 
-  if (module.createdByMembershipId !== args.ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(args.tx, args.ctx, {
+      id: module.courseId,
+      createdByMembershipId: module.createdByMembershipId,
+    }))
+  ) {
     throw moduleNotFound();
   }
 
@@ -145,9 +151,9 @@ export async function loadModuleParentCourseResourceRef(args: {
 
 /**
  * The module's course, for routes whose permission decides who may act on it.
- * Unlike `loadModuleParentCourseResourceRef` it doesn't require the actor to
- * have made the course, so `course.publish` lets the course's instructor act and
- * roles that bypass resource checks (admins, owners) too.
+ * Unlike `loadModuleParentCourseResourceRef` it makes no studio-access check of
+ * its own, so the route's permission alone decides: `course.publish` lets the
+ * course's instructor act, and roles that bypass resource checks (admins, owners).
  */
 export async function loadModuleCourseResourceRef(args: {
   tx: TenantTx;
@@ -223,7 +229,12 @@ export async function loadModuleLessonsResourceRef(args: {
   }
 
   if (args.requirePublished === false) {
-    if (module.createdByMembershipId !== args.ctx.actorMembershipId) {
+    if (
+      !(await canManageCourse(args.tx, args.ctx, {
+        id: module.courseId,
+        createdByMembershipId: module.createdByMembershipId,
+      }))
+    ) {
       throw moduleNotFound();
     }
   }

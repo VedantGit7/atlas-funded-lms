@@ -44,6 +44,7 @@ import {
 } from "./lesson-progress-guards";
 import { listTagIdsForLessons, listTagsForLesson, mapTagSummary } from "../tags/tags.service";
 import { parseContentMetadata, getEffectiveFeatures } from "./lesson-content-metadata";
+import { canManageCourse } from "../courses/course-studio-access";
 
 type ServiceCtx = {
   tenantId: string;
@@ -76,7 +77,12 @@ async function requireOwnedModule(tx: TenantTx, ctx: ServiceCtx, moduleId: strin
     throw moduleNotFound();
   }
 
-  if (module.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: module.courseId,
+      createdByMembershipId: module.createdByMembershipId,
+    }))
+  ) {
     throw moduleNotFound();
   }
 
@@ -90,7 +96,12 @@ async function requireOwnedLesson(tx: TenantTx, ctx: ServiceCtx, lessonId: strin
     throw lessonNotFound();
   }
 
-  if (lesson.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: lesson.courseId,
+      createdByMembershipId: lesson.createdByMembershipId,
+    }))
+  ) {
     throw lessonNotFound();
   }
 

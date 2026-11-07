@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { z } from "zod";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import type { studioCourseDetailSchema } from "@atlas/contracts/courses/course-authoring-schemas";
@@ -37,6 +37,12 @@ function CourseDetailShellInner({ course, canPublish, children }: CourseDetailSh
   const { enrollDialogOpen, openEnrollDialog, closeEnrollDialog, bumpDashboardRefresh } =
     useCourseDetailActions();
   const [currentCourse, setCurrentCourse] = useState(course);
+  // A change made on a child page (unpublish, submit for review) refreshes the
+  // route, which hands this shell the new course; take it, or the header keeps
+  // showing the old status until a reload.
+  useEffect(() => {
+    setCurrentCourse(course);
+  }, [course]);
   const [publishError, setPublishError] = useState<string | null>(null);
   const activeTab = resolveActiveCourseTab(pathname, currentCourse.id);
   const showPublish = currentCourse.status === "DRAFT" && canPublish;
@@ -48,6 +54,7 @@ function CourseDetailShellInner({ course, canPublish, children }: CourseDetailSh
         `/api/v1/courses/${currentCourse.id}/publish`,
         {},
         "course-publish",
+        { successMessage: "Course submitted for review" },
       );
       return response.data.status;
     },

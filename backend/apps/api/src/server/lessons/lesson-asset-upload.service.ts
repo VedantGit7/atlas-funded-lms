@@ -17,6 +17,7 @@ import { assertAllowedSize } from "@atlas/storage/size-policy";
 import { findLessonWithModuleAndCourse } from "./lessons.repository";
 import { lessonNotFound } from "./lessons.errors";
 import { lessonAssetBlobBodySchema, type LessonAssetBlobBody } from "./lesson-schemas";
+import { canManageCourse } from "../courses/course-studio-access";
 
 type ServiceCtx = {
   tenantId: string;
@@ -91,7 +92,12 @@ async function requireEditableStudioLesson(tx: TenantTx, ctx: ServiceCtx, lesson
     throw lessonNotFound();
   }
 
-  if (lesson.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: lesson.courseId,
+      createdByMembershipId: lesson.createdByMembershipId,
+    }))
+  ) {
     throw lessonNotFound();
   }
 
