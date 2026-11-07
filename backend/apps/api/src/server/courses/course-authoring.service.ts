@@ -46,6 +46,7 @@ import {
   validateModulePositions,
   type CourseLifecycleStatus,
 } from "./course-state-guards";
+import { canManageCourse, canManageEveryCourse } from "./course-studio-access";
 
 type ServiceCtx = {
   tenantId: string;
@@ -69,7 +70,12 @@ async function requireOwnedCourse(tx: TenantTx, ctx: ServiceCtx, courseId: strin
     throw courseNotFound();
   }
 
-  if (course.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: course.id,
+      createdByMembershipId: course.createdByMembershipId,
+    }))
+  ) {
     throw courseNotFound();
   }
 
@@ -117,7 +123,7 @@ export async function listStudioCourses(
 ) {
   const result = await listStudioCoursesPaginated({
     tx,
-    ownerMembershipId: ctx.actorMembershipId,
+    ownerMembershipId: (await canManageEveryCourse(tx, ctx)) ? null : ctx.actorMembershipId,
     query,
   });
 
@@ -412,7 +418,12 @@ export async function updateCourseModule(
     throw moduleNotFound();
   }
 
-  if (module.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: module.courseId,
+      createdByMembershipId: module.createdByMembershipId,
+    }))
+  ) {
     throw moduleNotFound();
   }
 
@@ -472,7 +483,12 @@ export async function deleteCourseModule(tx: TenantTx, ctx: ServiceCtx, moduleId
     throw moduleNotFound();
   }
 
-  if (module.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: module.courseId,
+      createdByMembershipId: module.createdByMembershipId,
+    }))
+  ) {
     throw moduleNotFound();
   }
 

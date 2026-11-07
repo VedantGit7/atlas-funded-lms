@@ -18,6 +18,11 @@ const { mockGet, mockPost, mockPut, mockRefresh } = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: mockRefresh }),
+  usePathname: () => "/studio/courses/018f0000-0000-7000-8000-000000000071/settings",
+}));
+
+vi.mock("../../../frontend/apps/web/src/features/studio/courses/enroll-student-dialog", () => ({
+  EnrollStudentDialog: () => null,
 }));
 
 vi.mock("next/link", async () => {
@@ -47,7 +52,12 @@ import {
   visibilityActionLabel,
 } from "../../../frontend/apps/web/src/features/studio/courses/content-visibility";
 import { resolveLessonBadges } from "../../../frontend/apps/web/src/features/studio/courses/lesson-outline-meta";
-import { CourseSettingsPublishCoursePanel } from "../../../frontend/apps/web/src/features/studio/courses/course-settings-publish-course-panel";
+import {
+  CourseSettingsPublishCoursePanel,
+  publishNote,
+} from "../../../frontend/apps/web/src/features/studio/courses/course-settings-publish-course-panel";
+import { CourseDetailShell } from "../../../frontend/apps/web/src/features/studio/courses/course-detail-shell";
+import { resolveMutationSuccessToast } from "../../../frontend/apps/web/src/lib/feedback/toast-messages";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 
@@ -201,5 +211,61 @@ describe("unpublish course panel", () => {
     expect(onCourseChange).toHaveBeenCalledWith({ id: courseId, status: "DRAFT" });
     expect(mockRefresh).toHaveBeenCalled();
     expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+});
+
+// Found on staging, 7 November 2026, while checking #268.
+describe("publish wording and course header state", () => {
+  it("explains publishing for each course status", () => {
+    expect(publishNote("DRAFT")).toMatch(/^Publishing sends the course for review/);
+    expect(publishNote("REVIEW")).toMatch(/^This course is in review/);
+    expect(publishNote("PUBLISHED")).toMatch(/^Unpublishing takes a live course back to draft/);
+    expect(publishNote("ARCHIVED")).toMatch(/archived/);
+  });
+
+  it("calls submitting a course for review a submission, not a publish", () => {
+    expect(resolveMutationSuccessToast("course-publish", "POST")).toBe(
+      "Course submitted successfully",
+    );
+  });
+
+  it("shows the course's new status in the header after the page refreshes", async () => {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    const client = new QueryClient();
+    const render = (status: "PUBLISHED" | "DRAFT") =>
+      root.render(
+        createElement(
+          QueryClientProvider,
+          { client },
+          createElement(CourseDetailShell, {
+            course: { id: courseId, title: "Acceptance course", status } as never,
+            canPublish: true,
+            children: null,
+          }),
+        ),
+      );
+
+    await act(async () => {
+      render("PUBLISHED");
+    });
+    expect(container.textContent).toContain("Published");
+    expect(
+      [...container.querySelectorAll("button")].some((b) => b.textContent?.trim() === "Publish"),
+    ).toBe(false);
+
+    // router.refresh() after an unpublish hands the shell the course in draft.
+    await act(async () => {
+      render("DRAFT");
+    });
+    expect(
+      [...container.querySelectorAll("button")].some((b) => b.textContent?.trim() === "Publish"),
+    ).toBe(true);
+
+    act(() => {
+      root.unmount();
+    });
+    container.remove();
   });
 });

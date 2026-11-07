@@ -106,7 +106,8 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "course-faqs-save": { label: "FAQs", action: "saved" },
   "course-instructors-save": { label: "Instructors", action: "saved" },
   "course-tags-save": { label: "Course tags", action: "saved" },
-  "course-publish": { label: "Course", action: "published" },
+  // Publishing a course sends it for review; a reviewer's approval puts it live.
+  "course-publish": { label: "Course", action: "submitted" },
   "course-archive": { label: "Course", action: "archived" },
   "course-enroll-student": { label: "Student", action: "enrolled" },
   "course-create": { label: "Course", action: "created" },

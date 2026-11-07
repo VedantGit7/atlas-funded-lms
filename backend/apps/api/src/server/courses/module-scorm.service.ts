@@ -21,6 +21,7 @@ import {
   updateModuleScormPackageReference,
 } from "./course-authoring.repository";
 import { assertModuleEditable } from "./course-state-guards";
+import { canManageCourse } from "./course-studio-access";
 
 type ServiceCtx = {
   tenantId: string;
@@ -35,7 +36,12 @@ async function requireEditableScormModule(tx: TenantTx, ctx: ServiceCtx, moduleI
     throw moduleNotFound();
   }
 
-  if (module.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: module.courseId,
+      createdByMembershipId: module.createdByMembershipId,
+    }))
+  ) {
     throw moduleNotFound();
   }
 

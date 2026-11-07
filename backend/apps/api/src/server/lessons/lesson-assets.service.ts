@@ -13,6 +13,7 @@ import {
   softDeleteLessonAsset,
 } from "./lesson-assets.repository";
 import { findLessonWithModuleAndCourse } from "./lessons.repository";
+import { canManageCourse } from "../courses/course-studio-access";
 
 type ServiceCtx = {
   tenantId: string;
@@ -27,7 +28,12 @@ async function requireStudioLesson(tx: TenantTx, ctx: ServiceCtx, lessonId: stri
     throw lessonNotFound();
   }
 
-  if (lesson.createdByMembershipId !== ctx.actorMembershipId) {
+  if (
+    !(await canManageCourse(tx, ctx, {
+      id: lesson.courseId,
+      createdByMembershipId: lesson.createdByMembershipId,
+    }))
+  ) {
     throw lessonNotFound();
   }
 
