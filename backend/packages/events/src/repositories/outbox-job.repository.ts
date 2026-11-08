@@ -24,21 +24,47 @@ export type DeliveryClaim = {
   exhausted: boolean;
 };
 
-/** Materialization is bounded and skips existing destinations, including terminal jobs. */
+/**
+ * Materialization is bounded and skips existing destinations, including terminal
+ * jobs. It considers events that became available after `availableAfter`: the
+ * worker passes the epoch for a full pass and otherwise only the recent window
+ * (outbox-worker.service.ts). Returns how many event/destination pairs lacked a
+ * job, up to `limit`; fewer than `limit` means the window has nothing left,
+ * even when a concurrent worker inserted some of them first.
+ */
 export async function materializeDeliveryJobs(
   tx: EventsDbTx,
   subscriptions: OutboxSubscription[],
   limit: number,
   maxAttempts: number,
-): Promise<void> {
-  if (subscriptions.length === 0) return;
-  await tx.$queryRaw`INSERT INTO outbox_delivery_jobs(tenant_id,outbox_event_id,destination_key,max_attempts)
-    SELECT o.tenant_id,o.id,s."destinationKey",${maxAttempts}
-    FROM outbox_events o CROSS JOIN jsonb_to_recordset(${JSON.stringify(subscriptions)}::jsonb) AS s("eventType" text,"destinationKey" text)
-    WHERE o.available_at <= now() AND o.event_type=s."eventType"
-    AND NOT EXISTS(SELECT 1 FROM outbox_delivery_jobs j WHERE j.outbox_event_id=o.id AND j.destination_key=s."destinationKey")
-    ORDER BY o.available_at,o.occurred_at,o.id,s."destinationKey" LIMIT ${limit}
-    ON CONFLICT(outbox_event_id,destination_key) DO NOTHING RETURNING id`;
+  availableAfter: Date = new Date(0),
+): Promise<number> {
+  if (subscriptions.length === 0) return 0;
+  const rows = await tx.$queryRaw<{ candidates: number }[]>`WITH candidates AS (
+      SELECT o.tenant_id,o.id,s."destinationKey" AS destination_key
+      FROM outbox_events o CROSS JOIN jsonb_to_recordset(${JSON.stringify(subscriptions)}::jsonb) AS s("eventType" text,"destinationKey" text)
+      WHERE o.available_at <= now() AND o.available_at > ${availableAfter}::timestamptz AND o.event_type=s."eventType"
+      AND NOT EXISTS(SELECT 1 FROM outbox_delivery_jobs j WHERE j.outbox_event_id=o.id AND j.destination_key=s."destinationKey")
+      ORDER BY o.available_at,o.occurred_at,o.id,s."destinationKey" LIMIT ${limit}
+    ), inserted AS (
+      INSERT INTO outbox_delivery_jobs(tenant_id,outbox_event_id,destination_key,max_attempts)
+      SELECT tenant_id,id,destination_key,${maxAttempts} FROM candidates
+      ON CONFLICT(outbox_event_id,destination_key) DO NOTHING RETURNING id
+    )
+    SELECT (SELECT count(*) FROM candidates)::int AS candidates`;
+  return Array.isArray(rows) ? (rows[0]?.candidates ?? 0) : 0;
+}
+
+/** The transaction's tenant scope and start time, which bound the next materialization window. */
+export async function readMaterializationScope(
+  tx: EventsDbTx,
+): Promise<{ tenant: string; startedAt: Date } | null> {
+  const rows = await tx.$queryRaw<{ tenant: string | null; started_at: Date }[]>`
+    SELECT current_setting('app.tenant_id', true) AS tenant, now() AS started_at`;
+  const row = Array.isArray(rows) ? rows[0] : undefined;
+  return row && row.started_at instanceof Date
+    ? { tenant: row.tenant ?? "", startedAt: row.started_at }
+    : null;
 }
 
 export async function claimDeliveryJob(

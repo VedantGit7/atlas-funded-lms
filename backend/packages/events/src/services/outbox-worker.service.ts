@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { EventsDbTx } from "../transaction";
 import {
   materializeDeliveryJobs,
+  readMaterializationScope,
   claimDeliveryJob,
   lockDeliveryJob,
   finishDeliveryJob,
@@ -113,6 +114,56 @@ async function recordOutcome(
   return true;
 }
 
+/**
+ * How far back past the last completed pass a materialization looks. An event
+ * is available from its transaction's start, so one that commits after a pass
+ * began can carry an earlier available_at; an hour is far beyond any
+ * transaction the statement timeouts allow.
+ */
+export const MATERIALIZE_LATE_COMMIT_MARGIN_MS = 60 * 60_000;
+
+/**
+ * Per process, per tenant and subscription set: the start of the last
+ * materialization pass that found nothing more to create. Outbox events are
+ * append-only and never pruned, so scanning all of them every cycle grew with
+ * history: 51 million index probes in the 2.5-hour staging load test
+ * (docs/engineering/staging-load-test-2026-11-07.md). A process's first pass
+ * covers all history, which also picks up a destination added by a deploy.
+ */
+const materializedThrough = new Map<string, Date>();
+
+export function resetMaterializationWindows(): void {
+  materializedThrough.clear();
+}
+
+async function materializeNewDeliveryJobs(
+  db: OutboxTransactions,
+  subscriptions: { eventType: string; destinationKey: string }[],
+  limit: number,
+  maxAttempts: number,
+) {
+  const pass = await db.transaction(async (tx) => {
+    const scope = await readMaterializationScope(tx);
+    const key = scope ? JSON.stringify([scope.tenant, subscriptions]) : null;
+    const through = key ? materializedThrough.get(key) : undefined;
+    const availableAfter = through
+      ? new Date(through.getTime() - MATERIALIZE_LATE_COMMIT_MARGIN_MS)
+      : new Date(0);
+    const missing = await materializeDeliveryJobs(
+      tx,
+      subscriptions,
+      limit,
+      maxAttempts,
+      availableAfter,
+    );
+    return { key, startedAt: scope?.startedAt, missing };
+  });
+  // Only after the commit, and only when the window is exhausted: a full batch
+  // means more may be waiting, so the next pass starts from the same point.
+  if (pass.key && pass.startedAt && pass.missing < limit)
+    materializedThrough.set(pass.key, pass.startedAt);
+}
+
 /** Claims and outcomes commit separately. No transaction is held while a handler runs. */
 export async function processOutboxBatch(
   db: OutboxTransactions,
@@ -129,9 +180,7 @@ export async function processOutboxBatch(
   if (identities.size !== subscriptions.length) throw new Error("DUPLICATE_OUTBOX_DESTINATION");
   const counts = { processed: 0, delivered: 0, failed: 0, skipped: 0 };
   if (subscriptions.length === 0) return counts;
-  await db.transaction((tx) =>
-    materializeDeliveryJobs(tx, subscriptions, args.limit, args.maxRetries + 1),
-  );
+  await materializeNewDeliveryJobs(db, subscriptions, args.limit, args.maxRetries + 1);
   for (let index = 0; index < args.limit; index++) {
     const claim = await db.transaction((tx) => claimDeliveryJob(tx, subscriptions));
     if (!claim) break;

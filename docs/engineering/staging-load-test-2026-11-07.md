@@ -89,7 +89,15 @@ This is why Postgres averaged 72% of a core while the API's own queries were che
 
 After these, repeat the same profile with the same fixture and the same `profile.json`. The target is for both the 300-learner sustained phase and the 500-learner burst to pass.
 
-## Reproducing
+## What the follow-up changed
+
+1. **Three API processes.** `deploy/managed-node/api-cluster.mjs` starts the Next server as `API_PROCESS_COUNT` processes (3 in `deploy/coolify/compose.yaml`) that share port 3001. It restarts a process that dies, and it exits so that the container restarts if processes keep dying. Each process has a 1 GiB heap. The API container goes from 2 CPUs and 2 GiB to 4 CPUs and 4 GiB. The per-process database pools are smaller, and so are the worker's, so all of them together stay inside PostgreSQL's 100 connections (88 at most).
+2. **Server tracing off.** Setting the rate to 0 was not enough, because Sentry turns tracing on whenever `tracesSampleRate` is present at all. The API and web server and edge configs now leave it out unless `SENTRY_TRACES_SAMPLE_RATE` is above 0, and the compose default is now 0. Error reporting is unchanged.
+3. **One log line per request.** `route.start` is gone. `route.complete` and `route.failure` now carry the tenant and actor IDs that only the start line had before.
+4. **Outbox materialisation window.** Outbox events are append-only by design, so pruning them is not an option. Instead, each worker process keeps, for each tenant and subscription set, the start of the last pass that found nothing more to create. Later passes look only at events that became available after that point, minus a one-hour margin for late commits. The first pass in a process still covers all history, which also picks up a destination added by a deploy.
+5. **Usage metering.** The per-request row is kept, because it is written inside the request's own transaction so usage is counted exactly once, and the insert is cheap. What changed is the cost around it:
+   - processed rows are kept for 2 days instead of 30, which is still far longer than any retry;
+   - the worker drains up to 500 rows a sweep instead of 25, so the drain keeps up with three API processes.
 
 The fixture script and the harness are in `scripts/perf/`. The run used the profile below, plus `pacingMs` 20,000, `setupPacingMs` 250, `timeoutMs` 30,000 and `drainMs` 30,000:
 

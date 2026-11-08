@@ -122,9 +122,37 @@ describe("runRouteLifecycle failure logging", () => {
     expect(loggedErrorCode()).toBe("VALIDATION_ERROR");
   });
 
-  it("still logs route.start and rethrows for the factory to answer", async () => {
+  it("writes one failure line, with no separate start line, and rethrows", async () => {
     await runFailing(new Error("boom"));
-    const [startFields] = infoMock.mock.calls[0] as [{ message: string }];
-    expect(startFields.message).toBe("route.start");
+    expect(infoMock).not.toHaveBeenCalled();
+    expect(errorMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("runRouteLifecycle success logging", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("writes a single route.complete line that carries the tenant and actor", async () => {
+    await runRouteLifecycle(
+      {
+        requestId: "req-2",
+        route: "/api/v1/things",
+        tenantSafeId: "tenant-safe",
+        actorSafeId: "actor-safe",
+      },
+      () => Promise.resolve("ok"),
+    );
+    expect(infoMock).toHaveBeenCalledTimes(1);
+    expect(infoMock.mock.calls[0]?.[0]).toMatchObject({
+      message: "route.complete",
+      requestId: "req-2",
+      route: "/api/v1/things",
+      routeGroup: "tenant-api",
+      tenantSafeId: "tenant-safe",
+      actorSafeId: "actor-safe",
+      statusCode: 200,
+    });
   });
 });

@@ -39,8 +39,17 @@ export type SweepOptions = {
 export type RetentionTask = {
   name: string;
   includeInactiveTenants?: boolean;
+  /** Items one run handles at most, when it differs from the sweep's batch limit. */
+  batchLimit?: number;
   run: (input: { tenantId: string; requestId: string }) => Promise<number>;
 };
+
+/**
+ * Usage events drained per tenant per sweep. The API writes one per request, so
+ * the outbox batch size (25) let a backlog build as soon as traffic passed
+ * about 25 requests per sweep (staging load test, 7 Nov 2026).
+ */
+export const USAGE_DRAIN_BATCH_LIMIT = 500;
 
 export type SweepResult = {
   requestId: string;
@@ -144,10 +153,12 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
     {
       name: "usage-meter-drain",
       includeInactiveTenants: true,
+      batchLimit: USAGE_DRAIN_BATCH_LIMIT,
       run: async ({ tenantId, requestId }) =>
         withTenantTx(
           { tenantId, requestId, allowAnonymousTenantRead: true },
-          async (tx) => (await drainTenantUsageEvents(tx, { limit: batchLimit })).processed,
+          async (tx) =>
+            (await drainTenantUsageEvents(tx, { limit: USAGE_DRAIN_BATCH_LIMIT })).processed,
         ),
     },
     {
@@ -379,7 +390,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
         if (counter) result[counter] += purged;
         if (
           (task.name === "usage-meter-drain" || task.name === "attempt-deadline-finalize") &&
-          purged >= options.batchLimit
+          purged >= (task.batchLimit ?? options.batchLimit)
         )
           result.saturated = true;
         options.onProgress?.();
