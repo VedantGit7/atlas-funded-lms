@@ -9,7 +9,9 @@ All budgets use a 60-second fixed window from the first hit. Counters are shared
 | Protected ingress, attributed IP only |         1,200 |            300 | Plane + trusted IP                                  |
 | Protected operation                   |           240 |             60 | Plane + tenant (if applicable) + actor + permission |
 | Actor aggregate                       |           960 |            240 | Plane + tenant (if applicable) + actor              |
-| Tenant aggregate                      |         4,800 |          1,200 | Tenant, across its members                          |
+| Tenant aggregate (configurable)       |        12,000 |          3,000 | Tenant, across its members                          |
+
+The tenant aggregate stops one tenant from taking the whole platform. Each deployment sets it with `TENANT_RATE_LIMIT_READS_PER_MINUTE` and `TENANT_RATE_LIMIT_WRITES_PER_MINUTE`; the Coolify compose file passes both to the API with the defaults above. A value must be a whole number from one member's own aggregate (960 reads, 240 writes) up to 1,000,000. Anything else stops startup. It was 4,800 and 1,200 until the November staging load test, where 500 learners active at once made about 5,000 reads and 1,260 writes a minute and got 429s ([evidence](../engineering/staging-load-test-2026-11-07.md)). The defaults leave room for about 1,200 learners active at once. Raise them for a deployment whose largest tenant has more, and keep them well above what that tenant uses, because a member who hits this limit is refused on every route for the rest of the minute.
 
 Public buckets use trusted IP: `publicRead` 120; `publicAuth` 20; `publicInvitationAccept` 10; `publicDiagnostic` 10 per minute. In deployed runtimes public requests without attributable IP fail closed with `503 SERVICE_UNAVAILABLE` and `Retry-After: 5`, without consuming a global unknown bucket. Local development retains the shared `unknown` bucket. Credential verification retains its additional per-process 60/minute guard, now with a proper retry header; its shared public budget remains the primary application control.
 

@@ -7,6 +7,7 @@ import { resolveClientIp } from "./client-ip";
 import {
   RateLimitConfigurationError,
   resolveRateLimitStore,
+  resolveTenantRateLimits,
   setRateLimitStore,
   validateRateLimitConfiguration,
   type RateLimitStore,
@@ -126,7 +127,10 @@ export async function enforceIngressRateLimit(args: {
   );
 }
 
-/** Metadata limit per actor/permission, plus aggregate actor and tenant ceilings. */
+/**
+ * Metadata limit per actor/permission, plus aggregate actor and tenant
+ * ceilings. The tenant ceiling is a deployment setting (resolveTenantRateLimits).
+ */
 export async function enforceProtectedRateLimit(args: {
   plane: Plane;
   tenantId?: string;
@@ -147,7 +151,7 @@ export async function enforceProtectedRateLimit(args: {
   if (args.plane === "tenant")
     budgets.push({
       key: `tenant:aggregate:${identity([args.tenantId ?? "", bucket])}`,
-      max: max * 20,
+      max: resolveTenantRateLimits()[bucket],
     });
   await enforceBudgets(budgets, args.requestId);
 }

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { buildDocumentCsp } from "../../../configs/security-headers.mjs";
 import { validateDeploymentStartup } from "../../../backend/packages/api/src/deployment-startup";
+import { TENANT_RATE_LIMIT_SETTINGS } from "../../../backend/packages/api/src/rate-limit-store";
 import { deploymentEnv } from "../../helpers/deployment-env";
 
 /**
@@ -200,6 +201,17 @@ describe("Coolify compose topology", () => {
       pools(resolveEnvironment("web")) +
       pools(resolveEnvironment("worker"));
     expect(total).toBeLessThanOrEqual(90);
+  });
+
+  it("gives the API the tenant ceiling settings, defaulting to the code's values", () => {
+    for (const { name, fallback } of Object.values(TENANT_RATE_LIMIT_SETTINGS))
+      expect(coolify("api").environment[name]).toBe(`\${${name}:-${String(fallback)}}`);
+    expect(() =>
+      validateDeploymentStartup(
+        "api",
+        resolveEnvironment("api", { ...settings, TENANT_RATE_LIMIT_WRITES_PER_MINUTE: "10" }),
+      ),
+    ).toThrow(/TENANT_RATE_LIMIT_WRITES_PER_MINUTE/);
   });
 
   it.each(services)("turns server-side Sentry tracing off on %s by default", (service) => {

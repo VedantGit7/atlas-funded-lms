@@ -113,4 +113,34 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profile stay on the staging server under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profile stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+
+## Run 2 (8 November, build a9975de1)
+
+Run 2 used the same fixture, profile and pacing as run 1, on the build with the changes above.
+
+| Phase     | Learners | Requests | Request p95 (run 1) | Journey p95 (run 1) |          Errors | Result         |
+| --------- | -------: | -------: | ------------------: | ------------------: | --------------: | -------------- |
+| Warmup    |      100 |    3,000 |   816 ms (1,347 ms) |              3.77 s |               0 | not counted    |
+| Sustained |      300 |   66,580 |   478 ms (1,989 ms) |    2.67 s (10.17 s) |               0 | **pass**       |
+| Burst     |      500 |   32,683 | 1,621 ms (6,043 ms) |      7.1 s (28.4 s) | 1,376 (all 429) | fail           |
+| Endurance |      300 |  532,850 |     191 ms (587 ms) |     0.91 s (2.81 s) |   300 (all 429) | fail on errors |
+
+Setup was 500 logins and 500 enrolments with no errors (login p95 136 ms, enrolment p95 33 ms). No container restarted, and no request failed on the server side.
+
+- **API.** Average CPU was 76–90% of one core in every phase, out of four, and at most about 3.5 cores. Memory peaked at 1.8 GiB of 4 GiB.
+- **Database.** PostgreSQL averaged 50% of a core, down from 72%. There were at most 32 connections and 9 active, with no lock waits and no deadlocks.
+- **Outbox.** The worker averaged 3% CPU, down from 39%. `outbox_delivery_jobs_event_destination_key` was probed 153,736 times, down from 51.1 million.
+- **Usage metering.** 507,730 rows were inserted and 507,494 marked processed, so the drain kept up.
+- **Host.** Idle never fell below 32%, and CPU steal averaged 0.17%.
+
+**The 429s came from the tenant ceiling.** Besides each member's own budgets, the code allowed one tenant 4,800 reads and 1,200 writes a minute in total. In the burst, the tenant made about 5,000 reads and 1,260 writes a minute, so about 4% of requests were refused every minute. Run 1 never got there, because it was too slow. The ceiling counts in fixed one-minute windows, so the minute that was still full when the burst ended refused the first request of each of the 300 endurance learners, and endurance had no errors after that.
+
+The ceiling is now a deployment setting with higher defaults: 12,000 reads and 3,000 writes a minute (`TENANT_RATE_LIMIT_READS_PER_MINUTE`, `TENANT_RATE_LIMIT_WRITES_PER_MINUTE`; see `docs/runbooks/rate-limiting.md`).
+
+Even without the 429s, the burst is still over target: request p95 is 1.6 s and journey p95 7.1 s, while the API used well under its four cores. Run 3, on the build with the new ceiling, shows the burst without 429s. If it is still slow, the next step is to profile the API during the burst.
+
+Two smaller findings:
+
+- The API container keeps only 30 MB of logs (`max-size` 10m, `max-file` 3), which at this load is about the last 15 minutes.
+- `user_roles_tenant_id_membership_id_role_id_key` was read about five times per request (3.3 million in the run). The authorization lookups are cheap, but they are the most-read index in the database.
