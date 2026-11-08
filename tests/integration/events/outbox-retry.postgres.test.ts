@@ -186,6 +186,51 @@ suite("F08 durable delivery against isolated local PostgreSQL", () => {
       ),
     ).rejects.toThrow("DELIVERY_RECONCILIATION_REQUIRED");
   });
+  it("materializes only events inside the window, and reports what was missing", async () => {
+    const id = randomUUID(),
+      type = `test.${id}`;
+    await admin.query(
+      "INSERT INTO outbox_events(id,tenant_id,event_type,payload_json,available_at) VALUES($1,$2,$3,'{}',now()-interval '2 hours')",
+      [id, tenantA, type],
+    );
+    const recentOnly = new Date(Date.now() - 60 * 60_000);
+    // Older than the window: left for a full pass.
+    expect(
+      await transaction((tx) =>
+        materializeDeliveryJobs(tx, subscriptions(type), 10, 4, recentOnly),
+      ),
+    ).toBe(0);
+    expect(await job(id)).toBeUndefined();
+    // A full pass finds it; the next finds nothing left.
+    expect(await transaction((tx) => materializeDeliveryJobs(tx, subscriptions(type), 10, 4))).toBe(
+      1,
+    );
+    expect((await job(id)).status).toBe("pending");
+    expect(await transaction((tx) => materializeDeliveryJobs(tx, subscriptions(type), 10, 4))).toBe(
+      0,
+    );
+  });
+  it("starts each worker process with a full pass, then narrows to recent events", async () => {
+    const old = randomUUID(),
+      type = `test.${old}`;
+    await admin.query(
+      "INSERT INTO outbox_events(id,tenant_id,event_type,payload_json,available_at) VALUES($1,$2,$3,'{}',now()-interval '3 hours')",
+      [old, tenantA, type],
+    );
+    const handle = vi.fn(async () => {});
+    await run(type, [{ destinationKey: "a", handle }]);
+    expect(handle).toHaveBeenCalledTimes(1);
+    expect((await job(old)).status).toBe("succeeded");
+    // A new event is still picked up on the narrowed passes.
+    const fresh = randomUUID();
+    await admin.query(
+      "INSERT INTO outbox_events(id,tenant_id,event_type,payload_json) VALUES($1,$2,$3,'{}')",
+      [fresh, tenantA, type],
+    );
+    await run(type, [{ destinationKey: "a", handle }]);
+    expect(handle).toHaveBeenCalledTimes(2);
+    expect((await job(fresh)).status).toBe("succeeded");
+  });
   it("retries transient failure only when due and succeeds outside transactions", async () => {
     const event = await seed();
     const handle = vi.fn(async () => {

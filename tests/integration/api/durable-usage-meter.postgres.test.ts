@@ -243,6 +243,27 @@ suite("F22 durable usage PostgreSQL", () => {
       expect(await drainTenantUsageEvents(tx, { limit: 100 })).toEqual({ processed: 1 }),
     );
   });
+  it("keeps processed events two days for retry deduplication, then prunes them", async () => {
+    const { tenantA } = await createTenantIsolationFixture();
+    const recent = event(tenantA.tenantId);
+    const old = event(tenantA.tenantId);
+    await appendDurableUsage(recent);
+    await appendDurableUsage(old);
+    await withTenantTx(tenantCtx(tenantA), async (tx) => {
+      expect(await drainTenantUsageEvents(tx, { limit: 100 })).toEqual({ processed: 2 });
+      await tx.$executeRaw`UPDATE tenant_usage_events SET processed_at=now()-interval '1 day'
+        WHERE id=${recent.id}::uuid`;
+      await tx.$executeRaw`UPDATE tenant_usage_events SET processed_at=now()-interval '3 days'
+        WHERE id=${old.id}::uuid`;
+    });
+    await withTenantTx(tenantCtx(tenantA), async (tx) => {
+      expect(await drainTenantUsageEvents(tx, { limit: 100 })).toEqual({ processed: 0 });
+      const rows = await tx.$queryRaw<
+        Array<{ id: string }>
+      >`SELECT id::text FROM tenant_usage_events`;
+      expect(rows.map((row) => row.id)).toEqual([recent.id]);
+    });
+  });
   it("persists while every business-pool connection is held", async () => {
     const { tenantA } = await createTenantIsolationFixture();
     const pool = globalThis.__atlasPgPool;

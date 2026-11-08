@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  defaultRetentionTasks,
   runOutboxSweep,
+  USAGE_DRAIN_BATCH_LIMIT,
   type RetentionTask,
   type SweepOptions,
 } from "../../../backend/apps/api/src/worker/outbox-sweep";
@@ -96,6 +98,32 @@ describe("runOutboxSweep", () => {
     expect(visited).toEqual(["inactive", "deleted"]);
     expect(result.usageEventsProcessed).toBe(50);
     expect(result.saturated).toBe(true);
+  });
+  it("judges a retention task full by its own batch limit, not the outbox batch size", async () => {
+    // The usage drain takes up to USAGE_DRAIN_BATCH_LIMIT rows: 25 of them is
+    // a quiet sweep, not a backlog, and should let the worker idle.
+    const drain = (processed: number) =>
+      runOutboxSweep(
+        options({
+          listTenantIds: async () => [],
+          listRetentionTenantIds: async () => ["t1"],
+          retentionTasks: [
+            {
+              name: "usage-meter-drain",
+              includeInactiveTenants: true,
+              batchLimit: USAGE_DRAIN_BATCH_LIMIT,
+              run: async () => processed,
+            },
+          ],
+        }),
+      );
+    expect((await drain(25)).saturated).toBe(false);
+    expect((await drain(USAGE_DRAIN_BATCH_LIMIT)).saturated).toBe(true);
+    expect(defaultRetentionTasks().find((task) => task.name === "usage-meter-drain")).toMatchObject(
+      {
+        batchLimit: USAGE_DRAIN_BATCH_LIMIT,
+      },
+    );
   });
   it("serializes processor calls and resumes unstarted work after a worker restart", async () => {
     const controller = new AbortController();

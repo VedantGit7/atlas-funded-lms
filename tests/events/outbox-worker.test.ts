@@ -2,6 +2,7 @@ import { beforeEach, describe, it, expect, vi } from "vitest";
 import type { EventsDbTx } from "@atlas/events/transaction";
 const mocks = vi.hoisted(() => ({
   materialize: vi.fn(),
+  scope: vi.fn(),
   claim: vi.fn(),
   lock: vi.fn(),
   finish: vi.fn(),
@@ -11,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock("@atlas/events/repositories/outbox-job.repository", () => ({
   materializeDeliveryJobs: mocks.materialize,
+  readMaterializationScope: mocks.scope,
   claimDeliveryJob: mocks.claim,
   lockDeliveryJob: mocks.lock,
   finishDeliveryJob: mocks.finish,
@@ -24,6 +26,8 @@ vi.mock("@atlas/events/repositories/dead-letter.repository", () => ({
 }));
 import {
   processOutboxBatch,
+  MATERIALIZE_LATE_COMMIT_MARGIN_MS,
+  resetMaterializationWindows,
   OutboxDeliveryError,
   deliveryIdempotencyKey,
   retryDelayMs,
@@ -173,6 +177,49 @@ describe("durable outbox transaction and retry policy", () => {
     mocks.receipt.mockRejectedValue(new Error("commit failed"));
     await expect(execute(async () => {})).rejects.toThrow("commit failed");
     expect(mocks.dead).not.toHaveBeenCalled();
+  });
+  it("scans all history once, then only events since the last completed pass", async () => {
+    resetMaterializationWindows();
+    mocks.claim.mockReset().mockResolvedValue(null);
+    const at = (iso: string) => ({ tenant: "tenant-a", startedAt: new Date(iso) });
+    const after = (call: number) => mocks.materialize.mock.calls[call]?.[4] as Date;
+
+    // First pass in this process: all history. It fills the batch (limit 2),
+    // so the next pass must start from the same point.
+    mocks.scope.mockResolvedValueOnce(at("2026-11-08T10:00:00Z"));
+    mocks.materialize.mockResolvedValueOnce(2);
+    await execute(async () => {});
+    expect(after(0).getTime()).toBe(0);
+
+    mocks.scope.mockResolvedValueOnce(at("2026-11-08T10:00:05Z"));
+    mocks.materialize.mockResolvedValueOnce(1);
+    await execute(async () => {});
+    expect(after(1).getTime()).toBe(0);
+
+    // That pass left nothing waiting: later passes look back from its start,
+    // with the late-commit margin.
+    mocks.scope.mockResolvedValueOnce(at("2026-11-08T10:00:10Z"));
+    mocks.materialize.mockResolvedValueOnce(0);
+    await execute(async () => {});
+    expect(after(2).getTime()).toBe(
+      new Date("2026-11-08T10:00:05Z").getTime() - MATERIALIZE_LATE_COMMIT_MARGIN_MS,
+    );
+
+    // Another tenant keeps its own window and starts with a full pass.
+    mocks.scope.mockResolvedValueOnce({ tenant: "tenant-b", startedAt: new Date() });
+    mocks.materialize.mockResolvedValueOnce(0);
+    await execute(async () => {});
+    expect(after(3).getTime()).toBe(0);
+  });
+  it("keeps the window where it was when the materialization rolls back", async () => {
+    resetMaterializationWindows();
+    mocks.claim.mockReset().mockResolvedValue(null);
+    mocks.scope.mockResolvedValue({ tenant: "tenant-a", startedAt: new Date() });
+    mocks.materialize.mockRejectedValueOnce(new Error("serialization failure"));
+    await expect(execute(async () => {})).rejects.toThrow("serialization failure");
+    mocks.materialize.mockResolvedValueOnce(0);
+    await execute(async () => {});
+    expect((mocks.materialize.mock.calls[1]?.[4] as Date).getTime()).toBe(0);
   });
   it("uses stable destination-specific identities and bounded exponential jitter", () => {
     expect(deliveryIdempotencyKey("one", "a")).toBe(deliveryIdempotencyKey("one", "a"));

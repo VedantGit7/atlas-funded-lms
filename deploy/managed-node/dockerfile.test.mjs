@@ -129,3 +129,12 @@ test("ships the migration job with only what applying the schema needs, unprivil
   assert.ok(migrate.lines.slice(user).every((line) => !/^(COPY|RUN)\b/.test(line)));
   assert.ok(migrate.lines.includes('ENTRYPOINT ["node", "scripts/db/migration-job.mjs"]'));
 });
+
+test("starts the API through the process supervisor, copied root-owned before USER", () => {
+  const api = byName.get("api");
+  const copy = "COPY --from=source /source/deploy/managed-node/api-cluster.mjs ./api-cluster.mjs";
+  const at = api.lines.indexOf(copy);
+  assert.ok(at >= 0, "api copies api-cluster.mjs");
+  assert.ok(at < api.lines.indexOf("USER node"), "before USER");
+  assert.ok(api.lines.includes('CMD ["node", "api-cluster.mjs", "backend/apps/api/server.js"]'));
+});

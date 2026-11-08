@@ -237,7 +237,10 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
    - the SMTP agent;
    - every secret, generated independently per environment (`deployment-configuration.md`).
 
-   `CERTIFICATE_OPEN_BADGE`, `MARKETING_EMAIL_ENABLED`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `false`, `0.05`, `587`).
+   `CERTIFICATE_OPEN_BADGE`, `MARKETING_EMAIL_ENABLED`, `SENTRY_TRACES_SAMPLE_RATE` and `SMTP_PORT` have defaults (`false`, `false`, `0`, `587`).
+   With `SENTRY_TRACES_SAMPLE_RATE` at `0` the servers report errors but build no request traces. Sentry builds a span for every request whenever any rate is set, even `0`, which took about 31% of the API's CPU in the staging load test (`docs/engineering/staging-load-test-2026-11-07.md`). Set a rate above `0` only to trace for a while.
+
+   The API runs as three processes on one port (`API_PROCESS_COUNT`, `deploy/managed-node/api-cluster.mjs`), each with a 1 GiB heap and its own database pools. The compose file sizes the container (4 CPUs, 4 GiB) and the pools for three; change them together.
 
    Sign-in is Better Auth, in the API. It needs `BETTER_AUTH_SECRET`, at least 32 characters, generated like the other internal secrets; only the API receives it, and it refuses to start without it. Rotating it signs everyone out and makes existing authenticators unreadable, so generate it once per environment. The API also needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, the environment's Google OAuth client (launch plan 0.4), and refuses to start without them: the sign-in page always offers Google. Its redirect URI is `https://<academy host>/auth/callback/google`.
 

@@ -82,16 +82,16 @@ export async function runRouteLifecycle<T>(
   };
 
   applySafeSentryTags(sentryTags);
-
-  structuredLogger.info({
-    message: "route.start",
+  // One line per request, written when it ends. A separate start line doubled
+  // the log volume, and stdout writes were a measurable share of API CPU in the
+  // staging load test (docs/engineering/staging-load-test-2026-11-07.md).
+  const identity = {
     requestId: context.requestId,
     route: context.route,
     routeGroup,
     ...(context.tenantSafeId ? { tenantSafeId: context.tenantSafeId } : {}),
     ...(context.actorSafeId ? { actorSafeId: context.actorSafeId } : {}),
-    module: "route",
-  });
+  };
 
   try {
     const result = await runWithObservabilityContext(
@@ -108,9 +108,7 @@ export async function runRouteLifecycle<T>(
 
     structuredLogger.info({
       message: "route.complete",
-      requestId: context.requestId,
-      route: context.route,
-      routeGroup: sentryTags.routeGroup,
+      ...identity,
       durationMs: Date.now() - startedAt,
       statusCode: 200,
       module: "route",
@@ -124,9 +122,7 @@ export async function runRouteLifecycle<T>(
 
     structuredLogger.error({
       message: "route.failure",
-      requestId: context.requestId,
-      route: context.route,
-      routeGroup: sentryTags.routeGroup,
+      ...identity,
       durationMs: Date.now() - startedAt,
       errorCode,
       ...(process.env["NODE_ENV"] === "development" && error instanceof Error

@@ -238,8 +238,11 @@ export async function drainTenantUsageEvents(
   if (ids.length)
     await tx.$executeRaw`UPDATE tenant_usage_events SET processed_at=now() WHERE id=ANY(${ids}::uuid[])`;
   // Retain acknowledgement IDs for retries, then prune only old processed entries.
+  // A retry reuses its event's ID within seconds (createDurableUsageRecorder), so
+  // two days is ample. Thirty days kept one row per API request for a month:
+  // 136 MB in the 2.5-hour staging load test.
   await tx.$executeRaw`DELETE FROM tenant_usage_events WHERE id IN (
-    SELECT id FROM tenant_usage_events WHERE processed_at<now()-interval '30 days'
+    SELECT id FROM tenant_usage_events WHERE processed_at<now()-interval '2 days'
     ORDER BY processed_at,id LIMIT ${options.limit} FOR UPDATE SKIP LOCKED)`;
   return { processed: rows.length };
 }

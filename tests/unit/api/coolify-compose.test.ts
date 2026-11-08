@@ -164,12 +164,50 @@ describe("Coolify compose topology", () => {
       "tmpfs",
     ];
     for (const service of services)
-      for (const key of keys)
+      for (const key of keys) {
+        // The API runs several processes, so it is sized on its own (below).
+        if (service === "api" && (key === "mem_limit" || key === "cpus")) continue;
         expect(coolify(service)[key], `${service}.${key}`).toEqual(
           managed(service === "web" ? "api" : service)[key],
         );
+      }
     expect(coolify("worker").shm_size).toBe(managed("worker").shm_size);
     expect(coolify("worker").healthcheck).toEqual(managed("worker").healthcheck);
+  });
+
+  it("sizes the API container and its pools for the processes it runs", () => {
+    // One Next process saturated a core in the staging load test, so the API
+    // runs several (deploy/managed-node/api-cluster.mjs).
+    const api = coolify("api");
+    const env = resolveEnvironment("api");
+    const processes = Number(env.API_PROCESS_COUNT);
+    expect(processes).toBe(3);
+    const heapMb = Number(env.API_PROCESS_HEAP_MB);
+    const memoryMb = Number(String(api.mem_limit).replace(/g$/, "")) * 1024;
+    // Each heap plus about a quarter more for native memory fits the limit.
+    expect(processes * heapMb * 1.25).toBeLessThanOrEqual(memoryMb);
+    expect(Number(api.cpus)).toBeGreaterThanOrEqual(processes);
+    // Every process opens its own pools. All of them together, with web and
+    // the worker, leave PostgreSQL (100 connections) room for a migration job
+    // and an operator's psql.
+    const pools = (settings: NodeJS.ProcessEnv) =>
+      Number(settings.DATABASE_POOL_MAX ?? 20) +
+      Number(settings.PLATFORM_DATABASE_POOL_MAX ?? 10) +
+      Number(settings.AUTH_DATABASE_POOL_MAX ?? 0) +
+      2; // the usage-metering pool's default
+    const total =
+      processes * pools(env) +
+      pools(resolveEnvironment("web")) +
+      pools(resolveEnvironment("worker"));
+    expect(total).toBeLessThanOrEqual(90);
+  });
+
+  it.each(services)("turns server-side Sentry tracing off on %s by default", (service) => {
+    // Any tracesSampleRate, even 0.05, makes Sentry build spans for every
+    // request: about 31% of API CPU in the staging load test.
+    expect(coolify(service).environment.SENTRY_TRACES_SAMPLE_RATE).toBe(
+      "${SENTRY_TRACES_SAMPLE_RATE:-0}",
+    );
   });
 
   it.each(services)(
