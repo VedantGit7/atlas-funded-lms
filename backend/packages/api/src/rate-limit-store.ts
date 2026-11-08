@@ -34,11 +34,55 @@ export type RateLimitStore = {
 
 export class RateLimitConfigurationError extends Error {}
 
+/**
+ * The most one tenant's members can make together in a minute, across every
+ * route, on top of each member's own budgets. It stops one tenant from taking
+ * the whole platform, so it has to sit above what a busy school really does.
+ *
+ * It was 4,800 reads and 1,200 writes. The staging load test had 500 learners
+ * active at once making about 5,000 reads and 1,260 writes a minute, and they
+ * got 429s (docs/engineering/staging-load-test-2026-11-07.md, run 2). The
+ * defaults leave room for about 1,200 learners active at once, and each
+ * deployment can set its own.
+ */
+export const TENANT_RATE_LIMIT_SETTINGS = {
+  read: { name: "TENANT_RATE_LIMIT_READS_PER_MINUTE", fallback: 12_000, min: 960 },
+  write: { name: "TENANT_RATE_LIMIT_WRITES_PER_MINUTE", fallback: 3_000, min: 240 },
+} as const;
+// The floors are one member's own aggregate budget: a tenant never gets less
+// than a single member can use.
+const TENANT_RATE_LIMIT_MAX = 1_000_000;
+
+export function resolveTenantRateLimits(env: NodeJS.ProcessEnv = process.env): {
+  read: number;
+  write: number;
+} {
+  const parse = ({
+    name,
+    fallback,
+    min,
+  }: (typeof TENANT_RATE_LIMIT_SETTINGS)["read" | "write"]) => {
+    const raw = env[name]?.trim();
+    if (!raw) return fallback;
+    const value = /^\d+$/.test(raw) ? Number(raw) : Number.NaN;
+    if (!Number.isSafeInteger(value) || value < min || value > TENANT_RATE_LIMIT_MAX)
+      throw new RateLimitConfigurationError(
+        `${name} must be a whole number from ${String(min)} to ${String(TENANT_RATE_LIMIT_MAX)}.`,
+      );
+    return value;
+  };
+  return {
+    read: parse(TENANT_RATE_LIMIT_SETTINGS.read),
+    write: parse(TENANT_RATE_LIMIT_SETTINGS.write),
+  };
+}
+
 export function validateRateLimitConfiguration(env: NodeJS.ProcessEnv = process.env): {
   url: string | null;
   sharedRequired: boolean;
 } {
   validateClientIpConfiguration(env);
+  resolveTenantRateLimits(env);
   const url = env["RATE_LIMIT_REDIS_URL"]?.trim() || env["REDIS_URL"]?.trim() || null;
   const sharedRequired = isDeployedRuntime(env);
   if (url) {

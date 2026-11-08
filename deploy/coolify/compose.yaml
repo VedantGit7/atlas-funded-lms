@@ -153,6 +153,10 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:?}
       STORAGE_PROVIDER: r2
+      # The most one tenant's members can make together each minute
+      # (docs/runbooks/rate-limiting.md); the defaults match the code's.
+      TENANT_RATE_LIMIT_READS_PER_MINUTE: ${TENANT_RATE_LIMIT_READS_PER_MINUTE:-12000}
+      TENANT_RATE_LIMIT_WRITES_PER_MINUTE: ${TENANT_RATE_LIMIT_WRITES_PER_MINUTE:-3000}
     volumes:
       # Created on the server when SSL is turned on for Coolify's PostgreSQL.
       - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
