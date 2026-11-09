@@ -186,7 +186,7 @@ describe("Coolify compose topology", () => {
       const env = resolveEnvironment(service);
       const prefix = service.toUpperCase();
       const processes = Number(env[`${prefix}_PROCESS_COUNT`]);
-      expect(processes).toBe(3);
+      expect(processes).toBe(service === "api" ? 5 : 3);
       const heapMb = Number(env[`${prefix}_PROCESS_HEAP_MB`]);
       const memoryMb = Number(String(container.mem_limit).replace(/g$/, "")) * 1024;
       // Each heap plus about a quarter more for native memory fits the limit.
@@ -194,6 +194,14 @@ describe("Coolify compose topology", () => {
       expect(Number(container.cpus)).toBeGreaterThanOrEqual(processes);
     },
   );
+
+  it("spreads web's kept-alive connections across the API's processes", () => {
+    // Web's proxy reuses its most recent connection first, and node:cluster
+    // balances connections, not requests (deploy/managed-node/server-cluster.mjs).
+    const limit = Number(resolveEnvironment("api").API_MAX_REQUESTS_PER_SOCKET);
+    expect(limit).toBeGreaterThanOrEqual(10);
+    expect(limit).toBeLessThanOrEqual(1000);
+  });
 
   it("keeps every process's database pools inside PostgreSQL's connections", () => {
     // Every process opens its own pools. All of them together leave PostgreSQL
