@@ -32,6 +32,17 @@ s.listen(Number(process.env.PORT), "127.0.0.1", () => {
 process.on("SIGTERM", () => s.close(() => process.exit(0)));
 `,
 );
+// Like Next: keeps connections alive and creates its server with http.createServer.
+const keepAlive = join(dir, "keep-alive.cjs");
+writeFileSync(
+  keepAlive,
+  `const http = require("node:http");
+const s = http.createServer((req, res) => res.end(String(process.pid)));
+s.listen(Number(process.env.PORT), "127.0.0.1", () => {
+  process.stdout.write("listening " + s.address().port + "\\n");
+});
+`,
+);
 const crashing = join(dir, "crash.cjs");
 writeFileSync(crashing, "process.exit(3);\n");
 
@@ -139,12 +150,68 @@ test("refuses to start without a known service and an entry", async () => {
   }
 });
 
-test("rejects a process count or heap size out of range", async () => {
+// Sends requests one after another over a single kept-alive connection at a
+// time, as a busy proxy reusing its most recent connection does.
+async function pidsOverOneConnection(port, requests) {
+  const agent = new http.Agent({ keepAlive: true, maxSockets: 1 });
+  const pids = [];
+  const closes = [];
+  try {
+    for (let index = 0; index < requests; index++)
+      await new Promise((done, fail) => {
+        http
+          .get({ host: "127.0.0.1", port, agent }, (res) => {
+            let body = "";
+            res.on("data", (chunk) => (body += chunk));
+            res.on("end", () => {
+              pids.push(Number(body));
+              closes.push(res.headers.connection === "close");
+              done();
+            });
+          })
+          .on("error", fail);
+      });
+  } finally {
+    agent.destroy();
+  }
+  return { pids, closes };
+}
+
+test("a kept-alive connection stays on one process unless connections are recycled", async () => {
+  const pinned = start(keepAlive, { API_PROCESS_COUNT: "3" });
+  try {
+    const [port] = await pinned.listening(3);
+    const { pids } = await pidsOverOneConnection(port, 12);
+    assert.equal(new Set(pids).size, 1, "one connection, one process");
+  } finally {
+    pinned.child.kill("SIGKILL");
+    await pinned.exited;
+  }
+
+  const recycled = start(keepAlive, { API_PROCESS_COUNT: "3", API_MAX_REQUESTS_PER_SOCKET: "4" });
+  try {
+    const [port] = await recycled.listening(3);
+    const { pids, closes } = await pidsOverOneConnection(port, 12);
+    // Every 4th response closes its connection; the next one goes to the next process.
+    assert.deepEqual(
+      closes.map((close, index) => close === ((index + 1) % 4 === 0)),
+      Array(12).fill(true),
+    );
+    assert.equal(new Set(pids).size, 3, "the three connections land on three processes");
+  } finally {
+    recycled.child.kill("SIGKILL");
+    await recycled.exited;
+  }
+});
+
+test("rejects a process count, heap size or connection limit out of range", async () => {
   for (const env of [
     { API_PROCESS_COUNT: "0" },
     { API_PROCESS_COUNT: "2.5" },
     { API_PROCESS_COUNT: "17" },
     { API_PROCESS_COUNT: "2", API_PROCESS_HEAP_MB: "64" },
+    { API_PROCESS_COUNT: "2", API_MAX_REQUESTS_PER_SOCKET: "-1" },
+    { API_PROCESS_COUNT: "2", API_MAX_REQUESTS_PER_SOCKET: "100001" },
   ]) {
     const run = start(server, env);
     assert.equal(await run.exited, 1, JSON.stringify(env));

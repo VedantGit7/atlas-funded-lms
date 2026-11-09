@@ -13,12 +13,18 @@
 //   <NAME>_PROCESS_HEAP_MB   old-space limit per process, 128 to 8192 (default
 //                            1024), so the processes together stay inside the
 //                            container's memory limit.
+//   <NAME>_MAX_REQUESTS_PER_SOCKET
+//                            requests a process answers on one connection
+//                            before closing it, 0 to 100000 (default 0, no
+//                            limit), so long-lived connections are spread
+//                            across the processes (recycleConnections below).
 //
 // Every process is a complete server. Rate limits, sessions and usage metering
 // live in Redis and PostgreSQL, usage is durable before a request completes,
 // and the web app keeps no cache that the other processes would need to see.
 // So nothing is lost when one process stops.
 import cluster from "node:cluster";
+import http from "node:http";
 import { resolve } from "node:path";
 import process from "node:process";
 import { setTimeout } from "node:timers";
@@ -47,14 +53,41 @@ function parseSetting(name, raw, { fallback, min, max }) {
   return value;
 }
 
+// node:cluster balances connections, not requests: the primary hands each new
+// connection to the next process in turn. A client that keeps connections
+// alive and reuses the most recent one first, as Next's proxy in the web app
+// does, then sends most requests down a few connections, so a few processes
+// do most of the work (35/21/44% across three in the staging burst). With
+// <NAME>_MAX_REQUESTS_PER_SOCKET set, each server answers that many requests
+// on a connection and marks the last response "Connection: close". The client
+// then opens a new connection, which goes to the next process. 0 (default)
+// leaves connections open for as long as the client keeps them.
+function recycleConnections(maxRequests) {
+  if (maxRequests === 0) return;
+  // Next creates its server with http.createServer, after this runs.
+  const createServer = http.createServer;
+  http.createServer = (...args) => {
+    const server = createServer(...args);
+    server.maxRequestsPerSocket = maxRequests;
+    return server;
+  };
+}
+
 async function main() {
   const [name, entry] = process.argv.slice(2);
   if (!name || !SERVICES.has(name) || !entry)
     throw new Error("Usage: node server-cluster.mjs <api|web> <server entry>");
   service = name;
   const prefix = name.toUpperCase();
+  // Checked in the primary too, so a bad value stops startup once.
+  const maxRequestsPerSocket = parseSetting(
+    `${prefix}_MAX_REQUESTS_PER_SOCKET`,
+    process.env[`${prefix}_MAX_REQUESTS_PER_SOCKET`],
+    { fallback: 0, min: 0, max: 100_000 },
+  );
 
   if (!cluster.isPrimary) {
+    recycleConnections(maxRequestsPerSocket);
     await import(pathToFileURL(resolve(entry)).href);
     return;
   }

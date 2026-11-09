@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, and the burst profiling run under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, and the connection check under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -210,3 +210,30 @@ The socket writes are not logging, although the profile names them after the sam
 
 1. **Three web processes.** `deploy/managed-node/api-cluster.mjs` is now `server-cluster.mjs` and starts either app: `node server-cluster.mjs <api|web> <entry>`, reading `API_PROCESS_COUNT` and `API_PROCESS_HEAP_MB` or `WEB_PROCESS_COUNT` and `WEB_PROCESS_HEAP_MB`. The API's log lines are unchanged (`api.cluster.*`); web's are `web.cluster.*`. The Coolify compose file runs web as 3 processes with 512 MiB heaps (the heaviest load so far used 370 MiB in its one process), and the web container goes from 2 CPUs to 4, still 2 GB. Web opens no database pools today. It now has small pool settings (2 and 1) so the connection budget holds if a route ever opens one.
 2. **No Sentry tracer when tracing is off.** The API and web server configs pass `skipOpenTelemetrySetup: true` unless `SENTRY_TRACES_SAMPLE_RATE` is above 0, so Next.js gets OpenTelemetry's no-op tracer. Sentry keeps each request's scope in OpenTelemetry's context, so the configs still install Sentry's context manager. Without it, a test with two concurrent requests attached one request's tag to the other's error. Error reporting is otherwise unchanged. The worker loads the API's config, so it gets the same change.
+
+## Burst runs after the follow-up (9 November, build 8ce44939)
+
+Two more short runs (warmup 100 for 1 minute, sustained 300 for 3 minutes, burst 500 for 4 minutes) checked the build with three web processes and no Sentry tracer. The first took CPU profiles of every API and web process at the start of the burst. The second took none, and recorded instead which API process owns each connection from web, every 2 seconds for 150 seconds of the burst. Both had no errors, no restarts and no error log lines.
+
+| Short run                      | Sustained p95 (journey) | Burst p95 (journey) |
+| ------------------------------ | ----------------------- | ------------------- |
+| Before the follow-up, profiled | 1,319 ms                | 1,588 ms            |
+| After, profiled                | 1,463 ms (7.2 s)        | 1,929 ms (9.9 s)    |
+| After, connection check only   | 1,129 ms (5.9 s)        | 1,814 ms (8.8 s)    |
+
+The same build differed by about 25% between the two runs, so a short run measures the shape of the problem, not small gains.
+
+**Both changes worked.** Sentry's share of busy time fell from 13–19% to 0.2%. The three web processes never went above 52% of a core, so web is no longer a bottleneck.
+
+**The API is now the only tier that saturates, and its processes shared the load unevenly.** During the burst the three API processes averaged 42%, 20% and 39% of a core. The cause is how connections are balanced:
+
+- node:cluster hands each new connection to the next process in turn, so web's connections were spread evenly: 29 to 189 per process.
+- Next's proxy keeps up to 256 connections alive, but always reuses the most recently used one first. Most requests therefore travel down a few connections, and so reach a few processes. Web's request bytes split 35%, 21% and 44% across the three processes, matching their CPU.
+
+**Even perfect balance would not make the burst pass.** Each wave sends about 2,500 requests at once, and each request costs the API about 12 ms of CPU, mostly Prisma (33% of busy time) and the `pg` driver (20%). That is about 30 seconds of CPU per wave, which keeps three processes saturated for 8 to 10 seconds. Balancing alone would shorten the busiest process's share by about a quarter.
+
+### What the second follow-up changed
+
+1. **Connections are recycled.** With `API_MAX_REQUESTS_PER_SOCKET` set, `server-cluster.mjs` sets Node's `maxRequestsPerSocket` on the server Next creates. After that many requests, the response carries `Connection: close`, and the client's next connection goes to the next process. The compose file sets 100, which is about 25 new local connections per wave. A test shows that one kept-alive connection stays on one process without the setting and moves across all three with it.
+2. **Five API processes instead of three.** The host had about two cores spare during the burst. The API container goes to 5 CPUs and 5 GB, with 768 MiB heaps (three processes used 1.9 GiB at most). Each process's main pool drops from 6 to 4, so five API processes, three web processes and the worker open at most 87 connections.
+3. **Next: less work per request.** Each request reads the user's roles about five times (3.3 million reads of `user_roles_tenant_id_membership_id_role_id_key` in run 2). Caching the permission lookup within a request, or for a few seconds, would remove much of the API's database work. It touches authorization, so it is being designed separately.

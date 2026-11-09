@@ -115,15 +115,22 @@ services:
       # sslmode=require as verify-full, and the contract forbids sslrootcert.
       NODE_EXTRA_CA_CERTS: /etc/ssl/certs/coolify-ca.crt
       API_INTERNAL_URL: http://api.atlas.internal:3001
-      # Three server processes on one port (deploy/managed-node/server-cluster.mjs).
+      # Five server processes on one port (deploy/managed-node/server-cluster.mjs).
       # One process saturated a core at about 75 requests a second in the
-      # staging load test while the host stayed half idle. Each process gets a
-      # 1 GiB heap and its own pools, sized so three of them, web and the worker
-      # stay under PostgreSQL's 100 connections (pools open only on demand).
-      API_PROCESS_COUNT: "3"
-      API_PROCESS_HEAP_MB: "1024"
+      # staging load test while the host stayed half idle, and in the 500-learner
+      # burst three still saturated together while the host had about two cores
+      # spare. Three used 1.9 GiB at most, so each gets a 768 MiB heap. Each
+      # opens its own pools, sized so five of them, web and the worker stay under
+      # PostgreSQL's 100 connections (pools open only on demand).
+      API_PROCESS_COUNT: "5"
+      API_PROCESS_HEAP_MB: "768"
+      # Web's proxy reuses its most recent connection first, so without this a
+      # few kept-alive connections, and the processes holding them, carried most
+      # requests (35/21/44% across three). Closing a connection after 100
+      # requests moves its traffic to the next process.
+      API_MAX_REQUESTS_PER_SOCKET: "100"
       AUTH_DATABASE_POOL_MAX: "2"
-      DATABASE_POOL_MAX: "6"
+      DATABASE_POOL_MAX: "4"
       PLATFORM_DATABASE_POOL_MAX: "3"
       API_PROXY_SECRET: ${API_PROXY_SECRET:?}
       APP_ENV: ${APP_ENV:?}
@@ -174,9 +181,9 @@ services:
     init: true
     restart: unless-stopped
     stop_grace_period: 45s
-    # Room for the three processes above: 3 x 1 GiB heap plus native memory.
-    mem_limit: 4g
-    cpus: 4
+    # Room for the five processes above: 5 x 768 MiB heap plus native memory.
+    mem_limit: 5g
+    cpus: 5
     read_only: true
     tmpfs:
       - /tmp:size=256m,mode=1777
