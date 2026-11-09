@@ -121,13 +121,13 @@ COPY --from=api-build --chown=node:node /app/backend/apps/api/.next/static ./bac
 # The health probe that also restarts a container stuck unhealthy (healthcheck.mjs).
 # Root-owned and read-only at runtime, like the rest of the image.
 COPY --from=source /source/deploy/managed-node/healthcheck.mjs ./healthcheck.mjs
-# Runs the server as API_PROCESS_COUNT processes on one port (api-cluster.mjs):
+# Runs the server as API_PROCESS_COUNT processes on one port (server-cluster.mjs):
 # one Next process saturates a single core long before the host does.
-COPY --from=source /source/deploy/managed-node/api-cluster.mjs ./api-cluster.mjs
+COPY --from=source /source/deploy/managed-node/server-cluster.mjs ./server-cluster.mjs
 USER node
 EXPOSE 3001
 STOPSIGNAL SIGTERM
-CMD ["node", "api-cluster.mjs", "backend/apps/api/server.js"]
+CMD ["node", "server-cluster.mjs", "api", "backend/apps/api/server.js"]
 
 FROM runtime-base AS web
 WORKDIR /app
@@ -148,10 +148,12 @@ COPY --from=web-build --chown=node:node /app/frontend/apps/web/public ./frontend
 # The health probe that also restarts a container stuck unhealthy (healthcheck.mjs).
 # Root-owned and read-only at runtime, like the rest of the image.
 COPY --from=source /source/deploy/managed-node/healthcheck.mjs ./healthcheck.mjs
+# Runs the server as WEB_PROCESS_COUNT processes on one port, as for the API.
+COPY --from=source /source/deploy/managed-node/server-cluster.mjs ./server-cluster.mjs
 USER node
 EXPOSE 3000
 STOPSIGNAL SIGTERM
-CMD ["node", "frontend/apps/web/server.js"]
+CMD ["node", "server-cluster.mjs", "web", "frontend/apps/web/server.js"]
 
 # The database migration job (scripts/db/migration-job.mjs): run once per
 # deploy with the owner's login, then exits. The dependency layer already has

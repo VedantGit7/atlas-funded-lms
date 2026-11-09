@@ -9,12 +9,12 @@ import { setTimeout } from "node:timers";
 import { after, test } from "node:test";
 
 /**
- * api-cluster.mjs runs the API as several processes on one port. These start it
+ * server-cluster.mjs runs the API or the web app as several processes on one port. These start it
  * against tiny stand-in servers, so a broken fork, port share, shutdown or
  * crash-loop exit fails here instead of after a deploy.
  */
-const script = resolve("deploy/managed-node/api-cluster.mjs");
-const dir = mkdtempSync(join(tmpdir(), "api-cluster-"));
+const script = resolve("deploy/managed-node/server-cluster.mjs");
+const dir = mkdtempSync(join(tmpdir(), "server-cluster-"));
 after(() => rmSync(dir, { recursive: true, force: true }));
 
 // Like the Next standalone server: CommonJS, listens on PORT when loaded.
@@ -35,8 +35,8 @@ process.on("SIGTERM", () => s.close(() => process.exit(0)));
 const crashing = join(dir, "crash.cjs");
 writeFileSync(crashing, "process.exit(3);\n");
 
-function start(entry, env) {
-  const child = spawn(process.execPath, [script, entry], {
+function start(entry, env, service = "api") {
+  const child = spawn(process.execPath, [script, service, entry].filter(Boolean), {
     env: { ...process.env, NODE_CLUSTER_SCHED_POLICY: "rr", PORT: "0", ...env },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -111,6 +111,32 @@ test("a process that keeps crashing takes the container down instead of looping"
   const run = start(crashing, { API_PROCESS_COUNT: "2" });
   assert.equal(await run.exited, 1);
   assert.match(run.output(), /api.cluster.crash_loop/);
+});
+
+test("runs the web app from its own settings and logs as web", async () => {
+  const run = start(server, { WEB_PROCESS_COUNT: "2", API_PROCESS_COUNT: "3" }, "web");
+  try {
+    const ports = await run.listening(2);
+    const pids = new Set();
+    for (let index = 0; index < 20; index++) pids.add(await pidAt(ports[0]));
+    assert.equal(pids.size, 2, "WEB_PROCESS_COUNT, not API_PROCESS_COUNT");
+    assert.match(run.output(), /"message":"web.cluster.started","module":"web-cluster"/);
+  } finally {
+    run.child.kill("SIGKILL");
+    await run.exited;
+  }
+});
+
+test("refuses to start without a known service and an entry", async () => {
+  for (const [service, entry] of [
+    ["worker", server],
+    ["", server],
+    ["web", ""],
+  ]) {
+    const run = start(entry, {}, service);
+    assert.equal(await run.exited, 1, `${service} ${entry}`);
+    assert.match(run.output(), /Usage: node server-cluster\.mjs <api\|web> <server entry>/);
+  }
 });
 
 test("rejects a process count or heap size out of range", async () => {
