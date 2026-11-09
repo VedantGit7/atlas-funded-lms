@@ -166,8 +166,9 @@ describe("Coolify compose topology", () => {
     ];
     for (const service of services)
       for (const key of keys) {
-        // The API runs several processes, so it is sized on its own (below).
-        if (service === "api" && (key === "mem_limit" || key === "cpus")) continue;
+        // The API and web run several processes, so they are sized on their own (below).
+        if ((service === "api" || service === "web") && (key === "mem_limit" || key === "cpus"))
+          continue;
         expect(coolify(service)[key], `${service}.${key}`).toEqual(
           managed(service === "web" ? "api" : service)[key],
         );
@@ -176,29 +177,37 @@ describe("Coolify compose topology", () => {
     expect(coolify("worker").healthcheck).toEqual(managed("worker").healthcheck);
   });
 
-  it("sizes the API container and its pools for the processes it runs", () => {
-    // One Next process saturated a core in the staging load test, so the API
-    // runs several (deploy/managed-node/api-cluster.mjs).
-    const api = coolify("api");
-    const env = resolveEnvironment("api");
-    const processes = Number(env.API_PROCESS_COUNT);
-    expect(processes).toBe(3);
-    const heapMb = Number(env.API_PROCESS_HEAP_MB);
-    const memoryMb = Number(String(api.mem_limit).replace(/g$/, "")) * 1024;
-    // Each heap plus about a quarter more for native memory fits the limit.
-    expect(processes * heapMb * 1.25).toBeLessThanOrEqual(memoryMb);
-    expect(Number(api.cpus)).toBeGreaterThanOrEqual(processes);
-    // Every process opens its own pools. All of them together, with web and
-    // the worker, leave PostgreSQL (100 connections) room for a migration job
-    // and an operator's psql.
+  it.each(["api", "web"] as const)(
+    "sizes the %s container for the processes it runs",
+    (service) => {
+      // One Next process saturated a core in the staging load test, so the API
+      // and web run several (deploy/managed-node/server-cluster.mjs).
+      const container = coolify(service);
+      const env = resolveEnvironment(service);
+      const prefix = service.toUpperCase();
+      const processes = Number(env[`${prefix}_PROCESS_COUNT`]);
+      expect(processes).toBe(3);
+      const heapMb = Number(env[`${prefix}_PROCESS_HEAP_MB`]);
+      const memoryMb = Number(String(container.mem_limit).replace(/g$/, "")) * 1024;
+      // Each heap plus about a quarter more for native memory fits the limit.
+      expect(processes * heapMb * 1.25).toBeLessThanOrEqual(memoryMb);
+      expect(Number(container.cpus)).toBeGreaterThanOrEqual(processes);
+    },
+  );
+
+  it("keeps every process's database pools inside PostgreSQL's connections", () => {
+    // Every process opens its own pools. All of them together leave PostgreSQL
+    // (100 connections) room for a migration job and an operator's psql.
     const pools = (settings: NodeJS.ProcessEnv) =>
       Number(settings.DATABASE_POOL_MAX ?? 20) +
       Number(settings.PLATFORM_DATABASE_POOL_MAX ?? 10) +
       Number(settings.AUTH_DATABASE_POOL_MAX ?? 0) +
       2; // the usage-metering pool's default
+    const api = resolveEnvironment("api");
+    const web = resolveEnvironment("web");
     const total =
-      processes * pools(env) +
-      pools(resolveEnvironment("web")) +
+      Number(api.API_PROCESS_COUNT) * pools(api) +
+      Number(web.WEB_PROCESS_COUNT) * pools(web) +
       pools(resolveEnvironment("worker"));
     expect(total).toBeLessThanOrEqual(90);
   });

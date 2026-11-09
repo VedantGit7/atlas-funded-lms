@@ -29,6 +29,7 @@
     "@atlas/security": "workspace:*",
     "@atlas/storage": "workspace:*",
     "@atlas/tenancy": "workspace:*",
+    "@opentelemetry/api": "^1.9.1",
     "@sentry/nextjs": "^10.76.2",
     "ethers": "^6.17.0",
     "jose": "^6.2.12",

@@ -57,7 +57,9 @@ test("ships the web standalone tree with its static assets and public files", ()
     "COPY --from=web-build --chown=node:node /app/frontend/apps/web/public ./frontend/apps/web/public",
   ]);
   // The standalone entrypoint keeps the workspace path, not .next/standalone/server.js.
-  assert.ok(web.lines.includes('CMD ["node", "frontend/apps/web/server.js"]'));
+  assert.ok(
+    web.lines.includes('CMD ["node", "server-cluster.mjs", "web", "frontend/apps/web/server.js"]'),
+  );
 });
 
 test("runs the web image like the API: unprivileged, no package managers, clean shutdown", () => {
@@ -130,11 +132,17 @@ test("ships the migration job with only what applying the schema needs, unprivil
   assert.ok(migrate.lines.includes('ENTRYPOINT ["node", "scripts/db/migration-job.mjs"]'));
 });
 
-test("starts the API through the process supervisor, copied root-owned before USER", () => {
-  const api = byName.get("api");
-  const copy = "COPY --from=source /source/deploy/managed-node/api-cluster.mjs ./api-cluster.mjs";
-  const at = api.lines.indexOf(copy);
-  assert.ok(at >= 0, "api copies api-cluster.mjs");
-  assert.ok(at < api.lines.indexOf("USER node"), "before USER");
-  assert.ok(api.lines.includes('CMD ["node", "api-cluster.mjs", "backend/apps/api/server.js"]'));
+test("starts the API and web through the process supervisor, copied root-owned before USER", () => {
+  const copy =
+    "COPY --from=source /source/deploy/managed-node/server-cluster.mjs ./server-cluster.mjs";
+  for (const [name, entry] of [
+    ["api", "backend/apps/api/server.js"],
+    ["web", "frontend/apps/web/server.js"],
+  ]) {
+    const stage = byName.get(name);
+    const at = stage.lines.indexOf(copy);
+    assert.ok(at >= 0, `${name} copies server-cluster.mjs`);
+    assert.ok(at < stage.lines.indexOf("USER node"), `${name}: before USER`);
+    assert.ok(stage.lines.includes(`CMD ["node", "server-cluster.mjs", "${name}", "${entry}"]`));
+  }
 });

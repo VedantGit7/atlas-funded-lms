@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profile stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, and the burst profiling run under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -144,3 +144,69 @@ Two smaller findings:
 
 - The API container keeps only 30 MB of logs (`max-size` 10m, `max-file` 3), which at this load is about the last 15 minutes.
 - `user_roles_tenant_id_membership_id_role_id_key` was read about five times per request (3.3 million in the run). The authorization lookups are cheap, but they are the most-read index in the database.
+
+## Run 3 (9 November, build 6d6a1911)
+
+Run 3 used the same fixture, profile and pacing, on the build with the higher tenant ceiling (12,000 reads and 3,000 writes a minute).
+
+| Phase     | Learners | Requests | Requests/s | Request p50 / p95 / p99 | Journey p95 | Errors | Result (run 2)                  |
+| --------- | -------: | -------: | ---------: | ----------------------- | ----------: | -----: | ------------------------------- |
+| Warmup    |      100 |    3,000 |       25.0 | 294 / 654 / 956 ms      |      2.99 s |      0 | not counted                     |
+| Sustained |      300 |   66,385 |       73.8 | 33 / 633 / 1,361 ms     |      3.14 s |      0 | fail by 140 ms (pass at 2.67 s) |
+| Burst     |      500 |   36,415 |      121.3 | 45 / 1,572 / 2,271 ms   |      8.50 s |      0 | fail (fail, with 1,376 × 429)   |
+| Endurance |      300 |  533,415 |       74.1 | 29 / 207 / 371 ms       |      1.00 s |      0 | **pass** (fail on 300 × 429)    |
+
+Setup was 500 logins (p95 175 ms) and 500 enrolments (p95 40 ms) with no errors. Every one of the 639,215 requests returned 200. No container restarted, and the API and web logs had no error codes, usage-metering failures, pool messages or timeouts.
+
+**The ceiling change worked.** There were no 429s, and the burst completed 11% more requests than in run 2 (36,415 against 32,683).
+
+**The burst is still slow, and the slowness is a tail, not the typical request.** Burst median latency was 45 ms, but p95 was 1.6 s. The slow requests bunch up when the number of learners steps up:
+
+- in sustained, the running p95 was 1.28 s after the first 4 minutes and fell to 633 ms by the end;
+- in burst, it was 1.85 s after 3 minutes;
+- the slowest burst requests were progress read (p95 1.8 s), progress save (1.8 s) and lesson (1.6 s).
+
+Run 2 passed sustained at 2.67 s and run 3 missed it at 3.14 s with nothing changed in that path, so 300 learners starting together sit right at the journey limit.
+
+**The server was not the limit:**
+
+- **Host.** Idle averaged 61% in the burst and never fell below 17%. CPU steal averaged 0.96% over the run (18 of 508 samples at 5% or more, one 42% sample in endurance).
+- **API.** CPU averaged 143% in the burst, out of 4 cores across 3 processes, with a peak of 356%. Memory peaked at 1.9 GiB of 4 GiB.
+- **Database.** PostgreSQL averaged 89% of a core in the burst and 56% in endurance. There were at most 28 connections and 7 active, with no lock waits and no deadlocks.
+- **Worker.** The worker averaged 3–5% CPU. `outbox_delivery_jobs_event_destination_key` was probed 154,088 times, the same as run 2.
+- **Usage metering.** 512,015 rows were inserted and 511,727 marked processed, so the drain kept up.
+
+With spare CPU everywhere, the tail looks like requests queueing inside each API process when load steps up. The next step is a CPU profile of the API processes during a short 500-learner burst.
+
+### Burst profile (9 November)
+
+A short run on the same build (warmup 100 for 1 minute, sustained 300 for 3 minutes, burst 500 for 4 minutes) sampled the CPU of each API process and of the web process every second. It also took 30-second CPU profiles of one API process and the web process at the start of the burst. The run had no errors (request p95: sustained 1,319 ms, burst 1,588 ms). Both debugger ports were closed again afterwards.
+
+**The load arrives in waves, and every process is saturated during each wave.** All 500 learners join the burst together and then wait 20 seconds between journeys, so their requests stay grouped. Each wave keeps all three API processes and the web process at 85–120% of a core for about 10 seconds. All four are then nearly idle for about 15 seconds before the next wave. Averaged over the burst, the API processes were at 40–47% and the web at 43%, which is why the container and host averages look like spare capacity. Requests that arrive in the middle of a wave queue behind the others, which is the slow tail. The three API processes shared the load evenly.
+
+**The web app is a second bottleneck.** It runs as one Node process, and every API call passes through it. During each wave it was saturated at the same time as the API, so adding API processes alone would not remove the queueing.
+
+**What each request still costs** (share of busy time in the 30-second profiles):
+
+| Work                                      | API | Web |
+| ----------------------------------------- | --: | --: |
+| Sentry and OpenTelemetry code (self time) | 13% | 19% |
+| Socket writes to PostgreSQL and HTTP      | 15% | 14% |
+| Prisma (inclusive)                        | 34% |   — |
+| `pg` driver (inclusive)                   | 18% |   — |
+| Garbage collection                        |  4% |  7% |
+
+Request tracing has been off since run 2, but Sentry still registers its OpenTelemetry tracer, and so builds an unsampled span for each of Next.js's own spans (`handleOnSpanStart`, `httpHeadersToSpanAttributes`, `uuid4`).
+
+The socket writes are not logging, although the profile names them after the same low-level functions: the logger accounts for almost none of the busy time. In the API, 12% is sending queries to PostgreSQL over TLS and 1% is Redis; in web, it is proxying requests to the API and responses to the browser. Fewer queries per request would cut the API's share, but that is separate work.
+
+**Recommended next changes:**
+
+1. Run the web app as several processes too, as the API does, and give the web container the CPU for them.
+2. Stop Sentry registering its tracer on the API and web servers when tracing is off.
+3. Repeat the burst. The waves are the harness's worst case: everyone clicks at the same moment, as at the start of a live class or exam. Keep that shape rather than smoothing it, because it is the case a launch has to survive.
+
+### What the burst follow-up changed
+
+1. **Three web processes.** `deploy/managed-node/api-cluster.mjs` is now `server-cluster.mjs` and starts either app: `node server-cluster.mjs <api|web> <entry>`, reading `API_PROCESS_COUNT` and `API_PROCESS_HEAP_MB` or `WEB_PROCESS_COUNT` and `WEB_PROCESS_HEAP_MB`. The API's log lines are unchanged (`api.cluster.*`); web's are `web.cluster.*`. The Coolify compose file runs web as 3 processes with 512 MiB heaps (the heaviest load so far used 370 MiB in its one process), and the web container goes from 2 CPUs to 4, still 2 GB. Web opens no database pools today. It now has small pool settings (2 and 1) so the connection budget holds if a route ever opens one.
+2. **No Sentry tracer when tracing is off.** The API and web server configs pass `skipOpenTelemetrySetup: true` unless `SENTRY_TRACES_SAMPLE_RATE` is above 0, so Next.js gets OpenTelemetry's no-op tracer. Sentry keeps each request's scope in OpenTelemetry's context, so the configs still install Sentry's context manager. Without it, a test with two concurrent requests attached one request's tag to the other's error. Error reporting is otherwise unchanged. The worker loads the API's config, so it gets the same change.

@@ -27,6 +27,16 @@ services:
       # sslmode=require as verify-full, and the contract forbids sslrootcert.
       NODE_EXTRA_CA_CERTS: /etc/ssl/certs/coolify-ca.crt
       API_INTERNAL_URL: http://api.atlas.internal:3001
+      # Three server processes on one port (deploy/managed-node/server-cluster.mjs).
+      # Every API call passes through web, and in the staging burst profile its
+      # one process saturated whenever the API's three did. The heaviest load so
+      # far used 370 MiB in one process, so 512 MiB heaps leave room. Web opens no
+      # database pools today; these keep it inside the connection budget if a
+      # route ever does.
+      WEB_PROCESS_COUNT: "3"
+      WEB_PROCESS_HEAP_MB: "512"
+      DATABASE_POOL_MAX: "2"
+      PLATFORM_DATABASE_POOL_MAX: "1"
       API_PROXY_SECRET: ${API_PROXY_SECRET:?}
       APP_ENV: ${APP_ENV:?}
       APP_URL: ${APP_URL:?}
@@ -71,8 +81,9 @@ services:
     init: true
     restart: unless-stopped
     stop_grace_period: 45s
+    # Room for the three processes above: 3 x 512 MiB heap plus native memory.
     mem_limit: 2g
-    cpus: 2
+    cpus: 4
     read_only: true
     tmpfs:
       - /tmp:size=256m,mode=1777
@@ -104,7 +115,7 @@ services:
       # sslmode=require as verify-full, and the contract forbids sslrootcert.
       NODE_EXTRA_CA_CERTS: /etc/ssl/certs/coolify-ca.crt
       API_INTERNAL_URL: http://api.atlas.internal:3001
-      # Three server processes on one port (deploy/managed-node/api-cluster.mjs).
+      # Three server processes on one port (deploy/managed-node/server-cluster.mjs).
       # One process saturated a core at about 75 requests a second in the
       # staging load test while the host stayed half idle. Each process gets a
       # 1 GiB heap and its own pools, sized so three of them, web and the worker
