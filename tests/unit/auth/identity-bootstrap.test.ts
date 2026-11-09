@@ -22,7 +22,7 @@ describe("membership gate refuses disabled accounts (audit H6)", () => {
     invitedEmailNormalized: null,
   };
 
-  it.each(["disabled", "unclaimed", null])(
+  it.each(["disabled", "unclaimed"])(
     "blocks an ACTIVE membership whose account is %s",
     async (status) => {
       // Activity is written only for an admitted request: the SQL that does it
@@ -41,6 +41,21 @@ describe("membership gate refuses disabled accounts (audit H6)", () => {
       ).rejects.toMatchObject({ code: "ACCOUNT_DISABLED", status: 403 });
     },
   );
+
+  it("treats a principal that no longer exists as signed out, as the principal lookup did", async () => {
+    vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue({
+      membership: activeMembership,
+      principalStatus: null,
+    });
+
+    await expect(
+      requireActiveMembership({
+        tx: { $queryRaw: vi.fn() },
+        tenantId: "tenant-a-id",
+        authPrincipalId: "principal-id",
+      }),
+    ).rejects.toMatchObject({ code: "AUTH_REQUIRED", status: 401 });
+  });
 
   it("admits an ACTIVE membership of an active account", async () => {
     vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue({

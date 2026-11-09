@@ -11,13 +11,13 @@ import type { ResourceRef } from "@atlas/authorization";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import { attachRequestIdHeader, inferRouteGroup, runRouteLifecycle } from "@atlas/observability";
-import { requireSessionUser, resolveSessionPrincipal } from "./session-user";
+import { requireSessionUser } from "./session-user";
 import type { SessionAssuranceLevel } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import type { TenantTx } from "@atlas/db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { requireActiveMembership } from "@atlas/membership";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
+import { resolveTenantFromRecentLookup, resolveTenantFromRequest } from "@atlas/tenancy";
 import { assertSameOrigin } from "./assert-same-origin";
 import {
   fingerprintRequest,
@@ -393,20 +393,23 @@ export function createTenantRoute<
           // while waiting for an inner one, none could release, and every
           // request failed after the 10s connect timeout. Measured 0 successful
           // requests at 20 concurrent; 364 rps at 80 concurrent once un-nested.
+          //
+          // It is opened only when this process has not resolved the host
+          // recently: the tenant is otherwise known without a connection. The principal is
+          // not read here any more. The membership gate in phase 3 reads its
+          // account status in the same statement as the membership, and
+          // refuses a deleted or disabled account with the same answers this
+          // read gave (401 AUTH_REQUIRED, 403 ACCOUNT_DISABLED). That saved a
+          // transaction of four statements on every request.
           // ---------------------------------------------------------------
-          const { tenant, principal } = await measureRouteStage("global_total", () =>
-            withGlobalDb((db) =>
-              measureRouteStage("global_work", async () => {
-                const resolvedTenant = await resolveTenantFromRequest({ req, db });
-                const resolvedPrincipal = await resolveSessionPrincipal({
-                  db,
-                  user: sessionUser,
-                });
-
-                return { tenant: resolvedTenant, principal: resolvedPrincipal };
-              }),
-            ),
-          );
+          const tenant =
+            resolveTenantFromRecentLookup(req) ??
+            (await measureRouteStage("global_total", () =>
+              withGlobalDb((db) =>
+                measureRouteStage("global_work", () => resolveTenantFromRequest({ req, db })),
+              ),
+            ));
+          const principal = { id: sessionUser.principalId };
           const usage = createTenantRequestUsage(tenant.tenantId);
           metered.usage = usage;
 

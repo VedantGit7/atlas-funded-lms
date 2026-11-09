@@ -33,6 +33,16 @@ export function membershipRemoved(): AtlasHttpError {
   });
 }
 
+/** The signed-in principal no longer exists: the same answer as @atlas/auth's authRequired. */
+export function principalNotFound(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "AUTH_REQUIRED",
+    status: 401,
+    message: "Authentication required",
+  });
+}
+
+/** The same answer as @atlas/auth's accountDisabled. */
 export function principalDisabled(): AtlasHttpError {
   return new AtlasHttpError({
     code: "ACCOUNT_DISABLED",

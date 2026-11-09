@@ -3,7 +3,8 @@ import type { TenantTx } from "@atlas/db";
 import { findModuleWithCourse } from "./course-authoring.repository";
 import { courseNotFound, moduleNotFound } from "./courses.errors";
 import { findCourseAuthProjection, findEnrollmentForMembership } from "./courses.repository";
-import { findLessonWithModuleAndCourse } from "../lessons/lessons.repository";
+import type { findLessonWithModuleAndCourse } from "../lessons/lessons.repository";
+import { findLessonWithCourseAndEnrollment } from "../lessons/lesson-access.repository";
 import { lessonNotFound } from "../lessons/lessons.errors";
 import { createResourceProjection } from "../resource-projection";
 import { canManageCourse } from "./course-studio-access";
@@ -69,6 +70,17 @@ export async function loadCourseResourceRef(args: {
     membershipId: args.ctx.actorMembershipId,
   });
 
+  return courseResourceRef({ tx: args.tx, ctx: args.ctx, course, enrollment });
+}
+
+/** The course's resource ref from its loaded projection and the member's enrollment. */
+function courseResourceRef(args: {
+  tx: TenantTx;
+  ctx: LoaderCtx;
+  course: NonNullable<Awaited<ReturnType<typeof findCourseAuthProjection>>>;
+  enrollment: Awaited<ReturnType<typeof findEnrollmentForMembership>>;
+}) {
+  const { course, enrollment } = args;
   const relationships: Record<string, boolean | string> = {};
 
   if (course.status === "PUBLISHED") {
@@ -193,26 +205,35 @@ export async function loadLessonParentCourseResourceRef(args: {
   lessonId: string;
   requirePublished?: boolean;
 }) {
-  const lesson = await findLessonWithModuleAndCourse({ tx: args.tx, lessonId: args.lessonId });
+  // The lesson, its course and the member's enrollment in one statement. The
+  // checks are loadCourseResourceRef's, on the course read with the lesson.
+  const found = await findLessonWithCourseAndEnrollment({
+    tx: args.tx,
+    lessonId: args.lessonId,
+    membershipId: args.ctx.actorMembershipId,
+  });
 
-  if (!lesson || lesson.tenantId !== args.ctx.tenantId) {
+  if (!found || found.lesson.tenantId !== args.ctx.tenantId) {
     throw lessonNotFound();
   }
+
+  const { lesson, course, enrollment } = found;
 
   if (args.requirePublished !== false && lesson.courseStatus !== "PUBLISHED") {
     throw lessonNotFound();
   }
 
-  const resource = await loadCourseResourceRef({
-    tx: args.tx,
-    ctx: args.ctx,
-    courseId: lesson.courseId,
-    requirePublished: args.requirePublished ?? lesson.courseStatus === "PUBLISHED",
-  });
-  const course = getLoadedCourseProjection(args.tx, args.ctx, lesson.courseId, resource);
-  if (course) {
-    lessonProjections.set(resource, args.tx, args.ctx, { lesson, enrollment: course.enrollment });
+  if (course.tenantId !== args.ctx.tenantId) {
+    throw courseNotFound();
   }
+
+  const requirePublished = args.requirePublished ?? lesson.courseStatus === "PUBLISHED";
+  if (requirePublished && course.status !== "PUBLISHED") {
+    throw courseNotFound();
+  }
+
+  const resource = courseResourceRef({ tx: args.tx, ctx: args.ctx, course, enrollment });
+  lessonProjections.set(resource, args.tx, args.ctx, { lesson, enrollment });
   return resource;
 }
 

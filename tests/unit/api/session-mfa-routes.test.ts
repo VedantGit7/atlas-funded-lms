@@ -34,6 +34,8 @@ vi.mock("@atlas/membership", () => ({
   requireActiveMembership: mocks.membership,
 }));
 vi.mock("@atlas/tenancy", () => ({
+  // Nothing is cached in these tests, so tenant routes ask resolveTenantFromRequest.
+  resolveTenantFromRecentLookup: () => null,
   resolveTenantFromRequest: async () => ({ tenantId: "tenant-1", host: "tenant.example.com" }),
 }));
 vi.mock("@atlas/authorization", async (importOriginal) => ({

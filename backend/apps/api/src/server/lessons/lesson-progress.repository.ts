@@ -79,6 +79,11 @@ export async function findLessonProgress(args: {
   };
 }
 
+/**
+ * `existing` is the row findLessonProgress returned in this transaction,
+ * after lockEnrollmentForProgress, so nothing else can have changed it since.
+ * Passing it saves reading the same row twice on every autosave.
+ */
 export async function upsertLessonProgress(args: {
   tx: Tx;
   tenantId: string;
@@ -87,12 +92,9 @@ export async function upsertLessonProgress(args: {
   status: ProgressStatus;
   progressPct: number;
   completedAt: Date | null;
+  existing: LessonProgressRow | null;
 }): Promise<LessonProgressRow> {
-  const existing = await findLessonProgress({
-    tx: args.tx,
-    lessonId: args.lessonId,
-    membershipId: args.membershipId,
-  });
+  const { existing } = args;
 
   if (existing) {
     await args.tx.$executeRaw`

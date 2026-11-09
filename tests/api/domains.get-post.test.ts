@@ -79,6 +79,8 @@ async function getRealCreateTenantDomain() {
 }
 
 vi.mock("@atlas/tenancy", () => ({
+  // Nothing is cached in these tests, so tenant routes ask resolveTenantFromRequest.
+  resolveTenantFromRecentLookup: () => null,
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 

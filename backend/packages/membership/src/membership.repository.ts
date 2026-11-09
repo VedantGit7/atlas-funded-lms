@@ -52,35 +52,45 @@ export async function findMembershipByPrincipal(args: {
 
 /**
  * The membership gate's whole database work in one round trip (audit §3.1):
- * the membership, its principal's account status (audit H6), and the activity
- * bookkeeping. This runs on every authenticated tenant request.
+ * the signed-in principal's account status (audit H6), its membership, and the
+ * activity bookkeeping. This runs on every authenticated tenant request, and it
+ * is the request's only principal check: tenant routes no longer read the
+ * principal in a transaction of their own first.
  *
  * Activity is recorded only for an ACTIVE membership of an active account: the
  * throttled `last_active_at` touch, and the per-day row behind MAU/DAU (a no-op
  * after the day's first request thanks to its primary key). A refused request
  * writes nothing. The returned row is the state before those writes.
  *
- * `principalStatus` is null when the principal row no longer exists.
+ * Always one row. `principalStatus` is null when the principal no longer
+ * exists, and `membership` is null when it has none in this tenant.
  */
 export async function findMembershipForRequest(args: {
   tx: Tx;
   tenantId: string;
   authPrincipalId: string;
   lastActiveThrottleMinutes: number;
-}): Promise<{ membership: MembershipProjection; principalStatus: string | null } | null> {
-  const rows = await args.tx.$queryRaw<Array<MembershipRow & { principal_status: string | null }>>`
-    with found as (
-      select m.id, m.tenant_id, m.auth_principal_id, m.status, m.invited_email_normalized,
-             ap.global_status as principal_status
+}): Promise<{ membership: MembershipProjection | null; principalStatus: string | null }> {
+  const rows = await args.tx.$queryRaw<
+    Array<
+      { [K in keyof MembershipRow]: MembershipRow[K] | null } & { principal_status: string | null }
+    >
+  >`
+    with principal as (
+      select ap.global_status
+      from auth_principals ap
+      where ap.id = ${args.authPrincipalId}::uuid
+    ),
+    found as (
+      select m.id, m.tenant_id, m.auth_principal_id, m.status, m.invited_email_normalized
       from memberships m
-      left join auth_principals ap on ap.id = m.auth_principal_id
       where m.tenant_id = ${args.tenantId}::uuid
         and m.auth_principal_id = ${args.authPrincipalId}::uuid
       limit 1
     ),
     admitted as (
-      select id, tenant_id from found
-      where status = 'ACTIVE' and principal_status = 'active'
+      select found.id, found.tenant_id from found, principal
+      where found.status = 'ACTIVE' and principal.global_status = 'active'
     ),
     touched as (
       update memberships m
@@ -101,21 +111,33 @@ export async function findMembershipForRequest(args: {
       returning membership_id
     )
     select
-      id::text,
-      tenant_id::text,
-      auth_principal_id::text,
-      status::text,
-      invited_email_normalized::text,
-      principal_status
-    from found
+      found.id::text as id,
+      found.tenant_id::text as tenant_id,
+      found.auth_principal_id::text as auth_principal_id,
+      found.status::text as status,
+      found.invited_email_normalized::text as invited_email_normalized,
+      principal.global_status as principal_status
+    from (select 1) as one
+    left join principal on true
+    left join found on true
   `;
 
   const row = rows[0];
-  if (!row) {
-    return null;
+  const principalStatus = row?.principal_status ?? null;
+  if (!row?.id || !row.tenant_id || !row.status) {
+    return { membership: null, principalStatus };
   }
 
-  return { membership: mapMembershipRow(row), principalStatus: row.principal_status };
+  return {
+    membership: mapMembershipRow({
+      id: row.id,
+      tenant_id: row.tenant_id,
+      auth_principal_id: row.auth_principal_id,
+      status: row.status,
+      invited_email_normalized: row.invited_email_normalized,
+    }),
+    principalStatus,
+  };
 }
 
 /**
