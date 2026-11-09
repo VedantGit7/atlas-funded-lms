@@ -24,6 +24,26 @@ vi.mock("../../../backend/apps/api/src/server/lessons/lessons.repository", async
   findResumeLessonIdForLearner: mocks.resume,
   listPublishedLessonNavigation: vi.fn(async () => ({})),
 }));
+// The lesson loader reads the lesson, its course and the enrollment in one
+// statement; composed from the single-purpose mocks so each read still counts.
+vi.mock("../../../backend/apps/api/src/server/lessons/lesson-access.repository", () => ({
+  findLessonWithCourseAndEnrollment: vi.fn(
+    async (args: { tx: unknown; lessonId: string; membershipId: string }) => {
+      const lesson = (await mocks.lesson({ tx: args.tx, lessonId: args.lessonId })) as {
+        courseId: string;
+      } | null;
+      if (!lesson) return null;
+      const course: unknown = await mocks.course({ tx: args.tx, courseId: lesson.courseId });
+      if (!course) return null;
+      const enrollment: unknown = await mocks.enrollment({
+        tx: args.tx,
+        courseId: lesson.courseId,
+        membershipId: args.membershipId,
+      });
+      return { lesson, course, enrollment };
+    },
+  ),
+}));
 vi.mock("../../../backend/apps/api/src/server/lessons/lesson-progress.repository", () => ({
   findLessonProgress: mocks.progress,
   lockEnrollmentForProgress: mocks.lock,

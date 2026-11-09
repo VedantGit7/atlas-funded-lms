@@ -14,6 +14,19 @@ const fixture = vi.hoisted(() => {
       return [
         { ok: text.includes("from memberships") ? state.status === "ACTIVE" && state.admin : true },
       ];
+    // The membership gate: the account status and the membership in one row,
+    // the membership's columns null when there is none.
+    if (text.includes("with principal as"))
+      return [
+        {
+          id: state.status ? "member-1" : null,
+          tenant_id: state.status ? "tenant-1" : null,
+          auth_principal_id: state.status ? "principal-1" : null,
+          status: state.status,
+          invited_email_normalized: null,
+          principal_status: "active",
+        },
+      ];
     if (text.includes("from auth_principals"))
       return [{ id: "principal-1", global_status: "active" }];
     if (text.includes("from memberships"))
@@ -25,8 +38,6 @@ const fixture = vi.hoisted(() => {
               auth_principal_id: "principal-1",
               status: state.status,
               invited_email_normalized: null,
-              // The membership gate reads the account status in the same statement.
-              principal_status: "active",
             },
           ]
         : [];
@@ -71,6 +82,8 @@ vi.mock("@atlas/access", async (importOriginal) => ({
   assignSystemRoleToMembership: fixture.assignRole,
 }));
 vi.mock("@atlas/tenancy", () => ({
+  // Nothing is cached in these tests, so tenant routes ask resolveTenantFromRequest.
+  resolveTenantFromRecentLookup: () => null,
   resolveTenantFromRequest: async () => ({ tenantId: "tenant-1", host: "tenant.example.com" }),
 }));
 vi.mock("@atlas/authorization", async (importOriginal) => ({

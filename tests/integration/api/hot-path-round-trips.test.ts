@@ -37,6 +37,10 @@ vi.mock("../../../backend/packages/auth/src/better-auth-runtime", async (importO
 
 const { GET: getCourse } =
   await import("../../../backend/apps/api/src/app/api/v1/courses/[id]/route");
+const { GET: getLesson } =
+  await import("../../../backend/apps/api/src/app/api/v1/lessons/[id]/route");
+const { POST: postLessonProgress } =
+  await import("../../../backend/apps/api/src/app/api/v1/lessons/[id]/progress/route");
 const { getAttempt, startAttempt } =
   await import("../../../backend/apps/api/src/server/attempts/attempts.service");
 
@@ -88,6 +92,15 @@ suite("hot-path database round trips (audit §3.1–3.2)", () => {
     recordQueries();
     course = await createCourseEnrollmentFixture();
     host = `${course.slug}.hot-path.test`;
+    // The learner is enrolled, as in the staging load test's journey.
+    await withTenantTx(
+      { tenantId: course.tenantId, requestId: randomUUID(), allowAnonymousTenantRead: true },
+      (tx) => tx.$executeRaw`
+        insert into enrollments (id, tenant_id, course_id, membership_id, status, enrolled_at)
+        values (${randomUUID()}::uuid, ${course.tenantId}::uuid, ${course.publishedCourseId}::uuid,
+                ${course.membershipId}::uuid, 'active', now())
+      `,
+    );
     await withTenantTx(
       { tenantId: course.tenantId, requestId: randomUUID(), allowAnonymousTenantRead: true },
       (tx) => tx.$executeRaw`
@@ -138,8 +151,13 @@ suite("hot-path database round trips (audit §3.1–3.2)", () => {
     );
     // 18 before the audit §3.1 work: global transaction 5 (BEGIN, role, host,
     // principal, COMMIT); tenant transaction 7 (BEGIN, role and context,
-    // membership gate, the course loader's 2, can(), COMMIT).
-    expect(sql.length, sql.join("\n")).toBeLessThanOrEqual(12);
+    // membership gate, the course loader's 2, can(), COMMIT). 8 now, for an enrolled learner: the tenant
+    // transaction alone, because the gate reads the account status itself and
+    // the host was resolved by the warm-up request (staging load test,
+    // docs/engineering/staging-load-test-2026-11-07.md).
+    expect(sql.length, sql.join("\n")).toBeLessThanOrEqual(8);
+    // One transaction: no separate global one to read the principal.
+    expect(sql.filter((statement) => statement === "BEGIN")).toHaveLength(1);
 
     // Latency only on request: timings on a shared CI runner are noise.
     const samples = Number(process.env["HOT_PATH_SAMPLES"] ?? 0);
@@ -154,6 +172,54 @@ suite("hot-path database round trips (audit §3.1–3.2)", () => {
       const at = (p: number) => timings[Math.ceil((p / 100) * timings.length) - 1]?.toFixed(1);
       report(`[hot-path] learner course read: p50 ${at(50)} ms, p95 ${at(95)} ms`);
     }
+  });
+
+  it("lesson reads and progress saves stay within their round-trip budget", async () => {
+    const headers = { host, "x-forwarded-for": "198.51.100.9" };
+    const lessonRequest = () =>
+      getLesson(new NextRequest(`https://${host}/api/v1/lessons/${course.lessonId}`, { headers }), {
+        params: Promise.resolve({ id: course.lessonId }),
+      });
+    const progressRequest = () =>
+      postLessonProgress(
+        new NextRequest(`https://${host}/api/v1/lessons/${course.lessonId}/progress`, {
+          method: "POST",
+          headers: { ...headers, "content-type": "application/json" },
+          body: JSON.stringify({ positionSeconds: 30, completed: false }),
+        }),
+        { params: Promise.resolve({ id: course.lessonId }) },
+      );
+    // Warm once: creates the progress row, so the save below is an update.
+    expect((await progressRequest()).status).toBe(200);
+
+    const lesson = await countStatements(lessonRequest);
+    const progress = await countStatements(progressRequest);
+    expect(lesson.result.status).toBe(200);
+    expect(progress.result.status).toBe(200);
+    report(`[hot-path] learner lesson read: ${String(lesson.sql.length)} statements`);
+    report(`[hot-path] learner progress save: ${String(progress.sql.length)} statements`);
+    // 15 and 16 before: a global transaction for the principal (4), the
+    // lesson, course and enrollment read separately (3), and, when saving, the
+    // progress row read twice.
+    expect(lesson.sql.length, lesson.sql.join("\n")).toBeLessThanOrEqual(9);
+    expect(progress.sql.length, progress.sql.join("\n")).toBeLessThanOrEqual(9);
+  });
+
+  it("refuses a principal that no longer exists as signed out", async () => {
+    const outcome = await withTenantTx(
+      { tenantId: course.tenantId, requestId: randomUUID(), allowAnonymousTenantRead: true },
+      (tx) =>
+        requireActiveMembership({
+          tx,
+          tenantId: course.tenantId,
+          authPrincipalId: randomUUID(),
+        }).then(
+          () => "admitted",
+          (error: { code?: string; status?: number }) =>
+            `${String(error.code)} ${String(error.status)}`,
+        ),
+    );
+    expect(outcome).toBe("AUTH_REQUIRED 401");
   });
 
   it("runs tenant work as atlas_app, set in the context statement", async () => {

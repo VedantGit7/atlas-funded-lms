@@ -37,6 +37,8 @@ const {
 });
 
 vi.mock("@atlas/tenancy", () => ({
+  // Nothing is cached in these tests, so tenant routes ask resolveTenantFromRequest.
+  resolveTenantFromRecentLookup: () => null,
   resolveTenantFromRequest: (...args: unknown[]) => mockResolveTenant(...args),
 }));
 
@@ -310,7 +312,10 @@ describe("entitlements and feature flags tenant isolation", () => {
   });
 
   it("returns NO_MEMBERSHIP on tenant B host when the same JWT principal has no tenant B membership", async () => {
-    vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue(null);
+    vi.spyOn(membershipRepository, "findMembershipForRequest").mockResolvedValue({
+      membership: null,
+      principalStatus: "active",
+    });
 
     await expect(
       requireActiveMembership({

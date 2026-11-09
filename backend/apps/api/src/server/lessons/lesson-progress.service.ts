@@ -109,6 +109,7 @@ export async function recordLessonProgress(
     status,
     progressPct: nextPct,
     completedAt,
+    existing,
   });
 
   if (

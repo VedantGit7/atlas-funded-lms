@@ -1,5 +1,10 @@
 import { findMembershipForRequest } from "./membership.repository";
-import { membershipStatusToError, noMembership, principalDisabled } from "./membership-errors";
+import {
+  membershipStatusToError,
+  noMembership,
+  principalDisabled,
+  principalNotFound,
+} from "./membership-errors";
 import type { ActiveMembershipContext } from "./types";
 
 type Tx = Parameters<typeof findMembershipForRequest>[0]["tx"];
@@ -11,8 +16,8 @@ export async function requireActiveMembership(args: {
   tenantId: string;
   authPrincipalId: string;
 }): Promise<ActiveMembershipContext> {
-  // One statement: the lookup and the activity bookkeeping, which it records
-  // only for a request this gate admits.
+  // One statement: the principal, the membership and the activity bookkeeping,
+  // which it records only for a request this gate admits.
   const found = await findMembershipForRequest({
     tx: args.tx,
     tenantId: args.tenantId,
@@ -20,21 +25,24 @@ export async function requireActiveMembership(args: {
     lastActiveThrottleMinutes: LAST_ACTIVE_THROTTLE_MINUTES,
   });
 
-  if (!found) {
-    throw noMembership();
+  // The account first, with the answers the separate principal lookup gave
+  // before this gate replaced it: a deleted principal is not signed in, and a
+  // disabled account is refused whatever its memberships are.
+  if (found.principalStatus === null) {
+    throw principalNotFound();
+  }
+  if (found.principalStatus !== "active") {
+    throw principalDisabled();
   }
 
   const { membership } = found;
 
-  if (membership.status !== "ACTIVE") {
-    throw membershipStatusToError(membership.status);
+  if (!membership) {
+    throw noMembership();
   }
 
-  // An ACTIVE membership belongs to an active account, never a disabled one.
-  // Principal resolution already refuses a disabled principal; checking again
-  // keeps tenant access closed for a caller that reached the gate another way.
-  if (found.principalStatus !== "active") {
-    throw principalDisabled();
+  if (membership.status !== "ACTIVE") {
+    throw membershipStatusToError(membership.status);
   }
 
   return {

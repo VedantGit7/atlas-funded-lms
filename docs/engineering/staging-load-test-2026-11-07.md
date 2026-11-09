@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, and the connection check under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, and the five-process check under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -237,3 +237,42 @@ The same build differed by about 25% between the two runs, so a short run measur
 1. **Connections are recycled.** With `API_MAX_REQUESTS_PER_SOCKET` set, `server-cluster.mjs` sets Node's `maxRequestsPerSocket` on the server Next creates. After that many requests, the response carries `Connection: close`, and the client's next connection goes to the next process. The compose file sets 100, which is about 25 new local connections per wave. A test shows that one kept-alive connection stays on one process without the setting and moves across all three with it.
 2. **Five API processes instead of three.** The host had about two cores spare during the burst. The API container goes to 5 CPUs and 5 GB, with 768 MiB heaps (three processes used 1.9 GiB at most). Each process's main pool drops from 6 to 4, so five API processes, three web processes and the worker open at most 87 connections.
 3. **Next: less work per request.** Each request reads the user's roles about five times (3.3 million reads of `user_roles_tenant_id_membership_id_role_id_key` in run 2). Caching the permission lookup within a request, or for a few seconds, would remove much of the API's database work. It touches authorization, so it is being designed separately.
+
+## Five API processes (9 November, build 6eb90b1d)
+
+The same short connection-check run on the build with five API processes and connections recycled every 100 requests had no errors, no restarts and no error log lines.
+
+| Short connection-check run | Sustained p95 (journey) | Burst p95 (journey) |
+| -------------------------- | ----------------------- | ------------------- |
+| Three API processes        | 1,129 ms (5.9 s)        | 1,814 ms (8.8 s)    |
+| Five API processes         | 1,292 ms (6.5 s)        | 1,814 ms (9.2 s)    |
+
+**The load is now balanced.** Web's request bytes split 17%, 16%, 19%, 16% and 31% across the five processes, and their burst CPU averaged 24–27% each. No process stayed saturated for more than a few seconds.
+
+**Latency did not move, because the host is now the limit at each wave.** At the peak of a wave the 8-core host was about 88% busy (71% user, 17% system, 9–12% idle), with PostgreSQL at up to two cores. The database itself did not queue: at most 8 active statements and no lock waits. The load generator runs on the same host and uses about half a core.
+
+### Statements per request
+
+A local count of every statement the `pg` driver sends, using the five journey routes against the test database, showed where the CPU goes:
+
+| Journey step  | Statements |
+| ------------- | ---------: |
+| identity      |         11 |
+| course        |         11 |
+| lesson        |         15 |
+| progress save |         16 |
+| progress read |         15 |
+| **Journey**   |     **68** |
+
+- Every request opened a separate transaction only to read the signed-in principal: BEGIN, role, the principal, COMMIT. That was 20 of the 68 statements. The membership gate in the main transaction already read the account status as well.
+- The lesson routes read the lesson, its course and the member's enrollment as three statements.
+- Saving progress read the progress row twice.
+- The permission check was already one statement per request, so role lookups were not the cost.
+
+### What the third follow-up changed
+
+1. **No principal transaction.** The membership gate's statement now starts from the principal and joins the membership, so it is always one row. The gate checks the account first, with the answers the separate read gave: a principal that no longer exists is 401 `AUTH_REQUIRED`, and a disabled account is 403 `ACCOUNT_DISABLED`, whatever its membership. Tenant routes now open the global transaction only when this process has not resolved the request's host in the last 30 seconds. `/me` and the other custom routes still read the principal themselves, because they return its details.
+2. **One statement for a lesson's access.** `findLessonWithCourseAndEnrollment` reads the lesson, its course and the active enrollment together. The loader keeps the same checks.
+3. **One progress read per save.** The save passes the row it read after locking the enrollment to the upsert, instead of reading it again. The lock stays a separate statement before that read, so overlapping autosaves still see the last committed progress.
+
+The journey is now 46 statements: identity 11, course 8, lesson 9, progress save 9 and progress read 9. `hot-path-round-trips.test.ts` holds the course read to 8 statements in one transaction, and the lesson read and progress save to 9 each. It also checks against the database that an unknown principal is refused as signed out.

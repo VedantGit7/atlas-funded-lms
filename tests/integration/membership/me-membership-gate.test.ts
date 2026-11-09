@@ -8,7 +8,7 @@ const mockFindMembership = vi.fn();
 vi.mock("../../../backend/packages/membership/src/membership.repository", () => ({
   findMembershipForRequest: async (...args: unknown[]) => {
     const membership: unknown = await mockFindMembership(...args);
-    return membership ? { membership, principalStatus: "active" } : null;
+    return { membership: membership ?? null, principalStatus: "active" };
   },
 }));
 
