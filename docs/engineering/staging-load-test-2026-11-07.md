@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, and the 46-statement check under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, and the diagnostics run under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -296,3 +296,30 @@ The burst still misses both gates (request p95 1 s, journey p95 3 s). Nothing st
 
 1. **`/me` reads the principal in its tenant transaction.** It still reads it before the membership gate and refuses it unless active, but not in a global transaction of its own. The tenant comes from the process's recent lookups when it can. `/me` goes from 11 statements to 8, and the journey from 46 to 43. `hot-path-round-trips.test.ts` holds it to 8 statements in one transaction against PostgreSQL. The unit tests check the order (tenant transaction, then principal, then membership), that a disabled account is refused before the gate, and that a recently resolved tenant needs no global transaction.
 2. **Diagnostics can be turned on in Coolify.** The compose file passes `ATLAS_ROUTE_STAGE_TIMINGS` and `DATABASE_POOL_METRICS` to the API, both 0 by default (`docs/runbooks/coolify-deployment.md`).
+
+## Where the burst waits (10 November, build 2b4e9d88)
+
+The same short run with `ATLAS_ROUTE_STAGE_TIMINGS=1` and `DATABASE_POOL_METRICS=1` had no errors: all 43,450 requests returned 200. Request p95 was 1,347 ms sustained and 1,760 ms in the burst (journey p95 7.0 s and 8.8 s), in the range of the previous run.
+
+**Requests spend most of their server time waiting for a database connection.** The figures below are the API's own stage timings and pool metrics, as averages over the burst and all five processes:
+
+| Stage                                 | Mean   |
+| ------------------------------------- | ------ |
+| Session check                         | 4 ms   |
+| Waiting for a main-pool connection    | 287 ms |
+| The request's work in the transaction | 28 ms  |
+| The whole tenant transaction          | 333 ms |
+| Usage recording                       | 3 ms   |
+
+- **The wait has a long tail.** The p95 of the connection wait fell in the 1–5 second bucket. It was the same in the 300-learner phase (mean 286 ms).
+- **The queries themselves were fast.** They averaged 3.7 ms, about 9.7 per request.
+- **The auth pool did not queue.** Its connection wait averaged 1.4 ms.
+
+The cause is the pool size. Each API process had 4 main connections, cut from 6 in the five-process change to stay under PostgreSQL's 100 connections. A wave sends each process about 100 requests at once, each holding its connection for about 35 ms, so the last ones wait close to a second. Between waves the pools sat idle.
+
+### What the fifth follow-up changed
+
+1. **PostgreSQL allows 200 connections.** On staging, `ALTER SYSTEM SET max_connections = 200` writes `postgresql.auto.conf` in the data volume, so the setting survives restarts and redeploys, and the database was restarted once. It was back in about 2 seconds, and the services reconnected with no errors. `docs/runbooks/coolify-deployment.md` makes this part of each environment's one-time setup.
+2. **Ten main connections per API process.** `DATABASE_POOL_MAX` goes from 4 to 10. Every process's pools together can now open up to 117 connections. `coolify-compose.test.ts` holds that total to 180 or fewer, leaving room for a migration job, an operator's `psql` and PostgreSQL's reserved superuser slots.
+
+`shared_buffers` is still PostgreSQL's default of 128 MB on a 32 GB host. That is not the bottleneck here, but it is worth sizing before production.

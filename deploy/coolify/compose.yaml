@@ -121,7 +121,8 @@ services:
       # burst three still saturated together while the host had about two cores
       # spare. Three used 1.9 GiB at most, so each gets a 768 MiB heap. Each
       # opens its own pools, sized so five of them, web and the worker stay under
-      # PostgreSQL's 100 connections (pools open only on demand).
+      # PostgreSQL's 200 connections (pools open only on demand; max_connections
+      # is raised from 100 when the database is set up, coolify-deployment.md).
       API_PROCESS_COUNT: "5"
       API_PROCESS_HEAP_MB: "768"
       # Web's proxy reuses its most recent connection first, so without this a
@@ -130,7 +131,10 @@ services:
       # requests moves its traffic to the next process.
       API_MAX_REQUESTS_PER_SOCKET: "100"
       AUTH_DATABASE_POOL_MAX: "2"
-      DATABASE_POOL_MAX: "4"
+      # Ten, not four: in the 500-learner burst a request waited 287 ms on
+      # average for one of four connections, against 28 ms of work, because a
+      # wave sends each process about 100 requests at once.
+      DATABASE_POOL_MAX: "10"
       PLATFORM_DATABASE_POOL_MAX: "3"
       API_PROXY_SECRET: ${API_PROXY_SECRET:?}
       APP_ENV: ${APP_ENV:?}
@@ -233,7 +237,7 @@ services:
       NOTIFICATION_EMAIL_PROVIDER: smtp
       OBSERVABILITY_HASH_SALT: ${OBSERVABILITY_HASH_SALT:?}
       # The worker sweeps one tenant and processor at a time; smaller pools
-      # keep it, web and the API's processes under PostgreSQL's 100 connections.
+      # keep it, web and the API's processes under PostgreSQL's 200 connections.
       DATABASE_POOL_MAX: "10"
       OUTBOX_WORKER_BATCH_LIMIT: "25"
       OUTBOX_WORKER_HEALTH_PORT: "8081"
