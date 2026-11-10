@@ -41,6 +41,7 @@ const { GET: getLesson } =
   await import("../../../backend/apps/api/src/app/api/v1/lessons/[id]/route");
 const { POST: postLessonProgress } =
   await import("../../../backend/apps/api/src/app/api/v1/lessons/[id]/progress/route");
+const { GET: getMe } = await import("../../../backend/apps/api/src/app/api/v1/me/route");
 const { getAttempt, startAttempt } =
   await import("../../../backend/apps/api/src/server/attempts/attempts.service");
 
@@ -172,6 +173,25 @@ suite("hot-path database round trips (audit §3.1–3.2)", () => {
       const at = (p: number) => timings[Math.ceil((p / 100) * timings.length) - 1]?.toFixed(1);
       report(`[hot-path] learner course read: p50 ${at(50)} ms, p95 ${at(95)} ms`);
     }
+  });
+
+  it("the identity read stays within its round-trip budget", async () => {
+    const meRequest = () =>
+      getMe(
+        new NextRequest(`https://${host}/api/v1/me`, {
+          headers: { host, "x-forwarded-for": "198.51.100.9" },
+        }),
+      );
+    expect((await meRequest()).status).toBe(200);
+    const { result, sql } = await countStatements(meRequest);
+    expect(result.status).toBe(200);
+    const body = (await result.json()) as { data: { identity: { email: string } } };
+    expect(body.data.identity.email).toBe(sessionUser.current?.["email"]);
+    report(`[hot-path] learner identity read: ${String(sql.length)} statements`);
+    // 11 before: a global transaction for the principal (BEGIN, role, select,
+    // COMMIT). The principal is now read in the tenant transaction.
+    expect(sql.length, sql.join("\n")).toBeLessThanOrEqual(8);
+    expect(sql.filter((statement) => statement === "BEGIN")).toHaveLength(1);
   });
 
   it("lesson reads and progress saves stay within their round-trip budget", async () => {

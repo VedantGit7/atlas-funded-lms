@@ -195,6 +195,11 @@ describe("Coolify compose topology", () => {
     },
   );
 
+  it("passes the API's load-test diagnostics through, off unless set", () => {
+    for (const name of ["ATLAS_ROUTE_STAGE_TIMINGS", "DATABASE_POOL_METRICS"])
+      expect(coolify("api").environment[name]).toBe(`\${${name}:-0}`);
+  });
+
   it("spreads web's kept-alive connections across the API's processes", () => {
     // Web's proxy reuses its most recent connection first, and node:cluster
     // balances connections, not requests (deploy/managed-node/server-cluster.mjs).
