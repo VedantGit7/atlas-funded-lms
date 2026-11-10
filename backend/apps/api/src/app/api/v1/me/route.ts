@@ -3,7 +3,7 @@ import { measureRouteStage } from "@atlas/api/route-stage-timings";
 import { requireSessionUser, resolveSessionPrincipal } from "@atlas/api/session-user";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { resolveTenantFromRequest } from "@atlas/tenancy";
+import { resolveTenantFromRecentLookup, resolveTenantFromRequest } from "@atlas/tenancy";
 import { getOrCreateRequestId } from "@atlas/core/request/request-id";
 import {
   enforceTenantRouteRateLimit,
@@ -54,25 +54,21 @@ export async function GET(req: NextRequest) {
 
   try {
     await enforceIngressRateLimit({ req, plane: "tenant", requestId });
-    // Verify the remote session before acquiring a database connection, then
-    // release global identity work before the tenant transaction checks out one.
+    // Verify the remote session before acquiring a database connection. The
+    // tenant comes from this process's recent lookups, or from a global
+    // transaction released before the tenant transaction checks out one.
     const sessionUser = await measureRouteStage("authentication", () => requireSessionUser(req));
-    const { tenant, principal } = await measureRouteStage("global_total", () =>
-      withGlobalDb((db) =>
-        measureRouteStage("global_work", async () => {
-          const tenant = await resolveTenantFromRequest({ req, db });
-          const principal = await resolveSessionPrincipal({
-            db,
-            user: sessionUser,
-          });
-          return { tenant, principal };
-        }),
-      ),
-    );
+    const tenant =
+      resolveTenantFromRecentLookup(req) ??
+      (await measureRouteStage("global_total", () =>
+        withGlobalDb((db) =>
+          measureRouteStage("global_work", () => resolveTenantFromRequest({ req, db })),
+        ),
+      ));
 
     await enforceTenantRouteRateLimit({
       tenantId: tenant.tenantId,
-      principalId: principal.id,
+      principalId: sessionUser.principalId,
       metadata: meRouteMetadata,
       requestId,
     });
@@ -86,13 +82,19 @@ export async function GET(req: NextRequest) {
         },
         (tx) =>
           measureRouteStage("tenant_work", async () => {
+            // The principal is read here, in the tenant transaction, rather than
+            // in a global one of its own: three statements fewer on the load
+            // test's slowest step (docs/engineering/staging-load-test-2026-11-07.md).
+            // It is still read and refused unless active before the membership
+            // gate, with the same answers.
+            const principal = await resolveSessionPrincipal({ db: tx, user: sessionUser });
             const membership = await requireActiveMembership({
               tx,
               tenantId: tenant.tenantId,
               authPrincipalId: principal.id,
             });
 
-            return runProtectedTenantRouteHandler({
+            const handled = await runProtectedTenantRouteHandler({
               sessionAssuranceLevel: sessionUser.sessionAssuranceLevel,
               rateLimitEnforced: true,
               tx,
@@ -124,6 +126,7 @@ export async function GET(req: NextRequest) {
                 return { membership, profile, roles };
               },
             });
+            return { ...handled, principal };
           }),
       ),
     );
@@ -135,7 +138,7 @@ export async function GET(req: NextRequest) {
           slug: tenant.tenantSlug,
           state: tenant.tenantState,
         },
-        identity: toSessionSafeIdentity(principal),
+        identity: toSessionSafeIdentity(result.principal),
         membership: {
           id: result.membership.membershipId,
           status: "ACTIVE",

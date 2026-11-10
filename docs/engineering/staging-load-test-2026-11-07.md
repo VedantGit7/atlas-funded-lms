@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, and the five-process check under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, and the 46-statement check under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -276,3 +276,23 @@ A local count of every statement the `pg` driver sends, using the five journey r
 3. **One progress read per save.** The save passes the row it read after locking the enrollment to the upsert, instead of reading it again. The lock stays a separate statement before that read, so overlapping autosaves still see the last committed progress.
 
 The journey is now 46 statements: identity 11, course 8, lesson 9, progress save 9 and progress read 9. `hot-path-round-trips.test.ts` holds the course read to 8 statements in one transaction, and the lesson read and progress save to 9 each. It also checks against the database that an unknown principal is refused as signed out.
+
+## Fewer statements (9 November, build 948dfd9b)
+
+The same short connection-check run on the build with 46 statements per journey had no errors: all 44,430 requests returned 200.
+
+| Short connection-check run         | Sustained p95 (journey) | Burst p95 (journey) | Host idle at the waves |
+| ---------------------------------- | ----------------------- | ------------------- | ---------------------- |
+| Five API processes, 68 per journey | 1,292 ms (6.5 s)        | 1,814 ms (9.2 s)    | 9–12% at the lowest    |
+| Five API processes, 46 per journey | 1,165 ms (6.2 s)        | 1,540 ms (8.1 s)    | 24% at the lowest      |
+
+- **Faster, and the host has room again.** Burst p95 fell by about 15% and the burst median from 38 ms to 27 ms. The host stayed at least 24% idle at the waves. PostgreSQL averaged 94% of a core in the burst (up to 184%), with at most 5 active statements and no lock waits.
+- **Still balanced.** The five API processes averaged 22–25% each in the burst, and none was saturated for more than 3 seconds.
+- **The identity step was now the slowest.** `/me` had a burst p95 of 1,814 ms, against 1,305–1,572 ms for the others. It was the one journey request still reading the principal in a transaction of its own, so it still made 11 statements.
+
+The burst still misses both gates (request p95 1 s, journey p95 3 s). Nothing stays saturated for more than a few seconds, so the remaining tail is queueing while 500 learners click within the same second. The next run turns on the API's stage timings to show where that queueing happens.
+
+### What the fourth follow-up changed
+
+1. **`/me` reads the principal in its tenant transaction.** It still reads it before the membership gate and refuses it unless active, but not in a global transaction of its own. The tenant comes from the process's recent lookups when it can. `/me` goes from 11 statements to 8, and the journey from 46 to 43. `hot-path-round-trips.test.ts` holds it to 8 statements in one transaction against PostgreSQL. The unit tests check the order (tenant transaction, then principal, then membership), that a disabled account is refused before the gate, and that a recently resolved tenant needs no global transaction.
+2. **Diagnostics can be turned on in Coolify.** The compose file passes `ATLAS_ROUTE_STAGE_TIMINGS` and `DATABASE_POOL_METRICS` to the API, both 0 by default (`docs/runbooks/coolify-deployment.md`).

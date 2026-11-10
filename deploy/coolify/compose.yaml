@@ -175,6 +175,12 @@ services:
       # (docs/runbooks/rate-limiting.md); the defaults match the code's.
       TENANT_RATE_LIMIT_READS_PER_MINUTE: ${TENANT_RATE_LIMIT_READS_PER_MINUTE:-12000}
       TENANT_RATE_LIMIT_WRITES_PER_MINUTE: ${TENANT_RATE_LIMIT_WRITES_PER_MINUTE:-3000}
+      # Diagnostics for a load test, off by default. Each process logs one
+      # aggregate line a minute: request stage timings (route.stage_timings) and
+      # pool wait and query timings (db_pool_metrics). No SQL, parameters,
+      # identities or URLs (docs/runbooks/coolify-deployment.md).
+      ATLAS_ROUTE_STAGE_TIMINGS: ${ATLAS_ROUTE_STAGE_TIMINGS:-0}
+      DATABASE_POOL_METRICS: ${DATABASE_POOL_METRICS:-0}
     volumes:
       # Created on the server when SSL is turned on for Coolify's PostgreSQL.
       - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro

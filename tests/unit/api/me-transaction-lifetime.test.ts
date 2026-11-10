@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   global: vi.fn(),
   tenant: vi.fn(),
   resolveTenant: vi.fn(),
+  recentTenant: vi.fn(),
   principal: vi.fn(),
   membership: vi.fn(),
   profile: vi.fn(),
@@ -23,7 +24,10 @@ const mocks = vi.hoisted(() => ({
   rateLimit: vi.fn(),
 }));
 vi.mock("@atlas/api/rate-limit", () => ({ enforceIngressRateLimit: mocks.ingress }));
-vi.mock("@atlas/tenancy", () => ({ resolveTenantFromRequest: mocks.resolveTenant }));
+vi.mock("@atlas/tenancy", () => ({
+  resolveTenantFromRequest: mocks.resolveTenant,
+  resolveTenantFromRecentLookup: mocks.recentTenant,
+}));
 vi.mock("@atlas/db/global-db", () => ({ withGlobalDb: mocks.global }));
 vi.mock("@atlas/db/with-tenant-tx", () => ({ withTenantTx: mocks.tenant }));
 vi.mock("@atlas/api/session-user", () => ({
@@ -84,7 +88,11 @@ beforeEach(() => {
     tenantSlug: "tenant-slug",
     tenantState: "active",
   });
-  mocks.principal.mockResolvedValue({ id: "principal" });
+  mocks.recentTenant.mockReturnValue(null);
+  mocks.principal.mockImplementation(async () => {
+    state.order.push("principal");
+    return { id: "principal" };
+  });
   mocks.global.mockImplementation(async (callback: (db: object) => Promise<unknown>) => {
     state.globalDepth++;
     state.order.push("global-acquire");
@@ -105,7 +113,10 @@ beforeEach(() => {
       return callback({});
     },
   );
-  mocks.membership.mockResolvedValue({ membershipId: "membership" });
+  mocks.membership.mockImplementation(async () => {
+    state.order.push("membership");
+    return { membershipId: "membership" };
+  });
   mocks.profile.mockResolvedValue({ id: "profile", displayName: "Learner", avatarUrl: null });
   mocks.roles.mockResolvedValue([{ key: "learner" }]);
   mocks.protected.mockImplementation(
@@ -180,6 +191,33 @@ describe("identity route transaction lifetime", () => {
     expect((await GET(request())).status).toBe(401);
     expect(mocks.global).not.toHaveBeenCalled();
     expect(mocks.tenant).not.toHaveBeenCalled();
+  });
+  it("reads the principal in the tenant transaction, before the membership gate", async () => {
+    expect((await GET(request())).status).toBe(200);
+    const order = state.order;
+    expect(order.indexOf("tenant-acquire")).toBeLessThan(order.indexOf("principal"));
+    expect(order.indexOf("principal")).toBeLessThan(order.indexOf("membership"));
+    expect(order.indexOf("global-release")).toBeLessThan(order.indexOf("principal"));
+  });
+  it("opens no global transaction when the tenant was resolved recently", async () => {
+    mocks.recentTenant.mockReturnValue({
+      tenantId: "tenant",
+      tenantSlug: "tenant-slug",
+      tenantState: "active",
+    });
+    expect((await GET(request())).status).toBe(200);
+    expect(mocks.global).not.toHaveBeenCalled();
+    expect(mocks.resolveTenant).not.toHaveBeenCalled();
+  });
+  it("refuses a disabled account before the membership gate, as before", async () => {
+    mocks.principal.mockRejectedValue(
+      new AtlasHttpError({ code: "ACCOUNT_DISABLED", status: 403, message: "Disabled" }),
+    );
+    const response = await GET(request());
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.code).toBe("ACCOUNT_DISABLED");
+    expect(mocks.membership).not.toHaveBeenCalled();
+    expect(mocks.protected).not.toHaveBeenCalled();
   });
   it("keeps fresh membership and permission checks after the global transaction is released", async () => {
     expect((await GET(request())).status).toBe(200);
