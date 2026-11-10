@@ -210,7 +210,8 @@ describe("Coolify compose topology", () => {
 
   it("keeps every process's database pools inside PostgreSQL's connections", () => {
     // Every process opens its own pools. All of them together leave PostgreSQL
-    // (100 connections) room for a migration job and an operator's psql.
+    // (max_connections 200, docs/runbooks/coolify-deployment.md) room for a
+    // migration job, an operator's psql and its reserved superuser slots.
     const pools = (settings: NodeJS.ProcessEnv) =>
       Number(settings.DATABASE_POOL_MAX ?? 20) +
       Number(settings.PLATFORM_DATABASE_POOL_MAX ?? 10) +
@@ -222,7 +223,7 @@ describe("Coolify compose topology", () => {
       Number(api.API_PROCESS_COUNT) * pools(api) +
       Number(web.WEB_PROCESS_COUNT) * pools(web) +
       pools(resolveEnvironment("worker"));
-    expect(total).toBeLessThanOrEqual(90);
+    expect(total).toBeLessThanOrEqual(180);
   });
 
   it("gives the API the tenant ceiling settings, defaulting to the code's values", () => {

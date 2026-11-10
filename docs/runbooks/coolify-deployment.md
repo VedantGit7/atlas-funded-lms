@@ -309,6 +309,16 @@ printf 'DATABASE_URL=postgresql://atlas_app_login:%s%s\nPLATFORM_DATABASE_URL=po
 
 Then run the job with `login-roles` once after the first `migrate`.
 
+**Raise the connection limit to 200**, once per environment. The API runs five processes with ten main connections each, so every process's pools together can open up to 117 connections, against PostgreSQL's default 100 (`coolify-compose.test.ts` keeps them at 180 or fewer). PostgreSQL reads `max_connections` only at startup, so restart the database once. It is back in a few seconds, and the services reconnect on their own. `ALTER SYSTEM` writes `postgresql.auto.conf` in the data volume, so the setting survives restarts and redeploys:
+
+```bash
+docker exec "$PG" psql -U postgres -c "ALTER SYSTEM SET max_connections = 200"
+docker restart "$PG"
+docker exec "$PG" psql -U postgres -At -c "show max_connections"   # 200
+```
+
+Staging was raised on 10 November 2026.
+
 **Every deploy runs the job before the services change:**
 
 ```bash
