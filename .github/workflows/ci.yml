@@ -43,7 +43,7 @@ jobs:
           node-version-file: .node-version
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -62,7 +62,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -92,7 +92,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -111,7 +111,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -159,7 +159,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -222,7 +222,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -285,7 +285,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -324,7 +324,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -366,7 +366,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -431,7 +431,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -492,7 +492,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -515,7 +515,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -534,7 +534,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -553,7 +553,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -572,7 +572,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -591,7 +591,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -614,7 +614,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -633,7 +633,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -652,7 +652,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -671,7 +671,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -690,7 +690,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -711,7 +711,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -730,7 +730,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -749,7 +749,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -789,7 +789,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -862,7 +862,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -922,7 +922,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -942,7 +942,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -967,7 +967,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -993,7 +993,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -1058,7 +1058,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
       - run: pnpm install --frozen-lockfile
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
@@ -1079,7 +1079,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
       - run: pnpm install --frozen-lockfile
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
@@ -1137,7 +1137,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
       - run: pnpm install --frozen-lockfile
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
@@ -1277,7 +1277,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - run: pnpm install --frozen-lockfile
         env:
@@ -1298,7 +1298,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
       - run: pnpm install --frozen-lockfile
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
