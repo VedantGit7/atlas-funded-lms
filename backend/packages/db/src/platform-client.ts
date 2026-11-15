@@ -1,7 +1,11 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "./generated/prisma/client";
-import { connectionTimeoutMillis, instrumentPool } from "./pool-instrumentation";
+import {
+  connectionTimeoutMillis,
+  instrumentPool,
+  poolIdleTimeoutMillis,
+} from "./pool-instrumentation";
 
 declare global {
   var __atlasPlatformPrisma: PrismaClient | undefined;
@@ -32,6 +36,7 @@ function getPlatformPool(): Pool {
     connectionTimeoutMillis: connectionTimeoutMillis(
       process.env["PLATFORM_DATABASE_CONNECTION_TIMEOUT_MS"],
     ),
+    idleTimeoutMillis: poolIdleTimeoutMillis(process.env["DATABASE_POOL_IDLE_TIMEOUT_MS"]),
   });
   instrumentPool(globalThis.__atlasPlatformPgPool, {
     enabled: process.env["DATABASE_POOL_METRICS"] === "1",

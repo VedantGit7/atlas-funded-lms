@@ -1,7 +1,11 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "./generated/prisma/client";
-import { connectionTimeoutMillis, instrumentPool } from "./pool-instrumentation";
+import {
+  connectionTimeoutMillis,
+  instrumentPool,
+  poolIdleTimeoutMillis,
+} from "./pool-instrumentation";
 import { prismaLogLevels } from "./prisma-logging";
 
 declare global {
@@ -18,6 +22,7 @@ function getPool(): Pool {
     // pg pool size of 10 starves under that fan-out and cascades into ITX timeouts.
     max: Number.isFinite(max) && max > 0 ? max : 20,
     connectionTimeoutMillis: connectionTimeoutMillis(process.env["DATABASE_CONNECTION_TIMEOUT_MS"]),
+    idleTimeoutMillis: poolIdleTimeoutMillis(process.env["DATABASE_POOL_IDLE_TIMEOUT_MS"]),
   });
   instrumentPool(globalThis.__atlasPgPool, {
     enabled: process.env["DATABASE_POOL_METRICS"] === "1",

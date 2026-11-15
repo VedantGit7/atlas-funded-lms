@@ -1,7 +1,11 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "./generated/prisma/client";
-import { connectionTimeoutMillis, instrumentPool } from "./pool-instrumentation";
+import {
+  connectionTimeoutMillis,
+  instrumentPool,
+  poolIdleTimeoutMillis,
+} from "./pool-instrumentation";
 import { prismaLogLevels } from "./prisma-logging";
 
 declare global {
@@ -30,6 +34,7 @@ export function authPrisma(connectionString = process.env["DATABASE_URL"]): Pris
     options: "-c role=atlas_auth",
     max: Number.isFinite(max) && max > 0 ? max : 5,
     connectionTimeoutMillis: connectionTimeoutMillis(process.env["DATABASE_CONNECTION_TIMEOUT_MS"]),
+    idleTimeoutMillis: poolIdleTimeoutMillis(process.env["DATABASE_POOL_IDLE_TIMEOUT_MS"]),
   });
   instrumentPool(pool, {
     enabled: process.env["DATABASE_POOL_METRICS"] === "1",

@@ -46,6 +46,25 @@ export function connectionTimeoutMillis(value: string | undefined): number {
   return Number.isInteger(parsed) && parsed > 0 && parsed <= 2_147_483_647 ? parsed : 10_000;
 }
 
+/** How long an unused connection stays open when DATABASE_POOL_IDLE_TIMEOUT_MS is unset or invalid. */
+export const DEFAULT_POOL_IDLE_TIMEOUT_MS = 60_000;
+
+/**
+ * How long a pool keeps an unused connection open (DATABASE_POOL_IDLE_TIMEOUT_MS,
+ * 1 second to 1 hour). node-postgres closes them after 10 seconds by default.
+ * In the staging load test learners clicked in waves about 20 seconds apart,
+ * so every wave opened its connections again: a TLS handshake, a new
+ * PostgreSQL backend and its empty caches, each time
+ * (docs/engineering/staging-load-test-2026-11-07.md). Idle connections cost
+ * PostgreSQL only memory, and the pools stay inside its max_connections.
+ */
+export function poolIdleTimeoutMillis(value: string | undefined): number {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 1_000 && parsed <= 3_600_000
+    ? parsed
+    : DEFAULT_POOL_IDLE_TIMEOUT_MS;
+}
+
 /**
  * Cumulative process-local aggregates, emitted every 60s only when opted in.
  * Query timing starts after checkout and includes the client's query queue.

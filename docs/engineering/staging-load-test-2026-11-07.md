@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, and the diagnostics run under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, the diagnostics run under `/root/atlas/loadtest/out/results-diag1`, and the ten-connection run under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -323,3 +323,28 @@ The cause is the pool size. Each API process had 4 main connections, cut from 6 
 2. **Ten main connections per API process.** `DATABASE_POOL_MAX` goes from 4 to 10. Every process's pools together can now open up to 117 connections. `coolify-compose.test.ts` holds that total to 180 or fewer, leaving room for a migration job, an operator's `psql` and PostgreSQL's reserved superuser slots.
 
 `shared_buffers` is still PostgreSQL's default of 128 MB on a 32 GB host. That is not the bottleneck here, but it is worth sizing before production.
+
+## Ten connections per process (10 November, build 23388a1d)
+
+The same short run with the main pool raised from 4 to 10 per API process, and PostgreSQL allowing 200 connections, had no errors but was slower:
+
+| Short run with diagnostics | Sustained p95 (journey) | Burst p95 (journey) | Pool wait (burst) | Query time (burst) | Active statements |
+| -------------------------- | ----------------------- | ------------------- | ----------------- | ------------------ | ----------------- |
+| 4 connections per process  | 1,347 ms (7.0 s)        | 1,760 ms (8.8 s)    | 287 ms            | 3.7 ms             | at most 5         |
+| 10 connections per process | 1,638 ms (8.4 s)        | 2,030 ms (10.5 s)   | 276 ms            | 10.8 ms            | at most 27        |
+
+**PostgreSQL is the bottleneck, and it has two CPUs.** Coolify runs the database container with its default resource limits: 2 CPUs and 2 GB. Its CPU peaked at about 200% in every run, while the host still had at least 20% idle. With four connections per process, the queue formed in the API. With ten, up to 27 statements shared the same two CPUs, each took three times as long, and the wait did not shrink.
+
+Two smaller causes:
+
+- **Connections closed between waves.** node-postgres closes an idle connection after 10 seconds, and the waves were about 15 seconds apart. Every wave opened its connections again: a TLS handshake, a new PostgreSQL backend and empty caches. With ten per process that happened more, which is also why the 100-learner warmup was slower (p95 1,621 ms).
+- **PostgreSQL's settings were its defaults.** Shared buffers were 128 MB for a 525 MB database, in a 2 GB container.
+
+### What the sixth follow-up changed
+
+1. **The database's size is written down and checked.**
+   - `deploy/coolify/postgresql-settings.sql` sizes PostgreSQL for 4 CPUs and 6 GB: 200 connections, 1.5 GB of shared buffers, a 4 GB cache estimate, 8 MB of `work_mem`, SSD costs and `pg_stat_statements`.
+   - The Coolify runbook adds the resource limits and these settings to each environment's setup. Its apply step refuses to run until Coolify's limits are raised.
+   - `postgresql-settings.test.ts` keeps the memory settings inside the limits, even with every connection sorting at once during a vacuum. `coolify-compose.test.ts` keeps every process's pools at least 20 below `max_connections`.
+2. **Connections stay open between waves.** All four pools (main, platform, auth and usage) keep an unused connection for 60 seconds, set by `DATABASE_POOL_IDLE_TIMEOUT_MS` (1 second to 1 hour).
+3. **Six connections per API process.** That is 30 in all, enough to keep a four-CPU database busy; the rest of a burst queues in the API, which is cheaper than queueing inside PostgreSQL. The services together now open at most 97 connections.
