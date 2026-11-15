@@ -6,6 +6,7 @@ import { buildDocumentCsp } from "../../../configs/security-headers.mjs";
 import { validateDeploymentStartup } from "../../../backend/packages/api/src/deployment-startup";
 import { TENANT_RATE_LIMIT_SETTINGS } from "../../../backend/packages/api/src/rate-limit-store";
 import { deploymentEnv } from "../../helpers/deployment-env";
+import { readPostgresqlSettings } from "../../helpers/postgresql-settings";
 
 /**
  * deploy/coolify/compose.yaml is the production topology. Coolify passes a
@@ -210,7 +211,7 @@ describe("Coolify compose topology", () => {
 
   it("keeps every process's database pools inside PostgreSQL's connections", () => {
     // Every process opens its own pools. All of them together leave PostgreSQL
-    // (max_connections 200, docs/runbooks/coolify-deployment.md) room for a
+    // (max_connections in deploy/coolify/postgresql-settings.sql) room for a
     // migration job, an operator's psql and its reserved superuser slots.
     const pools = (settings: NodeJS.ProcessEnv) =>
       Number(settings.DATABASE_POOL_MAX ?? 20) +
@@ -223,7 +224,9 @@ describe("Coolify compose topology", () => {
       Number(api.API_PROCESS_COUNT) * pools(api) +
       Number(web.WEB_PROCESS_COUNT) * pools(web) +
       pools(resolveEnvironment("worker"));
-    expect(total).toBeLessThanOrEqual(180);
+    const maxConnections = Number(readPostgresqlSettings().settings.get("max_connections"));
+    expect(maxConnections).toBeGreaterThan(0);
+    expect(total).toBeLessThanOrEqual(maxConnections - 20);
   });
 
   it("gives the API the tenant ceiling settings, defaulting to the code's values", () => {

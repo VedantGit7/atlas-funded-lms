@@ -2,8 +2,10 @@ import { EventEmitter } from "node:events";
 import { Pool } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  DEFAULT_POOL_IDLE_TIMEOUT_MS,
   instrumentPool,
   connectionTimeoutMillis,
+  poolIdleTimeoutMillis,
 } from "../../../backend/packages/db/src/pool-instrumentation";
 
 type Callback = (...args: unknown[]) => void;
@@ -243,5 +245,25 @@ describe("finite acquisition timeout", () => {
   );
   it("accepts a positive bounded integer override", () => {
     expect(connectionTimeoutMillis("2500")).toBe(2500);
+  });
+});
+
+describe("pool idle timeout", () => {
+  it("keeps idle connections a minute by default, longer than the gaps between bursts", () => {
+    expect(DEFAULT_POOL_IDLE_TIMEOUT_MS).toBe(60_000);
+    expect(poolIdleTimeoutMillis(undefined)).toBe(60_000);
+  });
+  it.each(["", "0", "999", "-1", "Infinity", "12abc", "1.5", "3600001"])(
+    "uses the default for invalid %s",
+    (value) => {
+      expect(poolIdleTimeoutMillis(value)).toBe(60_000);
+    },
+  );
+  it.each([
+    ["1000", 1_000],
+    ["30000", 30_000],
+    ["3600000", 3_600_000],
+  ])("accepts %s", (value, expected) => {
+    expect(poolIdleTimeoutMillis(value)).toBe(expected);
   });
 });

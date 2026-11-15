@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { instrumentPool } from "./pool-instrumentation";
+import { instrumentPool, poolIdleTimeoutMillis } from "./pool-instrumentation";
 
 export type DurableUsageEvent = {
   id: string;
@@ -198,7 +198,8 @@ function getUsagePool(): Pool {
       connectionTimeoutMillis: USAGE_ACQUIRE_TIMEOUT_MS,
       statement_timeout: 750,
       idle_in_transaction_session_timeout: 1_000,
-      idleTimeoutMillis: 10_000,
+      // Used by every request, so kept open across the gaps between bursts like the others.
+      idleTimeoutMillis: poolIdleTimeoutMillis(process.env["DATABASE_POOL_IDLE_TIMEOUT_MS"]),
       application_name: "atlas-usage-meter",
     });
     // pg emits errors for idle connections separately from awaited queries.

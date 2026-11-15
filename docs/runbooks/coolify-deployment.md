@@ -242,7 +242,7 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
 
    The API runs as five processes on one port (`API_PROCESS_COUNT`, `deploy/managed-node/server-cluster.mjs`), each with a 768 MiB heap and its own database pools. The compose file sizes the container (5 CPUs, 5 GiB) and the pools for five; change them together. `API_MAX_REQUESTS_PER_SOCKET` (100) makes each process close a connection after that many requests. The processes are balanced by connection, and web's proxy keeps reusing its most recent connection, so without this setting a few processes carry most of the requests.
 
-   **Load-test diagnostics.** `ATLAS_ROUTE_STAGE_TIMINGS=1` and `DATABASE_POOL_METRICS=1` in the env file make each API process log one aggregate line a minute: `route.stage_timings` (authentication, global and tenant transaction, and usage durations) and `db_pool_metrics` (connection wait and query timings per pool). Neither logs SQL, parameters, identities or URLs. Both default to 0. Turn them on for a load test, then set them back to 0 and redeploy. Web runs the same way (`WEB_PROCESS_COUNT`): three processes with 512 MiB heaps in 4 CPUs and 2 GB, with small database pools that it does not open today. Each process logs separately, so a startup error appears up to three times.
+   **Load-test diagnostics.** `ATLAS_ROUTE_STAGE_TIMINGS=1` and `DATABASE_POOL_METRICS=1` in the env file make each API process log one aggregate line a minute: `route.stage_timings` (authentication, global and tenant transaction, and usage durations) and `db_pool_metrics` (connection wait and query timings per pool). Neither logs SQL, parameters, identities or URLs. Both default to 0. Turn them on for a load test, then set them back to 0 and redeploy. For per-statement costs, clear `pg_stat_statements` before the run (`select pg_stat_statements_reset()` in the postgres database). After it, list the statements by `total_exec_time`. Web runs the same way (`WEB_PROCESS_COUNT`): three processes with 512 MiB heaps in 4 CPUs and 2 GB, with small database pools that it does not open today. Each process logs separately, so a startup error appears up to three times.
 
    Sign-in is Better Auth, in the API. It needs `BETTER_AUTH_SECRET`, at least 32 characters, generated like the other internal secrets; only the API receives it, and it refuses to start without it. Rotating it signs everyone out and makes existing authenticators unreadable, so generate it once per environment. The API also needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, the environment's Google OAuth client (launch plan 0.4), and refuses to start without them: the sign-in page always offers Google. Its redirect URI is `https://<academy host>/auth/callback/google`.
 
@@ -309,15 +309,46 @@ printf 'DATABASE_URL=postgresql://atlas_app_login:%s%s\nPLATFORM_DATABASE_URL=po
 
 Then run the job with `login-roles` once after the first `migrate`.
 
-**Raise the connection limit to 200**, once per environment. The API runs five processes with ten main connections each, so every process's pools together can open up to 117 connections, against PostgreSQL's default 100 (`coolify-compose.test.ts` keeps them at 180 or fewer). PostgreSQL reads `max_connections` only at startup, so restart the database once. It is back in a few seconds, and the services reconnect on their own. `ALTER SYSTEM` writes `postgresql.auto.conf` in the data volume, so the setting survives restarts and redeploys:
+**Database resources and settings**, once per environment. In the November staging load test, PostgreSQL sat at Coolify's default limit of 2 CPUs for each 500-learner burst. Its settings were PostgreSQL's defaults, with 128 MB of shared buffers for a 525 MB database ([evidence](../engineering/staging-load-test-2026-11-07.md)).
 
-```bash
-docker exec "$PG" psql -U postgres -c "ALTER SYSTEM SET max_connections = 200"
-docker restart "$PG"
-docker exec "$PG" psql -U postgres -At -c "show max_connections"   # 200
-```
+1. **Resource limits.** In Coolify, open the database's **Resource Limits** and set **4 CPUs and 6 GB** of memory. Coolify's default is 2 CPUs and 2 GB. Save, and Coolify restarts the database.
+2. **Settings.** `deploy/coolify/postgresql-settings.sql` sizes PostgreSQL for those limits:
+   - 200 connections;
+   - 1.5 GB of shared buffers;
+   - planner and memory settings to match;
+   - `pg_stat_statements`.
 
-Staging was raised on 10 November 2026.
+   Copy it to the server from the repository, then apply it and restart the database once. The check refuses to run until the limits are in place, because 1.5 GB of shared buffers would not fit in 2 GB under load:
+
+   ```bash
+   scp deploy/coolify/postgresql-settings.sql root@<server>:/root/atlas/$ENV/
+   ```
+
+   ```bash
+   cpus=$(docker inspect -f '{{.HostConfig.NanoCpus}}' "$PG"); mem=$(docker inspect -f '{{.HostConfig.Memory}}' "$PG")
+   if [ "$cpus" -ge 4000000000 ] && [ "$mem" -ge 6442450944 ]; then
+     docker exec -i "$PG" psql -U postgres -d postgres -v ON_ERROR_STOP=1 < /root/atlas/$ENV/postgresql-settings.sql && docker restart "$PG"
+   else
+     echo "Set the database to 4 CPUs and 6 GB in Coolify first"
+   fi
+   ```
+
+   `ALTER SYSTEM` writes `postgresql.auto.conf` in the data volume, so the settings survive restarts and redeploys. PostgreSQL is back in a few seconds, and the services reconnect on their own.
+
+3. **Check** that the settings took effect:
+
+   ```bash
+   docker exec "$PG" psql -U postgres -At -c "select name, setting, unit from pg_settings where name in ('max_connections', 'shared_buffers', 'effective_cache_size', 'work_mem', 'shared_preload_libraries')"
+   docker exec "$PG" psql -U postgres -d postgres -At -c "select count(*) from pg_stat_statements"
+   ```
+
+   You should see 200, 196608 × 8 kB (1.5 GB), 524288 × 8 kB (4 GB), 8192 kB and `pg_stat_statements`, and the count query should answer without an error.
+
+The services' pools together open at most 97 of the 200 connections. Each pool keeps an unused connection for 60 seconds (`DATABASE_POOL_IDLE_TIMEOUT_MS`). `coolify-compose.test.ts` keeps the total at least 20 below `max_connections`, and `postgresql-settings.test.ts` keeps the memory settings inside the limits.
+
+Coolify gives the database container 64 MB of `/dev/shm`, which PostgreSQL uses for parallel queries. That is enough for the learner and admin paths. If a large report fails with "could not resize shared memory segment" in the database log, lower `max_parallel_workers_per_gather` (2 by default) in `postgresql-settings.sql`, or raise the container's shared memory.
+
+Staging: max_connections was raised on 10 November 2026; the resource limits and the other settings follow this change.
 
 **Every deploy runs the job before the services change:**
 
