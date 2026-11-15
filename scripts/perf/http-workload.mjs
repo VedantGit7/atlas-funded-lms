@@ -68,6 +68,16 @@ export function validateConfig(c, approvedOrigin = process.env.PERF_APPROVED_STA
     c.phases.some((p) => !integer(p.users, 1, maxUsers) || !integer(p.seconds, 1, maxSeconds))
   )
     throw new Error("Require bounded warmup, sustained and burst phases");
+  // arrivalSeconds spreads a phase's learners' first journeys evenly over that
+  // many seconds, as learners arriving for a class do; 0 or absent starts them
+  // all at once, the worst case.
+  if (
+    c.phases.some(
+      (p) =>
+        p.arrivalSeconds !== undefined && !integer(p.arrivalSeconds, 0, Math.min(p.seconds, 600)),
+    )
+  )
+    throw new Error("A phase's arrivals must fit inside the phase");
   const users = Math.max(...c.phases.map((p) => p.users));
   if (
     !Array.isArray(c.users) ||
@@ -393,6 +403,13 @@ export async function runWorkload(
             try {
               // Atlas stores percentage progress, so the fixture must choose an exactly representable position.
               const position = c.fixture.positionSeconds;
+              // Evenly spaced, not random, so runs stay comparable. Pacing then
+              // keeps each learner's later journeys spread the same way.
+              const arrivalMs = phase.arrivalSeconds
+                ? Math.floor((phase.arrivalSeconds * 1000 * actorIndex) / phase.users)
+                : 0;
+              if (arrivalMs > 0)
+                await delay(Math.max(0, Math.min(arrivalMs, deadline - performance.now())));
               while (performance.now() < deadline) {
                 const begin = performance.now();
                 let ok = true;
@@ -544,7 +561,7 @@ export async function runWorkload(
     pacingMs: c.pacingMs,
     setupPacingMs: c.setupPacingMs ?? c.pacingMs,
     model:
-      "closed-loop distinct authenticated learners; think time follows each journey; setup measured separately",
+      "closed-loop distinct authenticated learners; a phase's learners start together, or evenly over its arrivalSeconds; think time follows each journey; setup measured separately",
     setup: summarize(setup),
     setupByOperation: Object.fromEntries(
       ["login", "enrollment"].map((name) => [
