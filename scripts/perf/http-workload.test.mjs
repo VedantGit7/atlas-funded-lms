@@ -88,11 +88,65 @@ test("rejects unsafe targets, duplicate actors, invalid phases, and missing buil
     { users: [config().users[0], config().users[0]] },
     { phases: [] },
     { phases: [{ name: "sustained", users: 9999, seconds: 1 }] },
+    // Arrivals must be whole seconds inside the phase.
+    { phases: config().phases.map((p) => ({ ...p, arrivalSeconds: -1 })) },
+    { phases: config().phases.map((p) => ({ ...p, arrivalSeconds: 2 })) },
+    { phases: config().phases.map((p) => ({ ...p, arrivalSeconds: 0.5 })) },
   ])
     assert.throws(() => validateConfig({ ...config(), ...patch }));
   assert.throws(() =>
     validateConfig({ ...config(), mode: "staging", origin: "https://staging.example.com" }),
   );
+  assert.doesNotThrow(() =>
+    validateConfig({
+      ...config(),
+      phases: config().phases.map((p) => ({ ...p, arrivalSeconds: 1 })),
+    }),
+  );
+});
+
+test("a phase's learners arrive evenly over its arrivalSeconds, then keep their spacing", async () => {
+  const c = config();
+  c.users = [0, 1, 2, 3].map((index) => ({ email: `learner${index}@test`, password: "secret" }));
+  c.phases = [
+    { name: "warmup", users: 4, seconds: 1 },
+    { name: "sustained", users: 4, seconds: 1 },
+    { name: "burst", users: 4, seconds: 3, arrivalSeconds: 2 },
+  ];
+  c.pacingMs = 1000;
+  c.setupPacingMs = 100;
+  let phase = null;
+  let phaseStarted = 0;
+  // Each learner's identity requests in the burst, in ms after it started.
+  const identities = new Map();
+  const result = await runWorkload(c, {
+    onProgress: onPhaseStart((name) => {
+      phase = name;
+      phaseStarted = performance.now();
+    }),
+    request: async ({ jar, path }) => {
+      if (phase === "burst" && path.endsWith("/api/v1/me"))
+        identities.set(jar, [...(identities.get(jar) ?? []), performance.now() - phaseStarted]);
+      return { ms: 1, ok: true, status: 200, reason: null };
+    },
+  });
+  assert.equal(result.passed, true);
+  const burst = result.phases.find((p) => p.name === "burst");
+  assert.equal(burst.arrivalSeconds, 2);
+  const learners = [...identities.values()].sort((a, b) => (a[0] ?? 0) - (b[0] ?? 0));
+  assert.equal(learners.length, 4);
+  learners.forEach(([first, second], index) => {
+    // Four learners over two seconds: 0, 500, 1000 and 1500 ms after the phase starts.
+    assert.ok(
+      Math.abs((first ?? -1) - index * 500) < 150,
+      `learner ${String(index)} first at ${String(first)} ms`,
+    );
+    // The next journey follows its own after the pacing, so the spacing holds.
+    assert.ok(
+      Math.abs((second ?? -1) - (first ?? 0) - 1000) < 150,
+      `learner ${String(index)} second at ${String(second)} ms`,
+    );
+  });
 });
 
 test("empty samples are unavailable, and failed requests remain in error and all-attempt counts", () => {

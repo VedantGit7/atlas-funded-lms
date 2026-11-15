@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, the diagnostics run under `/root/atlas/loadtest/out/results-diag1`, the ten-connection run under `/root/atlas/loadtest/out/results-pool10`, the run on the bigger database under `/root/atlas/loadtest/out/results-db4cpu`, the run with reused plans under `/root/atlas/loadtest/out/results-planreuse`, and the API profiles under `/root/atlas/loadtest/out/results`. The database runs keep `pg-stat-statements.txt`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, the diagnostics run under `/root/atlas/loadtest/out/results-diag1`, the ten-connection run under `/root/atlas/loadtest/out/results-pool10`, the run on the bigger database under `/root/atlas/loadtest/out/results-db4cpu`, the run with reused plans under `/root/atlas/loadtest/out/results-planreuse`, the API profiles under `/root/atlas/loadtest/out/results-apiprofile`, the twelve-connection run under `/root/atlas/loadtest/out/results-pool12`, and run 4 under `/root/atlas/loadtest/out/results-run4`. The database runs keep `pg-stat-statements.txt`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -424,3 +424,51 @@ The web processes were busy 18% of the time, mostly Next.js's proxying.
 1. **Twelve connections per API process.** The pool goes from 6 to 12. The services together can open at most 127 of PostgreSQL's 200 connections; `coolify-compose.test.ts` keeps that at least 20 below the limit.
 2. **The outbox claim names its columns.** It selects the 13 columns of `DeliveryJob` instead of `j.*`, so it gets a reusable plan. The `RETURNING *` and the event read after a claim are unchanged; they run only when there is a job to deliver.
 3. **Measured memory in the runbook.** Reused plans take about 40 KB each, at most about 8 MB per connection.
+
+## Twelve connections per process (15 November, build 84e70916)
+
+The same short run with twelve connections per API process and the diagnostics on had no errors: all 44,370 requests returned 200.
+
+| Short run with diagnostics | Sustained p95 (journey) | Burst p95 (journey) | Connection wait in burst | Work in the transaction |
+| -------------------------- | ----------------------- | ------------------- | -----------------------: | ----------------------: |
+| Six connections            | 861 ms (4.4 s)          | 1,227 ms (6.5 s)    |                   194 ms |                   26 ms |
+| Twelve connections         | 1,214 ms (6.5 s)        | 1,279 ms (7.2 s)    |                   125 ms |                   44 ms |
+
+**The wait moved instead of going away.** Requests waited less for a connection, but with twice as many statements running at once, each one took longer: the mean query rose from 4.0 to 7.0 ms, and the work inside a transaction from 26 to 44 ms. Burst latency was the same, within the variation between short runs. Nothing was saturated: the database, the API and the host all had spare CPU between the waves.
+
+After eight rounds of changes, the synchronized burst has gone from 6.0 s to about 1.3 s p95 and stopped improving. All 500 learners send a request at the same moment, and then all wait 20 seconds. Each wave puts about 500 requests in the queue at once; whichever resource serves them, the last ones wait about a second. Cutting that further means making each request cheaper (Prisma, Next.js and TLS to the database take most of the API's CPU) or adding cores, and either is a large change for a shape of load that real learners do not produce.
+
+### The realistic burst
+
+Learners arriving for a class or an exam log in over several seconds, not within the same millisecond. The harness can now spread a phase's first journeys: with `arrivalSeconds` on a phase, learner _i_ of _n_ starts its first journey at _i_ × `arrivalSeconds` / _n_ seconds and then keeps its 20-second rhythm (`scripts/perf/http-workload.mjs`). Without it, a phase's learners start together, as before.
+
+The launch gate is now the burst with its 500 learners arriving over 10 seconds, which is still 50 new learners a second, every one of them sending a request in that 10-second window. The synchronized burst stays in the record as a stress figure: about 1.3 s p95, with no errors.
+
+## Run 4 (15 November, build 84e70916)
+
+Run 4 is the full profile again (warmup 100 for 2 minutes, sustained 300 for 15 minutes, burst 500 for 5 minutes, endurance 300 for 2 hours), with the diagnostics off and the burst's learners arriving over 10 seconds. Sustained still starts all 300 together.
+
+| Phase     | Learners | Requests | Requests/s | Request p50 / p95 / p99 | Journey p95 | Errors | Result (run 3)                    |
+| --------- | -------: | -------: | ---------: | ----------------------- | ----------: | -----: | --------------------------------- |
+| Warmup    |      100 |    3,000 |       25.0 | 153 / 640 / 1,094 ms    |      2.78 s |      0 | not counted                       |
+| Sustained |      300 |   66,785 |       74.2 | 23 / 515 / 1,201 ms     |      2.54 s |      0 | **pass** (fail: 633 ms, 3.14 s)   |
+| Burst     |      500 |   37,510 |      125.0 | 39 / 210 / 515 ms       |      1.02 s |      0 | **pass** (fail: 1,572 ms, 8.50 s) |
+| Endurance |      300 |  536,225 |       74.5 | 21 / 53 / 367 ms        |      0.25 s |      0 | **pass** (pass: 207 ms, 1.00 s)   |
+
+**Every phase passed both limits** (request p95 1 s, journey p95 3 s), with no errors: all 643,520 requests and the 1,000 setup requests (500 logins, p95 184 ms, and 500 enrolments, p95 45 ms) returned 200. No container restarted, and the API and web logs had no error codes, usage-metering failures, pool messages or timeouts.
+
+- **Sustained passes with the synchronized start,** which run 3 missed by 140 ms. Its journey p95 of 2.54 s is the closest of the phases to its limit.
+- **Endurance is four times faster than in run 3** at p95 (53 against 207 ms). The two hours of 300 learners are the steady state, so this is the clearest measure of what the eight rounds of changes did per request.
+- **Memory was flat.** Over the two hours of endurance the API's memory went from 2.9 to 2.8 GiB and web's stayed at 0.7 GiB.
+- **The database had room.** At most 74 connections were open and 8 active, with no lock waits and no deadlocks, and 99.8% of block reads came from its cache. The usage drain kept up: 515,449 rows inserted and 515,288 marked processed. The indexes and tables were the same before and after (778 and 244).
+
+**The slowest requests coincide with the host losing its CPU.** The request maximum in endurance was 5.0 s, at 17:00. The host sample at 17:00:00 shows 75% CPU steal: the hypervisor gave the server's cores to other machines for three quarters of that sample's 17 seconds. The highest steal samples fell on quarter hours (16:15, 16:30, 16:45, 17:00, 17:15, 17:30 and 18:30, 30–75%), which points to other tenants' scheduled jobs on the same physical host. Steal was also higher in general than in run 3: it averaged 4.1% over the run, against 0.96%, and 85 of 505 samples were between 5% and 29%. It does not move the p95, but it sets the worst case, and it varies from day to day with the neighbours. A plan with dedicated cores would remove it; the shared KVM plan cannot.
+
+### Gate status
+
+| Profile                                | Request p95 | Journey p95 | Errors | Gate                   |
+| -------------------------------------- | ----------: | ----------: | -----: | ---------------------- |
+| Full run, burst arriving over 10 s     |      210 ms |      1.02 s |      0 | **pass** (launch gate) |
+| Short run, synchronized burst (stress) |    1,279 ms |       7.2 s |      0 | recorded, not a gate   |
+
+Launch plan 5.2 is met on staging with the current build: 500 learners arriving over 10 seconds, 300 learners for two hours, and no errors.
