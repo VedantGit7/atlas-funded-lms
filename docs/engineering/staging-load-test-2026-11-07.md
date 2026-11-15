@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, the diagnostics run under `/root/atlas/loadtest/out/results-diag1`, the ten-connection run under `/root/atlas/loadtest/out/results-pool10`, and the run on the bigger database, with `pg-stat-statements.txt`, under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, the diagnostics run under `/root/atlas/loadtest/out/results-diag1`, the ten-connection run under `/root/atlas/loadtest/out/results-pool10`, the run on the bigger database under `/root/atlas/loadtest/out/results-db4cpu`, the run with reused plans under `/root/atlas/loadtest/out/results-planreuse`, and the API profiles under `/root/atlas/loadtest/out/results`. The database runs keep `pg-stat-statements.txt`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -380,3 +380,47 @@ Row-level security adds its policies to every table these statements read, which
    - `tests/integration/db/statement-plan-reuse.test.ts` runs one row-level-security query twelve times on one connection, alternating tenants, until PostgreSQL uses a generic plan. Each tenant still sees only its own rows. It fails, as it should, with naming turned off.
    - The integration, tenant-isolation, routes, authorization, db, workers and events suites also passed with every statement named from its first use.
 3. **An off switch.** `DATABASE_STATEMENT_CACHE_MAX=0` turns naming off for the API and the worker without a code change. The Coolify runbook covers this, the migration caveat, and turning on `track_planning` for a load test only.
+
+## Reused plans (15 November, build 441c3841)
+
+The same short run with named statements, the diagnostics on and `pg_stat_statements` tracking planning time had no errors: all 44,245 requests returned 200.
+
+| Short run with diagnostics       | Sustained p95 (journey) | Burst p95 (journey) | Database CPU in burst (peak) | Host idle at the waves |
+| -------------------------------- | ----------------------- | ------------------- | ---------------------------- | ---------------------- |
+| 4-CPU database, plans not reused | 1,361 ms (7.0 s)        | 1,969 ms (9.4 s)    | 127% (299%)                  | 4–6%                   |
+| 4-CPU database, plans reused     | 1,361 ms (6.5 s)        | 1,347 ms (7.2 s)    | 54% (184%)                   | at least 33%           |
+
+- **Planning nearly stopped.** There were 16,423 plans for 583,894 calls, against 416,618 for 563,851 before. Planning time fell from 234 to 13 seconds, and the database's total time from 301 to 79 seconds. At most 3 statements ran at once.
+- **The memory is small.** A backend's memory contexts show each reused statement takes about 40 KB: 19 KB for the plan, 9 KB for its source and 12 KB for its query tree. At 200 per connection that is about 8 MB.
+- **Two statements were still costly.** The worker's outbox claim selected `j.*`, so it was never named: 9,328 calls and 9,328 plans, 10% of the remaining time. The per-request usage insert was 14%, but it was already named (452 plans for 35,949 calls); it simply runs once per request.
+
+## The API during a burst (15 November, build 441c3841)
+
+The same run again, with 30-second CPU profiles of three API and three web processes at the start of the burst, had no errors. It measured faster than the run before: 861 ms sustained p95 (journey 4.4 s) and 1,227 ms burst p95 (journey 6.5 s). Short runs vary by about 20%.
+
+**Requests wait for a connection, and neither the API nor the database is saturated.** Averaged over the burst, an API request spent:
+
+| Stage                                 | Mean   |
+| ------------------------------------- | ------ |
+| Waiting for a main-pool connection    | 194 ms |
+| The request's work in the transaction | 26 ms  |
+| Session check                         | 7 ms   |
+| Usage recording                       | 4 ms   |
+
+The profiled API processes were busy 19–35% of the 30 seconds, and every API process stayed under 110% even at the waves. A wave still sends each process about 100 requests at once. Each holds a connection for about 35 ms, so six connections take about 600 ms to clear it. The pool had been cut to six while the two-CPU database was the limit. That is no longer true.
+
+**Where the API's CPU goes,** as a share of its busy time:
+
+- **The `pg` driver: 21%.** 15% is writing queries to the database socket, over TLS.
+- **Prisma's runtime: 32%,** including what it calls.
+- **Next.js: 20%.**
+- **The rate limiter's Redis calls: 5%.**
+- **Garbage collection: 5%.**
+
+The web processes were busy 18% of the time, mostly Next.js's proxying.
+
+### What the eighth follow-up changed
+
+1. **Twelve connections per API process.** The pool goes from 6 to 12. The services together can open at most 127 of PostgreSQL's 200 connections; `coolify-compose.test.ts` keeps that at least 20 below the limit.
+2. **The outbox claim names its columns.** It selects the 13 columns of `DeliveryJob` instead of `j.*`, so it gets a reusable plan. The `RETURNING *` and the event read after a claim are unchanged; they run only when there is a job to deliver.
+3. **Measured memory in the runbook.** Reused plans take about 40 KB each, at most about 8 MB per connection.

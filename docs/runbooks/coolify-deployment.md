@@ -344,11 +344,11 @@ Then run the job with `login-roles` once after the first `migrate`.
 
    You should see 200, 196608 × 8 kB (1.5 GB), 524288 × 8 kB (4 GB), 8192 kB and `pg_stat_statements`, and the count query should answer without an error.
 
-The services' pools together open at most 97 of the 200 connections. Each pool keeps an unused connection for 60 seconds (`DATABASE_POOL_IDLE_TIMEOUT_MS`). `coolify-compose.test.ts` keeps the total at least 20 below `max_connections`, and `postgresql-settings.test.ts` keeps the memory settings inside the limits.
+The services' pools together open at most 127 of the 200 connections. Each pool keeps an unused connection for 60 seconds (`DATABASE_POOL_IDLE_TIMEOUT_MS`). `coolify-compose.test.ts` keeps the total at least 20 below `max_connections`, and `postgresql-settings.test.ts` keeps the memory settings inside the limits.
 
 **Statement plan reuse.** The API's and worker's Prisma clients give each statement a name once it has run three times, up to 200 per pool (`backend/packages/db/src/statement-names.ts`). A connection then parses it once, and PostgreSQL can keep one plan for it instead of planning it on every run. In the November load test, planning was 78% of the database's time. Things to know:
 
-- **Each database connection keeps up to 200 prepared statements**, some tens of kilobytes each. They go when the connection closes.
+- **Each database connection keeps up to 200 prepared statements**, about 40 KB each as measured on staging (the plan, its source and its query tree), so at most about 8 MB per connection. They go when the connection closes.
 - **Row-level security is unaffected**, because the policies read the tenant when a statement runs. `tests/integration/db/statement-plan-reuse.test.ts` checks that against PostgreSQL.
 - **Statements that select or return `*` are never named.** A migration that adds a column would otherwise break them on connections that are already open. A migration that changes the type of a column a named statement returns has the same effect until the old processes are replaced, which the deploy right after the migration job does.
 - **To turn it off,** set `DATABASE_STATEMENT_CACHE_MAX=0` in the env file and redeploy.
