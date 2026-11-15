@@ -113,7 +113,7 @@ The fixture script and the harness are in `scripts/perf/`. The run used the prof
 }
 ```
 
-The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, the diagnostics run under `/root/atlas/loadtest/out/results-diag1`, and the ten-connection run under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
+The raw results, minute-by-minute progress, host and container samples, index and table counters from before and after, and the CPU profiles stay on the staging server: run 1 under `/root/atlas/loadtest/out/results-run1`, run 2 under `/root/atlas/loadtest/out/results-run2` run 3 under `/root/atlas/loadtest/out/results-run3`, the first burst profile under `/root/atlas/loadtest/out/results-burst1`, the second under `/root/atlas/loadtest/out/results-burst2`, the first connection check under `/root/atlas/loadtest/out/results-conn1`, the five-process check under `/root/atlas/loadtest/out/results-conn2`, the 46-statement check under `/root/atlas/loadtest/out/results-conn3`, the diagnostics run under `/root/atlas/loadtest/out/results-diag1`, the ten-connection run under `/root/atlas/loadtest/out/results-pool10`, and the run on the bigger database, with `pg-stat-statements.txt`, under `/root/atlas/loadtest/out/results`. They are not committed, because they name the staging host.
 
 ## Run 2 (8 November, build a9975de1)
 
@@ -348,3 +348,35 @@ Two smaller causes:
    - `postgresql-settings.test.ts` keeps the memory settings inside the limits, even with every connection sorting at once during a vacuum. `coolify-compose.test.ts` keeps every process's pools at least 20 below `max_connections`.
 2. **Connections stay open between waves.** All four pools (main, platform, auth and usage) keep an unused connection for 60 seconds, set by `DATABASE_POOL_IDLE_TIMEOUT_MS` (1 second to 1 hour).
 3. **Six connections per API process.** That is 30 in all, enough to keep a four-CPU database busy; the rest of a burst queues in the API, which is cheaper than queueing inside PostgreSQL. The services together now open at most 97 connections.
+
+## A bigger database, and where its time goes (15 November, build 7b3fc063)
+
+Staging's database was given 4 CPUs and 6 GB in Coolify. Saving the limits did not apply them; a restart from Coolify did. Then `postgresql-settings.sql` was applied with one more restart, about 2 seconds. The same short run, with the diagnostics on and `pg_stat_statements` tracking planning time, had no errors: all 43,105 requests returned 200.
+
+| Short run with diagnostics                  | Sustained p95 (journey) | Burst p95 (journey) | Pool wait (burst) | Host idle at the waves |
+| ------------------------------------------- | ----------------------- | ------------------- | ----------------- | ---------------------- |
+| 2-CPU database, 4 connections per process   | 1,347 ms (7.0 s)        | 1,760 ms (8.8 s)    | 287 ms            | about 20%              |
+| 4-CPU database, new settings, 6 per process | 1,361 ms (7.0 s)        | 1,969 ms (9.4 s)    | 237 ms            | 4–6%                   |
+
+**The bigger database used its extra CPU but did not get faster.** In the burst PostgreSQL averaged 127% of a core and peaked at 299%, and the API peaked at 293%. Together they filled the 8-core host at each wave.
+
+**Most of PostgreSQL's time was spent planning.** Over the run it executed statements for 67 seconds and planned them for 234 seconds: 78% of its time. There were 416,618 plans for 563,851 calls. Prisma's pg adapter sends every statement unnamed, and PostgreSQL plans an unnamed statement each time it runs. Three statements took about two thirds of the database's time, each costing about five times more to plan than to run:
+
+| Statement                     | Share of DB time | Planning | Running |
+| ----------------------------- | ---------------: | -------: | ------: |
+| Membership gate               |              25% |  1.44 ms | 0.30 ms |
+| Permission check (`can()`)    |              25% |  1.39 ms | 0.31 ms |
+| Lesson, course and enrollment |              15% |  1.55 ms | 0.24 ms |
+
+Row-level security adds its policies to every table these statements read, which makes them costly to plan. Shared buffers held the database: 4.4 million block hits against 1,462 reads.
+
+### What the seventh follow-up changed
+
+1. **Named statements.** `@prisma/adapter-pg` takes a `statementNameGenerator`. The main, auth and platform clients now give a statement a name once it has run three times, up to 200 per pool (`backend/packages/db/src/statement-names.ts`). A connection then parses it once, and after five runs PostgreSQL can keep a generic plan instead of planning it again. Since the previous change, connections stay open between bursts, which is what makes this pay. The limits:
+   - only SELECT, WITH, INSERT, UPDATE and DELETE are named;
+   - nothing that selects or returns `*`, so a migration that adds a column cannot break a statement held by a running process;
+   - a bounded number of statements is counted, so one-off SQL cannot grow the cache.
+2. **Tests.**
+   - `tests/integration/db/statement-plan-reuse.test.ts` runs one row-level-security query twelve times on one connection, alternating tenants, until PostgreSQL uses a generic plan. Each tenant still sees only its own rows. It fails, as it should, with naming turned off.
+   - The integration, tenant-isolation, routes, authorization, db, workers and events suites also passed with every statement named from its first use.
+3. **An off switch.** `DATABASE_STATEMENT_CACHE_MAX=0` turns naming off for the API and the worker without a code change. The Coolify runbook covers this, the migration caveat, and turning on `track_planning` for a load test only.
