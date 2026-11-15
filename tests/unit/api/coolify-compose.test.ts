@@ -201,6 +201,13 @@ describe("Coolify compose topology", () => {
       expect(coolify("api").environment[name]).toBe(`\${${name}:-0}`);
   });
 
+  it("lets Coolify turn statement plan reuse off for the API and the worker", () => {
+    for (const service of ["api", "worker"] as const)
+      expect(coolify(service).environment["DATABASE_STATEMENT_CACHE_MAX"]).toBe(
+        "${DATABASE_STATEMENT_CACHE_MAX:-200}",
+      );
+  });
+
   it("spreads web's kept-alive connections across the API's processes", () => {
     // Web's proxy reuses its most recent connection first, and node:cluster
     // balances connections, not requests (deploy/managed-node/server-cluster.mjs).

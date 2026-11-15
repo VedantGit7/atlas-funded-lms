@@ -6,6 +6,7 @@ import {
   instrumentPool,
   poolIdleTimeoutMillis,
 } from "./pool-instrumentation";
+import { prismaStatementNameGenerator } from "./statement-names";
 
 declare global {
   var __atlasPlatformPrisma: PrismaClient | undefined;
@@ -46,7 +47,10 @@ function getPlatformPool(): Pool {
 }
 
 function createPlatformPrisma(): PrismaClient {
-  const adapter = new PrismaPg(getPlatformPool());
+  // Named statements, so PostgreSQL reuses their plans (statement-names.ts).
+  const adapter = new PrismaPg(getPlatformPool(), {
+    statementNameGenerator: prismaStatementNameGenerator(),
+  });
 
   return new PrismaClient({
     adapter,

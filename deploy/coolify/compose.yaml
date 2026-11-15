@@ -188,6 +188,10 @@ services:
       # identities or URLs (docs/runbooks/coolify-deployment.md).
       ATLAS_ROUTE_STAGE_TIMINGS: ${ATLAS_ROUTE_STAGE_TIMINGS:-0}
       DATABASE_POOL_METRICS: ${DATABASE_POOL_METRICS:-0}
+      # Named statements, so PostgreSQL reuses their plans
+      # (backend/packages/db/src/statement-names.ts). 0 turns it off without a
+      # code change (docs/runbooks/coolify-deployment.md).
+      DATABASE_STATEMENT_CACHE_MAX: ${DATABASE_STATEMENT_CACHE_MAX:-200}
     volumes:
       # Created on the server when SSL is turned on for Coolify's PostgreSQL.
       - /data/coolify/ssl/coolify-ca.crt:/etc/ssl/certs/coolify-ca.crt:ro
@@ -243,6 +247,8 @@ services:
       # keep it, web and the API's processes under PostgreSQL's 200 connections.
       DATABASE_POOL_MAX: "10"
       OUTBOX_WORKER_BATCH_LIMIT: "25"
+      # The same plan reuse and off switch as the API.
+      DATABASE_STATEMENT_CACHE_MAX: ${DATABASE_STATEMENT_CACHE_MAX:-200}
       OUTBOX_WORKER_HEALTH_PORT: "8081"
       OUTBOX_WORKER_SHUTDOWN_TIMEOUT_MS: "30000"
       PLATFORM_DATABASE_POOL_MAX: "5"
