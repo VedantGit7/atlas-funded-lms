@@ -72,7 +72,13 @@ export async function claimDeliveryJob(
   subscriptions: OutboxSubscription[],
 ): Promise<DeliveryClaim | null> {
   if (subscriptions.length === 0) return null;
-  const rows = await tx.$queryRaw<DeliveryJob[]>`SELECT j.* FROM outbox_delivery_jobs j
+  // Columns named, not j.*: the worker runs this on every poll, and a statement
+  // selecting * is never given a reusable plan (backend/packages/db/src/statement-names.ts).
+  // It was planned on every one of its 9,328 calls in the staging load test.
+  const rows = await tx.$queryRaw<DeliveryJob[]>`SELECT j.id, j.tenant_id, j.outbox_event_id,
+    j.destination_key, j.status, j.attempt_count, j.cycle_attempt_count, j.max_attempts,
+    j.lease_token, j.lease_until, j.next_attempt_at, j.last_dead_letter_id, j.replayed_dead_letter_id
+    FROM outbox_delivery_jobs j
     JOIN outbox_events o ON o.id=j.outbox_event_id
     WHERE j.status IN ('pending','retry','processing') AND j.next_attempt_at<=now()
     AND (j.lease_until IS NULL OR j.lease_until<now())

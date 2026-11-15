@@ -131,13 +131,13 @@ services:
       # requests moves its traffic to the next process.
       API_MAX_REQUESTS_PER_SOCKET: "100"
       AUTH_DATABASE_POOL_MAX: "2"
-      # Six. With four, a request in the 500-learner burst waited 287 ms on
-      # average for a connection, against 28 ms of work. With ten, PostgreSQL ran
-      # up to 27 queries at once on its two CPUs and each took three times as
-      # long, so the wait did not shrink. Six per process, 30 in all, is enough
-      # to keep a four-CPU database busy without queueing inside it
-      # (coolify-deployment.md); the rest of a burst queues here, which is cheaper.
-      DATABASE_POOL_MAX: "6"
+      # Twelve. A burst sends each process about 100 requests at once, each
+      # holding a connection for about 35 ms, so with six a request waited
+      # 194 ms on average for one. PostgreSQL had stopped being the limit: with
+      # four CPUs and its plans reused it ran at most 3 statements at once.
+      # (With ten on a two-CPU database that re-planned every statement, queries
+      # slowed threefold instead.) docs/engineering/staging-load-test-2026-11-07.md
+      DATABASE_POOL_MAX: "12"
       PLATFORM_DATABASE_POOL_MAX: "3"
       API_PROXY_SECRET: ${API_PROXY_SECRET:?}
       APP_ENV: ${APP_ENV:?}
