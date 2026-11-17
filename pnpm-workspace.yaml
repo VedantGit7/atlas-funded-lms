@@ -83,8 +83,16 @@ overrides:
 auditConfig:
   # Suppressed by advisory id, so any NEW advisory still fails security:check.
   # The extract-zip pair (SEC-09) went with @lhci/cli, its only path in; the
-  # node-forge one (SEC-10) was fixed by upgrading to 1.4.2. Nothing is waived.
-  ignoreGhsas: []
+  # node-forge one (SEC-10) was fixed by upgrading to 1.4.2.
+  ignoreGhsas:
+    # picomatch ReDoS through single-branch repeated extglobs (high). Widened on
+    # 17 Nov 2026 to every version through 4.0.7, the latest, with no patched
+    # release. Not reachable: the only production path is @sentry/nextjs ->
+    # @rollup/plugin-commonjs, which runs at build time on our own source, and
+    # nothing passes a request's input to picomatch as a pattern; the other
+    # paths are dev tooling (lint-staged and friends). Remove this entry once
+    # picomatch ships a fix and the tree is upgraded to it.
+    - GHSA-fc5q-39xc-vjpf
 
 allowBuilds:
   "@prisma/client": true
