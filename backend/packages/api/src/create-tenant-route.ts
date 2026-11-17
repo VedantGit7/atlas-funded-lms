@@ -29,6 +29,7 @@ import { toSafeErrorEnvelope } from "./error-envelope";
 import { loadResourceRefOrDefault } from "./load-resource-ref";
 import type { RouteMetadata, TenantRouteContext } from "./route-metadata";
 import { noBodySchema } from "./schemas";
+import { readJsonBody } from "./read-json-body";
 import { createTenantRequestUsage } from "./tenant-usage-meter";
 import { enforceIngressRateLimit, enforceProtectedRateLimit } from "./rate-limit";
 import { measureRouteStage } from "./route-stage-timings";
@@ -224,8 +225,7 @@ function readGetInput(req: NextRequest, schema: z.ZodType): unknown {
 }
 
 async function readBodyInput(req: NextRequest, schema: z.ZodType): Promise<unknown> {
-  const raw: unknown = await req.json();
-  return schema.parse(raw);
+  return readJsonBody(req, schema);
 }
 
 function requireIdempotencyKey(req: NextRequest): void {

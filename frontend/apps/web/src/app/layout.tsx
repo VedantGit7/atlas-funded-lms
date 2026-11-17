@@ -5,6 +5,9 @@ import "./globals.css";
 import "../styles/cormorant-garamond.css";
 import "../styles/plus-jakarta-sans.css";
 import "../styles/jetbrains-mono.css";
+import "../styles/manrope.css";
+import "../styles/ibm-plex-mono.css";
+import "../styles/skins/sky-glass.css";
 
 import { AppProviders } from "@/components/providers/AppProviders";
 import { AnalyticsConsentBridge } from "../observability/AnalyticsConsentBridge";
@@ -55,7 +58,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const hasSession = await hasSessionCookie();
   const theme = await loadTenantThemeRuntime();
-  const baseClassName = `font-plus-jakarta-sans font-cormorant font-jetbrains-mono`;
+  // The Sky Glass skin brings its own fonts; other academies never load them.
+  const skyGlass = theme.skin === "sky-glass";
+  const baseClassName = `font-plus-jakarta-sans font-cormorant font-jetbrains-mono${
+    skyGlass ? " font-manrope font-plex-mono" : ""
+  }`;
   const appearance = await resolveAppearanceHtmlProps(
     baseClassName,
     theme.style ?? undefined,
@@ -91,6 +98,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html
       lang="en"
+      data-skin={theme.skin}
       className={appearance.className}
       style={{ ...appearance.style, ...brandingStyle }}
       suppressHydrationWarning
@@ -124,6 +132,38 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           type="font/woff2"
           crossOrigin="anonymous"
         />
+        {skyGlass ? (
+          <>
+            <link
+              rel="preload"
+              href="/fonts/manrope/v1/normal-latin.e310b55a7fd9.woff2"
+              as="font"
+              type="font/woff2"
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="preload"
+              href="/fonts/ibm-plex-mono/v1/normal-400-latin.c36f509c0a8f.woff2"
+              as="font"
+              type="font/woff2"
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="preload"
+              href="/fonts/ibm-plex-mono/v1/normal-500-latin.a76f53ca6612.woff2"
+              as="font"
+              type="font/woff2"
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="preload"
+              href="/fonts/ibm-plex-mono/v1/normal-600-latin.ad4580d8cb4b.woff2"
+              as="font"
+              type="font/woff2"
+              crossOrigin="anonymous"
+            />
+          </>
+        ) : null}
         <ThemeInitScript {...(nonce ? { nonce } : {})} tenantModeDefault={theme.modeDefault} />
       </head>
       <body suppressHydrationWarning>

@@ -27,6 +27,9 @@ for (const [slug, version, faces, assets] of [
   ["jetbrains-mono", "v24", 12, 6],
   ["inter", "v20", 28, 7],
   ["playfair-display", "v40", 4, 4],
+  // The Sky Glass theme skin (src/styles/skins/sky-glass.css), from a brand kit.
+  ["manrope", "v1", 2, 2],
+  ["ibm-plex-mono", "v1", 3, 3],
 ]) {
   test(`${slug} preserves licensed bytes, face coverage, fallback metrics and immutable paths`, () => {
     const dir = resolve(root, `frontend/apps/web/public/fonts/${slug}/${version}`);

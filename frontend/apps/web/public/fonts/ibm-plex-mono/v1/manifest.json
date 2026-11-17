@@ -1,0 +1,48 @@
+{
+  "family": "IBM Plex Mono",
+  "version": "v1",
+  "source": "FundedBeyond Brand Kit v1 (October 2026), 03 Fonts",
+  "retrievedAt": "2026-11-17",
+  "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexmono/OFL.txt",
+  "licenseSha256": "90b105ce41e97140a972bd62a6e778d3feb88a561b314cdbed9c58b9d4b881a4",
+  "metricsSource": "Next.js 16.4.2 getFallbackFontOverrideMetrics",
+  "metrics": {
+    "fallbackFont": "Arial",
+    "ascentOverride": "76.16%",
+    "descentOverride": "20.43%",
+    "lineGapOverride": "0.00%",
+    "sizeAdjust": "134.59%"
+  },
+  "assets": [
+    {
+      "file": "normal-400-latin.c36f509c0a8f.woff2",
+      "style": "normal",
+      "weight": "400",
+      "subset": "latin",
+      "source": "FundedBeyond Brand Kit v1, 03 Fonts/IBMPlexMono-Regular-latin.woff2",
+      "sha256": "c36f509c0a8f9f85f29cb44bc8701d8a9e0b14c499e77a884f789ead7093a7ac",
+      "bytes": 10052,
+      "preload": true
+    },
+    {
+      "file": "normal-500-latin.a76f53ca6612.woff2",
+      "style": "normal",
+      "weight": "500",
+      "subset": "latin",
+      "source": "FundedBeyond Brand Kit v1, 03 Fonts/IBMPlexMono-Medium-latin.woff2",
+      "sha256": "a76f53ca6612e7b3828eec2311098675b7f9849ae4169a8bcef6302aec02a6c0",
+      "bytes": 10060,
+      "preload": true
+    },
+    {
+      "file": "normal-600-latin.ad4580d8cb4b.woff2",
+      "style": "normal",
+      "weight": "600",
+      "subset": "latin",
+      "source": "FundedBeyond Brand Kit v1, 03 Fonts/IBMPlexMono-SemiBold-latin.woff2",
+      "sha256": "ad4580d8cb4b5f627c2d18457656732f7f7b070f7837fbc380e08054157e6f6c",
+      "bytes": 10120,
+      "preload": true
+    }
+  ]
+}

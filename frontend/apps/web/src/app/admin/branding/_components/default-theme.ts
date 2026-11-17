@@ -12,6 +12,7 @@ export function createDefaultAdminTheme(tenantId: string, updatedAt: string): Th
       header: "#112233",
       radius: "md",
       modeDefault: "system",
+      skin: "classic",
     },
     status: "DRAFT",
     version: 0,

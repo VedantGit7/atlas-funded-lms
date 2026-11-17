@@ -1,0 +1,38 @@
+{
+  "family": "Manrope",
+  "version": "v1",
+  "source": "FundedBeyond Brand Kit v1 (October 2026), 03 Fonts",
+  "retrievedAt": "2026-11-17",
+  "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
+  "licenseSha256": "e01b637272e0cbdfb240184dd98ea5cc671556d9894dae2668d92ab2c906787c",
+  "metricsSource": "Next.js 16.4.2 getFallbackFontOverrideMetrics",
+  "metrics": {
+    "fallbackFont": "Arial",
+    "ascentOverride": "103.31%",
+    "descentOverride": "29.07%",
+    "lineGapOverride": "0.00%",
+    "sizeAdjust": "103.19%"
+  },
+  "assets": [
+    {
+      "file": "normal-latin.e310b55a7fd9.woff2",
+      "style": "normal",
+      "weight": "200 800",
+      "subset": "latin",
+      "source": "FundedBeyond Brand Kit v1, 03 Fonts/Manrope-Variable-latin.woff2",
+      "sha256": "e310b55a7fd9677f5e3555e6c6c4d064fa1f1d24393f0ddbe217cea12a8c432f",
+      "bytes": 24576,
+      "preload": true
+    },
+    {
+      "file": "normal-latin-ext.ce093b341d9c.woff2",
+      "style": "normal",
+      "weight": "200 800",
+      "subset": "latin-ext",
+      "source": "FundedBeyond Brand Kit v1, 03 Fonts/Manrope-Variable-latin-ext.woff2",
+      "sha256": "ce093b341d9c10658ee1eaa85c5f8042ff3307bc6ccfc5f405616eb437f0009e",
+      "bytes": 15240,
+      "preload": false
+    }
+  ]
+}

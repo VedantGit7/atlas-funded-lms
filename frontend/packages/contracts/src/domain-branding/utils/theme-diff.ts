@@ -12,6 +12,7 @@ const TOKEN_LABELS: Record<keyof UpdateTenantThemeRequest["tokens"], string> = {
   header: "Header",
   radius: "Corner radius",
   modeDefault: "Default appearance",
+  skin: "Style",
 };
 
 export function diffThemeTokens(

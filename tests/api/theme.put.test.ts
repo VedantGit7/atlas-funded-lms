@@ -16,6 +16,7 @@ const themePayload = {
       primary: "#112233",
       radius: "md" as const,
       modeDefault: "system" as const,
+      skin: "classic" as const,
     },
     status: "DRAFT" as const,
     version: 0,

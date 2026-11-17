@@ -74,6 +74,8 @@ const nextConfig: NextConfig = {
         "/fonts/jetbrains-mono/v24/:path*",
         "/fonts/inter/v20/:path*",
         "/fonts/playfair-display/v40/:path*",
+        "/fonts/manrope/v1/:path*",
+        "/fonts/ibm-plex-mono/v1/:path*",
       ].map((source) => ({
         source,
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
