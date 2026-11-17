@@ -170,20 +170,22 @@ export function LandingNav({
 
   return (
     <div className="sticky top-0 z-[100] border-b border-[var(--fba-bdr)] bg-[var(--fba-nav-bg)] backdrop-blur-[8px]">
-      <div className="mx-auto flex h-[62px] max-w-[1100px] items-center justify-between gap-6 px-7 max-[1024px]:px-4">
-        <Link href="/" className="flex shrink-0 items-center gap-2 no-underline">
+      {/* On a phone the brand gives way to the buttons: it drops "Academy" and,
+          for a long name, truncates, so the bar never scrolls sideways. */}
+      <div className="mx-auto flex h-[62px] max-w-[1100px] items-center justify-between gap-3 px-7 max-[1024px]:px-4 sm:gap-6">
+        <Link href="/" className="flex min-w-0 items-center gap-2 no-underline">
           <TenantBrandMark
             logoUrl={logoUrl}
             name={fullName}
             size={30}
             className="h-[30px] w-[30px] shrink-0 rounded-full"
           />
-          <div>
+          <div className="min-w-0 truncate" title={fullName}>
             <span className="text-[13px] font-extrabold leading-none text-[var(--fba-tx)]">
               {brandName}
             </span>
             {hasAcademySuffix ? (
-              <span className="text-[13px] font-normal leading-none text-[var(--fba-tx3)]">
+              <span className="text-[13px] font-normal leading-none text-[var(--fba-tx3)] max-[400px]:hidden">
                 {" "}
                 Academy
               </span>
@@ -217,7 +219,7 @@ export function LandingNav({
             onClick={() => {
               captureLandingCtaClick("nav_start_free");
             }}
-            className="rounded-lg bg-[var(--fba-ind)] px-5 py-[11px] text-xs font-bold text-white no-underline transition-colors hover:bg-[var(--fba-ind-d)]"
+            className="whitespace-nowrap rounded-lg bg-[var(--fba-ind)] px-4 py-[11px] text-xs font-bold text-white no-underline transition-colors hover:bg-[var(--fba-ind-d)] sm:px-5"
           >
             Start Free →
           </Link>

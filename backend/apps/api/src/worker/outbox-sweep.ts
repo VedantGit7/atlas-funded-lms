@@ -15,7 +15,7 @@ import { purgeExpiredAttributionEvents } from "@atlas/domain/sales-marketing/att
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import { purgeAbandonedUploads } from "@atlas/storage/abandoned-upload-purge";
 import { OUTBOX_PROCESSORS, type OutboxProcessor } from "./outbox-processors";
-import { drainTenantUsageEvents } from "@atlas/api/tenant-usage-meter";
+import { drainTenantUsageEvents, pruneTenantUsageEvents } from "@atlas/api/tenant-usage-meter";
 
 export type SweepOptions = {
   /** Max events each processor drains per tenant per pass. */
@@ -72,6 +72,8 @@ export type SweepResult = {
   attributionEventsPurged: number;
   exportFilesPurged: number;
   usageEventsProcessed: number;
+  /** Processed usage events past their two-day retry window, deleted this sweep. */
+  usageEventsPruned: number;
   /** Timed attempts closed by their deadline this sweep (H1). */
   expiredAttemptsFinalized: number;
   /** Scheduled report runs enqueued this sweep (formerly a Vercel cron). */
@@ -128,6 +130,7 @@ const RETENTION_COUNTERS: Record<
   | "attributionEventsPurged"
   | "exportFilesPurged"
   | "usageEventsProcessed"
+  | "usageEventsPruned"
   | "expiredAttemptsFinalized"
   | "scheduledReportRunsEnqueued"
   | "certificatesExpired"
@@ -135,6 +138,7 @@ const RETENTION_COUNTERS: Record<
   | "abandonedUploadsPurged"
 > = {
   "usage-meter-drain": "usageEventsProcessed",
+  "usage-events-prune": "usageEventsPruned",
   "export-file-purge": "exportFilesPurged",
   "idempotency-purge": "idempotencyRecordsPurged",
   "proctoring-media-purge": "proctoringMediaPurged",
@@ -145,6 +149,13 @@ const RETENTION_COUNTERS: Record<
   "fx-rate-refresh": "fxRatesRefreshed",
   "abandoned-upload-purge": "abandonedUploadsPurged",
 };
+
+/** Tasks whose full batch means a backlog, so the worker should sweep again soon. */
+const SATURATING_TASKS = new Set([
+  "usage-meter-drain",
+  "usage-events-prune",
+  "attempt-deadline-finalize",
+]);
 
 export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
   // One live FX fetch per sweep at most, shared by every tenant that needs it.
@@ -159,6 +170,18 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
           { tenantId, requestId, allowAnonymousTenantRead: true },
           async (tx) =>
             (await drainTenantUsageEvents(tx, { limit: USAGE_DRAIN_BATCH_LIMIT })).processed,
+        ),
+    },
+    {
+      // Its own transaction: a failed prune must not roll back the drain above.
+      name: "usage-events-prune",
+      includeInactiveTenants: true,
+      batchLimit: USAGE_DRAIN_BATCH_LIMIT,
+      run: async ({ tenantId, requestId }) =>
+        withTenantTx(
+          { tenantId, requestId, allowAnonymousTenantRead: true },
+          async (tx) =>
+            (await pruneTenantUsageEvents(tx, { limit: USAGE_DRAIN_BATCH_LIMIT })).pruned,
         ),
     },
     {
@@ -305,6 +328,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     attributionEventsPurged: 0,
     exportFilesPurged: 0,
     usageEventsProcessed: 0,
+    usageEventsPruned: 0,
     expiredAttemptsFinalized: 0,
     scheduledReportRunsEnqueued: 0,
     certificatesExpired: 0,
@@ -388,10 +412,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
         });
         const counter = RETENTION_COUNTERS[task.name];
         if (counter) result[counter] += purged;
-        if (
-          (task.name === "usage-meter-drain" || task.name === "attempt-deadline-finalize") &&
-          purged >= (task.batchLimit ?? options.batchLimit)
-        )
+        if (SATURATING_TASKS.has(task.name) && purged >= (task.batchLimit ?? options.batchLimit))
           result.saturated = true;
         options.onProgress?.();
       } catch (error) {
