@@ -12,6 +12,7 @@ import {
   deriveVerdict,
   gateBlockers,
 } from "./evidence-contract.mjs";
+import { GATE_OUTPUT_MAX_BUFFER, gateFailureLog, gateFailureMessage } from "./gate-output.mjs";
 
 const outputIndex = process.argv.indexOf("--output");
 const outputPath =
@@ -45,6 +46,7 @@ const gates = AUTOMATED_GATES.map(({ id, name, script, severity, group }) => {
   const result = spawnSync("pnpm", [script], {
     stdio: "pipe",
     encoding: "utf8",
+    maxBuffer: GATE_OUTPUT_MAX_BUFFER,
     shell: process.platform === "win32",
     env:
       id === "db_rls_check"
@@ -56,20 +58,14 @@ const gates = AUTOMATED_GATES.map(({ id, name, script, severity, group }) => {
         : process.env,
   });
   const ok = result.status === 0 && !result.error;
+  // The end of a failed gate's output, where the failures are reported, goes
+  // to the evidence file, and a longer end to the CI log (gate-output.mjs).
+  if (!ok) console.error(gateFailureLog(id, result));
   return {
     ...base,
     status: ok ? "passed" : "failed",
     command: `pnpm ${script}`,
-    ...(ok
-      ? {}
-      : {
-          message: (
-            result.error?.message ||
-            result.stderr ||
-            result.stdout ||
-            `exit ${result.status}`
-          ).slice(0, 500),
-        }),
+    ...(ok ? {} : { message: gateFailureMessage(result) }),
     durationMs: Date.now() - started,
   };
 });
