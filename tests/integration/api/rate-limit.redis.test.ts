@@ -7,7 +7,7 @@ import {
   setRateLimitStore,
   type RateLimitRedisClient,
 } from "@atlas/api/rate-limit-store";
-import { enforcePublicRateLimit } from "@atlas/api/rate-limit";
+import { enforceAddressRateLimit, enforcePublicRateLimit } from "@atlas/api/rate-limit";
 
 const redisUrl = process.env["F04_TEST_REDIS_URL"];
 type Client = RateLimitRedisClient & {
@@ -78,14 +78,23 @@ describe.skipIf(!redisUrl)("F04 isolated real Redis", () => {
       bucket: "publicAuth" as const,
       requestId: "redis-f04",
     };
+    // publicAuth allows 60 a minute per IP (security review 5.3, finding 5).
     setRateLimitStore(a);
-    for (let index = 0; index < 10; index++) await enforcePublicRateLimit(args);
+    for (let index = 0; index < 30; index++) await enforcePublicRateLimit(args);
     setRateLimitStore(b);
-    for (let index = 0; index < 10; index++) await enforcePublicRateLimit(args);
+    for (let index = 0; index < 30; index++) await enforcePublicRateLimit(args);
     await expect(enforcePublicRateLimit(args)).rejects.toMatchObject({
       status: 429,
       retryAfterSeconds: expect.any(Number),
     });
+  });
+  it("shares an address's budget across application store instances", async () => {
+    const args = { kind: "signup-link" as const, email: "redis-f04@example.test" };
+    setRateLimitStore(a);
+    for (let index = 0; index < 2; index++) await enforceAddressRateLimit(args);
+    setRateLimitStore(b);
+    await enforceAddressRateLimit(args);
+    await expect(enforceAddressRateLimit(args)).rejects.toMatchObject({ status: 429 });
   });
   it("expires counters and starts a fresh window", async () => {
     expect((await a.hit("expiry", 100)).count).toBe(1);
