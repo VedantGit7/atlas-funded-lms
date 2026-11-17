@@ -63,11 +63,14 @@ vi.mock("../../../backend/packages/api/src/load-resource-ref", () => ({
 import { createTenantRoute } from "@atlas/api/create-tenant-route";
 import { requirePlatformPrincipal } from "@atlas/auth/platform-auth";
 
-function authenticatedSession(sessionAssuranceLevel: "aal1" | "aal2" | null | undefined) {
+function authenticatedSession(
+  sessionAssuranceLevel: "aal1" | "aal2" | null | undefined,
+  mfaEnabled = true,
+) {
   return {
     principalId: "principal-1",
     email: "operator@example.com",
-    mfaEnabled: true,
+    mfaEnabled,
     sessionAssuranceLevel,
   };
 }
@@ -84,7 +87,10 @@ function request() {
   });
 }
 
-function tenantRoute(mfa: "required" | "none", idempotency: "required" | "none" = "none") {
+function tenantRoute(
+  mfa: "required" | "none" | "challenge",
+  idempotency: "required" | "none" = "none",
+) {
   return createTenantRoute({
     metadata: {
       permission: "role.delete",
@@ -154,7 +160,34 @@ describe("session MFA at platform and tenant boundaries (F01)", () => {
     expect(mocks.handler).toHaveBeenCalledOnce();
   });
 
-  it("keeps non-MFA tenant operations available at AAL1", async () => {
+  it("keeps non-MFA tenant operations available at AAL1 for an account without an authenticator", async () => {
+    mocks.user.mockResolvedValue(authenticatedSession("aal1", false));
+    const response = await tenantRoute("none")(request());
+    expect(response.status).toBe(200);
+    expect(mocks.handler).toHaveBeenCalledOnce();
+  });
+
+  // Security review 5.3, finding 2: a Google or email-link sign-in starts an
+  // aal1 session, which must not stand in for the account's second factor.
+  it.each(["aal1", null, undefined] as const)(
+    "refuses every tenant route to an account with an authenticator whose session is at %s",
+    async (level) => {
+      mocks.user.mockResolvedValue(authenticatedSession(level));
+      const response = await tenantRoute("none")(request());
+      expect(response.status).toBe(403);
+      expect(await response.json()).toMatchObject({ error: { code: "MFA_REQUIRED" } });
+      expect(mocks.handler).not.toHaveBeenCalled();
+    },
+  );
+
+  it("lets that session reach the route that takes its code", async () => {
+    const response = await tenantRoute("challenge")(request());
+    expect(response.status).toBe(200);
+    expect(mocks.handler).toHaveBeenCalledOnce();
+  });
+
+  it("runs non-MFA tenant operations once the session has passed its second factor", async () => {
+    mocks.user.mockResolvedValue(authenticatedSession("aal2"));
     const response = await tenantRoute("none")(request());
     expect(response.status).toBe(200);
     expect(mocks.handler).toHaveBeenCalledOnce();

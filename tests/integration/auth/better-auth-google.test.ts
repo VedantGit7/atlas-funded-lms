@@ -1,21 +1,19 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { removeBetterAuthTestRows } from "../../helpers/better-auth-cleanup";
+import { signUpThroughEmailedLink } from "../../helpers/better-auth-signup";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { withGlobalDb } from "@atlas/db/global-db";
 import {
   completeGoogleCallback,
-  establishSessionFromTokenHash,
   listLoginMethods,
   loginWithPassword,
   requireBetterAuthUser,
   setAtlasAuthForTests,
-  signupWithPassword,
   startGoogleLink,
   startGoogleSignIn,
   unlinkLoginMethod,
-  type AuthEmail,
 } from "@atlas/auth";
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
 
@@ -81,12 +79,6 @@ function idToken(): string {
   ].join(".");
 }
 
-function tokenOf(emails: AuthEmail[] | undefined, kind: AuthEmail["kind"]): string {
-  const email = emails?.find((candidate) => candidate.kind === kind);
-  if (!email) throw new Error(`no ${kind} email`);
-  return email.token;
-}
-
 async function principalIdOf(email: string): Promise<string | undefined> {
   const { rows } = await owner.query<{ id: string }>(
     "select id::text from auth_principals where email_normalized = $1",
@@ -96,20 +88,14 @@ async function principalIdOf(email: string): Promise<string | undefined> {
 }
 
 async function passwordUser(email: string): Promise<{ cookie: string; principalId: string }> {
-  const signup = await signupWithPassword({
+  const { setCookies } = await signUpThroughEmailedLink({
     db: perStatement,
-    input: { email, password: PASSWORD, displayName: "Test Learner" },
-    req: request(),
+    email,
+    password: PASSWORD,
+    req: () => request(),
   });
-  const verified = await establishSessionFromTokenHash({
-    db: perStatement,
-    tokenHash: tokenOf(signup.emails, "verify-email"),
-    type: "signup",
-    req: request(),
-  });
-  if (!("setCookies" in verified.session)) throw new Error("expected Better Auth cookies");
   return {
-    cookie: cookieHeader(verified.session.setCookies),
+    cookie: cookieHeader(setCookies),
     principalId: (await principalIdOf(email)) ?? "",
   };
 }
@@ -233,12 +219,13 @@ suite("Better Auth Google sign-in", () => {
 
   it("refuses to link Google to an account whose own address isn't verified yet", async () => {
     const email = freshEmail();
-    // Signed up, never opened the link: someone else may have typed this address.
-    await signupWithPassword({
-      db: perStatement,
-      input: { email, password: PASSWORD, displayName: "Unverified" },
-      req: request(),
-    });
+    // An account whose address was never proven, as sign-up made before the
+    // 5.3 security review: someone else may have typed this address.
+    await owner.query(
+      `insert into auth_principals (id, email, email_normalized, email_verified, global_status, updated_at)
+       values ($1, $2, $2, false, 'active', now())`,
+      [randomUUID(), email],
+    );
     googleProfile = { sub: randomUUID(), email, email_verified: true, name: "Real Owner" };
 
     await expect(
@@ -251,19 +238,16 @@ suite("Better Auth Google sign-in", () => {
     expect(rows[0].n).toBe(0);
   });
 
-  it("gives no session to a new address Google hasn't verified, and sends our verification email", async () => {
+  // Security review 5.3, finding 1: an account from an address nobody has
+  // proven would keep this Google login after the real owner proved it.
+  it("creates nothing for a new address Google hasn't verified", async () => {
     const email = freshEmail();
     googleProfile = { sub: randomUUID(), email, email_verified: false, name: "Unverified Google" };
 
     const start = await startGoogleSignIn({ ctx: authRequestContext(request()) });
-    await expect(throughGoogle(start)).rejects.toMatchObject({ code: "EMAIL_NOT_VERIFIED" });
+    await expect(throughGoogle(start)).rejects.toMatchObject({ status: 401 });
 
-    const principalId = await principalIdOf(email);
-    const { rows } = await owner.query(
-      "select count(*)::int as n from auth_sessions where user_id = $1",
-      [principalId],
-    );
-    expect(rows[0].n).toBe(0);
+    expect(await principalIdOf(email)).toBeUndefined();
   });
 
   it("refuses a callback whose state cookie is missing", async () => {

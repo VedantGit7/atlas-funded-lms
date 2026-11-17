@@ -3,28 +3,26 @@ import {
   meOutputSchema,
   publicAuthOutputSchema,
   publicLoginInputSchema,
+  publicSignupCompleteInputSchema,
   publicSignupInputSchema,
 } from "@atlas/auth";
 
 describe("auth request/response schemas", () => {
-  it("accepts valid signup input", () => {
+  it("accepts valid signup input, which carries no password", () => {
     expect(
       publicSignupInputSchema.parse({
         email: " User@Example.com ",
         password: "password123",
       }),
-    ).toEqual({
-      email: "user@example.com",
-      password: "password123",
-    });
+    ).toEqual({ email: "user@example.com" });
   });
 
-  it("rejects short signup passwords", () => {
+  it("takes the password when the sign-up's link is opened, and refuses a short one", () => {
+    expect(
+      publicSignupCompleteInputSchema.parse({ token: "t".repeat(43), password: "password123" }),
+    ).toEqual({ token: "t".repeat(43), password: "password123" });
     expect(() =>
-      publicSignupInputSchema.parse({
-        email: "user@example.com",
-        password: "short",
-      }),
+      publicSignupCompleteInputSchema.parse({ token: "t".repeat(43), password: "short" }),
     ).toThrow();
   });
 

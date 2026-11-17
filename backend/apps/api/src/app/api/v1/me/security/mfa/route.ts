@@ -6,10 +6,11 @@ import {
   MfaEnrollResponseSchema,
   MfaListResponseSchema,
 } from "@atlas/domain-identity";
-import { securityMutationMetadata, securityReadMetadata } from "../route.metadata";
+import { securityFactorListMetadata, securityMutationMetadata } from "../route.metadata";
 
 export const GET = createTenantRoute({
-  metadata: securityReadMetadata,
+  // A session still waiting for its code reaches this, for the code dialog.
+  metadata: securityFactorListMetadata,
   output: MfaListResponseSchema,
   handler: async () => {
     const result = await listMfaFactors();

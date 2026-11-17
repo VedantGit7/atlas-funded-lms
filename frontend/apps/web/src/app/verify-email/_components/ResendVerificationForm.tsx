@@ -140,7 +140,7 @@ export function ResendVerificationForm({
             ? "Sending…"
             : cooldown > 0
               ? `Resend available in ${cooldown}s`
-              : "Resend verification email"}
+              : "Send a new link"}
         </button>
 
         <Link

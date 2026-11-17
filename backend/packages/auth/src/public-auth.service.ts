@@ -1,11 +1,11 @@
-import type { PublicLoginInput, PublicSignupInput } from "./schemas";
+import type { PublicLoginInput, PublicSignupCompleteInput, PublicSignupInput } from "./schemas";
 import { invalidCredentials } from "./auth-errors";
 import { findActiveSessionPrincipal } from "./auth-principal.repository";
 import {
   authRequestContext,
-  resendVerificationWithBetterAuth,
+  completeSignUp,
+  requestSignUpLink,
   signInWithBetterAuth,
-  signUpWithBetterAuth,
   verifyEmailWithBetterAuth,
   verifyMagicLinkWithBetterAuth,
 } from "./better-auth-flows";
@@ -49,24 +49,49 @@ export async function loginWithPassword(args: {
 }
 
 /**
- * Creates the account and asks for its address to be verified. A principal is
- * only created for an address its owner has proven (audit H6), so nobody is
- * signed in until the link is opened; the route sends the email.
+ * Starts a sign-up: emails the link that finishes it (security review 5.3,
+ * finding 1). Nothing is created until the link is opened and a password
+ * chosen, so a principal only exists for an address its owner has proven
+ * (audit H6). The route sends the email; the answer is the same for every
+ * address.
  */
-export async function signupWithPassword(args: {
-  db: QueryableDb;
+export async function requestSignup(args: {
   input: PublicSignupInput;
-  req: Request;
 }): Promise<{ status: "verification_required"; emails: AuthEmail[] }> {
-  await assertPasswordNotBreached(args.input.password);
-  const result = await signUpWithBetterAuth({
-    db: args.db,
-    ctx: authRequestContext(args.req),
+  const result = await requestSignUpLink({
     email: args.input.email,
-    password: args.input.password,
-    ...(args.input.displayName ? { displayName: args.input.displayName.trim() } : {}),
+    displayName: args.input.displayName?.trim(),
+    inviteToken: args.input.inviteToken,
   });
   return { status: "verification_required" as const, emails: result.emails };
+}
+
+/**
+ * Finishes a sign-up from its emailed link: checks the password against
+ * breaches before the single-use link is spent, then creates the verified
+ * account and signs it in.
+ */
+export async function completeSignup(args: {
+  db: QueryableDb;
+  input: PublicSignupCompleteInput;
+  req: Request;
+}) {
+  await assertPasswordNotBreached(args.input.password);
+  const completed = await completeSignUp({
+    ctx: authRequestContext(args.req),
+    token: args.input.token,
+    password: args.input.password,
+  });
+  const principal = await findActiveSessionPrincipal({
+    db: args.db,
+    principalId: completed.principalId,
+  });
+  return {
+    status: "signed_in" as const,
+    identity: toSessionSafeIdentity(principal),
+    session: completed.cookies,
+    ...(completed.inviteToken ? { inviteToken: completed.inviteToken } : {}),
+  };
 }
 
 /**
@@ -119,17 +144,14 @@ export async function establishSessionFromTokenHash(args: {
 }
 
 /**
- * Re-sends the sign-up verification email. Anti-enumeration: the outcome is
- * uniform whether or not the address exists or is already verified, so the
- * response can't be used to probe accounts.
+ * Re-sends the link that finishes a sign-up: a fresh one, since only its hash
+ * is stored. Anti-enumeration: the outcome is uniform whether or not the
+ * address exists or is already verified, so the response can't be used to
+ * probe accounts.
  */
 export async function resendSignupVerification(args: {
   email: string;
-  req: Request;
 }): Promise<{ ok: true; emails: AuthEmail[] }> {
-  const { emails } = await resendVerificationWithBetterAuth({
-    ctx: authRequestContext(args.req),
-    email: args.email,
-  });
+  const { emails } = await requestSignUpLink({ email: args.email });
   return { ok: true as const, emails };
 }

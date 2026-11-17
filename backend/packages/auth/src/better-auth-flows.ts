@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from "node:crypto";
 import { isAPIError } from "better-auth/api";
 import { resolveRequestHostFromHeaders } from "@atlas/tenancy";
 
@@ -11,6 +12,7 @@ import {
   signInRateLimited,
 } from "./auth-errors";
 import {
+  isEmailChangeToken,
   OAUTH_DONE_PATH,
   OAUTH_ERROR_PATH,
   OAUTH_LINKED_PATH,
@@ -136,79 +138,151 @@ export async function signInWithBetterAuth(args: {
   }
 }
 
-export type BetterAuthSignUp = { status: "verification_required"; emails: AuthEmail[] };
-
 /**
- * Signs up and asks for the verification email. The answer is the same whether
- * or not the address already has an account, so it can't be used to probe
- * accounts. An unclaimed placeholder (audit H6) gets the password and the
- * email; it becomes active when its owner signs in with the proven address.
+ * Sign-up proves the address before anything is chosen for the account
+ * (security review 5.3, finding 1). The sign-up form asks only for the name
+ * and email; the emailed link opens the page where the password is chosen,
+ * and only then is the account created, verified, and signed in. A password
+ * typed before the address is proven could belong to anyone, and would
+ * otherwise outlive the owner's own verification.
  */
-export async function signUpWithBetterAuth(args: {
-  db: QueryableDb;
-  ctx: AuthRequestContext;
-  email: string;
-  password: string;
-  displayName?: string;
-}): Promise<BetterAuthSignUp> {
-  const auth = getAtlasAuth();
-  const existing = await principalByEmail(args.db, args.email);
+const SIGNUP_LINK_TTL_MS = 24 * 60 * 60 * 1000;
 
-  if (existing?.global_status === "unclaimed") {
-    const { emails } = await captureAuthEmails(async () => {
-      const context = await auth.$context;
-      const accounts = await context.internalAdapter.findAccounts(existing.id);
-      if (!accounts.some((account) => account.providerId === "credential")) {
-        await context.internalAdapter.linkAccount({
-          userId: existing.id,
-          providerId: "credential",
-          accountId: existing.id,
-          password: await context.password.hash(args.password),
-        });
-      }
-      await auth.api.sendVerificationEmail({
-        body: { email: args.email },
-        headers: headersFor(args.ctx),
-      });
-    });
-    return { status: "verification_required", emails };
-  }
+/** The verification row's identifier: the token itself is never stored. */
+function signupIdentifier(token: string): string {
+  return `signup:${createHash("sha256").update(token).digest("hex")}`;
+}
 
-  if (existing) {
-    // Already registered: no email, and the same answer as a new address.
-    return { status: "verification_required", emails: [] };
-  }
+type PendingSignup = { email: string; displayName?: string; inviteToken?: string };
 
+function readPendingSignup(value: string): PendingSignup | null {
   try {
-    const { emails } = await captureAuthEmails(() =>
-      auth.api.signUpEmail({
-        body: { email: args.email, password: args.password, name: args.displayName ?? "" },
-        headers: headersFor(args.ctx),
-      }),
-    );
-    return { status: "verification_required", emails };
-  } catch (error) {
-    const code = errorCode(error);
-    if (code && WEAK_PASSWORD_CODES.has(code)) throw passwordRejected();
-    // Lost a race with another sign-up for the same address.
-    if (code === "USER_ALREADY_EXISTS" || code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
-      return { status: "verification_required", emails: [] };
-    }
-    if (statusOf(error) === 429) throw signInRateLimited();
-    throw authProviderUnavailable();
+    const parsed: unknown = JSON.parse(value);
+    if (typeof parsed !== "object" || parsed === null) return null;
+    const record = parsed as Record<string, unknown>;
+    if (typeof record["email"] !== "string") return null;
+    return {
+      email: record["email"],
+      ...(typeof record["displayName"] === "string" ? { displayName: record["displayName"] } : {}),
+      ...(typeof record["inviteToken"] === "string" ? { inviteToken: record["inviteToken"] } : {}),
+    };
+  } catch {
+    return null;
   }
 }
 
+type FoundPrincipal = {
+  user: { id: string; email: string; emailVerified?: boolean; globalStatus?: unknown };
+  accounts: Array<{ id: string }>;
+};
+
 /**
- * Opens a verification link: marks the email verified and signs the person in.
- * Better Auth answers `user: null` and signs in only through the cookie it
- * sets, so the principal is read back from that session. A link that was
- * already used verifies nothing and sets no cookie.
+ * Whether the address belongs to someone who has proven it and can sign in.
+ * An unverified account, an unclaimed placeholder (audit H6) or one with no
+ * login method is not: whoever proves the address next becomes its owner.
+ */
+function addressState(found: FoundPrincipal | null): "none" | "claimable" | "exists" | "disabled" {
+  if (!found) return "none";
+  if (found.user.globalStatus === "disabled") return "disabled";
+  const proven = found.user.emailVerified === true && found.user.globalStatus !== "unclaimed";
+  return proven && found.accounts.length > 0 ? "exists" : "claimable";
+}
+
+/**
+ * Starts a sign-up: emails the link that finishes it, or, when the address
+ * already has an account, an email saying so with a way to sign in. The
+ * answer is the same for every address, so it can't be used to probe
+ * accounts, and a disabled account is sent nothing.
+ */
+export async function requestSignUpLink(args: {
+  email: string;
+  displayName?: string | undefined;
+  inviteToken?: string | undefined;
+}): Promise<{ emails: AuthEmail[] }> {
+  const email = args.email.trim().toLowerCase();
+  const context = await getAtlasAuth().$context;
+  const found = (await context.internalAdapter.findUserByEmail(email, {
+    includeAccounts: true,
+  })) as FoundPrincipal | null;
+
+  const state = addressState(found);
+  if (state === "disabled") return { emails: [] };
+  if (state === "exists") return { emails: [{ kind: "account-exists", email, token: "" }] };
+
+  const token = randomBytes(32).toString("base64url");
+  const pending: PendingSignup = {
+    email,
+    ...(args.displayName ? { displayName: args.displayName } : {}),
+    ...(args.inviteToken ? { inviteToken: args.inviteToken } : {}),
+  };
+  await context.internalAdapter.createVerificationValue({
+    identifier: signupIdentifier(token),
+    value: JSON.stringify(pending),
+    expiresAt: new Date(Date.now() + SIGNUP_LINK_TTL_MS),
+  });
+  return { emails: [{ kind: "complete-signup", email, token }] };
+}
+
+function signupLinkInvalid(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "AUTH_REQUIRED",
+    status: 401,
+    message: "This sign-up link is invalid or has expired. Sign up again to get a new one.",
+  });
+}
+
+/**
+ * Finishes a sign-up from its emailed link: the link proves the address, so
+ * the account is created verified with the password chosen now, and signed
+ * in. The link works once. Returns the invitation the sign-up started from,
+ * if any, for the page to open next.
+ */
+export async function completeSignUp(args: {
+  ctx: AuthRequestContext;
+  token: string;
+  password: string;
+}): Promise<{
+  principalId: string;
+  email: string;
+  cookies: BetterAuthCookies;
+  inviteToken?: string;
+}> {
+  const context = await getAtlasAuth().$context;
+  const consumed = await context.internalAdapter
+    .consumeVerificationValue(signupIdentifier(args.token))
+    .catch(() => null);
+  if (!consumed || new Date(consumed.expiresAt).getTime() <= Date.now()) throw signupLinkInvalid();
+  const pending = readPendingSignup(consumed.value);
+  if (!pending) throw signupLinkInvalid();
+
+  const created = await createAccountFromProvenAddress({
+    ctx: args.ctx,
+    email: pending.email,
+    password: args.password,
+    ...(pending.displayName ? { displayName: pending.displayName } : {}),
+    existsMessage: "This email already has an account. Sign in instead.",
+  });
+  return {
+    ...created,
+    email: pending.email,
+    ...(pending.inviteToken ? { inviteToken: pending.inviteToken } : {}),
+  };
+}
+
+/**
+ * Opens the link that confirms the new address of an email change, or the
+ * current address's approval of one. Better Auth answers `user: null` and
+ * signs in only through the cookie it sets, so the principal is read back from
+ * that session. A link that was already used verifies nothing and sets no
+ * cookie. Better Auth's sign-up verification links are refused: no flow sends
+ * them any more, and one would verify an account without proving who chose
+ * its password.
  */
 export async function verifyEmailWithBetterAuth(args: {
   ctx: AuthRequestContext;
   token: string;
 }): Promise<{ principalId: string | null; cookies: BetterAuthCookies; emails: AuthEmail[] }> {
+  if (!isEmailChangeToken(args.token)) throw invalidCredentials();
   const auth = getAtlasAuth();
   let cookies: BetterAuthCookies;
   let emails: AuthEmail[];
@@ -249,8 +323,8 @@ async function sessionPrincipal(
 }
 
 /**
- * Emails a sign-in link (launch plan task 3.4). Existing accounts only, and
- * the same answer either way: an unknown address gets nothing.
+ * Emails a sign-in link (launch plan task 3.4). Existing, verified accounts
+ * only, and the same answer either way: any other address gets nothing.
  */
 export async function requestMagicLinkWithBetterAuth(args: {
   ctx: AuthRequestContext;
@@ -259,8 +333,12 @@ export async function requestMagicLinkWithBetterAuth(args: {
   try {
     // Better Auth sends the link to any address and refuses it only when it's
     // opened (disableSignUp), which would let anyone have us email anyone.
+    // Opening one also verifies the address, so an unverified account would
+    // keep whatever login method it was created with (security review 5.3,
+    // finding 1); its owner finishes signing up instead.
     const context = await getAtlasAuth().$context;
-    if (!(await context.internalAdapter.findUserByEmail(args.email))) return { emails: [] };
+    const found = await context.internalAdapter.findUserByEmail(args.email);
+    if (found?.user.emailVerified !== true) return { emails: [] };
 
     const { emails } = await captureAuthEmails(() =>
       getAtlasAuth().api.signInMagicLink({
@@ -335,24 +413,6 @@ export async function changeEmailWithBetterAuth(args: {
       status: 400,
       message: "Unable to complete this security action. Please try again.",
     });
-  }
-}
-
-/** Uniform: never says whether the address exists. */
-export async function resendVerificationWithBetterAuth(args: {
-  ctx: AuthRequestContext;
-  email: string;
-}): Promise<{ emails: AuthEmail[] }> {
-  try {
-    const { emails } = await captureAuthEmails(() =>
-      getAtlasAuth().api.sendVerificationEmail({
-        body: { email: args.email },
-        headers: headersFor(args.ctx),
-      }),
-    );
-    return { emails };
-  } catch {
-    return { emails: [] };
   }
 }
 
@@ -837,38 +897,61 @@ export async function invitedAccountState(email: string): Promise<"none" | "exis
 
 /**
  * Finishes an invitation for someone who can't sign in yet: the invitation
- * link was sent to this address, which proves it, so the account is created
- * verified (or, for a principal with no login method, such as an unclaimed
- * placeholder, given one), with the chosen password, and signed in.
- * An address that can already sign in is refused: that person signs in and
- * accepts, so nobody's password is replaced from an invitation.
+ * link was sent to this address, which proves it. See
+ * createAccountFromProvenAddress.
  */
 export async function createAccountFromInvitation(args: {
   ctx: AuthRequestContext;
   email: string;
   password: string;
 }): Promise<{ principalId: string; cookies: BetterAuthCookies }> {
+  return createAccountFromProvenAddress({
+    ...args,
+    existsMessage: "This email already has an account. Sign in to accept the invitation.",
+  });
+}
+
+/**
+ * Creates the account for an address just proven by an emailed link (a
+ * sign-up's or an invitation's), with the password chosen now, and signs it
+ * in. An account that wasn't yet proven, such as an unverified one or an
+ * unclaimed placeholder (audit H6), becomes this person's: every login method
+ * and session it had is removed first, since whoever added them hadn't proven
+ * the address (security review 5.3, finding 1). An address that can already
+ * sign in is refused: that person signs in, so nobody's password is replaced
+ * from an emailed link.
+ */
+async function createAccountFromProvenAddress(args: {
+  ctx: AuthRequestContext;
+  email: string;
+  password: string;
+  displayName?: string;
+  existsMessage: string;
+}): Promise<{ principalId: string; cookies: BetterAuthCookies }> {
   const auth = getAtlasAuth();
   const context = await auth.$context;
-  const found = await context.internalAdapter.findUserByEmail(args.email, {
+  const found = (await context.internalAdapter.findUserByEmail(args.email, {
     includeAccounts: true,
-  });
-  if (found && found.accounts.length > 0) {
-    throw new AtlasHttpError({
-      code: "ALREADY_MEMBER",
-      status: 409,
-      message: "This email already has an account. Sign in to accept the invitation.",
-    });
+  })) as FoundPrincipal | null;
+  const state = addressState(found);
+  if (state === "exists") {
+    throw new AtlasHttpError({ code: "ALREADY_MEMBER", status: 409, message: args.existsMessage });
   }
+  // Refused at sign-in by the session hook, as everywhere.
+  if (state === "disabled") throw accountDisabled();
 
+  if (found) {
+    for (const account of found.accounts) await context.internalAdapter.deleteAccount(account.id);
+    await context.internalAdapter.deleteUserSessions(found.user.id);
+  }
   const user =
     found?.user ??
     (await context.internalAdapter.createUser(
-      { email: args.email, name: "", emailVerified: true },
-      // An academy invitation, accepted by setting a password.
+      { email: args.email, name: args.displayName ?? "", emailVerified: true },
+      // Accepted by setting a password, after the emailed link proved the address.
       { method: "email-password" },
     ));
-  if (!user.emailVerified) {
+  if (user.emailVerified !== true) {
     await context.internalAdapter.updateUser(user.id, { emailVerified: true });
   }
   await context.internalAdapter.linkAccount({

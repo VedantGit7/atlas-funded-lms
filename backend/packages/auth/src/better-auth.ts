@@ -62,12 +62,18 @@ export const OAUTH_ERROR_PATH = "/auth/oauth/error";
  */
 export type AuthEmail = {
   /**
-   * verify-email: confirm a new account's address. verify-new-email: confirm
-   * the new address of an email change. confirm-email-change: ask the current
-   * address to approve a change. magic-link: sign in without a password.
-   * invitation: join an academy (the token is the membership's invite token).
+   * complete-signup: the link that finishes a sign-up, where the password is
+   * chosen. account-exists: a sign-up for an address that already has an
+   * account; it carries no token. verify-email: Better Auth's own verification,
+   * which no flow asks for any more (an account is only created verified).
+   * verify-new-email: confirm the new address of an email change.
+   * confirm-email-change: ask the current address to approve a change.
+   * magic-link: sign in without a password. invitation: join an academy (the
+   * token is the membership's invite token).
    */
   kind:
+    | "complete-signup"
+    | "account-exists"
     | "verify-email"
     | "verify-new-email"
     | "confirm-email-change"
@@ -85,7 +91,7 @@ export type AuthEmail = {
  * new address (`updateTo`). Read for the email's wording only, never trusted:
  * Better Auth verifies the token when the link is opened.
  */
-function isEmailChangeToken(token: string): boolean {
+export function isEmailChangeToken(token: string): boolean {
   try {
     const payload: unknown = JSON.parse(
       Buffer.from(token.split(".")[1] ?? "", "base64url").toString("utf8"),
@@ -264,8 +270,8 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
               clientId: options.google.clientId,
               clientSecret: options.google.clientSecret,
               prompt: "select_account" as const,
-              // A new account from an address Google hasn't verified gets no
-              // session (audit H6): Better Auth sends our verification email.
+              // An address Google hasn't verified gets no account at all: the
+              // user create hook refuses it, and the person signs up by email.
               requireEmailVerification: true,
             },
           },
@@ -305,10 +311,17 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
     databaseHooks: {
       user: {
         create: {
+          // Only for an address its owner has proven (security review 5.3,
+          // finding 1): our sign-up and invitation flows create accounts
+          // verified, and Google does when Google has verified the address.
+          // An unverified account would let whoever created it keep a login
+          // method after the real owner later proves the address.
           before: (user) =>
-            Promise.resolve({
-              data: { ...user, emailNormalized: normalizeEmail(user.email) },
-            }),
+            Promise.resolve(
+              user.emailVerified
+                ? { data: { ...user, emailNormalized: normalizeEmail(user.email) } }
+                : false,
+            ),
         },
         update: {
           before: (user) =>

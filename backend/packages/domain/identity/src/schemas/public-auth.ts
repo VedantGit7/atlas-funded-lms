@@ -54,10 +54,14 @@ export const PublicOAuthCallbackRequestSchema = z
  */
 export const NEW_PASSWORD_MIN_LENGTH = 10;
 
+/**
+ * Starts a sign-up. The password isn't asked for here: it is chosen on the
+ * page the emailed link opens, once the address is proven (security review
+ * 5.3, finding 1).
+ */
 export const PublicSignupRequestSchema = z
   .object({
     email: z.string().trim().toLowerCase().pipe(z.email()),
-    password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
     displayName: z.string().trim().min(2).max(120),
     inviteToken: z.string().min(20).max(500).optional(),
     /** Optional Learnyst-style referral / invite code (not an admin invite token). */
@@ -71,6 +75,15 @@ export const PublicSignupRequestSchema = z
         .regex(/^[A-Za-z0-9_-]+$/)
         .optional(),
     ),
+  })
+  .strict();
+
+/** Finishes a sign-up: the emailed link's single-use token and the chosen password. */
+export const PublicSignupCompleteRequestSchema = z
+  .object({
+    token: z.string().min(20).max(200),
+    // Better Auth's own ceiling is 128 characters.
+    password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(128),
   })
   .strict();
 

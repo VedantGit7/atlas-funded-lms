@@ -65,14 +65,29 @@ async function queryAs(role: string, sql: string, values: unknown[] = []) {
   }
 }
 
-async function signUpVerified(email: string) {
-  const { user } = await auth.api.signUpEmail({
-    body: { email, password: PASSWORD, name: "Test Learner" },
-    headers: headersFor("academy.localhost.test"),
+/**
+ * A verified account with a password, made the way the sign-up and invitation
+ * flows make one once an emailed link has proven the address (security review
+ * 5.3, finding 1). Better Auth's own sign-up would make it unverified, which
+ * the user create hook refuses.
+ */
+async function createAccount(email: string, name = "Test Learner") {
+  const context = await auth.$context;
+  const user = await context.internalAdapter.createUser(
+    { email, name, emailVerified: true },
+    { method: "email-password" },
+  );
+  await context.internalAdapter.linkAccount({
+    userId: user.id,
+    providerId: "credential",
+    accountId: user.id,
+    password: await context.password.hash(PASSWORD),
   });
-  // Email verification is task 3.2; here the address is confirmed directly.
-  await owner.query("update auth_principals set email_verified = true where id = $1", [user.id]);
   return user;
+}
+
+async function signUpVerified(email: string) {
+  return createAccount(email);
 }
 
 async function signIn(email: string) {
@@ -103,12 +118,9 @@ suite("Better Auth on the Atlas schema", () => {
     await closeAuthPrismaForTests();
   });
 
-  it("signs up into auth_principals with a UUIDv7 id and the normalised email", async () => {
+  it("creates a principal in auth_principals with a UUIDv7 id and the normalised email", async () => {
     const email = freshEmail();
-    const { user } = await auth.api.signUpEmail({
-      body: { email, password: PASSWORD, name: "Test Learner" },
-      headers: headersFor("academy.localhost.test"),
-    });
+    const user = await createAccount(email);
 
     expect(user.id).toMatch(UUID_V7);
     const { rows } = await owner.query(
@@ -120,7 +132,7 @@ suite("Better Auth on the Atlas schema", () => {
       email: email.toLowerCase(),
       email_normalized: email.toLowerCase(),
       name: "Test Learner",
-      email_verified: false,
+      email_verified: true,
       global_status: "active",
       mfa_enabled: false,
     });
@@ -136,12 +148,26 @@ suite("Better Auth on the Atlas schema", () => {
 
   it("refuses to sign in before the email is verified", async () => {
     const email = freshEmail();
-    await auth.api.signUpEmail({
-      body: { email, password: PASSWORD, name: "" },
-      headers: headersFor("academy.localhost.test"),
-    });
+    const user = await createAccount(email, "");
+    // An account from before the 5.3 security review, never verified.
+    await owner.query("update auth_principals set email_verified = false where id = $1", [user.id]);
 
     await expect(signIn(email)).rejects.toMatchObject({ statusCode: 403 });
+  });
+
+  it("refuses to create a principal whose address is unproven", async () => {
+    const email = freshEmail();
+    await expect(
+      auth.api.signUpEmail({
+        body: { email, password: PASSWORD, name: "" },
+        headers: headersFor("academy.localhost.test"),
+      }),
+    ).rejects.toBeDefined();
+    const { rowCount } = await owner.query(
+      "select 1 from auth_principals where email_normalized = $1",
+      [email.toLowerCase()],
+    );
+    expect(rowCount).toBe(0);
   });
 
   it("signs in with an aal1 session in auth_sessions and the atlas_session cookie", async () => {

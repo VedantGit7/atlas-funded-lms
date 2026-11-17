@@ -30,9 +30,15 @@ function resolveDestination(
       return resolvePostAuthRedirect(clientNext, apiRedirect, "/") ?? "/";
     case "INVITED_MEMBERSHIP":
       return resolvePostAuthRedirect(clientNext, apiRedirect, "/invite/accept") ?? "/invite/accept";
+    case "MFA_REQUIRED": {
+      // Signed in, but the session can't be used until the authenticator code
+      // is given (security review 5.3, finding 2): the sign-in page asks for it.
+      const next = resolvePostAuthRedirect(clientNext, null);
+      return next ? `/login?step=mfa&next=${encodeURIComponent(next)}` : "/login?step=mfa";
+    }
     default:
-      // NO_ACTIVE_MEMBERSHIP, MFA_REQUIRED, EMAIL_VERIFICATION_REQUIRED are not
-      // resolvable through the social flow; bounce back to login with an error.
+      // NO_ACTIVE_MEMBERSHIP and EMAIL_VERIFICATION_REQUIRED are not resolvable
+      // through the social flow; bounce back to login with an error.
       return null;
   }
 }

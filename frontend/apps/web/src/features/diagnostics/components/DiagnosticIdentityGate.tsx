@@ -49,7 +49,6 @@ export function DiagnosticIdentityGate({
     defaultValues: {
       displayName: "",
       email: "",
-      password: "",
     },
   });
 
@@ -74,7 +73,10 @@ export function DiagnosticIdentityGate({
     }
   }, [open]);
 
-  async function submitSignup(values: { email: string; password: string; displayName: string }) {
+  // A sign-up emails the link that finishes it, where the password is chosen
+  // (security review 5.3, finding 1), so nobody is signed in yet: the results
+  // are saved when the person signs in afterwards.
+  async function submitSignup(values: { email: string; displayName: string }) {
     setStatus("loading");
     setMessage(null);
 
@@ -84,8 +86,11 @@ export function DiagnosticIdentityGate({
         values,
         "diagnostic-signup",
       );
-      const mergeResult = await diagnosticApiClient.mergePublicDiagnostic(anonymousId);
-      router.push(mergeResult.data.resultPath);
+      setStatus("idle");
+      setMessage(
+        "Check your email for the link to finish creating your account, then sign in here to save your results.",
+      );
+      setMode("login");
     } catch (error) {
       setStatus("error");
       setMessage(
@@ -201,26 +206,6 @@ export function DiagnosticIdentityGate({
                 )}
               />
 
-              <FormField
-                control={signupForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        required
-                        type="password"
-                        autoComplete="new-password"
-                        className="w-full"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {message ? (
                 <p role="alert" className="text-sm text-destructive-text">
                   {message}
@@ -295,7 +280,10 @@ export function DiagnosticIdentityGate({
               />
 
               {message ? (
-                <p role="alert" className="text-sm text-destructive-text">
+                <p
+                  role={status === "error" ? "alert" : "status"}
+                  className={status === "error" ? "text-sm text-destructive-text" : "text-sm"}
+                >
                   {message}
                 </p>
               ) : null}

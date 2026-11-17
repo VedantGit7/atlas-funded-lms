@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { loadPublicBootstrap } from "@/lib/server/bootstrap";
 import { resolveTenantLogoUrl } from "@/lib/brand";
+import { resolveSafeRedirectPath } from "@/lib/auth/safe-redirect";
 import { VerifyEmailScreen, type VerifyEmailStatus } from "./_components/VerifyEmailScreen";
 
 export const metadata: Metadata = {
@@ -19,13 +20,11 @@ type VerifyEmailSearchParams = Promise<{
  * never bounce back into the auth/verify namespaces (which would loop).
  */
 function sanitizeNext(value: string | undefined): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/";
-  }
-  if (value.startsWith("/auth/") || value.startsWith("/verify-email")) {
-    return "/";
-  }
-  return value;
+  // The shared check also refuses `/\host`, which browsers read as `//host`
+  // (security review 5.3, finding 4).
+  const safe = resolveSafeRedirectPath(value);
+  if (!safe || safe.startsWith("/auth/") || safe.startsWith("/verify-email")) return "/";
+  return safe;
 }
 
 export default async function VerifyEmailPage({

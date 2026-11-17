@@ -191,6 +191,13 @@ const CONFIRM_TYPE: Partial<Record<AuthEmail["kind"], string>> = {
  * for the new password, and /invite/accept opens an invitation.
  */
 export function authEmailLink(email: AuthEmail, origin: string): string {
+  if (email.kind === "complete-signup") {
+    const url = new URL("/signup/complete", origin);
+    url.searchParams.set("token", email.token);
+    return url.toString();
+  }
+  // A sign-up for an address that has an account: no token, just the way in.
+  if (email.kind === "account-exists") return new URL("/login", origin).toString();
   if (email.kind === "invitation") {
     const url = new URL("/invite/accept", origin);
     url.searchParams.set("token", email.token);
@@ -222,6 +229,24 @@ type AuthEmailContent = {
 function contentFor(email: AuthEmail, academyName: string): AuthEmailContent {
   const name = escapeHtml(academyName);
   switch (email.kind) {
+    case "complete-signup":
+      return {
+        subject: `Finish creating your ${academyName} account`,
+        headingHtml: "Finish creating your account",
+        introHtml: `Open this link to choose your password and finish creating your ${name} account.`,
+        actionLabel: "Choose my password",
+        footnote:
+          "The link works once and expires in 24 hours. If you didn't sign up, you can ignore this email: no account is created until the link is opened.",
+      };
+    case "account-exists":
+      return {
+        subject: `You already have an account with ${academyName}`,
+        headingHtml: "You already have an account",
+        introHtml: `Someone tried to sign up for ${name} with this email address, which already has an account. Sign in instead, or use "Forgot password" on the sign-in page if you don't remember it.`,
+        actionLabel: "Sign in",
+        footnote:
+          "If this wasn't you, you can ignore this email: nothing about your account has changed.",
+      };
     case "verify-email":
       return {
         subject: `Confirm your email for ${academyName}`,

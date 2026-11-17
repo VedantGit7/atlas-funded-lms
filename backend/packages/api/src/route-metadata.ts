@@ -86,8 +86,13 @@ export type RouteMetadata<TInput = unknown> = {
    * actions, payouts and refunds, and data exports. Defaults to "none" so the
    * requirement is always visible at the route rather than implied by a
    * permission-name convention that would drift.
+   *
+   * "challenge": a route the second-factor step needs (taking the code, and
+   * listing the account's authenticators for the code dialog). An account
+   * with an authenticator whose session hasn't passed it yet reaches these
+   * routes and no others (security review 5.3, finding 2).
    */
-  mfa?: "none" | "required";
+  mfa?: "none" | "required" | "challenge";
 };
 
 export type PlatformRouteContext = {

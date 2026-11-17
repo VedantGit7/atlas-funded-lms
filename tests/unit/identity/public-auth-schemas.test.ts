@@ -37,11 +37,20 @@ describe("public auth schemas", () => {
     expect(
       PublicSignupRequestSchema.parse({
         email: "user@example.com",
-        password: "password123",
         displayName: "Atlas User",
         inviteToken: "a".repeat(32),
       }).displayName,
     ).toBe("Atlas User");
+  });
+
+  it("refuses a password at sign-up: it is chosen from the emailed link", () => {
+    expect(
+      PublicSignupRequestSchema.safeParse({
+        email: "user@example.com",
+        password: "password123",
+        displayName: "Atlas User",
+      }).success,
+    ).toBe(false);
   });
 
   it("validates auth response envelope", () => {

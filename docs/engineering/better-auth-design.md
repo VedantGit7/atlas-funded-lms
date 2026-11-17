@@ -72,7 +72,7 @@ So `auth_sessions` gets two columns of our own, declared to Better Auth as sessi
 - A session-create hook sets it when the session is created by the two-factor verify endpoints (TOTP or a backup code).
 - The step-up route (`POST /api/v1/me/security/mfa/step-up`) and verifying a new factor (`…/mfa/verify`) set it after Better Auth accepts the code.
 
-**Everything else gets `aal1`,** including Google and email-code sign-in. For an account with an authenticator, the sign-in flow then asks for the code on the step-up screen. The platform guard and the tenant routes that declare MFA keep refusing `aal1` either way.
+**Everything else gets `aal1`,** including Google and email-link sign-in. For an account with an authenticator, that session isn't signed in until the code is given: `requireSessionUser` answers MFA_REQUIRED on every route except the step-up route and the authenticator list the code dialog reads (`mfa: "challenge"`), and the sign-in page asks for the code (`/login?step=mfa`). Before the login security review this was left to the sign-in page, and the Google callback didn't ask at all ([review](login-security-review-2026-11-16.md), finding 2). The platform guard and the tenant routes that declare MFA keep refusing `aal1` for every account.
 
 **"Trust this device" isn't offered.** A backup code counts as a second factor (`aal2`), as NIST SP 800-63B allows for look-up secrets.
 
@@ -173,7 +173,7 @@ There are no production accounts.
 
 - Better Auth's callbacks only record what it asked for (`captureAuthEmails`). The route then sends it (`apps/api/src/lib/auth-email.ts`) with the academy's name and its Transactional Email sender, on the host the person used.
 - Asking for an email outside a route that sends it throws, so nothing is silently not sent.
-- Links go to our pages: `/auth/confirm?token_hash=…&type=signup` verifies and signs in, as Supabase's link does; `/reset-password?token=…` asks for the new password.
+- Links go to our pages: `/signup/complete?token=…` finishes a sign-up, `/auth/confirm?token_hash=…` opens sign-in links and email-change links, and `/reset-password?token=…` asks for the new password. Until the login security review a sign-up's link went to `/auth/confirm` with `type=signup`; see "Login security review" below.
 - Full academy branding is 3.6.
 
 **What differs from Supabase, on purpose:**
@@ -228,7 +228,7 @@ Behind the same `AUTH_PROVIDER` switch. The product sends **links**, not codes t
 
 **Sign-in links ("Email me a sign-in link").**
 
-- Existing accounts only (`disableSignUp`): signing up still needs a password.
+- Existing, verified accounts only (`disableSignUp`, and a check for the verified address): opening a link verifies the address, so one sent to an unverified account would leave it with whatever login method it was created with.
 - Better Auth would email a link to any address and refuse it only when opened. That would let anyone have us email anyone, so the API checks for the account first and sends nothing otherwise. The answer is the same either way.
 - The link (`/auth/confirm?token_hash=…&type=magiclink`) works once, within 10 minutes. The token is stored hashed, so the database alone can't sign anyone in.
 - Opening it marks the address verified and starts an `aal1` session. The session hook still refuses a disabled principal and claims a placeholder (H6).
@@ -303,7 +303,7 @@ It's used for sign-up verification, sign-in links, password resets, both email-c
 **Accepting.**
 
 - The page asks the API's invitation preview who is signed in, and, with Better Auth, whether the invited address can already sign in.
-- **Can't sign in yet:** the person sets a password straight away. The invitation proves the address, because it was emailed there. The account is created verified and signed in, or a placeholder with no login method gets its first one and is claimed.
+- **Can't sign in yet:** the person sets a password straight away. The invitation proves the address, because it was emailed there. The account is created verified and signed in. An account that wasn't yet proven (a placeholder, or an unverified account from before the login security review) becomes theirs: its login methods and sessions are removed first, and it gets the new password.
 - **Can sign in:** the person signs in and accepts. Nobody's password is replaced from an invitation.
 
 **One change outside the switch.** The web app used to ask Supabase directly who was signed in on the invitation page. Now the API's preview answers, for either system. That works on staging today and is one less Supabase call to remove in 3.8.
@@ -392,6 +392,17 @@ Better Auth is the only login system. `AUTH_PROVIDER` is gone, along with every 
 - the first-password reset.
 
 The web actions' handling of a password-policy refusal kept its tests.
+
+## Login security review (launch plan 5.3, 16 November 2026)
+
+The review and its findings are in [login-security-review-2026-11-16.md](login-security-review-2026-11-16.md). What it changed here:
+
+- **Sign-up proves the address first.** The form asks for the name and email only (`POST /public/auth/signup`). The emailed link opens `/signup/complete`, where the password is chosen, and `POST /public/auth/signup/complete` creates the account verified and signs it in. The link is a random token stored only as its SHA-256 hash in `auth_verifications` (`signup:<hash>`), works once and lasts 24 hours. A sign-up for an address that already has an account emails its owner instead; a disabled account gets nothing. Resend sends a fresh link.
+- **Better Auth creates no unverified account.** The user create hook refuses one, so a Google address Google hasn't verified gets no account, and Better Auth's own sign-up verification links are refused when opened.
+- **Proving an address takes over an unproven account** (finishing sign-up, or accepting an invitation): every login method and session it had is removed first.
+- **MFA at sign-in, for every route.** See "Setting `aal2`" above.
+- **The session cache reads only the cookie Better Auth reads** (`__Secure-atlas_session` on https) and checks Better Auth's answer is for that token.
+- **Per-address budgets** on the sign-in routes ([rate limiting](../runbooks/rate-limiting.md)).
 
 ## Open items for the flow tasks
 

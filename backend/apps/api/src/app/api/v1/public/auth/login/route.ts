@@ -5,6 +5,7 @@ import {
   resolveTenantFromRequest,
 } from "@atlas/tenancy";
 import { createPublicRouteHandler } from "@atlas/api";
+import { enforceAddressRateLimit } from "@atlas/api/rate-limit";
 import { applyAuthSession, loginWithPassword } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
@@ -34,6 +35,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     const rawBody: unknown = await req.json();
     rejectClientTenantId(rawBody);
     const input = PublicLoginRequestSchema.parse(rawBody);
+    await enforceAddressRateLimit({ kind: "sign-in", email: input.email });
 
     const result = await loginWithPassword({
       db: loginPrincipalDb,
@@ -61,6 +63,8 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
   const rawBody: unknown = await req.json();
   rejectClientTenantId(rawBody);
   const input = PublicLoginRequestSchema.parse(rawBody);
+  // Per address as well as per IP (security review 5.3, finding 5).
+  await enforceAddressRateLimit({ kind: "sign-in", email: input.email });
 
   const result = await loginWithPassword({
     db: loginPrincipalDb,

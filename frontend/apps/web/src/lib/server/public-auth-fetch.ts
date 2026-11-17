@@ -116,11 +116,17 @@ export const serverPublicApi = {
 
   signup: (body: {
     email: string;
-    password: string;
     displayName: string;
     inviteToken?: string;
     referralCode?: string;
   }) => postJson<PublicAuthApiResponse>("/api/v1/public/auth/signup", body, "public-signup"),
+
+  completeSignup: (body: { token: string; password: string }) =>
+    postJson<PublicAuthApiResponse>(
+      "/api/v1/public/auth/signup/complete",
+      body,
+      "public-signup-complete",
+    ),
 
   resend: (body: { email: string }) =>
     postJson<{ data: { ok: boolean; message: string } }>(

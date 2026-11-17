@@ -3,6 +3,7 @@ import { confirmEmailViaInternalApi } from "../../../lib/server/public-auth-fetc
 import { resolveRequestOrigin } from "../../../lib/server/resolve-request-origin";
 import { withSignupCompleteMarker } from "../../../features/marketing/snippet-scope";
 import { identityBlockQueryValue, isIdentityBlockCode } from "../../../lib/auth-messages";
+import { resolveSafeRedirectPath } from "../../../lib/auth/safe-redirect";
 
 // The academy's auth emails (sign-up verification, sign-in links, both email
 // change steps) point here with a single-use `token_hash` and its `type`
@@ -15,15 +16,13 @@ export const dynamic = "force-dynamic";
 /**
  * Only allow same-origin absolute paths as the post-verification destination,
  * and never bounce back into the auth/confirm namespace (which would loop).
+ * The shared check also refuses `/\host`, which browsers read as `//host`
+ * (security review 5.3, finding 4).
  */
 function sanitizeNext(value: string | null): string | null {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return null;
-  }
-  if (value.startsWith("/auth/")) {
-    return null;
-  }
-  return value;
+  const safe = resolveSafeRedirectPath(value);
+  if (!safe || safe.startsWith("/auth/")) return null;
+  return safe;
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -76,9 +75,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     destination = new URL("/verify-email", origin);
     destination.searchParams.set("status", "success");
     destination.searchParams.set("next", dest);
+  } else if (result.status === "MFA_REQUIRED") {
+    // Signed in, but the session can't be used until the authenticator code
+    // is given (security review 5.3, finding 2): the sign-in page asks for it.
+    destination = new URL("/login", origin);
+    destination.searchParams.set("step", "mfa");
+    if (next) destination.searchParams.set("next", next);
   } else {
-    // Verified but not auto-signed-in (e.g. MFA / no active membership) → sign in
-    // with a success banner.
+    // Verified but not signed in here (no active membership) → sign in with a
+    // success banner.
     destination = new URL("/login?verified=1", origin);
   }
 

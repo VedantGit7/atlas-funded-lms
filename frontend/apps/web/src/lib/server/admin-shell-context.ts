@@ -6,7 +6,10 @@ import {
   type AdminNavigationProjection,
 } from "./admin-navigation-projection";
 import { ServerApiError, serverApi } from "../server-api";
-import { redirectUnauthenticatedToLogin } from "./shell-auth-redirect";
+import {
+  redirectPendingSecondFactorToLogin,
+  redirectUnauthenticatedToLogin,
+} from "./shell-auth-redirect";
 
 export type AdminShellMemberProjection = {
   membershipId: string;
@@ -145,6 +148,10 @@ export async function loadAdminShellContext(): Promise<AdminShellContext> {
 
     if (error.status === 401 || error.code === "AUTH_REQUIRED") {
       await redirectUnauthenticatedToLogin("/admin");
+    }
+
+    if (error.code === "MFA_REQUIRED") {
+      await redirectPendingSecondFactorToLogin("/admin");
     }
 
     if (error.code === "TENANT_NOT_FOUND") {

@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { removeBetterAuthTestRows } from "../../helpers/better-auth-cleanup";
+import { signUpThroughEmailedLink } from "../../helpers/better-auth-signup";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { withGlobalDb } from "@atlas/db/global-db";
@@ -13,11 +14,11 @@ import {
   requestMagicLinkWithBetterAuth,
   requireBetterAuthUser,
   setAtlasAuthForTests,
-  signupWithPassword,
   verifySecondFactor,
   type AuthEmail,
 } from "@atlas/auth";
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
+import { requireSessionUser } from "@atlas/api/session-user";
 
 /**
  * Launch plan task 3.5 against Postgres:
@@ -81,21 +82,13 @@ function totp(uri: string): string {
 }
 
 async function signedInUser(email: string): Promise<{ cookie: string }> {
-  const signup = await signupWithPassword({
+  const { setCookies } = await signUpThroughEmailedLink({
     db: perStatement,
-    input: { email, password: PASSWORD, displayName: "Test Learner" },
-    req: request(),
+    email,
+    password: PASSWORD,
+    req: () => request(),
   });
-  const verified = await establishSessionFromTokenHash({
-    db: perStatement,
-    tokenHash: only(signup.emails, "verify-email").token,
-    type: "signup",
-    req: request(),
-  });
-  if (verified.status !== "signed_in" || !("setCookies" in verified.session)) {
-    throw new Error("expected a Better Auth sign-in");
-  }
-  return { cookie: cookieHeader(verified.session.setCookies) };
+  return { cookie: cookieHeader(setCookies) };
 }
 
 /** A user with a verified authenticator; returns its URI, backup codes and an aal2 cookie. */
@@ -233,10 +226,22 @@ suite("Better Auth two-factor", () => {
     expect(await requireBetterAuthUser(request(cookie))).toMatchObject({
       sessionAssuranceLevel: "aal1",
     });
+    // Security review 5.3, finding 2: until the code is given, that session is
+    // not signed in anywhere but the route that takes the code.
+    await expect(requireSessionUser(request(cookie))).rejects.toMatchObject({
+      code: "MFA_REQUIRED",
+      status: 403,
+    });
+    await expect(
+      requireSessionUser(request(cookie), { allowPendingSecondFactor: true }),
+    ).resolves.toMatchObject({ sessionAssuranceLevel: "aal1" });
 
     const stepped = await verifySecondFactor({ ctx: ctx(cookie), code: totp(uri) });
     expect(stepped.cookies.setCookies).toEqual([]);
     expect(await requireBetterAuthUser(request(cookie))).toMatchObject({
+      sessionAssuranceLevel: "aal2",
+    });
+    await expect(requireSessionUser(request(cookie))).resolves.toMatchObject({
       sessionAssuranceLevel: "aal2",
     });
     const { rows } = await owner.query(

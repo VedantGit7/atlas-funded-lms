@@ -7,6 +7,7 @@ import {
 } from "./learner-navigation-projection";
 import { parallelLoad } from "../api/parallel";
 import { ServerApiError, serverApi } from "../server-api";
+import { redirectPendingSecondFactorToLogin } from "./shell-auth-redirect";
 
 export type LearnerShellMemberProjection = {
   membershipId: string;
@@ -93,6 +94,10 @@ export async function loadLearnerShellContext(): Promise<LearnerShellContext> {
   } catch (error) {
     if (!(error instanceof ServerApiError)) {
       throw error;
+    }
+
+    if (error.code === "MFA_REQUIRED") {
+      await redirectPendingSecondFactorToLogin("/");
     }
 
     if (error.status === 401) {

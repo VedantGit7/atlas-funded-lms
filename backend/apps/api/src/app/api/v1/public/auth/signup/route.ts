@@ -1,18 +1,25 @@
 import { NextResponse } from "next/server";
-import { createPublicRouteHandler, globalDbPerStatement, resolveRequestTenant } from "@atlas/api";
-import { publicSignupInputSchema, signupWithPassword } from "@atlas/auth";
+import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
+import { enforceAddressRateLimit } from "@atlas/api/rate-limit";
+import { publicSignupInputSchema, requestSignup } from "@atlas/auth";
 import { sendAuthEmails } from "../../../../../../lib/auth-email";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
-import { findMembershipByPrincipal } from "@atlas/membership";
 import {
+  PublicAuthResponseSchema,
   PublicSignupRequestSchema,
   rejectClientTenantId,
-  buildPublicAuthResponse,
 } from "@atlas/domain-identity";
-import { dispatchMarketingIntegrationWebhooks } from "../../../../../../server/marketing-integrations/marketing-integrations.dispatch";
 import { stashReferralCodeForSignup } from "../../../../../../server/sales-referrals/sales-referrals.service";
 import { routeMetadata } from "./route.metadata";
 
+/**
+ * Starts a sign-up: emails the link that finishes it, where the password is
+ * chosen (security review 5.3, finding 1). Nothing is created here, and the
+ * answer is the same for every address: a new one gets the link, one that
+ * already has an account gets an email saying so, and a disabled one gets
+ * nothing. The account and the learner membership are made by
+ * /public/auth/signup/complete.
+ */
 export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
   // One pooled connection at a time, none during the sign-up itself (audit H3).
   const tenant = await resolveRequestTenant(req);
@@ -20,9 +27,11 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
   const rawBody: unknown = await req.json();
   rejectClientTenantId(rawBody);
   const input = PublicSignupRequestSchema.parse(rawBody);
+  // Per address as well as per IP (security review 5.3, finding 5).
+  await enforceAddressRateLimit({ kind: "signup-link", email: input.email });
 
-  // Validate + stash referral before creating the auth principal so a bad
-  // code cannot leave an orphaned signup behind.
+  // Validate + stash referral before anything else, so a bad code is refused
+  // before an email goes out. It is applied when the membership is made.
   const referralCode = input.referralCode;
   if (referralCode) {
     await withTenantTx(
@@ -40,73 +49,20 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     );
   }
 
-  const result = await signupWithPassword({
-    db: globalDbPerStatement,
+  const result = await requestSignup({
     input: publicSignupInputSchema.parse({
       email: input.email,
-      password: input.password,
       displayName: input.displayName,
       inviteToken: input.inviteToken,
       referralCode: input.referralCode,
     }),
-    req,
   });
-  // Better Auth leaves the verification email to us, sent from the academy.
+  // Sent from the academy, with its link back to this host.
   await sendAuthEmails({ req, requestId, emails: result.emails });
 
-  const principalRows = await globalDbPerStatement.$queryRaw<{ id: string }[]>`
-    select id::text
-    from auth_principals
-    where email_normalized = ${input.email}
-    limit 1
-  `;
-  const principalId = principalRows[0]?.id;
-
-  const body = await withTenantTx(
-    {
-      tenantId: tenant.tenantId,
-      requestId,
-      allowAnonymousTenantRead: true,
-    },
-    async (tx) => {
-      // Nobody is signed in until the address is verified; the learner
-      // membership is provisioned at that first sign-in. An address that
-      // already belongs to a member is answered for that membership.
-      const membership = principalId
-        ? await findMembershipByPrincipal({
-            tx,
-            tenantId: tenant.tenantId,
-            authPrincipalId: principalId,
-          })
-        : null;
-
-      if (membership) {
-        try {
-          await dispatchMarketingIntegrationWebhooks(
-            tx,
-            { tenantId: tenant.tenantId, actorMembershipId: membership.id, requestId },
-            "sign_up",
-            {
-              email: input.email,
-              name: input.displayName,
-              membershipId: membership.id,
-              source: "public_signup",
-            },
-          );
-        } catch {
-          // Webhook fan-out must never block signup.
-        }
-      }
-
-      return buildPublicAuthResponse({
-        tx,
-        tenantId: tenant.tenantId,
-        serviceStatus: result.status,
-        mfaEnabled: false,
-        membership: membership ? { id: membership.id, status: membership.status } : null,
-      });
-    },
+  return NextResponse.json(
+    PublicAuthResponseSchema.parse({
+      data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null },
+    }),
   );
-
-  return NextResponse.json(body);
 });
