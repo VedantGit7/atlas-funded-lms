@@ -18,6 +18,7 @@ import { toSafeErrorEnvelope } from "./error-envelope";
 import type { PlatformRouteContext, PlatformRouteMetadata } from "./route-metadata";
 import { fingerprintRequest, validateIdempotencyKey } from "./idempotency-registry";
 import { withPlatformIdempotency } from "./platform-idempotency-registry";
+import { readJsonBody } from "./read-json-body";
 import { enforceIngressRateLimit, enforceProtectedRateLimit } from "./rate-limit";
 
 const MIN_PLATFORM_REASON_LENGTH = 10;
@@ -34,8 +35,7 @@ function readQueryInput<T>(req: NextRequest, schema: z.ZodType<T>): T {
 }
 
 async function readBodyInput<T>(req: NextRequest, schema: z.ZodType<T>): Promise<T> {
-  const raw: unknown = await req.json();
-  return schema.parse(raw);
+  return readJsonBody(req, schema);
 }
 
 function readPlatformReason(req: NextRequest): string {

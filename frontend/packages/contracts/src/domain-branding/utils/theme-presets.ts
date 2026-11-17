@@ -16,6 +16,7 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
       header: "#112233",
       radius: "md",
       modeDefault: "system",
+      skin: "classic",
     },
   },
   {
@@ -30,6 +31,24 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
       header: "#1B2A4A",
       radius: "md",
       modeDefault: "system",
+      skin: "classic",
+    },
+  },
+  {
+    // A complete look rather than a tint: ice and white surfaces, ink text,
+    // one bright blue, cyan glows, frosted cards and Manrope with IBM Plex
+    // Mono. Built from an academy's brand kit (November 2026), named for the
+    // look so the catalogue advertises no academy. Light by default; its dark
+    // variant is a night sky in the same blues.
+    key: "sky-glass",
+    label: "Sky Glass",
+    tokens: {
+      primary: "#1E6BFF",
+      accent: "#5FD4FF",
+      header: "#0A1F3D",
+      radius: "lg",
+      modeDefault: "light",
+      skin: "sky-glass",
     },
   },
   {
@@ -41,6 +60,7 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
       header: "#1e293b",
       radius: "sm",
       modeDefault: "light",
+      skin: "classic",
     },
   },
   {
@@ -52,6 +72,7 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
       header: "#064e3b",
       radius: "lg",
       modeDefault: "system",
+      skin: "classic",
     },
   },
 ] as const;

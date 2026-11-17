@@ -1,0 +1,263 @@
+/* ------------------------------------------------------------------------ */
+/* Sky Glass theme skin                                                      */
+/*                                                                          */
+/* Selected by the academy theme (TenantThemeTokensSchema.skin), and active  */
+/* only when the root layout sets `data-skin="sky-glass"` on <html>. Every   */
+/* rule below is scoped to that attribute, so other academies are untouched. */
+/*                                                                          */
+/* It changes no markup. It re-points the tokens the app already uses -- the */
+/* shared shadcn tokens, the public/auth palette (--fba-*), the admin,       */
+/* studio and account/learner palettes -- at one brand palette, and swaps    */
+/* the fonts. The palette is a brand kit's (ink, one bright blue, ice, cyan, */
+/* frosted white), adapted where its values fail WCAG AA as text:            */
+/*   - the brand blue #1E6BFF carries white text at 4.57:1, so it fills      */
+/*     buttons, but blue *text* uses #1654CE (5.8:1 on ice);                 */
+/*   - the subtle grey-blue #5A7398 is 4.3:1 on ice, so tertiary text uses   */
+/*     #3A5A86 (6.2:1);                                                      */
+/*   - there is no gold: the gold accents become cyan fills and deep blue    */
+/*     text.                                                                 */
+/* Light is the default (the preset sets modeDefault "light"). The dark      */
+/* variant is a night sky in the same blues, because every surface must     */
+/* support both modes.                                                       */
+/* ------------------------------------------------------------------------ */
+
+/* Fonts: Manrope for everything, IBM Plex Mono for labels and data. The
+   font classes set their variables on each element that carries them, so the
+   override has to match those elements too, not only <html>. */
+html[data-skin="sky-glass"],
+html[data-skin="sky-glass"] .font-plus-jakarta-sans {
+  --font-jakarta: var(--font-manrope);
+  --font-plus-jakarta: var(--font-manrope);
+}
+
+html[data-skin="sky-glass"],
+html[data-skin="sky-glass"] .font-jetbrains-mono {
+  --font-jetbrains: var(--font-plex-mono);
+  --font-studio-mono: var(--font-plex-mono);
+}
+
+html[data-skin="sky-glass"] body {
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-feature-settings: "tnum" 0;
+}
+
+/* Shared tokens (shadcn components, page canvas). ------------------------ */
+html[data-skin="sky-glass"] {
+  --background: #f3f9ff;
+  --foreground: #0a1f3d;
+  --card: #ffffff;
+  --card-foreground: #0a1f3d;
+  --border: #d3e5f7;
+  --input: #c4dcf3;
+  --ring: #1e6bff;
+  --muted: #e6f3ff;
+  --muted-foreground: #3a5a86;
+  /* --radius and the --brand-* colours come from the theme's own tokens, set
+     inline on <html>, which wins over this sheet. */
+}
+
+html[data-skin="sky-glass"].dark {
+  --background: #07142b;
+  --foreground: #e6f3ff;
+  --card: #0f2446;
+  --card-foreground: #e6f3ff;
+  --border: #1c3560;
+  --input: #23406f;
+  --ring: #7fdbff;
+  --muted: #0b1c38;
+  --muted-foreground: #a9c3de;
+}
+
+/* Public, sign-in and landing pages (--fba-*). ---------------------------- */
+html[data-skin="sky-glass"] .fba-scope {
+  --fba-bg: #e6f3ff;
+  --fba-bg2: #dceefc;
+  --fba-surf: #ffffff;
+  --fba-bdr: #d3e5f7;
+  --fba-bdr2: #b9d3ee;
+  --fba-tx: #0a1f3d;
+  --fba-tx2: #24365c;
+  --fba-tx3: #3a5a86;
+  --fba-ind: #1e6bff;
+  --fba-ind-d: #1654ce;
+  --fba-ind-l: #e4f5ff;
+  --fba-ind-tx: #1654ce;
+  --fba-panel: #1654ce;
+  --fba-gld: #5fd4ff;
+  --fba-gld-l: #e4f5ff;
+  --fba-gld-b: #9be3ff;
+  --fba-gld-tx: #16407f;
+  --fba-on-gld: #0a1f3d;
+  --fba-gld-num: #1e6bff;
+  --fba-ind-num: #3080ff;
+  --fba-nav-bg: rgba(243, 249, 255, 0.86);
+  --fba-footer-bg: #0a1f3d;
+
+  /* The sky: ice at the top fading to white, as on the brand's pages. */
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(95, 212, 255, 0.22) 0%, transparent 60%),
+    linear-gradient(180deg, #e6f3ff 0%, #f3f9ff 45%, #ffffff 100%);
+}
+
+html[data-skin="sky-glass"] .fba-scope.fba-dark,
+html[data-skin="sky-glass"] .fba-dark .fba-scope,
+html[data-skin="sky-glass"].dark .fba-scope {
+  --fba-bg: #07142b;
+  --fba-bg2: #0b1c38;
+  --fba-surf: #0f2446;
+  --fba-bdr: #1c3560;
+  --fba-bdr2: #23406f;
+  --fba-tx: #e6f3ff;
+  --fba-tx2: #bfd4ee;
+  --fba-tx3: #9fb8d8;
+  --fba-ind: #1e6bff;
+  --fba-ind-d: #1654ce;
+  --fba-ind-l: #12305e;
+  --fba-ind-tx: #7fdbff;
+  --fba-panel: #103ea0;
+  --fba-gld: #5fd4ff;
+  --fba-gld-l: #12305e;
+  --fba-gld-tx: #9be3ff;
+  --fba-on-gld: #0a1f3d;
+  --fba-nav-bg: rgba(7, 20, 43, 0.9);
+  --fba-footer-bg: #040c1c;
+
+  background: linear-gradient(180deg, #0b1c38 0%, #07142b 55%);
+}
+
+html[data-skin="sky-glass"]:has(.fba-scope.fba-dark) body {
+  background-color: #07142b;
+}
+
+/* Admin console. --------------------------------------------------------- */
+html[data-skin="sky-glass"] .admin-theme {
+  --admin-bg: #eef6ff;
+  --admin-surface: #ffffff;
+  --admin-surface-low: #f3f9ff;
+  --admin-surface-high: #e4f0fc;
+  --admin-surface-variant: #e6f3ff;
+  --admin-border: #d3e5f7;
+  --admin-outline: #a9c3de;
+  --admin-primary: #1e6bff;
+  --admin-primary-strong: #1654ce;
+  --admin-primary-container: #e4f5ff;
+  --admin-on-primary: #ffffff;
+  --admin-on-primary-container: #16407f;
+  --admin-on-surface: #0a1f3d;
+  --admin-on-surface-variant: #3a5a86;
+}
+
+html[data-skin="sky-glass"].dark .admin-theme {
+  --admin-bg: #07142b;
+  --admin-surface: #0f2446;
+  --admin-surface-low: #0b1c38;
+  --admin-surface-high: #16305a;
+  --admin-surface-variant: #132b52;
+  --admin-border: #1c3560;
+  --admin-outline: #3a5a86;
+  --admin-primary: #7fdbff;
+  --admin-primary-strong: #bfefff;
+  --admin-primary-container: #103ea0;
+  --admin-on-primary: #0a1f3d;
+  --admin-on-primary-container: #e4f5ff;
+  --admin-on-surface: #e6f3ff;
+  --admin-on-surface-variant: #a9c3de;
+}
+
+/* Course studio. --------------------------------------------------------- */
+html[data-skin="sky-glass"] .studio-shell {
+  --studio-bg: #eef6ff;
+  --studio-surface: #ffffff;
+  --studio-surface-low: #f3f9ff;
+  --studio-surface-high: #e4f0fc;
+  --studio-border: #d3e5f7;
+  --studio-outline: #5a7398;
+  --studio-primary: #1654ce;
+  --studio-primary-container: #1e6bff;
+  --studio-on-primary: #ffffff;
+  --studio-on-primary-container: #ffffff;
+  --studio-on-surface: #0a1f3d;
+  --studio-on-surface-variant: #3a5a86;
+  --studio-secondary: #24365c;
+  --studio-tertiary: #16407f;
+}
+
+html[data-skin="sky-glass"].dark .studio-shell {
+  --studio-bg: #07142b;
+  --studio-surface: #0f2446;
+  --studio-surface-low: #0b1c38;
+  --studio-surface-high: #16305a;
+  --studio-border: #1c3560;
+  --studio-outline: #5a7398;
+  --studio-primary: #7fdbff;
+  --studio-primary-container: #103ea0;
+  --studio-on-primary: #0a1f3d;
+  --studio-on-primary-container: #e4f5ff;
+  --studio-on-surface: #e6f3ff;
+  --studio-on-surface-variant: #a9c3de;
+  --studio-secondary: #bfd4ee;
+  --studio-tertiary: #9be3ff;
+}
+
+/* Account settings and the learner area (--acct-*). ---------------------- */
+html[data-skin="sky-glass"] .account-settings-theme,
+html[data-skin="sky-glass"] .learner-shell {
+  --acct-bg: #eef6ff;
+  --acct-surface: #f3f9ff;
+  --acct-surface-lowest: #ffffff;
+  --acct-surface-low: #eaf4ff;
+  --acct-surface-container: #e4f0fc;
+  --acct-surface-high: #dceefc;
+  --acct-surface-variant: #d3e5f7;
+  --acct-border: #c4dcf3;
+  --acct-outline: #5a7398;
+  --acct-on-surface: #0a1f3d;
+  --acct-on-surface-variant: #3a5a86;
+  --acct-primary: #1654ce;
+  --acct-primary-container: #1e6bff;
+  --acct-on-primary: #ffffff;
+  --acct-on-primary-container: #e4f5ff;
+  --acct-inverse-surface: #0a1f3d;
+  --acct-inverse-on-surface: #e6f3ff;
+  --acct-inverse-primary: #7fdbff;
+}
+
+html[data-skin="sky-glass"].dark .account-settings-theme,
+html[data-skin="sky-glass"].dark .learner-shell {
+  --acct-bg: #07142b;
+  --acct-surface: #0b1c38;
+  --acct-surface-lowest: #05101f;
+  --acct-surface-low: #0f2446;
+  --acct-surface-container: #132b52;
+  --acct-surface-high: #16305a;
+  --acct-surface-variant: #1c3560;
+  --acct-border: #23406f;
+  --acct-outline: #8fa5c2;
+  --acct-on-surface: #e6f3ff;
+  --acct-on-surface-variant: #a9c3de;
+  --acct-primary: #7fdbff;
+  --acct-primary-container: #103ea0;
+  --acct-on-primary: #0a1f3d;
+  --acct-on-primary-container: #e4f5ff;
+  --acct-inverse-surface: #e6f3ff;
+  --acct-inverse-on-surface: #0a1f3d;
+  --acct-inverse-primary: #1654ce;
+}
+
+/* Frosted cards: the brand's glass, on the surfaces already marked as glass. */
+html[data-skin="sky-glass"]:not(.dark) .admin-glass {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.27) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 30px 50px -30px rgba(14, 60, 140, 0.42),
+    inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(26px) saturate(160%);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html[data-skin="sky-glass"] .admin-glass {
+    background: var(--admin-surface);
+    backdrop-filter: none;
+  }
+}

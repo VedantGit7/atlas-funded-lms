@@ -150,6 +150,6 @@ export const config = {
      * this proxy that call carried no client IP, so the API refused it with
      * 503 on every few page views (Sentry ATLAS-LMS-6, since 30 October).
      */
-    "/((?!_next/static|_next/image|_next/webpack-hmr|fonts/cormorant-garamond/v21/|fonts/plus-jakarta-sans/v12/|fonts/jetbrains-mono/v24/|fonts/inter/v20/|fonts/playfair-display/v40/).*)",
+    "/((?!_next/static|_next/image|_next/webpack-hmr|fonts/cormorant-garamond/v21/|fonts/plus-jakarta-sans/v12/|fonts/jetbrains-mono/v24/|fonts/inter/v20/|fonts/playfair-display/v40/|fonts/manrope/v1/|fonts/ibm-plex-mono/v1/).*)",
   ],
 };

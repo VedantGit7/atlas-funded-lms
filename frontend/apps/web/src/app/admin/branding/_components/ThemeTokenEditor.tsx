@@ -166,6 +166,26 @@ export function ThemeTokenEditor({
             }}
           />
         </div>
+
+        <div className="space-y-2">
+          <p className={labelClassName}>Style</p>
+          <BrandingSegmentedControl
+            value={tokens.skin}
+            ariaLabel="Style"
+            options={[
+              { id: "classic", label: "Classic" },
+              { id: "sky-glass", label: "Sky Glass" },
+            ]}
+            onChange={(skin) => {
+              onTokensChange({ ...tokens, skin });
+            }}
+          />
+          <p className={sectionDescClassName}>
+            Classic tints the standard look with your colours. Sky Glass restyles every page: ice
+            and white surfaces, one bright blue, frosted cards and the Manrope typeface. It shows
+            once the theme is published.
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--admin-border)] px-6 py-4">

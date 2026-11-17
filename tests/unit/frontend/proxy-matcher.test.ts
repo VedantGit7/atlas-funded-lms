@@ -27,10 +27,13 @@ describe("web proxy matcher", () => {
     },
   );
 
-  it.each(["/_next/static/chunks/app.js", "/_next/image", "/fonts/inter/v20/inter.woff2"])(
-    "keeps static assets out: %s",
-    (path) => {
-      expect(matches(path)).toBe(false);
-    },
-  );
+  it.each([
+    "/_next/static/chunks/app.js",
+    "/_next/image",
+    "/fonts/inter/v20/inter.woff2",
+    "/fonts/manrope/v1/normal-latin.e310b55a7fd9.woff2",
+    "/fonts/ibm-plex-mono/v1/normal-400-latin.c36f509c0a8f.woff2",
+  ])("keeps static assets out: %s", (path) => {
+    expect(matches(path)).toBe(false);
+  });
 });
