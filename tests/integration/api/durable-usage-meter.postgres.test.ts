@@ -12,6 +12,7 @@ import {
   appendTenantUsageEvent,
   createTenantRequestUsage,
   drainTenantUsageEvents,
+  pruneTenantUsageEvents,
   type UsageEvent,
 } from "@atlas/api/tenant-usage-meter";
 import {
@@ -257,7 +258,15 @@ suite("F22 durable usage PostgreSQL", () => {
         WHERE id=${old.id}::uuid`;
     });
     await withTenantTx(tenantCtx(tenantA), async (tx) => {
+      // The drain no longer prunes: that runs in a transaction of its own.
       expect(await drainTenantUsageEvents(tx, { limit: 100 })).toEqual({ processed: 0 });
+      expect(
+        await tx.$queryRaw<Array<{ n: number }>>`
+        SELECT count(*)::int AS n FROM tenant_usage_events`,
+      ).toEqual([{ n: 2 }]);
+    });
+    await withTenantTx(tenantCtx(tenantA), async (tx) => {
+      expect(await pruneTenantUsageEvents(tx, { limit: 100 })).toEqual({ pruned: 1 });
       const rows = await tx.$queryRaw<
         Array<{ id: string }>
       >`SELECT id::text FROM tenant_usage_events`;

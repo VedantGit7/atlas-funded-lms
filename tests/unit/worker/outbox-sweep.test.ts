@@ -125,6 +125,51 @@ describe("runOutboxSweep", () => {
       },
     );
   });
+  it("prunes usage events in a task of its own, so a failed prune keeps the drain", async () => {
+    const result = await runOutboxSweep(
+      options({
+        listTenantIds: async () => [],
+        listRetentionTenantIds: async () => ["t1"],
+        retentionTasks: [
+          { name: "usage-meter-drain", includeInactiveTenants: true, run: async () => 7 },
+          {
+            name: "usage-events-prune",
+            includeInactiveTenants: true,
+            run: async () => {
+              throw new Error("canceling statement due to statement timeout");
+            },
+          },
+        ],
+      }),
+    );
+    expect(result.usageEventsProcessed).toBe(7);
+    expect(result.errors).toEqual([
+      expect.objectContaining({ processor: "usage-events-prune", tenantId: "t1" }),
+    ]);
+    const names = defaultRetentionTasks().map((task) => task.name);
+    expect(names.indexOf("usage-events-prune")).toBe(names.indexOf("usage-meter-drain") + 1);
+    expect(
+      defaultRetentionTasks().find((task) => task.name === "usage-events-prune"),
+    ).toMatchObject({ includeInactiveTenants: true, batchLimit: USAGE_DRAIN_BATCH_LIMIT });
+  });
+  it("counts pruned usage events and sweeps again while a prune backlog remains", async () => {
+    const result = await runOutboxSweep(
+      options({
+        listTenantIds: async () => [],
+        listRetentionTenantIds: async () => ["t1"],
+        retentionTasks: [
+          {
+            name: "usage-events-prune",
+            includeInactiveTenants: true,
+            batchLimit: USAGE_DRAIN_BATCH_LIMIT,
+            run: async () => USAGE_DRAIN_BATCH_LIMIT,
+          },
+        ],
+      }),
+    );
+    expect(result.usageEventsPruned).toBe(USAGE_DRAIN_BATCH_LIMIT);
+    expect(result.saturated).toBe(true);
+  });
   it("serializes processor calls and resumes unstarted work after a worker restart", async () => {
     const controller = new AbortController();
     const completed = new Set<string>();

@@ -237,14 +237,35 @@ export async function drainTenantUsageEvents(
   const ids = rows.map((row) => row.id);
   if (ids.length)
     await tx.$executeRaw`UPDATE tenant_usage_events SET processed_at=now() WHERE id=ANY(${ids}::uuid[])`;
-  // Retain acknowledgement IDs for retries, then prune only old processed entries.
-  // A retry reuses its event's ID within seconds (createDurableUsageRecorder), so
-  // two days is ample. Thirty days kept one row per API request for a month:
-  // 136 MB in the 2.5-hour staging load test.
-  await tx.$executeRaw`DELETE FROM tenant_usage_events WHERE id IN (
-    SELECT id FROM tenant_usage_events WHERE processed_at<now()-interval '2 days'
-    ORDER BY processed_at,id LIMIT ${options.limit} FOR UPDATE SKIP LOCKED)`;
   return { processed: rows.length };
+}
+
+/**
+ * Deletes processed events older than two days, at most `limit` per call. They
+ * are kept that long so a retry can be recognised: a retry reuses its event's
+ * ID within seconds (createDurableUsageRecorder). Thirty days kept one row per
+ * API request for a month: 136 MB in the 2.5-hour staging load test.
+ *
+ * Run it in its own transaction, not the drain's. On 17 Nov 2026 this delete
+ * timed out on staging every 10 seconds for eight hours, and because it shared
+ * the drain's transaction, each timeout also rolled back that sweep's rollup.
+ *
+ * `id = ANY(ARRAY(...))`, not `id IN (SELECT ...)`: the limit is a bound
+ * parameter, so Postgres may reuse a generic plan, and for `IN` that plan read
+ * the whole table into a hash join to find the few hundred rows (2.4 s for two
+ * million rows locally, past the timeout on staging). The array form always
+ * deletes through the primary key (7 ms for the same rows).
+ */
+export async function pruneTenantUsageEvents(
+  tx: TenantTx,
+  options: { limit: number },
+): Promise<{ pruned: number }> {
+  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 1000)
+    throw new Error("Usage prune limit must be between 1 and 1000");
+  const pruned = await tx.$executeRaw`DELETE FROM tenant_usage_events WHERE id = ANY(ARRAY(
+    SELECT id FROM tenant_usage_events WHERE processed_at<now()-interval '2 days'
+    ORDER BY processed_at,id LIMIT ${options.limit} FOR UPDATE SKIP LOCKED))`;
+  return { pruned };
 }
 /** Stop producers first. Wait for every admitted write to acknowledge or report failure. */
 export async function flushTenantUsageMeter(): Promise<void> {

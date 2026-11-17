@@ -153,6 +153,7 @@ export async function main(): Promise<number> {
       if (
         sweep.processed > 0 ||
         sweep.usageEventsProcessed > 0 ||
+        sweep.usageEventsPruned > 0 ||
         sweep.expiredAttemptsFinalized > 0 ||
         sweep.scheduledReportRunsEnqueued > 0 ||
         sweep.certificatesExpired > 0 ||
@@ -165,6 +166,7 @@ export async function main(): Promise<number> {
           tenants: sweep.tenants,
           processed: sweep.processed,
           usageEventsProcessed: sweep.usageEventsProcessed,
+          usageEventsPruned: sweep.usageEventsPruned,
           expiredAttemptsFinalized: sweep.expiredAttemptsFinalized,
           scheduledReportRunsEnqueued: sweep.scheduledReportRunsEnqueued,
           certificatesExpired: sweep.certificatesExpired,
