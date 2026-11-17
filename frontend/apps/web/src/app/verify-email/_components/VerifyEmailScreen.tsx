@@ -6,6 +6,7 @@ import { TenantBrandMark } from "@/components/patterns/TenantBrandMark";
 import { FbaDarkModeButton } from "@/components/theme/FbaDarkModeButton";
 import { useFbaTheme } from "@/components/theme/use-fba-theme";
 import "@/components/theme/fba-theme.css";
+import { resolveSafeRedirectPath } from "@/lib/auth/safe-redirect";
 import { ResendVerificationForm } from "./ResendVerificationForm";
 
 export type VerifyEmailStatus = "success" | "sent" | "expired" | "invalid";
@@ -43,9 +44,9 @@ const COPY: Record<
     tone: "success",
   },
   sent: {
-    eyebrow: "Verification sent",
+    eyebrow: "Link sent",
     title: "Check your inbox",
-    lead: "We sent a secure verification link to activate your account. Click it to finish signing up — the link is valid for 24 hours.",
+    lead: "We sent a secure link to finish creating your account. Open it to choose your password — the link is valid for 24 hours.",
     tone: "brand",
   },
   expired: {
@@ -360,7 +361,8 @@ export function VerifyEmailScreen({
   const copy = COPY[status];
   const isSuccess = status === "success";
   const isWarn = copy.tone === "warn";
-  const redirectTarget = next.startsWith("/") ? next : "/";
+  // Checked again here: this is where the browser is sent.
+  const redirectTarget = resolveSafeRedirectPath(next) ?? "/";
   const hasKnownEmail = status === "sent" && initialEmail.trim().length > 0;
 
   // Success: auto-redirect to the resolved destination after a brief beat.

@@ -17,7 +17,10 @@ const WINDOW_MS = 60_000;
 const PUBLIC_LIMITS: Record<RateLimitBucket, number> = {
   publicRead: 120,
   cspReport: 120,
-  publicAuth: 20,
+  // Per client IP across the sign-in routes. A class signing in behind one
+  // address needs room; each address has its own tighter budget
+  // (enforceAddressRateLimit).
+  publicAuth: 60,
   publicInvitationAccept: 10,
   publicDiagnostic: 10,
   scormContent: 600,
@@ -184,10 +187,60 @@ export async function enforcePlatformMfaAttemptRateLimit(args: {
 }
 
 async function countMfaAttempt(key: string): Promise<void> {
+  await countInWindow({
+    key,
+    windowMs: MFA_ATTEMPT_WINDOW_MS,
+    max: MFA_ATTEMPTS_PER_WINDOW,
+    what: "verification attempts",
+  });
+}
+
+/**
+ * Per-address budgets for the public sign-in routes (security review 5.3,
+ * finding 5). The IP budget alone let one account's password be guessed from
+ * many addresses without limit, and let anyone have us email any address 60
+ * times a minute per IP. They count every request for the address, whether
+ * or not it has an account, so the answer reveals nothing about it.
+ *
+ * - sign-in: password attempts, 10 per 15 minutes. Someone guessing can hold
+ *   the owner's password sign-in for that long; Google and sign-in links still
+ *   work.
+ * - the email kinds: 3 of each per 15 minutes.
+ */
+export type AddressRateLimitKind = "sign-in" | "signup-link" | "sign-in-link" | "password-reset";
+
+const ADDRESS_WINDOW_MS = 15 * 60_000;
+const ADDRESS_LIMITS: Record<AddressRateLimitKind, number> = {
+  "sign-in": 10,
+  "signup-link": 3,
+  "sign-in-link": 3,
+  "password-reset": 3,
+};
+
+export async function enforceAddressRateLimit(args: {
+  kind: AddressRateLimitKind;
+  email: string;
+}): Promise<void> {
+  const address = args.email.trim().toLowerCase();
+  if (!address) throw new RateLimitConfigurationError("Missing address rate-limit identity.");
+  await countInWindow({
+    key: `address:${args.kind}:${identity([address])}`,
+    windowMs: ADDRESS_WINDOW_MS,
+    max: ADDRESS_LIMITS[args.kind],
+    what: args.kind === "sign-in" ? "sign-in attempts for this email" : "emails to this address",
+  });
+}
+
+async function countInWindow(args: {
+  key: string;
+  windowMs: number;
+  max: number;
+  what: string;
+}): Promise<void> {
   const store = resolveRateLimitStore();
   let hit;
   try {
-    hit = await store.hit(key, MFA_ATTEMPT_WINDOW_MS);
+    hit = await store.hit(args.key, args.windowMs);
   } catch {
     throw new AtlasHttpError({
       code: "SERVICE_UNAVAILABLE",
@@ -196,12 +249,12 @@ async function countMfaAttempt(key: string): Promise<void> {
       retryAfterSeconds: 5,
     });
   }
-  if (hit.count > MFA_ATTEMPTS_PER_WINDOW) {
+  if (hit.count > args.max) {
     const retryAfterSeconds = Math.max(1, Math.ceil((hit.resetAt - Date.now()) / 1000));
     throw new AtlasHttpError({
       code: "RATE_LIMITED",
       status: 429,
-      message: `Too many verification attempts. Try again in ${String(Math.ceil(retryAfterSeconds / 60))} min.`,
+      message: `Too many ${args.what}. Try again in ${String(Math.ceil(retryAfterSeconds / 60))} min.`,
       retryAfterSeconds,
     });
   }

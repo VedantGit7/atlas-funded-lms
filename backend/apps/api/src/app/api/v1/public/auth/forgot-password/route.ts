@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createPublicRouteHandler } from "@atlas/api";
+import { enforceAddressRateLimit } from "@atlas/api/rate-limit";
 import { authRequestContext, requestPasswordResetWithBetterAuth } from "@atlas/auth";
 import { PublicPasswordResetRequestSchema, rejectClientTenantId } from "@atlas/domain-identity";
 import { sendAuthEmails } from "../../../../../../lib/auth-email";
@@ -13,6 +14,8 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
   const rawBody: unknown = await req.json();
   rejectClientTenantId(rawBody);
   const input = PublicPasswordResetRequestSchema.parse(rawBody);
+  // Per address as well as per IP (security review 5.3, finding 5).
+  await enforceAddressRateLimit({ kind: "password-reset", email: input.email });
 
   const { emails } = await requestPasswordResetWithBetterAuth({
     ctx: authRequestContext(req),

@@ -34,6 +34,6 @@ export async function resendVerificationAction(
 
   return {
     ok: true,
-    message: "If your email needs verification, we've sent a new link. Check your inbox.",
+    message: "If your account isn't finished yet, we've sent a new link. Check your inbox.",
   };
 }

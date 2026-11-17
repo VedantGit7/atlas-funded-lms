@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { removeBetterAuthTestRows } from "../../helpers/better-auth-cleanup";
+import { signUpThroughEmailedLink } from "../../helpers/better-auth-signup";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { withGlobalDb } from "@atlas/db/global-db";
@@ -10,7 +11,6 @@ import {
   requestMagicLinkWithBetterAuth,
   requireBetterAuthUser,
   setAtlasAuthForTests,
-  signupWithPassword,
   type AuthEmail,
 } from "@atlas/auth";
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
@@ -57,21 +57,13 @@ function only(emails: AuthEmail[] | undefined, kind: AuthEmail["kind"]): AuthEma
 }
 
 async function verifiedUser(email: string): Promise<{ cookie: string }> {
-  const signup = await signupWithPassword({
+  const { setCookies } = await signUpThroughEmailedLink({
     db: perStatement,
-    input: { email, password: PASSWORD, displayName: "Test Learner" },
-    req: request(),
+    email,
+    password: PASSWORD,
+    req: () => request(),
   });
-  const verified = await establishSessionFromTokenHash({
-    db: perStatement,
-    tokenHash: only(signup.emails, "verify-email").token,
-    type: "signup",
-    req: request(),
-  });
-  if (verified.status !== "signed_in" || !("setCookies" in verified.session)) {
-    throw new Error("expected a Better Auth sign-in");
-  }
-  return { cookie: cookieHeader(verified.session.setCookies) };
+  return { cookie: cookieHeader(setCookies) };
 }
 
 suite("Better Auth email links", () => {

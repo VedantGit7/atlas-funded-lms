@@ -6,16 +6,20 @@ import { closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { withGlobalDb } from "@atlas/db/global-db";
 import {
   changePasswordWithBetterAuth,
-  establishSessionFromTokenHash,
+  completeSignup,
+  getAtlasAuth,
   loginWithPassword,
+  requestMagicLinkWithBetterAuth,
   requestPasswordResetWithBetterAuth,
+  requestSignup,
   requireBetterAuthUser,
+  resendSignupVerification,
   resetPasswordWithBetterAuth,
   setAtlasAuthForTests,
   signOutWithBetterAuth,
-  signupWithPassword,
   type AuthEmail,
 } from "@atlas/auth";
+import { signUpThroughEmailedLink, signupLinkToken } from "../../helpers/better-auth-signup";
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
 import { requireSessionUser, resolveSessionPrincipal } from "@atlas/api/session-user";
 
@@ -63,22 +67,34 @@ function tokenOf(emails: AuthEmail[] | undefined, kind: AuthEmail["kind"]): stri
 }
 
 async function signUpAndVerify(email: string): Promise<{ cookie: string; principalId: string }> {
-  const signup = await signupWithPassword({
+  const { setCookies } = await signUpThroughEmailedLink({
     db: perStatement,
-    input: { email, password: PASSWORD, displayName: "Test Learner" },
-    req: request(),
+    email,
+    password: PASSWORD,
+    req: () => request(),
   });
-  const verified = await establishSessionFromTokenHash({
-    db: perStatement,
-    tokenHash: tokenOf(signup.emails, "verify-email"),
-    type: "signup",
-    req: request(),
+  return { cookie: cookieHeader(setCookies), principalId: await principalIdOf(email) };
+}
+
+/**
+ * An account made before its owner proved the address, the way sign-up worked
+ * before the 5.3 security review: unverified, with a password someone chose.
+ */
+async function unprovenAccount(email: string, password: string): Promise<string> {
+  const id = randomUUID();
+  await owner.query(
+    `insert into auth_principals (id, email, email_normalized, email_verified, global_status, updated_at)
+     values ($1, $2, $2, false, 'active', now())`,
+    [id, email],
+  );
+  const context = await getAtlasAuth().$context;
+  await context.internalAdapter.linkAccount({
+    userId: id,
+    providerId: "credential",
+    accountId: id,
+    password: await context.password.hash(password),
   });
-  if (!("setCookies" in verified.session)) throw new Error("expected Better Auth cookies");
-  return {
-    cookie: cookieHeader(verified.session.setCookies),
-    principalId: await principalIdOf(email),
-  };
+  return id;
 }
 
 /** The session-safe identity carries no id, so tests read it from the table. */
@@ -114,27 +130,32 @@ suite("Better Auth password flows", () => {
     await closeAuthPrismaForTests();
   });
 
-  it("signs up with a verification email, and its link signs the person in", async () => {
+  it("signs up from the emailed link, where the password is chosen, and signs the person in", async () => {
     const email = freshEmail();
-    const signup = await signupWithPassword({
-      db: perStatement,
-      input: { email, password: PASSWORD, displayName: "Test Learner" },
-      req: request(),
-    });
+    const signup = await requestSignup({ input: { email, displayName: "Test Learner" } });
     expect(signup.status).toBe("verification_required");
     expect(signup.emails).toEqual([
-      { kind: "verify-email", email, token: expect.any(String) as string },
+      { kind: "complete-signup", email, token: expect.any(String) as string },
     ]);
+    // Nothing exists until the link is opened (security review 5.3, finding 1).
+    const before = await owner.query("select 1 from auth_principals where email_normalized = $1", [
+      email,
+    ]);
+    expect(before.rowCount).toBe(0);
+    const token = tokenOf(signup.emails, "complete-signup");
+    const stored = await owner.query<{ identifier: string }>(
+      "select identifier from auth_verifications where value like $1",
+      [`%${email}%`],
+    );
+    // Only the token's hash is stored.
+    expect(stored.rows.map((row) => row.identifier)).toEqual([
+      expect.stringMatching(/^signup:[0-9a-f]{64}$/),
+    ]);
+    expect(stored.rows[0]?.identifier).not.toContain(token);
 
-    // Not before the address is proven (audit H6).
-    await expect(
-      loginWithPassword({ db: perStatement, input: { email, password: PASSWORD }, req: request() }),
-    ).rejects.toMatchObject({ code: "EMAIL_NOT_VERIFIED" });
-
-    const verified = await establishSessionFromTokenHash({
+    const verified = await completeSignup({
       db: perStatement,
-      tokenHash: tokenOf(signup.emails, "verify-email"),
-      type: "signup",
+      input: { token, password: PASSWORD },
       req: request(),
     });
     expect(verified.status).toBe("signed_in");
@@ -154,16 +175,96 @@ suite("Better Auth password flows", () => {
     expect(principal.id).toBe(await principalIdOf(email));
   });
 
-  it("answers a sign-up for a registered address the same way, and sends nothing", async () => {
+  it("answers a sign-up for a registered address the same way, and tells its owner", async () => {
     const email = freshEmail();
     await signUpAndVerify(email);
 
-    const again = await signupWithPassword({
+    const again = await requestSignup({ input: { email, displayName: "Someone Else" } });
+    expect(again).toEqual({
+      status: "verification_required",
+      emails: [{ kind: "account-exists", email, token: "" }],
+    });
+    // Its password is untouched.
+    await expect(
+      loginWithPassword({ db: perStatement, input: { email, password: PASSWORD }, req: request() }),
+    ).resolves.toMatchObject({ status: "signed_in" });
+  });
+
+  it("uses a sign-up link once", async () => {
+    const email = freshEmail();
+    const signup = await requestSignup({ input: { email, displayName: "Once" } });
+    const token = signupLinkToken(signup.emails);
+    await completeSignup({
       db: perStatement,
-      input: { email, password: "a-different-password", displayName: "Someone Else" },
+      input: { token, password: PASSWORD },
       req: request(),
     });
-    expect(again).toMatchObject({ status: "verification_required", emails: [] });
+
+    await expect(
+      completeSignup({
+        db: perStatement,
+        input: { token, password: NEW_PASSWORD },
+        req: request(),
+      }),
+    ).rejects.toMatchObject({ code: "AUTH_REQUIRED", status: 401 });
+    await expect(
+      completeSignup({
+        db: perStatement,
+        input: { token: "a-token-nobody-was-sent-0000000000", password: PASSWORD },
+        req: request(),
+      }),
+    ).rejects.toMatchObject({ code: "AUTH_REQUIRED", status: 401 });
+  });
+
+  // Security review 5.3, finding 1: a password set before the address was
+  // proven must not outlive the owner proving it.
+  it("drops every login method an unproven account had when its owner finishes signing up", async () => {
+    const email = freshEmail();
+    const id = await unprovenAccount(email, "the-attackers-password");
+
+    // A sign-in link isn't offered to it; the owner is sent the sign-up link.
+    expect(
+      (await requestMagicLinkWithBetterAuth({ ctx: authRequestContext(request()), email })).emails,
+    ).toEqual([]);
+    const resent = await resendSignupVerification({ email });
+    expect(resent.emails.map((sent) => sent.kind)).toEqual(["complete-signup"]);
+
+    await completeSignup({
+      db: perStatement,
+      input: { token: signupLinkToken(resent.emails), password: PASSWORD },
+      req: request(),
+    });
+    expect(await principalIdOf(email)).toBe(id);
+    await expect(
+      loginWithPassword({
+        db: perStatement,
+        input: { email, password: "the-attackers-password" },
+        req: request(),
+      }),
+    ).rejects.toMatchObject({ status: 401 });
+    await expect(
+      loginWithPassword({ db: perStatement, input: { email, password: PASSWORD }, req: request() }),
+    ).resolves.toMatchObject({ status: "signed_in" });
+    const { rows } = await owner.query<{ n: number }>(
+      "select count(*)::int as n from auth_accounts where user_id = $1",
+      [id],
+    );
+    expect(rows[0]?.n).toBe(1);
+  });
+
+  it("lets Better Auth create no account whose address is unproven", async () => {
+    const email = freshEmail();
+    await expect(
+      getAtlasAuth().api.signUpEmail({
+        body: { email, password: PASSWORD, name: "Direct" },
+        headers: new Headers({ host: HOST }),
+      }),
+    ).rejects.toBeDefined();
+    const { rowCount } = await owner.query(
+      "select 1 from auth_principals where email_normalized = $1",
+      [email],
+    );
+    expect(rowCount).toBe(0);
   });
 
   it("signs in with the password, and refuses a wrong one", async () => {
@@ -309,6 +410,23 @@ suite("Better Auth password flows", () => {
         newPassword: "yet-another-password",
       }),
     ).rejects.toMatchObject({ status: 400 });
+  });
+
+  // Security review 5.3, finding 3: the session cache remembered Better
+  // Auth's answer under whichever session cookie came first, so a cookie
+  // planted beside the real one could later stand in for it.
+  it("never lets a planted session cookie stand in for the real one", async () => {
+    const email = freshEmail();
+    const { cookie } = await signUpAndVerify(email);
+    const planted = "atlas_session=planted-token.planted-signature";
+
+    // Whichever of the two Better Auth reads, the answer is remembered only
+    // under the cookie it actually checked.
+    await requireBetterAuthUser(request(`${planted}; ${cookie}`)).catch(() => null);
+    await expect(requireBetterAuthUser(request(planted))).rejects.toMatchObject({
+      code: "AUTH_REQUIRED",
+    });
+    await expect(requireBetterAuthUser(request(cookie))).resolves.toMatchObject({ email });
   });
 
   it("signs out by deleting the session", async () => {

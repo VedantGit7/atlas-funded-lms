@@ -75,7 +75,7 @@ describe("POST /api/v1/public/auth/resend", () => {
     expect(body).toEqual({
       data: {
         ok: true,
-        message: "If your email needs verification, a new link has been sent.",
+        message: "If your account isn't finished yet, a new link has been sent.",
       },
     });
   });

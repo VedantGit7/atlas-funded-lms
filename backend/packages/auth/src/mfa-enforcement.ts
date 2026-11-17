@@ -33,6 +33,23 @@ export function assertPlatformMfa(args: {
 }
 
 /**
+ * An account with an authenticator is signed in only once its code is given.
+ *
+ * A password sign-in gets no session until then, but Google and email sign-in
+ * links make an aal1 session straight away. Without this, that session alone
+ * reached every route that doesn't declare MFA, so the inbox or the Google
+ * account was enough (security review 5.3, finding 2). The routes the code
+ * step needs opt out (`mfa: "challenge"`).
+ */
+export function assertSecondFactorComplete(user: {
+  mfaEnabled: boolean;
+  sessionAssuranceLevel?: SessionAssuranceLevel | undefined;
+}): void {
+  if (!user.mfaEnabled || user.sessionAssuranceLevel === "aal2") return;
+  throw mfaRequiredError("Enter the code from your authenticator app to finish signing in.");
+}
+
+/**
  * Sensitive tenant operations that require MFA when the route declares it.
  *
  * Scoped by route metadata rather than inferred from the permission string, so

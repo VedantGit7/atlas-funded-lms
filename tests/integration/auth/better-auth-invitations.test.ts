@@ -1,18 +1,16 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { removeBetterAuthTestRows } from "../../helpers/better-auth-cleanup";
+import { signUpThroughEmailedLink } from "../../helpers/better-auth-signup";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeAuthPrismaForTests } from "@atlas/db/auth-client";
 import { withGlobalDb } from "@atlas/db/global-db";
 import {
   createAccountFromInvitation,
-  establishSessionFromTokenHash,
   invitedAccountState,
   loginWithPassword,
   requireBetterAuthUser,
   setAtlasAuthForTests,
-  signupWithPassword,
-  type AuthEmail,
 } from "@atlas/auth";
 import { authRequestContext } from "@atlas/auth/better-auth-flows";
 
@@ -52,12 +50,6 @@ function cookieHeader(setCookies: string[]): string {
     .map((cookie) => cookie.split(";")[0] ?? "")
     .filter((pair) => pair && !pair.endsWith("="))
     .join("; ");
-}
-
-function only(emails: AuthEmail[] | undefined, kind: AuthEmail["kind"]): AuthEmail {
-  const email = emails?.find((candidate) => candidate.kind === kind);
-  if (!email) throw new Error(`no ${kind} email`);
-  return email;
 }
 
 suite("Better Auth invitations", () => {
@@ -103,16 +95,12 @@ suite("Better Auth invitations", () => {
 
   it("asks an address that can already sign in to sign in, and keeps its password", async () => {
     const email = freshEmail();
-    const signup = await signupWithPassword({
+    await signUpThroughEmailedLink({
       db: perStatement,
-      input: { email, password: PASSWORD, displayName: "Existing" },
-      req: request(),
-    });
-    await establishSessionFromTokenHash({
-      db: perStatement,
-      tokenHash: only(signup.emails, "verify-email").token,
-      type: "signup",
-      req: request(),
+      email,
+      password: PASSWORD,
+      displayName: "Existing",
+      req: () => request(),
     });
 
     await expect(

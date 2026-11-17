@@ -50,6 +50,31 @@ describe("Better Auth email links", () => {
     ).toBe("https://academy.example.com/auth/confirm?token_hash=tok+en&type=signup");
   });
 
+  // Security review 5.3, finding 1: the password is chosen from this link.
+  it("sends the link that finishes a sign-up to the page where the password is chosen", () => {
+    const link = authEmailLink(
+      { kind: "complete-signup", email: "a@example.test", token: "abc" },
+      "https://academy.example.com",
+    );
+    expect(link).toBe("https://academy.example.com/signup/complete?token=abc");
+    const email = buildAuthEmail(
+      { kind: "complete-signup", email: "a@example.test", token: "abc" },
+      { origin: "https://academy.example.com", academyName: "Academy" },
+    );
+    expect(email.subject).toBe("Finish creating your Academy account");
+    expect(email.body).toContain("signup/complete?token=abc");
+  });
+
+  it("tells an address that already has an account to sign in, with no token", () => {
+    const email = buildAuthEmail(
+      { kind: "account-exists", email: "a@example.test", token: "" },
+      { origin: "https://academy.example.com", academyName: "Academy" },
+    );
+    expect(email.subject).toBe("You already have an account with Academy");
+    expect(email.body).toContain('href="https://academy.example.com/login"');
+    expect(email.body).not.toContain("token");
+  });
+
   it("sends a reset to the reset page with the single-use token", () => {
     expect(
       authEmailLink(

@@ -354,7 +354,10 @@ export function createTenantRoute<
           // disclose whether a tenant host exists to an anonymous caller.
           // ---------------------------------------------------------------
           const sessionUser = await measureRouteStage("authentication", () =>
-            requireSessionUser(req),
+            requireSessionUser(req, {
+              // The routes the code step needs reach a waiting session.
+              allowPendingSecondFactor: config.metadata.mfa === "challenge",
+            }),
           );
 
           let input: TInput;

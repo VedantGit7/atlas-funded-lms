@@ -203,6 +203,10 @@ export function LoginForm() {
   const identityBlocked = identityBlockMessageFromQuery(searchParams.get("error"));
   const oauthFailed = searchParams.get("error") === "oauth" || identityBlocked !== null;
   const verified = searchParams.get("verified") === "1";
+  // Google and email sign-in links send an account with an authenticator here
+  // for its code: their session can't be used until it's given (security
+  // review 5.3, finding 2).
+  const codeStepFromSignIn = searchParams.get("step") === "mfa";
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   // True once the user dismisses a verification failure to retry; reset on each
@@ -279,7 +283,7 @@ export function LoginForm() {
     );
   }
 
-  if (loginState.mfaRequired) {
+  if (loginState.mfaRequired || codeStepFromSignIn) {
     const mfaRejected = Boolean(mfaState.message) && !mfaState.ok;
 
     if (mfaRejected && !mfaRetried) {
@@ -320,8 +324,9 @@ export function LoginForm() {
             void mfaForm.handleSubmit((values) => {
               setMfaRetried(false);
               const formData = valuesToFormData(values);
-              if (loginState.redirectTo) {
-                formData.set("redirectTo", loginState.redirectTo);
+              const destination = loginState.redirectTo ?? redirectTo;
+              if (destination) {
+                formData.set("redirectTo", destination);
               }
               startTransition(() => {
                 mfaFormAction(formData);

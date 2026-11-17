@@ -6,12 +6,12 @@ import {
   NEW_PASSWORD_MIN_LENGTH,
   readPasswordBreachCheckMode,
 } from "@atlas/auth/password-policy";
-import { publicSignupInputSchema } from "@atlas/auth/schemas";
+import { publicSignupCompleteInputSchema } from "@atlas/auth/schemas";
 import {
   NEW_PASSWORD_MIN_LENGTH as CONTRACT_MIN_LENGTH,
   PublicLoginRequestSchema,
   PublicPasswordResetCompleteSchema,
-  PublicSignupRequestSchema,
+  PublicSignupCompleteRequestSchema,
 } from "../../../backend/packages/domain/identity/src/schemas/public-auth";
 import { ChangePasswordRequestSchema } from "../../../backend/packages/domain/identity/src/schemas/account-security";
 import { SetInvitationPasswordRequestSchema } from "../../../backend/packages/domain/identity/src/schemas/invitation-public";
@@ -42,12 +42,11 @@ describe("new password policy (audit H6)", () => {
 
   it("rejects a nine-character password wherever one is set, but still lets it sign in", () => {
     const nine = "abcdefghi";
+    // A sign-up's password is set when its emailed link is opened (security
+    // review 5.3, finding 1).
     expect(
-      PublicSignupRequestSchema.safeParse({
-        email: "a@example.com",
-        password: nine,
-        displayName: "Ann",
-      }).success,
+      PublicSignupCompleteRequestSchema.safeParse({ token: "t".repeat(32), password: nine })
+        .success,
     ).toBe(false);
     expect(
       PublicPasswordResetCompleteSchema.safeParse({ password: nine, accessToken: "t" }).success,
@@ -64,7 +63,7 @@ describe("new password policy (audit H6)", () => {
       }).success,
     ).toBe(false);
     expect(
-      publicSignupInputSchema.safeParse({ email: "a@example.com", password: nine }).success,
+      publicSignupCompleteInputSchema.safeParse({ token: "t".repeat(32), password: nine }).success,
     ).toBe(false);
     expect(
       PublicLoginRequestSchema.safeParse({ email: "a@example.com", password: "abcdefgh" }).success,

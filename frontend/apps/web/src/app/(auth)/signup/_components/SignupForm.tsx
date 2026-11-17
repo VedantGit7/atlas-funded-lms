@@ -37,35 +37,6 @@ const primaryButtonClass =
 const inlineLinkClass =
   "text-[13px] font-semibold text-[var(--fba-ind-tx)] transition-colors hover:underline";
 
-function EyeIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      {open ? (
-        <>
-          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
-          <circle cx="12" cy="12" r="3" />
-        </>
-      ) : (
-        <>
-          <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-          <path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-          <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24M2 2l20 20" />
-        </>
-      )}
-    </svg>
-  );
-}
-
 const SOCIAL_PROVIDERS = [
   {
     id: "google",
@@ -111,10 +82,6 @@ export function SignupForm() {
   const oauthFailed = searchParams.get("error") === "oauth" || identityBlocked !== null;
   const [state, formAction, pending] = useActionState(signupAction, initialState);
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [confirmError, setConfirmError] = useState("");
   const [referralsEnabled, setReferralsEnabled] = useState(Boolean(referralCodeFromUrl));
 
   useEffect(() => {
@@ -140,9 +107,10 @@ export function SignupForm() {
     };
   }, [referralCodeFromUrl]);
 
-  // After a successful signup the account exists but is unverified. Route to the
-  // dedicated verify-email screen (full navigation, matching the sign-in flow)
-  // so the learner gets clear "check your inbox" guidance and a resend control.
+  // After a sign-up the emailed link finishes it, where the password is chosen
+  // (security review 5.3, finding 1). Route to the verify-email screen (full
+  // navigation, matching the sign-in flow) for "check your inbox" guidance and
+  // a resend control.
   useEffect(() => {
     const attribution = captureUtmFromSearchParams(searchParams);
     if (attribution) {
@@ -176,7 +144,6 @@ export function SignupForm() {
     defaultValues: {
       displayName: "",
       email: "",
-      password: "",
       inviteToken: inviteToken || undefined,
       referralCode: referralCodeFromUrl || undefined,
     },
@@ -206,15 +173,9 @@ export function SignupForm() {
         onSubmit={(event) => {
           event.preventDefault();
           void form.handleSubmit((values) => {
-            if (values.password !== confirmPassword) {
-              setConfirmError("Passwords do not match.");
-              return;
-            }
-            setConfirmError("");
             const formValues: Record<string, string | undefined> = {
               displayName: values.displayName,
               email: values.email,
-              password: values.password,
               ...(typeof values.inviteToken === "string"
                 ? { inviteToken: values.inviteToken }
                 : {}),
@@ -296,75 +257,6 @@ export function SignupForm() {
           />
         ) : null}
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem className="space-y-0">
-              <FormLabel className={fieldLabelClass}>Password</FormLabel>
-              <div className="relative">
-                <FormControl>
-                  <input
-                    {...field}
-                    required
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    placeholder="At least 10 characters"
-                    className={`${fieldInputClass} pr-12`}
-                  />
-                </FormControl>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPassword((prev) => !prev);
-                  }}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-tx)]"
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-              <FormMessage className="mt-2 text-[13px] text-[var(--fba-red-tx)]" />
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-0">
-          <label htmlFor="confirmPassword" className={fieldLabelClass}>
-            Confirm password
-          </label>
-          <div className="relative">
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              required
-              type={showConfirm ? "text" : "password"}
-              autoComplete="new-password"
-              placeholder="Re-enter your password"
-              value={confirmPassword}
-              onChange={(event) => {
-                setConfirmPassword(event.target.value);
-                if (confirmError) setConfirmError("");
-              }}
-              aria-invalid={confirmError ? true : undefined}
-              className={`${fieldInputClass} pr-12`}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setShowConfirm((prev) => !prev);
-              }}
-              aria-label={showConfirm ? "Hide password" : "Show password"}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--fba-tx3)] transition-colors hover:text-[var(--fba-tx)]"
-            >
-              <EyeIcon open={showConfirm} />
-            </button>
-          </div>
-          {confirmError ? (
-            <p className="mt-2 text-[13px] text-[var(--fba-red-tx)]">{confirmError}</p>
-          ) : null}
-        </div>
-
         {state.message || oauthFailed ? (
           <p
             role="alert"
@@ -379,18 +271,16 @@ export function SignupForm() {
           </p>
         ) : null}
 
-        {state.verificationRequired ? (
-          <p className="text-[13px] text-[var(--fba-tx2)]">
-            After verifying your email, return here to sign in.
-          </p>
-        ) : null}
+        <p className="text-[13px] leading-[1.6] text-[var(--fba-tx2)]">
+          We&apos;ll email you a link to choose your password and finish creating your account.
+        </p>
 
         <button
           type="submit"
           disabled={pending || form.formState.isSubmitting}
           className={primaryButtonClass}
         >
-          {pending || form.formState.isSubmitting ? "Creating account..." : "Create Account"}
+          {pending || form.formState.isSubmitting ? "Sending link..." : "Continue"}
         </button>
       </form>
 

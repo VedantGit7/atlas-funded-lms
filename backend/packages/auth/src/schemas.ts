@@ -3,9 +3,12 @@ import { NEW_PASSWORD_MIN_LENGTH } from "./password-policy";
 
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
+/**
+ * A sign-up names the address and the person; the password is chosen on the
+ * page its emailed link opens (security review 5.3, finding 1).
+ */
 export const publicSignupInputSchema = z.object({
   email: emailSchema,
-  password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(128),
   displayName: z.string().trim().min(2).max(120).optional(),
   inviteToken: z.string().min(20).max(500).optional(),
   referralCode: z.preprocess(
@@ -18,6 +21,12 @@ export const publicSignupInputSchema = z.object({
       .regex(/^[A-Za-z0-9_-]+$/)
       .optional(),
   ),
+});
+
+/** The emailed link's single-use token, and the password chosen with it. */
+export const publicSignupCompleteInputSchema = z.object({
+  token: z.string().min(20).max(200),
+  password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(128),
 });
 
 export const publicLoginInputSchema = z.object({
@@ -63,4 +72,5 @@ export const meOutputSchema = z.object({
 });
 
 export type PublicSignupInput = z.infer<typeof publicSignupInputSchema>;
+export type PublicSignupCompleteInput = z.infer<typeof publicSignupCompleteInputSchema>;
 export type PublicLoginInput = z.infer<typeof publicLoginInputSchema>;

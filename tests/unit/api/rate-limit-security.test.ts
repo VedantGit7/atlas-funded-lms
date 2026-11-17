@@ -91,10 +91,10 @@ describe("F04 strict shared limiter configuration and failures", () => {
       { public: true, permission: "pub", rateLimit: "publicAuth", idempotency: "none" },
       handler,
     );
-    for (let i = 0; i < 20; i++) expect((await route(request())).status).toBe(200);
+    for (let i = 0; i < 60; i++) expect((await route(request())).status).toBe(200);
     const denied = await route(request());
     expect(denied.status).toBe(429);
     expect(Number(denied.headers.get("retry-after"))).toBeGreaterThan(0);
-    expect(handler).toHaveBeenCalledTimes(20);
+    expect(handler).toHaveBeenCalledTimes(60);
   });
 });

@@ -13,41 +13,26 @@ const tenantA = {
 
 const {
   mockResolveTenant,
-  mockSignupWithPassword,
-  mockBuildPublicAuthResponse,
-  mockGlobalQueryRaw,
-  mockWithGlobalDb,
+  mockRequestSignup,
+  mockSendAuthEmails,
   mockWithTenantTx,
   mockRejectClientTenantId,
-  mockFindMembership,
-  mockEnsureSelfServiceLearnerMembership,
-} = vi.hoisted(() => {
-  const mockGlobalQueryRaw = vi.fn().mockResolvedValue([]);
-  return {
-    mockResolveTenant: vi.fn(),
-    mockSignupWithPassword: vi.fn(),
-    mockBuildPublicAuthResponse: vi.fn(),
-    mockGlobalQueryRaw,
-    mockWithGlobalDb: vi.fn((fn: (db: unknown) => unknown) =>
-      fn({ $queryRaw: mockGlobalQueryRaw }),
-    ),
-    mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
-      // The signup/login routes now apply a referral for a newly provisioned
-      // membership, and that repository reads through the Unsafe variants. A tx
-      // stub without them throws "tx.$queryRawUnsafe is not a function", which
-      // the route reports as a bare 500.
-      fn({
-        $queryRaw: vi.fn().mockResolvedValue([]),
-        $queryRawUnsafe: vi.fn().mockResolvedValue([]),
-        $executeRaw: vi.fn().mockResolvedValue(0),
-        $executeRawUnsafe: vi.fn().mockResolvedValue(0),
-      }),
-    ),
-    mockRejectClientTenantId: vi.fn(),
-    mockFindMembership: vi.fn(),
-    mockEnsureSelfServiceLearnerMembership: vi.fn(),
-  };
-});
+  mockEnforceAddressRateLimit,
+} = vi.hoisted(() => ({
+  mockResolveTenant: vi.fn(),
+  mockRequestSignup: vi.fn(),
+  mockSendAuthEmails: vi.fn(),
+  mockWithTenantTx: vi.fn((_ctx: unknown, fn: (tx: unknown) => unknown) =>
+    fn({
+      $queryRaw: vi.fn().mockResolvedValue([]),
+      $queryRawUnsafe: vi.fn().mockResolvedValue([]),
+      $executeRaw: vi.fn().mockResolvedValue(0),
+      $executeRawUnsafe: vi.fn().mockResolvedValue(0),
+    }),
+  ),
+  mockRejectClientTenantId: vi.fn(),
+  mockEnforceAddressRateLimit: vi.fn(),
+}));
 
 vi.mock("@atlas/tenancy", async (importOriginal) => ({
   // Real host helpers: the redirect check resolves the request host with them.
@@ -59,31 +44,29 @@ vi.mock("@atlas/auth", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
-    signupWithPassword: (...args: unknown[]) => mockSignupWithPassword(...args),
+    requestSignup: (...args: unknown[]) => mockRequestSignup(...args),
   };
 });
+
+vi.mock("@atlas/api/rate-limit", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  enforceAddressRateLimit: (...args: unknown[]) => mockEnforceAddressRateLimit(...args),
+}));
 
 vi.mock("@atlas/domain-identity", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
     rejectClientTenantId: (...args: unknown[]) => mockRejectClientTenantId(...args),
-    buildPublicAuthResponse: (...args: unknown[]) => mockBuildPublicAuthResponse(...args),
   };
 });
 
-vi.mock("@atlas/membership", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    findMembershipByPrincipal: (...args: unknown[]) => mockFindMembership(...args),
-    ensureSelfServiceLearnerMembership: (...args: unknown[]) =>
-      mockEnsureSelfServiceLearnerMembership(...args),
-  };
-});
+vi.mock("../../backend/apps/api/src/lib/auth-email", () => ({
+  sendAuthEmails: (...args: unknown[]) => mockSendAuthEmails(...args),
+}));
 
 vi.mock("@atlas/db/global-db", () => ({
-  withGlobalDb: (fn: (db: unknown) => unknown) => mockWithGlobalDb(fn),
+  withGlobalDb: (fn: (db: unknown) => unknown) => fn({ $queryRaw: vi.fn().mockResolvedValue([]) }),
 }));
 
 vi.mock("@atlas/db/with-tenant-tx", () => ({
@@ -104,67 +87,87 @@ describe("POST /api/v1/public/auth/signup", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveTenant.mockResolvedValue(tenantA);
-    mockGlobalQueryRaw.mockResolvedValue([]);
-    mockFindMembership.mockResolvedValue(null);
-    mockEnsureSelfServiceLearnerMembership.mockResolvedValue({
-      membershipId: "new-membership",
-      created: true,
-      status: "ACTIVE",
-    });
-    mockSignupWithPassword.mockResolvedValue({ status: "verification_required", emails: [] });
-    mockBuildPublicAuthResponse.mockResolvedValue({
-      data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null },
+    mockEnforceAddressRateLimit.mockResolvedValue(undefined);
+    mockSendAuthEmails.mockResolvedValue(undefined);
+    mockRequestSignup.mockResolvedValue({
+      status: "verification_required",
+      emails: [{ kind: "complete-signup", email: "user@example.com", token: "t" }],
     });
   });
 
-  it("returns verification_required status for signup", async () => {
+  it("emails the link that finishes the sign-up, and answers the same for every address", async () => {
     const response = await POST(
-      createRequest({
-        email: "user@example.com",
-        password: "password123",
-        displayName: "Atlas User",
-      }),
+      createRequest({ email: "user@example.com", displayName: "Atlas User" }),
     );
     const body: unknown = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body).toEqual({
-      data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null },
+    expect(body).toEqual({ data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null } });
+    expect(mockRequestSignup).toHaveBeenCalledWith({
+      input: { email: "user@example.com", displayName: "Atlas User" },
     });
-  });
-
-  it("does not provision a membership while email verification is pending", async () => {
-    // A principal exists but there is no session yet, so provisioning must wait
-    // for the first login after verification.
-    mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
-
-    await POST(
-      createRequest({
-        email: "user@example.com",
-        password: "password123",
-        displayName: "Atlas User",
+    expect(mockSendAuthEmails).toHaveBeenCalledWith(
+      expect.objectContaining({
+        emails: [{ kind: "complete-signup", email: "user@example.com", token: "t" }],
       }),
     );
 
-    expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
+    // An address with an account gets an email saying so: the answer is identical.
+    mockRequestSignup.mockResolvedValue({
+      status: "verification_required",
+      emails: [{ kind: "account-exists", email: "user@example.com", token: "" }],
+    });
+    const again = await POST(
+      createRequest({ email: "user@example.com", displayName: "Atlas User" }),
+    );
+    expect(await again.json()).toEqual(body);
   });
 
-  // The verification link always leads back to this academy: the API builds it
-  // from the request's host, so a client can't name one.
+  // Security review 5.3, finding 1: the password is chosen from the emailed link.
+  it("refuses a password at sign-up, before sending anything", async () => {
+    const response = await POST(
+      createRequest({ email: "user@example.com", password: "password123", displayName: "Atlas" }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(mockRequestSignup).not.toHaveBeenCalled();
+    expect(mockSendAuthEmails).not.toHaveBeenCalled();
+  });
+
+  // Security review 5.3, finding 5.
+  it("counts the sign-up against the address's own budget", async () => {
+    await POST(createRequest({ email: "User@Example.com", displayName: "Atlas User" }));
+    expect(mockEnforceAddressRateLimit).toHaveBeenCalledWith({
+      kind: "signup-link",
+      email: "user@example.com",
+    });
+
+    mockEnforceAddressRateLimit.mockRejectedValue(
+      Object.assign(new Error("Too many emails to this address."), {
+        code: "RATE_LIMITED",
+        status: 429,
+      }),
+    );
+    const limited = await POST(createRequest({ email: "user@example.com", displayName: "Atlas" }));
+    expect(limited.status).not.toBe(200);
+    expect(mockSendAuthEmails).toHaveBeenCalledTimes(1);
+  });
+
+  // The link always leads back to this academy: the API builds it from the
+  // request's host, so a client can't name one.
   it.each(["https://tenant-b.example.com/auth/confirm", "https://evil.example/auth/confirm"])(
-    "refuses a client-chosen confirmation link (%s), before creating anything",
+    "refuses a client-chosen confirmation link (%s), before sending anything",
     async (emailRedirectTo) => {
       const response = await POST(
         createRequest({
           email: "user@example.com",
-          password: "password123",
           displayName: "Atlas User",
           emailRedirectTo,
         }),
       );
 
       expect(response.status).toBe(400);
-      expect(mockSignupWithPassword).not.toHaveBeenCalled();
+      expect(mockRequestSignup).not.toHaveBeenCalled();
     },
   );
 });

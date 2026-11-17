@@ -110,9 +110,10 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         tx,
         tenantId: tenant.tenantId,
         serviceStatus: "signed_in",
-        // A session from Google is aal1, so routes that need MFA still ask for
-        // the code (docs/engineering/better-auth-design.md).
-        mfaEnabled: false,
+        // A session from Google is aal1. For an account with an authenticator
+        // it can't be used until the code is given (security review 5.3,
+        // finding 2), so the sign-in page asks for it next.
+        mfaEnabled: principal?.mfa_enabled ?? false,
         membership,
       });
     },

@@ -90,16 +90,40 @@ export function betterAuthHeaders(args: {
   return headers;
 }
 
-/** The session cookie's value, under its plain or `__Secure-` name. */
-export function readBetterAuthSessionToken(cookieHeader: string | null): string | null {
+/**
+ * The name Better Auth reads the session from: `__Secure-atlas_session` on
+ * https deployments, `atlas_session` locally (useSecureCookies). Only that
+ * one counts. A plain `atlas_session` beside a secure one could have been
+ * planted from a sibling site or over plain http (security review 5.3,
+ * finding 3).
+ */
+export function betterAuthSessionCookieName(env: NodeJS.ProcessEnv = process.env): string {
+  return env["NODE_ENV"] === "production" ? ATLAS_SECURE_SESSION_COOKIE : ATLAS_SESSION_COOKIE;
+}
+
+/** The session cookie's value, under the name Better Auth reads. */
+export function readBetterAuthSessionToken(
+  cookieHeader: string | null,
+  env: NodeJS.ProcessEnv = process.env,
+): string | null {
   if (!cookieHeader) return null;
+  const name = betterAuthSessionCookieName(env);
   for (const part of cookieHeader.split(";")) {
     const [rawKey, ...rest] = part.trim().split("=");
-    if (rawKey === ATLAS_SESSION_COOKIE || rawKey === ATLAS_SECURE_SESSION_COOKIE) {
-      return rest.join("=") || null;
-    }
+    if (rawKey === name) return rest.join("=") || null;
   }
   return null;
+}
+
+/** The session token inside a signed cookie value (`token.signature`, URL-encoded). */
+function sessionTokenOf(cookieValue: string): string {
+  let decoded = cookieValue;
+  try {
+    decoded = decodeURIComponent(cookieValue);
+  } catch {
+    // Not URL-encoded; compare it as it is.
+  }
+  return decoded.split(".")[0] ?? "";
 }
 
 export type BetterAuthSessionUser = {
@@ -170,6 +194,9 @@ export async function requireBetterAuthUser(req: Request): Promise<BetterAuthSes
     throw authProviderUnavailable();
   }
   if (!found) throw authRequired();
+  // The answer is remembered under this cookie's value, so it must be about
+  // this cookie's session and no other.
+  if (found.session.token !== sessionTokenOf(token)) throw authRequired();
 
   const user: BetterAuthSessionUser = {
     principalId: found.user.id,

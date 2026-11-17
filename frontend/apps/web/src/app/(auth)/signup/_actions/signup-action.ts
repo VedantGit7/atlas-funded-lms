@@ -26,7 +26,6 @@ export async function signupAction(
   const referralCode = readFormString(formData.get("referralCode")).trim();
   const parsed = PublicSignupRequestSchema.safeParse({
     email: readFormString(formData.get("email")),
-    password: readFormString(formData.get("password")),
     displayName: readFormString(formData.get("displayName")),
     ...(inviteToken ? { inviteToken } : {}),
     ...(referralCode ? { referralCode } : {}),
@@ -41,10 +40,11 @@ export async function signupAction(
   }
 
   try {
-    const { email, password, displayName, inviteToken, referralCode } = parsed.data;
+    // The emailed link finishes the sign-up, where the password is chosen
+    // (security review 5.3, finding 1).
+    const { email, displayName, inviteToken, referralCode } = parsed.data;
     const body = await serverPublicApi.signup({
       email,
-      password,
       displayName,
       ...(inviteToken ? { inviteToken } : {}),
       ...(referralCode ? { referralCode } : {}),
@@ -53,7 +53,7 @@ export async function signupAction(
     if (body.data.status === "EMAIL_VERIFICATION_REQUIRED") {
       return {
         ok: true,
-        message: "Check your email to verify your account before signing in.",
+        message: "Check your email for the link to finish creating your account.",
         requestId,
         verificationRequired: true,
         email,

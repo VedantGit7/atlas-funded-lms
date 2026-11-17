@@ -4,7 +4,7 @@ import { enforceMfaAttemptRateLimit } from "@atlas/api/rate-limit";
 import { applyVerifiedSessionToCookieStore } from "@atlas/auth/cookie-store";
 import { stepUpMfa } from "@atlas/auth";
 import { AccountSecurityOkResponseSchema, MfaStepUpRequestSchema } from "@atlas/domain-identity";
-import { securityMutationMetadata } from "../../route.metadata";
+import { securityStepUpMetadata } from "../../route.metadata";
 
 type MfaStepUpBody = z.output<typeof MfaStepUpRequestSchema>;
 
@@ -19,7 +19,7 @@ export const POST = createTenantRoute<
   MfaStepUpBody,
   z.output<typeof AccountSecurityOkResponseSchema>
 >({
-  metadata: securityMutationMetadata,
+  metadata: securityStepUpMetadata,
   body: MfaStepUpRequestSchema,
   output: AccountSecurityOkResponseSchema,
   handler: async ({ ctx, input }) => {
