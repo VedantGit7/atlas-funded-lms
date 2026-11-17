@@ -33,7 +33,7 @@ The workflow's always-run aggregate is designed to expose missing or skipped man
 
 ## Maintaining the gate
 
-Use the exact Node version in `.node-version` for local candidate checks. CI and drills read that file; the managed API/worker Docker bases must use the matching patch version. The September 2026 candidate pins Node 24.21.0 and accepts Node 24.15.0 through 24.x in `engines.node`: the locked DOM sanitizer and jsdom require at least 24.15.0. Do not disable `engine-strict` to accommodate an older runtime. The CI regression checks the pin against all locked packages applicable to Linux x64 and verifies workflow/container alignment. Vercel selects the current patch within the declared major, so record its actual build/runtime version separately.
+Use the exact Node version in `.node-version` for local candidate checks. CI and drills read that file; the managed API/worker Docker bases must use the matching patch version. The September 2026 candidate pins Node 24.21.0 and accepts Node 24.15.0 through 24.x in `engines.node`: the locked DOM sanitizer and jsdom require at least 24.15.0. Do not disable `engine-strict` to accommodate an older runtime. The CI regression checks the pin against all locked packages applicable to Linux x64 and verifies workflow/container alignment. The deployed images use the same pinned version (`deploy/managed-node/Dockerfile`).
 
 When adding or removing a CI job, update `scripts/ci/required-jobs.json`, the `ci-required` dependency list, and the build dependencies together. Every non-aggregate job must be registered. Keep only explicitly optional environment checks in the optional list. Run `tests/ci/ci-gate.test.ts` and `tests/unit/release-readiness` after changes.
 

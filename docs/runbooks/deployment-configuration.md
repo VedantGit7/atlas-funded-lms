@@ -4,7 +4,7 @@ The API, web server and outbox worker validate configuration before accepting wo
 
 ## Environment and preflight
 
-F22 requires `ATLAS_SERVICE_RUNTIME=managed-node` on deployed API and worker services. Web remains on Vercel. See the [managed Node runtime contract](managed-node-runtime.md). Include the independent `USAGE_DATABASE_POOL_MAX` pool (default 2) in the cross-process database connection budget.
+F22 requires `ATLAS_SERVICE_RUNTIME=managed-node` on deployed API and worker services. All three services run as containers on the Coolify server, whose `deploy/coolify/compose.yaml` sets these values ([Coolify deployment](coolify-deployment.md)). See the [managed Node runtime contract](managed-node-runtime.md). Include the independent `USAGE_DATABASE_POOL_MAX` pool (default 2) in the cross-process database connection budget.
 
 Inject settings from the deployment secret manager, then run each service check in that environment:
 
@@ -22,7 +22,7 @@ node --env-file=.env.local node_modules/tsx/dist/cli.mjs --tsconfig backend/apps
 
 Success prints `ok: true` and `connectivityVerified: false`. Check that the intended deployed environment is reported. Failure exits nonzero and prints variable names and safe reasons, without credential values. Do not log secret-manager exports or full connection strings.
 
-`NODE_ENV=production`, `APP_ENV`/`RELEASE_ENV` production or staging, `VERCEL=1`, and Vercel production/preview indicators all activate deployed validation. In those runtimes `APP_ENV` must explicitly be `production` or `staging`. Production Vercel/release labels require `APP_ENV=production`; previews normally use `APP_ENV=staging` and isolated staging resources. A dev/test label cannot turn off deployed checks. Without deployment signals, local development/test can retain mock email and local storage. A production build run on a laptop also activates the deployed contract; use development mode for the local mock setup.
+`NODE_ENV=production`, `APP_ENV`/`RELEASE_ENV` production or staging, `VERCEL=1`, and Vercel production/preview indicators all activate deployed validation. (The Vercel signals are left from when the web app was planned for Vercel; nothing sets them on Coolify.) In those runtimes `APP_ENV` must explicitly be `production` or `staging`. Production Vercel/release labels require `APP_ENV=production`; previews normally use `APP_ENV=staging` and isolated staging resources. A dev/test label cannot turn off deployed checks. Without deployment signals, local development/test can retain mock email and local storage. A production build run on a laptop also activates the deployed contract; use development mode for the local mock setup.
 
 All three services currently share the contract because web-side handlers and the worker consume the same infrastructure. Build environments that execute server instrumentation must have the required configuration too. Supply public `NEXT_PUBLIC_*` settings at build time as well as runtime. Never put server credentials in public variables.
 

@@ -36,7 +36,7 @@ Production apply is refused by default. Execute the printed plan through approve
 ## Production domain: `academy.fundedbeyond.com`
 
 1. In the platform console, open the tenant's **Domains** tab and add `academy.fundedbeyond.com`. It is added pending, with a TXT record to create.
-2. In Cloudflare, create the TXT record shown (`_atlas-verify.academy.fundedbeyond.com`). Point `academy` at the server with a proxied record, and add it to the Full (strict) and HTTPS rules (`coolify-deployment.md`, "TLS and DNS"). The origin certificate already covers it.
+2. In Cloudflare, create the TXT record shown (`_atlas-verify.academy.fundedbeyond.com`). Add a tunnel route for `academy`, which creates its proxied DNS record and replaces the Porkbun forwarding for that name (`coolify-deployment.md`, "Cloudflare Tunnel"). Add it to the HTTP-to-HTTPS rule, and to the Full (strict) rule in the same change ("TLS and DNS"). The origin certificate already covers it.
 3. **Verify** in the console. The domain becomes active only when the TXT record matches.
 4. **Make primary**, so invitation and email links use it. Then send the owner invitation (`platform-operator-access.md`, "On a fresh environment").
 5. Record audit review and run tenant smoke on the branded host.
