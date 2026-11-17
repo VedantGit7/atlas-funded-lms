@@ -17,7 +17,7 @@ pnpm tenant-config:plan -- --tenant <slug> --environment production --production
 - Platform principal ID with provisioning permissions
 - Approved branding storage reference IDs
 - Legal approval reference (for readiness publish)
-- Production DNS/Vercel operator credentials (outside repository)
+- Access to the `fundedbeyond.com` Cloudflare zone and its tunnel (outside repository)
 
 ## Execution order
 
@@ -29,7 +29,7 @@ pnpm tenant-config:plan -- --tenant <slug> --environment production --production
 6. Apply competency/readiness draft configuration
 7. Create draft learning paths, certificate templates, badges, and community spaces
 8. Verify projection with `tenant-config:verify`
-9. Complete manual DNS/Vercel/SSL activation
+9. Complete DNS and TLS by hand: the domain's tunnel route, its Cloudflare rules and the console's domain verification (`coolify-deployment.md`, "TLS and DNS" and "Cloudflare Tunnel"; `tenant-config-fundedbeyond.md`, "Production domain")
 10. Publish branding/readiness/scoring only through approved human workflows
 
 ## Refused operations

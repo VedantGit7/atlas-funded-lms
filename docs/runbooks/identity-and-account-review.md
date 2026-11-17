@@ -10,14 +10,18 @@ by any of its login methods (a password, Google, an email link), with an authent
 if it has one (docs/engineering/better-auth-design.md). The email address alone never
 moves it.
 
-| Sign-in situation                                         | Result                                                                  |
-| --------------------------------------------------------- | ----------------------------------------------------------------------- |
-| An active account signs in with one of its login methods  | Signed in.                                                              |
-| The account is disabled                                   | Refused with `ACCOUNT_DISABLED`, at sign-in and on every later request. |
-| The address has not been verified                         | Refused with `EMAIL_NOT_VERIFIED`. Nothing is signed in.                |
-| A new address signs up                                    | The account waits until its owner opens the verification link.          |
-| A verified address matches an **unclaimed** placeholder   | The placeholder is claimed at that first sign-in, once.                 |
-| Google sign-in for an address that already has an account | Refused with `ACCOUNT_NOT_LINKED` unless both sides verified it.        |
+| Sign-in situation                                                    | Result                                                                                                                                  |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| An active account signs in with one of its login methods             | Signed in.                                                                                                                              |
+| The account is disabled                                              | Refused with `ACCOUNT_DISABLED`, at sign-in and on every later request.                                                                 |
+| The address has not been verified                                    | Refused with `EMAIL_NOT_VERIFIED`. Nothing is signed in. Only accounts from before the November 2026 security review can be unverified. |
+| A new address signs up                                               | Nothing is created until its owner opens the emailed link and chooses a password; the account is then created verified and signed in.   |
+| Someone finishes sign-up for an unverified account or a placeholder  | The emailed link proved the address, so the account becomes theirs: every login method and session it had is removed first.             |
+| A sign-up for an address that already has an account                 | Its owner is emailed that the account exists. The answer on screen is the same as for a new address.                                    |
+| A verified address matches an **unclaimed** placeholder              | The placeholder is claimed at that first sign-in, once.                                                                                 |
+| Google sign-in for an address that already has an account            | Refused with `ACCOUNT_NOT_LINKED` unless both sides verified it.                                                                        |
+| Google sign-in for an address Google hasn't verified                 | No account is created; the person signs up by email.                                                                                    |
+| An account with an authenticator signs in by Google or an email link | Signed in only once the authenticator code is given; until then every request but the code step answers `MFA_REQUIRED`.                 |
 
 Unclaimed placeholders are created by the marketing integration sign-up API before
 the learner has signed up. A placeholder that carries a platform grant is never
@@ -61,12 +65,20 @@ account** reverses it. Operators cannot change their own account. Each change wr
 
 ## Where auth emails send people back
 
-Verification, sign-in, password-reset, email-change and invitation links are built by
+Sign-up, sign-in, password-reset, email-change and invitation links are built by
 the API from the host the request came to, so they always lead back to the academy
 (or the platform console) the person was on (`backend/apps/api/src/lib/auth-email.ts`).
 A client can't name a return address: the requests have no field for one. Google
 returns people to `/auth/callback/google` on the same host, the address registered on
 the Google clients.
+
+## The November 2026 security review
+
+The sign-up, two-factor and session rules above came from the login security review
+(launch plan 5.3), which also added per-address rate limits on the sign-in routes and made
+a sign-out end the session in every API process at once
+([review](../engineering/login-security-review-2026-11-16.md),
+[rate limiting](rate-limiting.md)).
 
 ## Migrations
 
