@@ -1,5 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import cluster from "node:cluster";
 import { createHash } from "node:crypto";
+import process from "node:process";
 import { authPrisma } from "@atlas/db/auth-client";
 
 import { authProviderUnavailable, authRequired } from "./auth-errors";
@@ -136,22 +138,94 @@ export type BetterAuthSessionUser = {
 
 /**
  * Better Auth's answer for a session, reused for up to a minute (audit
- * §3.1). A signed-out session keeps working on this
- * process for up to that long unless it was signed out here; disabling an
- * account is immediate, because global_status is read on every request.
+ * §3.1). Ending a session forgets it in every process of this server at once
+ * (below); disabling an account is immediate, because global_status is read
+ * on every request.
  */
 const VERIFIED_SESSION_TTL_MS = 60_000;
 const MAX_VERIFIED_SESSIONS = 10_000;
-const verifiedSessions = new Map<string, { user: BetterAuthSessionUser; expiresAt: number }>();
+type VerifiedSession = { user: BetterAuthSessionUser; expiresAt: number };
+declare global {
+  var __atlasVerifiedSessions: Map<string, VerifiedSession> | undefined;
+  var __atlasForgetListener: boolean | undefined;
+}
+// One cache per process, like the Better Auth instance above, however many
+// times the bundler loads this module.
+const verifiedSessions = (globalThis.__atlasVerifiedSessions ??= new Map<
+  string,
+  VerifiedSession
+>());
 
 function sessionCacheKey(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
-/** After sign-out or step-up on this process, the next request reads the database. */
+/**
+ * The API runs as several processes (deploy/managed-node/server-cluster.mjs),
+ * each with its own cache. A process that ends sessions tells the others
+ * through the cluster supervisor, which passes the message on; otherwise a
+ * signed-out session went on working for up to a minute in the processes that
+ * had it cached (staging, 17 November 2026). The message names hashes of
+ * session tokens and principal ids only, never a token.
+ */
+export const FORGET_SESSIONS_MESSAGE = "atlas.sessions.forget";
+
+export type ForgetSessionsMessage = {
+  type: typeof FORGET_SESSIONS_MESSAGE;
+  keys: string[];
+  principalIds: string[];
+};
+
+export function isForgetSessionsMessage(value: unknown): value is ForgetSessionsMessage {
+  if (typeof value !== "object" || value === null) return false;
+  const message = value as Record<string, unknown>;
+  const strings = (list: unknown) =>
+    Array.isArray(list) && list.length <= 1_000 && list.every((item) => typeof item === "string");
+  return (
+    message["type"] === FORGET_SESSIONS_MESSAGE &&
+    strings(message["keys"]) &&
+    strings(message["principalIds"])
+  );
+}
+
+function forgetLocally(message: Pick<ForgetSessionsMessage, "keys" | "principalIds">): void {
+  for (const key of message.keys) verifiedSessions.delete(key);
+  if (message.principalIds.length === 0) return;
+  const principals = new Set(message.principalIds);
+  for (const [key, entry] of verifiedSessions) {
+    if (principals.has(entry.user.principalId)) verifiedSessions.delete(key);
+  }
+}
+
+function forgetEverywhere(message: Pick<ForgetSessionsMessage, "keys" | "principalIds">): void {
+  forgetLocally(message);
+  // Only a cluster worker has the supervisor to tell. A test runner's own
+  // child processes have an IPC channel too, which this must not write to.
+  if (cluster.isWorker && typeof process.send === "function" && process.connected) {
+    process.send({ type: FORGET_SESSIONS_MESSAGE, ...message } satisfies ForgetSessionsMessage);
+  }
+}
+
+if (cluster.isWorker && !globalThis.__atlasForgetListener) {
+  globalThis.__atlasForgetListener = true;
+  process.on("message", (message: unknown) => {
+    if (isForgetSessionsMessage(message)) forgetLocally(message);
+  });
+}
+
+/** After sign-out or step-up, the next request in any process reads the database. */
 export function forgetBetterAuthSession(cookieHeader: string | null): void {
   const token = readBetterAuthSessionToken(cookieHeader);
-  if (token) verifiedSessions.delete(sessionCacheKey(token));
+  if (token) forgetEverywhere({ keys: [sessionCacheKey(token)], principalIds: [] });
+}
+
+/**
+ * After a change that ends or alters every session of a principal (a new or
+ * reset password, "sign out other devices", an authenticator added or
+ * removed), its sessions are read from the database again in every process.
+ */
+export function forgetPrincipalSessions(principalId: string): void {
+  forgetEverywhere({ keys: [], principalIds: [principalId] });
 }
 
 function remember(key: string, user: BetterAuthSessionUser, sessionExpiresAt: number): void {

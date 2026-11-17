@@ -162,7 +162,7 @@ There are no production accounts.
 **One path for "who is signed in".**
 
 - `requireSessionUser` and `resolveSessionPrincipal` (`@atlas/api/session-user`) answer for either system: tenant routes, `/me`, invitations, certificates and the platform guard.
-- A Better Auth session is checked once a minute per token, as the Supabase one is. A Better Auth user is the principal, so it's only read, and refused unless active. Tenant routes created with `createTenantRoute` read it in the membership gate's statement instead of calling `resolveSessionPrincipal`, with the same answers (`docs/engineering/staging-load-test-2026-11-07.md`).
+- A Better Auth session is checked once a minute per token, as the Supabase one is. Ending a session makes every API process forget it at once, through the cluster supervisor ([login security review](login-security-review-2026-11-16.md), "After the review"). A Better Auth user is the principal, so it's only read, and refused unless active. Tenant routes created with `createTenantRoute` read it in the membership gate's statement instead of calling `resolveSessionPrincipal`, with the same answers (`docs/engineering/staging-load-test-2026-11-07.md`).
 
 **The same routes and answers.** Sign-in, sign-up, email confirmation, resend, reset and change password keep their routes and responses. Each service function has a Better Auth branch. Two routes are new, so the web app no longer talks to Supabase for these:
 

@@ -34,6 +34,16 @@ const CRASH_WINDOW_MS = 60_000;
 const SHUTDOWN_TIMEOUT_MS = 40_000; // Under the compose stop_grace_period (45 s).
 
 const SERVICES = new Set(["api", "web"]);
+
+/** The one message the supervisor relays; its shape is checked, never trusted. */
+function isForgetSessionsMessage(value) {
+  if (typeof value !== "object" || value === null) return false;
+  const strings = (list) =>
+    Array.isArray(list) && list.length <= 1_000 && list.every((item) => typeof item === "string");
+  return (
+    value.type === "atlas.sessions.forget" && strings(value.keys) && strings(value.principalIds)
+  );
+}
 // Messages are "<service>.cluster.*" from module "<service>-cluster", so the
 // API's log lines are the same as before the web app used this too.
 let service = "server";
@@ -159,6 +169,17 @@ async function main() {
   };
   process.on("SIGTERM", () => stop("SIGTERM"));
   process.on("SIGINT", () => stop("SIGINT"));
+
+  // Each API process caches verified sessions for up to a minute. One that
+  // ends sessions (sign-out, a password change) sends this message, and it is
+  // passed on to every other process so they forget them at once
+  // (backend/packages/auth/src/better-auth-runtime.ts).
+  cluster.on("message", (from, message) => {
+    if (!isForgetSessionsMessage(message)) return;
+    for (const worker of Object.values(cluster.workers ?? {})) {
+      if (worker && worker !== from && worker.isConnected()) worker.send(message);
+    }
+  });
 
   for (let index = 0; index < count; index++) cluster.fork();
   log("info", "started", { processes: count, heapMb });

@@ -7,6 +7,7 @@ import { withGlobalDb } from "@atlas/db/global-db";
 import {
   changePasswordWithBetterAuth,
   completeSignup,
+  forgetPrincipalSessions,
   getAtlasAuth,
   loginWithPassword,
   requestMagicLinkWithBetterAuth,
@@ -439,6 +440,44 @@ suite("Better Auth password flows", () => {
       [principalId],
     );
     expect(rows[0].n).toBe(0);
+  });
+
+  // Staging, 17 November 2026: a session ended elsewhere went on working
+  // from the cache for up to a minute. Forgetting a principal clears every
+  // cached session of it, in this process and (through the cluster
+  // supervisor) the others.
+  it("stops answering from the cache for a principal whose sessions were ended", async () => {
+    const { cookie, principalId } = await signUpAndVerify(freshEmail());
+    await requireBetterAuthUser(request(cookie));
+    // Ended in the database, as another process would end it.
+    await owner.query("delete from auth_sessions where user_id = $1", [principalId]);
+    await expect(requireBetterAuthUser(request(cookie))).resolves.toMatchObject({
+      principalId,
+    });
+
+    forgetPrincipalSessions(principalId);
+    await expect(requireBetterAuthUser(request(cookie))).rejects.toMatchObject({ status: 401 });
+  });
+
+  it("ends the other sessions everywhere when the password changes", async () => {
+    const email = freshEmail();
+    const { cookie: first } = await signUpAndVerify(email);
+    const second = await loginWithPassword({
+      db: perStatement,
+      input: { email, password: PASSWORD },
+      req: request(),
+    });
+    if (!("setCookies" in second.session)) throw new Error("expected Better Auth cookies");
+    const other = cookieHeader(second.session.setCookies);
+    await requireBetterAuthUser(request(other));
+
+    await changePasswordWithBetterAuth({
+      ctx: authRequestContext(request(first)),
+      currentPassword: PASSWORD,
+      newPassword: NEW_PASSWORD,
+    });
+    await expect(requireBetterAuthUser(request(other))).rejects.toMatchObject({ status: 401 });
+    await expect(requireBetterAuthUser(request(first))).resolves.toMatchObject({ email });
   });
 
   it("refuses a disabled principal's existing session on the next request", async () => {

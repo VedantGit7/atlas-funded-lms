@@ -143,7 +143,13 @@ export const config = {
     /*
      * Keep static assets out of middleware.
      * Tenant resolution itself happens in server route wrappers/loaders.
+     *
+     * favicon.ico, robots.txt and sitemap.xml used to be skipped too, but no
+     * such files exist: a request for one renders the not-found page inside
+     * the root layout, which loads the academy's branding from the API. Without
+     * this proxy that call carried no client IP, so the API refused it with
+     * 503 on every few page views (Sentry ATLAS-LMS-6, since 30 October).
      */
-    "/((?!_next/static|_next/image|_next/webpack-hmr|fonts/cormorant-garamond/v21/|fonts/plus-jakarta-sans/v12/|fonts/jetbrains-mono/v24/|fonts/inter/v20/|fonts/playfair-display/v40/|favicon.ico|robots.txt|sitemap.xml).*)",
+    "/((?!_next/static|_next/image|_next/webpack-hmr|fonts/cormorant-garamond/v21/|fonts/plus-jakarta-sans/v12/|fonts/jetbrains-mono/v24/|fonts/inter/v20/|fonts/playfair-display/v40/).*)",
   ],
 };

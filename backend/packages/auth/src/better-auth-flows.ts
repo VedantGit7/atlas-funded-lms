@@ -22,6 +22,7 @@ import {
   betterAuthHeaders,
   captureAuthEmails,
   forgetBetterAuthSession,
+  forgetPrincipalSessions,
   getAtlasAuth,
 } from "./better-auth-runtime";
 import { readRequestCookieHeader } from "./cookie-names";
@@ -463,6 +464,8 @@ export async function resetPasswordWithBetterAuth(args: {
     if (code && WEAK_PASSWORD_CODES.has(code)) throw passwordRejected();
     throw authRequired();
   }
+  // Every session was ended; no process may go on answering for one.
+  forgetPrincipalSessions(principal.id);
   return { principalId: principal.id, email: principal.email };
 }
 
@@ -487,6 +490,7 @@ export async function changePasswordWithBetterAuth(args: {
       headers: headersFor(args.ctx),
     });
     await auth.api.revokeOtherSessions({ headers: headersFor(args.ctx) });
+    forgetPrincipalSessions(response.user.id);
     return { email: response.user.email };
   } catch (error) {
     const code = errorCode(error);
@@ -517,16 +521,19 @@ export async function signOutWithBetterAuth(args: {
 }
 
 /**
- * Ends every other session of the signed-in principal, keeping this one. A
- * session ended elsewhere stops working on other processes within the
- * verified-session cache's minute, as a sign-out does.
+ * Ends every other session of the signed-in principal, keeping this one.
+ * Every API process forgets the principal's cached sessions at once, so the
+ * ended ones stop working straight away, as after a sign-out.
  */
 export async function signOutOtherSessionsWithBetterAuth(args: {
   ctx: AuthRequestContext;
 }): Promise<void> {
   try {
+    const session = await currentSession(args.ctx);
     await getAtlasAuth().api.revokeOtherSessions({ headers: headersFor(args.ctx) });
+    forgetPrincipalSessions(session.user.id);
   } catch (error) {
+    if (error instanceof AtlasHttpError) throw error;
     if (statusOf(error) === 401) throw authRequired();
     throw authProviderUnavailable();
   }
@@ -848,6 +855,9 @@ export async function verifySecondFactor(args: {
     const principalId = await sessionPrincipal(args.ctx, cookies);
     if (!principalId) throw mfaCodeRejected();
     forgetBetterAuthSession(args.ctx.cookie);
+    // Finishing setup turns MFA on: the principal's other sessions must now
+    // pass it too (requireSessionUser), in every process.
+    forgetPrincipalSessions(principalId);
     return { cookies, principalId };
   }
 
@@ -882,7 +892,7 @@ export async function disableTwoFactor(args: { ctx: AuthRequestContext }): Promi
     where: [{ field: "userId", value: session.user.id }],
   });
   await context.internalAdapter.updateUser(session.user.id, { twoFactorEnabled: false });
-  forgetBetterAuthSession(args.ctx.cookie);
+  forgetPrincipalSessions(session.user.id);
 }
 
 /**
@@ -943,6 +953,7 @@ async function createAccountFromProvenAddress(args: {
   if (found) {
     for (const account of found.accounts) await context.internalAdapter.deleteAccount(account.id);
     await context.internalAdapter.deleteUserSessions(found.user.id);
+    forgetPrincipalSessions(found.user.id);
   }
   const user =
     found?.user ??

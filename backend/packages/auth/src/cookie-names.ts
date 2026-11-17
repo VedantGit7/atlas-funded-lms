@@ -10,6 +10,16 @@ export const ATLAS_UI_MODE_COOKIE = "atlas_ui_mode";
 export const ATLAS_SESSION_COOKIE = "atlas_session";
 export const ATLAS_SECURE_SESSION_COOKIE = `__Secure-${ATLAS_SESSION_COOKIE}`;
 
+/**
+ * A Set-Cookie that removes a session cookie. A browser ignores one for a
+ * `__Secure-` cookie unless it says Secure, so the secure name gets it; the
+ * plain name, which only local http uses, doesn't need it.
+ */
+export function expiredSessionCookie(name: string): string {
+  const secure = name.startsWith("__Secure-") ? "; Secure" : "";
+  return `${name}=; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax${secure}`;
+}
+
 /** How long a "remember me" session lasts. */
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
