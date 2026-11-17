@@ -3,6 +3,7 @@ import { validateProductionObservabilityEnv } from "@atlas/observability/env";
 import { createWorkerObservabilityContext } from "@atlas/observability/worker/context";
 import { isExpectedClientError } from "@atlas/observability/sentry/expected-errors";
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import { EntitlementRequiredError } from "@atlas/authorization";
 
 describe("observability env and worker context", () => {
   it("requires hash salt in production", () => {
@@ -33,5 +34,18 @@ describe("observability env and worker context", () => {
       message: "Denied",
     });
     expect(isExpectedClientError(error)).toBe(true);
+  });
+
+  // Sentry ATLAS-LMS-5 and -H: refusals whose codes weren't listed.
+  it("treats every 4xx refusal as expected, and still reports a 5xx", () => {
+    const refusal = (code: string, status: number) =>
+      new AtlasHttpError({ code, status, message: code });
+    expect(isExpectedClientError(new EntitlementRequiredError("community.enable"))).toBe(true);
+    expect(isExpectedClientError(refusal("MFA_REQUIRED", 403))).toBe(true);
+    expect(isExpectedClientError(refusal("RATE_LIMITED", 429))).toBe(true);
+    expect(isExpectedClientError(refusal("SOMETHING_NEW", 409))).toBe(true);
+    expect(isExpectedClientError(refusal("SERVICE_UNAVAILABLE", 503))).toBe(false);
+    expect(isExpectedClientError(refusal("INTERNAL_ERROR", 500))).toBe(false);
+    expect(isExpectedClientError(new Error("boom"))).toBe(false);
   });
 });

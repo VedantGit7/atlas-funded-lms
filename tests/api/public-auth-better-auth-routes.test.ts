@@ -106,6 +106,31 @@ describe("POST /api/v1/public/auth/logout", () => {
     expect(cleared).toEqual(expect.arrayContaining(["atlas_session", "__Secure-atlas_session"]));
   });
 
+  // Staging, 17 November 2026: the session cookie outlived sign-out, because
+  // the deletion of __Secure-atlas_session lacked Secure, which browsers
+  // require, and Better Auth's own headers were dropped.
+  it("clears the secure session cookie the way a browser accepts, keeping Better Auth's headers", async () => {
+    const betterAuths =
+      "__Secure-atlas.dont_remember=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax";
+    mocks.signOut.mockResolvedValue({ setCookies: [betterAuths] });
+
+    const response = await logout(
+      request("/api/v1/public/auth/logout", {}, "__Secure-atlas_session=opaque.signature"),
+    );
+
+    const headers = response.headers.getSetCookie();
+    expect(headers).toContain(betterAuths);
+    const secure = headers.find((cookie) => cookie.startsWith("__Secure-atlas_session="));
+    expect(secure).toBeDefined();
+    expect(secure).toMatch(/^__Secure-atlas_session=;/);
+    expect(secure).toMatch(/;\s*Secure(;|$)/);
+    expect(secure).toMatch(/;\s*Max-Age=0(;|$)/);
+    expect(secure).toMatch(/;\s*Path=\/(;|$)/);
+    expect(secure).toMatch(/;\s*HttpOnly(;|$)/);
+    const plain = headers.find((cookie) => cookie.startsWith("atlas_session="));
+    expect(plain).toMatch(/;\s*Max-Age=0(;|$)/);
+  });
+
   it("answers the same with no session", async () => {
     const response = await logout(request("/api/v1/public/auth/logout", {}));
     expect(await response.json()).toEqual({ data: { ok: true } });

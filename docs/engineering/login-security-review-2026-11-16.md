@@ -129,7 +129,7 @@ They count requests for any address, with or without an account, so a refusal re
 
 ## Kept as designed
 
-- **The 60-second session cache.** A sign-out, password reset or "sign out other sessions" takes up to a minute to reach every API process. Disabling an account is still immediate. This was decided in audit §3.1 for the load it saves.
+- **The 60-second session cache** (audit §3.1, for the load it saves). Disabling an account is immediate. Ending a session reaches every API process at once since 17 November; see "After the review" below.
 - **Lockout by a guesser.** Someone guessing a password can hold its owner's password sign-in for 15 minutes; Google and sign-in links still work. The same is true of the authenticator lockout, which only someone with the password can trigger.
 
 ## Tests
@@ -150,3 +150,33 @@ They count requests for any address, with or without an account, so a refusal re
   - a planted cookie never authenticates;
   - a session from an email link is refused until its code is given.
 - **Browser journey J01.** The sign-up form has no password field, and the completion page asks for one.
+
+## After the review: signing out (17 November 2026)
+
+Testing on staging after the fixes were deployed, signing out of the admin console left the landing page showing "Dashboard", and the button still opened the dashboard. The API logs showed two causes acting together:
+
+1. **The session cookie survived sign-out.** On https it is `__Secure-atlas_session`, and a browser ignores a deletion of a `__Secure-` cookie unless it says `Secure`. The API route deleted it with `NextResponse.cookies.delete`, which writes no `Secure` and also rebuilt the response's Set-Cookie header, dropping Better Auth's own correct deletion. The web's sign-out action then deleted it the same way with `cookies().delete()`, replacing the API's deletion as it was passed on.
+2. **Other API processes still accepted it for up to a minute.** The session was deleted from the database, but each of the five API processes remembers a verified session for 60 seconds. Only the process that handled the sign-out forgot it, so requests after the sign-out alternated between "signed out" and 200 for that minute.
+
+**Fixes:**
+
+- Both the API route and the web action now write explicit expiring cookies: `Secure` on `__Secure-atlas_session`, the same path, `HttpOnly`, `SameSite=Lax`, `Max-Age=0`. The API appends them after Better Auth's headers instead of rebuilding the header.
+- A process that ends sessions sends a message through the cluster supervisor (`deploy/managed-node/server-cluster.mjs`), which passes it to every other process, and they forget those sessions at once:
+  - a sign-out forgets that session;
+  - a password change or reset, "sign out other devices", and adding or removing an authenticator forget every session of the account.
+
+  The message carries hashes of session tokens and principal ids, never a token. It reaches the processes of one server. A deployment that runs the API on several servers would need a shared channel such as Redis instead.
+
+**Tests:**
+
+- the sign-out route's cookie attributes;
+- the web action's cookie writes;
+- the supervisor relaying a valid message to every other process and dropping a malformed one;
+- against Postgres, cached sessions are dropped when an account is forgotten and when the password changes.
+
+## Sentry, the same day
+
+The three unresolved Sentry issues on staging after the deploy:
+
+- **ATLAS-LMS-5 (50 events) and ATLAS-LMS-H (4 events): refusals reported as errors.** "Entitlement required: community.enable" came from the admin overview asking for moderation cases on an academy without the community feature, which it already tolerates. "Enter the code from your authenticator app" came from the second-factor check above, while a session was waiting for its code. The API skipped only errors whose codes were on a fixed list, and these weren't. It now skips every error that carries a 4xx status (`isExpectedClientError`), so a new kind of refusal never becomes an issue, and still reports every 5xx.
+- **ATLAS-LMS-6 (90 events since 30 October): `/public/bootstrap` refused with 503 while people browsed.** The web proxy, which stamps the visitor's IP on each request, skipped `favicon.ico`, `robots.txt` and `sitemap.xml`. No such files exist, so a browser's request for `/favicon.ico` rendered the not-found page inside the root layout. That layout loads the academy's branding from the API, and without the IP the API refused it, as it must for a public request. Requesting `/favicon.ico` and `/sitemap.xml` on staging reproduced it, two refusals for two requests. The proxy now runs for those paths; only build assets and font files skip it.
