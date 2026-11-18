@@ -2,6 +2,7 @@ export {
   PublicLoginRequestSchema,
   PublicSignupRequestSchema,
   PublicSignupCompleteRequestSchema,
+  PublicJoinRequestSchema,
   PublicAuthConfirmRequestSchema,
   PublicAuthResendRequestSchema,
   PublicEmailOtpTypeSchema,

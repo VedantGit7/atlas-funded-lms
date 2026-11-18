@@ -20,6 +20,7 @@ const {
   mockWithGlobalDb,
   mockWithTenantTx,
   mockRejectClientTenantId,
+  mockRecordAcceptance,
 } = vi.hoisted(() => ({
   mockResolveTenant: vi.fn(),
   mockRequireSessionUser: vi.fn(),
@@ -31,6 +32,7 @@ const {
     fn({ $queryRaw: vi.fn() }),
   ),
   mockRejectClientTenantId: vi.fn(),
+  mockRecordAcceptance: vi.fn(),
 }));
 
 vi.mock("@atlas/tenancy", () => ({
@@ -61,6 +63,14 @@ vi.mock("@atlas/domain-identity", async (importOriginal) => {
     resolveRoleHomePath: () => "/",
   };
 });
+
+vi.mock(
+  "../../backend/apps/api/src/server/tenant-settings/legal-acceptance.service",
+  async (importOriginal) => ({
+    ...(await importOriginal<Record<string, unknown>>()),
+    recordLegalAcceptance: (...args: unknown[]) => mockRecordAcceptance(...args),
+  }),
+);
 
 vi.mock("@atlas/db/global-db", () => ({
   withGlobalDb: (fn: (db: unknown) => unknown) => mockWithGlobalDb(fn),
@@ -105,12 +115,28 @@ describe("POST /api/v1/public/invitations/accept", () => {
   });
 
   it("accepts invitation and returns accepted status", async () => {
-    const response = await POST(createRequest({ token: `${"a".repeat(40)}` }));
+    const response = await POST(createRequest({ token: `${"a".repeat(40)}`, acceptTerms: true }));
     const body: unknown = await response.json();
 
     expect(response.status).toBe(200);
     expect(body).toEqual({
       data: { status: "ACCEPTED", redirectTo: "/" },
     });
+    // Launch plan 5.7: the agreement is recorded with the membership it opens.
+    expect(mockRecordAcceptance).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        membershipId: "membership-a",
+        consent: expect.objectContaining({ source: "invitation" }),
+      }),
+    );
+  });
+
+  it("refuses to accept without the agreement box ticked, opening nothing", async () => {
+    const response = await POST(createRequest({ token: `${"a".repeat(40)}` }));
+
+    expect(response.status).toBe(400);
+    expect(mockAcceptInvitation).not.toHaveBeenCalled();
+    expect(mockRecordAcceptance).not.toHaveBeenCalled();
   });
 });

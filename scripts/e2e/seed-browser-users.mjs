@@ -163,6 +163,18 @@ try {
          on conflict (tenant_id, membership_id, role_id) do nothing`,
         [randomUUID(), userTenant, membershipId, roleId],
       );
+
+      // These accounts stand for people who already signed up, so they have
+      // agreed to the academy's Terms (launch plan 5.7). Without the record,
+      // sign-in sends them to /join instead of their home.
+      await client.query(
+        `insert into tenant_legal_acceptances (tenant_id, membership_id, source, accepted_at)
+         select $1::uuid, $2::uuid, 'join', now()
+         where not exists (
+           select 1 from tenant_legal_acceptances where tenant_id = $1::uuid and membership_id = $2::uuid
+         )`,
+        [userTenant, membershipId],
+      );
     } else {
       // This is explicit fixture setup, never a request-time fallback. Serialize
       // the history check and insertion so a concurrent seed/revocation cannot

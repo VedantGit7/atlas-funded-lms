@@ -16,6 +16,9 @@ const mocks = vi.hoisted(() => ({
   applyReferral: vi.fn(),
   principalRows: vi.fn(),
   buildResponse: vi.fn(),
+  findInvitation: vi.fn(),
+  hasAcceptance: vi.fn(),
+  recordAcceptance: vi.fn(),
 }));
 
 vi.mock("@atlas/auth", async (importOriginal) => ({
@@ -36,7 +39,16 @@ vi.mock("@atlas/membership", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   findMembershipByPrincipal: (...args: unknown[]) => mocks.findMembership(...args),
   ensureSelfServiceLearnerMembership: (...args: unknown[]) => mocks.ensureLearner(...args),
+  findPendingInvitationByEmail: (...args: unknown[]) => mocks.findInvitation(...args),
 }));
+vi.mock(
+  "../../backend/apps/api/src/server/tenant-settings/legal-acceptance.service",
+  async (importOriginal) => ({
+    ...(await importOriginal<Record<string, unknown>>()),
+    hasLegalAcceptance: (...args: unknown[]) => mocks.hasAcceptance(...args),
+    recordLegalAcceptance: (...args: unknown[]) => mocks.recordAcceptance(...args),
+  }),
+);
 vi.mock(
   "../../backend/apps/api/src/server/sales-referrals/sales-referrals.service",
   async (importOriginal) => ({
@@ -118,6 +130,10 @@ describe("POST /api/v1/public/auth/oauth/callback", () => {
       { email_normalized: "learner@example.test", mfa_enabled: false },
     ]);
     mocks.applyReferral.mockResolvedValue(undefined);
+    mocks.findInvitation.mockResolvedValue(null);
+    // Existing members have agreed already, unless a test says otherwise.
+    mocks.hasAcceptance.mockResolvedValue(true);
+    mocks.recordAcceptance.mockResolvedValue(undefined);
     mocks.buildResponse.mockResolvedValue({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
   });
 
@@ -139,11 +155,20 @@ describe("POST /api/v1/public/auth/oauth/callback", () => {
       created: true,
     });
 
+    // Ticked "I agree" on the sign-up page before going to Google (launch plan 5.7).
+    const termsAcceptedAt = new Date().toISOString();
     const response = await callback(
-      request("/api/v1/public/auth/oauth/callback", { code: "c", state: "s1" }),
+      request("/api/v1/public/auth/oauth/callback", { code: "c", state: "s1", termsAcceptedAt }),
     );
 
     expect(response.status).toBe(200);
+    expect(mocks.recordAcceptance).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        membershipId: "membership-new",
+        consent: { source: "google_signup", acceptedAt: new Date(termsAcceptedAt) },
+      }),
+    );
     expect(mocks.ensureLearner).toHaveBeenCalledWith(
       expect.objectContaining({ authPrincipalId: "principal-new", email: "learner@example.test" }),
     );
@@ -153,6 +178,46 @@ describe("POST /api/v1/public/auth/oauth/callback", () => {
     );
     expect(mocks.buildResponse).toHaveBeenCalledWith(
       expect.objectContaining({ membership: { id: "membership-new", status: "ACTIVE" } }),
+    );
+  });
+
+  it("opens no membership for a newcomer who hasn't agreed, and asks them to (launch plan 5.7)", async () => {
+    mocks.completeGoogle.mockResolvedValue({
+      kind: "signed_in",
+      principalId: "principal-new",
+      cookies: { setCookies: [sessionCookie] },
+      emails: [],
+    });
+    mocks.findMembership.mockResolvedValue(null);
+
+    const response = await callback(
+      request("/api/v1/public/auth/oauth/callback", { code: "c", state: "s1" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mocks.ensureLearner).not.toHaveBeenCalled();
+    expect(mocks.recordAcceptance).not.toHaveBeenCalled();
+    expect(mocks.buildResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ membership: null, termsRequired: true }),
+    );
+  });
+
+  it("asks an existing member with no recorded agreement to agree", async () => {
+    mocks.completeGoogle.mockResolvedValue({
+      kind: "signed_in",
+      principalId: "principal-1",
+      cookies: { setCookies: [sessionCookie] },
+      emails: [],
+    });
+    mocks.hasAcceptance.mockResolvedValue(false);
+
+    await callback(request("/api/v1/public/auth/oauth/callback", { code: "c", state: "s1" }));
+
+    expect(mocks.buildResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        membership: { id: "membership-1", status: "ACTIVE" },
+        termsRequired: true,
+      }),
     );
   });
 

@@ -399,6 +399,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Tenant: 'Tenant',
   TenantUsageEvent: 'TenantUsageEvent',
+  TenantLegalAcceptance: 'TenantLegalAcceptance',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
   AuthSession: 'AuthSession',
@@ -650,7 +651,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantUsageEvent" | "tenantDomain" | "authPrincipal" | "authSession" | "authAccount" | "authVerification" | "authTwoFactor" | "platformOperator" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave" | "paymentRefundIntent" | "outboxDeliveryJob" | "reportDeliveryEffect" | "exportFileCleanupRequest"
+    modelProps: "tenant" | "tenantUsageEvent" | "tenantLegalAcceptance" | "tenantDomain" | "authPrincipal" | "authSession" | "authAccount" | "authVerification" | "authTwoFactor" | "platformOperator" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave" | "paymentRefundIntent" | "outboxDeliveryJob" | "reportDeliveryEffect" | "exportFileCleanupRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -799,6 +800,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TenantUsageEventCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TenantUsageEventCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantLegalAcceptance: {
+      payload: Prisma.$TenantLegalAcceptancePayload<ExtArgs>
+      fields: Prisma.TenantLegalAcceptanceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantLegalAcceptanceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantLegalAcceptanceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>
+        }
+        findFirst: {
+          args: Prisma.TenantLegalAcceptanceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantLegalAcceptanceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>
+        }
+        findMany: {
+          args: Prisma.TenantLegalAcceptanceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>[]
+        }
+        create: {
+          args: Prisma.TenantLegalAcceptanceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>
+        }
+        createMany: {
+          args: Prisma.TenantLegalAcceptanceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantLegalAcceptanceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>[]
+        }
+        delete: {
+          args: Prisma.TenantLegalAcceptanceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>
+        }
+        update: {
+          args: Prisma.TenantLegalAcceptanceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantLegalAcceptanceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantLegalAcceptanceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantLegalAcceptanceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantLegalAcceptanceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantLegalAcceptancePayload>
+        }
+        aggregate: {
+          args: Prisma.TenantLegalAcceptanceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantLegalAcceptance>
+        }
+        groupBy: {
+          args: Prisma.TenantLegalAcceptanceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantLegalAcceptanceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantLegalAcceptanceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantLegalAcceptanceCountAggregateOutputType> | number
         }
       }
     }
@@ -18337,6 +18412,20 @@ export const TenantUsageEventScalarFieldEnum = {
 export type TenantUsageEventScalarFieldEnum = (typeof TenantUsageEventScalarFieldEnum)[keyof typeof TenantUsageEventScalarFieldEnum]
 
 
+export const TenantLegalAcceptanceScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  membership_id: 'membership_id',
+  source: 'source',
+  terms_version: 'terms_version',
+  privacy_version: 'privacy_version',
+  accepted_at: 'accepted_at',
+  created_at: 'created_at'
+} as const
+
+export type TenantLegalAcceptanceScalarFieldEnum = (typeof TenantLegalAcceptanceScalarFieldEnum)[keyof typeof TenantLegalAcceptanceScalarFieldEnum]
+
+
 export const TenantDomainScalarFieldEnum = {
   id: 'id',
   tenant_id: 'tenant_id',
@@ -22652,6 +22741,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
   tenantUsageEvent?: Prisma.TenantUsageEventOmit
+  tenantLegalAcceptance?: Prisma.TenantLegalAcceptanceOmit
   tenantDomain?: Prisma.TenantDomainOmit
   authPrincipal?: Prisma.AuthPrincipalOmit
   authSession?: Prisma.AuthSessionOmit

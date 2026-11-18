@@ -12,8 +12,13 @@ describe("public invitation schemas", () => {
     expect(
       AcceptInvitationRequestSchema.parse({
         token: "a".repeat(40),
+        acceptTerms: true,
       }).token,
     ).toHaveLength(40);
+  });
+
+  it("refuses to accept an invitation without the 'I agree' box ticked (launch plan 5.7)", () => {
+    expect(AcceptInvitationRequestSchema.safeParse({ token: "a".repeat(40) }).success).toBe(false);
   });
 
   it("rejects tenant_id in invitation body", () => {

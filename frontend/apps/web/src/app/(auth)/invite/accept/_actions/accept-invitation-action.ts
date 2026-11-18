@@ -11,6 +11,8 @@ import { safeInvitationErrorMessage } from "../../../../../lib/auth-messages";
 import { ServerPublicApiError, serverPublicApi } from "../../../../../lib/server/public-auth-fetch";
 import { readFormString } from "../../../../../lib/server/form";
 
+const TERMS_REQUIRED_MESSAGE = "Tick the box to agree to the Terms and Privacy Policy.";
+
 export type AcceptInvitationActionState = {
   ok: boolean;
   message: string;
@@ -25,12 +27,15 @@ export async function acceptInvitationAction(
 ): Promise<AcceptInvitationActionState> {
   const parsed = AcceptInvitationRequestSchema.safeParse({
     token: readFormString(formData.get("token")),
+    acceptTerms: readFormString(formData.get("acceptTerms")) === "true",
   });
 
   if (!parsed.success) {
     return {
       ok: false,
-      message: safeInvitationErrorMessage(undefined),
+      message: parsed.error.issues.some((issue) => issue.path[0] === "acceptTerms")
+        ? TERMS_REQUIRED_MESSAGE
+        : safeInvitationErrorMessage(undefined),
       requestId: crypto.randomUUID(),
     };
   }
@@ -79,9 +84,13 @@ export async function setInvitationPasswordAction(
   const parsed = SetInvitationPasswordRequestSchema.safeParse({
     token: readFormString(formData.get("token")),
     password: readFormString(formData.get("password")),
+    acceptTerms: readFormString(formData.get("acceptTerms")) === "true",
   });
 
   if (!parsed.success) {
+    if (parsed.error.issues.some((issue) => issue.path[0] === "acceptTerms")) {
+      return { ok: false, message: TERMS_REQUIRED_MESSAGE, requestId: crypto.randomUUID() };
+    }
     const passwordIssue = parsed.error.issues.find((issue) => issue.path[0] === "password");
     return {
       ok: false,

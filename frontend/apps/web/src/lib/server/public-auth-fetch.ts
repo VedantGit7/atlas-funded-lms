@@ -118,8 +118,13 @@ export const serverPublicApi = {
     email: string;
     displayName: string;
     inviteToken?: string;
+    acceptTerms: true;
     referralCode?: string;
   }) => postJson<PublicAuthApiResponse>("/api/v1/public/auth/signup", body, "public-signup"),
+
+  /** Agrees to this academy's Terms as someone signed in, opening the membership (launch plan 5.7). */
+  join: (body: { acceptTerms: true }) =>
+    postJson<PublicAuthApiResponse>("/api/v1/public/auth/join", body, "public-join"),
 
   completeSignup: (body: { token: string; password: string }) =>
     postJson<PublicAuthApiResponse>(
@@ -138,7 +143,7 @@ export const serverPublicApi = {
   verifyMfa: (body: { code: string }) =>
     postJson<PublicAuthApiResponse>("/api/v1/public/auth/verify-mfa", body, "public-mfa-verify"),
 
-  acceptInvitation: (body: { token: string }) =>
+  acceptInvitation: (body: { token: string; acceptTerms: true }) =>
     postJson<AcceptInvitationApiResponse>(
       "/api/v1/public/invitations/accept",
       body,
@@ -162,7 +167,7 @@ export const serverPublicApi = {
       "public-password-reset",
     ),
 
-  setInvitationPassword: (body: { token: string; password: string }) =>
+  setInvitationPassword: (body: { token: string; password: string; acceptTerms: true }) =>
     postJson<SetInvitationPasswordApiResponse>(
       "/api/v1/public/invitations/set-password",
       body,

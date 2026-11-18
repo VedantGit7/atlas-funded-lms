@@ -13,8 +13,16 @@ describe("auth request/response schemas", () => {
       publicSignupInputSchema.parse({
         email: " User@Example.com ",
         password: "password123",
+        acceptTerms: true,
       }),
-    ).toEqual({ email: "user@example.com" });
+    ).toEqual({ email: "user@example.com", acceptTerms: true });
+  });
+
+  it("refuses a sign-up whose 'I agree' box was not ticked (launch plan 5.7)", () => {
+    expect(publicSignupInputSchema.safeParse({ email: "user@example.com" }).success).toBe(false);
+    expect(
+      publicSignupInputSchema.safeParse({ email: "user@example.com", acceptTerms: false }).success,
+    ).toBe(false);
   });
 
   it("takes the password when the sign-up's link is opened, and refuses a short one", () => {

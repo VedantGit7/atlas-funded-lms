@@ -41,6 +41,7 @@ function invitationAction() {
   const form = new FormData();
   form.set("token", "fixture-invitation-token-long-enough");
   form.set("password", "new-password");
+  form.set("acceptTerms", "true");
   return setInvitationPasswordAction(null, form);
 }
 

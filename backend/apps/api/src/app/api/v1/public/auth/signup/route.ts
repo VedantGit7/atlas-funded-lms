@@ -54,6 +54,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       email: input.email,
       displayName: input.displayName,
       inviteToken: input.inviteToken,
+      acceptTerms: input.acceptTerms,
       referralCode: input.referralCode,
     }),
   });

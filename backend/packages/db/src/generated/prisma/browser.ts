@@ -28,6 +28,12 @@ export type Tenant = Prisma.TenantModel
  */
 export type TenantUsageEvent = Prisma.TenantUsageEventModel
 /**
+ * Model TenantLegalAcceptance
+ * Launch plan 5.7: insert-only record of a member agreeing to the academy's
+ * Terms and Privacy Policy before their membership was opened (migration 131).
+ */
+export type TenantLegalAcceptance = Prisma.TenantLegalAcceptanceModel
+/**
  * Model TenantDomain
  * 
  */

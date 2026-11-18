@@ -6,6 +6,7 @@ export const publicAuthStatusSchema = z.enum([
   "MFA_REQUIRED",
   "NO_ACTIVE_MEMBERSHIP",
   "INVITED_MEMBERSHIP",
+  "TERMS_REQUIRED",
 ]);
 
 export type PublicAuthStatus = z.infer<typeof publicAuthStatusSchema>;
@@ -27,6 +28,12 @@ export const PublicOAuthStartRequestSchema = z
   .object({
     provider: PublicOAuthProviderSchema,
     rememberMe: z.boolean().optional(),
+    /**
+     * Started from the sign-up page after "I agree" was ticked: Google may
+     * create a new account. From anywhere else it signs in existing accounts
+     * only (launch plan 5.7).
+     */
+    signUp: z.boolean().optional(),
   })
   .strict();
 
@@ -44,6 +51,8 @@ export const PublicOAuthCallbackRequestSchema = z
     state: z.string().min(1).max(500),
     redirectTo: z.string().max(300).optional(),
     rememberMe: z.boolean().optional(),
+    /** When "I agree" was ticked before a Google sign-up (launch plan 5.7). */
+    termsAcceptedAt: z.iso.datetime().optional(),
   })
   .strict();
 
@@ -64,6 +73,13 @@ export const PublicSignupRequestSchema = z
     email: z.string().trim().toLowerCase().pipe(z.email()),
     displayName: z.string().trim().min(2).max(120),
     inviteToken: z.string().min(20).max(500).optional(),
+    /**
+     * The "I agree" box: 18 or older, and agreeing to the academy's Terms and
+     * Privacy Policy. No account is opened without it (launch plan 5.7).
+     */
+    acceptTerms: z.literal(true, {
+      error: "Tick the box to agree to the Terms and Privacy Policy.",
+    }),
     /** Optional Learnyst-style referral / invite code (not an admin invite token). */
     referralCode: z.preprocess(
       (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
@@ -75,6 +91,18 @@ export const PublicSignupRequestSchema = z
         .regex(/^[A-Za-z0-9_-]+$/)
         .optional(),
     ),
+  })
+  .strict();
+
+/**
+ * Joins this academy as someone already signed in, by agreeing to its Terms
+ * and Privacy Policy (launch plan 5.7).
+ */
+export const PublicJoinRequestSchema = z
+  .object({
+    acceptTerms: z.literal(true, {
+      error: "Tick the box to agree to the Terms and Privacy Policy.",
+    }),
   })
   .strict();
 

@@ -11,6 +11,8 @@ export const publicSignupInputSchema = z.object({
   email: emailSchema,
   displayName: z.string().trim().min(2).max(120).optional(),
   inviteToken: z.string().min(20).max(500).optional(),
+  /** Agreed to the academy's Terms and Privacy Policy (launch plan 5.7). */
+  acceptTerms: z.literal(true),
   referralCode: z.preprocess(
     (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
     z

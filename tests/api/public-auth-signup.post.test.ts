@@ -97,14 +97,14 @@ describe("POST /api/v1/public/auth/signup", () => {
 
   it("emails the link that finishes the sign-up, and answers the same for every address", async () => {
     const response = await POST(
-      createRequest({ email: "user@example.com", displayName: "Atlas User" }),
+      createRequest({ email: "user@example.com", displayName: "Atlas User", acceptTerms: true }),
     );
     const body: unknown = await response.json();
 
     expect(response.status).toBe(200);
     expect(body).toEqual({ data: { status: "EMAIL_VERIFICATION_REQUIRED", redirectTo: null } });
     expect(mockRequestSignup).toHaveBeenCalledWith({
-      input: { email: "user@example.com", displayName: "Atlas User" },
+      input: { email: "user@example.com", displayName: "Atlas User", acceptTerms: true },
     });
     expect(mockSendAuthEmails).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -118,10 +118,28 @@ describe("POST /api/v1/public/auth/signup", () => {
       emails: [{ kind: "account-exists", email: "user@example.com", token: "" }],
     });
     const again = await POST(
-      createRequest({ email: "user@example.com", displayName: "Atlas User" }),
+      createRequest({ email: "user@example.com", displayName: "Atlas User", acceptTerms: true }),
     );
     expect(await again.json()).toEqual(body);
   });
+
+  // Launch plan 5.7: no account is started without the "I agree" box.
+  it.each([undefined, false])(
+    "refuses a sign-up whose agreement box is %s, before sending anything",
+    async (acceptTerms) => {
+      const response = await POST(
+        createRequest({
+          email: "user@example.com",
+          displayName: "Atlas User",
+          ...(acceptTerms === undefined ? {} : { acceptTerms }),
+        }),
+      );
+
+      expect(response.status).toBe(400);
+      expect(mockRequestSignup).not.toHaveBeenCalled();
+      expect(mockSendAuthEmails).not.toHaveBeenCalled();
+    },
+  );
 
   // Security review 5.3, finding 1: the password is chosen from the emailed link.
   it("refuses a password at sign-up, before sending anything", async () => {
@@ -136,7 +154,9 @@ describe("POST /api/v1/public/auth/signup", () => {
 
   // Security review 5.3, finding 5.
   it("counts the sign-up against the address's own budget", async () => {
-    await POST(createRequest({ email: "User@Example.com", displayName: "Atlas User" }));
+    await POST(
+      createRequest({ email: "User@Example.com", displayName: "Atlas User", acceptTerms: true }),
+    );
     expect(mockEnforceAddressRateLimit).toHaveBeenCalledWith({
       kind: "signup-link",
       email: "user@example.com",
@@ -148,7 +168,9 @@ describe("POST /api/v1/public/auth/signup", () => {
         status: 429,
       }),
     );
-    const limited = await POST(createRequest({ email: "user@example.com", displayName: "Atlas" }));
+    const limited = await POST(
+      createRequest({ email: "user@example.com", displayName: "Atlas", acceptTerms: true }),
+    );
     expect(limited.status).not.toBe(200);
     expect(mockSendAuthEmails).toHaveBeenCalledTimes(1);
   });
@@ -162,6 +184,7 @@ describe("POST /api/v1/public/auth/signup", () => {
         createRequest({
           email: "user@example.com",
           displayName: "Atlas User",
+          acceptTerms: true,
           emailRedirectTo,
         }),
       );

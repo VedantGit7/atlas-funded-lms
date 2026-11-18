@@ -62,6 +62,8 @@ export async function requestSignup(args: {
     email: args.input.email,
     displayName: args.input.displayName?.trim(),
     inviteToken: args.input.inviteToken,
+    // The schema only admits a sign-up whose "I agree" box was ticked.
+    termsAcceptedAt: new Date().toISOString(),
   });
   return { status: "verification_required" as const, emails: result.emails };
 }
@@ -91,6 +93,7 @@ export async function completeSignup(args: {
     identity: toSessionSafeIdentity(principal),
     session: completed.cookies,
     ...(completed.inviteToken ? { inviteToken: completed.inviteToken } : {}),
+    ...(completed.termsAcceptedAt ? { termsAcceptedAt: completed.termsAcceptedAt } : {}),
   };
 }
 

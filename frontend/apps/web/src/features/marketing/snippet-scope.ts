@@ -26,6 +26,8 @@ export const SNIPPET_BLOCKED_ROOTS = [
   "invite",
   "auth",
   "verify-email",
+  // Agreeing to the Terms as someone signed in (launch plan 5.7).
+  "join",
   // Account security (password, MFA, sessions).
   "profile",
   "settings",

@@ -3,7 +3,7 @@ import { confirmEmailViaInternalApi } from "../../../lib/server/public-auth-fetc
 import { resolveRequestOrigin } from "../../../lib/server/resolve-request-origin";
 import { withSignupCompleteMarker } from "../../../features/marketing/snippet-scope";
 import { identityBlockQueryValue, isIdentityBlockCode } from "../../../lib/auth-messages";
-import { resolveSafeRedirectPath } from "../../../lib/auth/safe-redirect";
+import { resolveSafeRedirectPath, termsRequiredDestination } from "../../../lib/auth/safe-redirect";
 
 // The academy's auth emails (sign-up verification, sign-in links, both email
 // change steps) point here with a single-use `token_hash` and its `type`
@@ -75,6 +75,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     destination = new URL("/verify-email", origin);
     destination.searchParams.set("status", "success");
     destination.searchParams.set("next", dest);
+  } else if (result.status === "TERMS_REQUIRED") {
+    // Signed in, but not yet agreed to this academy's Terms (launch plan 5.7).
+    destination = new URL(termsRequiredDestination(next ?? null), origin);
   } else if (result.status === "MFA_REQUIRED") {
     // Signed in, but the session can't be used until the authenticator code
     // is given (security review 5.3, finding 2): the sign-in page asks for it.

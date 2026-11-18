@@ -96,7 +96,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     async (tx) => {
       // `loginWithPassword` resolves only on a completed password sign-in and
       // throws otherwise, so sign-up waits only for a pending MFA challenge.
-      const membership = await resolveSignInMembership(tx, {
+      const { membership, termsRequired } = await resolveSignInMembership(tx, {
         tenantId: tenant.tenantId,
         principalId,
         email: input.email,
@@ -109,6 +109,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         serviceStatus: result.status,
         mfaEnabled: result.identity.mfaEnabled,
         membership,
+        termsRequired,
       });
     },
   );

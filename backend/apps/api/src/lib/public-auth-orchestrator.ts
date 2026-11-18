@@ -67,7 +67,7 @@ async function buildResponse(args: {
     async (tx) => {
       // A fully authenticated user, including one who just cleared an MFA
       // challenge (`args.mfaEnabled` is false once it's satisfied), may sign up.
-      const membership = await resolveSignInMembership(tx, {
+      const { membership, termsRequired } = await resolveSignInMembership(tx, {
         tenantId: args.tenantId,
         principalId,
         email: args.email,
@@ -80,6 +80,7 @@ async function buildResponse(args: {
         serviceStatus: args.serviceStatus,
         mfaEnabled: args.mfaEnabled,
         membership,
+        termsRequired,
       });
     },
   );

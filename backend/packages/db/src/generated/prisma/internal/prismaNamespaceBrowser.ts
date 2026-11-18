@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Tenant: 'Tenant',
   TenantUsageEvent: 'TenantUsageEvent',
+  TenantLegalAcceptance: 'TenantLegalAcceptance',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
   AuthSession: 'AuthSession',
@@ -337,6 +338,20 @@ export const TenantUsageEventScalarFieldEnum = {
 } as const
 
 export type TenantUsageEventScalarFieldEnum = (typeof TenantUsageEventScalarFieldEnum)[keyof typeof TenantUsageEventScalarFieldEnum]
+
+
+export const TenantLegalAcceptanceScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  membership_id: 'membership_id',
+  source: 'source',
+  terms_version: 'terms_version',
+  privacy_version: 'privacy_version',
+  accepted_at: 'accepted_at',
+  created_at: 'created_at'
+} as const
+
+export type TenantLegalAcceptanceScalarFieldEnum = (typeof TenantLegalAcceptanceScalarFieldEnum)[keyof typeof TenantLegalAcceptanceScalarFieldEnum]
 
 
 export const TenantDomainScalarFieldEnum = {

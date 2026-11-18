@@ -181,8 +181,9 @@ suite("Better Auth Google sign-in", () => {
     const email = freshEmail();
     googleProfile = { sub: randomUUID(), email, email_verified: true, name: "Google Person" };
 
+    // A sign-up start: the sign-up page's Google button, after "I agree".
     const result = await throughGoogle(
-      await startGoogleSignIn({ ctx: authRequestContext(request()) }),
+      await startGoogleSignIn({ ctx: authRequestContext(request()), signUp: true }),
     );
     if (result.kind !== "signed_in") throw new Error("expected a sign-in");
 
@@ -240,11 +241,25 @@ suite("Better Auth Google sign-in", () => {
 
   // Security review 5.3, finding 1: an account from an address nobody has
   // proven would keep this Google login after the real owner proved it.
+  it("opens no account for a new address unless the start asked to sign up (launch plan 5.7)", async () => {
+    const email = freshEmail();
+    googleProfile = { sub: randomUUID(), email, email_verified: true, name: "No Agreement" };
+
+    // The sign-in page's Google button: existing accounts only.
+    const start = await startGoogleSignIn({ ctx: authRequestContext(request()) });
+    await expect(throughGoogle(start)).rejects.toMatchObject({
+      code: "SIGNUP_REQUIRED",
+      status: 403,
+    });
+
+    expect(await principalIdOf(email)).toBeUndefined();
+  });
+
   it("creates nothing for a new address Google hasn't verified", async () => {
     const email = freshEmail();
     googleProfile = { sub: randomUUID(), email, email_verified: false, name: "Unverified Google" };
 
-    const start = await startGoogleSignIn({ ctx: authRequestContext(request()) });
+    const start = await startGoogleSignIn({ ctx: authRequestContext(request()), signUp: true });
     await expect(throughGoogle(start)).rejects.toMatchObject({ status: 401 });
 
     expect(await principalIdOf(email)).toBeUndefined();

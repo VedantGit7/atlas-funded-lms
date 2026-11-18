@@ -392,318 +392,392 @@
       "terms": {
         "slug": "terms",
         "title": "Terms and Conditions",
-        "subtitle": "These Terms and Conditions govern your access to and use of FundedBeyond Academy, including our free diagnostic, courses, practice tools, community features, and related educational services.",
-        "lastUpdated": "June 26, 2026",
+        "subtitle": "The agreement between you and FundedBeyond Academy for using our courses, assessments, certificates and community.",
+        "lastUpdated": "November 18, 2026",
         "sections": [
           {
-            "id": "introduction",
+            "id": "about",
             "sectionNumber": "Section 01",
-            "title": "Introduction and Acceptance",
+            "title": "About These Terms",
             "blocks": [
               {
                 "type": "p",
-                "text": "Welcome to FundedBeyond Academy (\"Academy,\" \"we,\" \"us,\" or \"our\"), the education and trader-development platform operated as part of the FundedBeyond ecosystem. By creating an account, accessing our website at academy.fundedbeyond.com (or your tenant domain), or using any Academy service, you agree to be bound by these Terms and Conditions (\"Terms\")."
+                "text": "FundedBeyond Academy (the \"Academy\", \"we\", \"us\") is an online trading-education platform at academy.fundedbeyond.com. It is operated by Beyond Edge FZCO, a company registered in the International Free Zone Authority (IFZA), Dubai, United Arab Emirates."
               },
               {
                 "type": "p",
-                "text": "If you do not agree to these Terms, you must not use the Academy. We may update these Terms from time to time. Material changes will be communicated through the platform or by email where appropriate. Continued use after changes take effect constitutes acceptance of the revised Terms."
-              },
+                "text": "These Terms and Conditions (\"Terms\") apply whenever you visit the Academy, create an account, take a course or assessment, or post in the community. Our Privacy Policy explains how we handle your personal data and forms part of these Terms. To create an account you must tick the box confirming that you agree to these Terms and the Privacy Policy. No account is opened until you do. By using the Academy you also agree to both. If you do not agree, please do not use the Academy."
+              }
+            ]
+          },
+          {
+            "id": "summary",
+            "sectionNumber": "Section 02",
+            "title": "The Short Version",
+            "blocks": [
               {
                 "type": "p",
-                "text": "The Academy provides educational content, assessments, practice tools, and community features designed to help traders develop skills and prepare for proprietary trading evaluations. The Academy does not operate trading accounts, sell prop-trading challenges, or provide investment advice."
+                "text": "This summary is here to help you find your way. The full sections below are what count."
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "You must be 18 or older to use the Academy.",
+                  "The Academy teaches trading. It does not give financial advice, manage money or run trading accounts.",
+                  "Some courses are free and some are paid. Prices and what you get are shown before you pay.",
+                  "All payments are final. We do not give refunds or compensation in any case.",
+                  "Course material is for your own learning. Please do not share or resell it.",
+                  "Treat other learners with respect, and take assessments honestly.",
+                  "You can close your account at any time.",
+                  "Trading carries a real risk of loss. Nothing you learn here guarantees profits or a funded account."
+                ]
               }
             ]
           },
           {
             "id": "eligibility",
-            "sectionNumber": "Section 02",
-            "title": "Eligibility and Account Registration",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "You must be at least 18 years of age (or the age of majority in your jurisdiction, whichever is higher) to create an account and use the Academy. By registering, you represent that you meet this requirement and that all information you provide is accurate, current, and complete."
-              },
-              {
-                "type": "h3",
-                "text": "Account responsibilities"
-              },
-              {
-                "type": "ul",
-                "items": [
-                  "You are responsible for maintaining the confidentiality of your login credentials and for all activity under your account.",
-                  "You must notify us promptly at support@fundedbeyond.com if you suspect unauthorized access.",
-                  "One person may not maintain more than one personal account unless we expressly authorize otherwise (for example, separate admin or instructor roles).",
-                  "You may sign in using email and password or supported third-party authentication providers where available."
-                ]
-              },
-              {
-                "type": "p",
-                "text": "We reserve the right to refuse registration, suspend, or terminate accounts that violate these Terms or that we reasonably believe pose a risk to the platform or other users."
-              }
-            ]
-          },
-          {
-            "id": "code-of-conduct",
             "sectionNumber": "Section 03",
-            "title": "Code of Conduct",
+            "title": "Who Can Use the Academy",
             "blocks": [
               {
                 "type": "p",
-                "text": "FundedBeyond Academy is a learning community. All users are expected to interact respectfully and in good faith. The following conduct is prohibited:"
-              },
-              {
-                "type": "ul",
-                "items": [
-                  "Harassment, hate speech, threats, or discrimination based on protected characteristics.",
-                  "Sharing false, misleading, or manipulative trading signals presented as guaranteed outcomes.",
-                  "Spamming, scraping, automated abuse, or attempts to circumvent access controls or rate limits.",
-                  "Uploading malware, attempting unauthorized access, or interfering with platform security or performance.",
-                  "Sharing login credentials, course materials, or proprietary Academy content outside permitted use.",
-                  "Impersonating another person, instructor, or FundedBeyond representative.",
-                  "Using the community or messaging features for unsolicited commercial promotion unrelated to permitted educational discussion."
-                ]
+                "text": "You must be at least 18 years old, or the age of majority where you live if that is higher, and able to enter into a binding contract. The Academy is not intended for children and we do not knowingly allow anyone under 18 to register."
               },
               {
                 "type": "p",
-                "text": "Violations may result in content removal, feature restrictions, or permanent account termination at our discretion. Serious violations may be referred to appropriate authorities."
+                "text": "You may not use the Academy if you are barred from receiving our services under the laws that apply to you, or if we have previously closed your account for breaking these Terms."
               }
             ]
           },
           {
-            "id": "educational-services",
+            "id": "accounts",
             "sectionNumber": "Section 04",
-            "title": "Educational Services and Platform Scope",
+            "title": "Your Account",
             "blocks": [
               {
                 "type": "p",
-                "text": "The Academy offers structured learning paths, lessons, diagnostics, simulated practice tools, progress tracking, certificates of completion where applicable, and community spaces. Availability of specific features may vary by membership tier, enrollment, or tenant configuration."
-              },
-              {
-                "type": "h3",
-                "text": "Relationship to FundedBeyond challenges"
-              },
-              {
-                "type": "p",
-                "text": "Prop-trading challenges, funded accounts, and related trading services are offered separately through fundedbeyond.com and its trading infrastructure. The Academy may display readiness indicators, recommendations, or outbound links to challenge purchase flows. Those purchases are governed by the terms and policies of the main FundedBeyond platform, not these Academy Terms alone."
-              },
-              {
-                "type": "p",
-                "text": "Completion of Academy courses or achievement of readiness scores does not guarantee challenge approval, funding, or trading profits. Outcomes depend on your performance, market conditions, and the rules of any third-party evaluation program you choose to pursue."
-              }
-            ]
-          },
-          {
-            "id": "fees",
-            "sectionNumber": "Section 05",
-            "title": "Fees, Subscriptions, and Payments",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "Certain Academy features are free (including the trader diagnostic in applicable configurations). Paid courses, memberships, or premium tools may require payment as displayed at checkout. Prices are shown in the currency indicated and may include applicable taxes where required by law."
-              },
-              {
-                "type": "table",
-                "headers": ["Offering type", "Billing", "Access"],
-                "rows": [
-                  [
-                    "Free diagnostic and selected public content",
-                    "No charge",
-                    "As described on the product page"
-                  ],
-                  [
-                    "Individual course purchase",
-                    "One-time or installment per checkout",
-                    "Per course enrollment terms"
-                  ],
-                  [
-                    "Membership or bundle plans",
-                    "Recurring until cancelled",
-                    "While subscription remains active"
-                  ],
-                  [
-                    "Enterprise or custom tenant plans",
-                    "Per agreement",
-                    "Per contract with your organization"
-                  ]
-                ]
-              },
-              {
-                "type": "p",
-                "text": "You authorize us and our payment processors to charge your selected payment method for applicable fees. Failed payments may result in suspension of paid features until the balance is resolved. We may change pricing for future billing periods with reasonable notice; changes do not affect amounts already paid for the current term unless required by law."
-              }
-            ]
-          },
-          {
-            "id": "intellectual-property",
-            "sectionNumber": "Section 06",
-            "title": "Intellectual Property",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "All content on the Academy platform, including videos, text, graphics, assessments, software, logos, and course materials, is owned by FundedBeyond or its licensors and is protected by copyright, trademark, and other intellectual property laws."
-              },
-              {
-                "type": "h3",
-                "text": "Limited license to learners"
-              },
-              {
-                "type": "p",
-                "text": "Subject to these Terms and your active enrollment, we grant you a personal, non-exclusive, non-transferable, revocable license to access and use Academy materials solely for your own educational purposes. You may not copy, redistribute, publicly perform, resell, sublicense, or create derivative works from Academy content except where expressly permitted (for example, personal notes or exports explicitly provided by the platform)."
-              },
-              {
-                "type": "p",
-                "text": "User-generated content you post in community areas remains yours, but you grant us a worldwide, royalty-free license to host, display, and moderate that content in connection with operating the Academy."
-              }
-            ]
-          },
-          {
-            "id": "termination",
-            "sectionNumber": "Section 07",
-            "title": "Account Suspension and Termination",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "You may close your account at any time by contacting support@fundedbeyond.com or through account settings where available. We may suspend or terminate your access immediately, with or without notice, if you breach these Terms, engage in fraudulent activity, abuse other users, or if required by law."
-              },
-              {
-                "type": "h3",
-                "text": "Effect of termination"
+                "text": "You can register with an email address and password, or with Google. Either way, your account is only created after you tick the box confirming that you are 18 or older and agree to these Terms and the Privacy Policy. We record when you agreed and to which version. Please give us accurate information and keep it up to date."
               },
               {
                 "type": "ul",
                 "items": [
-                  "Your right to access enrolled courses and community features ends upon termination, except where law requires continued access to previously purchased digital goods.",
-                  "Provisions that by nature should survive (including intellectual property, disclaimers, limitation of liability, and dispute resolution) remain in effect.",
-                  "We may retain certain records as described in our Privacy Policy and as required for legal, security, or accounting purposes."
+                  "Keep your password and sign-in details private. You are responsible for what happens under your account.",
+                  "Tell us straight away at support@fundedbeyond.com if you think someone else has used your account.",
+                  "One account per person. Do not share an account, sell it, or let someone else learn or take assessments under your name.",
+                  "Staff, instructor and administrator accounts are given by us and may only be used for that role."
                 ]
+              }
+            ]
+          },
+          {
+            "id": "service",
+            "sectionNumber": "Section 05",
+            "title": "What the Academy Is, and What It Is Not",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "The Academy offers courses, lessons, videos, quizzes and assessments, a trader diagnostic, progress tracking, readiness indicators, certificates and a members' community. Which features you see can depend on the courses you are enrolled in."
+              },
+              {
+                "type": "h3",
+                "text": "Education, not advice"
+              },
+              {
+                "type": "p",
+                "text": "Everything in the Academy is general education. It is not financial, investment, tax or legal advice, and it is not a recommendation to buy or sell any instrument. Instructors and community members speak for themselves, not for us. You alone decide how and whether to trade."
+              },
+              {
+                "type": "h3",
+                "text": "FundedBeyond challenges are separate"
+              },
+              {
+                "type": "p",
+                "text": "Prop-trading challenges, evaluations and funded accounts are offered through fundedbeyond.com under its own terms. The Academy may show you readiness scores or links to those programmes, but buying a challenge is a separate contract with its own rules. Finishing a course, earning a certificate or reaching a readiness score does not entitle you to a challenge, a discount, funding or any trading outcome."
+              }
+            ]
+          },
+          {
+            "id": "payments",
+            "sectionNumber": "Section 06",
+            "title": "Free and Paid Courses",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "Some courses and features are free. Others require payment. Before you pay, the course page or checkout shows the price, the currency, any taxes, and what you get, including how long you will have access."
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "Payments are handled by a third-party payment processor shown at checkout. We do not see or store your full card or bank details.",
+                  "All payments are final and non-refundable (see No Refunds).",
+                  "Prices include or add taxes such as VAT or GST where the law requires.",
+                  "If a course page does not state an access period, you keep access for as long as the Academy offers that course.",
+                  "We may change prices for future purchases. A price change never affects a purchase you have already made.",
+                  "If a payment fails or is reversed, we may pause access to the paid course until it is settled."
+                ]
+              },
+              {
+                "type": "p",
+                "text": "If we ever offer recurring plans, the plan page will explain how often you are charged and how to cancel, and you can cancel at any time before the next billing date."
               }
             ]
           },
           {
             "id": "refunds",
-            "sectionNumber": "Section 08",
-            "title": "Refund and Cancellation Policy",
+            "sectionNumber": "Section 07",
+            "title": "No Refunds",
             "blocks": [
               {
                 "type": "p",
-                "text": "Refund eligibility depends on the product purchased and the laws of your jurisdiction. The table below summarizes our standard approach; specific offers may include additional terms shown at checkout."
+                "text": "All purchases are final. Please read the course page carefully, and try our free courses and the diagnostic, before you buy."
               },
               {
-                "type": "table",
-                "headers": ["Product", "Refund window", "Notes"],
-                "rows": [
-                  [
-                    "One-time course purchase",
-                    "14 days from purchase",
-                    "If less than 20% of course content has been completed"
-                  ],
-                  [
-                    "Subscription plans",
-                    "No refund for current period",
-                    "Cancel anytime; access continues until period end"
-                  ],
-                  ["Free diagnostic and free tiers", "Not applicable", "No payment collected"],
-                  [
-                    "Promotional or bundled offers",
-                    "Per offer terms",
-                    "As stated on the promotional page"
-                  ]
+                "type": "ul",
+                "items": [
+                  "We do not give refunds, in full or in part, for any purchase, whether or not you start, finish or use the course.",
+                  "We do not give credits, compensation or other payments for any reason, including dissatisfaction, change of mind, technical problems on your side, account suspension or closure, or changes to the Academy.",
+                  "If you are charged twice or charged an amount that does not match the price shown at checkout, contact us and we will correct the billing error.",
+                  "If you cancel a recurring plan, if we offer one, you are not charged again, but you are not refunded for the current period."
                 ]
               },
               {
                 "type": "p",
-                "text": "To request a refund, contact support@fundedbeyond.com with your account email and order details. Approved refunds are processed to the original payment method within a reasonable timeframe. Nothing in this section limits mandatory consumer rights where applicable law provides otherwise."
+                "text": "This does not take away any right you have that the law where you live does not allow a business to exclude."
               }
             ]
           },
           {
-            "id": "disclaimers",
-            "sectionNumber": "Section 09",
-            "title": "Educational Disclaimers and Trading Risk",
+            "id": "assessments",
+            "sectionNumber": "Section 08",
+            "title": "Assessments, Monitoring and Certificates",
             "blocks": [
               {
                 "type": "p",
-                "text": "FUNDEDBEYOND ACADEMY PROVIDES EDUCATIONAL INFORMATION ONLY. NOTHING ON THE PLATFORM CONSTITUTES FINANCIAL, INVESTMENT, TAX, OR LEGAL ADVICE. YOU ALONE ARE RESPONSIBLE FOR YOUR TRADING AND INVESTMENT DECISIONS."
+                "text": "Quizzes, assessments and the diagnostic must be your own work. Do not get help from another person, share questions or answers, or use tools to complete them for you."
               },
               {
                 "type": "p",
-                "text": "Trading financial instruments, including forex, futures, and other leveraged products, involves substantial risk of loss and is not suitable for every person. Past performance in simulations, diagnostics, or practice tools does not guarantee future results. You should seek independent professional advice before trading with real capital."
+                "text": "Some assessments use monitoring to protect their integrity. The assessment tells you before you start, and asks for your agreement, if it records browser activity (such as leaving the page or copying text) or uses your camera and microphone. Our Privacy Policy explains what is collected and how long it is kept."
               },
               {
                 "type": "p",
-                "text": "Simulated reviews, readiness scores, and practice metrics are educational aids. They do not represent actual trading results and may not reflect slippage, liquidity, psychology, or rule changes in live evaluation programs."
+                "text": "When you earn a certificate, it gets a unique link that anyone you share it with can use to check it is genuine. That page shows your name, the course and the date issued. Certificates are kept permanently as part of our records, and their links keep working, even if you later close or delete your account. We may withdraw a certificate if it was earned through cheating or a breach of these Terms."
+              }
+            ]
+          },
+          {
+            "id": "community",
+            "sectionNumber": "Section 09",
+            "title": "Community and Your Content",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "The community is for members to learn from each other. Anything you post or upload, such as posts, comments, questions, assignment answers or your profile photo, is \"your content\"."
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "You keep ownership of your content.",
+                  "If you delete your account, your posts, comments and messages stay in the community so conversations still make sense, but they are shown as written by a deleted member instead of your name.",
+                  "You give us a worldwide, non-exclusive, royalty-free licence to store, display, copy and adapt your content as needed to run the Academy, for example to show your post to other members. This licence continues for content that stays in the community after your account is deleted.",
+                  "Only post content you have the right to share, and do not post anyone's personal information without their permission.",
+                  "We may review, hide or remove content that breaks these Terms or the law, and we may restrict accounts that repeatedly do so."
+                ]
+              },
+              {
+                "type": "p",
+                "text": "If you send us ideas or feedback about the Academy, we may use them freely without paying you or giving you credit."
+              }
+            ]
+          },
+          {
+            "id": "conduct",
+            "sectionNumber": "Section 10",
+            "title": "Acceptable Use",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "When using the Academy, you must not:"
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "harass, threaten, abuse or discriminate against anyone;",
+                  "promote trading signals, schemes or products, or claim guaranteed returns;",
+                  "advertise or sell anything to members without our written permission;",
+                  "copy, record, download, share or resell course videos, materials or assessment questions, except where the Academy offers a download for your own use;",
+                  "share your account or paid access with anyone else;",
+                  "pretend to be another person, an instructor or a member of our team;",
+                  "scrape or harvest content or member data, or use automated tools, bots or AI agents to access the Academy, except through features we provide for that purpose;",
+                  "try to get around access controls, assessment monitoring, rate limits or other security measures;",
+                  "probe, attack or overload our systems, or upload malware;",
+                  "use the Academy for anything unlawful."
+                ]
+              },
+              {
+                "type": "p",
+                "text": "If you break these rules we may remove content, withdraw certificates, or suspend or close your account. Where it is serious, we may report it to the authorities."
+              }
+            ]
+          },
+          {
+            "id": "intellectual-property",
+            "sectionNumber": "Section 11",
+            "title": "Our Content and Your Licence",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "The courses, videos, text, assessments, software, designs, logos and the FundedBeyond name belong to us or the people who license them to us, and are protected by intellectual property law."
+              },
+              {
+                "type": "p",
+                "text": "While you have access to a course, we give you a personal, non-exclusive, non-transferable licence to use it for your own learning. You may keep private notes. Any other use, including copying, sharing, publishing, reselling or creating courses from our material, needs our written permission."
+              },
+              {
+                "type": "p",
+                "text": "If you believe something on the Academy infringes your rights, email support@fundedbeyond.com with details and we will look into it promptly."
+              }
+            ]
+          },
+          {
+            "id": "third-parties",
+            "sectionNumber": "Section 12",
+            "title": "Other Services and Links",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "The Academy works with services run by other companies, for example Google for sign-in, YouTube for some lesson videos, and our payment processor. When you use them, their own terms and privacy policies also apply. The Academy also links to fundedbeyond.com and other websites we do not control, and we are not responsible for their content or practices."
+              }
+            ]
+          },
+          {
+            "id": "termination",
+            "sectionNumber": "Section 13",
+            "title": "Closing or Suspending an Account",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "You can stop using the Academy and close your account at any time, from your account settings or by emailing support@fundedbeyond.com. Closing your account ends your access to all courses, including paid ones, so save copies of any certificates you want to keep first."
+              },
+              {
+                "type": "p",
+                "text": "We may suspend or close your account, or remove access to a course, if you break these Terms, if we need to for legal or security reasons, or if your account has been inactive and unused for an extended period. Where it is reasonable, we will tell you first and give you a chance to respond. Closing or suspending an account, by you or by us, does not entitle you to a refund or compensation."
+              },
+              {
+                "type": "p",
+                "text": "If we stop offering a paid course before the access period you paid for ends, we will tell you in advance where we reasonably can."
+              },
+              {
+                "type": "p",
+                "text": "Sections of these Terms that by their nature should last, including those on content ownership, disclaimers, liability, and governing law, continue after your account is closed."
+              }
+            ]
+          },
+          {
+            "id": "risk",
+            "sectionNumber": "Section 14",
+            "title": "Trading Risk and Disclaimers",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "Trading forex, futures, indices, commodities, cryptocurrencies and other leveraged products carries a high risk of losing money, and is not suitable for everyone. You can lose more than you expect. Results in simulations, practice tools, diagnostics and readiness scores are educational aids. They do not reflect real market conditions and do not predict your future results."
+              },
+              {
+                "type": "p",
+                "text": "We work to keep the Academy accurate, available and secure, but we provide it \"as is\" and \"as available\". To the extent the law allows, we do not promise that the content is complete or free of errors, that the Academy will always be available, or that it will meet your particular goals."
               }
             ]
           },
           {
             "id": "liability",
-            "sectionNumber": "Section 10",
-            "title": "Limitation of Liability",
+            "sectionNumber": "Section 15",
+            "title": "Limits on Our Liability",
             "blocks": [
               {
                 "type": "p",
-                "text": "TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, FUNDEDBEYOND ACADEMY AND ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AND SUPPLIERS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, DATA, GOODWILL, OR TRADING LOSSES, ARISING FROM YOUR USE OF OR INABILITY TO USE THE PLATFORM."
+                "text": "Nothing in these Terms limits liability that cannot be limited by law, such as liability for fraud, or for death or personal injury caused by negligence."
               },
               {
                 "type": "p",
-                "text": "OUR TOTAL LIABILITY FOR ANY CLAIM ARISING OUT OF THESE TERMS OR THE ACADEMY SHALL NOT EXCEED THE GREATER OF (A) THE AMOUNTS YOU PAID TO US FOR THE ACADEMY IN THE TWELVE (12) MONTHS BEFORE THE CLAIM, OR (B) ONE HUNDRED U.S. DOLLARS (USD $100), EXCEPT WHERE LIABILITY CANNOT BE LIMITED BY LAW."
+                "text": "Subject to that, we are not liable for trading losses or investment decisions, or for indirect or consequential loss, such as loss of profits, opportunity, data or goodwill, arising from your use of the Academy."
               },
               {
                 "type": "p",
-                "text": "Some jurisdictions do not allow certain limitations; in those cases, our liability is limited to the fullest extent permitted by law."
+                "text": "We do not pay compensation for any loss arising from your use of the Academy. Where the law does not allow us to exclude liability entirely, our total liability to you for all claims is limited to the amount you paid us for the course concerned in the 12 months before the claim arose."
               }
             ]
           },
           {
-            "id": "disputes",
-            "sectionNumber": "Section 11",
-            "title": "Dispute Resolution",
+            "id": "indemnity",
+            "sectionNumber": "Section 16",
+            "title": "Your Responsibility to Us",
             "blocks": [
               {
                 "type": "p",
-                "text": "We prefer to resolve concerns informally. Before initiating formal proceedings, please contact support@fundedbeyond.com with a description of the issue and your desired resolution. We will attempt to address the matter within a reasonable period."
-              },
-              {
-                "type": "h3",
-                "text": "Binding arbitration (where permitted)"
-              },
-              {
-                "type": "p",
-                "text": "If informal resolution fails and permitted by law, disputes arising from these Terms or the Academy shall be resolved through binding arbitration on an individual basis, rather than in class or representative proceedings, except that either party may seek injunctive relief in court for intellectual property or unauthorized access."
-              },
-              {
-                "type": "p",
-                "text": "Arbitration rules, venue, and administering body will be specified in a separate dispute notice or as required by applicable consumer protection law in your region."
+                "text": "If someone brings a claim against us because of content you posted or because you broke these Terms or the law, you agree to cover our reasonable losses and costs arising from that claim, to the extent the law allows."
               }
             ]
           },
           {
-            "id": "governing-law",
-            "sectionNumber": "Section 12",
-            "title": "Governing Law",
+            "id": "law",
+            "sectionNumber": "Section 17",
+            "title": "Governing Law and Disputes",
             "blocks": [
               {
                 "type": "p",
-                "text": "These Terms are governed by the laws of the jurisdiction in which FundedBeyond's operating entity is registered, without regard to conflict-of-law principles, except where mandatory local consumer protection laws apply to you as an individual consumer."
+                "text": "If something goes wrong, please contact us first at support@fundedbeyond.com. Most concerns can be sorted out quickly, and we aim to respond and resolve yours within about 15 days."
               },
               {
                 "type": "p",
-                "text": "If any provision of these Terms is held invalid or unenforceable, the remaining provisions remain in full force. Our failure to enforce a right does not waive that right."
+                "text": "These Terms are governed by the laws of the Emirate of Dubai and the federal laws of the United Arab Emirates. The courts of Dubai have jurisdiction over any dispute arising from them."
+              },
+              {
+                "type": "p",
+                "text": "If you use the Academy as a consumer, you also keep the protection of any mandatory consumer laws of the country where you live, and you may bring a claim in the courts of that country where its law allows."
               }
             ]
           },
           {
             "id": "changes",
-            "sectionNumber": "Section 13",
-            "title": "Changes to These Terms",
+            "sectionNumber": "Section 18",
+            "title": "Changes to the Academy and These Terms",
             "blocks": [
               {
                 "type": "p",
-                "text": "We may modify these Terms to reflect changes in our services, legal requirements, or business practices. We will post the updated Terms on this page and update the \"Last updated\" date. For material changes affecting paid subscribers, we will provide additional notice by email or in-product message where practicable."
+                "text": "We keep improving the Academy, so features and courses may change. We will not remove the core content of a paid course during your access period except for legal, safety or accuracy reasons."
               },
               {
                 "type": "p",
-                "text": "Questions about these Terms may be directed to support@fundedbeyond.com."
+                "text": "We may update these Terms. The date at the top shows when they last changed. If a change is significant, we will tell you by email or in the Academy at least 14 days before it takes effect. If you do not agree to the new Terms, you can close your account before then. If you keep using the Academy after that, the new Terms apply."
+              }
+            ]
+          },
+          {
+            "id": "general",
+            "sectionNumber": "Section 19",
+            "title": "General",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "These Terms and the Privacy Policy are the whole agreement between you and us about the Academy. Additional terms shown at checkout or on an offer page also apply to that purchase.",
+                  "If a court finds part of these Terms unenforceable, the rest stays in effect.",
+                  "If we do not enforce a right straight away, we can still enforce it later.",
+                  "You may not transfer your rights under these Terms. We may transfer ours, for example if the business is reorganised or sold, and your rights will not be reduced as a result.",
+                  "We are not responsible for delays or failures caused by events outside our reasonable control.",
+                  "These Terms are written in English. If we provide a translation, the English version applies where they differ."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "contact",
+            "sectionNumber": "Section 20",
+            "title": "Contact Us",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "Questions about these Terms and notices can be sent to support@fundedbeyond.com. Our postal address is Beyond Edge FZCO, Dubai, United Arab Emirates."
               }
             ]
           }
@@ -712,313 +786,414 @@
       "privacy": {
         "slug": "privacy",
         "title": "Privacy Policy",
-        "subtitle": "This Privacy Policy explains how FundedBeyond Academy collects, uses, stores, and protects personal information when you use our educational platform, diagnostic tools, courses, and community features.",
-        "lastUpdated": "June 26, 2026",
+        "subtitle": "How FundedBeyond Academy collects, uses, shares and protects your personal data, and the choices you have.",
+        "lastUpdated": "November 18, 2026",
         "sections": [
           {
-            "id": "introduction",
+            "id": "about",
             "sectionNumber": "Section 01",
-            "title": "Introduction",
+            "title": "Who We Are and What This Policy Covers",
             "blocks": [
               {
                 "type": "p",
-                "text": "FundedBeyond Academy (\"Academy,\" \"we,\" \"us,\" or \"our\") respects your privacy. This Privacy Policy describes our practices when you visit academy.fundedbeyond.com (or your organization's tenant domain), create an account, take the free trader diagnostic, enroll in courses, use practice tools, or participate in community spaces."
+                "text": "This Privacy Policy explains how Beyond Edge FZCO (\"we\", \"us\"), registered in the International Free Zone Authority (IFZA), Dubai, United Arab Emirates, handles personal data when you use FundedBeyond Academy at academy.fundedbeyond.com (the \"Academy\"). We decide how and why your personal data is used, which makes us responsible for it (the \"controller\" or \"data fiduciary\")."
               },
               {
                 "type": "p",
-                "text": "This policy applies to the Academy platform. Separate privacy practices may apply when you leave the Academy for fundedbeyond.com, challenge purchase flows, or third-party trading platforms. Those services are governed by their own policies."
-              },
-              {
-                "type": "p",
-                "text": "By using the Academy, you acknowledge that you have read this Privacy Policy. If you do not agree with our practices, please do not use the platform."
+                "text": "This policy covers the Academy only. When you visit fundedbeyond.com or buy a challenge there, its own privacy policy applies."
               }
             ]
           },
           {
-            "id": "information-we-collect",
+            "id": "commitments",
             "sectionNumber": "Section 02",
-            "title": "Information We Collect",
+            "title": "Our Commitments",
             "blocks": [
               {
-                "type": "h3",
-                "text": "Information you provide"
-              },
-              {
                 "type": "ul",
                 "items": [
-                  "Account details: name, display name, email address, password (stored in hashed form via our authentication provider), and profile preferences.",
-                  "Enrollment and learning data: course progress, assessment responses, diagnostic results, practice tool usage, and certificate information.",
-                  "Payment information: billing name, address, and transaction metadata processed by our payment partners (we do not store full card numbers on Academy servers).",
-                  "Communications: messages you send to support, community posts, comments, and survey responses.",
-                  "Optional profile information you choose to share, such as trading experience level or goals."
+                  "We collect what we need to run the Academy and teach you well, and no more.",
+                  "We do not sell your personal data, and we do not show advertising in the Academy.",
+                  "We only share data with service providers who help us run the Academy, under contracts that protect it.",
+                  "You can see, download and correct your data, and ask us to delete it.",
+                  "We protect your data with modern security and tell you if something goes wrong."
                 ]
-              },
-              {
-                "type": "h3",
-                "text": "Information collected automatically"
-              },
-              {
-                "type": "ul",
-                "items": [
-                  "Device and browser data: IP address, browser type, operating system, and device identifiers.",
-                  "Usage data: pages viewed, features used, session duration, click paths, and error logs.",
-                  "Authentication events: sign-in timestamps, multi-factor authentication status, and session tokens managed through secure cookies.",
-                  "Approximate location derived from IP address for security, fraud prevention, and regional compliance."
-                ]
-              },
-              {
-                "type": "h3",
-                "text": "Information from third parties"
-              },
-              {
-                "type": "p",
-                "text": "If you sign in with Google, Apple, or another supported provider, we receive basic profile information permitted by that provider (such as email and name). If you arrive via an invitation or organizational tenant, we may receive enrollment data from your institution."
               }
             ]
           },
           {
-            "id": "how-we-use",
+            "id": "information-you-give",
             "sectionNumber": "Section 03",
+            "title": "Information You Give Us",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "Account details: your name, email address and password. Passwords are stored only in hashed form, never readable.",
+                  "Profile details you choose to add, such as a display name, profile photo, trading experience or goals.",
+                  "Diagnostic and assessment answers, assignment submissions and anything else you submit while learning.",
+                  "Community posts, comments and messages.",
+                  "Billing details for paid courses, such as your billing name, address and tax details. These are stored encrypted. Card and bank details go straight to the payment processor and are never stored by us.",
+                  "Messages you send to our support team.",
+                  "Your agreement to our Terms and this policy: when you agreed, how (for example the sign-up form or Google), and which versions you agreed to."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "information-from-learning",
+            "sectionNumber": "Section 04",
+            "title": "Information Created as You Learn",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "Enrolments, lesson progress, video progress, quiz and assessment results, scores and time spent.",
+                  "Your diagnostic results and readiness indicators.",
+                  "Certificates issued to you.",
+                  "Assessment monitoring signals, where an assessment uses monitoring (see the Assessment Monitoring section)."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "information-collected-automatically",
+            "sectionNumber": "Section 05",
+            "title": "Information Collected Automatically",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "Device and connection data: IP address, browser and device type, operating system, and approximate location worked out from your IP address.",
+                  "Sign-in and security data: when you sign in, your active sessions and devices, and security events such as failed sign-ins.",
+                  "Usage data: pages viewed, features used and errors you run into."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "information-from-others",
+            "sectionNumber": "Section 06",
+            "title": "Information From Other Sources",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "Google: if you sign in with Google, Google shares your name, email address and profile picture with us.",
+                  "Payment processor: when you buy a course, the processor tells us whether the payment succeeded and gives us a payment reference.",
+                  "Our team: if an administrator invites you or enrols you in a course, they give us your name and email address."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "use",
+            "sectionNumber": "Section 07",
             "title": "How We Use Your Information",
             "blocks": [
               {
-                "type": "p",
-                "text": "We use personal information for the following purposes:"
-              },
-              {
-                "type": "ul",
-                "items": [
-                  "Provide, operate, and improve the Academy, including diagnostics, courses, practice tools, and community features.",
-                  "Create and manage your account, authenticate sessions, and enforce our Terms and Conditions.",
-                  "Process payments, fulfill enrollments, and send transactional messages (receipts, password resets, course updates).",
-                  "Personalize learning recommendations, readiness insights, and progress reporting.",
-                  "Monitor platform security, detect fraud, and prevent abuse.",
-                  "Analyze aggregated usage to improve content quality and product design.",
-                  "Send marketing communications where you have opted in; you may unsubscribe at any time.",
-                  "Comply with legal obligations and respond to lawful requests."
-                ]
-              },
-              {
-                "type": "p",
-                "text": "We process data based on contractual necessity (to deliver services you request), legitimate interests (security, analytics, product improvement), consent (where required for marketing or optional features), and legal obligations."
-              }
-            ]
-          },
-          {
-            "id": "cookies",
-            "sectionNumber": "Section 04",
-            "title": "Cookies and Similar Technologies",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "We use cookies and similar technologies to keep you signed in, remember preferences (such as theme settings), measure performance, and understand how the platform is used."
-              },
-              {
                 "type": "table",
-                "headers": ["Category", "Purpose", "Examples"],
+                "headers": ["What we do", "Information used", "Why we are allowed to"],
                 "rows": [
-                  ["Essential", "Authentication and security", "Session cookies, CSRF protection"],
-                  ["Functional", "Preferences and UX", "Theme, language, dismissed notices"],
                   [
-                    "Analytics",
-                    "Usage measurement",
-                    "Page views, feature adoption (where enabled)"
+                    "Create and run your account, sign you in, deliver courses and track progress",
+                    "Account, learning and device data",
+                    "To provide the service you asked for"
                   ],
-                  ["Marketing", "Attribution and campaigns", "Only with consent where required"]
+                  [
+                    "Issue certificates and let others verify them",
+                    "Name, course and completion date",
+                    "To provide the service you asked for"
+                  ],
+                  [
+                    "Process payments, invoices and taxes",
+                    "Billing and payment data",
+                    "To perform our contract with you, and to meet tax and accounting laws"
+                  ],
+                  [
+                    "Keep the Academy secure, prevent fraud and abuse, and protect assessment integrity",
+                    "Device, sign-in and security data, monitoring signals",
+                    "Our legitimate interest in a safe, fair service, and your consent for camera and microphone monitoring"
+                  ],
+                  [
+                    "Send service emails such as email verification, password resets, receipts and course updates",
+                    "Email address and account data",
+                    "To provide the service you asked for"
+                  ],
+                  [
+                    "Send news and offers, if you have agreed to receive them",
+                    "Email address",
+                    "Your consent, which you can withdraw at any time"
+                  ],
+                  [
+                    "Understand how the Academy is used and fix problems",
+                    "Usage and error data",
+                    "Our legitimate interest in improving the Academy"
+                  ],
+                  [
+                    "Meet legal obligations and respond to lawful requests",
+                    "Whatever the obligation requires",
+                    "Legal obligation"
+                  ]
                 ]
               },
               {
                 "type": "p",
-                "text": "You can control cookies through your browser settings. Disabling essential cookies may prevent you from signing in or using core features."
+                "text": "We do not use your data to make decisions that have legal or similarly significant effects on you based solely on automated processing. Readiness scores and recommendations are guidance to help you learn."
               }
             ]
           },
           {
-            "id": "content-security",
-            "sectionNumber": "Section 05",
-            "title": "Content Security",
+            "id": "monitoring",
+            "sectionNumber": "Section 08",
+            "title": "Assessment Monitoring",
             "blocks": [
               {
                 "type": "p",
-                "text": "Course videos, downloadable materials, and proprietary assessments are valuable intellectual property. We employ technical and organizational measures to reduce unauthorized copying, redistribution, or scraping of Academy content."
+                "text": "Some assessments use monitoring to make sure results are fair. An assessment always tells you which level it uses and asks for your agreement before you start."
               },
               {
                 "type": "ul",
                 "items": [
-                  "Access controls tied to active enrollment and account status.",
-                  "Signed or time-limited URLs for media delivery where applicable.",
-                  "Watermarking or viewer identification on select premium materials.",
-                  "Rate limiting and monitoring for abnormal download or API patterns.",
-                  "Termination of accounts that violate content licensing terms."
+                  "Level 1: records browser signals during the attempt, such as switching tabs, leaving full screen, and copying or pasting.",
+                  "Level 2: also asks for access to your camera and microphone, to record whether someone is present and whether there is audio activity. If you refuse access or your camera is unavailable, you can still take the assessment with reduced monitoring."
                 ]
               },
               {
                 "type": "p",
-                "text": "No security measure is perfect. You agree not to attempt to bypass protections or share access credentials with others."
-              }
-            ]
-          },
-          {
-            "id": "data-retention",
-            "sectionNumber": "Section 06",
-            "title": "Data Retention",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "We retain personal information for as long as your account is active or as needed to provide services, comply with law, resolve disputes, and enforce agreements."
-              },
-              {
-                "type": "ul",
-                "items": [
-                  "Account profile data: retained while your account exists and for a limited period after deletion for backup and legal purposes.",
-                  "Learning and diagnostic records: retained to support progress history and certificates; may be anonymized after account closure where appropriate.",
-                  "Payment records: retained as required by tax, accounting, and financial regulations.",
-                  "Security logs: typically retained for a shorter defined period unless needed for an investigation."
-                ]
-              },
-              {
-                "type": "p",
-                "text": "You may request deletion of your account and associated personal data subject to exceptions described in the \"Your Rights\" section below."
+                "text": "Monitoring signals are reviewed by our team only to check the integrity of an attempt. Camera and microphone recordings are kept for 90 days and then deleted automatically, unless we need them for an open integrity review."
               }
             ]
           },
           {
             "id": "sharing",
-            "sectionNumber": "Section 07",
-            "title": "Information Sharing and Disclosure",
+            "sectionNumber": "Section 09",
+            "title": "Who We Share It With",
             "blocks": [
               {
                 "type": "p",
-                "text": "We do not sell your personal information. We may share information in these circumstances:"
+                "text": "We share personal data only with the service providers below, who process it on our instructions and under contracts that require them to protect it, and only as needed for the service they provide."
+              },
+              {
+                "type": "table",
+                "headers": ["Provider", "What they do", "Where"],
+                "rows": [
+                  ["Hostinger", "Hosts our servers and database", "India (Mumbai)"],
+                  [
+                    "Cloudflare",
+                    "Delivers and protects the website, and stores uploaded files",
+                    "Global network"
+                  ],
+                  ["Google", "Sign in with Google", "Global"],
+                  ["Zoho (ZeptoMail)", "Sends our emails", "India"],
+                  ["Sentry", "Records technical errors so we can fix them", "European Union"],
+                  ["PostHog", "Measures how features are used, where enabled", "European Union"],
+                  ["YouTube (Google)", "Plays some lesson videos", "Global"],
+                  ["Payment processor shown at checkout", "Takes payments", "Varies"]
+                ]
+              },
+              {
+                "type": "p",
+                "text": "We may also share personal data:"
               },
               {
                 "type": "ul",
                 "items": [
-                  "Service providers who process data on our behalf (hosting, authentication, email delivery, payment processing, analytics) under contractual confidentiality and security obligations.",
-                  "Organizational tenants: if you access the Academy through an employer or partner program, certain progress data may be visible to authorized administrators of that tenant.",
-                  "Legal and safety: when required by law, court order, or to protect rights, safety, and security of users and the public.",
-                  "Business transfers: in connection with a merger, acquisition, or sale of assets, subject to continued protection consistent with this policy.",
-                  "With your direction: when you choose to share content publicly in community areas or integrate with a third-party service you authorize."
+                  "with our instructors and staff, who see your progress and submissions for the courses they teach or support;",
+                  "with other members, but only what you choose to post in the community or show on your profile;",
+                  "with anyone you give a certificate link to, who can see your name, the course and the date issued;",
+                  "with authorities, regulators or courts when the law requires it, or to protect the rights and safety of our members, our team or the public;",
+                  "with a buyer or successor if our business is reorganised or sold. They must protect your data as this policy describes."
+                ]
+              },
+              {
+                "type": "p",
+                "text": "When you follow a link from the Academy to fundedbeyond.com, the link carries a code so FundedBeyond can tell the visit came from the Academy. The code does not contain your name or email address."
+              }
+            ]
+          },
+          {
+            "id": "cookies",
+            "sectionNumber": "Section 10",
+            "title": "Cookies and Similar Technologies",
+            "blocks": [
+              {
+                "type": "table",
+                "headers": ["Type", "What it does", "Can you turn it off?"],
+                "rows": [
+                  [
+                    "Essential",
+                    "Keeps you signed in, secures your session and protects forms against misuse",
+                    "No. The Academy cannot work without these"
+                  ],
+                  [
+                    "Preferences",
+                    "Remembers choices such as light or dark mode, stored on your device",
+                    "Yes, by clearing your browser storage"
+                  ],
+                  [
+                    "Analytics",
+                    "Helps us see which features are used, where enabled",
+                    "Yes, through your browser settings"
+                  ],
+                  [
+                    "Video",
+                    "YouTube may set its own cookies when you play an embedded lesson video",
+                    "Yes, through your browser settings, though videos may then not play"
+                  ]
+                ]
+              },
+              {
+                "type": "p",
+                "text": "We do not use advertising or cross-site tracking cookies."
+              }
+            ]
+          },
+          {
+            "id": "transfers",
+            "sectionNumber": "Section 11",
+            "title": "Where Your Data Is Stored",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "Our main servers and database are in India. Some providers listed above process data in other countries, including the European Union and wherever Cloudflare's and Google's networks operate. When your data leaves your country, we rely on the provider's contractual commitments, such as standard contractual clauses, to keep it protected to the standard required by law."
+              }
+            ]
+          },
+          {
+            "id": "retention",
+            "sectionNumber": "Section 12",
+            "title": "How Long We Keep It",
+            "blocks": [
+              {
+                "type": "table",
+                "headers": ["Information", "How long"],
+                "rows": [
+                  [
+                    "Account, profile and learning records",
+                    "While your account is open. Deleted or anonymised within 30 days of your deletion request, except as below"
+                  ],
+                  [
+                    "Certificates",
+                    "Kept permanently as part of our records, including your name, the course and the date. Verification links keep working after your account is deleted"
+                  ],
+                  ["Assessment monitoring recordings", "90 days, unless needed for an open review"],
+                  [
+                    "Payment and invoice records",
+                    "Kept permanently for accounting, tax and legal records, including after your account is deleted"
+                  ],
+                  [
+                    "Security logs and error reports",
+                    "Up to 90 days, unless needed to investigate an incident"
+                  ],
+                  [
+                    "Audit records of actions in the Academy",
+                    "Kept for security. When your account is deleted, your name, email and other personal details are removed from them"
+                  ],
+                  [
+                    "Community posts, comments and messages",
+                    "Stay after your account is deleted, shown as written by a deleted member"
+                  ],
+                  [
+                    "Record of your agreement to the Terms and this policy",
+                    "Kept permanently as proof of consent"
+                  ],
+                  ["Support emails", "Up to 2 years after your request is resolved"],
+                  ["Backups", "Overwritten on a rolling basis within 30 days"]
                 ]
               }
             ]
           },
           {
-            "id": "third-party",
-            "sectionNumber": "Section 08",
-            "title": "Third-Party Services",
+            "id": "rights",
+            "sectionNumber": "Section 13",
+            "title": "Your Rights and Choices",
             "blocks": [
               {
                 "type": "p",
-                "text": "The Academy may contain links to external sites, including fundedbeyond.com for challenge purchases, payment processors, and social sign-in providers. We are not responsible for the privacy practices of those third parties."
+                "text": "Depending on where you live, you have some or all of these rights:"
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "Access: ask what personal data we hold about you and how we use it.",
+                  "Portability: download a copy of your data. You can do this yourself in your profile's privacy settings.",
+                  "Correction: fix inaccurate or incomplete data. Most of it you can edit in your profile.",
+                  "Deletion: ask us to delete your account and personal data. You can start this in your profile's privacy settings or by email. We complete deletion within 30 days. Some records are kept, as explained in How Long We Keep It: certificates, payment records and the record of your agreement are kept, and your community posts stay without your name.",
+                  "Withdraw consent: stop marketing emails with the unsubscribe link, or withdraw consent for monitoring before an assessment. Withdrawing consent does not affect what was done before.",
+                  "Objection and restriction: object to, or ask us to limit, processing based on our legitimate interests.",
+                  "Nominate someone: if you are in India, you can nominate a person to exercise your rights if you die or become unable to do so.",
+                  "Complain: contact our Grievance Officer (below), and, if you are not satisfied, the data protection authority where you live, such as the Data Protection Board of India or your local authority in the European Union, the United Kingdom or the United Arab Emirates."
+                ]
               },
               {
                 "type": "p",
-                "text": "We encourage you to review the privacy policies of any third-party service before providing personal information. OAuth sign-in is governed by both this policy and the provider's terms."
+                "text": "To use any of these rights, email support@fundedbeyond.com from your account email address. We may need to confirm your identity first. We aim to respond within about 15 days. Deletion requests are completed within 30 days."
               }
             ]
           },
           {
             "id": "security",
-            "sectionNumber": "Section 09",
-            "title": "Security",
+            "sectionNumber": "Section 14",
+            "title": "How We Protect Your Data",
             "blocks": [
-              {
-                "type": "p",
-                "text": "We implement administrative, technical, and physical safeguards designed to protect personal information, including encryption in transit (TLS), access controls, tenant isolation for multi-tenant deployments, and regular security reviews."
-              },
-              {
-                "type": "p",
-                "text": "No method of transmission or storage is completely secure. You are responsible for using a strong password and keeping your credentials confidential. Notify us immediately at support@fundedbeyond.com if you believe your account has been compromised."
-              }
-            ]
-          },
-          {
-            "id": "your-rights",
-            "sectionNumber": "Section 10",
-            "title": "Your Rights and Choices",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "Depending on your location, you may have rights to access, correct, delete, restrict, or port your personal data, and to object to certain processing. You may also withdraw consent for marketing communications at any time."
-              },
               {
                 "type": "ul",
                 "items": [
-                  "Access and update profile information in account settings where available.",
-                  "Request a copy of personal data we hold about you.",
-                  "Request deletion of your account, subject to legal retention requirements.",
-                  "Opt out of marketing emails via the unsubscribe link in messages.",
-                  "Lodge a complaint with your local data protection authority if you believe we have not addressed your concern."
+                  "All connections to the Academy are encrypted.",
+                  "Passwords are hashed, and sensitive details such as billing information are encrypted in storage.",
+                  "Access to personal data is limited to the people who need it, and sensitive administrator actions require multi-factor authentication.",
+                  "Each academy's data is kept separate from every other academy's.",
+                  "We monitor our systems for errors and attacks."
                 ]
               },
               {
                 "type": "p",
-                "text": "To exercise these rights, contact support@fundedbeyond.com. We may need to verify your identity before fulfilling requests."
+                "text": "No system is completely secure. If a breach affects your personal data, we will tell you and the relevant authorities as the law requires. You can help by using a strong, unique password and signing out on shared devices."
               }
             ]
           },
           {
-            "id": "children",
-            "sectionNumber": "Section 11",
-            "title": "Children's Privacy",
+            "id": "age",
+            "sectionNumber": "Section 15",
+            "title": "Age Requirement",
             "blocks": [
               {
                 "type": "p",
-                "text": "The Academy is not directed to individuals under 18 years of age. We do not knowingly collect personal information from children. If you believe a child has provided us with personal data, contact us and we will take steps to delete such information."
-              }
-            ]
-          },
-          {
-            "id": "international",
-            "sectionNumber": "Section 12",
-            "title": "International Data Transfers",
-            "blocks": [
-              {
-                "type": "p",
-                "text": "FundedBeyond Academy may process and store information in countries other than your own. Where required, we use appropriate safeguards such as standard contractual clauses or equivalent mechanisms to protect data transferred across borders."
-              },
-              {
-                "type": "p",
-                "text": "By using the platform, you acknowledge that your information may be processed in jurisdictions that may have different data protection laws than your country of residence."
+                "text": "The Academy is for adults aged 18 and over. We do not knowingly collect personal data from anyone under 18. If you believe a child has given us personal data, email support@fundedbeyond.com and we will delete it."
               }
             ]
           },
           {
             "id": "changes",
-            "sectionNumber": "Section 13",
+            "sectionNumber": "Section 16",
             "title": "Changes to This Policy",
             "blocks": [
               {
                 "type": "p",
-                "text": "We may update this Privacy Policy to reflect changes in our practices, technology, or legal requirements. We will post the revised policy on this page and update the \"Last updated\" date. Material changes will be communicated through the platform or by email where appropriate."
-              },
-              {
-                "type": "p",
-                "text": "We encourage you to review this policy periodically to stay informed about how we protect your information."
+                "text": "We may update this policy as the Academy or the law changes. The date at the top shows when it last changed. If a change significantly affects how we use your data, we will tell you by email or in the Academy before it takes effect, and ask for your consent again where the law requires."
               }
             ]
           },
           {
             "id": "contact",
-            "sectionNumber": "Section 14",
-            "title": "Contact Us",
+            "sectionNumber": "Section 17",
+            "title": "Contact Us and Grievance Officer",
             "blocks": [
               {
                 "type": "p",
-                "text": "If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:"
+                "text": "For any question, request or complaint about your personal data, contact our Grievance Officer:"
               },
               {
                 "type": "ul",
                 "items": [
-                  "Email: support@fundedbeyond.com",
-                  "Subject line: Privacy Request - FundedBeyond Academy",
-                  "Include your account email and a description of your request for faster assistance."
+                  "Email: support@fundedbeyond.com, with \"Privacy\" in the subject line",
+                  "Post: Grievance Officer, Beyond Edge FZCO, Dubai, United Arab Emirates"
                 ]
               },
               {
                 "type": "p",
-                "text": "We aim to respond to privacy inquiries within a reasonable timeframe and in accordance with applicable law."
+                "text": "We aim to acknowledge and resolve complaints within about 15 days. Complex cases may take longer, and we will keep you updated."
               }
             ]
           }

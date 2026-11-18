@@ -18,6 +18,16 @@ export function resolveSafeRedirectPath(value: string | undefined | null): strin
   return trimmed;
 }
 
+/**
+ * Where a signed-in person who hasn't agreed to this academy's Terms and
+ * Privacy Policy goes (launch plan 5.7): the join page, which carries on to
+ * where they were headed once they agree.
+ */
+export function termsRequiredDestination(clientRedirect: string | null): string {
+  const next = resolveSafeRedirectPath(clientRedirect);
+  return next ? `/join?next=${encodeURIComponent(next)}` : "/join";
+}
+
 export function resolvePostAuthRedirect(
   clientRedirect: string | null,
   apiRedirect: string | null,
