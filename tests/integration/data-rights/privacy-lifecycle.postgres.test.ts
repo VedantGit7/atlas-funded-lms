@@ -128,7 +128,7 @@ suite("F14 isolated PostgreSQL migration and privacy outcomes", () => {
     ).rejects.toMatchObject({ code: "23514" });
   });
 
-  it("persists access removal while retaining profile, other-school membership and shared identity", async () => {
+  it("processing only brings the erasure forward: it removes nothing itself (launch plan 5.7)", async () => {
     const f = await fixture();
     const result = await transaction(f.tenant, (tx) =>
       processDeletionRequest(
@@ -138,13 +138,22 @@ suite("F14 isolated PostgreSQL migration and privacy outcomes", () => {
         { confirm: true },
       ),
     );
-    expect(result.data.outcome?.erasure).toBe("not_performed");
+    // The worker's member-erasure task carries it out; see
+    // tests/integration/api/member-erasure.postgres.test.ts.
+    expect(result.data).toMatchObject({
+      status: "QUEUED",
+      outcome: null,
+      operation: "erase_member",
+    });
+    const row = (
+      await admin.query(
+        "select status, scheduled_at <= now() as due from deletion_requests where id=$1",
+        [f.request],
+      )
+    ).rows[0];
+    expect(row).toEqual({ status: "QUEUED", due: true });
     expect(
       (await admin.query("select status from memberships where id=$1", [f.member])).rows[0].status,
-    ).toBe("REMOVED");
-    expect(
-      (await admin.query("select status from memberships where id=$1", [f.otherMember])).rows[0]
-        .status,
     ).toBe("ACTIVE");
     expect(
       (
@@ -153,14 +162,6 @@ suite("F14 isolated PostgreSQL migration and privacy outcomes", () => {
         ])
       ).rows[0].display_name,
     ).toBe("Retained name");
-    expect(
-      (await admin.query("select email from privacy_test_principals where id=$1", [f.principal]))
-        .rows[0].email,
-    ).toBe("shared@example.test");
-    expect(
-      (await admin.query("select outcome_json from deletion_requests where id=$1", [f.request]))
-        .rows[0].outcome_json,
-    ).toEqual(result.data.outcome);
   });
 
   it("rolls back removal and evidence together if the completion audit fails", async () => {

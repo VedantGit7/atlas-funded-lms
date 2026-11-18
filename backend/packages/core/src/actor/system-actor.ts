@@ -30,7 +30,9 @@ export type SystemActorSource =
   | "zoom.webhook"
   | "marketing.public_action"
   | "sales.public_attribution"
-  | "assessments.attempt_deadline";
+  | "assessments.attempt_deadline"
+  // A due deletion request erased by the worker (launch plan 5.7).
+  | "data_rights.member_erasure";
 
 export function isSystemActor(actorMembershipId: string | null | undefined): boolean {
   return actorMembershipId === SYSTEM_ACTOR_MEMBERSHIP_ID;

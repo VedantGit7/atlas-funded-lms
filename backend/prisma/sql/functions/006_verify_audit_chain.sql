@@ -35,8 +35,15 @@ BEGIN
       ae.after_json,
       ae.metadata_json,
       ae.occurred_at,
-      ae.entry_hash
+      ae.entry_hash,
+      -- A member erasure redacted this entry's payloads (member-erasure.md):
+      -- the chain is checked against the hashes of the originals.
+      (r.audit_entry_id IS NOT NULL) AS redacted,
+      r.before_sha256,
+      r.after_sha256,
+      r.metadata_sha256
     FROM audit_entries ae
+    LEFT JOIN audit_entry_redactions r ON r.audit_entry_id = ae.id
     WHERE ae.tenant_id IS NOT DISTINCT FROM p_tenant_id
     ORDER BY ae.occurred_at ASC, ae.id ASC
     LIMIT GREATEST(p_limit, 0)
@@ -56,9 +63,9 @@ BEGIN
         coalesce(rec.request_id, ''),
         coalesce(rec.ip_hash, ''),
         coalesce(rec.user_agent_hash, ''),
-        coalesce(app.jsonb_sha256(rec.before_json), ''),
-        coalesce(app.jsonb_sha256(rec.after_json), ''),
-        coalesce(app.jsonb_sha256(rec.metadata_json), ''),
+        coalesce(CASE WHEN rec.redacted THEN rec.before_sha256 ELSE app.jsonb_sha256(rec.before_json) END, ''),
+        coalesce(CASE WHEN rec.redacted THEN rec.after_sha256 ELSE app.jsonb_sha256(rec.after_json) END, ''),
+        coalesce(CASE WHEN rec.redacted THEN rec.metadata_sha256 ELSE app.jsonb_sha256(rec.metadata_json) END, ''),
         coalesce(rec.occurred_at::text, '')
       )
     );

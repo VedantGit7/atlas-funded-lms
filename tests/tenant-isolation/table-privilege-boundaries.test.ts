@@ -136,8 +136,32 @@ describeWithDb("table privilege boundaries", () => {
   });
 
   it("keeps proctoring_events append-only for every role", async () => {
-    for (const role of ["atlas_app", "atlas_worker", "atlas_platform"]) {
+    for (const role of ["atlas_app", "atlas_worker"]) {
       expect(await privileges("proctoring_events", role), role).toEqual(["INSERT", "SELECT"]);
+    }
+    // Launch plan 5.7: the member erasure runs as atlas_platform and deletes a
+    // member's own events. The grant alone gives nothing: the append-only
+    // trigger refuses any delete outside an open erasure
+    // (tests/integration/api/member-erasure.postgres.test.ts).
+    expect(await privileges("proctoring_events", "atlas_platform")).toEqual([
+      "DELETE",
+      "INSERT",
+      "SELECT",
+    ]);
+  });
+
+  it("keeps agreement records and the erasure log out of the application's hands", async () => {
+    for (const role of ["atlas_app", "atlas_worker", "atlas_platform"]) {
+      expect(await privileges("tenant_legal_acceptances", role), role).not.toEqual(
+        expect.arrayContaining(["UPDATE"]),
+      );
+      expect(await privileges("tenant_legal_acceptances", role), role).not.toEqual(
+        expect.arrayContaining(["DELETE"]),
+      );
+    }
+    for (const role of ["atlas_app", "atlas_worker"]) {
+      expect(await privileges("member_erasures", role), role).toEqual(["SELECT"]);
+      expect(await privileges("audit_entry_redactions", role), role).toEqual(["SELECT"]);
     }
   });
 });

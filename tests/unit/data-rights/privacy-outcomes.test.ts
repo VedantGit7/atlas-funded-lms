@@ -86,53 +86,55 @@ describe("F14 explicit privacy outcomes", () => {
     ).toBe("remove_school_access");
   });
 
-  it("records retained data and unchanged global identity in the same transaction as removal", async () => {
+  it("processing brings the erasure forward for the worker, and erases nothing itself (launch plan 5.7)", async () => {
     const tx = { $queryRaw: vi.fn().mockResolvedValue([queued]) };
     vi.spyOn(dataRightsRepository, "findDeletionRequestById").mockResolvedValue(queued);
-    const complete = vi
-      .spyOn(dataRightsRepository, "markDeletionRequestSucceeded")
-      .mockImplementation(async (_tx, _id, outcome) => ({
-        ...queued,
-        status: "SUCCEEDED",
-        outcome_json: outcome,
-      }));
+    const now = new Date("2026-11-18T12:00:00Z");
+    const expedite = vi
+      .spyOn(dataRightsRepository, "expediteDeletionRequest")
+      .mockResolvedValue({ ...queued, scheduled_at: now });
     const result = await processDeletionRequest(tx as never, ctx, requestId, { confirm: true });
-    expect(mocks.remove).toHaveBeenCalledExactlyOnceWith(tx, ctx, memberId);
-    expect(complete.mock.calls[0]?.[0]).toBe(tx);
-    const outcome = complete.mock.calls[0]?.[2];
-    expect(outcome).toMatchObject({
-      version: 1,
-      operation: "remove_school_access",
-      accessRemoved: true,
-      erasure: "not_performed",
-      globalIdentity: "unchanged",
-      retentionReviewRequired: true,
+    expect(expedite).toHaveBeenCalledExactlyOnceWith(tx, requestId);
+    expect(mocks.remove).not.toHaveBeenCalled();
+    expect(result.data).toMatchObject({
+      status: "QUEUED",
+      operation: "erase_member",
+      scheduledAt: now.toISOString(),
+      outcome: null,
     });
-    expect(outcome.retained.map((item: { category: string }) => item.category)).toEqual(
-      expect.arrayContaining([
-        "profile",
-        "learning",
-        "payments",
-        "uploads_proctoring",
-        "analytics_search",
-        "providers",
-        "backups",
-      ]),
-    );
-    expect(result.data.outcome).toEqual(outcome);
-    expect(mocks.audit.mock.calls[0]?.[2]?.after?.outcome).toEqual(outcome);
+    expect(mocks.audit.mock.calls[0]?.[2]).toMatchObject({
+      target: { type: "deletion_request", id: requestId },
+      after: { status: "QUEUED", scheduledAt: now.toISOString() },
+    });
   });
 
-  it("does not mark success or write a completion audit when access removal fails", async () => {
-    const tx = { $queryRaw: vi.fn().mockResolvedValue([queued]) };
-    vi.spyOn(dataRightsRepository, "findDeletionRequestById").mockResolvedValue(queued);
-    const complete = vi.spyOn(dataRightsRepository, "markDeletionRequestSucceeded");
-    mocks.remove.mockRejectedValue(new Error("Removal failed"));
-    await expect(
-      processDeletionRequest(tx as never, ctx, requestId, { confirm: true }),
-    ).rejects.toThrow("Removal failed");
-    expect(complete).not.toHaveBeenCalled();
-    expect(mocks.audit).not.toHaveBeenCalled();
+  it("reports a version 2 outcome as an erasure, naming what was kept", () => {
+    const outcome = {
+      version: 2,
+      operation: "erase_member",
+      erasedAt: "2026-11-18T12:00:00.000Z",
+      deleted: { point_ledger: 3 },
+      auditEntriesRedacted: 2,
+      eventsRedacted: 1,
+      files: { deleted: 1, failed: 0 },
+      account: "deleted",
+      kept: [
+        "certificates",
+        "payment_records",
+        "agreement_records",
+        "community_content_anonymised",
+        "audit_entries_redacted",
+      ],
+      notCovered: ["external_providers", "backups_until_expiry", "downloaded_exports"],
+    };
+    const dto = mapDeletionRequestDto({ ...queued, status: "SUCCEEDED", outcome_json: outcome });
+    expect(dto).toMatchObject({ operation: "erase_member", outcome });
+    expect(dto.completionMessage).toContain("Personal data erased");
+  });
+
+  it("explains a request the erasure refused", () => {
+    const dto = mapDeletionRequestDto({ ...queued, status: "FAILED" });
+    expect(dto.completionMessage).toContain("owner");
   });
 
   it("rejects a request belonging to another tenant before removal", async () => {

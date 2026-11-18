@@ -68,10 +68,11 @@ export default async function ProfileDangerZonePage() {
               What happens to your data?
             </h4>
             <p className="mt-1 text-sm leading-relaxed text-[var(--acct-on-surface-variant)]">
-              Processing a school-access removal request removes your membership access to this
-              school. Your identity, profile, learning history, billing records, and public
-              contributions are retained. Access to other schools is unaffected. Contact your school
-              for a separate erasure review; this action does not erase those records.
+              Your personal data in this academy is erased 7 days after you ask: your profile,
+              learning progress, quiz answers, exam monitoring records and uploads. Certificates,
+              payment records and your agreement to the Terms are kept, and community posts stay
+              without your name. Your login is deleted too, unless you belong to another academy.
+              The Privacy Policy explains what is kept and why.
             </p>
           </div>
         </div>

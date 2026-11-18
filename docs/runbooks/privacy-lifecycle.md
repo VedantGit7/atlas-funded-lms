@@ -1,16 +1,25 @@
-# Privacy lifecycle: access removal, exports and erasure review
+# Privacy lifecycle: erasure, exports and backups
 
-This runbook documents the implemented boundary, not an approved retention schedule or a claim of legal compliance. The F14 inventory found no approved cross-domain schedule or executable legal-hold system. Existing settings and gaps are listed in [the data inventory](../engineering/f14-data-inventory.md).
+Since launch plan 5.7 (November 2026) a deletion request erases the member's personal data in one academy. The design, the per-category decisions and the append-only and audit-chain handling are in [member-erasure.md](../engineering/member-erasure.md); the earlier access-removal boundary and its gaps are in [the F14 data inventory](../engineering/f14-data-inventory.md).
 
-## Supported operation
+## How a request is carried out
 
-The existing membership-targeted deletion API is retained for compatibility. Its operation is **remove school access**. Processing changes the target school's membership status to REMOVED. It does not erase the member profile, learning/assessment records, billing, uploads, proctoring media, messages, analytics/search records, provider copies or backups. It does not delete the shared login or another school's membership. Owner-removal and existing authorization/MFA/idempotency rules remain in place.
+1. **Request.** The learner (Profile → Danger zone) or an admin with `data.deletion.request` files it. It is `QUEUED` with `scheduled_at` 7 days ahead, inside the 30 days the Privacy Policy promises.
+2. **Processing early.** An admin with `data.deletion.manage` may process it; that sets `scheduled_at` to now. Nothing is erased by the API itself.
+3. **Erasure.** The worker task `member-erasure` finds due requests each sweep (all academies, active or not) and calls `app.erase_member()`, which erases the database records in one transaction, logs the erasure in `member_erasures` and sets the request `RUNNING`. The worker then deletes the stored files (avatars, exam monitoring media), deletes the login account through `app.erase_member_account()` if no other academy uses it and it isn't a platform operator, and records the version 2 outcome through `app.complete_member_erasure()`, which sets the request `SUCCEEDED`.
+4. **Refusals.** The academy owner can't be erased (ownership moves first). The request becomes `FAILED` with `error: ACADEMY_OWNER`.
+5. **Partial failure.** A failure after the database transaction leaves the request `RUNNING`; the next sweep resumes and only repeats what is left. Files that still won't delete stay in `member_erasures.pending_objects` and the request stays `RUNNING`; check `worker.sweep.processor_failed` for `member-erasure`.
 
-The request is locked before processing. Access removal, the detailed outcome, completion status and audit evidence commit in the same tenant transaction. If any of those fail, the transaction rolls back. Concurrent processing of the same request returns the recorded result without repeating completion. Mutation retries using the legacy `{confirm:true}` request keep their original request fingerprint; an optional explicit operation can only be `remove_school_access`. A caller cannot request full erasure and silently get offboarding.
+What is kept, by the owner's decision: certificates, payment records, agreement records, community content (as "Deleted member") and audit entries (payloads redacted). Outside the database's reach, and stated in each outcome: copies with providers (delivered emails and webhooks, Sentry, PostHog, the payment processor), backups until they expire, and exports already downloaded.
 
-Migration 111 adds nullable `deletion_requests.outcome_json`. New successful operations record version 1, access removed, erasure not performed, global identity unchanged, retention review required, legal hold not assessed, and retained categories with reasons. A retention reason here explains what this operation left untouched; it is **not** an approval to retain it indefinitely. Historical outcomes remain NULL. Malformed/unknown evidence is not presented as verified erasure.
+## After a restore
 
-The administration UI can display the recorded result. After removing access, the learner may no longer be authorized to view school APIs. The administrator must provide the outcome through an approved, identity-verified contact process; no automatic delivery or successful delivery receipt is implemented by this change. Do not close a separate comprehensive erasure request merely because access removal succeeded.
+Backups are kept 14 days. A restore from before an erasure brings the erased data back. Before reopening a restored database, re-erase every member in `member_erasures` whose `completed_at` is after the backup was taken:
+
+1. For each such row, find its deletion request (`deletion_request_id`), set it back to `QUEUED` with `scheduled_at = now()`, and remove the restored `member_erasures` row if the backup contains it.
+2. Let the worker run, or run its sweep once, and check every request is `SUCCEEDED` again.
+
+The erasure log itself must survive the restore: take the list of erasures from the live database before restoring over it.
 
 ## Export boundaries
 
@@ -18,15 +27,9 @@ The administration UI can display the recorded result. After removing access, th
 - The administrative export is a limited tenant snapshot: membership IDs/status/join dates; profile membership IDs/display names; non-deleted course ID/slug/title/status; enrollment ID/course/member/status. New artifacts include an explicit coverage manifest with field lists and exclusions. API responses expose known job scope and explicitly deny completeness as a personal-data export. Old unrecognized scope remains unknown.
 - Neither is a complete subject-access export. Assessments, submissions, progress, certificates, payments, full profile fields, messages, uploads/proctoring, audit data, provider copies and backups require additional scope/authorization handling. Never route a learner request to a tenant-wide export to compensate for those omissions.
 
-## Review workflow for broader erasure
+## Requests outside the application
 
-1. Verify the requester and tenant scope using the approved support process. Determine whether the request concerns one school, multiple schools or the shared global login. Do not infer global deletion authority from tenant administration.
-2. Inventory subject-linked rows, objects, free text/JSON snapshots and external identifiers across the categories in the F14 inventory. Include records linked by contact details rather than membership ID and derived search/analytics projections.
-3. Obtain the applicable approved category policy, purpose, retention trigger/period, retention decision authority and any hold decision. Record a reason and review/expiry date for each retained category. The current application does not implement holds; existing automatic purges do not check them. Do not promise that a hold is technically enforced until this is implemented and tested.
-4. For each approved deletion/anonymization, define tenant-bounded execution, dependency order, resumable retries, failures, verification and external deletion receipts. Shared records and other tenants require separate authorization. Preserve audit evidence with appropriate minimization; do not remove evidence simply to make the request look complete.
-5. Verify provider processing independently. Database cleanup cannot retract delivered emails, webhook payloads, downloaded exports or gateway records. Check R2/local object existence, CDN/public copies and provider retention/export/deletion support.
-6. Verify production backup/PITR expiry and access. Plan how completed privacy operations will be reapplied before reopening a restored database. An expired link or local restore drill does not prove a backup record has been erased.
-7. Send an accurate outcome: completed operations, retained categories/reasons/review dates, pending failures/provider actions and backup scope. Preserve delivery evidence through the approved process. Keep unresolved items open; do not label the entire request erased if only access was removed.
+A request by email to the Grievance Officer is filed as a deletion request by an admin, after confirming the requester's identity, so it follows the same path. Requests that span academies are one request per academy; the login account goes with the last one.
 
 ## Deployment and rollback
 

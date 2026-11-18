@@ -507,7 +507,7 @@ export function AdminCommerceOverview({
               />
               <TaskRow
                 icon={MessageSquare}
-                label="School-access removal"
+                label="Data deletion"
                 caption={
                   data.pendingTasks.deletionRequests > 0
                     ? `${formatCount(data.pendingTasks.deletionRequests)} in progress`

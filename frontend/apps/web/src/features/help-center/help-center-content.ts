@@ -777,7 +777,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     categoryId: "account",
     title: "Privacy and data export",
     summary:
-      "Analytics opt-out, profile visibility, partial profile downloads, and school-access removal.",
+      "Analytics opt-out, profile visibility, partial profile downloads, and deleting your data.",
     lastUpdated: "July 8, 2026",
     readMinutes: 5,
     relatedSlugs: ["updating-your-profile"],
@@ -794,11 +794,11 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
       },
       {
         id: "deletion",
-        title: "School-access removal and erasure review",
+        title: "Deleting your data",
         blocks: [
           {
             type: "p",
-            text: "The danger-zone action requests removal of your access to this school. Processing retains your identity and school records, including learning, billing, and public contributions. It does not remove access to other schools or erase these records. Contact your school for a separate erasure and retention review.",
+            text: 'Profile → Danger zone asks for your personal data in this academy to be deleted. It is erased 7 days later, or sooner if the academy processes the request: your profile, learning progress, quiz answers, exam monitoring records and uploads. Certificates, payment records and the record of agreeing to the Terms are kept, and your community posts stay, shown as written by "Deleted member". Your login is deleted too, unless you belong to another academy. This can\'t be undone.',
           },
         ],
       },

@@ -2,10 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import type { JobStatus } from "./data-rights.contract";
 import type { DeletionRequestRow, ExportJobRow } from "./data-rights.types";
-import {
-  accessRemovalOutcomeSchema,
-  type AccessRemovalOutcome,
-} from "./privacy-lifecycle.contract";
+import { ERASURE_DELAY_DAYS } from "./privacy-lifecycle.contract";
 
 function mapExportJobRow(row: Record<string, unknown>): ExportJobRow {
   return {
@@ -289,6 +286,7 @@ export const dataRightsRepository = {
         target_id,
         status,
         reason,
+        scheduled_at,
         created_at,
         updated_at
       )
@@ -300,6 +298,9 @@ export const dataRightsRepository = {
         ${args.targetId},
         'QUEUED',
         ${args.reason},
+        -- Erased this long after the request unless an admin processes it
+        -- sooner (launch plan 5.7).
+        now() + make_interval(days => ${ERASURE_DELAY_DAYS}::int),
         now(),
         now()
       )
@@ -410,26 +411,60 @@ export const dataRightsRepository = {
     return row ? mapDeletionRequestRow(row) : null;
   },
 
-  async markDeletionRequestSucceeded(
+  /**
+   * Brings a queued request's erasure forward to now: an admin processing it.
+   * The worker carries it out on its next sweep (launch plan 5.7).
+   */
+  async expediteDeletionRequest(
     tx: TenantTx,
     deletionRequestId: string,
-    outcome: AccessRemovalOutcome,
   ): Promise<DeletionRequestRow | null> {
-    const evidence = accessRemovalOutcomeSchema.parse(outcome);
     const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
       update deletion_requests
-      set
-        status = 'SUCCEEDED',
-        outcome_json = ${JSON.stringify(evidence)}::jsonb,
-        completed_at = now(),
-        updated_at = now()
+      set scheduled_at = clock_timestamp(), updated_at = now()
       where id = ${deletionRequestId}::uuid
         and tenant_id = current_setting('app.tenant_id', true)::uuid
-        and status = 'QUEUED'
+        and status in ('QUEUED', 'RUNNING')
+        -- Already due: nothing to bring forward. clock_timestamp(), not now():
+        -- a request processed twice at once is brought forward once.
+        and (scheduled_at is null or scheduled_at > clock_timestamp())
       returning *
     `;
-
     const row = rows[0];
     return row ? mapDeletionRequestRow(row) : null;
+  },
+
+  /** Requests whose erasure is due, oldest first, for the worker. */
+  async listDueDeletionRequests(tx: TenantTx, limit: number): Promise<DeletionRequestRow[]> {
+    const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+      select *
+      from deletion_requests
+      where tenant_id = current_setting('app.tenant_id', true)::uuid
+        and target_type = 'membership'
+        and status in ('QUEUED', 'RUNNING')
+        and scheduled_at is not null
+        and scheduled_at <= now()
+      order by scheduled_at, id
+      limit ${limit}
+    `;
+    return rows.map(mapDeletionRequestRow);
+  },
+
+  /** A request the erasure refused for good (for example, the academy owner). */
+  async markDeletionRequestFailed(
+    tx: TenantTx,
+    deletionRequestId: string,
+    errorCode: string,
+  ): Promise<void> {
+    await tx.$executeRaw`
+      update deletion_requests
+      set status = 'FAILED',
+          outcome_json = jsonb_build_object('version', 2, 'operation', 'erase_member', 'error', ${errorCode}::text),
+          completed_at = now(),
+          updated_at = now()
+      where id = ${deletionRequestId}::uuid
+        and tenant_id = current_setting('app.tenant_id', true)::uuid
+        and status in ('QUEUED', 'RUNNING')
+    `;
   },
 };

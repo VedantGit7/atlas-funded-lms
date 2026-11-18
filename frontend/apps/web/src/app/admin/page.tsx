@@ -566,8 +566,8 @@ export default async function AdminDashboardPage() {
             />
             <QuickLink
               icon={Trash2}
-              label="School-access removal"
-              caption="Remove school access; records retained"
+              label="Data deletion"
+              caption="Erase members' data on request"
               href="/admin/deletion-requests"
             />
           </div>

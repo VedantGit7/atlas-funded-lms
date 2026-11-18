@@ -331,7 +331,9 @@ describeWithDb("data-rights API integration", () => {
       },
     );
 
-    expect(processed.data.status).toBe("SUCCEEDED");
+    // Launch plan 5.7: processing brings the erasure forward; the worker erases.
+    expect(processed.data.status).toBe("QUEUED");
+    expect(Date.parse(processed.data.scheduledAt ?? "")).toBeLessThanOrEqual(Date.now());
 
     const audit = await withTenantTx(
       authoringTenantTx(fixture),

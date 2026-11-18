@@ -22,10 +22,7 @@ import {
   type ExportListQuery,
   type DeletionListQuery,
 } from "./data-rights.dto";
-import {
-  completeDeletionRequest,
-  processApprovedDeletionRequest,
-} from "./data-rights-deletion-processor";
+import { deletionOutcomeSchema } from "./privacy-lifecycle.contract";
 import {
   DATA_DELETION_PROCESSED_AUDIT,
   DATA_DELETION_REQUESTED_AUDIT,
@@ -44,7 +41,7 @@ import {
 import { dataRightsRepository } from "./data-rights.repository";
 import type { DeletionRequestRow, ExportJobRow, ServiceCtx } from "./data-rights.types";
 import { DELETION_TARGET_TYPES } from "./data-rights.contract";
-import { accessRemovalOutcomeSchema } from "./privacy-lifecycle.contract";
+import type { DeletionOutcome } from "./privacy-lifecycle.contract";
 
 function mapExportErrorCode(errorJson: unknown): string | null {
   if (!errorJson || typeof errorJson !== "object" || Array.isArray(errorJson)) {
@@ -69,19 +66,36 @@ function mapExportJobBaseDto(job: ExportJobRow) {
   });
 }
 
+function deletionCompletionMessage(
+  status: DeletionRequestRow["status"],
+  outcome: DeletionOutcome | null,
+): string | null {
+  if (status === "FAILED") {
+    return "This request could not be carried out. The academy owner can't be erased until ownership moves to someone else.";
+  }
+  if (status !== "SUCCEEDED") return null;
+  if (!outcome) {
+    return "Legacy request completed. Data erasure was not verified; no detailed outcome was recorded.";
+  }
+  if (outcome.version === 1) {
+    return "School access removed. Personal records remain; data erasure requires a separate review. Your shared login is unchanged.";
+  }
+  return 'Personal data erased. Certificates, payment records and the record of agreeing to the Terms are kept; community posts remain under "Deleted member".';
+}
+
 function mapDeletionRequestDto(request: DeletionRequestRow) {
-  const parsed = accessRemovalOutcomeSchema.safeParse(request.outcome_json);
+  const parsed = deletionOutcomeSchema.safeParse(request.outcome_json);
   const outcome = request.status === "SUCCEEDED" && parsed.success ? parsed.data : null;
   return deletionRequestDtoSchema.parse({
     id: request.id,
-    operation: "remove_school_access",
+    // Completed before erasure existed (access removal, with or without
+    // evidence) is never shown as an erasure.
+    operation:
+      outcome?.version === 2 || (request.status !== "SUCCEEDED" && !outcome)
+        ? "erase_member"
+        : "remove_school_access",
     outcome,
-    completionMessage:
-      request.status !== "SUCCEEDED"
-        ? null
-        : outcome
-          ? "School access removed. Personal records remain; data erasure requires a separate review. Your shared login is unchanged."
-          : "Legacy request completed. Data erasure was not verified; no detailed outcome was recorded.",
+    completionMessage: deletionCompletionMessage(request.status, outcome),
     status: request.status,
     targetType: request.target_type,
     targetId: request.target_id,
@@ -356,8 +370,16 @@ export async function processDeletionRequest(
     targetId: request.target_id,
   };
 
-  const outcome = await processApprovedDeletionRequest(tx, ctx, request);
-  const completed = await completeDeletionRequest(tx, deletionRequestId, outcome);
+  // Processing brings the erasure forward to now; the worker carries it out
+  // on its next sweep, within about a minute (launch plan 5.7).
+  // Already carried out, refused, or already due: nothing to change or record.
+  if (request.status !== "QUEUED" && request.status !== "RUNNING") {
+    return { data: mapDeletionRequestDto(request) };
+  }
+  const completed = await dataRightsRepository.expediteDeletionRequest(tx, deletionRequestId);
+  if (!completed) {
+    return { data: mapDeletionRequestDto(request) };
+  }
 
   await auditWriter.write(
     tx,
@@ -373,8 +395,7 @@ export async function processDeletionRequest(
       before,
       after: {
         status: completed.status,
-        completedAt: completed.completed_at?.toISOString() ?? null,
-        outcome,
+        scheduledAt: completed.scheduled_at?.toISOString() ?? null,
       },
       reason: null,
       metadata: {},

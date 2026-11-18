@@ -54,6 +54,8 @@ export const ModelName = {
   Tenant: 'Tenant',
   TenantUsageEvent: 'TenantUsageEvent',
   TenantLegalAcceptance: 'TenantLegalAcceptance',
+  MemberErasure: 'MemberErasure',
+  AuditEntryRedaction: 'AuditEntryRedaction',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
   AuthSession: 'AuthSession',
@@ -354,6 +356,36 @@ export const TenantLegalAcceptanceScalarFieldEnum = {
 export type TenantLegalAcceptanceScalarFieldEnum = (typeof TenantLegalAcceptanceScalarFieldEnum)[keyof typeof TenantLegalAcceptanceScalarFieldEnum]
 
 
+export const MemberErasureScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  membership_id: 'membership_id',
+  deletion_request_id: 'deletion_request_id',
+  principal_id: 'principal_id',
+  txid: 'txid',
+  started_at: 'started_at',
+  database_completed_at: 'database_completed_at',
+  completed_at: 'completed_at',
+  pending_objects: 'pending_objects',
+  outcome_json: 'outcome_json'
+} as const
+
+export type MemberErasureScalarFieldEnum = (typeof MemberErasureScalarFieldEnum)[keyof typeof MemberErasureScalarFieldEnum]
+
+
+export const AuditEntryRedactionScalarFieldEnum = {
+  audit_entry_id: 'audit_entry_id',
+  tenant_id: 'tenant_id',
+  member_erasure_id: 'member_erasure_id',
+  before_sha256: 'before_sha256',
+  after_sha256: 'after_sha256',
+  metadata_sha256: 'metadata_sha256',
+  redacted_at: 'redacted_at'
+} as const
+
+export type AuditEntryRedactionScalarFieldEnum = (typeof AuditEntryRedactionScalarFieldEnum)[keyof typeof AuditEntryRedactionScalarFieldEnum]
+
+
 export const TenantDomainScalarFieldEnum = {
   id: 'id',
   tenant_id: 'tenant_id',
@@ -480,6 +512,7 @@ export const MembershipScalarFieldEnum = {
   removed_at: 'removed_at',
   archived_at: 'archived_at',
   last_active_at: 'last_active_at',
+  erased_at: 'erased_at',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
