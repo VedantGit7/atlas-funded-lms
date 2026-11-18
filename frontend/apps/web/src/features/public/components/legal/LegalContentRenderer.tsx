@@ -1,11 +1,12 @@
 import type { LegalContentBlock } from "./legal-types";
 
-const proseClass = "text-[15px] leading-[1.75] text-[var(--fba-tx2)]";
-const headingClass = "mb-3 mt-6 text-[17px] font-bold text-[var(--fba-tx)] first:mt-0";
+// Compact, plain legal text (launch plan 5.7): small type, tight spacing.
+const proseClass = "text-[14px] leading-[1.6] text-[var(--fba-tx2)]";
+const headingClass = "mt-3 text-[14px] font-semibold text-[var(--fba-tx)] first:mt-0";
 
 export function LegalContentRenderer({ blocks }: { blocks: LegalContentBlock[] }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {blocks.map((block, index) => {
         switch (block.type) {
           case "p":
@@ -22,7 +23,7 @@ export function LegalContentRenderer({ blocks }: { blocks: LegalContentBlock[] }
             );
           case "ul":
             return (
-              <ul key={index} className={`${proseClass} list-disc space-y-2 pl-5`}>
+              <ul key={index} className={`${proseClass} list-disc space-y-1 pl-5`}>
                 {block.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -30,7 +31,7 @@ export function LegalContentRenderer({ blocks }: { blocks: LegalContentBlock[] }
             );
           case "ol":
             return (
-              <ol key={index} className={`${proseClass} list-decimal space-y-2 pl-5`}>
+              <ol key={index} className={`${proseClass} list-decimal space-y-1 pl-5`}>
                 {block.items.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -38,32 +39,24 @@ export function LegalContentRenderer({ blocks }: { blocks: LegalContentBlock[] }
             );
           case "table":
             return (
-              <div
-                key={index}
-                className="overflow-x-auto rounded-[10px] border border-[var(--fba-bdr)]"
-              >
-                <table className="w-full min-w-[480px] border-collapse text-left text-[14px]">
+              <div key={index} className="overflow-x-auto border border-[var(--fba-bdr)]">
+                <table className="w-full min-w-[480px] border-collapse text-left text-[13px] leading-[1.5]">
                   <thead>
                     <tr className="border-b border-[var(--fba-bdr)] bg-[var(--fba-bg2)]">
                       {block.headers.map((header) => (
-                        <th key={header} className="px-4 py-3 font-semibold text-[var(--fba-tx)]">
+                        <th key={header} className="px-3 py-1.5 font-semibold text-[var(--fba-tx)]">
                           {header}
                         </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {block.rows.map((row, rowIndex) => (
-                      <tr
-                        key={row.join("-")}
-                        className={
-                          rowIndex % 2 === 1 ? "bg-[var(--fba-bg2)]/40" : "bg-[var(--fba-surf)]"
-                        }
-                      >
+                    {block.rows.map((row) => (
+                      <tr key={row.join("-")} className="bg-[var(--fba-surf)] align-top">
                         {row.map((cell) => (
                           <td
                             key={cell}
-                            className="border-t border-[var(--fba-bdr)] px-4 py-3 text-[var(--fba-tx2)]"
+                            className="border-t border-[var(--fba-bdr)] px-3 py-1.5 text-[var(--fba-tx2)]"
                           >
                             {cell}
                           </td>
