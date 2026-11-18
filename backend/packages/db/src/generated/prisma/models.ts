@@ -11,6 +11,8 @@
 export type * from './models/Tenant'
 export type * from './models/TenantUsageEvent'
 export type * from './models/TenantLegalAcceptance'
+export type * from './models/MemberErasure'
+export type * from './models/AuditEntryRedaction'
 export type * from './models/TenantDomain'
 export type * from './models/AuthPrincipal'
 export type * from './models/AuthSession'

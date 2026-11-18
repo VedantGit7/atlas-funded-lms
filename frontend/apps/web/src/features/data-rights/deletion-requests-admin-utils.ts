@@ -3,20 +3,27 @@ import type { DeletionRequestItem } from "./api";
 export type DeletionDisplayStatus = DeletionRequestItem["status"];
 
 export const DELETION_STATUS_LABELS: Record<DeletionDisplayStatus, string> = {
-  QUEUED: "Queued",
-  RUNNING: "Removing school access",
+  QUEUED: "Scheduled",
+  RUNNING: "Erasing",
   SUCCEEDED: "Processed · erasure not verified",
   FAILED: "Failed",
   CANCELLED: "Cancelled",
 };
 
 export function deletionOutcomeLabel(request: DeletionRequestItem): string {
-  return request.status === "SUCCEEDED" &&
-    request.outcome?.accessRemoved === true &&
-    request.outcome.erasure === "not_performed" &&
-    request.outcome.retentionReviewRequired
-    ? "Access removed · records retained"
-    : (DELETION_STATUS_LABELS[request.status] ?? "Unknown · review required");
+  const outcome = request.status === "SUCCEEDED" ? request.outcome : null;
+  if (outcome?.version === 2) {
+    return outcome.files.failed > 0 ? "Erased · files pending" : "Erased";
+  }
+  if (
+    outcome?.version === 1 &&
+    outcome.accessRemoved &&
+    outcome.erasure === "not_performed" &&
+    outcome.retentionReviewRequired
+  ) {
+    return "Access removed · records retained";
+  }
+  return DELETION_STATUS_LABELS[request.status] ?? "Unknown · review required";
 }
 
 export const DELETIONS_PAGE_SIZE = 10;

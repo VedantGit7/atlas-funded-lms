@@ -58,6 +58,18 @@ export type TenantUsageEvent = Prisma.TenantUsageEventModel
  */
 export type TenantLegalAcceptance = Prisma.TenantLegalAcceptanceModel
 /**
+ * Model MemberErasure
+ * Launch plan 5.7: durable log of member erasures (migration 132); written only
+ * by app.erase_member(). docs/engineering/member-erasure.md.
+ */
+export type MemberErasure = Prisma.MemberErasureModel
+/**
+ * Model AuditEntryRedaction
+ * Launch plan 5.7: original payload hashes of audit entries a member erasure
+ * redacted, so app.verify_audit_chain() still verifies (migration 132).
+ */
+export type AuditEntryRedaction = Prisma.AuditEntryRedactionModel
+/**
  * Model TenantDomain
  * 
  */

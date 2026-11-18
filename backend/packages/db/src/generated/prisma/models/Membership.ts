@@ -38,6 +38,7 @@ export type MembershipMinAggregateOutputType = {
   removed_at: Date | null
   archived_at: Date | null
   last_active_at: Date | null
+  erased_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -56,6 +57,7 @@ export type MembershipMaxAggregateOutputType = {
   removed_at: Date | null
   archived_at: Date | null
   last_active_at: Date | null
+  erased_at: Date | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -74,6 +76,7 @@ export type MembershipCountAggregateOutputType = {
   removed_at: number
   archived_at: number
   last_active_at: number
+  erased_at: number
   created_at: number
   updated_at: number
   _all: number
@@ -94,6 +97,7 @@ export type MembershipMinAggregateInputType = {
   removed_at?: true
   archived_at?: true
   last_active_at?: true
+  erased_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -112,6 +116,7 @@ export type MembershipMaxAggregateInputType = {
   removed_at?: true
   archived_at?: true
   last_active_at?: true
+  erased_at?: true
   created_at?: true
   updated_at?: true
 }
@@ -130,6 +135,7 @@ export type MembershipCountAggregateInputType = {
   removed_at?: true
   archived_at?: true
   last_active_at?: true
+  erased_at?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -221,6 +227,7 @@ export type MembershipGroupByOutputType = {
   removed_at: Date | null
   archived_at: Date | null
   last_active_at: Date | null
+  erased_at: Date | null
   created_at: Date
   updated_at: Date
   _count: MembershipCountAggregateOutputType | null
@@ -260,6 +267,7 @@ export type MembershipWhereInput = {
   removed_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   archived_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   last_active_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
+  erased_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Membership"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -280,6 +288,7 @@ export type MembershipWhereInput = {
   permission_overrides?: Prisma.PermissionOverrideListRelationFilter
   at_risk_alerts?: Prisma.AtRiskAlertListRelationFilter
   legal_acceptances?: Prisma.TenantLegalAcceptanceListRelationFilter
+  erasures?: Prisma.MemberErasureListRelationFilter
   attribution_tokens?: Prisma.AttributionTokenListRelationFilter
   badge_awards?: Prisma.BadgeAwardListRelationFilter
   batch_memberships?: Prisma.BatchMembershipListRelationFilter
@@ -355,6 +364,7 @@ export type MembershipOrderByWithRelationInput = {
   removed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   archived_at?: Prisma.SortOrderInput | Prisma.SortOrder
   last_active_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  erased_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -375,6 +385,7 @@ export type MembershipOrderByWithRelationInput = {
   permission_overrides?: Prisma.PermissionOverrideOrderByRelationAggregateInput
   at_risk_alerts?: Prisma.AtRiskAlertOrderByRelationAggregateInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceOrderByRelationAggregateInput
+  erasures?: Prisma.MemberErasureOrderByRelationAggregateInput
   attribution_tokens?: Prisma.AttributionTokenOrderByRelationAggregateInput
   badge_awards?: Prisma.BadgeAwardOrderByRelationAggregateInput
   batch_memberships?: Prisma.BatchMembershipOrderByRelationAggregateInput
@@ -455,6 +466,7 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   removed_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   archived_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   last_active_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
+  erased_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Membership"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -475,6 +487,7 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   permission_overrides?: Prisma.PermissionOverrideListRelationFilter
   at_risk_alerts?: Prisma.AtRiskAlertListRelationFilter
   legal_acceptances?: Prisma.TenantLegalAcceptanceListRelationFilter
+  erasures?: Prisma.MemberErasureListRelationFilter
   attribution_tokens?: Prisma.AttributionTokenListRelationFilter
   badge_awards?: Prisma.BadgeAwardListRelationFilter
   batch_memberships?: Prisma.BatchMembershipListRelationFilter
@@ -550,6 +563,7 @@ export type MembershipOrderByWithAggregationInput = {
   removed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   archived_at?: Prisma.SortOrderInput | Prisma.SortOrder
   last_active_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  erased_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   _count?: Prisma.MembershipCountOrderByAggregateInput
@@ -574,6 +588,7 @@ export type MembershipScalarWhereWithAggregatesInput = {
   removed_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
   archived_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
   last_active_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
+  erased_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Membership"> | Date | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Membership"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Membership"> | Date | string
 }
@@ -590,6 +605,7 @@ export type MembershipCreateInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -610,6 +626,7 @@ export type MembershipCreateInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -685,6 +702,7 @@ export type MembershipUncheckedCreateInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -703,6 +721,7 @@ export type MembershipUncheckedCreateInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -776,6 +795,7 @@ export type MembershipUpdateInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -796,6 +816,7 @@ export type MembershipUpdateInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -871,6 +892,7 @@ export type MembershipUncheckedUpdateInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -889,6 +911,7 @@ export type MembershipUncheckedUpdateInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -964,6 +987,7 @@ export type MembershipCreateManyInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -980,6 +1004,7 @@ export type MembershipUpdateManyMutationInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -998,6 +1023,7 @@ export type MembershipUncheckedUpdateManyInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1041,6 +1067,7 @@ export type MembershipCountOrderByAggregateInput = {
   removed_at?: Prisma.SortOrder
   archived_at?: Prisma.SortOrder
   last_active_at?: Prisma.SortOrder
+  erased_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -1059,6 +1086,7 @@ export type MembershipMaxOrderByAggregateInput = {
   removed_at?: Prisma.SortOrder
   archived_at?: Prisma.SortOrder
   last_active_at?: Prisma.SortOrder
+  erased_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -1077,6 +1105,7 @@ export type MembershipMinOrderByAggregateInput = {
   removed_at?: Prisma.SortOrder
   archived_at?: Prisma.SortOrder
   last_active_at?: Prisma.SortOrder
+  erased_at?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -1140,6 +1169,20 @@ export type MembershipUpdateOneRequiredWithoutLegal_acceptancesNestedInput = {
   upsert?: Prisma.MembershipUpsertWithoutLegal_acceptancesInput
   connect?: Prisma.MembershipWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutLegal_acceptancesInput, Prisma.MembershipUpdateWithoutLegal_acceptancesInput>, Prisma.MembershipUncheckedUpdateWithoutLegal_acceptancesInput>
+}
+
+export type MembershipCreateNestedOneWithoutErasuresInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutErasuresInput, Prisma.MembershipUncheckedCreateWithoutErasuresInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutErasuresInput
+  connect?: Prisma.MembershipWhereUniqueInput
+}
+
+export type MembershipUpdateOneRequiredWithoutErasuresNestedInput = {
+  create?: Prisma.XOR<Prisma.MembershipCreateWithoutErasuresInput, Prisma.MembershipUncheckedCreateWithoutErasuresInput>
+  connectOrCreate?: Prisma.MembershipCreateOrConnectWithoutErasuresInput
+  upsert?: Prisma.MembershipUpsertWithoutErasuresInput
+  connect?: Prisma.MembershipWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MembershipUpdateToOneWithWhereWithoutErasuresInput, Prisma.MembershipUpdateWithoutErasuresInput>, Prisma.MembershipUncheckedUpdateWithoutErasuresInput>
 }
 
 export type MembershipCreateNestedManyWithoutAuth_principalInput = {
@@ -2256,6 +2299,7 @@ export type MembershipCreateWithoutTenantInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
@@ -2275,6 +2319,7 @@ export type MembershipCreateWithoutTenantInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -2349,6 +2394,7 @@ export type MembershipUncheckedCreateWithoutTenantInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -2367,6 +2413,7 @@ export type MembershipUncheckedCreateWithoutTenantInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -2471,6 +2518,7 @@ export type MembershipScalarWhereInput = {
   removed_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   archived_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   last_active_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
+  erased_at?: Prisma.DateTimeNullableFilter<"Membership"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"Membership"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Membership"> | Date | string
 }
@@ -2487,6 +2535,7 @@ export type MembershipCreateWithoutLegal_acceptancesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -2506,6 +2555,7 @@ export type MembershipCreateWithoutLegal_acceptancesInput = {
   user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -2581,6 +2631,7 @@ export type MembershipUncheckedCreateWithoutLegal_acceptancesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -2598,6 +2649,7 @@ export type MembershipUncheckedCreateWithoutLegal_acceptancesInput = {
   user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -2687,6 +2739,7 @@ export type MembershipUpdateWithoutLegal_acceptancesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -2706,6 +2759,7 @@ export type MembershipUpdateWithoutLegal_acceptancesInput = {
   user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -2781,6 +2835,7 @@ export type MembershipUncheckedUpdateWithoutLegal_acceptancesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -2798,6 +2853,7 @@ export type MembershipUncheckedUpdateWithoutLegal_acceptancesInput = {
   user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -2859,7 +2915,7 @@ export type MembershipUncheckedUpdateWithoutLegal_acceptancesInput = {
   zoom_meeting_participants?: Prisma.ZoomMeetingParticipantUncheckedUpdateManyWithoutMembershipNestedInput
 }
 
-export type MembershipCreateWithoutAuth_principalInput = {
+export type MembershipCreateWithoutErasuresInput = {
   id: string
   status?: $Enums.MembershipStatus
   invited_email_normalized?: string | null
@@ -2871,9 +2927,11 @@ export type MembershipCreateWithoutAuth_principalInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  auth_principal?: Prisma.AuthPrincipalCreateNestedOneWithoutMembershipsInput
   profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
   notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
   lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
@@ -2951,9 +3009,10 @@ export type MembershipCreateWithoutAuth_principalInput = {
   zoom_meeting_participants?: Prisma.ZoomMeetingParticipantCreateNestedManyWithoutMembershipInput
 }
 
-export type MembershipUncheckedCreateWithoutAuth_principalInput = {
+export type MembershipUncheckedCreateWithoutErasuresInput = {
   id: string
   tenant_id: string
+  auth_principal_id?: string | null
   status?: $Enums.MembershipStatus
   invited_email_normalized?: string | null
   invite_token_hash?: string | null
@@ -2964,6 +3023,7 @@ export type MembershipUncheckedCreateWithoutAuth_principalInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -2982,6 +3042,398 @@ export type MembershipUncheckedCreateWithoutAuth_principalInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
+  badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
+  batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
+  bundle_enrollments?: Prisma.BundleEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutAuthor_membershipInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedCreateNestedManyWithoutMembershipInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedCreateNestedManyWithoutMembershipInput
+  competency_signals?: Prisma.CompetencySignalUncheckedCreateNestedManyWithoutMembershipInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedCreateNestedManyWithoutMembershipInput
+  course_reviews?: Prisma.CourseReviewUncheckedCreateNestedManyWithoutMembershipInput
+  custom_field_value_history?: Prisma.CustomFieldValueHistoryUncheckedCreateNestedManyWithoutMembershipInput
+  custom_field_values?: Prisma.CustomFieldValueUncheckedCreateNestedManyWithoutMembershipInput
+  device_security_alerts?: Prisma.DeviceSecurityAlertUncheckedCreateNestedManyWithoutMembershipInput
+  device_sessions?: Prisma.DeviceSessionUncheckedCreateNestedManyWithoutMembershipInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedCreateNestedManyWithoutMembershipInput
+  gamification_profiles?: Prisma.GamificationProfileUncheckedCreateNestedManyWithoutMembershipInput
+  grading_tasks?: Prisma.GradingTaskUncheckedCreateNestedManyWithoutAssigned_to_membershipInput
+  group_memberships?: Prisma.GroupMembershipUncheckedCreateNestedManyWithoutMembershipInput
+  identity_verifications?: Prisma.IdentityVerificationUncheckedCreateNestedManyWithoutMembershipInput
+  learner_subscription_enrollments?: Prisma.LearnerSubscriptionEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  live_attendance?: Prisma.LiveAttendanceUncheckedCreateNestedManyWithoutMembershipInput
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationUncheckedCreateNestedManyWithoutMembershipInput
+  marketing_newsfeed_saves?: Prisma.MarketingNewsfeedSaveUncheckedCreateNestedManyWithoutMembershipInput
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunUncheckedCreateNestedManyWithoutMembershipInput
+  member_balances?: Prisma.MemberBalanceUncheckedCreateNestedManyWithoutMembershipInput
+  mentions?: Prisma.MentionUncheckedCreateNestedManyWithoutMentioned_membershipInput
+  messenger_messages?: Prisma.MessengerMessageUncheckedCreateNestedManyWithoutSender_membershipInput
+  mock_test_enrollments?: Prisma.MockTestEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedCreateNestedManyWithoutMembershipInput
+  notification_dispatches?: Prisma.NotificationDispatchUncheckedCreateNestedManyWithoutMembershipInput
+  path_enrollments?: Prisma.PathEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  path_step_progress?: Prisma.PathStepProgressUncheckedCreateNestedManyWithoutMembershipInput
+  point_ledger?: Prisma.PointLedgerUncheckedCreateNestedManyWithoutMembershipInput
+  poll_responses?: Prisma.PollResponseUncheckedCreateNestedManyWithoutMembershipInput
+  posts?: Prisma.PostUncheckedCreateNestedManyWithoutAuthor_membershipInput
+  practice_responses?: Prisma.PracticeResponseUncheckedCreateNestedManyWithoutMembershipInput
+  practice_sessions?: Prisma.PracticeSessionUncheckedCreateNestedManyWithoutMembershipInput
+  quest_progress?: Prisma.QuestProgressUncheckedCreateNestedManyWithoutMembershipInput
+  reactions?: Prisma.ReactionUncheckedCreateNestedManyWithoutMembershipInput
+  reward_redemptions?: Prisma.RewardRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_affiliate_commissions_affiliate_membership?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutAffiliate_membershipInput
+  sales_affiliate_commissions_buyer_membership?: Prisma.SalesAffiliateCommissionUncheckedCreateNestedManyWithoutBuyer_membershipInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedCreateNestedManyWithoutAffiliate_membershipInput
+  sales_affiliate_requests?: Prisma.SalesAffiliateRequestUncheckedCreateNestedManyWithoutMembershipInput
+  sales_affiliates?: Prisma.SalesAffiliateUncheckedCreateNestedManyWithoutMembershipInput
+  sales_attribution_events?: Prisma.SalesAttributionEventUncheckedCreateNestedManyWithoutMembershipInput
+  sales_referral_attributions_referee_membership?: Prisma.SalesReferralAttributionUncheckedCreateNestedManyWithoutReferee_membershipInput
+  sales_referral_attributions_referrer_membership?: Prisma.SalesReferralAttributionUncheckedCreateNestedManyWithoutReferrer_membershipInput
+  sales_referral_codes?: Prisma.SalesReferralCodeUncheckedCreateNestedManyWithoutMembershipInput
+  sales_referral_purchase_credits_referee_membership?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutReferee_membershipInput
+  sales_referral_purchase_credits_referrer_membership?: Prisma.SalesReferralPurchaseCreditUncheckedCreateNestedManyWithoutReferrer_membershipInput
+  srs_state?: Prisma.SrsStateUncheckedCreateNestedManyWithoutMembershipInput
+  streak_freezes?: Prisma.StreakFreezeUncheckedCreateNestedManyWithoutMembershipInput
+  streak_states?: Prisma.StreakStateUncheckedCreateNestedManyWithoutMembershipInput
+  tenant_active_days?: Prisma.TenantActiveDayUncheckedCreateNestedManyWithoutMembershipInput
+  test_series_enrollments?: Prisma.TestSeriesEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedCreateNestedManyWithoutMembershipInput
+  whatsapp_conversations?: Prisma.WhatsappConversationUncheckedCreateNestedManyWithoutMembershipInput
+  zoom_meeting_participants?: Prisma.ZoomMeetingParticipantUncheckedCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipCreateOrConnectWithoutErasuresInput = {
+  where: Prisma.MembershipWhereUniqueInput
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutErasuresInput, Prisma.MembershipUncheckedCreateWithoutErasuresInput>
+}
+
+export type MembershipUpsertWithoutErasuresInput = {
+  update: Prisma.XOR<Prisma.MembershipUpdateWithoutErasuresInput, Prisma.MembershipUncheckedUpdateWithoutErasuresInput>
+  create: Prisma.XOR<Prisma.MembershipCreateWithoutErasuresInput, Prisma.MembershipUncheckedCreateWithoutErasuresInput>
+  where?: Prisma.MembershipWhereInput
+}
+
+export type MembershipUpdateToOneWithWhereWithoutErasuresInput = {
+  where?: Prisma.MembershipWhereInput
+  data: Prisma.XOR<Prisma.MembershipUpdateWithoutErasuresInput, Prisma.MembershipUncheckedUpdateWithoutErasuresInput>
+}
+
+export type MembershipUpdateWithoutErasuresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
+  auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
+  profile?: Prisma.MemberProfileUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
+  at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
+  badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
+  batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
+  bundle_enrollments?: Prisma.BundleEnrollmentUpdateManyWithoutMembershipNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutAuthor_membershipNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUpdateManyWithoutMembershipNestedInput
+  competency_scores?: Prisma.CompetencyScoreUpdateManyWithoutMembershipNestedInput
+  competency_signals?: Prisma.CompetencySignalUpdateManyWithoutMembershipNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUpdateManyWithoutMembershipNestedInput
+  course_reviews?: Prisma.CourseReviewUpdateManyWithoutMembershipNestedInput
+  custom_field_value_history?: Prisma.CustomFieldValueHistoryUpdateManyWithoutMembershipNestedInput
+  custom_field_values?: Prisma.CustomFieldValueUpdateManyWithoutMembershipNestedInput
+  device_security_alerts?: Prisma.DeviceSecurityAlertUpdateManyWithoutMembershipNestedInput
+  device_sessions?: Prisma.DeviceSessionUpdateManyWithoutMembershipNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUpdateManyWithoutMembershipNestedInput
+  gamification_profiles?: Prisma.GamificationProfileUpdateManyWithoutMembershipNestedInput
+  grading_tasks?: Prisma.GradingTaskUpdateManyWithoutAssigned_to_membershipNestedInput
+  group_memberships?: Prisma.GroupMembershipUpdateManyWithoutMembershipNestedInput
+  identity_verifications?: Prisma.IdentityVerificationUpdateManyWithoutMembershipNestedInput
+  learner_subscription_enrollments?: Prisma.LearnerSubscriptionEnrollmentUpdateManyWithoutMembershipNestedInput
+  live_attendance?: Prisma.LiveAttendanceUpdateManyWithoutMembershipNestedInput
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationUpdateManyWithoutMembershipNestedInput
+  marketing_newsfeed_saves?: Prisma.MarketingNewsfeedSaveUpdateManyWithoutMembershipNestedInput
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunUpdateManyWithoutMembershipNestedInput
+  member_balances?: Prisma.MemberBalanceUpdateManyWithoutMembershipNestedInput
+  mentions?: Prisma.MentionUpdateManyWithoutMentioned_membershipNestedInput
+  messenger_messages?: Prisma.MessengerMessageUpdateManyWithoutSender_membershipNestedInput
+  mock_test_enrollments?: Prisma.MockTestEnrollmentUpdateManyWithoutMembershipNestedInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUpdateManyWithoutMembershipNestedInput
+  notification_dispatches?: Prisma.NotificationDispatchUpdateManyWithoutMembershipNestedInput
+  path_enrollments?: Prisma.PathEnrollmentUpdateManyWithoutMembershipNestedInput
+  path_step_progress?: Prisma.PathStepProgressUpdateManyWithoutMembershipNestedInput
+  point_ledger?: Prisma.PointLedgerUpdateManyWithoutMembershipNestedInput
+  poll_responses?: Prisma.PollResponseUpdateManyWithoutMembershipNestedInput
+  posts?: Prisma.PostUpdateManyWithoutAuthor_membershipNestedInput
+  practice_responses?: Prisma.PracticeResponseUpdateManyWithoutMembershipNestedInput
+  practice_sessions?: Prisma.PracticeSessionUpdateManyWithoutMembershipNestedInput
+  quest_progress?: Prisma.QuestProgressUpdateManyWithoutMembershipNestedInput
+  reactions?: Prisma.ReactionUpdateManyWithoutMembershipNestedInput
+  reward_redemptions?: Prisma.RewardRedemptionUpdateManyWithoutMembershipNestedInput
+  sales_affiliate_commissions_affiliate_membership?: Prisma.SalesAffiliateCommissionUpdateManyWithoutAffiliate_membershipNestedInput
+  sales_affiliate_commissions_buyer_membership?: Prisma.SalesAffiliateCommissionUpdateManyWithoutBuyer_membershipNestedInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUpdateManyWithoutAffiliate_membershipNestedInput
+  sales_affiliate_requests?: Prisma.SalesAffiliateRequestUpdateManyWithoutMembershipNestedInput
+  sales_affiliates?: Prisma.SalesAffiliateUpdateManyWithoutMembershipNestedInput
+  sales_attribution_events?: Prisma.SalesAttributionEventUpdateManyWithoutMembershipNestedInput
+  sales_referral_attributions_referee_membership?: Prisma.SalesReferralAttributionUpdateManyWithoutReferee_membershipNestedInput
+  sales_referral_attributions_referrer_membership?: Prisma.SalesReferralAttributionUpdateManyWithoutReferrer_membershipNestedInput
+  sales_referral_codes?: Prisma.SalesReferralCodeUpdateManyWithoutMembershipNestedInput
+  sales_referral_purchase_credits_referee_membership?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutReferee_membershipNestedInput
+  sales_referral_purchase_credits_referrer_membership?: Prisma.SalesReferralPurchaseCreditUpdateManyWithoutReferrer_membershipNestedInput
+  srs_state?: Prisma.SrsStateUpdateManyWithoutMembershipNestedInput
+  streak_freezes?: Prisma.StreakFreezeUpdateManyWithoutMembershipNestedInput
+  streak_states?: Prisma.StreakStateUpdateManyWithoutMembershipNestedInput
+  tenant_active_days?: Prisma.TenantActiveDayUpdateManyWithoutMembershipNestedInput
+  test_series_enrollments?: Prisma.TestSeriesEnrollmentUpdateManyWithoutMembershipNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUpdateManyWithoutMembershipNestedInput
+  whatsapp_conversations?: Prisma.WhatsappConversationUpdateManyWithoutMembershipNestedInput
+  zoom_meeting_participants?: Prisma.ZoomMeetingParticipantUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipUncheckedUpdateWithoutErasuresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  auth_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
+  invited_email_normalized?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_token_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  invite_expires_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accepted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  joined_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspended_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
+  lesson_progress?: Prisma.LessonProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  attempts?: Prisma.AttemptUncheckedUpdateManyWithoutMembershipNestedInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  certificates?: Prisma.CertificateUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_orders?: Prisma.PaymentOrderUncheckedUpdateManyWithoutMembershipNestedInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallets?: Prisma.SalesWalletUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedUpdateManyWithoutMembershipNestedInput
+  user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
+  at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
+  badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
+  batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
+  bundle_enrollments?: Prisma.BundleEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutAuthor_membershipNestedInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotUncheckedUpdateManyWithoutMembershipNestedInput
+  competency_scores?: Prisma.CompetencyScoreUncheckedUpdateManyWithoutMembershipNestedInput
+  competency_signals?: Prisma.CompetencySignalUncheckedUpdateManyWithoutMembershipNestedInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateUncheckedUpdateManyWithoutMembershipNestedInput
+  course_reviews?: Prisma.CourseReviewUncheckedUpdateManyWithoutMembershipNestedInput
+  custom_field_value_history?: Prisma.CustomFieldValueHistoryUncheckedUpdateManyWithoutMembershipNestedInput
+  custom_field_values?: Prisma.CustomFieldValueUncheckedUpdateManyWithoutMembershipNestedInput
+  device_security_alerts?: Prisma.DeviceSecurityAlertUncheckedUpdateManyWithoutMembershipNestedInput
+  device_sessions?: Prisma.DeviceSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  gamification_profiles?: Prisma.GamificationProfileUncheckedUpdateManyWithoutMembershipNestedInput
+  grading_tasks?: Prisma.GradingTaskUncheckedUpdateManyWithoutAssigned_to_membershipNestedInput
+  group_memberships?: Prisma.GroupMembershipUncheckedUpdateManyWithoutMembershipNestedInput
+  identity_verifications?: Prisma.IdentityVerificationUncheckedUpdateManyWithoutMembershipNestedInput
+  learner_subscription_enrollments?: Prisma.LearnerSubscriptionEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  live_attendance?: Prisma.LiveAttendanceUncheckedUpdateManyWithoutMembershipNestedInput
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationUncheckedUpdateManyWithoutMembershipNestedInput
+  marketing_newsfeed_saves?: Prisma.MarketingNewsfeedSaveUncheckedUpdateManyWithoutMembershipNestedInput
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunUncheckedUpdateManyWithoutMembershipNestedInput
+  member_balances?: Prisma.MemberBalanceUncheckedUpdateManyWithoutMembershipNestedInput
+  mentions?: Prisma.MentionUncheckedUpdateManyWithoutMentioned_membershipNestedInput
+  messenger_messages?: Prisma.MessengerMessageUncheckedUpdateManyWithoutSender_membershipNestedInput
+  mock_test_enrollments?: Prisma.MockTestEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  module_scorm_progress?: Prisma.ModuleScormProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  notification_dispatches?: Prisma.NotificationDispatchUncheckedUpdateManyWithoutMembershipNestedInput
+  path_enrollments?: Prisma.PathEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  path_step_progress?: Prisma.PathStepProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  point_ledger?: Prisma.PointLedgerUncheckedUpdateManyWithoutMembershipNestedInput
+  poll_responses?: Prisma.PollResponseUncheckedUpdateManyWithoutMembershipNestedInput
+  posts?: Prisma.PostUncheckedUpdateManyWithoutAuthor_membershipNestedInput
+  practice_responses?: Prisma.PracticeResponseUncheckedUpdateManyWithoutMembershipNestedInput
+  practice_sessions?: Prisma.PracticeSessionUncheckedUpdateManyWithoutMembershipNestedInput
+  quest_progress?: Prisma.QuestProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  reactions?: Prisma.ReactionUncheckedUpdateManyWithoutMembershipNestedInput
+  reward_redemptions?: Prisma.RewardRedemptionUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_affiliate_commissions_affiliate_membership?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutAffiliate_membershipNestedInput
+  sales_affiliate_commissions_buyer_membership?: Prisma.SalesAffiliateCommissionUncheckedUpdateManyWithoutBuyer_membershipNestedInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutUncheckedUpdateManyWithoutAffiliate_membershipNestedInput
+  sales_affiliate_requests?: Prisma.SalesAffiliateRequestUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_affiliates?: Prisma.SalesAffiliateUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_attribution_events?: Prisma.SalesAttributionEventUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_referral_attributions_referee_membership?: Prisma.SalesReferralAttributionUncheckedUpdateManyWithoutReferee_membershipNestedInput
+  sales_referral_attributions_referrer_membership?: Prisma.SalesReferralAttributionUncheckedUpdateManyWithoutReferrer_membershipNestedInput
+  sales_referral_codes?: Prisma.SalesReferralCodeUncheckedUpdateManyWithoutMembershipNestedInput
+  sales_referral_purchase_credits_referee_membership?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferee_membershipNestedInput
+  sales_referral_purchase_credits_referrer_membership?: Prisma.SalesReferralPurchaseCreditUncheckedUpdateManyWithoutReferrer_membershipNestedInput
+  srs_state?: Prisma.SrsStateUncheckedUpdateManyWithoutMembershipNestedInput
+  streak_freezes?: Prisma.StreakFreezeUncheckedUpdateManyWithoutMembershipNestedInput
+  streak_states?: Prisma.StreakStateUncheckedUpdateManyWithoutMembershipNestedInput
+  tenant_active_days?: Prisma.TenantActiveDayUncheckedUpdateManyWithoutMembershipNestedInput
+  test_series_enrollments?: Prisma.TestSeriesEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressUncheckedUpdateManyWithoutMembershipNestedInput
+  whatsapp_conversations?: Prisma.WhatsappConversationUncheckedUpdateManyWithoutMembershipNestedInput
+  zoom_meeting_participants?: Prisma.ZoomMeetingParticipantUncheckedUpdateManyWithoutMembershipNestedInput
+}
+
+export type MembershipCreateWithoutAuth_principalInput = {
+  id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  erased_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
+  profile?: Prisma.MemberProfileCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
+  at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
+  attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
+  badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
+  batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
+  bundle_enrollments?: Prisma.BundleEnrollmentCreateNestedManyWithoutMembershipInput
+  comments?: Prisma.CommentCreateNestedManyWithoutAuthor_membershipInput
+  competency_score_snapshots?: Prisma.CompetencyScoreSnapshotCreateNestedManyWithoutMembershipInput
+  competency_scores?: Prisma.CompetencyScoreCreateNestedManyWithoutMembershipInput
+  competency_signals?: Prisma.CompetencySignalCreateNestedManyWithoutMembershipInput
+  composite_readiness_state?: Prisma.CompositeReadinessStateCreateNestedManyWithoutMembershipInput
+  course_reviews?: Prisma.CourseReviewCreateNestedManyWithoutMembershipInput
+  custom_field_value_history?: Prisma.CustomFieldValueHistoryCreateNestedManyWithoutMembershipInput
+  custom_field_values?: Prisma.CustomFieldValueCreateNestedManyWithoutMembershipInput
+  device_security_alerts?: Prisma.DeviceSecurityAlertCreateNestedManyWithoutMembershipInput
+  device_sessions?: Prisma.DeviceSessionCreateNestedManyWithoutMembershipInput
+  diagnostic_sessions?: Prisma.DiagnosticSessionCreateNestedManyWithoutMembershipInput
+  gamification_profiles?: Prisma.GamificationProfileCreateNestedManyWithoutMembershipInput
+  grading_tasks?: Prisma.GradingTaskCreateNestedManyWithoutAssigned_to_membershipInput
+  group_memberships?: Prisma.GroupMembershipCreateNestedManyWithoutMembershipInput
+  identity_verifications?: Prisma.IdentityVerificationCreateNestedManyWithoutMembershipInput
+  learner_subscription_enrollments?: Prisma.LearnerSubscriptionEnrollmentCreateNestedManyWithoutMembershipInput
+  live_attendance?: Prisma.LiveAttendanceCreateNestedManyWithoutMembershipInput
+  marketing_event_registrations?: Prisma.MarketingEventRegistrationCreateNestedManyWithoutMembershipInput
+  marketing_newsfeed_saves?: Prisma.MarketingNewsfeedSaveCreateNestedManyWithoutMembershipInput
+  marketing_workflow_runs?: Prisma.MarketingWorkflowRunCreateNestedManyWithoutMembershipInput
+  member_balances?: Prisma.MemberBalanceCreateNestedManyWithoutMembershipInput
+  mentions?: Prisma.MentionCreateNestedManyWithoutMentioned_membershipInput
+  messenger_messages?: Prisma.MessengerMessageCreateNestedManyWithoutSender_membershipInput
+  mock_test_enrollments?: Prisma.MockTestEnrollmentCreateNestedManyWithoutMembershipInput
+  module_scorm_progress?: Prisma.ModuleScormProgressCreateNestedManyWithoutMembershipInput
+  notification_dispatches?: Prisma.NotificationDispatchCreateNestedManyWithoutMembershipInput
+  path_enrollments?: Prisma.PathEnrollmentCreateNestedManyWithoutMembershipInput
+  path_step_progress?: Prisma.PathStepProgressCreateNestedManyWithoutMembershipInput
+  point_ledger?: Prisma.PointLedgerCreateNestedManyWithoutMembershipInput
+  poll_responses?: Prisma.PollResponseCreateNestedManyWithoutMembershipInput
+  posts?: Prisma.PostCreateNestedManyWithoutAuthor_membershipInput
+  practice_responses?: Prisma.PracticeResponseCreateNestedManyWithoutMembershipInput
+  practice_sessions?: Prisma.PracticeSessionCreateNestedManyWithoutMembershipInput
+  quest_progress?: Prisma.QuestProgressCreateNestedManyWithoutMembershipInput
+  reactions?: Prisma.ReactionCreateNestedManyWithoutMembershipInput
+  reward_redemptions?: Prisma.RewardRedemptionCreateNestedManyWithoutMembershipInput
+  sales_affiliate_commissions_affiliate_membership?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutAffiliate_membershipInput
+  sales_affiliate_commissions_buyer_membership?: Prisma.SalesAffiliateCommissionCreateNestedManyWithoutBuyer_membershipInput
+  sales_affiliate_payouts?: Prisma.SalesAffiliatePayoutCreateNestedManyWithoutAffiliate_membershipInput
+  sales_affiliate_requests?: Prisma.SalesAffiliateRequestCreateNestedManyWithoutMembershipInput
+  sales_affiliates?: Prisma.SalesAffiliateCreateNestedManyWithoutMembershipInput
+  sales_attribution_events?: Prisma.SalesAttributionEventCreateNestedManyWithoutMembershipInput
+  sales_referral_attributions_referee_membership?: Prisma.SalesReferralAttributionCreateNestedManyWithoutReferee_membershipInput
+  sales_referral_attributions_referrer_membership?: Prisma.SalesReferralAttributionCreateNestedManyWithoutReferrer_membershipInput
+  sales_referral_codes?: Prisma.SalesReferralCodeCreateNestedManyWithoutMembershipInput
+  sales_referral_purchase_credits_referee_membership?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutReferee_membershipInput
+  sales_referral_purchase_credits_referrer_membership?: Prisma.SalesReferralPurchaseCreditCreateNestedManyWithoutReferrer_membershipInput
+  srs_state?: Prisma.SrsStateCreateNestedManyWithoutMembershipInput
+  streak_freezes?: Prisma.StreakFreezeCreateNestedManyWithoutMembershipInput
+  streak_states?: Prisma.StreakStateCreateNestedManyWithoutMembershipInput
+  tenant_active_days?: Prisma.TenantActiveDayCreateNestedManyWithoutMembershipInput
+  test_series_enrollments?: Prisma.TestSeriesEnrollmentCreateNestedManyWithoutMembershipInput
+  test_series_item_progress?: Prisma.TestSeriesItemProgressCreateNestedManyWithoutMembershipInput
+  whatsapp_conversations?: Prisma.WhatsappConversationCreateNestedManyWithoutMembershipInput
+  zoom_meeting_participants?: Prisma.ZoomMeetingParticipantCreateNestedManyWithoutMembershipInput
+}
+
+export type MembershipUncheckedCreateWithoutAuth_principalInput = {
+  id: string
+  tenant_id: string
+  status?: $Enums.MembershipStatus
+  invited_email_normalized?: string | null
+  invite_token_hash?: string | null
+  invite_expires_at?: Date | string | null
+  accepted_at?: Date | string | null
+  joined_at?: Date | string | null
+  suspended_at?: Date | string | null
+  removed_at?: Date | string | null
+  archived_at?: Date | string | null
+  last_active_at?: Date | string | null
+  erased_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
+  notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
+  lesson_progress?: Prisma.LessonProgressUncheckedCreateNestedManyWithoutMembershipInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutMembershipInput
+  attempts?: Prisma.AttemptUncheckedCreateNestedManyWithoutMembershipInput
+  proctoring_sessions?: Prisma.ProctoringSessionUncheckedCreateNestedManyWithoutMembershipInput
+  certificates?: Prisma.CertificateUncheckedCreateNestedManyWithoutMembershipInput
+  payment_orders?: Prisma.PaymentOrderUncheckedCreateNestedManyWithoutMembershipInput
+  payment_instalment_plans?: Prisma.PaymentInstalmentPlanUncheckedCreateNestedManyWithoutMembershipInput
+  sales_coupon_redemptions?: Prisma.SalesCouponRedemptionUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallets?: Prisma.SalesWalletUncheckedCreateNestedManyWithoutMembershipInput
+  sales_wallet_transactions?: Prisma.SalesWalletTransactionUncheckedCreateNestedManyWithoutMembershipInput
+  user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
+  permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
+  at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -3081,6 +3533,7 @@ export type MembershipCreateWithoutProfileInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -3100,6 +3553,7 @@ export type MembershipCreateWithoutProfileInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -3175,6 +3629,7 @@ export type MembershipUncheckedCreateWithoutProfileInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutMembershipInput
@@ -3192,6 +3647,7 @@ export type MembershipUncheckedCreateWithoutProfileInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -3281,6 +3737,7 @@ export type MembershipUpdateWithoutProfileInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -3300,6 +3757,7 @@ export type MembershipUpdateWithoutProfileInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -3375,6 +3833,7 @@ export type MembershipUncheckedUpdateWithoutProfileInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutMembershipNestedInput
@@ -3392,6 +3851,7 @@ export type MembershipUncheckedUpdateWithoutProfileInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -3465,6 +3925,7 @@ export type MembershipCreateWithoutNotification_preferencesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -3484,6 +3945,7 @@ export type MembershipCreateWithoutNotification_preferencesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -3559,6 +4021,7 @@ export type MembershipUncheckedCreateWithoutNotification_preferencesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -3576,6 +4039,7 @@ export type MembershipUncheckedCreateWithoutNotification_preferencesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -3665,6 +4129,7 @@ export type MembershipUpdateWithoutNotification_preferencesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -3684,6 +4149,7 @@ export type MembershipUpdateWithoutNotification_preferencesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -3759,6 +4225,7 @@ export type MembershipUncheckedUpdateWithoutNotification_preferencesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -3776,6 +4243,7 @@ export type MembershipUncheckedUpdateWithoutNotification_preferencesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -3849,6 +4317,7 @@ export type MembershipCreateWithoutUser_rolesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -3868,6 +4337,7 @@ export type MembershipCreateWithoutUser_rolesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -3943,6 +4413,7 @@ export type MembershipUncheckedCreateWithoutUser_rolesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -3960,6 +4431,7 @@ export type MembershipUncheckedCreateWithoutUser_rolesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -4049,6 +4521,7 @@ export type MembershipUpdateWithoutUser_rolesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -4068,6 +4541,7 @@ export type MembershipUpdateWithoutUser_rolesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -4143,6 +4617,7 @@ export type MembershipUncheckedUpdateWithoutUser_rolesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -4160,6 +4635,7 @@ export type MembershipUncheckedUpdateWithoutUser_rolesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -4233,6 +4709,7 @@ export type MembershipCreateWithoutPermission_overridesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -4252,6 +4729,7 @@ export type MembershipCreateWithoutPermission_overridesInput = {
   user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -4327,6 +4805,7 @@ export type MembershipUncheckedCreateWithoutPermission_overridesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -4344,6 +4823,7 @@ export type MembershipUncheckedCreateWithoutPermission_overridesInput = {
   user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -4433,6 +4913,7 @@ export type MembershipUpdateWithoutPermission_overridesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -4452,6 +4933,7 @@ export type MembershipUpdateWithoutPermission_overridesInput = {
   user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -4527,6 +5009,7 @@ export type MembershipUncheckedUpdateWithoutPermission_overridesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -4544,6 +5027,7 @@ export type MembershipUncheckedUpdateWithoutPermission_overridesInput = {
   user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -4617,6 +5101,7 @@ export type MembershipCreateWithoutTenant_active_daysInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -4637,6 +5122,7 @@ export type MembershipCreateWithoutTenant_active_daysInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -4711,6 +5197,7 @@ export type MembershipUncheckedCreateWithoutTenant_active_daysInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -4729,6 +5216,7 @@ export type MembershipUncheckedCreateWithoutTenant_active_daysInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -4817,6 +5305,7 @@ export type MembershipUpdateWithoutTenant_active_daysInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -4837,6 +5326,7 @@ export type MembershipUpdateWithoutTenant_active_daysInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -4911,6 +5401,7 @@ export type MembershipUncheckedUpdateWithoutTenant_active_daysInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -4929,6 +5420,7 @@ export type MembershipUncheckedUpdateWithoutTenant_active_daysInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -5001,6 +5493,7 @@ export type MembershipCreateWithoutModule_scorm_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -5021,6 +5514,7 @@ export type MembershipCreateWithoutModule_scorm_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -5095,6 +5589,7 @@ export type MembershipUncheckedCreateWithoutModule_scorm_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -5113,6 +5608,7 @@ export type MembershipUncheckedCreateWithoutModule_scorm_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -5201,6 +5697,7 @@ export type MembershipUpdateWithoutModule_scorm_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -5221,6 +5718,7 @@ export type MembershipUpdateWithoutModule_scorm_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -5295,6 +5793,7 @@ export type MembershipUncheckedUpdateWithoutModule_scorm_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -5313,6 +5812,7 @@ export type MembershipUncheckedUpdateWithoutModule_scorm_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -5385,6 +5885,7 @@ export type MembershipCreateWithoutEnrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -5404,6 +5905,7 @@ export type MembershipCreateWithoutEnrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -5479,6 +5981,7 @@ export type MembershipUncheckedCreateWithoutEnrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -5496,6 +5999,7 @@ export type MembershipUncheckedCreateWithoutEnrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -5585,6 +6089,7 @@ export type MembershipUpdateWithoutEnrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -5604,6 +6109,7 @@ export type MembershipUpdateWithoutEnrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -5679,6 +6185,7 @@ export type MembershipUncheckedUpdateWithoutEnrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -5696,6 +6203,7 @@ export type MembershipUncheckedUpdateWithoutEnrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -5769,6 +6277,7 @@ export type MembershipCreateWithoutMock_test_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -5789,6 +6298,7 @@ export type MembershipCreateWithoutMock_test_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -5863,6 +6373,7 @@ export type MembershipUncheckedCreateWithoutMock_test_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -5881,6 +6392,7 @@ export type MembershipUncheckedCreateWithoutMock_test_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -5969,6 +6481,7 @@ export type MembershipUpdateWithoutMock_test_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -5989,6 +6502,7 @@ export type MembershipUpdateWithoutMock_test_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -6063,6 +6577,7 @@ export type MembershipUncheckedUpdateWithoutMock_test_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -6081,6 +6596,7 @@ export type MembershipUncheckedUpdateWithoutMock_test_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -6153,6 +6669,7 @@ export type MembershipCreateWithoutTest_series_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -6173,6 +6690,7 @@ export type MembershipCreateWithoutTest_series_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -6247,6 +6765,7 @@ export type MembershipUncheckedCreateWithoutTest_series_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -6265,6 +6784,7 @@ export type MembershipUncheckedCreateWithoutTest_series_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -6353,6 +6873,7 @@ export type MembershipUpdateWithoutTest_series_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -6373,6 +6894,7 @@ export type MembershipUpdateWithoutTest_series_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -6447,6 +6969,7 @@ export type MembershipUncheckedUpdateWithoutTest_series_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -6465,6 +6988,7 @@ export type MembershipUncheckedUpdateWithoutTest_series_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -6537,6 +7061,7 @@ export type MembershipCreateWithoutTest_series_item_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -6557,6 +7082,7 @@ export type MembershipCreateWithoutTest_series_item_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -6631,6 +7157,7 @@ export type MembershipUncheckedCreateWithoutTest_series_item_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -6649,6 +7176,7 @@ export type MembershipUncheckedCreateWithoutTest_series_item_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -6737,6 +7265,7 @@ export type MembershipUpdateWithoutTest_series_item_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -6757,6 +7286,7 @@ export type MembershipUpdateWithoutTest_series_item_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -6831,6 +7361,7 @@ export type MembershipUncheckedUpdateWithoutTest_series_item_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -6849,6 +7380,7 @@ export type MembershipUncheckedUpdateWithoutTest_series_item_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -6921,6 +7453,7 @@ export type MembershipCreateWithoutBundle_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -6941,6 +7474,7 @@ export type MembershipCreateWithoutBundle_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -7015,6 +7549,7 @@ export type MembershipUncheckedCreateWithoutBundle_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -7033,6 +7568,7 @@ export type MembershipUncheckedCreateWithoutBundle_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -7121,6 +7657,7 @@ export type MembershipUpdateWithoutBundle_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -7141,6 +7678,7 @@ export type MembershipUpdateWithoutBundle_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -7215,6 +7753,7 @@ export type MembershipUncheckedUpdateWithoutBundle_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -7233,6 +7772,7 @@ export type MembershipUncheckedUpdateWithoutBundle_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -7305,6 +7845,7 @@ export type MembershipCreateWithoutLearner_subscription_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -7325,6 +7866,7 @@ export type MembershipCreateWithoutLearner_subscription_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -7399,6 +7941,7 @@ export type MembershipUncheckedCreateWithoutLearner_subscription_enrollmentsInpu
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -7417,6 +7960,7 @@ export type MembershipUncheckedCreateWithoutLearner_subscription_enrollmentsInpu
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -7505,6 +8049,7 @@ export type MembershipUpdateWithoutLearner_subscription_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -7525,6 +8070,7 @@ export type MembershipUpdateWithoutLearner_subscription_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -7599,6 +8145,7 @@ export type MembershipUncheckedUpdateWithoutLearner_subscription_enrollmentsInpu
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -7617,6 +8164,7 @@ export type MembershipUncheckedUpdateWithoutLearner_subscription_enrollmentsInpu
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -7689,6 +8237,7 @@ export type MembershipCreateWithoutLesson_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -7708,6 +8257,7 @@ export type MembershipCreateWithoutLesson_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -7783,6 +8333,7 @@ export type MembershipUncheckedCreateWithoutLesson_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -7800,6 +8351,7 @@ export type MembershipUncheckedCreateWithoutLesson_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -7889,6 +8441,7 @@ export type MembershipUpdateWithoutLesson_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -7908,6 +8461,7 @@ export type MembershipUpdateWithoutLesson_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -7983,6 +8537,7 @@ export type MembershipUncheckedUpdateWithoutLesson_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -8000,6 +8555,7 @@ export type MembershipUncheckedUpdateWithoutLesson_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -8073,6 +8629,7 @@ export type MembershipCreateWithoutCourse_reviewsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -8093,6 +8650,7 @@ export type MembershipCreateWithoutCourse_reviewsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -8167,6 +8725,7 @@ export type MembershipUncheckedCreateWithoutCourse_reviewsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -8185,6 +8744,7 @@ export type MembershipUncheckedCreateWithoutCourse_reviewsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -8273,6 +8833,7 @@ export type MembershipUpdateWithoutCourse_reviewsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -8293,6 +8854,7 @@ export type MembershipUpdateWithoutCourse_reviewsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -8367,6 +8929,7 @@ export type MembershipUncheckedUpdateWithoutCourse_reviewsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -8385,6 +8948,7 @@ export type MembershipUncheckedUpdateWithoutCourse_reviewsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -8457,6 +9021,7 @@ export type MembershipCreateWithoutPath_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -8477,6 +9042,7 @@ export type MembershipCreateWithoutPath_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -8551,6 +9117,7 @@ export type MembershipUncheckedCreateWithoutPath_enrollmentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -8569,6 +9136,7 @@ export type MembershipUncheckedCreateWithoutPath_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -8657,6 +9225,7 @@ export type MembershipUpdateWithoutPath_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -8677,6 +9246,7 @@ export type MembershipUpdateWithoutPath_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -8751,6 +9321,7 @@ export type MembershipUncheckedUpdateWithoutPath_enrollmentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -8769,6 +9340,7 @@ export type MembershipUncheckedUpdateWithoutPath_enrollmentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -8841,6 +9413,7 @@ export type MembershipCreateWithoutPath_step_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -8861,6 +9434,7 @@ export type MembershipCreateWithoutPath_step_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -8935,6 +9509,7 @@ export type MembershipUncheckedCreateWithoutPath_step_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -8953,6 +9528,7 @@ export type MembershipUncheckedCreateWithoutPath_step_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -9041,6 +9617,7 @@ export type MembershipUpdateWithoutPath_step_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -9061,6 +9638,7 @@ export type MembershipUpdateWithoutPath_step_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -9135,6 +9713,7 @@ export type MembershipUncheckedUpdateWithoutPath_step_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -9153,6 +9732,7 @@ export type MembershipUncheckedUpdateWithoutPath_step_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -9225,6 +9805,7 @@ export type MembershipCreateWithoutAttemptsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -9244,6 +9825,7 @@ export type MembershipCreateWithoutAttemptsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -9319,6 +9901,7 @@ export type MembershipUncheckedCreateWithoutAttemptsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -9336,6 +9919,7 @@ export type MembershipUncheckedCreateWithoutAttemptsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -9425,6 +10009,7 @@ export type MembershipUpdateWithoutAttemptsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -9444,6 +10029,7 @@ export type MembershipUpdateWithoutAttemptsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -9519,6 +10105,7 @@ export type MembershipUncheckedUpdateWithoutAttemptsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -9536,6 +10123,7 @@ export type MembershipUncheckedUpdateWithoutAttemptsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -9609,6 +10197,7 @@ export type MembershipCreateWithoutGrading_tasksInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -9629,6 +10218,7 @@ export type MembershipCreateWithoutGrading_tasksInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -9703,6 +10293,7 @@ export type MembershipUncheckedCreateWithoutGrading_tasksInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -9721,6 +10312,7 @@ export type MembershipUncheckedCreateWithoutGrading_tasksInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -9809,6 +10401,7 @@ export type MembershipUpdateWithoutGrading_tasksInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -9829,6 +10422,7 @@ export type MembershipUpdateWithoutGrading_tasksInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -9903,6 +10497,7 @@ export type MembershipUncheckedUpdateWithoutGrading_tasksInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -9921,6 +10516,7 @@ export type MembershipUncheckedUpdateWithoutGrading_tasksInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -9993,6 +10589,7 @@ export type MembershipCreateWithoutProctoring_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -10012,6 +10609,7 @@ export type MembershipCreateWithoutProctoring_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -10087,6 +10685,7 @@ export type MembershipUncheckedCreateWithoutProctoring_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -10104,6 +10703,7 @@ export type MembershipUncheckedCreateWithoutProctoring_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -10193,6 +10793,7 @@ export type MembershipUpdateWithoutProctoring_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -10212,6 +10813,7 @@ export type MembershipUpdateWithoutProctoring_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -10287,6 +10889,7 @@ export type MembershipUncheckedUpdateWithoutProctoring_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -10304,6 +10907,7 @@ export type MembershipUncheckedUpdateWithoutProctoring_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -10377,6 +10981,7 @@ export type MembershipCreateWithoutIdentity_verificationsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -10397,6 +11002,7 @@ export type MembershipCreateWithoutIdentity_verificationsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -10471,6 +11077,7 @@ export type MembershipUncheckedCreateWithoutIdentity_verificationsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -10489,6 +11096,7 @@ export type MembershipUncheckedCreateWithoutIdentity_verificationsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -10577,6 +11185,7 @@ export type MembershipUpdateWithoutIdentity_verificationsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -10597,6 +11206,7 @@ export type MembershipUpdateWithoutIdentity_verificationsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -10671,6 +11281,7 @@ export type MembershipUncheckedUpdateWithoutIdentity_verificationsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -10689,6 +11300,7 @@ export type MembershipUncheckedUpdateWithoutIdentity_verificationsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -10761,6 +11373,7 @@ export type MembershipCreateWithoutPractice_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -10781,6 +11394,7 @@ export type MembershipCreateWithoutPractice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -10855,6 +11469,7 @@ export type MembershipUncheckedCreateWithoutPractice_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -10873,6 +11488,7 @@ export type MembershipUncheckedCreateWithoutPractice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -10961,6 +11577,7 @@ export type MembershipUpdateWithoutPractice_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -10981,6 +11598,7 @@ export type MembershipUpdateWithoutPractice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -11055,6 +11673,7 @@ export type MembershipUncheckedUpdateWithoutPractice_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -11073,6 +11692,7 @@ export type MembershipUncheckedUpdateWithoutPractice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -11145,6 +11765,7 @@ export type MembershipCreateWithoutPractice_responsesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -11165,6 +11786,7 @@ export type MembershipCreateWithoutPractice_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -11239,6 +11861,7 @@ export type MembershipUncheckedCreateWithoutPractice_responsesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -11257,6 +11880,7 @@ export type MembershipUncheckedCreateWithoutPractice_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -11345,6 +11969,7 @@ export type MembershipUpdateWithoutPractice_responsesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -11365,6 +11990,7 @@ export type MembershipUpdateWithoutPractice_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -11439,6 +12065,7 @@ export type MembershipUncheckedUpdateWithoutPractice_responsesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -11457,6 +12084,7 @@ export type MembershipUncheckedUpdateWithoutPractice_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -11529,6 +12157,7 @@ export type MembershipCreateWithoutSrs_stateInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -11549,6 +12178,7 @@ export type MembershipCreateWithoutSrs_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -11623,6 +12253,7 @@ export type MembershipUncheckedCreateWithoutSrs_stateInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -11641,6 +12272,7 @@ export type MembershipUncheckedCreateWithoutSrs_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -11729,6 +12361,7 @@ export type MembershipUpdateWithoutSrs_stateInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -11749,6 +12382,7 @@ export type MembershipUpdateWithoutSrs_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -11823,6 +12457,7 @@ export type MembershipUncheckedUpdateWithoutSrs_stateInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -11841,6 +12476,7 @@ export type MembershipUncheckedUpdateWithoutSrs_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -11913,6 +12549,7 @@ export type MembershipCreateWithoutCompetency_signalsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -11933,6 +12570,7 @@ export type MembershipCreateWithoutCompetency_signalsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -12007,6 +12645,7 @@ export type MembershipUncheckedCreateWithoutCompetency_signalsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -12025,6 +12664,7 @@ export type MembershipUncheckedCreateWithoutCompetency_signalsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -12113,6 +12753,7 @@ export type MembershipUpdateWithoutCompetency_signalsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -12133,6 +12774,7 @@ export type MembershipUpdateWithoutCompetency_signalsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -12207,6 +12849,7 @@ export type MembershipUncheckedUpdateWithoutCompetency_signalsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -12225,6 +12868,7 @@ export type MembershipUncheckedUpdateWithoutCompetency_signalsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -12297,6 +12941,7 @@ export type MembershipCreateWithoutCompetency_scoresInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -12317,6 +12962,7 @@ export type MembershipCreateWithoutCompetency_scoresInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -12391,6 +13037,7 @@ export type MembershipUncheckedCreateWithoutCompetency_scoresInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -12409,6 +13056,7 @@ export type MembershipUncheckedCreateWithoutCompetency_scoresInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -12497,6 +13145,7 @@ export type MembershipUpdateWithoutCompetency_scoresInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -12517,6 +13166,7 @@ export type MembershipUpdateWithoutCompetency_scoresInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -12591,6 +13241,7 @@ export type MembershipUncheckedUpdateWithoutCompetency_scoresInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -12609,6 +13260,7 @@ export type MembershipUncheckedUpdateWithoutCompetency_scoresInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -12681,6 +13333,7 @@ export type MembershipCreateWithoutComposite_readiness_stateInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -12701,6 +13354,7 @@ export type MembershipCreateWithoutComposite_readiness_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -12775,6 +13429,7 @@ export type MembershipUncheckedCreateWithoutComposite_readiness_stateInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -12793,6 +13448,7 @@ export type MembershipUncheckedCreateWithoutComposite_readiness_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -12881,6 +13537,7 @@ export type MembershipUpdateWithoutComposite_readiness_stateInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -12901,6 +13558,7 @@ export type MembershipUpdateWithoutComposite_readiness_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -12975,6 +13633,7 @@ export type MembershipUncheckedUpdateWithoutComposite_readiness_stateInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -12993,6 +13652,7 @@ export type MembershipUncheckedUpdateWithoutComposite_readiness_stateInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -13065,6 +13725,7 @@ export type MembershipCreateWithoutCompetency_score_snapshotsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -13085,6 +13746,7 @@ export type MembershipCreateWithoutCompetency_score_snapshotsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -13159,6 +13821,7 @@ export type MembershipUncheckedCreateWithoutCompetency_score_snapshotsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -13177,6 +13840,7 @@ export type MembershipUncheckedCreateWithoutCompetency_score_snapshotsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -13265,6 +13929,7 @@ export type MembershipUpdateWithoutCompetency_score_snapshotsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -13285,6 +13950,7 @@ export type MembershipUpdateWithoutCompetency_score_snapshotsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -13359,6 +14025,7 @@ export type MembershipUncheckedUpdateWithoutCompetency_score_snapshotsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -13377,6 +14044,7 @@ export type MembershipUncheckedUpdateWithoutCompetency_score_snapshotsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -13449,6 +14117,7 @@ export type MembershipCreateWithoutDiagnostic_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -13469,6 +14138,7 @@ export type MembershipCreateWithoutDiagnostic_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -13543,6 +14213,7 @@ export type MembershipUncheckedCreateWithoutDiagnostic_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -13561,6 +14232,7 @@ export type MembershipUncheckedCreateWithoutDiagnostic_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -13649,6 +14321,7 @@ export type MembershipUpdateWithoutDiagnostic_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -13669,6 +14342,7 @@ export type MembershipUpdateWithoutDiagnostic_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -13743,6 +14417,7 @@ export type MembershipUncheckedUpdateWithoutDiagnostic_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -13761,6 +14436,7 @@ export type MembershipUncheckedUpdateWithoutDiagnostic_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -13833,6 +14509,7 @@ export type MembershipCreateWithoutAttribution_tokensInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -13853,6 +14530,7 @@ export type MembershipCreateWithoutAttribution_tokensInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
   bundle_enrollments?: Prisma.BundleEnrollmentCreateNestedManyWithoutMembershipInput
@@ -13927,6 +14605,7 @@ export type MembershipUncheckedCreateWithoutAttribution_tokensInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -13945,6 +14624,7 @@ export type MembershipUncheckedCreateWithoutAttribution_tokensInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
   bundle_enrollments?: Prisma.BundleEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
@@ -14033,6 +14713,7 @@ export type MembershipUpdateWithoutAttribution_tokensInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -14053,6 +14734,7 @@ export type MembershipUpdateWithoutAttribution_tokensInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
   bundle_enrollments?: Prisma.BundleEnrollmentUpdateManyWithoutMembershipNestedInput
@@ -14127,6 +14809,7 @@ export type MembershipUncheckedUpdateWithoutAttribution_tokensInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -14145,6 +14828,7 @@ export type MembershipUncheckedUpdateWithoutAttribution_tokensInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
   bundle_enrollments?: Prisma.BundleEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
@@ -14217,6 +14901,7 @@ export type MembershipCreateWithoutCertificatesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -14236,6 +14921,7 @@ export type MembershipCreateWithoutCertificatesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -14311,6 +14997,7 @@ export type MembershipUncheckedCreateWithoutCertificatesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -14328,6 +15015,7 @@ export type MembershipUncheckedCreateWithoutCertificatesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -14417,6 +15105,7 @@ export type MembershipUpdateWithoutCertificatesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -14436,6 +15125,7 @@ export type MembershipUpdateWithoutCertificatesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -14511,6 +15201,7 @@ export type MembershipUncheckedUpdateWithoutCertificatesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -14528,6 +15219,7 @@ export type MembershipUncheckedUpdateWithoutCertificatesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -14601,6 +15293,7 @@ export type MembershipCreateWithoutGamification_profilesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -14621,6 +15314,7 @@ export type MembershipCreateWithoutGamification_profilesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -14695,6 +15389,7 @@ export type MembershipUncheckedCreateWithoutGamification_profilesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -14713,6 +15408,7 @@ export type MembershipUncheckedCreateWithoutGamification_profilesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -14801,6 +15497,7 @@ export type MembershipUpdateWithoutGamification_profilesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -14821,6 +15518,7 @@ export type MembershipUpdateWithoutGamification_profilesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -14895,6 +15593,7 @@ export type MembershipUncheckedUpdateWithoutGamification_profilesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -14913,6 +15612,7 @@ export type MembershipUncheckedUpdateWithoutGamification_profilesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -14985,6 +15685,7 @@ export type MembershipCreateWithoutPoint_ledgerInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -15005,6 +15706,7 @@ export type MembershipCreateWithoutPoint_ledgerInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -15079,6 +15781,7 @@ export type MembershipUncheckedCreateWithoutPoint_ledgerInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -15097,6 +15800,7 @@ export type MembershipUncheckedCreateWithoutPoint_ledgerInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -15185,6 +15889,7 @@ export type MembershipUpdateWithoutPoint_ledgerInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -15205,6 +15910,7 @@ export type MembershipUpdateWithoutPoint_ledgerInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -15279,6 +15985,7 @@ export type MembershipUncheckedUpdateWithoutPoint_ledgerInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -15297,6 +16004,7 @@ export type MembershipUncheckedUpdateWithoutPoint_ledgerInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -15369,6 +16077,7 @@ export type MembershipCreateWithoutBadge_awardsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -15389,6 +16098,7 @@ export type MembershipCreateWithoutBadge_awardsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
   bundle_enrollments?: Prisma.BundleEnrollmentCreateNestedManyWithoutMembershipInput
@@ -15463,6 +16173,7 @@ export type MembershipUncheckedCreateWithoutBadge_awardsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -15481,6 +16192,7 @@ export type MembershipUncheckedCreateWithoutBadge_awardsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
   bundle_enrollments?: Prisma.BundleEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
@@ -15569,6 +16281,7 @@ export type MembershipUpdateWithoutBadge_awardsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -15589,6 +16302,7 @@ export type MembershipUpdateWithoutBadge_awardsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
   bundle_enrollments?: Prisma.BundleEnrollmentUpdateManyWithoutMembershipNestedInput
@@ -15663,6 +16377,7 @@ export type MembershipUncheckedUpdateWithoutBadge_awardsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -15681,6 +16396,7 @@ export type MembershipUncheckedUpdateWithoutBadge_awardsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
   bundle_enrollments?: Prisma.BundleEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
@@ -15753,6 +16469,7 @@ export type MembershipCreateWithoutStreak_statesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -15773,6 +16490,7 @@ export type MembershipCreateWithoutStreak_statesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -15847,6 +16565,7 @@ export type MembershipUncheckedCreateWithoutStreak_statesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -15865,6 +16584,7 @@ export type MembershipUncheckedCreateWithoutStreak_statesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -15953,6 +16673,7 @@ export type MembershipUpdateWithoutStreak_statesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -15973,6 +16694,7 @@ export type MembershipUpdateWithoutStreak_statesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -16047,6 +16769,7 @@ export type MembershipUncheckedUpdateWithoutStreak_statesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -16065,6 +16788,7 @@ export type MembershipUncheckedUpdateWithoutStreak_statesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -16137,6 +16861,7 @@ export type MembershipCreateWithoutStreak_freezesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -16157,6 +16882,7 @@ export type MembershipCreateWithoutStreak_freezesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -16231,6 +16957,7 @@ export type MembershipUncheckedCreateWithoutStreak_freezesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -16249,6 +16976,7 @@ export type MembershipUncheckedCreateWithoutStreak_freezesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -16337,6 +17065,7 @@ export type MembershipUpdateWithoutStreak_freezesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -16357,6 +17086,7 @@ export type MembershipUpdateWithoutStreak_freezesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -16431,6 +17161,7 @@ export type MembershipUncheckedUpdateWithoutStreak_freezesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -16449,6 +17180,7 @@ export type MembershipUncheckedUpdateWithoutStreak_freezesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -16521,6 +17253,7 @@ export type MembershipCreateWithoutQuest_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -16541,6 +17274,7 @@ export type MembershipCreateWithoutQuest_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -16615,6 +17349,7 @@ export type MembershipUncheckedCreateWithoutQuest_progressInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -16633,6 +17368,7 @@ export type MembershipUncheckedCreateWithoutQuest_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -16721,6 +17457,7 @@ export type MembershipUpdateWithoutQuest_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -16741,6 +17478,7 @@ export type MembershipUpdateWithoutQuest_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -16815,6 +17553,7 @@ export type MembershipUncheckedUpdateWithoutQuest_progressInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -16833,6 +17572,7 @@ export type MembershipUncheckedUpdateWithoutQuest_progressInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -16905,6 +17645,7 @@ export type MembershipCreateWithoutMember_balancesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -16925,6 +17666,7 @@ export type MembershipCreateWithoutMember_balancesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -16999,6 +17741,7 @@ export type MembershipUncheckedCreateWithoutMember_balancesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -17017,6 +17760,7 @@ export type MembershipUncheckedCreateWithoutMember_balancesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -17105,6 +17849,7 @@ export type MembershipUpdateWithoutMember_balancesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -17125,6 +17870,7 @@ export type MembershipUpdateWithoutMember_balancesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -17199,6 +17945,7 @@ export type MembershipUncheckedUpdateWithoutMember_balancesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -17217,6 +17964,7 @@ export type MembershipUncheckedUpdateWithoutMember_balancesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -17289,6 +18037,7 @@ export type MembershipCreateWithoutReward_redemptionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -17309,6 +18058,7 @@ export type MembershipCreateWithoutReward_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -17383,6 +18133,7 @@ export type MembershipUncheckedCreateWithoutReward_redemptionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -17401,6 +18152,7 @@ export type MembershipUncheckedCreateWithoutReward_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -17489,6 +18241,7 @@ export type MembershipUpdateWithoutReward_redemptionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -17509,6 +18262,7 @@ export type MembershipUpdateWithoutReward_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -17583,6 +18337,7 @@ export type MembershipUncheckedUpdateWithoutReward_redemptionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -17601,6 +18356,7 @@ export type MembershipUncheckedUpdateWithoutReward_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -17673,6 +18429,7 @@ export type MembershipCreateWithoutNotification_dispatchesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -17693,6 +18450,7 @@ export type MembershipCreateWithoutNotification_dispatchesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -17767,6 +18525,7 @@ export type MembershipUncheckedCreateWithoutNotification_dispatchesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -17785,6 +18544,7 @@ export type MembershipUncheckedCreateWithoutNotification_dispatchesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -17873,6 +18633,7 @@ export type MembershipUpdateWithoutNotification_dispatchesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -17893,6 +18654,7 @@ export type MembershipUpdateWithoutNotification_dispatchesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -17967,6 +18729,7 @@ export type MembershipUncheckedUpdateWithoutNotification_dispatchesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -17985,6 +18748,7 @@ export type MembershipUncheckedUpdateWithoutNotification_dispatchesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -18057,6 +18821,7 @@ export type MembershipCreateWithoutGroup_membershipsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -18077,6 +18842,7 @@ export type MembershipCreateWithoutGroup_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -18151,6 +18917,7 @@ export type MembershipUncheckedCreateWithoutGroup_membershipsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -18169,6 +18936,7 @@ export type MembershipUncheckedCreateWithoutGroup_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -18257,6 +19025,7 @@ export type MembershipUpdateWithoutGroup_membershipsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -18277,6 +19046,7 @@ export type MembershipUpdateWithoutGroup_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -18351,6 +19121,7 @@ export type MembershipUncheckedUpdateWithoutGroup_membershipsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -18369,6 +19140,7 @@ export type MembershipUncheckedUpdateWithoutGroup_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -18441,6 +19213,7 @@ export type MembershipCreateWithoutPostsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -18461,6 +19234,7 @@ export type MembershipCreateWithoutPostsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -18535,6 +19309,7 @@ export type MembershipUncheckedCreateWithoutPostsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -18553,6 +19328,7 @@ export type MembershipUncheckedCreateWithoutPostsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -18641,6 +19417,7 @@ export type MembershipUpdateWithoutPostsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -18661,6 +19438,7 @@ export type MembershipUpdateWithoutPostsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -18735,6 +19513,7 @@ export type MembershipUncheckedUpdateWithoutPostsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -18753,6 +19532,7 @@ export type MembershipUncheckedUpdateWithoutPostsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -18825,6 +19605,7 @@ export type MembershipCreateWithoutCommentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -18845,6 +19626,7 @@ export type MembershipCreateWithoutCommentsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -18919,6 +19701,7 @@ export type MembershipUncheckedCreateWithoutCommentsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -18937,6 +19720,7 @@ export type MembershipUncheckedCreateWithoutCommentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -19025,6 +19809,7 @@ export type MembershipUpdateWithoutCommentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -19045,6 +19830,7 @@ export type MembershipUpdateWithoutCommentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -19119,6 +19905,7 @@ export type MembershipUncheckedUpdateWithoutCommentsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -19137,6 +19924,7 @@ export type MembershipUncheckedUpdateWithoutCommentsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -19209,6 +19997,7 @@ export type MembershipCreateWithoutReactionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -19229,6 +20018,7 @@ export type MembershipCreateWithoutReactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -19303,6 +20093,7 @@ export type MembershipUncheckedCreateWithoutReactionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -19321,6 +20112,7 @@ export type MembershipUncheckedCreateWithoutReactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -19409,6 +20201,7 @@ export type MembershipUpdateWithoutReactionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -19429,6 +20222,7 @@ export type MembershipUpdateWithoutReactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -19503,6 +20297,7 @@ export type MembershipUncheckedUpdateWithoutReactionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -19521,6 +20316,7 @@ export type MembershipUncheckedUpdateWithoutReactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -19593,6 +20389,7 @@ export type MembershipCreateWithoutMentionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -19613,6 +20410,7 @@ export type MembershipCreateWithoutMentionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -19687,6 +20485,7 @@ export type MembershipUncheckedCreateWithoutMentionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -19705,6 +20504,7 @@ export type MembershipUncheckedCreateWithoutMentionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -19793,6 +20593,7 @@ export type MembershipUpdateWithoutMentionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -19813,6 +20614,7 @@ export type MembershipUpdateWithoutMentionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -19887,6 +20689,7 @@ export type MembershipUncheckedUpdateWithoutMentionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -19905,6 +20708,7 @@ export type MembershipUncheckedUpdateWithoutMentionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -19977,6 +20781,7 @@ export type MembershipCreateWithoutAt_risk_alertsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -19996,6 +20801,7 @@ export type MembershipCreateWithoutAt_risk_alertsInput = {
   user_roles?: Prisma.UserRoleCreateNestedManyWithoutMembershipInput
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -20071,6 +20877,7 @@ export type MembershipUncheckedCreateWithoutAt_risk_alertsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -20088,6 +20895,7 @@ export type MembershipUncheckedCreateWithoutAt_risk_alertsInput = {
   user_roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutMembershipInput
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -20177,6 +20985,7 @@ export type MembershipUpdateWithoutAt_risk_alertsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -20196,6 +21005,7 @@ export type MembershipUpdateWithoutAt_risk_alertsInput = {
   user_roles?: Prisma.UserRoleUpdateManyWithoutMembershipNestedInput
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -20271,6 +21081,7 @@ export type MembershipUncheckedUpdateWithoutAt_risk_alertsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -20288,6 +21099,7 @@ export type MembershipUncheckedUpdateWithoutAt_risk_alertsInput = {
   user_roles?: Prisma.UserRoleUncheckedUpdateManyWithoutMembershipNestedInput
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -20361,6 +21173,7 @@ export type MembershipCreateWithoutDevice_security_alertsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -20381,6 +21194,7 @@ export type MembershipCreateWithoutDevice_security_alertsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -20455,6 +21269,7 @@ export type MembershipUncheckedCreateWithoutDevice_security_alertsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -20473,6 +21288,7 @@ export type MembershipUncheckedCreateWithoutDevice_security_alertsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -20561,6 +21377,7 @@ export type MembershipUpdateWithoutDevice_security_alertsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -20581,6 +21398,7 @@ export type MembershipUpdateWithoutDevice_security_alertsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -20655,6 +21473,7 @@ export type MembershipUncheckedUpdateWithoutDevice_security_alertsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -20673,6 +21492,7 @@ export type MembershipUncheckedUpdateWithoutDevice_security_alertsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -20745,6 +21565,7 @@ export type MembershipCreateWithoutDevice_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -20765,6 +21586,7 @@ export type MembershipCreateWithoutDevice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -20839,6 +21661,7 @@ export type MembershipUncheckedCreateWithoutDevice_sessionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -20857,6 +21680,7 @@ export type MembershipUncheckedCreateWithoutDevice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -20945,6 +21769,7 @@ export type MembershipUpdateWithoutDevice_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -20965,6 +21790,7 @@ export type MembershipUpdateWithoutDevice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -21039,6 +21865,7 @@ export type MembershipUncheckedUpdateWithoutDevice_sessionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -21057,6 +21884,7 @@ export type MembershipUncheckedUpdateWithoutDevice_sessionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -21129,6 +21957,7 @@ export type MembershipCreateWithoutPayment_ordersInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -21148,6 +21977,7 @@ export type MembershipCreateWithoutPayment_ordersInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -21223,6 +22053,7 @@ export type MembershipUncheckedCreateWithoutPayment_ordersInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -21240,6 +22071,7 @@ export type MembershipUncheckedCreateWithoutPayment_ordersInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -21329,6 +22161,7 @@ export type MembershipUpdateWithoutPayment_ordersInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -21348,6 +22181,7 @@ export type MembershipUpdateWithoutPayment_ordersInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -21423,6 +22257,7 @@ export type MembershipUncheckedUpdateWithoutPayment_ordersInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -21440,6 +22275,7 @@ export type MembershipUncheckedUpdateWithoutPayment_ordersInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -21513,6 +22349,7 @@ export type MembershipCreateWithoutPayment_instalment_plansInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -21532,6 +22369,7 @@ export type MembershipCreateWithoutPayment_instalment_plansInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -21607,6 +22445,7 @@ export type MembershipUncheckedCreateWithoutPayment_instalment_plansInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -21624,6 +22463,7 @@ export type MembershipUncheckedCreateWithoutPayment_instalment_plansInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -21713,6 +22553,7 @@ export type MembershipUpdateWithoutPayment_instalment_plansInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -21732,6 +22573,7 @@ export type MembershipUpdateWithoutPayment_instalment_plansInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -21807,6 +22649,7 @@ export type MembershipUncheckedUpdateWithoutPayment_instalment_plansInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -21824,6 +22667,7 @@ export type MembershipUncheckedUpdateWithoutPayment_instalment_plansInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -21897,6 +22741,7 @@ export type MembershipCreateWithoutBatch_membershipsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -21917,6 +22762,7 @@ export type MembershipCreateWithoutBatch_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   bundle_enrollments?: Prisma.BundleEnrollmentCreateNestedManyWithoutMembershipInput
@@ -21991,6 +22837,7 @@ export type MembershipUncheckedCreateWithoutBatch_membershipsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -22009,6 +22856,7 @@ export type MembershipUncheckedCreateWithoutBatch_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   bundle_enrollments?: Prisma.BundleEnrollmentUncheckedCreateNestedManyWithoutMembershipInput
@@ -22097,6 +22945,7 @@ export type MembershipUpdateWithoutBatch_membershipsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -22117,6 +22966,7 @@ export type MembershipUpdateWithoutBatch_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   bundle_enrollments?: Prisma.BundleEnrollmentUpdateManyWithoutMembershipNestedInput
@@ -22191,6 +23041,7 @@ export type MembershipUncheckedUpdateWithoutBatch_membershipsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -22209,6 +23060,7 @@ export type MembershipUncheckedUpdateWithoutBatch_membershipsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   bundle_enrollments?: Prisma.BundleEnrollmentUncheckedUpdateManyWithoutMembershipNestedInput
@@ -22281,6 +23133,7 @@ export type MembershipCreateWithoutPoll_responsesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -22301,6 +23154,7 @@ export type MembershipCreateWithoutPoll_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -22375,6 +23229,7 @@ export type MembershipUncheckedCreateWithoutPoll_responsesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -22393,6 +23248,7 @@ export type MembershipUncheckedCreateWithoutPoll_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -22481,6 +23337,7 @@ export type MembershipUpdateWithoutPoll_responsesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -22501,6 +23358,7 @@ export type MembershipUpdateWithoutPoll_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -22575,6 +23433,7 @@ export type MembershipUncheckedUpdateWithoutPoll_responsesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -22593,6 +23452,7 @@ export type MembershipUncheckedUpdateWithoutPoll_responsesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -22665,6 +23525,7 @@ export type MembershipCreateWithoutSales_attribution_eventsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -22685,6 +23546,7 @@ export type MembershipCreateWithoutSales_attribution_eventsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -22759,6 +23621,7 @@ export type MembershipUncheckedCreateWithoutSales_attribution_eventsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -22777,6 +23640,7 @@ export type MembershipUncheckedCreateWithoutSales_attribution_eventsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -22865,6 +23729,7 @@ export type MembershipUpdateWithoutSales_attribution_eventsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -22885,6 +23750,7 @@ export type MembershipUpdateWithoutSales_attribution_eventsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -22959,6 +23825,7 @@ export type MembershipUncheckedUpdateWithoutSales_attribution_eventsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -22977,6 +23844,7 @@ export type MembershipUncheckedUpdateWithoutSales_attribution_eventsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -23049,6 +23917,7 @@ export type MembershipCreateWithoutSales_coupon_redemptionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -23068,6 +23937,7 @@ export type MembershipCreateWithoutSales_coupon_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -23143,6 +24013,7 @@ export type MembershipUncheckedCreateWithoutSales_coupon_redemptionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -23160,6 +24031,7 @@ export type MembershipUncheckedCreateWithoutSales_coupon_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -23249,6 +24121,7 @@ export type MembershipUpdateWithoutSales_coupon_redemptionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -23268,6 +24141,7 @@ export type MembershipUpdateWithoutSales_coupon_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -23343,6 +24217,7 @@ export type MembershipUncheckedUpdateWithoutSales_coupon_redemptionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -23360,6 +24235,7 @@ export type MembershipUncheckedUpdateWithoutSales_coupon_redemptionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -23433,6 +24309,7 @@ export type MembershipCreateWithoutSales_walletsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -23452,6 +24329,7 @@ export type MembershipCreateWithoutSales_walletsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -23527,6 +24405,7 @@ export type MembershipUncheckedCreateWithoutSales_walletsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -23544,6 +24423,7 @@ export type MembershipUncheckedCreateWithoutSales_walletsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -23633,6 +24513,7 @@ export type MembershipUpdateWithoutSales_walletsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -23652,6 +24533,7 @@ export type MembershipUpdateWithoutSales_walletsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -23727,6 +24609,7 @@ export type MembershipUncheckedUpdateWithoutSales_walletsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -23744,6 +24627,7 @@ export type MembershipUncheckedUpdateWithoutSales_walletsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -23817,6 +24701,7 @@ export type MembershipCreateWithoutSales_wallet_transactionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -23836,6 +24721,7 @@ export type MembershipCreateWithoutSales_wallet_transactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -23911,6 +24797,7 @@ export type MembershipUncheckedCreateWithoutSales_wallet_transactionsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -23928,6 +24815,7 @@ export type MembershipUncheckedCreateWithoutSales_wallet_transactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -24017,6 +24905,7 @@ export type MembershipUpdateWithoutSales_wallet_transactionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -24036,6 +24925,7 @@ export type MembershipUpdateWithoutSales_wallet_transactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -24111,6 +25001,7 @@ export type MembershipUncheckedUpdateWithoutSales_wallet_transactionsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -24128,6 +25019,7 @@ export type MembershipUncheckedUpdateWithoutSales_wallet_transactionsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -24201,6 +25093,7 @@ export type MembershipCreateWithoutSales_referral_codesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -24221,6 +25114,7 @@ export type MembershipCreateWithoutSales_referral_codesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -24295,6 +25189,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_codesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -24313,6 +25208,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_codesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -24401,6 +25297,7 @@ export type MembershipUpdateWithoutSales_referral_codesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -24421,6 +25318,7 @@ export type MembershipUpdateWithoutSales_referral_codesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -24495,6 +25393,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_codesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -24513,6 +25412,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_codesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -24585,6 +25485,7 @@ export type MembershipCreateWithoutSales_referral_attributions_referee_membershi
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -24605,6 +25506,7 @@ export type MembershipCreateWithoutSales_referral_attributions_referee_membershi
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -24679,6 +25581,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_attributions_referee_
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -24697,6 +25600,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_attributions_referee_
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -24774,6 +25678,7 @@ export type MembershipCreateWithoutSales_referral_attributions_referrer_membersh
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -24794,6 +25699,7 @@ export type MembershipCreateWithoutSales_referral_attributions_referrer_membersh
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -24868,6 +25774,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_attributions_referrer
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -24886,6 +25793,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_attributions_referrer
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -24974,6 +25882,7 @@ export type MembershipUpdateWithoutSales_referral_attributions_referee_membershi
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -24994,6 +25903,7 @@ export type MembershipUpdateWithoutSales_referral_attributions_referee_membershi
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -25068,6 +25978,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_attributions_referee_
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -25086,6 +25997,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_attributions_referee_
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -25169,6 +26081,7 @@ export type MembershipUpdateWithoutSales_referral_attributions_referrer_membersh
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -25189,6 +26102,7 @@ export type MembershipUpdateWithoutSales_referral_attributions_referrer_membersh
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -25263,6 +26177,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_attributions_referrer
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -25281,6 +26196,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_attributions_referrer
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -25353,6 +26269,7 @@ export type MembershipCreateWithoutSales_referral_purchase_credits_referee_membe
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -25373,6 +26290,7 @@ export type MembershipCreateWithoutSales_referral_purchase_credits_referee_membe
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -25447,6 +26365,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_purchase_credits_refe
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -25465,6 +26384,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_purchase_credits_refe
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -25542,6 +26462,7 @@ export type MembershipCreateWithoutSales_referral_purchase_credits_referrer_memb
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -25562,6 +26483,7 @@ export type MembershipCreateWithoutSales_referral_purchase_credits_referrer_memb
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -25636,6 +26558,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_purchase_credits_refe
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -25654,6 +26577,7 @@ export type MembershipUncheckedCreateWithoutSales_referral_purchase_credits_refe
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -25742,6 +26666,7 @@ export type MembershipUpdateWithoutSales_referral_purchase_credits_referee_membe
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -25762,6 +26687,7 @@ export type MembershipUpdateWithoutSales_referral_purchase_credits_referee_membe
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -25836,6 +26762,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_purchase_credits_refe
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -25854,6 +26781,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_purchase_credits_refe
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -25937,6 +26865,7 @@ export type MembershipUpdateWithoutSales_referral_purchase_credits_referrer_memb
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -25957,6 +26886,7 @@ export type MembershipUpdateWithoutSales_referral_purchase_credits_referrer_memb
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -26031,6 +26961,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_purchase_credits_refe
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -26049,6 +26980,7 @@ export type MembershipUncheckedUpdateWithoutSales_referral_purchase_credits_refe
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -26121,6 +27053,7 @@ export type MembershipCreateWithoutSales_affiliatesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -26141,6 +27074,7 @@ export type MembershipCreateWithoutSales_affiliatesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -26215,6 +27149,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliatesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -26233,6 +27168,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliatesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -26321,6 +27257,7 @@ export type MembershipUpdateWithoutSales_affiliatesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -26341,6 +27278,7 @@ export type MembershipUpdateWithoutSales_affiliatesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -26415,6 +27353,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliatesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -26433,6 +27372,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliatesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -26505,6 +27445,7 @@ export type MembershipCreateWithoutSales_affiliate_requestsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -26525,6 +27466,7 @@ export type MembershipCreateWithoutSales_affiliate_requestsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -26599,6 +27541,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_requestsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -26617,6 +27560,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_requestsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -26705,6 +27649,7 @@ export type MembershipUpdateWithoutSales_affiliate_requestsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -26725,6 +27670,7 @@ export type MembershipUpdateWithoutSales_affiliate_requestsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -26799,6 +27745,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_requestsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -26817,6 +27764,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_requestsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -26889,6 +27837,7 @@ export type MembershipCreateWithoutSales_affiliate_commissions_affiliate_members
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -26909,6 +27858,7 @@ export type MembershipCreateWithoutSales_affiliate_commissions_affiliate_members
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -26983,6 +27933,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_commissions_affiliat
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -27001,6 +27952,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_commissions_affiliat
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -27078,6 +28030,7 @@ export type MembershipCreateWithoutSales_affiliate_commissions_buyer_membershipI
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -27098,6 +28051,7 @@ export type MembershipCreateWithoutSales_affiliate_commissions_buyer_membershipI
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -27172,6 +28126,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_commissions_buyer_me
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -27190,6 +28145,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_commissions_buyer_me
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -27278,6 +28234,7 @@ export type MembershipUpdateWithoutSales_affiliate_commissions_affiliate_members
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -27298,6 +28255,7 @@ export type MembershipUpdateWithoutSales_affiliate_commissions_affiliate_members
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -27372,6 +28330,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_commissions_affiliat
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -27390,6 +28349,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_commissions_affiliat
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -27473,6 +28433,7 @@ export type MembershipUpdateWithoutSales_affiliate_commissions_buyer_membershipI
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -27493,6 +28454,7 @@ export type MembershipUpdateWithoutSales_affiliate_commissions_buyer_membershipI
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -27567,6 +28529,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_commissions_buyer_me
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -27585,6 +28548,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_commissions_buyer_me
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -27657,6 +28621,7 @@ export type MembershipCreateWithoutSales_affiliate_payoutsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -27677,6 +28642,7 @@ export type MembershipCreateWithoutSales_affiliate_payoutsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -27751,6 +28717,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_payoutsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -27769,6 +28736,7 @@ export type MembershipUncheckedCreateWithoutSales_affiliate_payoutsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -27857,6 +28825,7 @@ export type MembershipUpdateWithoutSales_affiliate_payoutsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -27877,6 +28846,7 @@ export type MembershipUpdateWithoutSales_affiliate_payoutsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -27951,6 +28921,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_payoutsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -27969,6 +28940,7 @@ export type MembershipUncheckedUpdateWithoutSales_affiliate_payoutsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -28041,6 +29013,7 @@ export type MembershipCreateWithoutCustom_field_valuesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -28061,6 +29034,7 @@ export type MembershipCreateWithoutCustom_field_valuesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -28135,6 +29109,7 @@ export type MembershipUncheckedCreateWithoutCustom_field_valuesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -28153,6 +29128,7 @@ export type MembershipUncheckedCreateWithoutCustom_field_valuesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -28241,6 +29217,7 @@ export type MembershipUpdateWithoutCustom_field_valuesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -28261,6 +29238,7 @@ export type MembershipUpdateWithoutCustom_field_valuesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -28335,6 +29313,7 @@ export type MembershipUncheckedUpdateWithoutCustom_field_valuesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -28353,6 +29332,7 @@ export type MembershipUncheckedUpdateWithoutCustom_field_valuesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -28425,6 +29405,7 @@ export type MembershipCreateWithoutCustom_field_value_historyInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -28445,6 +29426,7 @@ export type MembershipCreateWithoutCustom_field_value_historyInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -28519,6 +29501,7 @@ export type MembershipUncheckedCreateWithoutCustom_field_value_historyInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -28537,6 +29520,7 @@ export type MembershipUncheckedCreateWithoutCustom_field_value_historyInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -28625,6 +29609,7 @@ export type MembershipUpdateWithoutCustom_field_value_historyInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -28645,6 +29630,7 @@ export type MembershipUpdateWithoutCustom_field_value_historyInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -28719,6 +29705,7 @@ export type MembershipUncheckedUpdateWithoutCustom_field_value_historyInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -28737,6 +29724,7 @@ export type MembershipUncheckedUpdateWithoutCustom_field_value_historyInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -28809,6 +29797,7 @@ export type MembershipCreateWithoutZoom_meeting_participantsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -28829,6 +29818,7 @@ export type MembershipCreateWithoutZoom_meeting_participantsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -28903,6 +29893,7 @@ export type MembershipUncheckedCreateWithoutZoom_meeting_participantsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -28921,6 +29912,7 @@ export type MembershipUncheckedCreateWithoutZoom_meeting_participantsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -29009,6 +30001,7 @@ export type MembershipUpdateWithoutZoom_meeting_participantsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -29029,6 +30022,7 @@ export type MembershipUpdateWithoutZoom_meeting_participantsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -29103,6 +30097,7 @@ export type MembershipUncheckedUpdateWithoutZoom_meeting_participantsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -29121,6 +30116,7 @@ export type MembershipUncheckedUpdateWithoutZoom_meeting_participantsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -29193,6 +30189,7 @@ export type MembershipCreateWithoutLive_attendanceInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -29213,6 +30210,7 @@ export type MembershipCreateWithoutLive_attendanceInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -29287,6 +30285,7 @@ export type MembershipUncheckedCreateWithoutLive_attendanceInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -29305,6 +30304,7 @@ export type MembershipUncheckedCreateWithoutLive_attendanceInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -29393,6 +30393,7 @@ export type MembershipUpdateWithoutLive_attendanceInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -29413,6 +30414,7 @@ export type MembershipUpdateWithoutLive_attendanceInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -29487,6 +30489,7 @@ export type MembershipUncheckedUpdateWithoutLive_attendanceInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -29505,6 +30508,7 @@ export type MembershipUncheckedUpdateWithoutLive_attendanceInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -29577,6 +30581,7 @@ export type MembershipCreateWithoutMessenger_messagesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -29597,6 +30602,7 @@ export type MembershipCreateWithoutMessenger_messagesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -29671,6 +30677,7 @@ export type MembershipUncheckedCreateWithoutMessenger_messagesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -29689,6 +30696,7 @@ export type MembershipUncheckedCreateWithoutMessenger_messagesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -29777,6 +30785,7 @@ export type MembershipUpdateWithoutMessenger_messagesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -29797,6 +30806,7 @@ export type MembershipUpdateWithoutMessenger_messagesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -29871,6 +30881,7 @@ export type MembershipUncheckedUpdateWithoutMessenger_messagesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -29889,6 +30900,7 @@ export type MembershipUncheckedUpdateWithoutMessenger_messagesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -29961,6 +30973,7 @@ export type MembershipCreateWithoutWhatsapp_conversationsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -29981,6 +30994,7 @@ export type MembershipCreateWithoutWhatsapp_conversationsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -30055,6 +31069,7 @@ export type MembershipUncheckedCreateWithoutWhatsapp_conversationsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -30073,6 +31088,7 @@ export type MembershipUncheckedCreateWithoutWhatsapp_conversationsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -30161,6 +31177,7 @@ export type MembershipUpdateWithoutWhatsapp_conversationsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -30181,6 +31198,7 @@ export type MembershipUpdateWithoutWhatsapp_conversationsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -30255,6 +31273,7 @@ export type MembershipUncheckedUpdateWithoutWhatsapp_conversationsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -30273,6 +31292,7 @@ export type MembershipUncheckedUpdateWithoutWhatsapp_conversationsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -30345,6 +31365,7 @@ export type MembershipCreateWithoutMarketing_workflow_runsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -30365,6 +31386,7 @@ export type MembershipCreateWithoutMarketing_workflow_runsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -30439,6 +31461,7 @@ export type MembershipUncheckedCreateWithoutMarketing_workflow_runsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -30457,6 +31480,7 @@ export type MembershipUncheckedCreateWithoutMarketing_workflow_runsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -30545,6 +31569,7 @@ export type MembershipUpdateWithoutMarketing_workflow_runsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -30565,6 +31590,7 @@ export type MembershipUpdateWithoutMarketing_workflow_runsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -30639,6 +31665,7 @@ export type MembershipUncheckedUpdateWithoutMarketing_workflow_runsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -30657,6 +31684,7 @@ export type MembershipUncheckedUpdateWithoutMarketing_workflow_runsInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -30729,6 +31757,7 @@ export type MembershipCreateWithoutMarketing_event_registrationsInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -30749,6 +31778,7 @@ export type MembershipCreateWithoutMarketing_event_registrationsInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -30823,6 +31853,7 @@ export type MembershipUncheckedCreateWithoutMarketing_event_registrationsInput =
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -30841,6 +31872,7 @@ export type MembershipUncheckedCreateWithoutMarketing_event_registrationsInput =
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -30929,6 +31961,7 @@ export type MembershipUpdateWithoutMarketing_event_registrationsInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -30949,6 +31982,7 @@ export type MembershipUpdateWithoutMarketing_event_registrationsInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -31023,6 +32057,7 @@ export type MembershipUncheckedUpdateWithoutMarketing_event_registrationsInput =
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -31041,6 +32076,7 @@ export type MembershipUncheckedUpdateWithoutMarketing_event_registrationsInput =
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -31113,6 +32149,7 @@ export type MembershipCreateWithoutMarketing_newsfeed_savesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMembershipsInput
@@ -31133,6 +32170,7 @@ export type MembershipCreateWithoutMarketing_newsfeed_savesInput = {
   permission_overrides?: Prisma.PermissionOverrideCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipCreateNestedManyWithoutMembershipInput
@@ -31207,6 +32245,7 @@ export type MembershipUncheckedCreateWithoutMarketing_newsfeed_savesInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
   profile?: Prisma.MemberProfileUncheckedCreateNestedOneWithoutMembershipInput
@@ -31225,6 +32264,7 @@ export type MembershipUncheckedCreateWithoutMarketing_newsfeed_savesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedCreateNestedManyWithoutMembershipInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedCreateNestedManyWithoutMembershipInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutMembershipInput
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutMembershipInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedCreateNestedManyWithoutMembershipInput
   badge_awards?: Prisma.BadgeAwardUncheckedCreateNestedManyWithoutMembershipInput
   batch_memberships?: Prisma.BatchMembershipUncheckedCreateNestedManyWithoutMembershipInput
@@ -31313,6 +32353,7 @@ export type MembershipUpdateWithoutMarketing_newsfeed_savesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -31333,6 +32374,7 @@ export type MembershipUpdateWithoutMarketing_newsfeed_savesInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -31407,6 +32449,7 @@ export type MembershipUncheckedUpdateWithoutMarketing_newsfeed_savesInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -31425,6 +32468,7 @@ export type MembershipUncheckedUpdateWithoutMarketing_newsfeed_savesInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -31498,6 +32542,7 @@ export type MembershipCreateManyTenantInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -31514,6 +32559,7 @@ export type MembershipUpdateWithoutTenantInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   auth_principal?: Prisma.AuthPrincipalUpdateOneWithoutMembershipsNestedInput
@@ -31533,6 +32579,7 @@ export type MembershipUpdateWithoutTenantInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -31607,6 +32654,7 @@ export type MembershipUncheckedUpdateWithoutTenantInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -31625,6 +32673,7 @@ export type MembershipUncheckedUpdateWithoutTenantInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -31699,6 +32748,7 @@ export type MembershipUncheckedUpdateManyWithoutTenantInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -31716,6 +32766,7 @@ export type MembershipCreateManyAuth_principalInput = {
   removed_at?: Date | string | null
   archived_at?: Date | string | null
   last_active_at?: Date | string | null
+  erased_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -31732,6 +32783,7 @@ export type MembershipUpdateWithoutAuth_principalInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMembershipsNestedInput
@@ -31751,6 +32803,7 @@ export type MembershipUpdateWithoutAuth_principalInput = {
   permission_overrides?: Prisma.PermissionOverrideUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUpdateManyWithoutMembershipNestedInput
@@ -31825,6 +32878,7 @@ export type MembershipUncheckedUpdateWithoutAuth_principalInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   profile?: Prisma.MemberProfileUncheckedUpdateOneWithoutMembershipNestedInput
@@ -31843,6 +32897,7 @@ export type MembershipUncheckedUpdateWithoutAuth_principalInput = {
   permission_overrides?: Prisma.PermissionOverrideUncheckedUpdateManyWithoutMembershipNestedInput
   at_risk_alerts?: Prisma.AtRiskAlertUncheckedUpdateManyWithoutMembershipNestedInput
   legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutMembershipNestedInput
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutMembershipNestedInput
   attribution_tokens?: Prisma.AttributionTokenUncheckedUpdateManyWithoutMembershipNestedInput
   badge_awards?: Prisma.BadgeAwardUncheckedUpdateManyWithoutMembershipNestedInput
   batch_memberships?: Prisma.BatchMembershipUncheckedUpdateManyWithoutMembershipNestedInput
@@ -31917,6 +32972,7 @@ export type MembershipUncheckedUpdateManyWithoutAuth_principalInput = {
   removed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   archived_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   last_active_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  erased_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -31942,6 +32998,7 @@ export type MembershipCountOutputType = {
   permission_overrides: number
   at_risk_alerts: number
   legal_acceptances: number
+  erasures: number
   attribution_tokens: number
   badge_awards: number
   batch_memberships: number
@@ -32019,6 +33076,7 @@ export type MembershipCountOutputTypeSelect<ExtArgs extends runtime.Types.Extens
   permission_overrides?: boolean | MembershipCountOutputTypeCountPermission_overridesArgs
   at_risk_alerts?: boolean | MembershipCountOutputTypeCountAt_risk_alertsArgs
   legal_acceptances?: boolean | MembershipCountOutputTypeCountLegal_acceptancesArgs
+  erasures?: boolean | MembershipCountOutputTypeCountErasuresArgs
   attribution_tokens?: boolean | MembershipCountOutputTypeCountAttribution_tokensArgs
   badge_awards?: boolean | MembershipCountOutputTypeCountBadge_awardsArgs
   batch_memberships?: boolean | MembershipCountOutputTypeCountBatch_membershipsArgs
@@ -32193,6 +33251,13 @@ export type MembershipCountOutputTypeCountAt_risk_alertsArgs<ExtArgs extends run
  */
 export type MembershipCountOutputTypeCountLegal_acceptancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.TenantLegalAcceptanceWhereInput
+}
+
+/**
+ * MembershipCountOutputType without action
+ */
+export type MembershipCountOutputTypeCountErasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberErasureWhereInput
 }
 
 /**
@@ -32623,6 +33688,7 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   removed_at?: boolean
   archived_at?: boolean
   last_active_at?: boolean
+  erased_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -32643,6 +33709,7 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   permission_overrides?: boolean | Prisma.Membership$permission_overridesArgs<ExtArgs>
   at_risk_alerts?: boolean | Prisma.Membership$at_risk_alertsArgs<ExtArgs>
   legal_acceptances?: boolean | Prisma.Membership$legal_acceptancesArgs<ExtArgs>
+  erasures?: boolean | Prisma.Membership$erasuresArgs<ExtArgs>
   attribution_tokens?: boolean | Prisma.Membership$attribution_tokensArgs<ExtArgs>
   badge_awards?: boolean | Prisma.Membership$badge_awardsArgs<ExtArgs>
   batch_memberships?: boolean | Prisma.Membership$batch_membershipsArgs<ExtArgs>
@@ -32719,6 +33786,7 @@ export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   removed_at?: boolean
   archived_at?: boolean
   last_active_at?: boolean
+  erased_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -32739,6 +33807,7 @@ export type MembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   removed_at?: boolean
   archived_at?: boolean
   last_active_at?: boolean
+  erased_at?: boolean
   created_at?: boolean
   updated_at?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -32759,11 +33828,12 @@ export type MembershipSelectScalar = {
   removed_at?: boolean
   archived_at?: boolean
   last_active_at?: boolean
+  erased_at?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "auth_principal_id" | "status" | "invited_email_normalized" | "invite_token_hash" | "invite_expires_at" | "accepted_at" | "joined_at" | "suspended_at" | "removed_at" | "archived_at" | "last_active_at" | "created_at" | "updated_at", ExtArgs["result"]["membership"]>
+export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "auth_principal_id" | "status" | "invited_email_normalized" | "invite_token_hash" | "invite_expires_at" | "accepted_at" | "joined_at" | "suspended_at" | "removed_at" | "archived_at" | "last_active_at" | "erased_at" | "created_at" | "updated_at", ExtArgs["result"]["membership"]>
 export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   auth_principal?: boolean | Prisma.Membership$auth_principalArgs<ExtArgs>
@@ -32783,6 +33853,7 @@ export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   permission_overrides?: boolean | Prisma.Membership$permission_overridesArgs<ExtArgs>
   at_risk_alerts?: boolean | Prisma.Membership$at_risk_alertsArgs<ExtArgs>
   legal_acceptances?: boolean | Prisma.Membership$legal_acceptancesArgs<ExtArgs>
+  erasures?: boolean | Prisma.Membership$erasuresArgs<ExtArgs>
   attribution_tokens?: boolean | Prisma.Membership$attribution_tokensArgs<ExtArgs>
   badge_awards?: boolean | Prisma.Membership$badge_awardsArgs<ExtArgs>
   batch_memberships?: boolean | Prisma.Membership$batch_membershipsArgs<ExtArgs>
@@ -32874,6 +33945,7 @@ export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.Internal
     permission_overrides: Prisma.$PermissionOverridePayload<ExtArgs>[]
     at_risk_alerts: Prisma.$AtRiskAlertPayload<ExtArgs>[]
     legal_acceptances: Prisma.$TenantLegalAcceptancePayload<ExtArgs>[]
+    erasures: Prisma.$MemberErasurePayload<ExtArgs>[]
     attribution_tokens: Prisma.$AttributionTokenPayload<ExtArgs>[]
     badge_awards: Prisma.$BadgeAwardPayload<ExtArgs>[]
     batch_memberships: Prisma.$BatchMembershipPayload<ExtArgs>[]
@@ -32948,6 +34020,10 @@ export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.Internal
     removed_at: Date | null
     archived_at: Date | null
     last_active_at: Date | null
+    /**
+     * Set when a deletion request erased this member (migration 132); the row stays as a tombstone.
+     */
+    erased_at: Date | null
     created_at: Date
     updated_at: Date
   }, ExtArgs["result"]["membership"]>
@@ -33362,6 +34438,7 @@ export interface Prisma__MembershipClient<T, Null = never, ExtArgs extends runti
   permission_overrides<T extends Prisma.Membership$permission_overridesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$permission_overridesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PermissionOverridePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   at_risk_alerts<T extends Prisma.Membership$at_risk_alertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$at_risk_alertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AtRiskAlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   legal_acceptances<T extends Prisma.Membership$legal_acceptancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$legal_acceptancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantLegalAcceptancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  erasures<T extends Prisma.Membership$erasuresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$erasuresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberErasurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attribution_tokens<T extends Prisma.Membership$attribution_tokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$attribution_tokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttributionTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   badge_awards<T extends Prisma.Membership$badge_awardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$badge_awardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BadgeAwardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   batch_memberships<T extends Prisma.Membership$batch_membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Membership$batch_membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BatchMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -33463,6 +34540,7 @@ export interface MembershipFieldRefs {
   readonly removed_at: Prisma.FieldRef<"Membership", 'DateTime'>
   readonly archived_at: Prisma.FieldRef<"Membership", 'DateTime'>
   readonly last_active_at: Prisma.FieldRef<"Membership", 'DateTime'>
+  readonly erased_at: Prisma.FieldRef<"Membership", 'DateTime'>
   readonly created_at: Prisma.FieldRef<"Membership", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Membership", 'DateTime'>
 }
@@ -34261,6 +35339,30 @@ export type Membership$legal_acceptancesArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.TenantLegalAcceptanceScalarFieldEnum | Prisma.TenantLegalAcceptanceScalarFieldEnum[]
+}
+
+/**
+ * Membership.erasures
+ */
+export type Membership$erasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberErasure
+   */
+  select?: Prisma.MemberErasureSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberErasure
+   */
+  omit?: Prisma.MemberErasureOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberErasureInclude<ExtArgs> | null
+  where?: Prisma.MemberErasureWhereInput
+  orderBy?: Prisma.MemberErasureOrderByWithRelationInput | Prisma.MemberErasureOrderByWithRelationInput[]
+  cursor?: Prisma.MemberErasureWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberErasureScalarFieldEnum | Prisma.MemberErasureScalarFieldEnum[]
 }
 
 /**

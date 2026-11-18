@@ -14,6 +14,7 @@ import {
 import { purgeExpiredAttributionEvents } from "@atlas/domain/sales-marketing/attribution-retention";
 import { getStorageProvider, parseStorageEnv } from "@atlas/storage";
 import { purgeAbandonedUploads } from "@atlas/storage/abandoned-upload-purge";
+import { runDueMemberErasures } from "@atlas/domain/data-rights/member-erasure.runner";
 import { OUTBOX_PROCESSORS, type OutboxProcessor } from "./outbox-processors";
 import { drainTenantUsageEvents, pruneTenantUsageEvents } from "@atlas/api/tenant-usage-meter";
 
@@ -84,6 +85,8 @@ export type SweepResult = {
   fxRatesRefreshed: number;
   /** Signed uploads never confirmed, removed a day later (launch plan 5.1). */
   abandonedUploadsPurged: number;
+  /** Due deletion requests whose member was erased this sweep (launch plan 5.7). */
+  membersErased: number;
 };
 
 export async function listAllRetentionTenantIds(): Promise<string[]> {
@@ -136,6 +139,7 @@ const RETENTION_COUNTERS: Record<
   | "certificatesExpired"
   | "fxRatesRefreshed"
   | "abandonedUploadsPurged"
+  | "membersErased"
 > = {
   "usage-meter-drain": "usageEventsProcessed",
   "usage-events-prune": "usageEventsPruned",
@@ -148,6 +152,7 @@ const RETENTION_COUNTERS: Record<
   "certificate-expiry": "certificatesExpired",
   "fx-rate-refresh": "fxRatesRefreshed",
   "abandoned-upload-purge": "abandonedUploadsPurged",
+  "member-erasure": "membersErased",
 };
 
 /** Tasks whose full batch means a backlog, so the worker should sweep again soon. */
@@ -289,6 +294,24 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
       },
     },
     {
+      // Launch plan 5.7: deletion requests whose 7 days have passed, or that an
+      // admin processed, are erased (docs/engineering/member-erasure.md).
+      // Every academy, active or not: the Privacy Policy's promise doesn't lapse.
+      name: "member-erasure",
+      includeInactiveTenants: true,
+      run: async ({ tenantId, requestId }) => {
+        const storage = getStorageProvider();
+        const defaultBucket = parseStorageEnv(process.env).R2_BUCKET_NAME;
+        return runDueMemberErasures(
+          { tenantId, requestId },
+          {
+            deleteObject: ({ bucket, key }) =>
+              storage.deleteObject({ bucket: bucket ?? defaultBucket, key }),
+          },
+        );
+      },
+    },
+    {
       // A no-op for every tenant that has not opted in, which is the default.
       // This task visits active tenants only; deletion follows their setting.
       name: "attribution-events-purge",
@@ -334,6 +357,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     certificatesExpired: 0,
     fxRatesRefreshed: 0,
     abandonedUploadsPurged: 0,
+    membersErased: 0,
   };
 
   const tenantIds = await listTenants();

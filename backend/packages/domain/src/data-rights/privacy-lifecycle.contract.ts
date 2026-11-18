@@ -62,6 +62,63 @@ export function buildAccessRemovalOutcome(): AccessRemovalOutcome {
   });
 }
 
+/**
+ * Days between a deletion request and its erasure (launch plan 5.7). The
+ * Privacy Policy promises erasure within 30 days; an admin may process a
+ * request sooner, which only brings this forward.
+ */
+export const ERASURE_DELAY_DAYS = 7;
+
+/** What an erasure deliberately keeps, by the owner's decision (member-erasure.md). */
+export const ERASURE_KEPT_CATEGORIES = [
+  "certificates",
+  "payment_records",
+  "agreement_records",
+  "community_content_anonymised",
+  "audit_entries_redacted",
+] as const;
+
+/** What an erasure can't reach, stated rather than implied. */
+export const ERASURE_NOT_COVERED = [
+  "external_providers",
+  "backups_until_expiry",
+  "downloaded_exports",
+] as const;
+
+/**
+ * Evidence of a member erasure (launch plan 5.7, docs/engineering/member-erasure.md):
+ * what was deleted, redacted, kept, and what is out of reach. Version 1
+ * (access removal only) is still what earlier requests carry.
+ */
+export const memberErasureOutcomeSchema = z
+  .object({
+    version: z.literal(2),
+    operation: z.literal("erase_member"),
+    erasedAt: z.iso.datetime(),
+    /** Rows deleted, by table. */
+    deleted: z.record(z.string(), z.number().int().nonnegative()),
+    auditEntriesRedacted: z.number().int().nonnegative(),
+    eventsRedacted: z.number().int().nonnegative(),
+    files: z.object({
+      deleted: z.number().int().nonnegative(),
+      failed: z.number().int().nonnegative(),
+    }),
+    /** The global login: deleted, or kept because another academy uses it. */
+    account: z.enum(["deleted", "kept_for_other_academies", "none"]),
+    kept: z.array(z.enum(ERASURE_KEPT_CATEGORIES)),
+    notCovered: z.array(z.enum(ERASURE_NOT_COVERED)),
+  })
+  .strict();
+
+export type MemberErasureOutcome = z.infer<typeof memberErasureOutcomeSchema>;
+
+export const deletionOutcomeSchema = z.union([
+  memberErasureOutcomeSchema,
+  accessRemovalOutcomeSchema,
+]);
+
+export type DeletionOutcome = z.infer<typeof deletionOutcomeSchema>;
+
 /** Actual fields read by buildTenantExportSnapshot; not a subject access export. */
 export const TENANT_EXPORT_COVERAGE = {
   version: 1,

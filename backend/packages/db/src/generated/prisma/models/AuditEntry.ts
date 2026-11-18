@@ -258,6 +258,7 @@ export type AuditEntryWhereInput = {
   previous_hash?: Prisma.StringNullableFilter<"AuditEntry"> | string | null
   entry_hash?: Prisma.StringFilter<"AuditEntry"> | string
   occurred_at?: Prisma.DateTimeFilter<"AuditEntry"> | Date | string
+  redaction?: Prisma.XOR<Prisma.AuditEntryRedactionNullableScalarRelationFilter, Prisma.AuditEntryRedactionWhereInput> | null
 }
 
 export type AuditEntryOrderByWithRelationInput = {
@@ -277,6 +278,7 @@ export type AuditEntryOrderByWithRelationInput = {
   previous_hash?: Prisma.SortOrderInput | Prisma.SortOrder
   entry_hash?: Prisma.SortOrder
   occurred_at?: Prisma.SortOrder
+  redaction?: Prisma.AuditEntryRedactionOrderByWithRelationInput
 }
 
 export type AuditEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -299,6 +301,7 @@ export type AuditEntryWhereUniqueInput = Prisma.AtLeast<{
   previous_hash?: Prisma.StringNullableFilter<"AuditEntry"> | string | null
   entry_hash?: Prisma.StringFilter<"AuditEntry"> | string
   occurred_at?: Prisma.DateTimeFilter<"AuditEntry"> | Date | string
+  redaction?: Prisma.XOR<Prisma.AuditEntryRedactionNullableScalarRelationFilter, Prisma.AuditEntryRedactionWhereInput> | null
 }, "id">
 
 export type AuditEntryOrderByWithAggregationInput = {
@@ -362,6 +365,7 @@ export type AuditEntryCreateInput = {
   previous_hash?: string | null
   entry_hash: string
   occurred_at?: Date | string
+  redaction?: Prisma.AuditEntryRedactionCreateNestedOneWithoutAudit_entryInput
 }
 
 export type AuditEntryUncheckedCreateInput = {
@@ -381,6 +385,7 @@ export type AuditEntryUncheckedCreateInput = {
   previous_hash?: string | null
   entry_hash: string
   occurred_at?: Date | string
+  redaction?: Prisma.AuditEntryRedactionUncheckedCreateNestedOneWithoutAudit_entryInput
 }
 
 export type AuditEntryUpdateInput = {
@@ -400,6 +405,7 @@ export type AuditEntryUpdateInput = {
   previous_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entry_hash?: Prisma.StringFieldUpdateOperationsInput | string
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  redaction?: Prisma.AuditEntryRedactionUpdateOneWithoutAudit_entryNestedInput
 }
 
 export type AuditEntryUncheckedUpdateInput = {
@@ -419,6 +425,7 @@ export type AuditEntryUncheckedUpdateInput = {
   previous_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   entry_hash?: Prisma.StringFieldUpdateOperationsInput | string
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  redaction?: Prisma.AuditEntryRedactionUncheckedUpdateOneWithoutAudit_entryNestedInput
 }
 
 export type AuditEntryCreateManyInput = {
@@ -478,6 +485,11 @@ export type AuditEntryUncheckedUpdateManyInput = {
   occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type AuditEntryScalarRelationFilter = {
+  is?: Prisma.AuditEntryWhereInput
+  isNot?: Prisma.AuditEntryWhereInput
+}
+
 export type AuditEntryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -529,6 +541,112 @@ export type AuditEntryMinOrderByAggregateInput = {
   occurred_at?: Prisma.SortOrder
 }
 
+export type AuditEntryCreateNestedOneWithoutRedactionInput = {
+  create?: Prisma.XOR<Prisma.AuditEntryCreateWithoutRedactionInput, Prisma.AuditEntryUncheckedCreateWithoutRedactionInput>
+  connectOrCreate?: Prisma.AuditEntryCreateOrConnectWithoutRedactionInput
+  connect?: Prisma.AuditEntryWhereUniqueInput
+}
+
+export type AuditEntryUpdateOneRequiredWithoutRedactionNestedInput = {
+  create?: Prisma.XOR<Prisma.AuditEntryCreateWithoutRedactionInput, Prisma.AuditEntryUncheckedCreateWithoutRedactionInput>
+  connectOrCreate?: Prisma.AuditEntryCreateOrConnectWithoutRedactionInput
+  upsert?: Prisma.AuditEntryUpsertWithoutRedactionInput
+  connect?: Prisma.AuditEntryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AuditEntryUpdateToOneWithWhereWithoutRedactionInput, Prisma.AuditEntryUpdateWithoutRedactionInput>, Prisma.AuditEntryUncheckedUpdateWithoutRedactionInput>
+}
+
+export type AuditEntryCreateWithoutRedactionInput = {
+  id: string
+  tenant_id?: string | null
+  actor_membership_id?: string | null
+  actor_principal_id?: string | null
+  action: string
+  target_type: string
+  target_id?: string | null
+  request_id?: string | null
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  before_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  after_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previous_hash?: string | null
+  entry_hash: string
+  occurred_at?: Date | string
+}
+
+export type AuditEntryUncheckedCreateWithoutRedactionInput = {
+  id: string
+  tenant_id?: string | null
+  actor_membership_id?: string | null
+  actor_principal_id?: string | null
+  action: string
+  target_type: string
+  target_id?: string | null
+  request_id?: string | null
+  ip_hash?: string | null
+  user_agent_hash?: string | null
+  before_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  after_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previous_hash?: string | null
+  entry_hash: string
+  occurred_at?: Date | string
+}
+
+export type AuditEntryCreateOrConnectWithoutRedactionInput = {
+  where: Prisma.AuditEntryWhereUniqueInput
+  create: Prisma.XOR<Prisma.AuditEntryCreateWithoutRedactionInput, Prisma.AuditEntryUncheckedCreateWithoutRedactionInput>
+}
+
+export type AuditEntryUpsertWithoutRedactionInput = {
+  update: Prisma.XOR<Prisma.AuditEntryUpdateWithoutRedactionInput, Prisma.AuditEntryUncheckedUpdateWithoutRedactionInput>
+  create: Prisma.XOR<Prisma.AuditEntryCreateWithoutRedactionInput, Prisma.AuditEntryUncheckedCreateWithoutRedactionInput>
+  where?: Prisma.AuditEntryWhereInput
+}
+
+export type AuditEntryUpdateToOneWithWhereWithoutRedactionInput = {
+  where?: Prisma.AuditEntryWhereInput
+  data: Prisma.XOR<Prisma.AuditEntryUpdateWithoutRedactionInput, Prisma.AuditEntryUncheckedUpdateWithoutRedactionInput>
+}
+
+export type AuditEntryUpdateWithoutRedactionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actor_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actor_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  request_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  before_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  after_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previous_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entry_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AuditEntryUncheckedUpdateWithoutRedactionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actor_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  actor_principal_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  request_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ip_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  user_agent_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  before_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  after_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  metadata_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  previous_hash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entry_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  occurred_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 
 export type AuditEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -548,6 +666,7 @@ export type AuditEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   previous_hash?: boolean
   entry_hash?: boolean
   occurred_at?: boolean
+  redaction?: boolean | Prisma.AuditEntry$redactionArgs<ExtArgs>
 }, ExtArgs["result"]["auditEntry"]>
 
 export type AuditEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -608,10 +727,17 @@ export type AuditEntrySelectScalar = {
 }
 
 export type AuditEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "actor_membership_id" | "actor_principal_id" | "action" | "target_type" | "target_id" | "request_id" | "ip_hash" | "user_agent_hash" | "before_json" | "after_json" | "metadata_json" | "previous_hash" | "entry_hash" | "occurred_at", ExtArgs["result"]["auditEntry"]>
+export type AuditEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  redaction?: boolean | Prisma.AuditEntry$redactionArgs<ExtArgs>
+}
+export type AuditEntryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type AuditEntryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $AuditEntryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AuditEntry"
-  objects: {}
+  objects: {
+    redaction: Prisma.$AuditEntryRedactionPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string | null
@@ -1023,6 +1149,7 @@ readonly fields: AuditEntryFieldRefs;
  */
 export interface Prisma__AuditEntryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  redaction<T extends Prisma.AuditEntry$redactionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AuditEntry$redactionArgs<ExtArgs>>): Prisma.Prisma__AuditEntryRedactionClient<runtime.Types.Result.GetResult<Prisma.$AuditEntryRedactionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1085,6 +1212,10 @@ export type AuditEntryFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
+  /**
    * Filter, which AuditEntry to fetch.
    */
   where: Prisma.AuditEntryWhereUniqueInput
@@ -1103,6 +1234,10 @@ export type AuditEntryFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
+  /**
    * Filter, which AuditEntry to fetch.
    */
   where: Prisma.AuditEntryWhereUniqueInput
@@ -1120,6 +1255,10 @@ export type AuditEntryFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the AuditEntry
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
   /**
    * Filter, which AuditEntry to fetch.
    */
@@ -1169,6 +1308,10 @@ export type AuditEntryFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
+  /**
    * Filter, which AuditEntry to fetch.
    */
   where?: Prisma.AuditEntryWhereInput
@@ -1216,6 +1359,10 @@ export type AuditEntryFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the AuditEntry
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
   /**
    * Filter, which AuditEntries to fetch.
    */
@@ -1265,6 +1412,10 @@ export type AuditEntryCreateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
+  /**
    * The data needed to create a AuditEntry.
    */
   data: Prisma.XOR<Prisma.AuditEntryCreateInput, Prisma.AuditEntryUncheckedCreateInput>
@@ -1312,6 +1463,10 @@ export type AuditEntryUpdateArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the AuditEntry
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
   /**
    * The data needed to update a AuditEntry.
    */
@@ -1379,6 +1534,10 @@ export type AuditEntryUpsertArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
+  /**
    * The filter to search for the AuditEntry to update in case it exists.
    */
   where: Prisma.AuditEntryWhereUniqueInput
@@ -1405,6 +1564,10 @@ export type AuditEntryDeleteArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
+  /**
    * Filter which AuditEntry to delete.
    */
   where: Prisma.AuditEntryWhereUniqueInput
@@ -1425,6 +1588,25 @@ export type AuditEntryDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
+ * AuditEntry.redaction
+ */
+export type AuditEntry$redactionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditEntryRedaction
+   */
+  select?: Prisma.AuditEntryRedactionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditEntryRedaction
+   */
+  omit?: Prisma.AuditEntryRedactionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryRedactionInclude<ExtArgs> | null
+  where?: Prisma.AuditEntryRedactionWhereInput
+}
+
+/**
  * AuditEntry without action
  */
 export type AuditEntryDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1436,4 +1618,8 @@ export type AuditEntryDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the AuditEntry
    */
   omit?: Prisma.AuditEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditEntryInclude<ExtArgs> | null
 }

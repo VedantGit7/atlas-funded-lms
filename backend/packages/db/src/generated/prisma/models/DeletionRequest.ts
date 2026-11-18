@@ -234,6 +234,7 @@ export type DeletionRequestWhereInput = {
   completed_at?: Prisma.DateTimeNullableFilter<"DeletionRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"DeletionRequest"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"DeletionRequest"> | Date | string
+  erasures?: Prisma.MemberErasureListRelationFilter
 }
 
 export type DeletionRequestOrderByWithRelationInput = {
@@ -249,6 +250,7 @@ export type DeletionRequestOrderByWithRelationInput = {
   completed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  erasures?: Prisma.MemberErasureOrderByRelationAggregateInput
 }
 
 export type DeletionRequestWhereUniqueInput = Prisma.AtLeast<{
@@ -267,6 +269,7 @@ export type DeletionRequestWhereUniqueInput = Prisma.AtLeast<{
   completed_at?: Prisma.DateTimeNullableFilter<"DeletionRequest"> | Date | string | null
   created_at?: Prisma.DateTimeFilter<"DeletionRequest"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"DeletionRequest"> | Date | string
+  erasures?: Prisma.MemberErasureListRelationFilter
 }, "id">
 
 export type DeletionRequestOrderByWithAggregationInput = {
@@ -318,6 +321,7 @@ export type DeletionRequestCreateInput = {
   completed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  erasures?: Prisma.MemberErasureCreateNestedManyWithoutDeletion_requestInput
 }
 
 export type DeletionRequestUncheckedCreateInput = {
@@ -333,6 +337,7 @@ export type DeletionRequestUncheckedCreateInput = {
   completed_at?: Date | string | null
   created_at?: Date | string
   updated_at?: Date | string
+  erasures?: Prisma.MemberErasureUncheckedCreateNestedManyWithoutDeletion_requestInput
 }
 
 export type DeletionRequestUpdateInput = {
@@ -348,6 +353,7 @@ export type DeletionRequestUpdateInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  erasures?: Prisma.MemberErasureUpdateManyWithoutDeletion_requestNestedInput
 }
 
 export type DeletionRequestUncheckedUpdateInput = {
@@ -363,6 +369,7 @@ export type DeletionRequestUncheckedUpdateInput = {
   completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  erasures?: Prisma.MemberErasureUncheckedUpdateManyWithoutDeletion_requestNestedInput
 }
 
 export type DeletionRequestCreateManyInput = {
@@ -410,6 +417,11 @@ export type DeletionRequestUncheckedUpdateManyInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type DeletionRequestNullableScalarRelationFilter = {
+  is?: Prisma.DeletionRequestWhereInput | null
+  isNot?: Prisma.DeletionRequestWhereInput | null
+}
+
 export type DeletionRequestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   tenant_id?: Prisma.SortOrder
@@ -453,6 +465,127 @@ export type DeletionRequestMinOrderByAggregateInput = {
   updated_at?: Prisma.SortOrder
 }
 
+export type DeletionRequestCreateNestedOneWithoutErasuresInput = {
+  create?: Prisma.XOR<Prisma.DeletionRequestCreateWithoutErasuresInput, Prisma.DeletionRequestUncheckedCreateWithoutErasuresInput>
+  connectOrCreate?: Prisma.DeletionRequestCreateOrConnectWithoutErasuresInput
+  connect?: Prisma.DeletionRequestWhereUniqueInput
+}
+
+export type DeletionRequestUpdateOneWithoutErasuresNestedInput = {
+  create?: Prisma.XOR<Prisma.DeletionRequestCreateWithoutErasuresInput, Prisma.DeletionRequestUncheckedCreateWithoutErasuresInput>
+  connectOrCreate?: Prisma.DeletionRequestCreateOrConnectWithoutErasuresInput
+  upsert?: Prisma.DeletionRequestUpsertWithoutErasuresInput
+  disconnect?: Prisma.DeletionRequestWhereInput | boolean
+  delete?: Prisma.DeletionRequestWhereInput | boolean
+  connect?: Prisma.DeletionRequestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DeletionRequestUpdateToOneWithWhereWithoutErasuresInput, Prisma.DeletionRequestUpdateWithoutErasuresInput>, Prisma.DeletionRequestUncheckedUpdateWithoutErasuresInput>
+}
+
+export type DeletionRequestCreateWithoutErasuresInput = {
+  id: string
+  tenant_id: string
+  requested_by_membership_id?: string | null
+  target_type: string
+  target_id: string
+  status?: $Enums.JobStatus
+  reason?: string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  scheduled_at?: Date | string | null
+  completed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type DeletionRequestUncheckedCreateWithoutErasuresInput = {
+  id: string
+  tenant_id: string
+  requested_by_membership_id?: string | null
+  target_type: string
+  target_id: string
+  status?: $Enums.JobStatus
+  reason?: string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  scheduled_at?: Date | string | null
+  completed_at?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+}
+
+export type DeletionRequestCreateOrConnectWithoutErasuresInput = {
+  where: Prisma.DeletionRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.DeletionRequestCreateWithoutErasuresInput, Prisma.DeletionRequestUncheckedCreateWithoutErasuresInput>
+}
+
+export type DeletionRequestUpsertWithoutErasuresInput = {
+  update: Prisma.XOR<Prisma.DeletionRequestUpdateWithoutErasuresInput, Prisma.DeletionRequestUncheckedUpdateWithoutErasuresInput>
+  create: Prisma.XOR<Prisma.DeletionRequestCreateWithoutErasuresInput, Prisma.DeletionRequestUncheckedCreateWithoutErasuresInput>
+  where?: Prisma.DeletionRequestWhereInput
+}
+
+export type DeletionRequestUpdateToOneWithWhereWithoutErasuresInput = {
+  where?: Prisma.DeletionRequestWhereInput
+  data: Prisma.XOR<Prisma.DeletionRequestUpdateWithoutErasuresInput, Prisma.DeletionRequestUncheckedUpdateWithoutErasuresInput>
+}
+
+export type DeletionRequestUpdateWithoutErasuresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  requested_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DeletionRequestUncheckedUpdateWithoutErasuresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant_id?: Prisma.StringFieldUpdateOperationsInput | string
+  requested_by_membership_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  target_type?: Prisma.StringFieldUpdateOperationsInput | string
+  target_id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  outcome_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type DeletionRequestCountOutputType
+ */
+
+export type DeletionRequestCountOutputType = {
+  erasures: number
+}
+
+export type DeletionRequestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  erasures?: boolean | DeletionRequestCountOutputTypeCountErasuresArgs
+}
+
+/**
+ * DeletionRequestCountOutputType without action
+ */
+export type DeletionRequestCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DeletionRequestCountOutputType
+   */
+  select?: Prisma.DeletionRequestCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * DeletionRequestCountOutputType without action
+ */
+export type DeletionRequestCountOutputTypeCountErasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MemberErasureWhereInput
+}
 
 
 export type DeletionRequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -468,6 +601,8 @@ export type DeletionRequestSelect<ExtArgs extends runtime.Types.Extensions.Inter
   completed_at?: boolean
   created_at?: boolean
   updated_at?: boolean
+  erasures?: boolean | Prisma.DeletionRequest$erasuresArgs<ExtArgs>
+  _count?: boolean | Prisma.DeletionRequestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deletionRequest"]>
 
 export type DeletionRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -516,10 +651,18 @@ export type DeletionRequestSelectScalar = {
 }
 
 export type DeletionRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "requested_by_membership_id" | "target_type" | "target_id" | "status" | "reason" | "outcome_json" | "scheduled_at" | "completed_at" | "created_at" | "updated_at", ExtArgs["result"]["deletionRequest"]>
+export type DeletionRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  erasures?: boolean | Prisma.DeletionRequest$erasuresArgs<ExtArgs>
+  _count?: boolean | Prisma.DeletionRequestCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type DeletionRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type DeletionRequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $DeletionRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DeletionRequest"
-  objects: {}
+  objects: {
+    erasures: Prisma.$MemberErasurePayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     tenant_id: string
@@ -927,6 +1070,7 @@ readonly fields: DeletionRequestFieldRefs;
  */
 export interface Prisma__DeletionRequestClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  erasures<T extends Prisma.DeletionRequest$erasuresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeletionRequest$erasuresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberErasurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -985,6 +1129,10 @@ export type DeletionRequestFindUniqueArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
+  /**
    * Filter, which DeletionRequest to fetch.
    */
   where: Prisma.DeletionRequestWhereUniqueInput
@@ -1003,6 +1151,10 @@ export type DeletionRequestFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.E
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
+  /**
    * Filter, which DeletionRequest to fetch.
    */
   where: Prisma.DeletionRequestWhereUniqueInput
@@ -1020,6 +1172,10 @@ export type DeletionRequestFindFirstArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the DeletionRequest
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
   /**
    * Filter, which DeletionRequest to fetch.
    */
@@ -1069,6 +1225,10 @@ export type DeletionRequestFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Ex
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
+  /**
    * Filter, which DeletionRequest to fetch.
    */
   where?: Prisma.DeletionRequestWhereInput
@@ -1116,6 +1276,10 @@ export type DeletionRequestFindManyArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the DeletionRequest
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
   /**
    * Filter, which DeletionRequests to fetch.
    */
@@ -1165,6 +1329,10 @@ export type DeletionRequestCreateArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
+  /**
    * The data needed to create a DeletionRequest.
    */
   data: Prisma.XOR<Prisma.DeletionRequestCreateInput, Prisma.DeletionRequestUncheckedCreateInput>
@@ -1212,6 +1380,10 @@ export type DeletionRequestUpdateArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the DeletionRequest
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
   /**
    * The data needed to update a DeletionRequest.
    */
@@ -1279,6 +1451,10 @@ export type DeletionRequestUpsertArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
+  /**
    * The filter to search for the DeletionRequest to update in case it exists.
    */
   where: Prisma.DeletionRequestWhereUniqueInput
@@ -1305,6 +1481,10 @@ export type DeletionRequestDeleteArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
+  /**
    * Filter which DeletionRequest to delete.
    */
   where: Prisma.DeletionRequestWhereUniqueInput
@@ -1325,6 +1505,30 @@ export type DeletionRequestDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * DeletionRequest.erasures
+ */
+export type DeletionRequest$erasuresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MemberErasure
+   */
+  select?: Prisma.MemberErasureSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MemberErasure
+   */
+  omit?: Prisma.MemberErasureOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MemberErasureInclude<ExtArgs> | null
+  where?: Prisma.MemberErasureWhereInput
+  orderBy?: Prisma.MemberErasureOrderByWithRelationInput | Prisma.MemberErasureOrderByWithRelationInput[]
+  cursor?: Prisma.MemberErasureWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MemberErasureScalarFieldEnum | Prisma.MemberErasureScalarFieldEnum[]
+}
+
+/**
  * DeletionRequest without action
  */
 export type DeletionRequestDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1336,4 +1540,8 @@ export type DeletionRequestDefaultArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the DeletionRequest
    */
   omit?: Prisma.DeletionRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeletionRequestInclude<ExtArgs> | null
 }

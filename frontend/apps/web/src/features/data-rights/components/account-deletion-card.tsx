@@ -49,22 +49,24 @@ export function AccountDeletionCard({
     <>
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[var(--acct-danger-surface)] p-6">
         <div>
-          <h3 className={classes.sectionDangerTitle}>Remove school access</h3>
+          <h3 className={classes.sectionDangerTitle}>Delete my data</h3>
           <p className={`${classes.sectionDesc} text-[var(--acct-on-danger-container)]`}>
-            Request removal of your access to this school. Your account and school records are
-            retained. Erasure requires a separate review with your school.
+            Ask for your account and personal data in this academy to be deleted. It is erased 7
+            days after you ask. Certificates, payment records and your agreement to the Terms are
+            kept, and your community posts stay, shown as &quot;Deleted member&quot;.
           </p>
           {pending ? (
             <p
               role="status"
               className={`${classes.helper} mt-2 font-medium text-[var(--acct-danger)]`}
             >
-              A school-access removal request is pending review. No data has been erased.
+              Your deletion request is scheduled. Your data is erased 7 days after you asked, or
+              sooner if the academy processes it.
             </p>
           ) : null}
           {!canRequestDeletion ? (
             <p className={`${classes.helper} mt-2`}>
-              You do not have permission to request school-access removal.
+              You do not have permission to request deletion.
             </p>
           ) : null}
         </div>
@@ -76,7 +78,7 @@ export function AccountDeletionCard({
               setConfirmOpen(true);
             }}
           >
-            Request school-access removal
+            Request data deletion
           </button>
         ) : null}
       </div>
@@ -100,7 +102,7 @@ export function AccountDeletionCard({
           >
             <div className="flex items-center justify-between border-b border-[var(--acct-border)] p-6">
               <h3 id="confirm-deletion-title" className={classes.sectionTitle}>
-                Request removal of school access?
+                Delete your data?
               </h3>
               <button
                 type="button"
@@ -118,14 +120,16 @@ export function AccountDeletionCard({
               <div className={`${classes.errorBanner} mb-6 flex gap-3`}>
                 <Info className="h-5 w-5 shrink-0" aria-hidden="true" />
                 <p className="text-sm">
-                  When processed, this request removes your membership access to this school. School
-                  records remain retained.
+                  7 days after you confirm, your profile, learning progress, quiz answers, exam
+                  monitoring records and uploads in this academy are permanently deleted, and you
+                  lose access. This can&apos;t be undone.
                 </p>
               </div>
               <p className="mb-4 text-sm text-[var(--acct-on-surface)]">
-                This does not delete your identity, learning history, billing records, or public
-                contributions. It does not affect access to other schools. Contact your school for a
-                separate erasure review.
+                Kept: certificates you earned, payment records, and the record of agreeing to the
+                Terms. Your community posts and messages stay, shown as written by &quot;Deleted
+                member&quot;. If you belong to other academies, your login stays for them; otherwise
+                it is deleted too.
               </p>
               <div className="space-y-2">
                 <label className={classes.label} htmlFor="confirm-email">
@@ -153,7 +157,7 @@ export function AccountDeletionCard({
                   disabled={!canConfirmDelete || busy}
                   onClick={() => void submitDeletionRequest()}
                 >
-                  {busy ? "Submitting…" : "Submit school-access removal request"}
+                  {busy ? "Submitting…" : "Request deletion"}
                 </button>
               </div>
               <div className="mt-4 flex justify-end">

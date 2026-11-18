@@ -324,9 +324,9 @@ export const ADMIN_SETTINGS_SECTIONS: readonly AdminSettingsSection[] = [
       },
       {
         id: "deletion-requests",
-        title: "School-access removal",
+        title: "Data deletion requests",
         description:
-          "Review school-access removal requests. Records are retained; erasure requires a separate review.",
+          "Requests to erase a member's personal data. Each is erased 7 days after it was made, or as soon as you process it.",
         href: "/admin/deletion-requests",
         iconKey: "trash-2",
         keywords: ["gdpr", "privacy", "delete"],

@@ -119,6 +119,8 @@ model Tenant {
   proctoring_media_artifacts      ProctoringMediaArtifact[]
   usage_events                    TenantUsageEvent[]
   legal_acceptances               TenantLegalAcceptance[]
+  member_erasures                 MemberErasure[]
+  audit_entry_redactions          AuditEntryRedaction[]
 
   @@map("tenants")
 }
@@ -155,6 +157,48 @@ model TenantLegalAcceptance {
 
   @@index([tenant_id, membership_id, accepted_at(sort: Desc)], map: "tenant_legal_acceptances_membership_idx")
   @@map("tenant_legal_acceptances")
+}
+
+/// Launch plan 5.7: durable log of member erasures (migration 132); written only
+/// by app.erase_member(). docs/engineering/member-erasure.md.
+model MemberErasure {
+  id                    String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id             String           @db.Uuid
+  membership_id         String           @db.Uuid
+  deletion_request_id   String?          @db.Uuid
+  principal_id          String?          @db.Uuid
+  txid                  BigInt
+  started_at            DateTime         @default(now()) @db.Timestamptz(6)
+  database_completed_at DateTime?        @db.Timestamptz(6)
+  completed_at          DateTime?        @db.Timestamptz(6)
+  pending_objects       Json             @default("[]")
+  outcome_json          Json?
+  tenant                Tenant           @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  membership            Membership       @relation(fields: [tenant_id, membership_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "member_erasures_membership_id_tenant_fkey")
+  deletion_request      DeletionRequest? @relation(fields: [deletion_request_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  redactions            AuditEntryRedaction[]
+
+  @@unique([tenant_id, membership_id], map: "member_erasures_one_per_membership")
+  @@index([txid], map: "member_erasures_txid_idx")
+  @@map("member_erasures")
+}
+
+/// Launch plan 5.7: original payload hashes of audit entries a member erasure
+/// redacted, so app.verify_audit_chain() still verifies (migration 132).
+model AuditEntryRedaction {
+  audit_entry_id    String        @id @db.Uuid
+  tenant_id         String        @db.Uuid
+  member_erasure_id String        @db.Uuid
+  before_sha256     String?
+  after_sha256      String?
+  metadata_sha256   String?
+  redacted_at       DateTime      @default(now()) @db.Timestamptz(6)
+  audit_entry       AuditEntry    @relation(fields: [audit_entry_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  tenant            Tenant        @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  member_erasure    MemberErasure @relation(fields: [member_erasure_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([tenant_id], map: "audit_entry_redactions_tenant_idx")
+  @@map("audit_entry_redactions")
 }
 
 model TenantDomain {
@@ -319,6 +363,8 @@ model Membership {
   removed_at               DateTime?        @db.Timestamptz(6)
   archived_at              DateTime?        @db.Timestamptz(6)
   last_active_at           DateTime?        @db.Timestamptz(6)
+  /// Set when a deletion request erased this member (migration 132); the row stays as a tombstone.
+  erased_at                DateTime?        @db.Timestamptz(6)
   created_at               DateTime         @default(now()) @db.Timestamptz(6)
   updated_at               DateTime         @updatedAt @db.Timestamptz(6)
 
@@ -344,6 +390,7 @@ model Membership {
   // Composite tenant foreign keys (audit M3 coverage).
   at_risk_alerts AtRiskAlert[]
   legal_acceptances TenantLegalAcceptance[]
+  erasures MemberErasure[]
   attribution_tokens AttributionToken[]
   badge_awards BadgeAward[]
   batch_memberships BatchMembership[]
@@ -749,6 +796,7 @@ model AuditEntry {
   previous_hash       String?
   entry_hash          String
   occurred_at         DateTime @default(now()) @db.Timestamptz(6)
+  redaction           AuditEntryRedaction?
 
   @@index([tenant_id, occurred_at], map: "audit_entries_tenant_occurred_at_idx")
   @@index([tenant_id, action, occurred_at], map: "audit_entries_tenant_action_occurred_at_idx")
@@ -3156,6 +3204,7 @@ model DeletionRequest {
   completed_at               DateTime? @db.Timestamptz(6)
   created_at                 DateTime  @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime  @updatedAt @db.Timestamptz(6)
+  erasures                   MemberErasure[]
 
   @@index([tenant_id, target_type, target_id], map: "deletion_requests_tenant_target_idx")
   @@map("deletion_requests")

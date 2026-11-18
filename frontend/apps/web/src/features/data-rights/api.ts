@@ -25,11 +25,28 @@ export type DeletionRequestItem = {
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
-  outcome?: {
-    accessRemoved: boolean;
-    erasure: string;
-    retentionReviewRequired: boolean;
-  } | null;
+  operation?: "remove_school_access" | "erase_member";
+  /** Version 2 is an erasure (launch plan 5.7); version 1 an access removal from before it. */
+  outcome?:
+    | {
+        version: 2;
+        operation: "erase_member";
+        erasedAt: string;
+        deleted: Record<string, number>;
+        auditEntriesRedacted: number;
+        eventsRedacted: number;
+        files: { deleted: number; failed: number };
+        account: "deleted" | "kept_for_other_academies" | "none";
+        kept: string[];
+        notCovered: string[];
+      }
+    | {
+        version: 1;
+        accessRemoved: boolean;
+        erasure: string;
+        retentionReviewRequired: boolean;
+      }
+    | null;
   completionMessage?: string | null;
 };
 

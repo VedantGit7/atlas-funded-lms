@@ -74,12 +74,33 @@ describe("truthful partial profile export", () => {
     const request = {
       status: "SUCCEEDED",
       outcome: {
+        version: 1,
         accessRemoved: true,
         erasure: "not_performed",
         retentionReviewRequired: true,
       },
     } as DeletionRequestItem;
     expect(deletionOutcomeLabel(request)).toBe("Access removed · records retained");
+    // Launch plan 5.7: an erasure, and one still waiting on stored files.
+    const erased = {
+      version: 2 as const,
+      operation: "erase_member" as const,
+      erasedAt: "2026-11-18T12:00:00.000Z",
+      deleted: {},
+      auditEntriesRedacted: 0,
+      eventsRedacted: 0,
+      files: { deleted: 1, failed: 0 },
+      account: "deleted" as const,
+      kept: [],
+      notCovered: [],
+    };
+    expect(deletionOutcomeLabel({ ...request, outcome: erased })).toBe("Erased");
+    expect(
+      deletionOutcomeLabel({
+        ...request,
+        outcome: { ...erased, files: { deleted: 0, failed: 1 } },
+      }),
+    ).toBe("Erased · files pending");
     expect(deletionOutcomeLabel({ ...request, outcome: null })).toBe(
       "Processed · erasure not verified",
     );
@@ -96,10 +117,10 @@ describe("truthful partial profile export", () => {
         email: "learner@example.test",
       }),
     );
-    expect(card).toContain(
-      "school-access removal request is pending review. No data has been erased.",
-    );
-    expect(card).toContain("retained");
+    // Launch plan 5.7: the request erases, 7 days later, and says what is kept.
+    expect(card).toContain("Your deletion request is scheduled.");
+    expect(card).toContain("7 days");
+    expect(card).toContain("Certificates, payment records");
     expect(card).not.toContain("Delete account");
     const privacy = renderToStaticMarkup(
       createElement(PrivacyDataForm, {
@@ -114,7 +135,7 @@ describe("truthful partial profile export", () => {
     );
     expect(privacy).toContain("Download profile snapshot");
     expect(privacy).toContain("partial snapshot");
-    expect(privacy).toContain("separate erasure review");
+    expect(privacy).toContain("Request data deletion");
     expect(privacy).not.toContain("anonymized usage analytics");
   });
 
@@ -126,10 +147,9 @@ describe("truthful partial profile export", () => {
         canFileForOthers: true,
       }),
     );
-    expect(removals).toContain("School-access removal requests");
-    expect(removals).toContain("Records remain retained");
-    expect(removals).toContain("separate erasure and");
-    expect(removals).not.toContain("permanently removes");
+    expect(removals).toContain("Data deletion requests");
+    expect(removals).toContain("7 days after it was made");
+    expect(removals).toContain("What is kept");
     const exports = renderToStaticMarkup(
       createElement(ExportsAdmin, {
         initialJobs: [],

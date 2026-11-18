@@ -400,6 +400,8 @@ export const ModelName = {
   Tenant: 'Tenant',
   TenantUsageEvent: 'TenantUsageEvent',
   TenantLegalAcceptance: 'TenantLegalAcceptance',
+  MemberErasure: 'MemberErasure',
+  AuditEntryRedaction: 'AuditEntryRedaction',
   TenantDomain: 'TenantDomain',
   AuthPrincipal: 'AuthPrincipal',
   AuthSession: 'AuthSession',
@@ -651,7 +653,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "tenantUsageEvent" | "tenantLegalAcceptance" | "tenantDomain" | "authPrincipal" | "authSession" | "authAccount" | "authVerification" | "authTwoFactor" | "platformOperator" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave" | "paymentRefundIntent" | "outboxDeliveryJob" | "reportDeliveryEffect" | "exportFileCleanupRequest"
+    modelProps: "tenant" | "tenantUsageEvent" | "tenantLegalAcceptance" | "memberErasure" | "auditEntryRedaction" | "tenantDomain" | "authPrincipal" | "authSession" | "authAccount" | "authVerification" | "authTwoFactor" | "platformOperator" | "membership" | "memberProfile" | "memberNotificationPreference" | "permission" | "permissionBundle" | "role" | "rolePermission" | "userRole" | "permissionOverride" | "tenantConfig" | "tenantConfigVersion" | "featureFlag" | "featureFlagOverride" | "entitlement" | "entitlementGrantHistory" | "tenantSubscription" | "tenantActiveDay" | "learnerBillingConfig" | "learnerBillingLocation" | "fxRate" | "paymentGateway" | "auditEntry" | "secretRef" | "outboxEvent" | "eventDelivery" | "deadLetterEvent" | "provisioningJob" | "tenantBranding" | "tenantTheme" | "tenantBrandingVersion" | "tenantThemeVersion" | "lessonAsset" | "storageReference" | "course" | "courseModule" | "moduleScormProgress" | "lesson" | "tag" | "lessonTag" | "courseTag" | "enrollment" | "mockTest" | "mockTestEnrollment" | "testSeries" | "testSeriesItem" | "testSeriesEnrollment" | "testSeriesItemProgress" | "bundle" | "bundleItem" | "bundleEnrollment" | "learnerSubscriptionPlan" | "learnerSubscriptionPlanItem" | "learnerSubscriptionEnrollment" | "lessonProgress" | "courseReview" | "workflowDefinition" | "workflowTransition" | "learningPath" | "pathStep" | "pathStepGate" | "pathEnrollment" | "pathStepProgress" | "itemType" | "item" | "itemOption" | "itemDimensionWeight" | "itemCollection" | "itemCollectionItem" | "assessment" | "assessmentItem" | "attempt" | "attemptAnswer" | "gradingTask" | "examSecurityPolicy" | "proctoringSession" | "proctoringEvent" | "proctoringReport" | "identityVerification" | "proctoringMediaArtifact" | "practiceSession" | "practiceResponse" | "srsState" | "competencyDimension" | "scoringProfile" | "scoringConfigVersion" | "competencyBand" | "signalSource" | "competencySignal" | "competencyScore" | "compositeReadinessState" | "competencyScoreSnapshot" | "diagnosticSession" | "readinessPolicy" | "attributionToken" | "certificateTemplate" | "certificate" | "certificateBrandKit" | "certificateStatusList" | "certificateRenderJob" | "certificateWalletPass" | "credentialVerification" | "gamificationProfile" | "pointLedger" | "badge" | "badgeAward" | "streakState" | "streakFreeze" | "groupStreakState" | "leaderboardDefinition" | "leaderboardSnapshot" | "questDefinition" | "questProgress" | "gamificationCurrency" | "memberBalance" | "rewardItem" | "rewardRedemption" | "seasonalEvent" | "notificationTemplate" | "notificationDispatch" | "communitySpace" | "groupMembership" | "post" | "comment" | "reaction" | "mention" | "moderationCase" | "moderationDecision" | "appeal" | "searchIndexEntry" | "analyticsRollup" | "funnelDailyRollup" | "itemStatistic" | "materializedViewRegistry" | "automationRule" | "automationRun" | "localeResource" | "localeMetadata" | "localeCanonicalKey" | "localeQaCheckRun" | "localeQaIssue" | "extensionPoint" | "extensionRegistration" | "exportJob" | "deletionRequest" | "reportDefinition" | "reportSchedule" | "reportRun" | "reportDeliveryDestination" | "reportExportSettings" | "atRiskRule" | "atRiskAlert" | "deviceSecurityAlert" | "devicePolicyOverride" | "deviceBlockedFingerprint" | "deviceSession" | "paymentOrder" | "paymentInstalmentPlan" | "paymentInstalment" | "batch" | "batchMembership" | "poll" | "pollOption" | "pollResponse" | "salesAttributionEvent" | "salesAttributionRetentionSetting" | "salesCoupon" | "salesCouponCourse" | "salesCouponRedemption" | "salesWalletConfig" | "salesWallet" | "salesWalletTransaction" | "salesReferralConfig" | "salesReferralCode" | "salesReferralAttribution" | "salesReferralPurchaseCredit" | "salesReferralPending" | "salesAffiliateConfig" | "salesAffiliate" | "salesAffiliateProduct" | "salesAffiliateRequest" | "salesAffiliateCommission" | "salesAffiliatePayout" | "customFieldDefinition" | "customFieldValue" | "customFieldValueHistory" | "customFieldSegment" | "zoomConnection" | "zoomSyncRun" | "zoomWebhookEvent" | "zoomMeeting" | "zoomMeetingParticipant" | "liveSession" | "liveAttendance" | "messengerConversation" | "messengerMessage" | "biExportJob" | "subSchool" | "productCopyJob" | "courseBackupJob" | "pushMessage" | "marketingEmailCampaign" | "marketingCampaign" | "announcement" | "whatsappConnection" | "whatsappTemplate" | "whatsappCampaign" | "whatsappConversation" | "whatsappInboxMessage" | "marketingWorkflow" | "marketingWorkflowRun" | "marketingWorkflowRunLog" | "marketingForm" | "marketingContact" | "marketingFormSubmission" | "marketingCta" | "marketingPromoSlider" | "marketingPromoSlide" | "marketingEvent" | "marketingEventRegistration" | "marketingIntegrationSettings" | "marketingIntegrationWebhook" | "marketingIntegrationWebhookDelivery" | "marketingNewsfeedSettings" | "marketingNewsfeedPost" | "marketingNewsfeedSave" | "paymentRefundIntent" | "outboxDeliveryJob" | "reportDeliveryEffect" | "exportFileCleanupRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -874,6 +876,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TenantLegalAcceptanceCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TenantLegalAcceptanceCountAggregateOutputType> | number
+        }
+      }
+    }
+    MemberErasure: {
+      payload: Prisma.$MemberErasurePayload<ExtArgs>
+      fields: Prisma.MemberErasureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MemberErasureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MemberErasureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>
+        }
+        findFirst: {
+          args: Prisma.MemberErasureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MemberErasureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>
+        }
+        findMany: {
+          args: Prisma.MemberErasureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>[]
+        }
+        create: {
+          args: Prisma.MemberErasureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>
+        }
+        createMany: {
+          args: Prisma.MemberErasureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MemberErasureCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>[]
+        }
+        delete: {
+          args: Prisma.MemberErasureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>
+        }
+        update: {
+          args: Prisma.MemberErasureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>
+        }
+        deleteMany: {
+          args: Prisma.MemberErasureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MemberErasureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MemberErasureUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>[]
+        }
+        upsert: {
+          args: Prisma.MemberErasureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MemberErasurePayload>
+        }
+        aggregate: {
+          args: Prisma.MemberErasureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMemberErasure>
+        }
+        groupBy: {
+          args: Prisma.MemberErasureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberErasureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MemberErasureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MemberErasureCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuditEntryRedaction: {
+      payload: Prisma.$AuditEntryRedactionPayload<ExtArgs>
+      fields: Prisma.AuditEntryRedactionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditEntryRedactionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditEntryRedactionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditEntryRedactionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditEntryRedactionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>
+        }
+        findMany: {
+          args: Prisma.AuditEntryRedactionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>[]
+        }
+        create: {
+          args: Prisma.AuditEntryRedactionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>
+        }
+        createMany: {
+          args: Prisma.AuditEntryRedactionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuditEntryRedactionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>[]
+        }
+        delete: {
+          args: Prisma.AuditEntryRedactionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>
+        }
+        update: {
+          args: Prisma.AuditEntryRedactionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditEntryRedactionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditEntryRedactionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuditEntryRedactionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuditEntryRedactionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditEntryRedactionPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditEntryRedactionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditEntryRedaction>
+        }
+        groupBy: {
+          args: Prisma.AuditEntryRedactionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditEntryRedactionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditEntryRedactionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditEntryRedactionCountAggregateOutputType> | number
         }
       }
     }
@@ -18426,6 +18576,36 @@ export const TenantLegalAcceptanceScalarFieldEnum = {
 export type TenantLegalAcceptanceScalarFieldEnum = (typeof TenantLegalAcceptanceScalarFieldEnum)[keyof typeof TenantLegalAcceptanceScalarFieldEnum]
 
 
+export const MemberErasureScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  membership_id: 'membership_id',
+  deletion_request_id: 'deletion_request_id',
+  principal_id: 'principal_id',
+  txid: 'txid',
+  started_at: 'started_at',
+  database_completed_at: 'database_completed_at',
+  completed_at: 'completed_at',
+  pending_objects: 'pending_objects',
+  outcome_json: 'outcome_json'
+} as const
+
+export type MemberErasureScalarFieldEnum = (typeof MemberErasureScalarFieldEnum)[keyof typeof MemberErasureScalarFieldEnum]
+
+
+export const AuditEntryRedactionScalarFieldEnum = {
+  audit_entry_id: 'audit_entry_id',
+  tenant_id: 'tenant_id',
+  member_erasure_id: 'member_erasure_id',
+  before_sha256: 'before_sha256',
+  after_sha256: 'after_sha256',
+  metadata_sha256: 'metadata_sha256',
+  redacted_at: 'redacted_at'
+} as const
+
+export type AuditEntryRedactionScalarFieldEnum = (typeof AuditEntryRedactionScalarFieldEnum)[keyof typeof AuditEntryRedactionScalarFieldEnum]
+
+
 export const TenantDomainScalarFieldEnum = {
   id: 'id',
   tenant_id: 'tenant_id',
@@ -18552,6 +18732,7 @@ export const MembershipScalarFieldEnum = {
   removed_at: 'removed_at',
   archived_at: 'archived_at',
   last_active_at: 'last_active_at',
+  erased_at: 'erased_at',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const
@@ -22742,6 +22923,8 @@ export type GlobalOmitConfig = {
   tenant?: Prisma.TenantOmit
   tenantUsageEvent?: Prisma.TenantUsageEventOmit
   tenantLegalAcceptance?: Prisma.TenantLegalAcceptanceOmit
+  memberErasure?: Prisma.MemberErasureOmit
+  auditEntryRedaction?: Prisma.AuditEntryRedactionOmit
   tenantDomain?: Prisma.TenantDomainOmit
   authPrincipal?: Prisma.AuthPrincipalOmit
   authSession?: Prisma.AuthSessionOmit

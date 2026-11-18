@@ -168,7 +168,7 @@ function FileRequestDialog({
       >
         <div className="mb-5 flex items-center justify-between gap-3">
           <h2 id={headingId} className="text-lg font-semibold text-[var(--admin-on-surface)]">
-            New school-access removal request
+            New data deletion request
           </h2>
           <button
             type="button"
@@ -183,8 +183,8 @@ function FileRequestDialog({
 
         <div className="space-y-4">
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            This requests school-access removal only. Records are retained and require a separate
-            erasure and retention review.
+            The member's personal data is erased 7 days from now, or when you process the request.
+            Certificates, payment records and their agreement to the Terms are kept.
           </p>
           <div className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface-variant)]">
             Target type:{" "}
@@ -309,17 +309,18 @@ function ProcessDialog({
           <div className="flex items-center gap-3 text-[var(--admin-danger)]">
             <AlertTriangle className="h-8 w-8 shrink-0" aria-hidden="true" />
             <h2 id={headingId} className="text-lg font-bold text-[var(--admin-on-surface)]">
-              Remove school access
+              Erase this member's data now
             </h2>
           </div>
 
           <div id={descriptionId} className={deletionsDangerPanelClassName}>
             <p>
-              You are about to remove school access for the{" "}
-              <strong>{formatTargetType(request.targetType)}</strong>{" "}
-              <code className={deletionsTargetIdClassName}>{formatShortId(request.targetId)}</code>.
-              The identity and associated school records are retained. Access to other schools is
-              unaffected. A separate erasure and retention review is required.
+              The personal data of the <strong>{formatTargetType(request.targetType)}</strong>{" "}
+              <code className={deletionsTargetIdClassName}>{formatShortId(request.targetId)}</code>{" "}
+              is erased within about a minute instead of on its scheduled date: profile, learning
+              records, quiz answers, exam monitoring and uploads. Certificates, payment records and
+              their agreement to the Terms are kept, and community posts stay as &quot;Deleted
+              member&quot;. This can&apos;t be undone.
             </p>
           </div>
 
@@ -355,7 +356,7 @@ function ProcessDialog({
               onClick={onConfirm}
               disabled={busy || !confirmed}
             >
-              {busy ? "Processing…" : "Remove school access"}
+              {busy ? "Processing…" : "Erase now"}
             </button>
           </div>
         </div>
@@ -590,11 +591,11 @@ export function DeletionRequestsAdmin({
           <div className={deletionsPageHeaderClassName}>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]">
-                School-access removal requests
+                Data deletion requests
               </h1>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                Remove school membership access. Records remain retained; a separate erasure and
-                retention review is required. Processing does not delete the global identity.
+                Each request erases a member's personal data 7 days after it was made. Processing a
+                request erases it now. Their login is deleted too unless another academy uses it.
               </p>
             </div>
             {canFileForOthers ? (
@@ -623,7 +624,7 @@ export function DeletionRequestsAdmin({
             aria-labelledby="deletion-requests-heading"
           >
             <h2 id="deletion-requests-heading" className="sr-only">
-              School-access removal requests
+              Data deletion requests
             </h2>
 
             <div className={deletionsTableToolbarClassName}>
@@ -639,7 +640,7 @@ export function DeletionRequestsAdmin({
                     setSearchQuery(event.target.value);
                   }}
                   placeholder="Search requests…"
-                  aria-label="Search school-access removal requests"
+                  aria-label="Search data deletion requests"
                   className={deletionsSearchInputClassName}
                 />
               </div>
@@ -663,7 +664,7 @@ export function DeletionRequestsAdmin({
                   className={`${ghostButtonClassName} inline-flex h-9 w-9 items-center justify-center p-0`}
                   onClick={() => void handleRefresh()}
                   disabled={refreshing}
-                  aria-label="Refresh school-access removal requests"
+                  aria-label="Refresh data deletion requests"
                 >
                   <RefreshCw
                     className={`h-4 w-4 ${refreshing ? "motion-safe:animate-spin" : ""}`}
@@ -676,13 +677,11 @@ export function DeletionRequestsAdmin({
             {filteredRequests.length === 0 && !refreshing ? (
               <EmptyState
                 className={deletionsEmptyStateClassName}
-                title={
-                  searchQuery ? "No matching requests" : "No school-access removal requests yet"
-                }
+                title={searchQuery ? "No matching requests" : "No data deletion requests yet"}
                 description={
                   searchQuery
                     ? "Try a different search term or clear the filter."
-                    : "File a request to remove school membership access. Records are retained; erasure requires a separate review."
+                    : "Requests to erase a member's personal data appear here, from the member or filed by an admin."
                 }
               />
             ) : (
@@ -907,12 +906,13 @@ export function DeletionRequestsAdmin({
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-danger)]">
                 <Trash2 className="h-5 w-5" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                  Records retained
+                  What is kept
                 </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Processing removes access to this school. Identity, learning, billing, and other
-                school records remain. Review retention and erasure separately with your school.
+                Certificates, payment records and the record of agreeing to the Terms are kept.
+                Community posts stay as &quot;Deleted member&quot;. Audit entries stay, without
+                personal details.
               </p>
             </article>
             <article className={deletionsInfoCardClassName}>

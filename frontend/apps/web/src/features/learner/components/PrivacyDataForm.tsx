@@ -259,7 +259,7 @@ export function PrivacyDataForm({
           Download a partial snapshot of your account, profile, preferences, and available school
           entitlements. The file lists included fields and omissions. Learning history, assessment
           submissions, billing records, and other school records are not included. Contact your
-          school for a full data-rights review or a separate erasure review.
+          school for a full data-rights review.
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">
           <button
@@ -275,7 +275,7 @@ export function PrivacyDataForm({
           </button>
           <Link href="/profile/danger-zone" className={classes.dangerOutlineButton}>
             <Trash2 className="h-4 w-4" aria-hidden="true" />
-            Request school-access removal
+            Request data deletion
           </Link>
         </div>
       </section>
