@@ -12,6 +12,7 @@ import {
 } from "@atlas/domain-identity";
 import { sendAuthEmails } from "../../../../../../../lib/auth-email";
 import { resolveSignInMembership } from "../../../../../../../lib/sign-in-membership";
+import { consentFrom } from "../../../../../../../server/tenant-settings/legal-acceptance.service";
 import { routeMetadata } from "./route.metadata";
 
 /** Where a person who linked Google from their security settings goes back to. */
@@ -97,14 +98,16 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
-      const membership = principal
+      // Agreement given on the sign-up page before going to Google, if any.
+      const { membership, termsRequired } = principal
         ? await resolveSignInMembership(tx, {
             tenantId: tenant.tenantId,
             principalId,
             email: principal.email_normalized,
             provision: !principal.mfa_enabled,
+            consent: consentFrom("google_signup", input.termsAcceptedAt),
           })
-        : null;
+        : { membership: null, termsRequired: false };
 
       return buildPublicAuthResponse({
         tx,
@@ -115,6 +118,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         // finding 2), so the sign-in page asks for it next.
         mfaEnabled: principal?.mfa_enabled ?? false,
         membership,
+        termsRequired,
       });
     },
   );

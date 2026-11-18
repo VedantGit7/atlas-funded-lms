@@ -76,7 +76,29 @@ vi.mock("@atlas/membership", async (importOriginal) => {
     findMembershipByPrincipal: (...args: unknown[]) => mockFindMembership(...args),
     ensureSelfServiceLearnerMembership: (...args: unknown[]) =>
       mockEnsureSelfServiceLearnerMembership(...args),
+    findPendingInvitationByEmail: (...args: unknown[]) => legalMocks.findInvitation(...args),
   };
+});
+
+// Launch plan 5.7: agreement records. Existing members have agreed unless a
+// test says otherwise; a new membership needs agreement to open.
+const legalMocks = vi.hoisted(() => ({
+  findInvitation: vi.fn(),
+  hasAcceptance: vi.fn(),
+  recordAcceptance: vi.fn(),
+}));
+vi.mock(
+  "../../backend/apps/api/src/server/tenant-settings/legal-acceptance.service",
+  async (importOriginal) => ({
+    ...(await importOriginal<Record<string, unknown>>()),
+    hasLegalAcceptance: (...args: unknown[]) => legalMocks.hasAcceptance(...args),
+    recordLegalAcceptance: (...args: unknown[]) => legalMocks.recordAcceptance(...args),
+  }),
+);
+beforeEach(() => {
+  legalMocks.findInvitation.mockResolvedValue(null);
+  legalMocks.hasAcceptance.mockResolvedValue(true);
+  legalMocks.recordAcceptance.mockResolvedValue(undefined);
 });
 
 vi.mock("@atlas/domain-identity", async (importOriginal) => {
@@ -219,16 +241,14 @@ describe("POST /api/v1/public/auth/login", () => {
     expect(body).toEqual({ data: { status: "MFA_REQUIRED", redirectTo: null } });
   });
 
-  it("provisions a learner membership on first login when the user has none", async () => {
+  it("opens no membership on a first sign-in without agreement, and asks for it (launch plan 5.7)", async () => {
     mockLoginWithPassword.mockResolvedValue({
       status: "signed_in",
       identity: { mfaEnabled: false },
       session: { setCookies: ["atlas_session=s.sig; Path=/; HttpOnly"] },
     });
     mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
-    mockFindMembership
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ id: "new-membership", status: "ACTIVE" });
+    mockFindMembership.mockResolvedValue(null);
     mockBuildPublicAuthResponse.mockResolvedValue({
       data: { status: "AUTHENTICATED", redirectTo: "/" },
     });
@@ -238,12 +258,9 @@ describe("POST /api/v1/public/auth/login", () => {
     );
     const body: unknown = await response.json();
 
-    expect(mockEnsureSelfServiceLearnerMembership).toHaveBeenCalledWith(
-      expect.objectContaining({
-        tenantId: tenantA.tenantId,
-        authPrincipalId: "principal-id",
-        email: "learner@example.com",
-      }),
+    expect(mockEnsureSelfServiceLearnerMembership).not.toHaveBeenCalled();
+    expect(mockBuildPublicAuthResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ membership: null, termsRequired: true }),
     );
     expect(body).toEqual({ data: { status: "AUTHENTICATED", redirectTo: "/" } });
   });
@@ -251,11 +268,7 @@ describe("POST /api/v1/public/auth/login", () => {
   it("answers an invitee who signs in before accepting with their invitation", async () => {
     mockGlobalQueryRaw.mockResolvedValue([{ id: "principal-id" }]);
     mockFindMembership.mockResolvedValue(null);
-    mockEnsureSelfServiceLearnerMembership.mockResolvedValue({
-      membershipId: "invited-membership",
-      created: false,
-      status: "INVITED",
-    });
+    legalMocks.findInvitation.mockResolvedValue({ id: "invited-membership", status: "INVITED" });
 
     await POST(createRequest({ email: "owner@example.com", password: "password123" }));
 

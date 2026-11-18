@@ -39,8 +39,20 @@ describe("public auth schemas", () => {
         email: "user@example.com",
         displayName: "Atlas User",
         inviteToken: "a".repeat(32),
+        acceptTerms: true,
       }).displayName,
     ).toBe("Atlas User");
+  });
+
+  it("refuses a sign-up without the 'I agree' box ticked (launch plan 5.7)", () => {
+    const base = { email: "user@example.com", displayName: "Atlas User" };
+    expect(PublicSignupRequestSchema.safeParse(base).success).toBe(false);
+    expect(PublicSignupRequestSchema.safeParse({ ...base, acceptTerms: false }).success).toBe(
+      false,
+    );
+    expect(PublicSignupRequestSchema.safeParse({ ...base, acceptTerms: "true" }).success).toBe(
+      false,
+    );
   });
 
   it("refuses a password at sign-up: it is chosen from the emailed link", () => {
@@ -90,6 +102,33 @@ describe("public auth ui helpers", () => {
     });
     expect(status).toBe("INVITED_MEMBERSHIP");
     expect(resolveRedirectForAuthStatus(status, null)).toBe("/invite/accept");
+  });
+
+  it("sends someone who hasn't agreed to the Terms to the join page (launch plan 5.7)", () => {
+    for (const membershipStatus of [null, "ACTIVE"] as const) {
+      const status = resolvePublicAuthStatus({
+        authenticated: true,
+        verificationRequired: false,
+        mfaEnabled: false,
+        membershipStatus,
+        termsRequired: true,
+      });
+      expect(status).toBe("TERMS_REQUIRED");
+      expect(resolveRedirectForAuthStatus(status, "/admin")).toBe("/join");
+    }
+  });
+
+  it("asks for the second factor before the Terms, and leaves invitations to their page", () => {
+    const base = { authenticated: true, verificationRequired: false, termsRequired: true };
+    expect(resolvePublicAuthStatus({ ...base, mfaEnabled: true, membershipStatus: "ACTIVE" })).toBe(
+      "MFA_REQUIRED",
+    );
+    expect(
+      resolvePublicAuthStatus({ ...base, mfaEnabled: false, membershipStatus: "INVITED" }),
+    ).toBe("INVITED_MEMBERSHIP");
+    expect(
+      resolvePublicAuthStatus({ ...base, mfaEnabled: false, membershipStatus: "SUSPENDED" }),
+    ).toBe("NO_ACTIVE_MEMBERSHIP");
   });
 
   it("resolves role home by privilege", () => {

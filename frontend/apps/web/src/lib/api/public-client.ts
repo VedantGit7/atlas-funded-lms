@@ -7,7 +7,8 @@ export type PublicAuthApiResponse = {
       | "EMAIL_VERIFICATION_REQUIRED"
       | "MFA_REQUIRED"
       | "NO_ACTIVE_MEMBERSHIP"
-      | "INVITED_MEMBERSHIP";
+      | "INVITED_MEMBERSHIP"
+      | "TERMS_REQUIRED";
     redirectTo: string | null;
   };
 };

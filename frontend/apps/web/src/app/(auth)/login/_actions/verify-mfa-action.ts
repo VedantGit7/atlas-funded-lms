@@ -4,6 +4,7 @@ import { PublicMfaVerifyRequestSchema } from "@atlas/contracts/domain-identity/s
 import {
   resolvePostAuthRedirect,
   resolveSafeRedirectPath,
+  termsRequiredDestination,
 } from "../../../../lib/auth/safe-redirect";
 import { readFormString } from "../../../../lib/server/form";
 import { serverPublicApi } from "../../../../lib/server/public-auth-fetch";
@@ -39,6 +40,17 @@ export async function verifyMfaAction(
     body = await serverPublicApi.verifyMfa(parsed.data);
   } catch {
     return { ok: false, message: "Invalid or expired code. Try again.", requestId };
+  }
+
+  if (body.data.status === "TERMS_REQUIRED") {
+    // Signed in, but not yet agreed to this academy's Terms and Privacy Policy
+    // (launch plan 5.7): the join page asks first.
+    return {
+      ok: true,
+      message: "Verified.",
+      requestId,
+      destination: termsRequiredDestination(clientRedirect),
+    };
   }
 
   if (body.data.status === "NO_ACTIVE_MEMBERSHIP") {

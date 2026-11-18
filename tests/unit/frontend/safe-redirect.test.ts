@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   resolvePostAuthRedirect,
   resolveSafeRedirectPath,
+  termsRequiredDestination,
 } from "../../../frontend/apps/web/src/lib/auth/safe-redirect";
 
 describe("resolveSafeRedirectPath", () => {
@@ -39,6 +40,16 @@ describe("post-verification redirects (security review 5.3, finding 4)", () => {
     expect(source).toContain("resolveSafeRedirectPath(");
     // The old hand-written check stopped `//` but not `/\`.
     expect(source).not.toMatch(/startsWith\("\/\/"\)/);
+  });
+});
+
+describe("termsRequiredDestination", () => {
+  it("sends to the join page, carrying a safe destination on", () => {
+    expect(termsRequiredDestination(null)).toBe("/join");
+    expect(termsRequiredDestination("/courses/abc")).toBe("/join?next=%2Fcourses%2Fabc");
+    // An unsafe destination is dropped, never carried.
+    expect(termsRequiredDestination("//evil.example")).toBe("/join");
+    expect(termsRequiredDestination("https://evil.example")).toBe("/join");
   });
 });
 

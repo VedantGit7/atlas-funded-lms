@@ -154,7 +154,13 @@ function signupIdentifier(token: string): string {
   return `signup:${createHash("sha256").update(token).digest("hex")}`;
 }
 
-type PendingSignup = { email: string; displayName?: string; inviteToken?: string };
+type PendingSignup = {
+  email: string;
+  displayName?: string;
+  inviteToken?: string;
+  /** When the person ticked "I agree" on the sign-up form (launch plan 5.7). */
+  termsAcceptedAt?: string;
+};
 
 function readPendingSignup(value: string): PendingSignup | null {
   try {
@@ -166,6 +172,9 @@ function readPendingSignup(value: string): PendingSignup | null {
       email: record["email"],
       ...(typeof record["displayName"] === "string" ? { displayName: record["displayName"] } : {}),
       ...(typeof record["inviteToken"] === "string" ? { inviteToken: record["inviteToken"] } : {}),
+      ...(typeof record["termsAcceptedAt"] === "string"
+        ? { termsAcceptedAt: record["termsAcceptedAt"] }
+        : {}),
     };
   } catch {
     return null;
@@ -199,6 +208,7 @@ export async function requestSignUpLink(args: {
   email: string;
   displayName?: string | undefined;
   inviteToken?: string | undefined;
+  termsAcceptedAt?: string | undefined;
 }): Promise<{ emails: AuthEmail[] }> {
   const email = args.email.trim().toLowerCase();
   const context = await getAtlasAuth().$context;
@@ -215,6 +225,7 @@ export async function requestSignUpLink(args: {
     email,
     ...(args.displayName ? { displayName: args.displayName } : {}),
     ...(args.inviteToken ? { inviteToken: args.inviteToken } : {}),
+    ...(args.termsAcceptedAt ? { termsAcceptedAt: args.termsAcceptedAt } : {}),
   };
   await context.internalAdapter.createVerificationValue({
     identifier: signupIdentifier(token),
@@ -247,6 +258,7 @@ export async function completeSignUp(args: {
   email: string;
   cookies: BetterAuthCookies;
   inviteToken?: string;
+  termsAcceptedAt?: string;
 }> {
   const context = await getAtlasAuth().$context;
   const consumed = await context.internalAdapter
@@ -267,6 +279,7 @@ export async function completeSignUp(args: {
     ...created,
     email: pending.email,
     ...(pending.inviteToken ? { inviteToken: pending.inviteToken } : {}),
+    ...(pending.termsAcceptedAt ? { termsAcceptedAt: pending.termsAcceptedAt } : {}),
   };
 }
 
@@ -546,7 +559,11 @@ export async function signOutOtherSessionsWithBetterAuth(args: {
  */
 export type SocialStart = { url: string; cookies: BetterAuthCookies };
 
-export async function startGoogleSignIn(args: { ctx: AuthRequestContext }): Promise<SocialStart> {
+export async function startGoogleSignIn(args: {
+  ctx: AuthRequestContext;
+  /** Only after "I agree" on the sign-up page may Google create an account. */
+  signUp?: boolean;
+}): Promise<SocialStart> {
   try {
     const { headers, response } = await getAtlasAuth().api.signInSocial({
       body: {
@@ -554,6 +571,7 @@ export async function startGoogleSignIn(args: { ctx: AuthRequestContext }): Prom
         callbackURL: OAUTH_DONE_PATH,
         errorCallbackURL: OAUTH_ERROR_PATH,
         disableRedirect: true,
+        ...(args.signUp ? { requestSignUp: true } : {}),
       },
       headers: headersFor(args.ctx),
       returnHeaders: true,
@@ -596,6 +614,15 @@ export type GoogleCallback =
 /** The reason Better Auth gave, as a stable error for the web app's sign-in page. */
 function socialSignInRefused(reason: string): AtlasHttpError {
   if (reason === "email_not_verified") return emailNotVerified();
+  if (reason === "signup_disabled") {
+    // Google is set to sign in existing accounts only; a new one is opened
+    // from the sign-up page after "I agree" (launch plan 5.7).
+    return new AtlasHttpError({
+      code: "SIGNUP_REQUIRED",
+      status: 403,
+      message: "There's no account for this Google address yet. Sign up first.",
+    });
+  }
   return new AtlasHttpError({
     code: reason === "account_not_linked" ? "ACCOUNT_NOT_LINKED" : "AUTH_REQUIRED",
     status: reason === "account_not_linked" ? 409 : 401,

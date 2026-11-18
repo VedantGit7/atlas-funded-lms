@@ -27,7 +27,10 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req }) => {
       message: "This sign-in method isn't available here.",
     });
   }
-  const start = await startGoogleSignIn({ ctx: authRequestContext(req) });
+  const start = await startGoogleSignIn({
+    ctx: authRequestContext(req),
+    signUp: input.signUp === true,
+  });
   const response = NextResponse.json(
     PublicOAuthStartResponseSchema.parse({ data: { url: start.url } }),
   );

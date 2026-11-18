@@ -12,6 +12,9 @@ export type AtlasErrorCode =
   // or Atlas hasn't verified, so it isn't linked: sign in with the password,
   // then connect Google from the security settings (launch plan task 3.3).
   | "ACCOUNT_NOT_LINKED"
+  // 403. Google sign-in for an address with no account: a new account is only
+  // opened from the sign-up page, after "I agree" (launch plan 5.7).
+  | "SIGNUP_REQUIRED"
   | "NO_MEMBERSHIP"
   | "MEMBERSHIP_PENDING"
   | "MEMBERSHIP_SUSPENDED"

@@ -10,6 +10,7 @@ import {
 } from "../_actions/accept-invitation-action";
 import { InviteSignOutButton } from "./InviteSignOutButton";
 import { VerificationSuccess } from "../../../login/_components/VerificationSuccess";
+import { TermsAgreement } from "../../../_components/TermsAgreement";
 
 const initialState: AcceptInvitationActionState = {
   ok: false,
@@ -186,6 +187,8 @@ export function InviteAcceptCard({
   const existingAccount = inviteAccount === "exists";
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  // No membership is opened from an invitation without agreement (launch plan 5.7).
+  const [agreed, setAgreed] = useState(false);
 
   const mismatch = useMemo(
     () => emailsMismatch(signedInEmail, invitedEmail),
@@ -323,6 +326,8 @@ export function InviteAcceptCard({
             <StrengthMeter score={strength} />
           </div>
 
+          <TermsAgreement checked={agreed} onCheckedChange={setAgreed} />
+
           <button type="submit" disabled={passwordPending} className={primaryButtonClass}>
             {passwordPending ? <Spinner /> : null}
             {passwordPending ? "Setting up your account..." : "Set password and continue"}
@@ -457,8 +462,9 @@ export function InviteAcceptCard({
             </p>
           ) : null}
 
-          <form action={acceptAction} className="mt-6">
+          <form action={acceptAction} className="mt-6 space-y-5">
             <input type="hidden" name="token" value={token} />
+            <TermsAgreement checked={agreed} onCheckedChange={setAgreed} />
             <button type="submit" disabled={acceptPending} className={primaryButtonClass}>
               {acceptPending ? <Spinner /> : null}
               {acceptPending ? "Accepting..." : "Accept invitation"}

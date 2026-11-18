@@ -9,6 +9,7 @@ import {
 } from "@atlas/domain-identity";
 import { dispatchMarketingIntegrationWebhooks } from "../../../../../../../server/marketing-integrations/marketing-integrations.dispatch";
 import { resolveSignInMembership } from "../../../../../../../lib/sign-in-membership";
+import { consentFrom } from "../../../../../../../server/tenant-settings/legal-acceptance.service";
 import { routeMetadata } from "./route.metadata";
 
 /**
@@ -47,11 +48,15 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
     },
     async (tx) => {
       // A new account has no authenticator, so its membership is made now.
-      const membership = await resolveSignInMembership(tx, {
+      // The agreement ticked on the sign-up form travels with its link. A link
+      // sent before agreement was required carries none, so the person is
+      // asked on the join page instead.
+      const { membership, termsRequired } = await resolveSignInMembership(tx, {
         tenantId: tenant.tenantId,
         principalId,
         email: result.identity.emailNormalized,
         provision: !result.identity.mfaEnabled,
+        consent: consentFrom("signup", result.termsAcceptedAt),
       });
 
       if (membership) {
@@ -77,6 +82,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         serviceStatus: result.status,
         mfaEnabled: result.identity.mfaEnabled,
         membership,
+        termsRequired,
       });
     },
   );

@@ -12,6 +12,7 @@ import {
   resolveRoleHomePath,
   resolvePostInviteRedirect,
 } from "@atlas/domain-identity";
+import { recordLegalAcceptance } from "../../../../../../server/tenant-settings/legal-acceptance.service";
 import { routeMetadata } from "./route.metadata";
 
 export const POST = createPublicRouteHandler(routeMetadata, async ({ req, requestId }) => {
@@ -35,8 +36,8 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       requestId,
       allowAnonymousTenantRead: true,
     },
-    async (tx) =>
-      acceptInvitation({
+    async (tx) => {
+      const accepted = await acceptInvitation({
         tx,
         tenantId: tenant.tenantId,
         requestId,
@@ -45,7 +46,16 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
           id: principal.id,
           emailNormalized: principal.emailNormalized,
         },
-      }),
+      });
+      // The schema only admits an acceptance whose "I agree" box was ticked
+      // (launch plan 5.7); it is recorded with the membership it opens.
+      await recordLegalAcceptance(tx, {
+        tenantId: tenant.tenantId,
+        membershipId: accepted.membership.id,
+        consent: { source: "invitation", acceptedAt: new Date() },
+      });
+      return accepted;
+    },
   );
 
   const roleKeys = await withTenantTx(

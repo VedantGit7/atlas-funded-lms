@@ -4,6 +4,7 @@ import { PublicLoginRequestSchema } from "@atlas/contracts/domain-identity/schem
 import {
   resolvePostAuthRedirect,
   resolveSafeRedirectPath,
+  termsRequiredDestination,
 } from "../../../../lib/auth/safe-redirect";
 import {
   GENERIC_LOGIN_ERROR_MESSAGE,
@@ -83,6 +84,17 @@ export async function loginAction(
       message: "Signed in.",
       requestId,
       destination: destination ?? "/invite/accept",
+    };
+  }
+
+  if (body.data.status === "TERMS_REQUIRED") {
+    // Signed in, but not yet agreed to this academy's Terms and Privacy Policy
+    // (launch plan 5.7): the join page asks first.
+    return {
+      ok: true,
+      message: "Signed in.",
+      requestId,
+      destination: termsRequiredDestination(clientRedirect),
     };
   }
 

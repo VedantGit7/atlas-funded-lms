@@ -2,7 +2,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ATLAS_CLIENT_IP_HEADER, buildApiProxyHeaders } from "@atlas/core/http/api-proxy";
 import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolveSafeRedirectPath } from "@/lib/auth/safe-redirect";
-import { OAUTH_NEXT_COOKIE, OAUTH_REMEMBER_COOKIE, resolveRequestOrigin } from "../oauth-shared";
+import {
+  OAUTH_NEXT_COOKIE,
+  OAUTH_REMEMBER_COOKIE,
+  OAUTH_TERMS_COOKIE,
+  resolveRequestOrigin,
+} from "../oauth-shared";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 // Apple is deferred (launch plan, "Later: Apple sign-in").
@@ -19,6 +24,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   }
 
   const remember = req.nextUrl.searchParams.get("remember") === "1";
+  // The sign-up page links here with signup=1 only once "I agree" is ticked;
+  // only then may Google open a new account (launch plan 5.7).
+  const signUp = req.nextUrl.searchParams.get("signup") === "1";
+  const termsAcceptedAt = new Date().toISOString();
   const next = resolveSafeRedirectPath(req.nextUrl.searchParams.get("next"));
 
   let providerUrl: string;
@@ -39,7 +48,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
         req.headers.get(ATLAS_CLIENT_IP_HEADER) ?? "unknown",
       ),
       redirect: "error",
-      body: JSON.stringify({ provider, rememberMe: remember }),
+      body: JSON.stringify({ provider, rememberMe: remember, ...(signUp ? { signUp: true } : {}) }),
       cache: "no-store",
     });
 
@@ -74,6 +83,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   response.cookies.set(OAUTH_REMEMBER_COOKIE, remember ? "1" : "0", cookieOptions);
   if (next) {
     response.cookies.set(OAUTH_NEXT_COOKIE, next, cookieOptions);
+  }
+  if (signUp) {
+    response.cookies.set(OAUTH_TERMS_COOKIE, termsAcceptedAt, cookieOptions);
+  } else {
+    response.cookies.delete(OAUTH_TERMS_COOKIE);
   }
 
   // Appended last: response.cookies changes rebuild the Set-Cookie header.

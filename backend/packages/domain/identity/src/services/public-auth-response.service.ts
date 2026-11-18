@@ -35,11 +35,14 @@ export async function buildPublicAuthResponse(args: {
   serviceStatus: "signed_in" | "verification_required";
   mfaEnabled: boolean;
   membership: { id: string; status: MembershipStatus } | null;
+  /** Not yet agreed to this academy's Terms and Privacy Policy (launch plan 5.7). */
+  termsRequired?: boolean;
 }) {
   const status = mapAuthServiceStatusToPublicStatus({
     serviceStatus: args.serviceStatus,
     mfaEnabled: args.mfaEnabled,
     membershipStatus: args.membership?.status ?? null,
+    termsRequired: args.termsRequired ?? false,
   });
 
   let roleHome: string | null = null;

@@ -12,6 +12,10 @@ export type InvitationAcceptStatus = z.infer<typeof invitationAcceptStatusSchema
 export const AcceptInvitationRequestSchema = z
   .object({
     token: z.string().min(20).max(500),
+    /** Agreed to the academy's Terms and Privacy Policy (launch plan 5.7). */
+    acceptTerms: z.literal(true, {
+      error: "Tick the box to agree to the Terms and Privacy Policy.",
+    }),
   })
   .strict();
 
@@ -46,6 +50,10 @@ export const SetInvitationPasswordRequestSchema = z
   .object({
     token: z.string().min(20).max(500),
     password: z.string().min(NEW_PASSWORD_MIN_LENGTH).max(200),
+    /** Agreed to the academy's Terms and Privacy Policy (launch plan 5.7). */
+    acceptTerms: z.literal(true, {
+      error: "Tick the box to agree to the Terms and Privacy Policy.",
+    }),
   })
   .strict();
 

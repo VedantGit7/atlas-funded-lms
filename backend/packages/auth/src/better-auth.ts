@@ -273,6 +273,11 @@ export function createAtlasAuth(options: AtlasAuthOptions) {
               // An address Google hasn't verified gets no account at all: the
               // user create hook refuses it, and the person signs up by email.
               requireEmailVerification: true,
+              // A new person can only sign up with Google from the sign-up
+              // page, after ticking "I agree" (launch plan 5.7): that start
+              // asks for sign-up explicitly. Elsewhere Google signs in
+              // existing accounts only, and a new person is sent to sign up.
+              disableImplicitSignUp: true,
             },
           },
         }

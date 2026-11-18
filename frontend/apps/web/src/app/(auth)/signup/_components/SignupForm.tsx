@@ -25,6 +25,9 @@ import { useLazyZodForm } from "@/lib/forms/use-lazy-zod-form";
 import { HiddenFormField } from "@/lib/forms/hidden-form-field";
 import { valuesToFormData } from "@/lib/forms/values-to-form-data";
 import { signupAction, type SignupActionState } from "../_actions/signup-action";
+import { TermsAgreement } from "../../_components/TermsAgreement";
+
+const TERMS_REQUIRED_MESSAGE = "Tick the box to agree to the Terms and Privacy Policy.";
 
 const fieldLabelClass = "mb-2 block text-[13px] font-semibold text-[var(--fba-tx2)]";
 
@@ -129,9 +132,12 @@ export function SignupForm() {
     }
   }, [state.verificationRequired, state.email]);
 
+  // Only a sign-up whose "I agree" box is ticked may open an account with
+  // Google (launch plan 5.7); signup=1 asks for that.
   const buildSocialHref = (provider: string) => {
     const params = new URLSearchParams();
     params.set("remember", "0");
+    params.set("signup", "1");
     if (redirectTo) {
       params.set("next", redirectTo);
     }
@@ -148,6 +154,8 @@ export function SignupForm() {
       referralCode: referralCodeFromUrl || undefined,
     },
   });
+  // Typed as the validated value (true), but unset until the box is ticked.
+  const agreed = Boolean(form.watch("acceptTerms") as boolean | undefined);
 
   return (
     <Form {...form}>
@@ -176,6 +184,8 @@ export function SignupForm() {
             const formValues: Record<string, string | undefined> = {
               displayName: values.displayName,
               email: values.email,
+              // Validation only admits a ticked box.
+              acceptTerms: "true",
               ...(typeof values.inviteToken === "string"
                 ? { inviteToken: values.inviteToken }
                 : {}),
@@ -257,6 +267,21 @@ export function SignupForm() {
           />
         ) : null}
 
+        <FormField
+          control={form.control}
+          name="acceptTerms"
+          render={({ field, fieldState }) => (
+            <TermsAgreement
+              checked={Boolean(field.value as boolean | undefined)}
+              onCheckedChange={(checked) => {
+                field.onChange(checked ? true : undefined);
+                if (checked) form.clearErrors("acceptTerms");
+              }}
+              error={fieldState.error ? TERMS_REQUIRED_MESSAGE : null}
+            />
+          )}
+        />
+
         {state.message || oauthFailed ? (
           <p
             role="alert"
@@ -295,25 +320,20 @@ export function SignupForm() {
           <a
             key={provider.id}
             href={buildSocialHref(provider.id)}
-            className="flex items-center justify-center gap-2.5 rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] px-4 py-3 text-[14px] font-semibold text-[var(--fba-tx)] transition-colors hover:border-[var(--fba-tx3)] hover:bg-[var(--fba-bg2)]"
+            aria-disabled={!agreed}
+            onClick={(event) => {
+              if (agreed) return;
+              // No account is opened without agreement, with Google too.
+              event.preventDefault();
+              form.setError("acceptTerms", { type: "required", message: TERMS_REQUIRED_MESSAGE });
+            }}
+            className="flex items-center justify-center gap-2.5 rounded-[10px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] px-4 py-3 text-[14px] font-semibold text-[var(--fba-tx)] transition-colors hover:border-[var(--fba-tx3)] hover:bg-[var(--fba-bg2)] aria-disabled:cursor-not-allowed aria-disabled:opacity-60"
           >
             {provider.icon}
             {provider.label}
           </a>
         ))}
       </div>
-
-      <p className="mt-6 text-center text-[12px] leading-[1.6] text-[var(--fba-tx3)]">
-        By signing up, you acknowledge that you have read, understood, and agree to our{" "}
-        <Link href="/terms" className={inlineLinkClass}>
-          Terms
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className={inlineLinkClass}>
-          Privacy Policy
-        </Link>
-        .
-      </p>
     </Form>
   );
 }

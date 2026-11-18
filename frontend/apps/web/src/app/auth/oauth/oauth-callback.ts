@@ -3,7 +3,12 @@ import { ATLAS_CLIENT_IP_HEADER, buildApiProxyHeaders } from "@atlas/core/http/a
 import { ATLAS_INTERNAL_TENANT_HOST_HEADER } from "@/lib/http-headers";
 import { resolvePostAuthRedirect } from "@/lib/auth/safe-redirect";
 import { identityBlockQueryValue, isIdentityBlockCode } from "@/lib/auth-messages";
-import { OAUTH_NEXT_COOKIE, OAUTH_REMEMBER_COOKIE, resolveRequestOrigin } from "./oauth-shared";
+import {
+  OAUTH_NEXT_COOKIE,
+  OAUTH_REMEMBER_COOKIE,
+  OAUTH_TERMS_COOKIE,
+  resolveRequestOrigin,
+} from "./oauth-shared";
 
 const API_INTERNAL_URL = process.env["API_INTERNAL_URL"] ?? "http://127.0.0.1:3001";
 
@@ -17,6 +22,7 @@ type CallbackApiResponse = {
 function clearOAuthCookies(response: NextResponse): NextResponse {
   response.cookies.delete(OAUTH_REMEMBER_COOKIE);
   response.cookies.delete(OAUTH_NEXT_COOKIE);
+  response.cookies.delete(OAUTH_TERMS_COOKIE);
   return response;
 }
 
@@ -30,6 +36,12 @@ function resolveDestination(
       return resolvePostAuthRedirect(clientNext, apiRedirect, "/") ?? "/";
     case "INVITED_MEMBERSHIP":
       return resolvePostAuthRedirect(clientNext, apiRedirect, "/invite/accept") ?? "/invite/accept";
+    case "TERMS_REQUIRED": {
+      // Signed in, but not yet agreed to this academy's Terms (launch plan
+      // 5.7): the join page asks, then carries on to where they were going.
+      const next = resolvePostAuthRedirect(clientNext, null);
+      return next ? `/join?next=${encodeURIComponent(next)}` : "/join";
+    }
     case "MFA_REQUIRED": {
       // Signed in, but the session can't be used until the authenticator code
       // is given (security review 5.3, finding 2): the sign-in page asks for it.
@@ -58,6 +70,7 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
   const providerError = req.nextUrl.searchParams.get("error");
   const rememberMe = req.cookies.get(OAUTH_REMEMBER_COOKIE)?.value === "1";
   const clientNext = req.cookies.get(OAUTH_NEXT_COOKIE)?.value ?? null;
+  const termsAcceptedAt = req.cookies.get(OAUTH_TERMS_COOKIE)?.value ?? null;
 
   if (providerError || !code || !state) {
     return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=oauth`));
@@ -85,6 +98,7 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
         state,
         rememberMe,
         ...(clientNext ? { redirectTo: clientNext } : {}),
+        ...(termsAcceptedAt ? { termsAcceptedAt } : {}),
       }),
       cache: "no-store",
     });
@@ -100,7 +114,9 @@ export async function handleOAuthCallback(req: NextRequest): Promise<NextRespons
     } | null;
     const code = failure?.error?.code;
     const errorParam = isIdentityBlockCode(code) ? identityBlockQueryValue(code) : "oauth";
-    return clearOAuthCookies(NextResponse.redirect(`${loginUrl}?error=${errorParam}`));
+    // A new person who tried Google from the sign-in page signs up first.
+    const base = code === "SIGNUP_REQUIRED" ? `${origin}/signup` : loginUrl;
+    return clearOAuthCookies(NextResponse.redirect(`${base}?error=${errorParam}`));
   }
 
   const payload = (await apiRes.json()) as CallbackApiResponse;

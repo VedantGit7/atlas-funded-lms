@@ -27,6 +27,8 @@ const PROTECTED_ROUTE_PREFIXES = [
   "/settings",
   "/profile",
   "/review",
+  // Agreeing to the academy's Terms as someone signed in (launch plan 5.7).
+  "/join",
 ] as const;
 
 function isProtectedRoute(pathname: string): boolean {

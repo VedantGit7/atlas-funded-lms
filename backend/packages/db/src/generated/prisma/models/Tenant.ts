@@ -274,6 +274,7 @@ export type TenantWhereInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceListRelationFilter
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactListRelationFilter
   usage_events?: Prisma.TenantUsageEventListRelationFilter
+  legal_acceptances?: Prisma.TenantLegalAcceptanceListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -295,6 +296,7 @@ export type TenantOrderByWithRelationInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceOrderByRelationAggregateInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactOrderByRelationAggregateInput
   usage_events?: Prisma.TenantUsageEventOrderByRelationAggregateInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -319,6 +321,7 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   member_notification_preferences?: Prisma.MemberNotificationPreferenceListRelationFilter
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactListRelationFilter
   usage_events?: Prisma.TenantUsageEventListRelationFilter
+  legal_acceptances?: Prisma.TenantLegalAcceptanceListRelationFilter
 }, "id" | "slug">
 
 export type TenantOrderByWithAggregationInput = {
@@ -378,6 +381,7 @@ export type TenantCreateInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -399,6 +403,7 @@ export type TenantUncheckedCreateInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -420,6 +425,7 @@ export type TenantUpdateInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -441,6 +447,7 @@ export type TenantUncheckedUpdateInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -586,6 +593,20 @@ export type TenantUpdateOneRequiredWithoutUsage_eventsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutUsage_eventsInput, Prisma.TenantUpdateWithoutUsage_eventsInput>, Prisma.TenantUncheckedUpdateWithoutUsage_eventsInput>
 }
 
+export type TenantCreateNestedOneWithoutLegal_acceptancesInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutLegal_acceptancesInput, Prisma.TenantUncheckedCreateWithoutLegal_acceptancesInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLegal_acceptancesInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutLegal_acceptancesNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutLegal_acceptancesInput, Prisma.TenantUncheckedCreateWithoutLegal_acceptancesInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutLegal_acceptancesInput
+  upsert?: Prisma.TenantUpsertWithoutLegal_acceptancesInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutLegal_acceptancesInput, Prisma.TenantUpdateWithoutLegal_acceptancesInput>, Prisma.TenantUncheckedUpdateWithoutLegal_acceptancesInput>
+}
+
 export type TenantCreateNestedOneWithoutDomainsInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutDomainsInput, Prisma.TenantUncheckedCreateWithoutDomainsInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutDomainsInput
@@ -674,6 +695,7 @@ export type TenantCreateWithoutUsage_eventsInput = {
   member_profiles?: Prisma.MemberProfileCreateNestedManyWithoutTenantInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutUsage_eventsInput = {
@@ -694,6 +716,7 @@ export type TenantUncheckedCreateWithoutUsage_eventsInput = {
   member_profiles?: Prisma.MemberProfileUncheckedCreateNestedManyWithoutTenantInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutUsage_eventsInput = {
@@ -730,6 +753,7 @@ export type TenantUpdateWithoutUsage_eventsInput = {
   member_profiles?: Prisma.MemberProfileUpdateManyWithoutTenantNestedInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutUsage_eventsInput = {
@@ -750,6 +774,107 @@ export type TenantUncheckedUpdateWithoutUsage_eventsInput = {
   member_profiles?: Prisma.MemberProfileUncheckedUpdateManyWithoutTenantNestedInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutLegal_acceptancesInput = {
+  id: string
+  slug: string
+  legal_name?: string | null
+  display_name: string
+  state?: $Enums.TenantState
+  default_locale?: string
+  default_timezone?: string
+  statement_timeout_ms?: number
+  query_budget_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  domains?: Prisma.TenantDomainCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.MembershipCreateNestedManyWithoutTenantInput
+  member_profiles?: Prisma.MemberProfileCreateNestedManyWithoutTenantInput
+  member_notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutTenantInput
+  proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactCreateNestedManyWithoutTenantInput
+  usage_events?: Prisma.TenantUsageEventCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutLegal_acceptancesInput = {
+  id: string
+  slug: string
+  legal_name?: string | null
+  display_name: string
+  state?: $Enums.TenantState
+  default_locale?: string
+  default_timezone?: string
+  statement_timeout_ms?: number
+  query_budget_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Date | string
+  updated_at?: Date | string
+  deleted_at?: Date | string | null
+  domains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutTenantInput
+  memberships?: Prisma.MembershipUncheckedCreateNestedManyWithoutTenantInput
+  member_profiles?: Prisma.MemberProfileUncheckedCreateNestedManyWithoutTenantInput
+  member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
+  proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedCreateNestedManyWithoutTenantInput
+  usage_events?: Prisma.TenantUsageEventUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutLegal_acceptancesInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutLegal_acceptancesInput, Prisma.TenantUncheckedCreateWithoutLegal_acceptancesInput>
+}
+
+export type TenantUpsertWithoutLegal_acceptancesInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutLegal_acceptancesInput, Prisma.TenantUncheckedUpdateWithoutLegal_acceptancesInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutLegal_acceptancesInput, Prisma.TenantUncheckedCreateWithoutLegal_acceptancesInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutLegal_acceptancesInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutLegal_acceptancesInput, Prisma.TenantUncheckedUpdateWithoutLegal_acceptancesInput>
+}
+
+export type TenantUpdateWithoutLegal_acceptancesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  legal_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  display_name?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumTenantStateFieldUpdateOperationsInput | $Enums.TenantState
+  default_locale?: Prisma.StringFieldUpdateOperationsInput | string
+  default_timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  statement_timeout_ms?: Prisma.IntFieldUpdateOperationsInput | number
+  query_budget_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  domains?: Prisma.TenantDomainUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.MembershipUpdateManyWithoutTenantNestedInput
+  member_profiles?: Prisma.MemberProfileUpdateManyWithoutTenantNestedInput
+  member_notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutTenantNestedInput
+  proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUpdateManyWithoutTenantNestedInput
+  usage_events?: Prisma.TenantUsageEventUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutLegal_acceptancesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  legal_name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  display_name?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumTenantStateFieldUpdateOperationsInput | $Enums.TenantState
+  default_locale?: Prisma.StringFieldUpdateOperationsInput | string
+  default_timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  statement_timeout_ms?: Prisma.IntFieldUpdateOperationsInput | number
+  query_budget_json?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  domains?: Prisma.TenantDomainUncheckedUpdateManyWithoutTenantNestedInput
+  memberships?: Prisma.MembershipUncheckedUpdateManyWithoutTenantNestedInput
+  member_profiles?: Prisma.MemberProfileUncheckedUpdateManyWithoutTenantNestedInput
+  member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
+  proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedUpdateManyWithoutTenantNestedInput
+  usage_events?: Prisma.TenantUsageEventUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutDomainsInput = {
@@ -770,6 +895,7 @@ export type TenantCreateWithoutDomainsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutDomainsInput = {
@@ -790,6 +916,7 @@ export type TenantUncheckedCreateWithoutDomainsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutDomainsInput = {
@@ -826,6 +953,7 @@ export type TenantUpdateWithoutDomainsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutDomainsInput = {
@@ -846,6 +974,7 @@ export type TenantUncheckedUpdateWithoutDomainsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMembershipsInput = {
@@ -866,6 +995,7 @@ export type TenantCreateWithoutMembershipsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMembershipsInput = {
@@ -886,6 +1016,7 @@ export type TenantUncheckedCreateWithoutMembershipsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMembershipsInput = {
@@ -922,6 +1053,7 @@ export type TenantUpdateWithoutMembershipsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMembershipsInput = {
@@ -942,6 +1074,7 @@ export type TenantUncheckedUpdateWithoutMembershipsInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMember_profilesInput = {
@@ -962,6 +1095,7 @@ export type TenantCreateWithoutMember_profilesInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMember_profilesInput = {
@@ -982,6 +1116,7 @@ export type TenantUncheckedCreateWithoutMember_profilesInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMember_profilesInput = {
@@ -1018,6 +1153,7 @@ export type TenantUpdateWithoutMember_profilesInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMember_profilesInput = {
@@ -1038,6 +1174,7 @@ export type TenantUncheckedUpdateWithoutMember_profilesInput = {
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutMember_notification_preferencesInput = {
@@ -1058,6 +1195,7 @@ export type TenantCreateWithoutMember_notification_preferencesInput = {
   member_profiles?: Prisma.MemberProfileCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutMember_notification_preferencesInput = {
@@ -1078,6 +1216,7 @@ export type TenantUncheckedCreateWithoutMember_notification_preferencesInput = {
   member_profiles?: Prisma.MemberProfileUncheckedCreateNestedManyWithoutTenantInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutMember_notification_preferencesInput = {
@@ -1114,6 +1253,7 @@ export type TenantUpdateWithoutMember_notification_preferencesInput = {
   member_profiles?: Prisma.MemberProfileUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutMember_notification_preferencesInput = {
@@ -1134,6 +1274,7 @@ export type TenantUncheckedUpdateWithoutMember_notification_preferencesInput = {
   member_profiles?: Prisma.MemberProfileUncheckedUpdateManyWithoutTenantNestedInput
   proctoring_media_artifacts?: Prisma.ProctoringMediaArtifactUncheckedUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutProctoring_media_artifactsInput = {
@@ -1154,6 +1295,7 @@ export type TenantCreateWithoutProctoring_media_artifactsInput = {
   member_profiles?: Prisma.MemberProfileCreateNestedManyWithoutTenantInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutProctoring_media_artifactsInput = {
@@ -1174,6 +1316,7 @@ export type TenantUncheckedCreateWithoutProctoring_media_artifactsInput = {
   member_profiles?: Prisma.MemberProfileUncheckedCreateNestedManyWithoutTenantInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedCreateNestedManyWithoutTenantInput
   usage_events?: Prisma.TenantUsageEventUncheckedCreateNestedManyWithoutTenantInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutProctoring_media_artifactsInput = {
@@ -1210,6 +1353,7 @@ export type TenantUpdateWithoutProctoring_media_artifactsInput = {
   member_profiles?: Prisma.MemberProfileUpdateManyWithoutTenantNestedInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutProctoring_media_artifactsInput = {
@@ -1230,6 +1374,7 @@ export type TenantUncheckedUpdateWithoutProctoring_media_artifactsInput = {
   member_profiles?: Prisma.MemberProfileUncheckedUpdateManyWithoutTenantNestedInput
   member_notification_preferences?: Prisma.MemberNotificationPreferenceUncheckedUpdateManyWithoutTenantNestedInput
   usage_events?: Prisma.TenantUsageEventUncheckedUpdateManyWithoutTenantNestedInput
+  legal_acceptances?: Prisma.TenantLegalAcceptanceUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -1244,6 +1389,7 @@ export type TenantCountOutputType = {
   member_notification_preferences: number
   proctoring_media_artifacts: number
   usage_events: number
+  legal_acceptances: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1253,6 +1399,7 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   member_notification_preferences?: boolean | TenantCountOutputTypeCountMember_notification_preferencesArgs
   proctoring_media_artifacts?: boolean | TenantCountOutputTypeCountProctoring_media_artifactsArgs
   usage_events?: boolean | TenantCountOutputTypeCountUsage_eventsArgs
+  legal_acceptances?: boolean | TenantCountOutputTypeCountLegal_acceptancesArgs
 }
 
 /**
@@ -1307,6 +1454,13 @@ export type TenantCountOutputTypeCountUsage_eventsArgs<ExtArgs extends runtime.T
   where?: Prisma.TenantUsageEventWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountLegal_acceptancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantLegalAcceptanceWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1327,6 +1481,7 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   member_notification_preferences?: boolean | Prisma.Tenant$member_notification_preferencesArgs<ExtArgs>
   proctoring_media_artifacts?: boolean | Prisma.Tenant$proctoring_media_artifactsArgs<ExtArgs>
   usage_events?: boolean | Prisma.Tenant$usage_eventsArgs<ExtArgs>
+  legal_acceptances?: boolean | Prisma.Tenant$legal_acceptancesArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -1383,6 +1538,7 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   member_notification_preferences?: boolean | Prisma.Tenant$member_notification_preferencesArgs<ExtArgs>
   proctoring_media_artifacts?: boolean | Prisma.Tenant$proctoring_media_artifactsArgs<ExtArgs>
   usage_events?: boolean | Prisma.Tenant$usage_eventsArgs<ExtArgs>
+  legal_acceptances?: boolean | Prisma.Tenant$legal_acceptancesArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1397,6 +1553,7 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     member_notification_preferences: Prisma.$MemberNotificationPreferencePayload<ExtArgs>[]
     proctoring_media_artifacts: Prisma.$ProctoringMediaArtifactPayload<ExtArgs>[]
     usage_events: Prisma.$TenantUsageEventPayload<ExtArgs>[]
+    legal_acceptances: Prisma.$TenantLegalAcceptancePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1811,6 +1968,7 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   member_notification_preferences<T extends Prisma.Tenant$member_notification_preferencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$member_notification_preferencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberNotificationPreferencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   proctoring_media_artifacts<T extends Prisma.Tenant$proctoring_media_artifactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$proctoring_media_artifactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProctoringMediaArtifactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   usage_events<T extends Prisma.Tenant$usage_eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$usage_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantUsageEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  legal_acceptances<T extends Prisma.Tenant$legal_acceptancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$legal_acceptancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantLegalAcceptancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2386,6 +2544,30 @@ export type Tenant$usage_eventsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.TenantUsageEventScalarFieldEnum | Prisma.TenantUsageEventScalarFieldEnum[]
+}
+
+/**
+ * Tenant.legal_acceptances
+ */
+export type Tenant$legal_acceptancesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantLegalAcceptance
+   */
+  select?: Prisma.TenantLegalAcceptanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantLegalAcceptance
+   */
+  omit?: Prisma.TenantLegalAcceptanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantLegalAcceptanceInclude<ExtArgs> | null
+  where?: Prisma.TenantLegalAcceptanceWhereInput
+  orderBy?: Prisma.TenantLegalAcceptanceOrderByWithRelationInput | Prisma.TenantLegalAcceptanceOrderByWithRelationInput[]
+  cursor?: Prisma.TenantLegalAcceptanceWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantLegalAcceptanceScalarFieldEnum | Prisma.TenantLegalAcceptanceScalarFieldEnum[]
 }
 
 /**

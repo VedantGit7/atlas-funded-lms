@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   createAccount: vi.fn(),
   findPrincipal: vi.fn(),
   sessionUser: vi.fn(),
+  recordAcceptance: vi.fn(),
 }));
 
 vi.mock("@atlas/auth", async (importOriginal) => ({
@@ -46,6 +47,13 @@ vi.mock("@atlas/membership", async (importOriginal) => ({
   previewInvitation: (...args: unknown[]) => mocks.previewInvitation(...args),
   acceptInvitation: (...args: unknown[]) => mocks.acceptInvitation(...args),
 }));
+vi.mock(
+  "../../backend/apps/api/src/server/tenant-settings/legal-acceptance.service",
+  async (importOriginal) => ({
+    ...(await importOriginal<Record<string, unknown>>()),
+    recordLegalAcceptance: (...args: unknown[]) => mocks.recordAcceptance(...args),
+  }),
+);
 vi.mock("@atlas/domain-identity", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   readMembershipRoleKeys: () => Promise.resolve(["learner"]),
@@ -99,6 +107,7 @@ describe("invitations", () => {
       request("/api/v1/public/invitations/set-password", {
         token: TOKEN,
         password: "a-new-strong-password",
+        acceptTerms: true,
       }),
     );
 
@@ -112,6 +121,23 @@ describe("invitations", () => {
       }),
     );
     expect(response.headers.getSetCookie()).toEqual(["atlas_session=t.s; Path=/; HttpOnly"]);
+    // Launch plan 5.7: the agreement is recorded with the membership it opens.
+    expect(mocks.recordAcceptance).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ consent: expect.objectContaining({ source: "invitation" }) }),
+    );
+  });
+
+  it("refuses to set a password without the agreement box ticked, creating nothing", async () => {
+    const response = await setPassword(
+      request("/api/v1/public/invitations/set-password", {
+        token: TOKEN,
+        password: "a-new-strong-password",
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(mocks.createAccount).not.toHaveBeenCalled();
   });
 
   it("refuses an invitation that isn't valid, before creating anything", async () => {
@@ -120,6 +146,7 @@ describe("invitations", () => {
       request("/api/v1/public/invitations/set-password", {
         token: TOKEN,
         password: "a-new-strong-password",
+        acceptTerms: true,
       }),
     );
 

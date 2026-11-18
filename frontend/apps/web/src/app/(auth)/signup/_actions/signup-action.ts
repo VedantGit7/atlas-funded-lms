@@ -27,14 +27,18 @@ export async function signupAction(
   const parsed = PublicSignupRequestSchema.safeParse({
     email: readFormString(formData.get("email")),
     displayName: readFormString(formData.get("displayName")),
+    acceptTerms: readFormString(formData.get("acceptTerms")) === "true",
     ...(inviteToken ? { inviteToken } : {}),
     ...(referralCode ? { referralCode } : {}),
   });
 
   if (!parsed.success) {
+    const termsMissing = parsed.error.issues.some((issue) => issue.path[0] === "acceptTerms");
     return {
       ok: false,
-      message: "Check your details and try again.",
+      message: termsMissing
+        ? "Tick the box to agree to the Terms and Privacy Policy."
+        : "Check your details and try again.",
       requestId,
     };
   }
@@ -46,6 +50,7 @@ export async function signupAction(
     const body = await serverPublicApi.signup({
       email,
       displayName,
+      acceptTerms: true,
       ...(inviteToken ? { inviteToken } : {}),
       ...(referralCode ? { referralCode } : {}),
     });

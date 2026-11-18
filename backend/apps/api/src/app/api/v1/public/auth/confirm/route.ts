@@ -61,7 +61,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       allowAnonymousTenantRead: true,
     },
     async (tx) => {
-      const membership = await resolveSignInMembership(tx, {
+      const { membership, termsRequired } = await resolveSignInMembership(tx, {
         tenantId: tenant.tenantId,
         principalId,
         email: result.identity.emailNormalized,
@@ -74,6 +74,7 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
         serviceStatus: result.status,
         mfaEnabled: result.identity.mfaEnabled,
         membership,
+        termsRequired,
       });
     },
   );

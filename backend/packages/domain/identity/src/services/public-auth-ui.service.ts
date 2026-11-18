@@ -11,7 +11,9 @@ export type PublicAuthStatus =
   | "EMAIL_VERIFICATION_REQUIRED"
   | "MFA_REQUIRED"
   | "NO_ACTIVE_MEMBERSHIP"
-  | "INVITED_MEMBERSHIP";
+  | "INVITED_MEMBERSHIP"
+  /** Signed in, but not yet agreed to this academy's Terms and Privacy Policy (launch plan 5.7). */
+  | "TERMS_REQUIRED";
 
 const ROLE_HOME_PRIORITY: ReadonlyArray<{ keys: readonly string[]; path: string }> = [
   { keys: ["owner", "admin"], path: "/admin" },
@@ -39,6 +41,7 @@ export function resolvePublicAuthStatus(args: {
   membershipStatus: MembershipStatus | null;
   authenticated: boolean;
   verificationRequired: boolean;
+  termsRequired?: boolean;
 }): PublicAuthStatus {
   if (args.verificationRequired) {
     return "EMAIL_VERIFICATION_REQUIRED";
@@ -50,6 +53,10 @@ export function resolvePublicAuthStatus(args: {
 
   if (args.mfaEnabled) {
     return "MFA_REQUIRED";
+  }
+
+  if (args.termsRequired && (!args.membershipStatus || args.membershipStatus === "ACTIVE")) {
+    return "TERMS_REQUIRED";
   }
 
   if (!args.membershipStatus) {
@@ -71,8 +78,10 @@ export function mapAuthServiceStatusToPublicStatus(args: {
   serviceStatus: "signed_in" | "verification_required";
   mfaEnabled: boolean;
   membershipStatus: MembershipStatus | null;
+  termsRequired?: boolean;
 }): PublicAuthStatus {
   return resolvePublicAuthStatus({
+    termsRequired: args.termsRequired ?? false,
     mfaEnabled: args.mfaEnabled,
     membershipStatus: args.membershipStatus,
     authenticated: args.serviceStatus === "signed_in",
@@ -115,6 +124,8 @@ export function resolveRedirectForAuthStatus(
       return roleHome;
     case "INVITED_MEMBERSHIP":
       return "/invite/accept";
+    case "TERMS_REQUIRED":
+      return "/join";
     case "EMAIL_VERIFICATION_REQUIRED":
       return null;
     case "MFA_REQUIRED":
