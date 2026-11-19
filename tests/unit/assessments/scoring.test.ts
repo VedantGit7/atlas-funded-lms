@@ -105,6 +105,68 @@ describe("scoring service", () => {
   });
 });
 
+describe("scoring matching and multi-select answers", () => {
+  const matchingItem = {
+    assessmentItemId: "ai-m",
+    itemId: "item-m",
+    itemTypeKey: "matching",
+    points: 2,
+    answerKeyJson: { pairs: { "left-1": "right-2", "left-2": "right-1" } },
+    options: [],
+  };
+
+  const scoreMatching = (pairs: Record<string, string>) =>
+    scoreAttempt({ items: [matchingItem], answers: new Map([["ai-m", { pairs }]]) }).itemResults[0]
+      ?.isCorrect;
+
+  it("marks a correct matching answer correct whatever order it was made in", () => {
+    // The answer object is built in the order the learner matched the pairs,
+    // and the grader used to compare JSON text, so this was marked wrong.
+    expect(scoreMatching({ "left-2": "right-1", "left-1": "right-2" })).toBe(true);
+    expect(scoreMatching({ "left-1": "right-2", "left-2": "right-1" })).toBe(true);
+  });
+
+  it("still marks wrong, incomplete and padded matching answers wrong", () => {
+    expect(scoreMatching({ "left-1": "right-1", "left-2": "right-2" })).toBe(false);
+    expect(scoreMatching({ "left-1": "right-2" })).toBe(false);
+    expect(scoreMatching({ "left-1": "right-2", "left-2": "right-1", "left-3": "right-3" })).toBe(
+      false,
+    );
+  });
+
+  const multiItem = (correctOptionIds: string[]) => ({
+    assessmentItemId: "ai-x",
+    itemId: "item-x",
+    itemTypeKey: "mcq_multi",
+    points: 1,
+    answerKeyJson: { correctOptionIds },
+    options: [
+      { id: "opt-a", isCorrect: true, position: 1 },
+      { id: "opt-b", isCorrect: true, position: 2 },
+      { id: "opt-c", isCorrect: false, position: 3 },
+    ],
+  });
+
+  const scoreMulti = (correctOptionIds: string[], selected: string[]) =>
+    scoreAttempt({
+      items: [multiItem(correctOptionIds)],
+      answers: new Map([["ai-x", { selectedOptionIds: selected }]]),
+    }).itemResults[0]?.isCorrect;
+
+  it("uses the options' own flags when the key names options that no longer exist", () => {
+    // Saving a question used to give its options new ids while the key kept
+    // the editor's old ones; every correct answer was then marked wrong.
+    expect(scoreMulti(["stale-1", "stale-2"], ["opt-a", "opt-b"])).toBe(true);
+    expect(scoreMulti(["stale-1", "stale-2"], ["opt-a"])).toBe(false);
+  });
+
+  it("still follows a key that names this question's options", () => {
+    expect(scoreMulti(["opt-a", "opt-b"], ["opt-b", "opt-a"])).toBe(true);
+    expect(scoreMulti(["opt-a"], ["opt-a"])).toBe(true);
+    expect(scoreMulti(["opt-a"], ["opt-a", "opt-b"])).toBe(false);
+  });
+});
+
 describe("runner dto secrecy", () => {
   it("omits answer_key_json, is_correct, and correct flags from runner shape", () => {
     const runner = buildRunnerItems();

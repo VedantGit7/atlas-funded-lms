@@ -295,6 +295,8 @@ export const itemRegistryRepository = {
     tenantId: string,
     itemId: string,
     options: Array<{
+      /** Set by the service when the answer key must name this option. */
+      id?: string;
       optionJson: unknown;
       isCorrect?: boolean | null | undefined;
       position: number;
@@ -317,7 +319,7 @@ export const itemRegistryRepository = {
           updated_at
         )
         values (
-          ${randomUUID()}::uuid,
+          ${option.id ?? randomUUID()}::uuid,
           ${tenantId}::uuid,
           ${itemId}::uuid,
           ${JSON.stringify(option.optionJson)}::jsonb,

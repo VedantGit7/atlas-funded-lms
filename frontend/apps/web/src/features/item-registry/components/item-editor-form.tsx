@@ -6,6 +6,10 @@ import {
   readAnswerKeyExplanation,
   withAnswerKeyExplanation,
 } from "@atlas/contracts/item-registry/answer-contracts";
+import {
+  describeItemDefinitionIssues,
+  validateItemDefinition,
+} from "@atlas/contracts/item-registry/item-definition.contract";
 import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Eye, Info, Save, Scale, X } from "lucide-react";
 import {
@@ -153,6 +157,20 @@ export function ItemEditorForm({
           .filter(Boolean),
         options: requiresOptions ? editorOptionsToPayload(options) : [],
       };
+
+      // The same rules the server applies, so the author sees what to fix
+      // before saving instead of after.
+      const checked = validateItemDefinition({
+        itemTypeKey,
+        stem,
+        answerKeyJson: body.answerKeyJson,
+        options: body.options,
+      });
+      if (!checked.ok) {
+        setError(describeItemDefinitionIssues(checked.issues));
+        setPending(false);
+        return;
+      }
 
       if (itemId) {
         await itemRegistryApi.updateItem(itemId, {

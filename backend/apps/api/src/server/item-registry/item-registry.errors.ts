@@ -16,6 +16,15 @@ export function itemTypeNotFound(): AtlasHttpError {
   });
 }
 
+/** The question cannot be graded as written (item-definition.contract.ts). */
+export function itemDefinitionInvalid(message: string): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 400,
+    message,
+  });
+}
+
 export function itemCollectionNotFound(): AtlasHttpError {
   return new AtlasHttpError({
     code: "PERMISSION_DENIED",
