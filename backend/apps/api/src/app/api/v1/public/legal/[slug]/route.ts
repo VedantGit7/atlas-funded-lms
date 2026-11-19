@@ -4,11 +4,12 @@ import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import {
   LegalDocumentSlugSchema,
   PublicLegalDocumentResponseSchema,
+  type LegalDocumentSlug,
 } from "@atlas/domain-branding/schemas/public-legal";
 import { readTenantLegalDocument } from "../../../../../../server/tenant-settings/tenant-legal.service";
 import { routeMetadata } from "./route.metadata";
 
-function readSlugFromRequest(req: Request): "terms" | "privacy" {
+function readSlugFromRequest(req: Request): LegalDocumentSlug {
   const segments = new URL(req.url).pathname.split("/").filter(Boolean);
   return LegalDocumentSlugSchema.parse(segments.at(-1) ?? "");
 }

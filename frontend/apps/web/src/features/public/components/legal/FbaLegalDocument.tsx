@@ -9,6 +9,12 @@ import "@/components/theme/fba-theme.css";
 import type { LegalDocument } from "./legal-types";
 import { LegalContentRenderer } from "./LegalContentRenderer";
 
+const LEGAL_PAGES: ReadonlyArray<{ slug: LegalDocument["slug"]; href: string; label: string }> = [
+  { slug: "terms", href: "/terms", label: "Terms and Conditions" },
+  { slug: "privacy", href: "/privacy", label: "Privacy Policy" },
+  { slug: "disclaimer", href: "/disclaimer", label: "Disclaimer" },
+];
+
 type FbaLegalDocumentProps = {
   document: LegalDocument;
   publicName?: string;
@@ -40,8 +46,7 @@ export function FbaLegalDocument({
     [],
   );
 
-  const siblingHref = legalDocument.slug === "terms" ? "/privacy" : "/terms";
-  const siblingLabel = legalDocument.slug === "terms" ? "Privacy Policy" : "Terms and Conditions";
+  const siblings = LEGAL_PAGES.filter((page) => page.slug !== legalDocument.slug);
 
   return (
     <div
@@ -130,12 +135,17 @@ export function FbaLegalDocument({
 
         <p className="mt-8 border-t border-[var(--fba-bdr)] pt-4 text-[13px] text-[var(--fba-tx2)]">
           See also:{" "}
-          <Link
-            href={siblingHref}
-            className="text-[var(--fba-ind-tx)] no-underline hover:underline"
-          >
-            {siblingLabel}
-          </Link>
+          {siblings.map((page, index) => (
+            <span key={page.slug}>
+              {index > 0 ? " · " : null}
+              <Link
+                href={page.href}
+                className="text-[var(--fba-ind-tx)] no-underline hover:underline"
+              >
+                {page.label}
+              </Link>
+            </span>
+          ))}
         </p>
       </main>
 

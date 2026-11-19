@@ -49,6 +49,7 @@ export const SNIPPET_ALLOWED_ROOTS = [
   "verify",
   "privacy",
   "terms",
+  "disclaimer",
   "tenant-unavailable",
   "achievements",
   "certificates",

@@ -1198,6 +1198,251 @@
             ]
           }
         ]
+      },
+      "disclaimer": {
+        "slug": "disclaimer",
+        "title": "Disclaimer",
+        "subtitle": "What FundedBeyond Academy is and is not, the risks of trading, and the limits of our responsibility.",
+        "lastUpdated": "November 19, 2026",
+        "sections": [
+          {
+            "id": "about",
+            "sectionNumber": "Section 01",
+            "title": "About This Disclaimer",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "FundedBeyond Academy (the \"Academy\", \"we\", \"us\") is an online trading-education platform at academy.fundedbeyond.com, operated by Beyond Edge FZCO, a company registered in the International Free Zone Authority (IFZA), Dubai, United Arab Emirates."
+              },
+              {
+                "type": "p",
+                "text": "This Disclaimer applies to everything we provide: the website, courses, lessons, videos, live and recorded sessions, quizzes and assessments, the trader diagnostic, readiness scores, certificates, the community, emails and any other material. It forms part of our Terms and Conditions and should be read with them and with our Privacy Policy. If you do not accept it, please do not use the Academy."
+              }
+            ]
+          },
+          {
+            "id": "summary",
+            "sectionNumber": "Section 02",
+            "title": "The Short Version",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "The Academy is for education only. Nothing in it is financial, investment, trading, legal or tax advice.",
+                  "Trading is risky. You can lose some or all of your money and, with leverage, more than you put in.",
+                  "We do not guarantee any result: not profits, not passing a challenge or evaluation, not funding, not income.",
+                  "Every trading and financial decision you make is yours alone, and so are its consequences.",
+                  "To the fullest extent the law allows, we are not responsible for any loss or damage of any kind arising from your use of the Academy or from anything you do based on it.",
+                  "We do not give refunds or compensation in any case."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "education",
+            "sectionNumber": "Section 03",
+            "title": "Education Only, Not Advice",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "All content in the Academy is general educational information. It does not take into account your objectives, financial situation, experience or needs."
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "We are not your broker, investment adviser, portfolio manager, financial planner or fiduciary, and we do not act on your behalf.",
+                  "We do not recommend that you buy, sell or hold any instrument, or open an account with any broker, platform or proprietary trading firm.",
+                  "Strategies, setups, indicators, chart analysis, trade walkthroughs and market commentary are shown to explain concepts. They are not trading signals or recommendations.",
+                  "Before making any financial decision, consider getting advice from a professional who is properly licensed where you live."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "risk",
+            "sectionNumber": "Section 04",
+            "title": "Trading Risk Warning",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "Trading forex, contracts for difference (CFDs), futures, options, indices, commodities, cryptocurrencies and other leveraged or speculative products carries a high level of risk and is not suitable for everyone."
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "Leverage magnifies losses as well as gains. You can lose more than your initial deposit.",
+                  "Prices can move quickly or gap, and orders may not be filled at the price you expect.",
+                  "Cryptocurrencies are highly volatile and may not be regulated where you live.",
+                  "Only trade with money you can afford to lose entirely."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "results",
+            "sectionNumber": "Section 05",
+            "title": "Past Performance, Simulations and Examples",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "Past performance, whether ours, an instructor's, a member's or a market's, is not a reliable indicator of future results.",
+                  "Hypothetical, simulated, back-tested and demo results are prepared with hindsight and do not involve real money. They do not reflect real execution, slippage, fees or the pressure of live trading.",
+                  "Diagnostics, quizzes, readiness scores, bands, badges, leaderboards and certificates measure progress inside the Academy only. They are not a qualification, licence or professional accreditation, and they do not predict how you will trade.",
+                  "Testimonials and success stories describe individual experiences. They are not typical and may not be repeated."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "challenges",
+            "sectionNumber": "Section 06",
+            "title": "Funded Accounts and Trading Challenges",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "Completing a course, reaching a readiness band or earning a certificate does not entitle you to, or guarantee that you will pass, any challenge, evaluation or funded-account programme, including those offered through fundedbeyond.com.",
+                  "Any such programme is a separate service with its own terms, rules, fees and risk disclosures. The Academy does not decide its outcomes.",
+                  "Links and prompts to those programmes are for information. Whether you take part is your own decision."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "no-guarantees",
+            "sectionNumber": "Section 07",
+            "title": "No Guarantees",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "We do not promise or guarantee any particular outcome from using the Academy, including any level of skill, income, profit, trading success, employment or funding. Your results depend on many things outside our control, including your own effort, judgement, discipline, capital and market conditions."
+              }
+            ]
+          },
+          {
+            "id": "community",
+            "sectionNumber": "Section 08",
+            "title": "Instructors, Members and Community Content",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "Instructors, guest speakers and moderators share their own views and experience. Their opinions are not necessarily ours, and they do not give personal advice through the Academy.",
+                  "Posts, comments, messages and other content from members are the responsibility of the member who wrote them. We do not check them for accuracy and do not endorse them.",
+                  "Do not act on a trade idea, signal or \"tip\" from another member, and never send money, passwords or account details to anyone who contacts you through the Academy."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "accuracy",
+            "sectionNumber": "Section 09",
+            "title": "Accuracy and Availability",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "We prepare our content carefully, but markets, rules and platforms change. The Academy and everything in it are provided \"as is\" and \"as available\", without warranties of any kind, express or implied, to the fullest extent the law allows."
+              },
+              {
+                "type": "p",
+                "text": "We do not warrant that any content is accurate, complete, current or free of errors, or that the Academy will be uninterrupted, secure, or free of viruses or other harmful components."
+              }
+            ]
+          },
+          {
+            "id": "third-parties",
+            "sectionNumber": "Section 10",
+            "title": "Third-Party Services and Links",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "The Academy may mention or link to brokers, trading platforms, charting tools, data providers, video hosts, payment providers and other services. We do not control them and are not responsible for their content, products, availability, security, accuracy or practices, or for any dealings between you and them. A mention or a link is not an endorsement or a recommendation."
+              }
+            ]
+          },
+          {
+            "id": "not-responsible",
+            "sectionNumber": "Section 11",
+            "title": "We Are Not Responsible for Your Losses",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "To the fullest extent permitted by law, Beyond Edge FZCO, FundedBeyond Academy and our directors, employees, instructors, contractors, partners and affiliates are not responsible or liable for any loss or damage of any kind, however it arises, in connection with:"
+              },
+              {
+                "type": "ul",
+                "items": [
+                  "your use of, or inability to use, the Academy;",
+                  "any trading, investment or financial decision you make, or any trade you place, whether or not it was based on our content;",
+                  "any error, omission, delay or inaccuracy in our content, or any interruption, outage or loss of data;",
+                  "the acts or omissions of any instructor, member, broker, platform, prop firm or other third party;",
+                  "any access to your account that results from your login details not being kept secure."
+                ]
+              },
+              {
+                "type": "p",
+                "text": "This covers direct, indirect, incidental, special and consequential loss, including loss of profits, capital, trading funds, opportunity, data, goodwill or reputation, even if we were told that such loss was possible."
+              },
+              {
+                "type": "p",
+                "text": "Some laws do not allow certain liability to be excluded, such as liability for fraud, or for death or personal injury caused by negligence. Nothing in this Disclaimer excludes liability that cannot lawfully be excluded. Where liability cannot be excluded, it is limited as set out in our Terms and Conditions."
+              }
+            ]
+          },
+          {
+            "id": "your-responsibility",
+            "sectionNumber": "Section 12",
+            "title": "Your Responsibility",
+            "blocks": [
+              {
+                "type": "ul",
+                "items": [
+                  "You use the Academy, and act on anything you learn in it, entirely at your own risk.",
+                  "You are responsible for checking that trading, and any product, broker or platform you use, is lawful and suitable for you where you live, and for any taxes on your trading.",
+                  "The Academy is for adults aged 18 and over. It is not directed at anyone in a country where its content would be unlawful."
+                ]
+              }
+            ]
+          },
+          {
+            "id": "refunds",
+            "sectionNumber": "Section 13",
+            "title": "No Refunds or Compensation",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "As set out in our Terms and Conditions, all purchases are final. We do not give refunds, credits or compensation in any case, including for trading losses, for dissatisfaction with a course, or for any outcome described in this Disclaimer. This does not affect the correction of a billing error as described in our Terms, or any right that the law where you live does not allow a business to exclude."
+              }
+            ]
+          },
+          {
+            "id": "changes",
+            "sectionNumber": "Section 14",
+            "title": "Changes and Governing Law",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "We may update this Disclaimer at any time. The \"Last updated\" date shows when it last changed, and the version on this page applies from that date."
+              },
+              {
+                "type": "p",
+                "text": "This Disclaimer is governed by the laws of the Emirate of Dubai and the federal laws of the United Arab Emirates, as set out in our Terms and Conditions."
+              }
+            ]
+          },
+          {
+            "id": "contact",
+            "sectionNumber": "Section 15",
+            "title": "Contact Us",
+            "blocks": [
+              {
+                "type": "p",
+                "text": "If you have questions about this Disclaimer, email support@fundedbeyond.com. Beyond Edge FZCO, Dubai, United Arab Emirates."
+              }
+            ]
+          }
+        ]
       }
     }
   },

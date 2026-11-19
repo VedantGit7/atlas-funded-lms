@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Tenant-supplied legal documents (Terms, Privacy Policy).
+ * Tenant-supplied legal documents (Terms, Privacy Policy, Disclaimer).
  *
  * These used to be module constants in the web app
  * (`features/public/components/legal/terms-content.ts` and `privacy-content.ts`)
@@ -30,7 +30,10 @@ export const LegalSectionSchema = z.object({
   blocks: z.array(LegalContentBlockSchema),
 });
 
-export const LEGAL_DOCUMENT_SLUGS = ["terms", "privacy"] as const;
+// The disclaimer (education only, trading risk, limits of responsibility) is a
+// public page like the other two, but it is not part of the sign-up agreement:
+// legal acceptance records Terms and Privacy only.
+export const LEGAL_DOCUMENT_SLUGS = ["terms", "privacy", "disclaimer"] as const;
 
 export const LegalDocumentSlugSchema = z.enum(LEGAL_DOCUMENT_SLUGS);
 
