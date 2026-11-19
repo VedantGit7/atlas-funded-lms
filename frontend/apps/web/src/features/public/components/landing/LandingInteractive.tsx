@@ -14,10 +14,13 @@ export function TenantLandingFrame({
   publicName,
   authCta,
   logoUrl,
+  diagnosticAvailable = false,
 }: {
   publicName: string | null;
   authCta: { label: string; href: string } | null;
   logoUrl: string | null;
+  /** Whether the academy has a published diagnostic to link to. */
+  diagnosticAvailable?: boolean;
   children: ReactNode;
 }) {
   const { darkMode, toggleDark } = useFbaTheme();
@@ -29,6 +32,7 @@ export function TenantLandingFrame({
         publicName={publicName}
         authCta={authCta}
         logoUrl={logoUrl}
+        diagnosticAvailable={diagnosticAvailable}
       />
       {children}
     </div>
@@ -122,6 +126,7 @@ export function LandingNav({
   publicName,
   authCta = null,
   logoUrl = null,
+  diagnosticAvailable = false,
 }: {
   darkMode: boolean;
   onToggleDark: () => void;
@@ -130,6 +135,8 @@ export function LandingNav({
   authCta?: { label: string; href: string } | null;
   /** The tenant's own logo; without one their initials mark is shown. */
   logoUrl?: string | null;
+  /** Without a published diagnostic, "Start Free" leads to sign-up instead. */
+  diagnosticAvailable?: boolean;
 }) {
   // Neutral fallback: this nav renders every tenant's public landing, so a
   // "FundedBeyond" default put tenant #1's name on every academy's home page.
@@ -147,7 +154,7 @@ export function LandingNav({
 
   const navLinks = [
     { id: "how", label: "How It Works" },
-    { id: "diagnostic", label: "Diagnostic" },
+    ...(diagnosticAvailable ? [{ id: "diagnostic", label: "Diagnostic" }] : []),
     { id: "courses", label: "Courses" },
     { id: "faq", label: "FAQ" },
   ];
@@ -215,7 +222,7 @@ export function LandingNav({
             {primaryAuthLabel}
           </Link>
           <Link
-            href="/diagnostic"
+            href={diagnosticAvailable ? "/diagnostic" : "/signup"}
             onClick={() => {
               captureLandingCtaClick("nav_start_free");
             }}

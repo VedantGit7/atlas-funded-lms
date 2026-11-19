@@ -54,11 +54,32 @@ export function TenantPublicLanding({
   const heroAccent = landing.headline.includes("Trader")
     ? landing.headline
     : "Trader the Right Way.";
-  const ctaLabel = landing.primaryCta.label || "Take the Free Diagnostic →";
-  const ctaHref = landing.primaryCta.href || "/diagnostic";
+  // Every diagnostic call to action fails until the academy publishes a
+  // diagnostic assessment, so without one they lead to sign-up instead and the
+  // diagnostic section is left out.
+  const diagnosticAvailable = landing.diagnosticAvailable === true;
+  const configuredHref = landing.primaryCta.href || "/diagnostic";
+  const ctaPointsAtDiagnostic = configuredHref.startsWith("/diagnostic");
+  const ctaHref = ctaPointsAtDiagnostic && !diagnosticAvailable ? "/signup" : configuredHref;
+  const ctaLabel =
+    ctaPointsAtDiagnostic && !diagnosticAvailable
+      ? "Get Started Free →"
+      : landing.primaryCta.label || "Take the Free Diagnostic →";
+  const howItWorks = diagnosticAvailable
+    ? HOW_IT_WORKS
+    : HOW_IT_WORKS.map((item) =>
+        item.link.href === "#diagnostic"
+          ? { ...item, link: { href: "/signup", label: "Create a free account →" } }
+          : item,
+      );
 
   return (
-    <TenantLandingFrame publicName={landing.publicName} authCta={authCta} logoUrl={logoUrl}>
+    <TenantLandingFrame
+      publicName={landing.publicName}
+      authCta={authCta}
+      logoUrl={logoUrl}
+      diagnosticAvailable={diagnosticAvailable}
+    >
       {/* Hero */}
       <div
         id="hero"
@@ -68,7 +89,9 @@ export function TenantPublicLanding({
           <div className="mb-[30px] inline-flex items-center gap-2 rounded-[40px] border border-[var(--fba-gld-b)] bg-[var(--fba-gld-l)] px-4 py-[7px]">
             <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--fba-amb-tx)]" />
             <span className="text-[11px] font-medium text-[var(--fba-gld-tx)]">
-              Free Diagnostic - No Account Required
+              {diagnosticAvailable
+                ? "Free Diagnostic - No Account Required"
+                : "Free to Start - No Credit Card Required"}
             </span>
           </div>
           <h1 className="mb-1 text-[58px] font-extrabold leading-[1.03] text-balance text-[var(--fba-tx)] max-[768px]:text-[40px]">
@@ -79,7 +102,9 @@ export function TenantPublicLanding({
           </h1>
           <p className="mx-auto mb-[38px] max-w-[540px] text-[17px] leading-[1.75] text-pretty text-[var(--fba-tx2)]">
             {landing.subheadline ||
-              "Start with a free trader-readiness diagnostic, build daily habits with free tools, then go deeper with structured courses, designed to get you through your first funded evaluation."}
+              (diagnosticAvailable
+                ? "Start with a free trader-readiness diagnostic, build daily habits with free tools, then go deeper with structured courses, designed to get you through your first funded evaluation."
+                : "Build daily habits with free tools, then go deeper with structured courses, designed to get you through your first funded evaluation.")}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <LandingCtaLink
@@ -148,7 +173,7 @@ export function TenantPublicLanding({
             </p>
           </div>
           <div className="flex gap-6 max-[900px]:flex-col">
-            {HOW_IT_WORKS.map((item) => (
+            {howItWorks.map((item) => (
               <div
                 key={item.step}
                 className="flex-1 rounded-[14px] border-[1.5px] border-[var(--fba-bdr)] bg-[var(--fba-surf)] p-[34px_28px] transition-[box-shadow,transform,border-color] hover:-translate-y-0.5 hover:border-[var(--fba-bdr2)] hover:shadow-[0_6px_24px_rgba(0,0,0,0.06)]"
@@ -174,7 +199,7 @@ export function TenantPublicLanding({
         </div>
       </div>
 
-      <DiagnosticSection />
+      {diagnosticAvailable ? <DiagnosticSection /> : null}
       <ToolsSection />
 
       {/* Pricing */}
@@ -211,7 +236,7 @@ export function TenantPublicLanding({
               </Link>
               <div className="mb-6 h-px bg-[var(--fba-bdr)]" />
               <div className="flex flex-1 flex-col gap-[13px]">
-                <CheckRow>Trader Readiness Diagnostic</CheckRow>
+                {diagnosticAvailable ? <CheckRow>Trader Readiness Diagnostic</CheckRow> : null}
                 <CheckRow>Daily Habit Tracker</CheckRow>
                 <CheckRow>Risk Calculator</CheckRow>
                 <CheckRow>Trade Journal</CheckRow>
@@ -361,21 +386,31 @@ export function TenantPublicLanding({
             Start Today
           </div>
           <h2 className="mb-5 text-[44px] font-extrabold leading-[1.08] text-balance text-white max-[768px]:text-[32px]">
-            Your First Funded Account Starts With Knowing Where You Stand
+            {diagnosticAvailable
+              ? "Your First Funded Account Starts With Knowing Where You Stand"
+              : "Your First Funded Account Starts Here"}
           </h2>
           <p className="mx-auto mb-[38px] max-w-[460px] text-base leading-[1.75] text-white/70">
-            Take the free diagnostic. No account. No credit card. Just the clearest picture
-            you&apos;ll ever get of your evaluation readiness.
+            {diagnosticAvailable ? (
+              <>
+                Take the free diagnostic. No account. No credit card. Just the clearest picture
+                you&apos;ll ever get of your evaluation readiness.
+              </>
+            ) : (
+              "Create a free account. No credit card. Free tools and courses that build the skills funded evaluations test."
+            )}
           </p>
           <LandingCtaLink
-            href="/diagnostic"
+            href={diagnosticAvailable ? "/diagnostic" : "/signup"}
             source="final_cta"
             className="inline-flex items-center gap-2 rounded-[11px] bg-white px-9 py-[18px] text-[15px] font-bold text-[var(--fba-ind)] no-underline transition-colors hover:opacity-90"
           >
-            Take the Free Diagnostic →
+            {diagnosticAvailable ? "Take the Free Diagnostic →" : "Get Started Free →"}
           </LandingCtaLink>
           <div className="mt-3.5 text-xs text-white/70">
-            Free forever · 5 minutes · No signup required
+            {diagnosticAvailable
+              ? "Free forever · 5 minutes · No signup required"
+              : "Free forever · No credit card required"}
           </div>
         </div>
       </div>
@@ -405,7 +440,9 @@ export function TenantPublicLanding({
               {
                 title: "Platform",
                 links: [
-                  { label: "Free Diagnostic", href: "/diagnostic" },
+                  ...(diagnosticAvailable
+                    ? [{ label: "Free Diagnostic", href: "/diagnostic" }]
+                    : []),
                   { label: "Practice Tools", href: "#tools" },
                   { label: "Courses", href: "#courses" },
                   { label: "Pricing", href: "#courses" },
@@ -450,7 +487,7 @@ export function TenantPublicLanding({
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/8 pt-[26px]">
             <div className="text-xs text-white/70">
-              © 2025 FundedBeyond Academy. All rights reserved.
+              © {new Date().getFullYear()} {footerBrandName}. All rights reserved.
             </div>
             <div className="text-xs text-white/70">
               Not financial advice. Trading involves significant risk of loss.

@@ -37,6 +37,7 @@ const landing = {
   subheadline: "Build lasting habits",
   primaryCta: { label: "Start diagnostic", href: "/diagnostic" },
   footerText: "Example footer",
+  diagnosticAvailable: true,
 } as ComponentProps<typeof TenantPublicLanding>["landing"];
 
 it("renders the complete platform content on the server and retains theme switching", async () => {
@@ -89,4 +90,48 @@ it("retains tenant content, authenticated navigation, CTA attribution, theme and
   } finally {
     await act(() => root.unmount());
   }
+});
+
+it("sends every call to action to sign-up while no diagnostic is published", () => {
+  // Starting a diagnostic fails until the academy publishes one (Sentry
+  // ATLAS-LMS-7), so the landing must not offer it.
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(
+    createElement(TenantPublicLanding, {
+      landing: { ...landing, diagnosticAvailable: false },
+    }),
+  );
+
+  const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href") ?? "");
+  expect(hrefs.filter((href) => href.startsWith("/diagnostic"))).toEqual([]);
+  expect(hrefs).not.toContain("#diagnostic");
+  expect(container.querySelector("#diagnostic")).toBeNull();
+  // No link or button offers it. (Descriptive copy elsewhere still mentions the
+  // diagnostic; rewriting the landing copy is a separate content decision.)
+  const linkTexts = [...container.querySelectorAll("a")].map((a) => a.textContent ?? "");
+  expect(linkTexts.filter((text) => /diagnostic/i.test(text))).toEqual([]);
+  expect(container.textContent).not.toContain("Trader Readiness Diagnostic");
+
+  const hero = [...container.querySelectorAll("a")].find(
+    (a) => a.textContent === "Get Started Free →",
+  );
+  expect(hero?.getAttribute("href")).toBe("/signup");
+});
+
+it("keeps the diagnostic calls to action once one is published", () => {
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(createElement(TenantPublicLanding, { landing }));
+
+  const hrefs = [...container.querySelectorAll("a")].map((a) => a.getAttribute("href") ?? "");
+  expect(hrefs).toContain("/diagnostic");
+  expect(container.querySelector("#diagnostic")).not.toBeNull();
+});
+
+it("credits the academy itself, this year, in the footer", () => {
+  // The copyright line used to name tenant #1 and a fixed year on every academy.
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(createElement(TenantPublicLanding, { landing }));
+  expect(container.textContent).toContain(
+    `© ${new Date().getFullYear()} Example Academy. All rights reserved.`,
+  );
 });
