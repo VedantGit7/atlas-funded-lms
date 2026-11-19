@@ -33,6 +33,10 @@ export const PublicLandingPageSchema = z.object({
   secondaryCtas: z.array(PublicLandingCtaSchema),
   featuredVerifyHref: z.string().nullable(),
   footerText: z.string().nullable(),
+  // True only when the academy has a published diagnostic assessment. The
+  // landing hides its diagnostic calls to action otherwise, so a visitor never
+  // starts one that fails. Set by the public landing route.
+  diagnosticAvailable: z.boolean().optional(),
 });
 
 export const PublicLandingResponseSchema = z.object({

@@ -6,6 +6,7 @@ import {
   PublicLandingResponseSchema,
   PublicLandingSlugParamsSchema,
 } from "@atlas/domain-branding/schemas/public-landing";
+import { diagnosticRepository } from "../../../../../../server/diagnostics/diagnostic.repository";
 import { routeMetadata } from "./route.metadata";
 
 function readSlugFromRequest(req: Request): string {
@@ -28,7 +29,16 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
       requestId,
       allowAnonymousTenantRead: true,
     },
-    async (tx) => getPublicLandingPage(tx, slug),
+    async (tx) => {
+      const landing = await getPublicLandingPage(tx, slug);
+      // The landing's diagnostic buttons lead to an error until the academy
+      // publishes a diagnostic assessment, so tell the page whether one exists.
+      const diagnostic = await diagnosticRepository.findPublishedDiagnosticAssessment(
+        tx,
+        tenant.tenantId,
+      );
+      return { ...landing, diagnosticAvailable: diagnostic !== null };
+    },
   );
 
   return NextResponse.json(PublicLandingResponseSchema.parse({ data: page }), {

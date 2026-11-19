@@ -35,7 +35,7 @@ export function PublicSiteShell({
       <ShellSkipLink />
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-4 py-4">
-          <Link href="/diagnostic" className="text-brand-primary">
+          <Link href="/" className="text-brand-primary">
             <TenantLogo
               publicName={publicName}
               logoLightUrl={logoLightUrl}
