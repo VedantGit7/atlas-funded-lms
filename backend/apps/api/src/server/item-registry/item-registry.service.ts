@@ -1,5 +1,12 @@
+import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
+import {
+  describeItemDefinitionIssues,
+  isOptionItemType,
+  isValidatedItemType,
+  validateItemDefinition,
+} from "./item-definition.contract";
 import type {
   AddCollectionItemInput,
   CreateItemCollectionInput,
@@ -17,6 +24,7 @@ import {
   collectionItemConflict,
   duplicateDimensionWeight,
   itemCollectionNotFound,
+  itemDefinitionInvalid,
   itemCollectionSlugConflict,
   itemNotFound,
   itemTypeNotFound,
@@ -145,6 +153,79 @@ async function hydrateItem(tx: TenantTx, itemId: string) {
   return mapItem(item, options);
 }
 
+type StoredOptionInput = {
+  id?: string;
+  optionJson: unknown;
+  isCorrect?: boolean | null | undefined;
+  position: number;
+};
+
+/**
+ * Validates a question against its type's rules and returns what to store.
+ * For multiple choice the options get their ids here, before they are stored,
+ * so the answer key names the stored options. Options used to be renumbered
+ * on every save while the key kept the editor's ids, which no longer existed:
+ * a multi-select question then marked every correct answer wrong.
+ */
+function resolveItemDefinition(args: {
+  itemTypeKey: string;
+  contentJson: unknown;
+  answerKeyJson: unknown;
+  options: StoredOptionInput[] | null | undefined;
+}): { answerKeyJson: unknown; options: StoredOptionInput[] | null } {
+  if (!isValidatedItemType(args.itemTypeKey)) {
+    return { answerKeyJson: args.answerKeyJson, options: args.options ?? null };
+  }
+
+  const content =
+    args.contentJson && typeof args.contentJson === "object"
+      ? (args.contentJson as Record<string, unknown>)
+      : {};
+  const result = validateItemDefinition({
+    itemTypeKey: args.itemTypeKey,
+    stem: content["stem"],
+    answerKeyJson: args.answerKeyJson,
+    options: args.options,
+  });
+  if (!result.ok) {
+    throw itemDefinitionInvalid(describeItemDefinitionIssues(result.issues));
+  }
+
+  if (!result.options) {
+    // Types without options keep whatever options the caller sent: graders
+    // ignore them, and callers such as practice decks attach their own.
+    return { answerKeyJson: result.answerKey, options: args.options ?? null };
+  }
+
+  const options = result.options.map((option) => ({ ...option, id: randomUUID() }));
+  const correctIds = options.filter((option) => option.isCorrect).map((option) => option.id);
+  const answerKeyJson =
+    args.itemTypeKey === "mcq_single"
+      ? { ...result.answerKey, correctOptionId: correctIds[0] }
+      : { ...result.answerKey, correctOptionIds: correctIds };
+
+  return { answerKeyJson, options };
+}
+
+/** The canonical key, naming the correct options already stored. */
+function answerKeyForStoredOptions(
+  itemTypeKey: string,
+  answerKeyJson: unknown,
+  stored: Array<{ id: string; isCorrect: boolean | null }>,
+): Record<string, unknown> {
+  const key = {
+    ...(answerKeyJson && typeof answerKeyJson === "object"
+      ? (answerKeyJson as Record<string, unknown>)
+      : {}),
+  };
+  delete key["correctOptionId"];
+  delete key["correctOptionIds"];
+  const correctIds = stored.filter((option) => option.isCorrect === true).map((o) => o.id);
+  return itemTypeKey === "mcq_single"
+    ? { ...key, correctOptionId: correctIds[0] }
+    : { ...key, correctOptionIds: correctIds };
+}
+
 function auditActor(ctx: ServiceCtx) {
   return {
     tenantId: ctx.tenantId,
@@ -222,18 +303,30 @@ export const itemRegistryService = {
       throw itemTypeNotFound();
     }
 
+    const definition = resolveItemDefinition({
+      itemTypeKey: input.itemTypeKey,
+      contentJson: input.contentJson,
+      answerKeyJson: input.answerKeyJson,
+      options: input.options,
+    });
+
     const item = await itemRegistryRepository.createItem(tx, {
       tenantId: ctx.tenantId,
       itemTypeKey: input.itemTypeKey,
       contentJson: input.contentJson,
-      answerKeyJson: input.answerKeyJson,
+      answerKeyJson: definition.answerKeyJson,
       tags: input.tags,
       metadataJson: input.metadataJson,
       createdByMembershipId: ctx.actorMembershipId,
     });
 
-    if (input.options.length > 0) {
-      await itemRegistryRepository.replaceItemOptions(tx, ctx.tenantId, item.id, input.options);
+    if (definition.options && definition.options.length > 0) {
+      await itemRegistryRepository.replaceItemOptions(
+        tx,
+        ctx.tenantId,
+        item.id,
+        definition.options,
+      );
     }
 
     const created = await hydrateItem(tx, item.id);
@@ -254,22 +347,52 @@ export const itemRegistryService = {
 
   async updateItem(tx: TenantTx, ctx: ServiceCtx, itemId: string, input: UpdateItemInput) {
     const existing = await requireOwnedItem(tx, ctx, itemId);
-    const before = itemSnapshot(await hydrateItem(tx, itemId));
+    const current = await hydrateItem(tx, itemId);
+    const before = itemSnapshot(current);
 
     const updateData: Parameters<typeof itemRegistryRepository.updateItem>[2] = {
       existingExplanationJson: existing.explanation_json,
     };
 
+    // A change to the question, its answer or its options is checked as a
+    // whole question: the result must still be gradeable. Status, tags and
+    // metadata changes alone are not, so an older question can still be
+    // archived or retagged.
+    let optionsToStore: StoredOptionInput[] | null = null;
+    if (
+      input.contentJson !== undefined ||
+      input.answerKeyJson !== undefined ||
+      input.options !== undefined
+    ) {
+      const optionsChanged = input.options !== undefined;
+      const definition = resolveItemDefinition({
+        itemTypeKey: current.itemTypeKey,
+        contentJson: input.contentJson ?? current.contentJson,
+        answerKeyJson: input.answerKeyJson ?? current.answerKeyJson,
+        options: input.options ?? current.options ?? [],
+      });
+      updateData.answerKeyJson = definition.answerKeyJson;
+      // Unchanged options keep their ids, so the key must name those, not
+      // fresh ones.
+      if (!optionsChanged && definition.options && isOptionItemType(current.itemTypeKey)) {
+        updateData.answerKeyJson = answerKeyForStoredOptions(
+          current.itemTypeKey,
+          definition.answerKeyJson,
+          current.options ?? [],
+        );
+      }
+      if (optionsChanged) optionsToStore = definition.options ?? [];
+    }
+
     if (input.contentJson !== undefined) updateData.contentJson = input.contentJson;
-    if (input.answerKeyJson !== undefined) updateData.answerKeyJson = input.answerKeyJson;
     if (input.tags !== undefined) updateData.tags = input.tags;
     if (input.metadataJson !== undefined) updateData.metadataJson = input.metadataJson;
     if (input.status !== undefined) updateData.status = input.status;
 
     await itemRegistryRepository.updateItem(tx, itemId, updateData);
 
-    if (input.options !== undefined) {
-      await itemRegistryRepository.replaceItemOptions(tx, ctx.tenantId, itemId, input.options);
+    if (optionsToStore !== null) {
+      await itemRegistryRepository.replaceItemOptions(tx, ctx.tenantId, itemId, optionsToStore);
     }
 
     // Audit M7: answer-key edits were untraceable, which matters for disputes.

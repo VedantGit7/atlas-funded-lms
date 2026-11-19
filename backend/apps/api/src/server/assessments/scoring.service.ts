@@ -54,6 +54,27 @@ function compareSets(a: string[], b: string[]): boolean {
   return sortedA.every((value, index) => value === sortedB[index]);
 }
 
+function readPairs(value: unknown): Map<string, string> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const pairs = new Map<string, string>();
+  for (const [left, right] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof right !== "string") return null;
+    pairs.set(left, right);
+  }
+  return pairs;
+}
+
+/** Same left items, each matched to the same right item, in any order. */
+function samePairs(answer: unknown, expected: unknown): boolean {
+  const given = readPairs(answer);
+  const key = readPairs(expected);
+  if (!given || !key || key.size === 0 || given.size !== key.size) return false;
+  for (const [left, right] of key) {
+    if (given.get(left) !== right) return false;
+  }
+  return true;
+}
+
 function scoreObjectiveItem(
   item: ScoringItem,
   answerJson: Record<string, unknown> | null,
@@ -88,11 +109,19 @@ function scoreObjectiveItem(
             (value): value is string => typeof value === "string",
           )
         : [];
+      // The key's ids count only if they name this item's options. Options
+      // used to get new ids on every save while the key kept the old ones, so
+      // a stale key would mark every correct answer wrong; the options' own
+      // `isCorrect` flags are the fallback.
+      const optionIds = new Set(item.options.map((option) => option.id));
+      const keyIds = Array.isArray(answerKey["correctOptionIds"])
+        ? answerKey["correctOptionIds"].filter(
+            (value): value is string => typeof value === "string",
+          )
+        : [];
       const correctIds =
-        Array.isArray(answerKey["correctOptionIds"]) && answerKey["correctOptionIds"].length > 0
-          ? answerKey["correctOptionIds"].filter(
-              (value): value is string => typeof value === "string",
-            )
+        keyIds.length > 0 && keyIds.every((id) => optionIds.has(id))
+          ? keyIds
           : item.options.filter((option) => option.isCorrect).map((option) => option.id);
       const correct = compareSets(selected, correctIds);
       return {
@@ -124,12 +153,10 @@ function scoreObjectiveItem(
       };
     }
     case "matching": {
-      const pairs = answerJson["pairs"];
-      const expected = answerKey["pairs"];
-      const correct =
-        JSON.stringify(pairs ?? null) === JSON.stringify(expected ?? null) &&
-        pairs != null &&
-        expected != null;
+      // Compared pair by pair. Comparing the JSON text made the order the
+      // learner matched them in count, so a fully correct answer given in a
+      // different order was marked wrong (practice already compared this way).
+      const correct = samePairs(answerJson["pairs"], answerKey["pairs"]);
       return {
         isCorrect: correct,
         pointsAwarded: correct ? item.points : 0,
