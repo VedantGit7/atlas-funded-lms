@@ -166,7 +166,38 @@ export async function deleteItemCollection(
   return clientApi.delete(`/api/v1/item-collections/${collectionId}`, "delete-item-collection");
 }
 
+type ItemImportTemplateResponse = {
+  data: {
+    filename: string;
+    contentType: string;
+    content: string;
+    contentEncoding: "base64";
+    templateVersion: string;
+  };
+};
+
+/** Fetches the Excel import template for one question type and saves it. */
+export async function downloadItemImportTemplate(itemTypeKey: string): Promise<void> {
+  const response = await clientApi.get<ItemImportTemplateResponse>(
+    `/api/v1/items/import-templates/${encodeURIComponent(itemTypeKey)}`,
+  );
+  const binary = atob(response.data.content);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  const url = URL.createObjectURL(new Blob([bytes], { type: response.data.contentType }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = response.data.filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export const itemRegistryApi = {
+  downloadItemImportTemplate,
   listItemTypes,
   listItems,
   createItem,
