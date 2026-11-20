@@ -3,6 +3,7 @@
 import type { z } from "zod";
 import { ClientApiError, clientApi } from "../../lib/client-api";
 import type {
+  bulkDeleteItemsResponseSchema,
   bulkItemStatusResponseSchema,
   itemDetailResponseSchema,
   itemListResponseSchema,
@@ -22,6 +23,7 @@ import type {
 } from "@atlas/contracts/item-registry/item-import-api.contract";
 import type { ImportApi } from "./import/run-import";
 import type {
+  BulkDeleteItemsBodySchema,
   BulkItemStatusBodySchema,
   CreateItemBodySchema,
   UpdateItemBodySchema,
@@ -35,6 +37,8 @@ type ItemListResponse = z.infer<typeof itemListResponseSchema>;
 type ItemDetailResponse = z.infer<typeof itemDetailResponseSchema>;
 export type BulkItemStatusResponse = z.infer<typeof bulkItemStatusResponseSchema>;
 export type BulkItemStatusBody = z.infer<typeof BulkItemStatusBodySchema>;
+export type BulkDeleteItemsBody = z.infer<typeof BulkDeleteItemsBodySchema>;
+export type BulkDeleteItemsResponse = z.infer<typeof bulkDeleteItemsResponseSchema>;
 export type ItemListPage = ItemListResponse;
 type ItemTypeListResponse = z.infer<typeof itemTypeListResponseSchema>;
 type DimensionWeightListResponse = z.infer<typeof dimensionWeightListResponseSchema>;
@@ -102,6 +106,23 @@ export async function bulkSetItemStatus(
 ): Promise<BulkItemStatusResponse> {
   return clientApi.postWithKey<BulkItemStatusResponse>(
     "/api/v1/items/bulk-status",
+    body,
+    idempotencyKey,
+    { silent: true },
+  );
+}
+
+/**
+ * Deletes many items; items in use are kept and counted. A filter request
+ * deletes at most BULK_ITEM_STATUS_MAX items; repeat it while
+ * data.remaining > 0, each time with a new idempotency key.
+ */
+export async function bulkDeleteItems(
+  body: BulkDeleteItemsBody,
+  idempotencyKey: string,
+): Promise<BulkDeleteItemsResponse> {
+  return clientApi.postWithKey<BulkDeleteItemsResponse>(
+    "/api/v1/items/bulk-delete",
     body,
     idempotencyKey,
     { silent: true },
@@ -296,6 +317,7 @@ export const itemRegistryApi = {
   listItemTypes,
   listItems,
   bulkSetItemStatus,
+  bulkDeleteItems,
   listImportBatches,
   undoImportBatch,
   createItem,

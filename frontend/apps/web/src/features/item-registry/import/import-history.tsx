@@ -64,6 +64,15 @@ function when(iso: string): string {
   });
 }
 
+/** What an undone import left behind, in plain words. */
+export function undoneSummary(entry: { importedCount: number; liveCount: number }): string {
+  const added = plural(entry.importedCount, "question", "questions");
+  if (entry.liveCount === 0) {
+    return `${added} added, all removed by the undo`;
+  }
+  return `${added} added, ${plural(entry.liveCount, "kept because it is in use", "kept because they are in use")}`;
+}
+
 type Notice = { tone: "success" | "error"; text: string };
 
 /**
@@ -260,7 +269,7 @@ export function ImportHistory() {
                   </p>
                   <p className="text-xs text-[var(--admin-on-surface-variant)]">
                     {entry.status === "undone"
-                      ? `${plural(entry.importedCount, "question", "questions")} added, ${plural(entry.liveCount, "kept because it is in use", "kept because they are in use")}`
+                      ? undoneSummary(entry)
                       : `${plural(entry.importedCount, "question", "questions")} added · ${entry.liveCount.toLocaleString("en")} in the bank · ${entry.publishedCount.toLocaleString("en")} published`}
                   </p>
                 </div>
@@ -334,9 +343,9 @@ export function ImportHistory() {
           undoing ? (
             <span className="block space-y-2">
               <span className="block">
-                The {plural(undoing.liveCount, "question", "questions")} that {undoing.fileName}{" "}
-                added and still in the item bank are removed, published ones too. Learners stop
-                seeing them.
+                {undoing.liveCount === 1
+                  ? `The 1 question from ${undoing.fileName} that is still in the item bank is removed, even if it is published. Learners stop seeing it.`
+                  : `The ${undoing.liveCount.toLocaleString("en")} questions from ${undoing.fileName} that are still in the item bank are removed, published ones too. Learners stop seeing them.`}
               </span>
               <span className="block">
                 Any question a deck, collection or assessment already uses, or that learners have

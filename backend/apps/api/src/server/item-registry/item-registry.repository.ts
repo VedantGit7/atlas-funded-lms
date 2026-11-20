@@ -219,6 +219,122 @@ export const itemRegistryRepository = {
     return { changed: picked, remaining, skipped: others + missing };
   },
 
+  /**
+   * Whether anything depends on the item: a collection or deck, an
+   * assessment, practice answers or review history. Such an item is never
+   * deleted, so no learner record or assessment loses its question.
+   */
+  async isItemInUse(tx: TenantTx, itemId: string): Promise<boolean> {
+    const rows = await tx.$queryRaw<Array<{ in_use: boolean }>>`
+      select (exists (select 1 from item_collection_items x where x.item_id = ${itemId}::uuid)
+           or exists (select 1 from assessment_items x where x.item_id = ${itemId}::uuid)
+           or exists (select 1 from practice_responses x where x.item_id = ${itemId}::uuid)
+           or exists (select 1 from srs_state x where x.item_id = ${itemId}::uuid)) as in_use
+    `;
+    return rows[0]?.in_use ?? false;
+  },
+
+  /**
+   * Soft-deletes up to `max` of the author's items that nothing uses (see
+   * isItemInUse): the listed ids, or the items matching the filter. Returns
+   * the deleted items with their previous status, how many deletable items
+   * remain (repeat the call), how many matching items are in use, and how
+   * many belong to someone else (or, for listed ids, no longer exist).
+   */
+  async bulkDelete(
+    tx: TenantTx,
+    args: {
+      actorMembershipId: string;
+      max: number;
+      itemIds: string[] | null;
+      itemTypeKey: string | null;
+      status: string | null;
+      q: string | null;
+      importBatchId: string | null;
+    },
+  ) {
+    const actor = args.actorMembershipId;
+    const ids = args.itemIds;
+    const type = args.itemTypeKey;
+    const status = args.status;
+    const batch = args.importBatchId;
+    const pattern = args.q ? `%${args.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null;
+
+    const deleted = await tx.$queryRaw<Array<{ id: string; status: string }>>`
+      with picked as (
+        select i.id, i.status::text as status
+          from items i
+         where i.deleted_at is null
+           and i.created_by_membership_id = ${actor}::uuid
+           and (${ids}::uuid[] is null or i.id = any(${ids}::uuid[]))
+           and (${type}::text is null or i.item_type_key = ${type}::text)
+           and (${status}::text is null or i.status::text = ${status}::text)
+           and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+           and (${pattern}::text is null
+                or i.stem_json->>'stem' ilike ${pattern}::text
+                or i.import_reference ilike ${pattern}::text
+                or exists (select 1 from unnest(i.tags) t where t ilike ${pattern}::text))
+           and not exists (select 1 from item_collection_items x
+                            where x.tenant_id = i.tenant_id and x.item_id = i.id)
+           and not exists (select 1 from assessment_items x
+                            where x.tenant_id = i.tenant_id and x.item_id = i.id)
+           and not exists (select 1 from practice_responses x
+                            where x.tenant_id = i.tenant_id and x.item_id = i.id)
+           and not exists (select 1 from srs_state x
+                            where x.tenant_id = i.tenant_id and x.item_id = i.id)
+         order by i.id
+         limit ${args.max}
+           for update
+      )
+      update items u
+         set deleted_at = now(), status = 'ARCHIVED'::"PublishStatus", updated_at = now()
+        from picked p
+       where u.id = p.id
+      returning u.id::text as id, p.status
+    `;
+
+    const counted = await tx.$queryRaw<
+      Array<{ remaining: number; in_use: number; others: number; found: number }>
+    >`
+      with matching as (
+        select i.id, i.created_by_membership_id = ${actor}::uuid as mine,
+               (exists (select 1 from item_collection_items x
+                         where x.tenant_id = i.tenant_id and x.item_id = i.id)
+                or exists (select 1 from assessment_items x
+                            where x.tenant_id = i.tenant_id and x.item_id = i.id)
+                or exists (select 1 from practice_responses x
+                            where x.tenant_id = i.tenant_id and x.item_id = i.id)
+                or exists (select 1 from srs_state x
+                            where x.tenant_id = i.tenant_id and x.item_id = i.id)) as in_use
+          from items i
+         where i.deleted_at is null
+           and (${ids}::uuid[] is null or i.id = any(${ids}::uuid[]))
+           and (${type}::text is null or i.item_type_key = ${type}::text)
+           and (${status}::text is null or i.status::text = ${status}::text)
+           and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+           and (${pattern}::text is null
+                or i.stem_json->>'stem' ilike ${pattern}::text
+                or i.import_reference ilike ${pattern}::text
+                or exists (select 1 from unnest(i.tags) t where t ilike ${pattern}::text))
+      )
+      select count(*) filter (where mine is true and not in_use)::int as remaining,
+             count(*) filter (where mine is true and in_use)::int as in_use,
+             count(*) filter (where mine is not true)::int as others,
+             count(*)::int as found
+        from matching
+    `;
+    const row = counted[0];
+    // Listed ids that are gone count as skipped; those just deleted are not.
+    const missing = ids ? Math.max(0, new Set(ids).size - (row?.found ?? 0) - deleted.length) : 0;
+
+    return {
+      deleted,
+      remaining: row?.remaining ?? 0,
+      inUse: row?.in_use ?? 0,
+      skipped: (row?.others ?? 0) + missing,
+    };
+  },
+
   async createItem(
     tx: TenantTx,
     data: {

@@ -59,6 +59,21 @@ export const bulkItemStatusResponseSchema = z.object({
   }),
 });
 
+/**
+ * deleted: items removed by this request. remaining: items still to delete
+ * (repeat the request). inUse: matching items kept because a collection,
+ * deck or assessment uses them or learners have answered them. skipped:
+ * items left alone because they belong to another author or no longer exist.
+ */
+export const bulkDeleteItemsResponseSchema = z.object({
+  data: z.object({
+    deleted: z.number().int().nonnegative(),
+    remaining: z.number().int().nonnegative(),
+    inUse: z.number().int().nonnegative(),
+    skipped: z.number().int().nonnegative(),
+  }),
+});
+
 export const itemDetailResponseSchema = z.object({
   data: itemDtoSchema,
 });

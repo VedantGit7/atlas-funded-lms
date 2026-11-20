@@ -9,6 +9,7 @@ import {
 } from "./item-definition.contract";
 import type {
   AddCollectionItemInput,
+  BulkDeleteItemsInput,
   BulkItemStatusInput,
   CreateItemCollectionInput,
   CreateItemInput,
@@ -27,6 +28,7 @@ import {
   duplicateDimensionWeight,
   itemCollectionNotFound,
   itemDefinitionInvalid,
+  itemInUse,
   itemCollectionSlugConflict,
   itemNotFound,
   itemTypeNotFound,
@@ -452,8 +454,47 @@ export const itemRegistryService = {
     };
   },
 
+  /**
+   * Deletes many of the author's items at once, at most BULK_ITEM_STATUS_MAX
+   * per request (remaining says how many are left). Items in use are kept and
+   * counted; each deletion is audited like a single one.
+   */
+  async bulkDeleteItems(tx: TenantTx, ctx: ServiceCtx, input: BulkDeleteItemsInput) {
+    const result = await itemRegistryRepository.bulkDelete(tx, {
+      actorMembershipId: ctx.actorMembershipId,
+      max: BULK_ITEM_STATUS_MAX,
+      itemIds: input.itemIds ?? null,
+      itemTypeKey: input.filter?.itemTypeKey ?? null,
+      status: input.filter?.status ?? null,
+      q: input.filter?.q ?? null,
+      importBatchId: input.filter?.importBatchId ?? null,
+    });
+
+    for (const item of result.deleted) {
+      await auditWriter.write(tx, auditActor(ctx), {
+        action: "item.deleted",
+        target: { type: "item", id: item.id },
+        before: { status: item.status },
+        after: { status: "ARCHIVED", deleted: true },
+        metadata: { bulk: true },
+      });
+    }
+
+    return {
+      data: {
+        deleted: result.deleted.length,
+        remaining: result.remaining,
+        inUse: result.inUse,
+        skipped: result.skipped,
+      },
+    };
+  },
+
   async deleteItem(tx: TenantTx, ctx: ServiceCtx, itemId: string) {
     const existing = await requireOwnedItem(tx, ctx, itemId);
+    if (await itemRegistryRepository.isItemInUse(tx, itemId)) {
+      throw itemInUse();
+    }
 
     await itemRegistryRepository.softDeleteItem(tx, itemId);
 
