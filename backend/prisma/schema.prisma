@@ -1672,6 +1672,10 @@ model Item {
   created_at               DateTime      @default(now()) @db.Timestamptz(6)
   updated_at               DateTime      @updatedAt @db.Timestamptz(6)
   deleted_at               DateTime?     @db.Timestamptz(6)
+  /// Set when the question was imported from a spreadsheet (migration 133).
+  import_batch_id          String?       @db.Uuid
+  import_row_number        Int?
+  import_reference         String?
 
   // Composite tenant foreign keys (audit M3).
   assessment_items AssessmentItem[]
@@ -1688,6 +1692,36 @@ model Item {
   @@index([tenant_id, item_type_key, status])
   @@index([tags], type: Gin)
   @@map("items")
+}
+
+/// One upload of questions from an Excel template (migration 133). Items point
+/// back to it through items.import_batch_id; the foreign keys are declared in
+/// SQL only.
+model ItemImportBatch {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id                String    @db.Uuid
+  item_type_key            String
+  file_name                String
+  template_version         String
+  status                   String    @default("importing")
+  rows_in_file             Int
+  rows_with_errors         Int
+  rows_to_import           Int
+  imported_count           Int       @default(0)
+  duplicate_count          Int       @default(0)
+  rejected_count           Int       @default(0)
+  skip_duplicates          Boolean
+  extra_tags               String[]  @default([])
+  created_by_membership_id String    @db.Uuid
+  created_at               DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime  @default(now()) @db.Timestamptz(6)
+  completed_at             DateTime? @db.Timestamptz(6)
+  undone_at                DateTime? @db.Timestamptz(6)
+  undone_by_membership_id  String?   @db.Uuid
+
+  @@unique([tenant_id, id], map: "item_import_batches_tenant_id_id_key")
+  @@index([tenant_id, created_at(sort: Desc)], map: "item_import_batches_history_idx")
+  @@map("item_import_batches")
 }
 
 model ItemOption {

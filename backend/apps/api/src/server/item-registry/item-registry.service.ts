@@ -167,7 +167,7 @@ type StoredOptionInput = {
  * on every save while the key kept the editor's ids, which no longer existed:
  * a multi-select question then marked every correct answer wrong.
  */
-function resolveItemDefinition(args: {
+export function resolveItemDefinition(args: {
   itemTypeKey: string;
   contentJson: unknown;
   answerKeyJson: unknown;

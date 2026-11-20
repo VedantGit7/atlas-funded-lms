@@ -127,6 +127,7 @@ export const ModelName = {
   PathStepProgress: 'PathStepProgress',
   ItemType: 'ItemType',
   Item: 'Item',
+  ItemImportBatch: 'ItemImportBatch',
   ItemOption: 'ItemOption',
   ItemDimensionWeight: 'ItemDimensionWeight',
   ItemCollection: 'ItemCollection',
@@ -1464,10 +1465,39 @@ export const ItemScalarFieldEnum = {
   created_by_membership_id: 'created_by_membership_id',
   created_at: 'created_at',
   updated_at: 'updated_at',
-  deleted_at: 'deleted_at'
+  deleted_at: 'deleted_at',
+  import_batch_id: 'import_batch_id',
+  import_row_number: 'import_row_number',
+  import_reference: 'import_reference'
 } as const
 
 export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum]
+
+
+export const ItemImportBatchScalarFieldEnum = {
+  id: 'id',
+  tenant_id: 'tenant_id',
+  item_type_key: 'item_type_key',
+  file_name: 'file_name',
+  template_version: 'template_version',
+  status: 'status',
+  rows_in_file: 'rows_in_file',
+  rows_with_errors: 'rows_with_errors',
+  rows_to_import: 'rows_to_import',
+  imported_count: 'imported_count',
+  duplicate_count: 'duplicate_count',
+  rejected_count: 'rejected_count',
+  skip_duplicates: 'skip_duplicates',
+  extra_tags: 'extra_tags',
+  created_by_membership_id: 'created_by_membership_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  completed_at: 'completed_at',
+  undone_at: 'undone_at',
+  undone_by_membership_id: 'undone_by_membership_id'
+} as const
+
+export type ItemImportBatchScalarFieldEnum = (typeof ItemImportBatchScalarFieldEnum)[keyof typeof ItemImportBatchScalarFieldEnum]
 
 
 export const ItemOptionScalarFieldEnum = {

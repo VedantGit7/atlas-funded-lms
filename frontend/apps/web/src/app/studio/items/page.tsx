@@ -1,12 +1,15 @@
 import Link from "next/link";
-import { PlusCircle } from "lucide-react";
+import { FileUp, PlusCircle } from "lucide-react";
 import type { z } from "zod";
 import { PageGate } from "../../../components/patterns/PageGate";
 import {
   ItemBankEmptyState,
   ItemBankTable,
 } from "../../../features/item-registry/components/item-bank-table";
-import { primaryButtonClassName } from "../../../features/studio/courses/courses-catalog-shared";
+import {
+  outlineButtonClassName,
+  primaryButtonClassName,
+} from "../../../features/studio/courses/courses-catalog-shared";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type {
   itemListResponseSchema,
@@ -35,10 +38,19 @@ export default async function ItemBankPage() {
                 Author reusable questions for assessments, diagnostics, and practice.
               </p>
             </div>
-            <Link href="/studio/items/new" className={primaryButtonClassName}>
-              <PlusCircle className="h-4 w-4" aria-hidden="true" />
-              Create item
-            </Link>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <Link
+                href="/studio/items/import"
+                className={`${outlineButtonClassName} inline-flex items-center gap-1.5 px-4 py-2`}
+              >
+                <FileUp className="h-4 w-4" aria-hidden="true" />
+                Import questions
+              </Link>
+              <Link href="/studio/items/new" className={primaryButtonClassName}>
+                <PlusCircle className="h-4 w-4" aria-hidden="true" />
+                Create item
+              </Link>
+            </div>
           </div>
 
           {items.data.length === 0 ? (
