@@ -90,3 +90,12 @@ export function itemImportBatchAlreadyUndone(): AtlasHttpError {
     message: "This import was already undone.",
   });
 }
+
+export function itemInUse(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 409,
+    message:
+      "This question is used in a deck, collection or assessment, or learners have answered it, so it cannot be deleted. Archive it instead to hide it from learners.",
+  });
+}

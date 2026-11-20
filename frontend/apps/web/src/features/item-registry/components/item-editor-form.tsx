@@ -17,7 +17,8 @@ import {
 } from "@atlas/contracts/item-registry/item-import.contract";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Eye, FileSpreadsheet, Info, Save, Scale, X } from "lucide-react";
+import { AlertCircle, Eye, FileSpreadsheet, Info, Save, Scale, Trash2, X } from "lucide-react";
+import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import {
   catalogFilterButtonClassName,
   outlineButtonClassName,
@@ -98,6 +99,9 @@ export function ItemEditorForm({
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [weightsPending, setWeightsPending] = useState(false);
   const [weightsMessage, setWeightsMessage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -156,6 +160,22 @@ export function ItemEditorForm({
   const dimensionNameById = new Map(
     competencyDimensions.map((dimension) => [dimension.id, dimension.name]),
   );
+
+  /** Deletes the question; the server refuses one that is in use. */
+  async function onDelete() {
+    if (!itemId) return;
+    setDeletePending(true);
+    setDeleteError(null);
+    try {
+      await itemRegistryApi.deleteItem(itemId);
+      window.location.href = "/studio/items";
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : "The question could not be deleted. Try again.",
+      );
+      setDeletePending(false);
+    }
+  }
 
   async function onSubmit() {
     setPending(true);
@@ -451,6 +471,39 @@ export function ItemEditorForm({
               {pending ? "Saving..." : itemId ? "Save changes" : "Save item"}
             </button>
           </div>
+          {itemId ? (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteError(null);
+                  setDeleteOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-[var(--admin-danger)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))]"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                Delete question
+              </button>
+            </div>
+          ) : null}
+          <AdminConfirmDialog
+            open={deleteOpen}
+            title="Delete this question?"
+            description="It is removed from the item bank and learners stop seeing it. If a deck, collection or assessment uses it, or learners have answered it, it cannot be deleted; archive it instead."
+            confirmLabel="Delete question"
+            busyLabel="Deleting"
+            tone="danger"
+            icon={Trash2}
+            busy={deletePending}
+            error={deleteError}
+            onConfirm={() => {
+              void onDelete();
+            }}
+            onCancel={() => {
+              if (deletePending) return;
+              setDeleteOpen(false);
+            }}
+          />
         </div>
 
         <aside className="space-y-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 shadow-sm">

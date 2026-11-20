@@ -164,7 +164,7 @@ describeWithDb("item registry tenant isolation", () => {
     ).rejects.toMatchObject({ status: 404 });
   });
 
-  it("Tenant A cannot list or change the status of Tenant B items", async () => {
+  it("Tenant A cannot list, change the status of, or delete Tenant B items", async () => {
     const tenantA = await createItemRegistryFixture();
     const tenantB = await createItemRegistryFixture();
 
@@ -189,5 +189,20 @@ describeWithDb("item registry tenant isolation", () => {
       `,
     );
     expect(status[0]?.status).not.toBe("PUBLISHED");
+
+    const deleted = await withTenantTx(authoringTenantTx(tenantA), async (tx) =>
+      itemRegistryService.bulkDeleteItems(tx, instructorCtx(tenantA), {
+        itemIds: [tenantB.itemId],
+      }),
+    );
+    expect(deleted.data).toMatchObject({ deleted: 0, skipped: 1 });
+    const stillThere = await withTenantTx(
+      authoringTenantTx(tenantB),
+      async (tx) =>
+        tx.$queryRaw<Array<{ deleted: boolean }>>`
+        select deleted_at is not null as deleted from items where id = ${tenantB.itemId}::uuid
+      `,
+    );
+    expect(stillThere[0]?.deleted).toBe(false);
   });
 });

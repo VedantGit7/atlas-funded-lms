@@ -60,6 +60,16 @@ export const ListItemsQuerySchema = z.object({
 /** At most this many items change status in one request. */
 export const BULK_ITEM_STATUS_MAX = 500;
 
+/** The Item Bank list filters, for acting on every item they match. */
+export const ItemFilterSchema = z
+  .object({
+    itemTypeKey: ItemTypeKeySchema.optional(),
+    status: PublishStatusSchema.optional(),
+    q: z.string().trim().max(120).optional(),
+    importBatchId: IdSchema.optional(),
+  })
+  .strict();
+
 /**
  * Change the status of many items at once: the items listed, or the items
  * matching a list filter. A filter request changes at most
@@ -70,15 +80,24 @@ export const BulkItemStatusBodySchema = z
   .object({
     status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
     itemIds: z.array(IdSchema).min(1).max(BULK_ITEM_STATUS_MAX).optional(),
-    filter: z
-      .object({
-        itemTypeKey: ItemTypeKeySchema.optional(),
-        status: PublishStatusSchema.optional(),
-        q: z.string().trim().max(120).optional(),
-        importBatchId: IdSchema.optional(),
-      })
-      .strict()
-      .optional(),
+    filter: ItemFilterSchema.optional(),
+  })
+  .strict()
+  .refine((body) => (body.itemIds === undefined) !== (body.filter === undefined), {
+    message: "Send either itemIds or filter.",
+    path: ["itemIds"],
+  });
+
+/**
+ * Delete many items at once: the items listed, or the items matching a list
+ * filter, at most BULK_ITEM_STATUS_MAX per request (repeat while remaining > 0).
+ * An item in use (a collection or deck, an assessment, practice answers or
+ * review history) is never deleted; archive it instead.
+ */
+export const BulkDeleteItemsBodySchema = z
+  .object({
+    itemIds: z.array(IdSchema).min(1).max(BULK_ITEM_STATUS_MAX).optional(),
+    filter: ItemFilterSchema.optional(),
   })
   .strict()
   .refine((body) => (body.itemIds === undefined) !== (body.filter === undefined), {
@@ -142,6 +161,7 @@ export type CreateItemInput = z.infer<typeof CreateItemBodySchema>;
 export type UpdateItemInput = z.infer<typeof UpdateItemBodySchema>;
 export type ListItemsQuery = z.infer<typeof ListItemsQuerySchema>;
 export type BulkItemStatusInput = z.infer<typeof BulkItemStatusBodySchema>;
+export type BulkDeleteItemsInput = z.infer<typeof BulkDeleteItemsBodySchema>;
 export type PutDimensionWeightsInput = z.infer<typeof PutDimensionWeightsBodySchema>;
 export type CreateItemCollectionInput = z.infer<typeof CreateItemCollectionBodySchema>;
 export type UpdateItemCollectionInput = z.infer<typeof UpdateItemCollectionBodySchema>;

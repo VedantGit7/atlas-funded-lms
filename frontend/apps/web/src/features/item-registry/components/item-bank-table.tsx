@@ -13,6 +13,7 @@ import {
   Pencil,
   PlusCircle,
   Search,
+  Trash2,
   Undo2,
   X,
   XCircle,
@@ -26,7 +27,7 @@ import {
 } from "../../studio/courses/courses-catalog-shared";
 import { selectClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 import { listItems, type ItemDto, type ItemListPage, type ItemTypeDto } from "../api";
-import { runBulkStatus } from "../bulk-status";
+import { runBulkDelete, runBulkStatus } from "../bulk-status";
 import { BULK_ITEM_STATUS_MAX } from "../schemas";
 import { DEFAULT_ITEM_TYPE_VISUAL, getItemTypeVisual } from "./item-type-config";
 
@@ -51,6 +52,7 @@ type ItemBankTableProps = {
 
 type StatusKey = "DRAFT" | "REVIEW" | "PUBLISHED" | "ARCHIVED";
 type TargetStatus = "PUBLISHED" | "DRAFT" | "ARCHIVED";
+type BulkAction = TargetStatus | "DELETE";
 
 type StatusConfig = {
   label: string;
@@ -86,7 +88,7 @@ const STATUS_CONFIG: Record<StatusKey, StatusConfig> = {
 
 /** What each bulk action is called, and what it tells the admin. */
 const ACTIONS: Record<
-  TargetStatus,
+  BulkAction,
   { verb: string; busy: string; done: string; explain: string; tone: "primary" | "danger" }
 > = {
   PUBLISHED: {
@@ -111,6 +113,21 @@ const ACTIONS: Record<
       "Learners will stop seeing them. They stay in the bank and you can publish them again later.",
     tone: "danger",
   },
+  DELETE: {
+    verb: "Delete",
+    busy: "Deleting",
+    done: "deleted",
+    explain:
+      "They are removed from the item bank and learners stop seeing them. A question that a deck, collection or assessment uses, or that learners have answered, is kept; archive those instead.",
+    tone: "danger",
+  },
+};
+
+const ACTION_ICONS: Record<BulkAction, typeof Eye> = {
+  PUBLISHED: Eye,
+  DRAFT: Undo2,
+  ARCHIVED: Archive,
+  DELETE: Trash2,
 };
 
 const badgeClassName =
@@ -349,7 +366,7 @@ export function ItemBankEmptyState() {
 
 type Selection = { kind: "ids"; ids: Set<string> } | { kind: "matching" };
 
-type PendingAction = { status: TargetStatus; ids: string[] | null; count: number };
+type PendingAction = { status: BulkAction; ids: string[] | null; count: number };
 
 type Notice = { tone: "success" | "error"; text: string };
 
@@ -461,7 +478,7 @@ export function ItemBankTable({ initialPage, initialFilters, itemTypes }: ItemBa
     );
   }
 
-  function askToSetStatus(status: TargetStatus, ids: string[] | null) {
+  function askToSetStatus(status: BulkAction, ids: string[] | null) {
     setActionError(null);
     setPending({ status, ids, count: ids ? ids.length : total });
   }
@@ -474,29 +491,44 @@ export function ItemBankTable({ initialPage, initialFilters, itemTypes }: ItemBa
     try {
       let updated = 0;
       let skipped = 0;
+      let inUse = 0;
+      const target = pending.status;
+      const run = async (
+        body: { itemIds: string[] } | { filter: ReturnType<typeof queryFor> },
+        onProgress?: (done: number, remaining: number) => void,
+      ) => {
+        if (target === "DELETE") {
+          const outcome = await runBulkDelete(body, onProgress);
+          return { updated: outcome.deleted, skipped: outcome.skipped, inUse: outcome.inUse };
+        }
+        const outcome = await runBulkStatus({ status: target, ...body }, onProgress);
+        return { updated: outcome.updated, skipped: outcome.skipped, inUse: 0 };
+      };
       if (pending.ids) {
         for (let start = 0; start < pending.ids.length; start += BULK_ITEM_STATUS_MAX) {
           const chunk = pending.ids.slice(start, start + BULK_ITEM_STATUS_MAX);
-          const outcome = await runBulkStatus({ status: pending.status, itemIds: chunk });
+          const outcome = await run({ itemIds: chunk });
           updated += outcome.updated;
           skipped += outcome.skipped;
+          inUse += outcome.inUse;
           setWorking({ updated, remaining: Math.max(0, pending.count - start - chunk.length) });
         }
       } else {
-        const outcome = await runBulkStatus(
-          { status: pending.status, filter: queryFor(applied) },
-          (done, remaining) => {
-            setWorking({ updated: done, remaining });
-          },
-        );
+        const outcome = await run({ filter: queryFor(applied) }, (done, remaining) => {
+          setWorking({ updated: done, remaining });
+        });
         updated = outcome.updated;
         skipped = outcome.skipped;
+        inUse = outcome.inUse;
       }
       setPending(null);
       setNotice({
         tone: "success",
         text:
           `${plural(updated, "question", "questions")} ${action.done}.` +
+          (inUse > 0
+            ? ` ${plural(inUse, "question was", "questions were")} kept because a deck, collection or assessment uses ${inUse === 1 ? "it" : "them"} or learners have answered ${inUse === 1 ? "it" : "them"}; archive ${inUse === 1 ? "it" : "them"} to hide ${inUse === 1 ? "it" : "them"} from learners.`
+            : "") +
           (skipped > 0
             ? ` ${plural(skipped, "question was", "questions were")} left as they were because another author created them.`
             : ""),
@@ -705,9 +737,8 @@ export function ItemBankTable({ initialPage, initialFilters, itemTypes }: ItemBa
                     </button>
                   ) : null}
                   <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                    {(["PUBLISHED", "DRAFT", "ARCHIVED"] as const).map((status) => {
-                      const Icon =
-                        status === "PUBLISHED" ? Eye : status === "DRAFT" ? Undo2 : Archive;
+                    {(["PUBLISHED", "DRAFT", "ARCHIVED", "DELETE"] as const).map((status) => {
+                      const Icon = ACTION_ICONS[status];
                       return (
                         <button
                           key={status}
@@ -718,7 +749,9 @@ export function ItemBankTable({ initialPage, initialFilters, itemTypes }: ItemBa
                           className={
                             status === "PUBLISHED"
                               ? `${primaryButtonClassName} px-3 py-1.5 text-sm`
-                              : `${catalogFilterButtonClassName} px-3 py-1.5 text-sm`
+                              : status === "DELETE"
+                                ? `${catalogFilterButtonClassName} px-3 py-1.5 text-sm text-[var(--admin-danger)] hover:border-[color-mix(in_srgb,var(--admin-danger)_40%,var(--admin-border))]`
+                                : `${catalogFilterButtonClassName} px-3 py-1.5 text-sm`
                           }
                         >
                           <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -809,7 +842,7 @@ export function ItemBankTable({ initialPage, initialFilters, itemTypes }: ItemBa
         confirmLabel={pendingAction?.verb ?? "Confirm"}
         {...(pendingAction ? { busyLabel: pendingAction.busy } : {})}
         tone={pendingAction?.tone ?? "primary"}
-        icon={pending?.status === "ARCHIVED" ? Archive : pending?.status === "DRAFT" ? Undo2 : Eye}
+        icon={pending ? ACTION_ICONS[pending.status] : Eye}
         busy={working !== null}
         error={actionError}
         onConfirm={() => {

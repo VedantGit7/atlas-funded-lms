@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
 import { itemRegistryService } from "../../../backend/apps/api/src/server/item-registry/item-registry.service";
 import {
+  BulkDeleteItemsBodySchema,
   BulkItemStatusBodySchema,
   ListItemsQuerySchema,
 } from "../../../backend/apps/api/src/server/item-registry/schemas";
@@ -174,5 +175,80 @@ describeWithDb("item bulk status", () => {
     expect(BulkItemStatusBodySchema.safeParse({ status: "REVIEW", filter: {} }).success).toBe(
       false,
     );
+  });
+});
+
+async function bulkDelete(fixture: ItemRegistryFixture, body: unknown, ctx?: Ctx) {
+  return inTx<Awaited<ReturnType<typeof itemRegistryService.bulkDeleteItems>>>(fixture, (tx) =>
+    itemRegistryService.bulkDeleteItems(
+      tx,
+      ctx ?? instructorCtx(fixture),
+      BulkDeleteItemsBodySchema.parse(body),
+    ),
+  );
+}
+
+async function putInCollection(fixture: ItemRegistryFixture, itemId: string) {
+  await inTx(fixture, (tx) =>
+    itemRegistryService.addItemToCollection(tx, instructorCtx(fixture), fixture.collectionId, {
+      itemId,
+      position: 1,
+    }),
+  );
+}
+
+describeWithDb("item delete", () => {
+  it("deletes the listed items nothing uses, keeps one in a collection, and audits each", async () => {
+    const fixture = await createItemRegistryFixture();
+    const [free, published, inDeck] = await addSwipes(
+      fixture,
+      ["Delete one", "Delete two", "Delete three"],
+      ["deleting"],
+    );
+    await bulk(fixture, { status: "PUBLISHED", itemIds: [published] });
+    await putInCollection(fixture, inDeck ?? "");
+
+    const result = await bulkDelete(fixture, { itemIds: [free, published, inDeck] });
+    expect(result.data).toEqual({ deleted: 2, remaining: 0, inUse: 1, skipped: 0 });
+
+    const left = await list(fixture, { q: "deleting" });
+    expect(left.data.map((item) => item.id)).toEqual([inDeck]);
+
+    const audits = await inTx<Array<{ target_id: string }>>(
+      fixture,
+      (tx) => tx.$queryRaw`
+        select target_id from audit_entries
+         where action = 'item.deleted' and target_id = any(${[free, published]}::text[])
+      `,
+    );
+    expect(new Set(audits.map((row) => row.target_id))).toEqual(new Set([free, published]));
+  });
+
+  it("deletes every item matching a filter, but never another author's", async () => {
+    const fixture = await createItemRegistryFixture();
+    await addSwipes(fixture, ["Sweep one", "Sweep two"], ["sweeping"]);
+    await addSwipes(fixture, ["Sweep theirs"], ["sweeping"], otherInstructorCtx(fixture));
+
+    const result = await bulkDelete(fixture, { filter: { q: "sweeping" } });
+    expect(result.data).toMatchObject({ deleted: 2, remaining: 0, inUse: 0, skipped: 1 });
+    expect((await list(fixture, { q: "sweeping" })).page.total).toBe(1);
+  });
+
+  it("refuses to delete a single item that is in use", async () => {
+    const fixture = await createItemRegistryFixture();
+    const [inDeck] = await addSwipes(fixture, ["Single in use"], ["single"]);
+    await putInCollection(fixture, inDeck ?? "");
+
+    await expect(
+      inTx(fixture, (tx) =>
+        itemRegistryService.deleteItem(tx, instructorCtx(fixture), inDeck ?? ""),
+      ),
+    ).rejects.toMatchObject({ status: 409 });
+    expect((await list(fixture, { q: "single in use" })).page.total).toBe(1);
+  });
+
+  it("asks for either ids or a filter", () => {
+    expect(BulkDeleteItemsBodySchema.safeParse({}).success).toBe(false);
+    expect(BulkDeleteItemsBodySchema.safeParse({ filter: {}, itemIds: [] }).success).toBe(false);
   });
 });
