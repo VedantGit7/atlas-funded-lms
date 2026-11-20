@@ -45,6 +45,12 @@ overrides:
   "fflate@>=0.4.5 <0.4.9": "^0.4.9"
   "fflate@>=0.6.0 <0.6.11": "^0.6.11"
   "baseline-browser-mapping@>=2.0.0 <2.11.0": "^2.11.0"
+  # Raised (2026-11-20): ReDoS in Schema.TemplateLiteral's compiled regex
+  # (GHSA-7589-6fvf-x4pw, CVE-2026-121707, high), fixed in 3.22.1. Prisma pins
+  # 3.20.0 through @prisma/config (config loading for migrate and generate) and
+  # better-auth's Prisma adapter brings it again; a minor upgrade on the same
+  # major line.
+  "effect@<3.22.1": "^3.22.1"
   # Unbounded cache growth and a prototype-write crash on untrusted queries.
   # Two copies resolve; only 4.28.2 is affected, reached through
   # update-browserslist-db and the web app build.
