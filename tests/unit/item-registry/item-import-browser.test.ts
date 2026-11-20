@@ -6,6 +6,8 @@ import {
   columnLetter,
   importCellToPayload,
   importRowFromPayload,
+  itemImportBatchSummary,
+  type ItemImportBatch,
   type ImportRowPayload,
   type ImportTemplateIdentity,
   type ItemImportCheckedRow,
@@ -357,5 +359,49 @@ describe("sending a file", () => {
     };
     await expect(withRetry(refusal, [0, 0, 0])).rejects.toThrow("bad");
     expect(refused).toBe(1);
+  });
+});
+
+describe("itemImportBatchSummary", () => {
+  const batch = (overrides: Partial<ItemImportBatch>): ItemImportBatch => ({
+    id: "b",
+    itemTypeKey: "mcq_single",
+    fileName: "f.xlsx",
+    templateVersion: "1",
+    status: "completed",
+    rowsInFile: 8,
+    rowsWithErrors: 2,
+    rowsToImport: 4,
+    importedCount: 4,
+    duplicateCount: 0,
+    rejectedCount: 0,
+    skipDuplicates: true,
+    extraTags: [],
+    createdByMembershipId: "m",
+    createdAt: "2026-11-20T00:00:00.000Z",
+    completedAt: null,
+    undoneAt: null,
+    ...overrides,
+  });
+
+  it("counts the duplicates the browser left out of the upload", () => {
+    // Staging run, 20 Nov: 8 rows, 2 invalid, 2 repeats skipped, 4 sent.
+    expect(itemImportBatchSummary(batch({}))).toEqual({
+      imported: 4,
+      duplicatesSkipped: 2,
+      notImported: 2,
+    });
+  });
+
+  it("adds the repeats the server caught and the rows it rejected", () => {
+    expect(
+      itemImportBatchSummary(batch({ importedCount: 2, duplicateCount: 1, rejectedCount: 1 })),
+    ).toEqual({ imported: 2, duplicatesSkipped: 3, notImported: 3 });
+  });
+
+  it("counts no skipped duplicates when they were imported on purpose", () => {
+    expect(
+      itemImportBatchSummary(batch({ skipDuplicates: false, rowsToImport: 6, importedCount: 6 })),
+    ).toEqual({ imported: 6, duplicatesSkipped: 0, notImported: 2 });
   });
 });

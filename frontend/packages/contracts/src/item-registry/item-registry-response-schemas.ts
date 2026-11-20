@@ -41,7 +41,22 @@ export const itemDtoSchema = z.object({
 
 export const itemListResponseSchema = z.object({
   data: z.array(itemDtoSchema),
-  page: pageInfoSchema,
+  /** total: every item matching the filters, across all pages. */
+  page: pageInfoSchema.extend({ total: z.number().int().nonnegative() }),
+});
+
+/**
+ * updated: items changed by this request. remaining: items still to change
+ * (repeat the request). skipped: items left alone because they belong to
+ * another author or no longer exist.
+ */
+export const bulkItemStatusResponseSchema = z.object({
+  data: z.object({
+    status: PublishStatusSchema,
+    updated: z.number().int().nonnegative(),
+    remaining: z.number().int().nonnegative(),
+    skipped: z.number().int().nonnegative(),
+  }),
 });
 
 export const itemDetailResponseSchema = z.object({

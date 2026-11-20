@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { z } from "zod";
 import { PageGate } from "../../../../components/patterns/PageGate";
+import { ImportHistory } from "../../../../features/item-registry/import/import-history";
 import { ItemImportWizard } from "../../../../features/item-registry/import/item-import-wizard";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
 import type { itemTypeListResponseSchema } from "../../../../features/item-registry/item-registry-response-schemas";
@@ -37,13 +38,15 @@ export default async function ItemImportPage({
             </h1>
             <p className="mt-0.5 max-w-2xl text-sm text-[var(--admin-on-surface-variant)]">
               Add many questions of one type at once from an Excel template. You review every row
-              before anything is added, and imported questions start as Drafts.
+              before anything is added. Imported questions start as Drafts; publish them when you
+              are ready.
             </p>
           </div>
           <ItemImportWizard
             itemTypes={itemTypes.data}
             initialType={typeof type === "string" ? type : null}
           />
+          <ImportHistory />
         </main>
       </PageGate>
     );

@@ -27,6 +27,13 @@ export type ImportBatchRow = {
   created_by_membership_id: string;
   created_at: Date;
   completed_at: Date | null;
+  undone_at: Date | null;
+};
+
+/** A batch in the history, with what is left of it in the bank today. */
+export type ImportBatchHistoryRow = ImportBatchRow & {
+  live_count: number;
+  published_count: number;
 };
 
 export type ImportItemInsert = {
@@ -44,7 +51,7 @@ const BATCH_COLUMNS = `
   id::text, tenant_id::text, item_type_key, file_name, template_version, status,
   rows_in_file, rows_with_errors, rows_to_import, imported_count, duplicate_count,
   rejected_count, skip_duplicates, extra_tags, created_by_membership_id::text,
-  created_at, completed_at
+  created_at, completed_at, undone_at
 `;
 
 export const itemImportRepository = {
@@ -183,6 +190,85 @@ export const itemImportRepository = {
     const batch = rows[0];
     if (!batch) throw new Error("ITEM_IMPORT_BATCH_UPDATE_FAILED");
     return batch;
+  },
+
+  /**
+   * The academy's imports, newest first, with how many of each batch's
+   * questions are still in the bank and how many are published.
+   */
+  async listBatches(
+    tx: TenantTx,
+    args: { tenantId: string; limit: number; cursor: string | null },
+  ): Promise<ImportBatchHistoryRow[]> {
+    return tx.$queryRawUnsafe<ImportBatchHistoryRow[]>(
+      `select ${BATCH_COLUMNS},
+              coalesce(c.live_count, 0)::int as live_count,
+              coalesce(c.published_count, 0)::int as published_count
+         from item_import_batches b
+         left join lateral (
+           select count(*) filter (where i.deleted_at is null) as live_count,
+                  count(*) filter (where i.deleted_at is null
+                                     and i.status = 'PUBLISHED'::"PublishStatus") as published_count
+             from items i
+            where i.tenant_id = b.tenant_id and i.import_batch_id = b.id
+         ) c on true
+        where b.tenant_id = $1::uuid
+          and ($2::uuid is null
+               or (b.created_at, b.id) < (select p.created_at, p.id from item_import_batches p
+                                           where p.id = $2::uuid))
+        order by b.created_at desc, b.id desc
+        limit $3`,
+      args.tenantId,
+      args.cursor,
+      args.limit + 1,
+    );
+  },
+
+  /**
+   * Removes the batch's questions that nothing uses yet and closes the batch.
+   * A question in a collection or deck, an assessment, or with practice
+   * answers or review history stays, so no learner record loses its question.
+   * Removal is the usual soft delete (deleted_at, ARCHIVED).
+   */
+  async undoBatch(
+    tx: TenantTx,
+    args: { tenantId: string; batchId: string; actorMembershipId: string },
+  ): Promise<{ batch: ImportBatchRow; removed: number; kept: number }> {
+    const removed = await tx.$queryRaw<Array<{ id: string }>>`
+      update items i
+         set deleted_at = now(), status = 'ARCHIVED'::"PublishStatus", updated_at = now()
+       where i.tenant_id = ${args.tenantId}::uuid
+         and i.import_batch_id = ${args.batchId}::uuid
+         and i.deleted_at is null
+         and not exists (select 1 from item_collection_items x
+                          where x.tenant_id = i.tenant_id and x.item_id = i.id)
+         and not exists (select 1 from assessment_items x
+                          where x.tenant_id = i.tenant_id and x.item_id = i.id)
+         and not exists (select 1 from practice_responses x
+                          where x.tenant_id = i.tenant_id and x.item_id = i.id)
+         and not exists (select 1 from srs_state x
+                          where x.tenant_id = i.tenant_id and x.item_id = i.id)
+      returning i.id::text as id
+    `;
+    const kept = await tx.$queryRaw<Array<{ kept: number }>>`
+      select count(*)::int as kept
+        from items
+       where tenant_id = ${args.tenantId}::uuid
+         and import_batch_id = ${args.batchId}::uuid
+         and deleted_at is null
+    `;
+    const rows = await tx.$queryRawUnsafe<ImportBatchRow[]>(
+      `update item_import_batches
+          set status = 'undone', undone_at = now(), undone_by_membership_id = $2::uuid,
+              updated_at = now()
+        where id = $1::uuid
+        returning ${BATCH_COLUMNS}`,
+      args.batchId,
+      args.actorMembershipId,
+    );
+    const batch = rows[0];
+    if (!batch) throw new Error("ITEM_IMPORT_BATCH_UPDATE_FAILED");
+    return { batch, removed: removed.length, kept: kept[0]?.kept ?? 0 };
   },
 
   /** Rows of this batch already imported, with their question ids. */

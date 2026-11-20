@@ -48,10 +48,43 @@ export const UpdateItemBodySchema = z.object({
 export const ListItemsQuerySchema = z.object({
   itemTypeKey: ItemTypeKeySchema.optional(),
   status: PublishStatusSchema.optional(),
+  /** Matches the question text, a tag or your reference, ignoring case. */
   q: z.string().trim().max(120).optional(),
+  /** Only the questions one import added. */
+  importBatchId: IdSchema.optional(),
   limit: z.coerce.number().int().min(1).max(100).default(25),
-  cursor: z.string().optional(),
+  /** The last item id of the previous page (page.nextCursor). */
+  cursor: IdSchema.optional(),
 });
+
+/** At most this many items change status in one request. */
+export const BULK_ITEM_STATUS_MAX = 500;
+
+/**
+ * Change the status of many items at once: the items listed, or the items
+ * matching a list filter. A filter request changes at most
+ * BULK_ITEM_STATUS_MAX items and reports how many are left, so the caller
+ * repeats it until none remain.
+ */
+export const BulkItemStatusBodySchema = z
+  .object({
+    status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
+    itemIds: z.array(IdSchema).min(1).max(BULK_ITEM_STATUS_MAX).optional(),
+    filter: z
+      .object({
+        itemTypeKey: ItemTypeKeySchema.optional(),
+        status: PublishStatusSchema.optional(),
+        q: z.string().trim().max(120).optional(),
+        importBatchId: IdSchema.optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict()
+  .refine((body) => (body.itemIds === undefined) !== (body.filter === undefined), {
+    message: "Send either itemIds or filter.",
+    path: ["itemIds"],
+  });
 
 export const ItemParamsSchema = z.object({
   id: IdSchema,
@@ -108,6 +141,7 @@ export const DeleteCollectionItemBodySchema = z.object({
 export type CreateItemInput = z.infer<typeof CreateItemBodySchema>;
 export type UpdateItemInput = z.infer<typeof UpdateItemBodySchema>;
 export type ListItemsQuery = z.infer<typeof ListItemsQuerySchema>;
+export type BulkItemStatusInput = z.infer<typeof BulkItemStatusBodySchema>;
 export type PutDimensionWeightsInput = z.infer<typeof PutDimensionWeightsBodySchema>;
 export type CreateItemCollectionInput = z.infer<typeof CreateItemCollectionBodySchema>;
 export type UpdateItemCollectionInput = z.infer<typeof UpdateItemCollectionBodySchema>;

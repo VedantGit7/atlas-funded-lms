@@ -3,6 +3,7 @@
 import type { z } from "zod";
 import { ClientApiError, clientApi } from "../../lib/client-api";
 import type {
+  bulkItemStatusResponseSchema,
   itemDetailResponseSchema,
   itemListResponseSchema,
   itemTypeListResponseSchema,
@@ -16,9 +17,12 @@ import type {
   ImportItemRowsResponse,
   ItemImportBatch,
   ItemImportCheckResponse,
+  ItemImportHistoryEntry,
+  ItemImportBatchListQuery,
 } from "@atlas/contracts/item-registry/item-import-api.contract";
 import type { ImportApi } from "./import/run-import";
 import type {
+  BulkItemStatusBodySchema,
   CreateItemBodySchema,
   UpdateItemBodySchema,
   CreateItemCollectionBodySchema,
@@ -29,6 +33,9 @@ import type {
 
 type ItemListResponse = z.infer<typeof itemListResponseSchema>;
 type ItemDetailResponse = z.infer<typeof itemDetailResponseSchema>;
+export type BulkItemStatusResponse = z.infer<typeof bulkItemStatusResponseSchema>;
+export type BulkItemStatusBody = z.infer<typeof BulkItemStatusBodySchema>;
+export type ItemListPage = ItemListResponse;
 type ItemTypeListResponse = z.infer<typeof itemTypeListResponseSchema>;
 type DimensionWeightListResponse = z.infer<typeof dimensionWeightListResponseSchema>;
 type ItemCollectionListResponse = z.infer<typeof itemCollectionListResponseSchema>;
@@ -51,17 +58,21 @@ export async function listItemTypes(): Promise<ItemTypeListResponse> {
   return clientApi.get<ItemTypeListResponse>("/api/v1/item-types");
 }
 
-export async function listItems(query?: {
+export type ItemListQuery = {
   itemTypeKey?: string;
   status?: string;
   q?: string;
+  importBatchId?: string;
   limit?: number;
   cursor?: string;
-}): Promise<ItemListResponse> {
+};
+
+export async function listItems(query?: ItemListQuery): Promise<ItemListResponse> {
   const params = new URLSearchParams();
   if (query?.itemTypeKey) params.set("itemTypeKey", query.itemTypeKey);
   if (query?.status) params.set("status", query.status);
   if (query?.q) params.set("q", query.q);
+  if (query?.importBatchId) params.set("importBatchId", query.importBatchId);
   if (query?.limit != null) params.set("limit", String(query.limit));
   if (query?.cursor) params.set("cursor", query.cursor);
 
@@ -78,6 +89,23 @@ export async function updateItem(
   body: UpdateItemBody,
 ): Promise<ItemDetailResponse> {
   return clientApi.put<ItemDetailResponse>(`/api/v1/items/${itemId}`, body, "update-item");
+}
+
+/**
+ * Publishes, unpublishes or archives many items. A filter request changes at
+ * most BULK_ITEM_STATUS_MAX items; repeat it while data.remaining > 0, each
+ * time with a new idempotency key.
+ */
+export async function bulkSetItemStatus(
+  body: BulkItemStatusBody,
+  idempotencyKey: string,
+): Promise<BulkItemStatusResponse> {
+  return clientApi.postWithKey<BulkItemStatusResponse>(
+    "/api/v1/items/bulk-status",
+    body,
+    idempotencyKey,
+    { silent: true },
+  );
 }
 
 export async function deleteItem(itemId: string): Promise<{ data: { id: string; deleted: true } }> {
@@ -238,10 +266,38 @@ export const itemImportApi: ImportApi = {
     ),
 };
 
+/** The academy's question imports, newest first. */
+export async function listImportBatches(query: Partial<ItemImportBatchListQuery> = {}): Promise<{
+  data: ItemImportHistoryEntry[];
+  page: { nextCursor: string | null; hasMore: boolean };
+}> {
+  const params = new URLSearchParams();
+  if (query.limit != null) params.set("limit", String(query.limit));
+  if (query.cursor) params.set("cursor", query.cursor);
+  const suffix = params.toString();
+  return clientApi.get(`/api/v1/items/import-batches${suffix ? `?${suffix}` : ""}`);
+}
+
+/** Takes an import's unused questions back out of the bank. */
+export async function undoImportBatch(
+  batchId: string,
+  idempotencyKey: string,
+): Promise<{ data: { batch: ItemImportBatch; removed: number; kept: number } }> {
+  return clientApi.postWithKey(
+    `/api/v1/items/import-batches/${encodeURIComponent(batchId)}/undo`,
+    null,
+    idempotencyKey,
+    { silent: true },
+  );
+}
+
 export const itemRegistryApi = {
   downloadItemImportTemplate,
   listItemTypes,
   listItems,
+  bulkSetItemStatus,
+  listImportBatches,
+  undoImportBatch,
   createItem,
   updateItem,
   deleteItem,
