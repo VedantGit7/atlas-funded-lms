@@ -10,8 +10,13 @@ import {
   describeItemDefinitionIssues,
   validateItemDefinition,
 } from "@atlas/contracts/item-registry/item-definition.contract";
+import {
+  ITEM_IMPORT_MAX_ROWS,
+  ITEM_IMPORT_TYPE_NAMES,
+  isImportableItemType,
+} from "@atlas/contracts/item-registry/item-import.contract";
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Eye, Info, Save, Scale, X } from "lucide-react";
+import { AlertCircle, Eye, FileSpreadsheet, Info, Save, Scale, X } from "lucide-react";
 import {
   catalogFilterButtonClassName,
   outlineButtonClassName,
@@ -96,6 +101,22 @@ export function ItemEditorForm({
   const [weightsMessage, setWeightsMessage] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [typeSwitchToken, setTypeSwitchToken] = useState(0);
+  const [templatePending, setTemplatePending] = useState(false);
+  const [templateError, setTemplateError] = useState<string | null>(null);
+
+  async function onDownloadTemplate() {
+    setTemplatePending(true);
+    setTemplateError(null);
+    try {
+      await itemRegistryApi.downloadItemImportTemplate(itemTypeKey);
+    } catch (err) {
+      setTemplateError(
+        err instanceof Error ? err.message : "Could not download the template. Try again.",
+      );
+    } finally {
+      setTemplatePending(false);
+    }
+  }
 
   const requiresOptions = itemTypeKey === "mcq_single" || itemTypeKey === "mcq_multi";
   const answerKeyText = useMemo(() => JSON.stringify(answerKeyJson, null, 2), [answerKeyJson]);
@@ -287,6 +308,32 @@ export function ItemEditorForm({
                 );
               })}
             </div>
+            {!itemId && isImportableItemType(itemTypeKey) ? (
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                <button
+                  type="button"
+                  disabled={templatePending}
+                  onClick={() => {
+                    void onDownloadTemplate();
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md font-medium text-[var(--admin-primary)] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:cursor-wait disabled:opacity-60"
+                >
+                  <FileSpreadsheet className="h-4 w-4" aria-hidden="true" />
+                  {templatePending
+                    ? "Preparing template…"
+                    : `Download Excel template for ${ITEM_IMPORT_TYPE_NAMES[itemTypeKey]}`}
+                </button>
+                <span className="text-xs text-[var(--admin-on-surface-variant)]">
+                  Add many questions of this type at once, up to{" "}
+                  {ITEM_IMPORT_MAX_ROWS.toLocaleString("en")} per file.
+                </span>
+                {templateError ? (
+                  <span role="alert" className="w-full text-xs text-[var(--admin-danger)]">
+                    {templateError}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <div>
