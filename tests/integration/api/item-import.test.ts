@@ -412,4 +412,133 @@ describeWithDb("item import", () => {
       expect(seconds).toBeLessThan(DEFAULT_TENANT_TX_TIMEOUT_MS / 1000 / 3);
     });
   });
+
+  describe("history and undo", () => {
+    async function importQuestions(fixture: ItemRegistryFixture, questions: string[]) {
+      const batch = await openBatch(fixture, { rowsToImport: questions.length });
+      const result = await inTx<Awaited<ReturnType<typeof itemImportService.importRows>>>(
+        fixture,
+        (tx) =>
+          itemImportService.importRows(tx, instructorCtx(fixture), batch.data.id, {
+            template: identity("mcq_single"),
+            rows: questions.map((question, index) => mcqRow(index + 2, question)),
+          }),
+      );
+      await inTx(fixture, (tx) =>
+        itemImportService.completeBatch(tx, instructorCtx(fixture), batch.data.id),
+      );
+      return {
+        batchId: batch.data.id,
+        itemIds: result.data.results.map((row) => row.itemId ?? ""),
+      };
+    }
+
+    it("lists the academy's imports newest first, with what is left of each", async () => {
+      const fixture = await createItemRegistryFixture();
+      const first = await importQuestions(fixture, ["History one?", "History two?"]);
+      const second = await importQuestions(fixture, ["History three?"]);
+      await inTx(fixture, (tx) =>
+        itemRegistryService.bulkSetItemStatus(tx, instructorCtx(fixture), {
+          status: "PUBLISHED",
+          itemIds: [first.itemIds[0] ?? ""],
+        }),
+      );
+
+      const mine = await inTx<Awaited<ReturnType<typeof itemImportService.listBatches>>>(
+        fixture,
+        (tx) => itemImportService.listBatches(tx, instructorCtx(fixture), { limit: 1 }),
+      );
+      expect(mine.data.map((batch) => batch.id)).toEqual([second.batchId]);
+      expect(mine.page.hasMore).toBe(true);
+
+      const next = await inTx<Awaited<ReturnType<typeof itemImportService.listBatches>>>(
+        fixture,
+        (tx) =>
+          itemImportService.listBatches(tx, instructorCtx(fixture), {
+            limit: 10,
+            cursor: mine.page.nextCursor ?? undefined,
+          }),
+      );
+      expect(next.data).toHaveLength(1);
+      expect(next.data[0]).toMatchObject({
+        id: first.batchId,
+        status: "completed",
+        importedCount: 2,
+        liveCount: 2,
+        publishedCount: 1,
+        ownedByYou: true,
+        undoneAt: null,
+      });
+
+      // Another author sees the history but does not own it.
+      const theirs = await inTx<Awaited<ReturnType<typeof itemImportService.listBatches>>>(
+        fixture,
+        (tx) => itemImportService.listBatches(tx, otherInstructorCtx(fixture), { limit: 10 }),
+      );
+      expect(theirs.data.map((batch) => batch.ownedByYou)).toEqual([false, false]);
+    });
+
+    it("removes the questions nothing uses and keeps those in a collection", async () => {
+      const fixture = await createItemRegistryFixture();
+      const imported = await importQuestions(fixture, ["Undo one?", "Undo two?", "Undo three?"]);
+      const [inDeck, , published] = imported.itemIds;
+      await inTx(fixture, (tx) =>
+        itemRegistryService.addItemToCollection(tx, instructorCtx(fixture), fixture.collectionId, {
+          itemId: inDeck ?? "",
+          position: 1,
+        }),
+      );
+      await inTx(fixture, (tx) =>
+        itemRegistryService.bulkSetItemStatus(tx, instructorCtx(fixture), {
+          status: "PUBLISHED",
+          itemIds: [published ?? ""],
+        }),
+      );
+
+      const undone = await inTx<Awaited<ReturnType<typeof itemImportService.undoBatch>>>(
+        fixture,
+        (tx) => itemImportService.undoBatch(tx, instructorCtx(fixture), imported.batchId),
+      );
+      expect(undone.data).toMatchObject({ removed: 2, kept: 1 });
+      expect(undone.data.batch.status).toBe("undone");
+      expect(undone.data.batch.undoneAt).not.toBeNull();
+
+      const left = await inTx<Array<{ id: string; deleted: boolean; status: string }>>(
+        fixture,
+        (tx) => tx.$queryRaw`
+          select id::text as id, deleted_at is not null as deleted, status::text as status
+            from items where import_batch_id = ${imported.batchId}::uuid
+        `,
+      );
+      const byId = new Map(left.map((row) => [row.id, row]));
+      expect(byId.get(inDeck ?? "")).toMatchObject({ deleted: false });
+      expect(byId.get(published ?? "")).toMatchObject({ deleted: true, status: "ARCHIVED" });
+
+      const audit = await inTx<Array<{ metadata: unknown }>>(
+        fixture,
+        (tx) => tx.$queryRaw`
+          select metadata_json as metadata from audit_entries
+           where action = 'item_import_batch.undone' and target_id = ${imported.batchId}
+        `,
+      );
+      expect(audit[0]?.metadata).toMatchObject({ removed: 2, kept: 1 });
+
+      // Once only.
+      await expect(
+        inTx(fixture, (tx) =>
+          itemImportService.undoBatch(tx, instructorCtx(fixture), imported.batchId),
+        ),
+      ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it("lets only the admin who ran an import undo it", async () => {
+      const fixture = await createItemRegistryFixture();
+      const imported = await importQuestions(fixture, ["Owner only?"]);
+      await expect(
+        inTx(fixture, (tx) =>
+          itemImportService.undoBatch(tx, otherInstructorCtx(fixture), imported.batchId),
+        ),
+      ).rejects.toMatchObject({ status: 404 });
+    });
+  });
 });

@@ -5,6 +5,7 @@ import { PageGate } from "../../../components/patterns/PageGate";
 import {
   ItemBankEmptyState,
   ItemBankTable,
+  type ItemBankFilters,
 } from "../../../features/item-registry/components/item-bank-table";
 import {
   outlineButtonClassName,
@@ -19,10 +20,50 @@ import type {
 type ItemListResponse = z.infer<typeof itemListResponseSchema>;
 type ItemTypeListResponse = z.infer<typeof itemTypeListResponseSchema>;
 
-export default async function ItemBankPage() {
+const PAGE_SIZE = 50;
+const STATUSES = new Set(["DRAFT", "REVIEW", "PUBLISHED", "ARCHIVED"]);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+type SearchParams = {
+  q?: string | string[];
+  type?: string | string[];
+  status?: string | string[];
+  batch?: string | string[];
+};
+
+function first(value: string | string[] | undefined): string {
+  return (Array.isArray(value) ? value[0] : value) ?? "";
+}
+
+/** The filters in the address, anything malformed dropped. */
+function filtersFrom(params: SearchParams): ItemBankFilters {
+  const status = first(params.status).toUpperCase();
+  const batch = first(params.batch);
+  return {
+    q: first(params.q).trim().slice(0, 120),
+    itemTypeKey: /^[a-z][a-z0-9_]{0,63}$/.test(first(params.type)) ? first(params.type) : "",
+    status: STATUSES.has(status) ? status : "",
+    importBatchId: UUID.test(batch) ? batch : "",
+  };
+}
+
+export default async function ItemBankPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const filters = filtersFrom(await searchParams);
+  const query = new URLSearchParams({ limit: String(PAGE_SIZE) });
+  if (filters.q) query.set("q", filters.q);
+  if (filters.itemTypeKey) query.set("itemTypeKey", filters.itemTypeKey);
+  if (filters.status) query.set("status", filters.status);
+  if (filters.importBatchId) query.set("importBatchId", filters.importBatchId);
+  const filtered = Boolean(
+    filters.q || filters.itemTypeKey || filters.status || filters.importBatchId,
+  );
   try {
     const [items, itemTypes] = await Promise.all([
-      serverApi.get<ItemListResponse>("/api/v1/items"),
+      serverApi.get<ItemListResponse>(`/api/v1/items?${query.toString()}`),
       serverApi.get<ItemTypeListResponse>("/api/v1/item-types"),
     ]);
 
@@ -53,10 +94,14 @@ export default async function ItemBankPage() {
             </div>
           </div>
 
-          {items.data.length === 0 ? (
+          {items.data.length === 0 && !filtered ? (
             <ItemBankEmptyState />
           ) : (
-            <ItemBankTable items={items.data} itemTypes={itemTypes.data} />
+            <ItemBankTable
+              initialPage={items}
+              initialFilters={filters}
+              itemTypes={itemTypes.data}
+            />
           )}
         </main>
       </PageGate>

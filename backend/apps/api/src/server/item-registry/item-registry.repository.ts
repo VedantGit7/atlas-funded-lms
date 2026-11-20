@@ -1,6 +1,18 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 
+type ListedItemRow = {
+  id: string;
+  item_type_key: string;
+  stem_json: unknown;
+  explanation_json: unknown;
+  status: string;
+  tags: string[];
+  created_by_membership_id: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
+
 type CursorArgs = {
   limit: number;
   cursor?: string | undefined;
@@ -70,35 +82,141 @@ export const itemRegistryRepository = {
     });
   },
 
+  /**
+   * One page of the item bank, newest change first, and the number of items
+   * matching the filters across every page.
+   *
+   * The statement is fixed: a filter left out is passed as null and its
+   * condition is true. The search matches the question text, a tag or the
+   * import reference, ignoring case, with % and _ taken literally.
+   */
   async listItems(
     tx: TenantTx,
     args: CursorArgs & {
       itemTypeKey?: string | undefined;
       status?: string | undefined;
       q?: string | undefined;
+      importBatchId?: string | undefined;
     },
   ) {
-    return tx.item.findMany({
-      where: {
-        deleted_at: null,
-        ...(args.itemTypeKey ? { item_type_key: args.itemTypeKey } : {}),
-        ...(args.status ? { status: args.status as never } : {}),
-      },
-      orderBy: [{ updated_at: "desc" }, { id: "desc" }],
-      take: takePlusOne(args.limit),
-      ...(args.cursor ? { cursor: { id: args.cursor }, skip: 1 } : {}),
-      select: {
-        id: true,
-        item_type_key: true,
-        stem_json: true,
-        explanation_json: true,
-        status: true,
-        tags: true,
-        created_by_membership_id: true,
-        created_at: true,
-        updated_at: true,
-      },
-    });
+    const type = args.itemTypeKey ?? null;
+    const status = args.status ?? null;
+    const batch = args.importBatchId ?? null;
+    const pattern = args.q ? `%${args.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null;
+    const cursor = args.cursor ?? null;
+
+    const rows = await tx.$queryRaw<ListedItemRow[]>`
+        select i.id, i.item_type_key, i.stem_json, i.explanation_json, i.status::text as status,
+               i.tags, i.created_by_membership_id, i.created_at, i.updated_at
+          from items i
+         where i.deleted_at is null
+           and (${type}::text is null or i.item_type_key = ${type}::text)
+           and (${status}::text is null or i.status::text = ${status}::text)
+           and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+           and (${pattern}::text is null
+                or i.stem_json->>'stem' ilike ${pattern}::text
+                or i.import_reference ilike ${pattern}::text
+                or exists (select 1 from unnest(i.tags) t where t ilike ${pattern}::text))
+           and (${cursor}::uuid is null
+                or (i.updated_at, i.id) < (select c.updated_at, c.id from items c
+                                            where c.id = ${cursor}::uuid))
+         order by i.updated_at desc, i.id desc
+         limit ${takePlusOne(args.limit)}
+      `;
+    const counted = await tx.$queryRaw<Array<{ total: number }>>`
+        select count(*)::int as total
+          from items i
+         where i.deleted_at is null
+           and (${type}::text is null or i.item_type_key = ${type}::text)
+           and (${status}::text is null or i.status::text = ${status}::text)
+           and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+           and (${pattern}::text is null
+                or i.stem_json->>'stem' ilike ${pattern}::text
+                or i.import_reference ilike ${pattern}::text
+                or exists (select 1 from unnest(i.tags) t where t ilike ${pattern}::text))
+      `;
+
+    return { rows, total: counted[0]?.total ?? 0 };
+  },
+
+  /**
+   * Sets the status of up to `max` items the author created: the listed ids,
+   * or the items matching the filter. Items already in that status are left
+   * alone, so repeating the call finishes the rest. Returns the changed items
+   * with their previous status, how many of the author's items still need the
+   * change, and how many matching items belong to someone else (or, for
+   * listed ids, no longer exist).
+   */
+  async bulkSetStatus(
+    tx: TenantTx,
+    args: {
+      status: string;
+      actorMembershipId: string;
+      max: number;
+      itemIds: string[] | null;
+      itemTypeKey: string | null;
+      fromStatus: string | null;
+      q: string | null;
+      importBatchId: string | null;
+    },
+  ) {
+    const target = args.status;
+    const actor = args.actorMembershipId;
+    const ids = args.itemIds;
+    const type = args.itemTypeKey;
+    const from = args.fromStatus;
+    const batch = args.importBatchId;
+    const pattern = args.q ? `%${args.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null;
+
+    const picked = await tx.$queryRaw<Array<{ id: string; status: string }>>`
+      select i.id, i.status::text as status
+        from items i
+       where i.deleted_at is null
+         and i.status::text <> ${target}::text
+         and i.created_by_membership_id = ${actor}::uuid
+         and (${ids}::uuid[] is null or i.id = any(${ids}::uuid[]))
+         and (${type}::text is null or i.item_type_key = ${type}::text)
+         and (${from}::text is null or i.status::text = ${from}::text)
+         and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+         and (${pattern}::text is null
+              or i.stem_json->>'stem' ilike ${pattern}::text
+              or i.import_reference ilike ${pattern}::text
+              or exists (select 1 from unnest(i.tags) t where t ilike ${pattern}::text))
+       order by i.id
+       limit ${args.max}
+         for update
+    `;
+
+    if (picked.length > 0) {
+      await tx.$executeRaw`
+        update items
+           set status = ${target}::"PublishStatus", updated_at = now()
+         where id = any(${picked.map((row) => row.id)}::uuid[])
+      `;
+    }
+
+    const counted = await tx.$queryRaw<Array<{ remaining: number; others: number; found: number }>>`
+      select count(*) filter (where i.status::text <> ${target}::text
+                                and i.created_by_membership_id = ${actor}::uuid)::int as remaining,
+             count(*) filter (where i.status::text <> ${target}::text
+                                and i.created_by_membership_id is distinct from ${actor}::uuid)::int as others,
+             count(*)::int as found
+        from items i
+       where i.deleted_at is null
+         and (${ids}::uuid[] is null or i.id = any(${ids}::uuid[]))
+         and (${type}::text is null or i.item_type_key = ${type}::text)
+         and (${from}::text is null or i.status::text = ${from}::text)
+         and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+         and (${pattern}::text is null
+              or i.stem_json->>'stem' ilike ${pattern}::text
+              or i.import_reference ilike ${pattern}::text
+              or exists (select 1 from unnest(i.tags) t where t ilike ${pattern}::text))
+    `;
+    const remaining = counted[0]?.remaining ?? 0;
+    const others = counted[0]?.others ?? 0;
+    const missing = ids ? Math.max(0, new Set(ids).size - (counted[0]?.found ?? 0)) : 0;
+
+    return { changed: picked, remaining, skipped: others + missing };
   },
 
   async createItem(

@@ -10,6 +10,8 @@ import {
   type ImportRowPayload,
   type ImportTemplateIdentity,
   type ItemImportBatch,
+  type ItemImportBatchListQuery,
+  type ItemImportHistoryEntry,
   type ItemImportCheckBody,
   type ItemImportCheckedRow,
   type ItemImportRowResult,
@@ -22,6 +24,7 @@ import {
   type ImportRow,
 } from "./item-import.contract";
 import {
+  itemImportBatchAlreadyUndone,
   itemImportBatchClosed,
   itemImportBatchNotFound,
   itemImportFileInvalid,
@@ -30,6 +33,7 @@ import { resolveItemDefinition } from "./item-registry.service";
 import { encodeExplanationJson } from "./item-registry.repository";
 import {
   itemImportRepository,
+  type ImportBatchHistoryRow,
   type ImportBatchRow,
   type ImportItemInsert,
 } from "./item-import.repository";
@@ -67,6 +71,7 @@ function mapBatch(row: ImportBatchRow): ItemImportBatch {
     createdByMembershipId: row.created_by_membership_id,
     createdAt: row.created_at.toISOString(),
     completedAt: row.completed_at ? row.completed_at.toISOString() : null,
+    undoneAt: row.undone_at ? row.undone_at.toISOString() : null,
   };
 }
 
@@ -433,5 +438,64 @@ export const itemImportService = {
       metadata: {},
     });
     return { data };
+  },
+
+  /** The academy's imports, newest first, with what is left of each. */
+  async listBatches(
+    tx: TenantTx,
+    ctx: ServiceCtx,
+    query: ItemImportBatchListQuery,
+  ): Promise<{
+    data: ItemImportHistoryEntry[];
+    page: { nextCursor: string | null; hasMore: boolean };
+  }> {
+    const rows = await itemImportRepository.listBatches(tx, {
+      tenantId: ctx.tenantId,
+      limit: query.limit,
+      cursor: query.cursor ?? null,
+    });
+    const hasMore = rows.length > query.limit;
+    const page = hasMore ? rows.slice(0, query.limit) : rows;
+    return {
+      data: page.map((row: ImportBatchHistoryRow) => ({
+        ...mapBatch(row),
+        liveCount: row.live_count,
+        publishedCount: row.published_count,
+        ownedByYou: row.created_by_membership_id === ctx.actorMembershipId,
+      })),
+      page: { hasMore, nextCursor: hasMore ? (page[page.length - 1]?.id ?? null) : null },
+    };
+  },
+
+  /**
+   * Takes an import back out of the bank: its questions nothing uses yet are
+   * removed, the rest stay (see itemImportRepository.undoBatch). Only the
+   * admin who ran the import may undo it, and only once.
+   */
+  async undoBatch(
+    tx: TenantTx,
+    ctx: ServiceCtx,
+    batchId: string,
+  ): Promise<{ data: { batch: ItemImportBatch; removed: number; kept: number } }> {
+    const batch = await itemImportRepository.lockBatch(tx, batchId);
+    if (!batch || batch.created_by_membership_id !== ctx.actorMembershipId) {
+      throw itemImportBatchNotFound();
+    }
+    if (batch.status === "undone") throw itemImportBatchAlreadyUndone();
+
+    const result = await itemImportRepository.undoBatch(tx, {
+      tenantId: ctx.tenantId,
+      batchId,
+      actorMembershipId: ctx.actorMembershipId,
+    });
+    const data = mapBatch(result.batch);
+    await auditWriter.write(tx, auditActor(ctx), {
+      action: "item_import_batch.undone",
+      target: { type: "item_import_batch", id: batchId },
+      before: { status: batch.status },
+      after: { status: data.status },
+      metadata: { removed: result.removed, kept: result.kept },
+    });
+    return { data: { batch: data, removed: result.removed, kept: result.kept } };
   },
 };

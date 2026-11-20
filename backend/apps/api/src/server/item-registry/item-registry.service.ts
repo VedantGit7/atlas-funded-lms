@@ -9,6 +9,7 @@ import {
 } from "./item-definition.contract";
 import type {
   AddCollectionItemInput,
+  BulkItemStatusInput,
   CreateItemCollectionInput,
   CreateItemInput,
   DeleteCollectionItemInput,
@@ -19,6 +20,7 @@ import type {
   UpdateItemCollectionInput,
   UpdateItemInput,
 } from "../item-registry/schemas";
+import { BULK_ITEM_STATUS_MAX } from "../item-registry/schemas";
 import type { z } from "zod";
 import {
   collectionItemConflict,
@@ -288,11 +290,11 @@ export const itemRegistryService = {
 
   async listItems(tx: TenantTx, query: ListItemsQuery) {
     const result = await itemRegistryRepository.listItems(tx, query);
-    const page = pageFrom(result, query.limit);
+    const page = pageFrom(result.rows, query.limit);
 
     return {
       data: page.data.map((row) => mapItem(row)),
-      page: page.page,
+      page: { ...page.page, total: result.total },
     };
   },
 
@@ -411,6 +413,43 @@ export const itemRegistryService = {
     });
 
     return { data: updated };
+  },
+
+  /**
+   * Publishes, unpublishes or archives many of the author's items at once,
+   * at most BULK_ITEM_STATUS_MAX per request (remaining says how many are
+   * left). Each change is audited like a single edit.
+   */
+  async bulkSetItemStatus(tx: TenantTx, ctx: ServiceCtx, input: BulkItemStatusInput) {
+    const result = await itemRegistryRepository.bulkSetStatus(tx, {
+      status: input.status,
+      actorMembershipId: ctx.actorMembershipId,
+      max: BULK_ITEM_STATUS_MAX,
+      itemIds: input.itemIds ?? null,
+      itemTypeKey: input.filter?.itemTypeKey ?? null,
+      fromStatus: input.filter?.status ?? null,
+      q: input.filter?.q ?? null,
+      importBatchId: input.filter?.importBatchId ?? null,
+    });
+
+    for (const item of result.changed) {
+      await auditWriter.write(tx, auditActor(ctx), {
+        action: "item.updated",
+        target: { type: "item", id: item.id },
+        before: { status: item.status },
+        after: { status: input.status },
+        metadata: { changedFields: ["status"], answerKeyChanged: false, bulk: true },
+      });
+    }
+
+    return {
+      data: {
+        status: input.status,
+        updated: result.changed.length,
+        remaining: result.remaining,
+        skipped: result.skipped,
+      },
+    };
   },
 
   async deleteItem(tx: TenantTx, ctx: ServiceCtx, itemId: string) {

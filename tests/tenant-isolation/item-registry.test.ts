@@ -151,5 +151,43 @@ describeWithDb("item registry tenant isolation", () => {
       async (tx) => tx.$queryRaw<Array<{ id: string }>>`select id::text from item_import_batches`,
     );
     expect(visibleToA.map((row) => row.id)).not.toContain(batch.data.id);
+
+    // Nor see it in the history, or undo it.
+    const history = await withTenantTx(authoringTenantTx(tenantA), async (tx) =>
+      itemImportService.listBatches(tx, instructorCtx(tenantA), { limit: 50 }),
+    );
+    expect(history.data.map((entry) => entry.id)).not.toContain(batch.data.id);
+    await expect(
+      withTenantTx(authoringTenantTx(tenantA), async (tx) =>
+        itemImportService.undoBatch(tx, instructorCtx(tenantA), batch.data.id),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("Tenant A cannot list or change the status of Tenant B items", async () => {
+    const tenantA = await createItemRegistryFixture();
+    const tenantB = await createItemRegistryFixture();
+
+    const listed = await withTenantTx(authoringTenantTx(tenantA), async (tx) =>
+      itemRegistryService.listItems(tx, { limit: 100 }),
+    );
+    expect(listed.data.map((item) => item.id)).not.toContain(tenantB.itemId);
+
+    const bulk = await withTenantTx(authoringTenantTx(tenantA), async (tx) =>
+      itemRegistryService.bulkSetItemStatus(tx, instructorCtx(tenantA), {
+        status: "PUBLISHED",
+        itemIds: [tenantB.itemId],
+      }),
+    );
+    expect(bulk.data).toMatchObject({ updated: 0, skipped: 1 });
+
+    const status = await withTenantTx(
+      authoringTenantTx(tenantB),
+      async (tx) =>
+        tx.$queryRaw<Array<{ status: string }>>`
+        select status::text as status from items where id = ${tenantB.itemId}::uuid
+      `,
+    );
+    expect(status[0]?.status).not.toBe("PUBLISHED");
   });
 });

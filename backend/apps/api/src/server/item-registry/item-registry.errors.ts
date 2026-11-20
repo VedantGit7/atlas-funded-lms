@@ -82,3 +82,11 @@ export function itemImportFileInvalid(message: string): AtlasHttpError {
     message,
   });
 }
+
+export function itemImportBatchAlreadyUndone(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 409,
+    message: "This import was already undone.",
+  });
+}

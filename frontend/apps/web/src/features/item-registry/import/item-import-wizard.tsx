@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Copy,
   Download,
+  Eye,
   FileSpreadsheet,
   Loader2,
   RotateCcw,
@@ -16,6 +17,7 @@ import {
 import {
   checkImportTemplate,
   ITEM_IMPORT_EXTRA_TAGS_MAX,
+  itemImportBatchSummary,
 } from "@atlas/contracts/item-registry/item-import-api.contract";
 import {
   ITEM_IMPORT_MAX_ROWS,
@@ -37,6 +39,8 @@ import {
   type ItemTypeDto,
 } from "../api";
 import { getItemTypeVisual } from "../components/item-type-config";
+import { runBulkStatus } from "../bulk-status";
+import { announceImportsChanged } from "./import-history";
 import { downloadErrorReport } from "./error-report";
 import { ImportFileError, readImportFile, type ImportFile } from "./read-import-file";
 import {
@@ -182,6 +186,12 @@ export function ItemImportWizard({
   const [skipDuplicates, setSkipDuplicates] = useState(true);
   const [tagsText, setTagsText] = useState("");
   const [reportPending, setReportPending] = useState(false);
+  const [publish, setPublish] = useState<
+    | { kind: "idle" }
+    | { kind: "working"; done: number }
+    | { kind: "done"; count: number }
+    | { kind: "failed" }
+  >({ kind: "idle" });
   const importKey = useRef(createClientUuid());
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -202,10 +212,28 @@ export function ItemImportWizard({
   function reset() {
     setStep({ kind: "choose" });
     setError(null);
+    setPublish({ kind: "idle" });
     setFilter("all");
     setShown(PAGE);
     importKey.current = createClientUuid();
     if (inputRef.current) inputRef.current.value = "";
+  }
+
+  /** Publishes every question this import added that is still a Draft. */
+  async function publishImported(batchId: string) {
+    setPublish({ kind: "working", done: 0 });
+    try {
+      const outcome = await runBulkStatus(
+        { status: "PUBLISHED", filter: { importBatchId: batchId, status: "DRAFT" } },
+        (done) => {
+          setPublish({ kind: "working", done });
+        },
+      );
+      setPublish({ kind: "done", count: outcome.updated });
+      announceImportsChanged();
+    } catch {
+      setPublish({ kind: "failed" });
+    }
   }
 
   async function onDownloadTemplate() {
@@ -266,6 +294,7 @@ export function ItemImportWizard({
         },
       );
       setStep({ kind: "done", outcome });
+      announceImportsChanged();
     } catch (err) {
       // Rows already imported stay imported, and sending them again never
       // duplicates them, so Import picks up where this stopped.
@@ -303,7 +332,8 @@ export function ItemImportWizard({
         : null;
 
   if (step.kind === "done") {
-    const { batch } = step.outcome;
+    const batchId = step.outcome.batch.id;
+    const summary = itemImportBatchSummary(step.outcome.batch);
     return (
       <section
         className={`${cardClass} motion-safe:animate-[admin-dropdown-in_0.22s_cubic-bezier(0.16,1,0.3,1)]`}
@@ -315,24 +345,26 @@ export function ItemImportWizard({
           />
           <div className="space-y-1">
             <h2 className="text-lg font-semibold text-[var(--admin-on-surface)]">
-              {plural(batch.importedCount, "question", "questions")} imported
+              {plural(summary.imported, "question", "questions")} imported
             </h2>
-            <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              They are Drafts in the item bank, so learners see none of them until you publish them.
+            <p className="text-sm text-[var(--admin-on-surface-variant)]" aria-live="polite">
+              {publish.kind === "done"
+                ? `${plural(publish.count, "question is", "questions are")} now published, so learners can see them in decks, practice and assessments.`
+                : "They are Drafts in the item bank, so learners see none of them until you publish them."}
             </p>
           </div>
         </div>
         <dl className="grid gap-3 sm:grid-cols-3">
           {[
-            { label: "Imported", value: batch.importedCount, className: tone.ready.text },
+            { label: "Imported", value: summary.imported, className: tone.ready.text },
             {
               label: "Duplicates skipped",
-              value: batch.duplicateCount,
+              value: summary.duplicatesSkipped,
               className: tone.duplicate.text,
             },
             {
               label: "Not imported (errors)",
-              value: batch.rowsWithErrors + batch.rejectedCount,
+              value: summary.notImported,
               className: tone.invalid.text,
             },
           ].map((stat) => (
@@ -347,10 +379,38 @@ export function ItemImportWizard({
             </div>
           ))}
         </dl>
+        {publish.kind === "failed" ? (
+          <div role="alert" className={errorBannerClass}>
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>
+              Not every question could be published. Check your connection and select Publish all
+              again; questions already published stay published.
+            </span>
+          </div>
+        ) : null}
         <div className="flex flex-col gap-2 sm:flex-row">
+          {summary.imported > 0 && publish.kind !== "done" ? (
+            <button
+              type="button"
+              disabled={publish.kind === "working"}
+              onClick={() => {
+                void publishImported(batchId);
+              }}
+              className={`${primaryButtonClassName} inline-flex items-center justify-center gap-1.5 py-2.5 disabled:cursor-wait disabled:opacity-70`}
+            >
+              {publish.kind === "working" ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden="true" />
+              )}
+              {publish.kind === "working"
+                ? `Publishing ${publish.done.toLocaleString("en")} of ${summary.imported.toLocaleString("en")}`
+                : `Publish all ${plural(summary.imported, "question", "questions")}`}
+            </button>
+          ) : null}
           <Link
-            href="/studio/items"
-            className={`${primaryButtonClassName} inline-flex items-center justify-center gap-1.5 py-2.5`}
+            href={`/studio/items?batch=${encodeURIComponent(batchId)}`}
+            className={`${outlineButtonClassName} inline-flex items-center justify-center gap-1.5 px-4 py-2.5`}
           >
             Review the imported questions
           </Link>
@@ -768,7 +828,7 @@ function PreviewPanel(props: {
           {invalid > 0 ? (
             <p className="text-xs text-[var(--admin-on-surface-variant)] sm:ml-2">
               {plural(invalid, "row has", "rows have")} errors and will not be imported. Fix them in
-              your file and upload it again, or import the rest now.
+              your file and upload it again{toImport > 0 ? ", or import the rest now" : ""}.
             </p>
           ) : null}
         </div>

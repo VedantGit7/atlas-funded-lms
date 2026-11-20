@@ -170,10 +170,73 @@ export const ItemImportBatchSchema = z.object({
   createdByMembershipId: z.string(),
   createdAt: z.string(),
   completedAt: z.string().nullable(),
+  undoneAt: z.string().nullable(),
 });
 export type ItemImportBatch = z.infer<typeof ItemImportBatchSchema>;
 
+/**
+ * What happened to every row of the file, for the summary an admin reads.
+ *
+ * The browser leaves skipped duplicates out of the upload, so the batch's own
+ * duplicateCount holds only the repeats the server caught at import time (a
+ * question added between the check and the import). The rest are the rows
+ * neither invalid nor sent: rowsInFile - rowsWithErrors - rowsToImport.
+ */
+export function itemImportBatchSummary(batch: ItemImportBatch): {
+  imported: number;
+  duplicatesSkipped: number;
+  notImported: number;
+} {
+  const skippedBeforeUpload = Math.max(
+    0,
+    batch.rowsInFile - batch.rowsWithErrors - batch.rowsToImport,
+  );
+  return {
+    imported: batch.importedCount,
+    duplicatesSkipped: skippedBeforeUpload + batch.duplicateCount,
+    notImported: batch.rowsWithErrors + batch.rejectedCount,
+  };
+}
+
 export const ItemImportBatchResponseSchema = z.object({ data: ItemImportBatchSchema });
+
+export const ITEM_IMPORT_HISTORY_PAGE_MAX = 50;
+
+export const ItemImportBatchListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(ITEM_IMPORT_HISTORY_PAGE_MAX).default(20),
+  /** The last batch id of the previous page (page.nextCursor). */
+  cursor: z.uuid().optional(),
+});
+export type ItemImportBatchListQuery = z.infer<typeof ItemImportBatchListQuerySchema>;
+
+/**
+ * A batch in the history. liveCount: its questions still in the bank;
+ * publishedCount: those of them published. ownedByYou: the viewer ran the
+ * import, so may publish its questions or undo it.
+ */
+export const ItemImportHistoryEntrySchema = ItemImportBatchSchema.extend({
+  liveCount: z.number().int().nonnegative(),
+  publishedCount: z.number().int().nonnegative(),
+  ownedByYou: z.boolean(),
+});
+export type ItemImportHistoryEntry = z.infer<typeof ItemImportHistoryEntrySchema>;
+
+export const ItemImportBatchListResponseSchema = z.object({
+  data: z.array(ItemImportHistoryEntrySchema),
+  page: z.object({ nextCursor: z.string().nullable(), hasMore: z.boolean() }),
+});
+
+/**
+ * removed: questions taken out of the bank. kept: questions left because a
+ * collection, deck or assessment uses them or learners have answered them.
+ */
+export const UndoItemImportBatchResponseSchema = z.object({
+  data: z.object({
+    batch: ItemImportBatchSchema,
+    removed: z.number().int().nonnegative(),
+    kept: z.number().int().nonnegative(),
+  }),
+});
 
 export const ItemImportRowResultSchema = z.object({
   rowNumber: z.number().int(),
