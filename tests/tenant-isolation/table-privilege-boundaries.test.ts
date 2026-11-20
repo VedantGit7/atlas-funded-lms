@@ -164,4 +164,15 @@ describeWithDb("table privilege boundaries", () => {
       expect(await privileges("audit_entry_redactions", role), role).toEqual(["SELECT"]);
     }
   });
+
+  it("keeps question imports as history: opened and finished, never deleted", async () => {
+    expect(await privileges("item_import_batches", "atlas_app")).toEqual([
+      "INSERT",
+      "SELECT",
+      "UPDATE",
+    ]);
+    for (const role of ["atlas_worker", "atlas_platform"]) {
+      expect(await privileges("item_import_batches", role), role).toEqual(["SELECT"]);
+    }
+  });
 });

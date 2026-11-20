@@ -56,3 +56,29 @@ export function duplicateDimensionWeight(): AtlasHttpError {
     message: "Duplicate dimensionId in weights.",
   });
 }
+
+export function itemImportBatchNotFound(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "PERMISSION_DENIED",
+    status: 404,
+    message: "Import not found or access denied.",
+  });
+}
+
+/** The batch is no longer taking rows: it was completed or undone. */
+export function itemImportBatchClosed(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 409,
+    message: "This import is already finished. Start a new import to add more questions.",
+  });
+}
+
+/** The uploaded file is not the current template for the chosen type. */
+export function itemImportFileInvalid(message: string): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 400,
+    message,
+  });
+}

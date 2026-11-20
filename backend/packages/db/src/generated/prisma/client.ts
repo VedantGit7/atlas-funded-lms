@@ -434,6 +434,13 @@ export type ItemType = Prisma.ItemTypeModel
  */
 export type Item = Prisma.ItemModel
 /**
+ * Model ItemImportBatch
+ * One upload of questions from an Excel template (migration 133). Items point
+ * back to it through items.import_batch_id; the foreign keys are declared in
+ * SQL only.
+ */
+export type ItemImportBatch = Prisma.ItemImportBatchModel
+/**
  * Model ItemOption
  * 
  */

@@ -13,6 +13,12 @@ import type {
   collectionItemListResponseSchema,
 } from "./item-registry-response-schemas";
 import type {
+  ImportItemRowsResponse,
+  ItemImportBatch,
+  ItemImportCheckResponse,
+} from "@atlas/contracts/item-registry/item-import-api.contract";
+import type { ImportApi } from "./import/run-import";
+import type {
   CreateItemBodySchema,
   UpdateItemBodySchema,
   CreateItemCollectionBodySchema,
@@ -195,6 +201,42 @@ export async function downloadItemImportTemplate(itemTypeKey: string): Promise<v
   link.remove();
   URL.revokeObjectURL(url);
 }
+
+/** The requests behind importing a filled-in template (item-import-api.contract.ts). */
+export const itemImportApi: ImportApi = {
+  check: (body) =>
+    clientApi.post<ItemImportCheckResponse>(
+      "/api/v1/items/import-check",
+      body,
+      "item-import-check",
+      {
+        silent: true,
+      },
+    ),
+  createBatch: (body, idempotencyKey) =>
+    clientApi.postWithKey<{ data: ItemImportBatch }>(
+      "/api/v1/items/import-batches",
+      body,
+      idempotencyKey,
+      {
+        silent: true,
+      },
+    ),
+  importRows: (batchId, body, idempotencyKey) =>
+    clientApi.postWithKey<ImportItemRowsResponse>(
+      `/api/v1/items/import-batches/${encodeURIComponent(batchId)}/rows`,
+      body,
+      idempotencyKey,
+      { silent: true },
+    ),
+  complete: (batchId, idempotencyKey) =>
+    clientApi.postWithKey<{ data: ItemImportBatch }>(
+      `/api/v1/items/import-batches/${encodeURIComponent(batchId)}/complete`,
+      null,
+      idempotencyKey,
+      { silent: true },
+    ),
+};
 
 export const itemRegistryApi = {
   downloadItemImportTemplate,

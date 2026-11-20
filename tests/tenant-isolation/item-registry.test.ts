@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
 import { itemRegistryService } from "../../backend/apps/api/src/server/item-registry/item-registry.service";
+import { itemImportService } from "../../backend/apps/api/src/server/item-registry/item-import.service";
+import { itemImportColumns } from "../../backend/apps/api/src/server/item-registry/item-import.contract";
 import {
   authoringTenantTx,
   createItemRegistryFixture,
@@ -105,5 +107,49 @@ describeWithDb("item registry tenant isolation", () => {
       `;
       expect(rows).toHaveLength(0);
     });
+  });
+
+  it("Tenant A cannot add questions to, or finish, Tenant B's import", async () => {
+    const tenantA = await createItemRegistryFixture();
+    const tenantB = await createItemRegistryFixture();
+    const columns = itemImportColumns("true_false", []);
+    const template = {
+      format: "atlas-item-import",
+      version: "1",
+      itemTypeKey: "true_false" as const,
+      columns: columns.map((column) => column.key),
+      headers: columns.map((column) => column.header),
+    };
+    const batch = await withTenantTx(authoringTenantTx(tenantB), async (tx) =>
+      itemImportService.createBatch(tx, instructorCtx(tenantB), {
+        template,
+        fileName: "b.xlsx",
+        rowsInFile: 1,
+        rowsWithErrors: 0,
+        rowsToImport: 1,
+        skipDuplicates: true,
+        extraTags: [],
+      }),
+    );
+
+    await expect(
+      withTenantTx(authoringTenantTx(tenantA), async (tx) =>
+        itemImportService.importRows(tx, instructorCtx(tenantA), batch.data.id, {
+          template,
+          rows: [{ rowNumber: 2, cells: { question: "Injected", correct_answer: "TRUE" } }],
+        }),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+    await expect(
+      withTenantTx(authoringTenantTx(tenantA), async (tx) =>
+        itemImportService.completeBatch(tx, instructorCtx(tenantA), batch.data.id),
+      ),
+    ).rejects.toMatchObject({ status: 404 });
+
+    const visibleToA = await withTenantTx(
+      authoringTenantTx(tenantA),
+      async (tx) => tx.$queryRaw<Array<{ id: string }>>`select id::text from item_import_batches`,
+    );
+    expect(visibleToA.map((row) => row.id)).not.toContain(batch.data.id);
   });
 });

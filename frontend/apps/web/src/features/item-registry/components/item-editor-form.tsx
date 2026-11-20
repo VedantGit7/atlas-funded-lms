@@ -15,6 +15,7 @@ import {
   ITEM_IMPORT_TYPE_NAMES,
   isImportableItemType,
 } from "@atlas/contracts/item-registry/item-import.contract";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Eye, FileSpreadsheet, Info, Save, Scale, X } from "lucide-react";
 import {
@@ -325,7 +326,14 @@ export function ItemEditorForm({
                 </button>
                 <span className="text-xs text-[var(--admin-on-surface-variant)]">
                   Add many questions of this type at once, up to{" "}
-                  {ITEM_IMPORT_MAX_ROWS.toLocaleString("en")} per file.
+                  {ITEM_IMPORT_MAX_ROWS.toLocaleString("en")} per file, then{" "}
+                  <Link
+                    href={`/studio/items/import?type=${encodeURIComponent(itemTypeKey)}`}
+                    className="font-medium text-[var(--admin-primary)] underline-offset-4 hover:underline"
+                  >
+                    upload it here
+                  </Link>
+                  .
                 </span>
                 {templateError ? (
                   <span role="alert" className="w-full text-xs text-[var(--admin-danger)]">

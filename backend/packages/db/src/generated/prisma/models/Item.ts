@@ -28,10 +28,12 @@ export type AggregateItem = {
 
 export type ItemAvgAggregateOutputType = {
   difficulty: number | null
+  import_row_number: number | null
 }
 
 export type ItemSumAggregateOutputType = {
   difficulty: number | null
+  import_row_number: number | null
 }
 
 export type ItemMinAggregateOutputType = {
@@ -44,6 +46,9 @@ export type ItemMinAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
+  import_batch_id: string | null
+  import_row_number: number | null
+  import_reference: string | null
 }
 
 export type ItemMaxAggregateOutputType = {
@@ -56,6 +61,9 @@ export type ItemMaxAggregateOutputType = {
   created_at: Date | null
   updated_at: Date | null
   deleted_at: Date | null
+  import_batch_id: string | null
+  import_row_number: number | null
+  import_reference: string | null
 }
 
 export type ItemCountAggregateOutputType = {
@@ -71,16 +79,21 @@ export type ItemCountAggregateOutputType = {
   created_at: number
   updated_at: number
   deleted_at: number
+  import_batch_id: number
+  import_row_number: number
+  import_reference: number
   _all: number
 }
 
 
 export type ItemAvgAggregateInputType = {
   difficulty?: true
+  import_row_number?: true
 }
 
 export type ItemSumAggregateInputType = {
   difficulty?: true
+  import_row_number?: true
 }
 
 export type ItemMinAggregateInputType = {
@@ -93,6 +106,9 @@ export type ItemMinAggregateInputType = {
   created_at?: true
   updated_at?: true
   deleted_at?: true
+  import_batch_id?: true
+  import_row_number?: true
+  import_reference?: true
 }
 
 export type ItemMaxAggregateInputType = {
@@ -105,6 +121,9 @@ export type ItemMaxAggregateInputType = {
   created_at?: true
   updated_at?: true
   deleted_at?: true
+  import_batch_id?: true
+  import_row_number?: true
+  import_reference?: true
 }
 
 export type ItemCountAggregateInputType = {
@@ -120,6 +139,9 @@ export type ItemCountAggregateInputType = {
   created_at?: true
   updated_at?: true
   deleted_at?: true
+  import_batch_id?: true
+  import_row_number?: true
+  import_reference?: true
   _all?: true
 }
 
@@ -222,6 +244,9 @@ export type ItemGroupByOutputType = {
   created_at: Date
   updated_at: Date
   deleted_at: Date | null
+  import_batch_id: string | null
+  import_row_number: number | null
+  import_reference: string | null
   _count: ItemCountAggregateOutputType | null
   _avg: ItemAvgAggregateOutputType | null
   _sum: ItemSumAggregateOutputType | null
@@ -260,6 +285,9 @@ export type ItemWhereInput = {
   created_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
+  import_batch_id?: Prisma.UuidNullableFilter<"Item"> | string | null
+  import_row_number?: Prisma.IntNullableFilter<"Item"> | number | null
+  import_reference?: Prisma.StringNullableFilter<"Item"> | string | null
   assessment_items?: Prisma.AssessmentItemListRelationFilter
   item_options?: Prisma.ItemOptionListRelationFilter
   item_collection_items?: Prisma.ItemCollectionItemListRelationFilter
@@ -282,6 +310,9 @@ export type ItemOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  import_batch_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  import_row_number?: Prisma.SortOrderInput | Prisma.SortOrder
+  import_reference?: Prisma.SortOrderInput | Prisma.SortOrder
   assessment_items?: Prisma.AssessmentItemOrderByRelationAggregateInput
   item_options?: Prisma.ItemOptionOrderByRelationAggregateInput
   item_collection_items?: Prisma.ItemCollectionItemOrderByRelationAggregateInput
@@ -308,6 +339,9 @@ export type ItemWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"Item"> | Date | string
   deleted_at?: Prisma.DateTimeNullableFilter<"Item"> | Date | string | null
+  import_batch_id?: Prisma.UuidNullableFilter<"Item"> | string | null
+  import_row_number?: Prisma.IntNullableFilter<"Item"> | number | null
+  import_reference?: Prisma.StringNullableFilter<"Item"> | string | null
   assessment_items?: Prisma.AssessmentItemListRelationFilter
   item_options?: Prisma.ItemOptionListRelationFilter
   item_collection_items?: Prisma.ItemCollectionItemListRelationFilter
@@ -330,6 +364,9 @@ export type ItemOrderByWithAggregationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder
+  import_batch_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  import_row_number?: Prisma.SortOrderInput | Prisma.SortOrder
+  import_reference?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ItemCountOrderByAggregateInput
   _avg?: Prisma.ItemAvgOrderByAggregateInput
   _max?: Prisma.ItemMaxOrderByAggregateInput
@@ -353,6 +390,9 @@ export type ItemScalarWhereWithAggregatesInput = {
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Item"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"Item"> | Date | string
   deleted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
+  import_batch_id?: Prisma.UuidNullableWithAggregatesFilter<"Item"> | string | null
+  import_row_number?: Prisma.IntNullableWithAggregatesFilter<"Item"> | number | null
+  import_reference?: Prisma.StringNullableWithAggregatesFilter<"Item"> | string | null
 }
 
 export type ItemCreateInput = {
@@ -368,6 +408,9 @@ export type ItemCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
@@ -390,6 +433,9 @@ export type ItemUncheckedCreateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
@@ -412,6 +458,9 @@ export type ItemUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
@@ -434,6 +483,9 @@ export type ItemUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
@@ -456,6 +508,9 @@ export type ItemCreateManyInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
 }
 
 export type ItemUpdateManyMutationInput = {
@@ -471,6 +526,9 @@ export type ItemUpdateManyMutationInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ItemUncheckedUpdateManyInput = {
@@ -486,6 +544,9 @@ export type ItemUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StringNullableListFilter<$PrismaModel = never> = {
@@ -514,10 +575,14 @@ export type ItemCountOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
+  import_batch_id?: Prisma.SortOrder
+  import_row_number?: Prisma.SortOrder
+  import_reference?: Prisma.SortOrder
 }
 
 export type ItemAvgOrderByAggregateInput = {
   difficulty?: Prisma.SortOrder
+  import_row_number?: Prisma.SortOrder
 }
 
 export type ItemMaxOrderByAggregateInput = {
@@ -530,6 +595,9 @@ export type ItemMaxOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
+  import_batch_id?: Prisma.SortOrder
+  import_row_number?: Prisma.SortOrder
+  import_reference?: Prisma.SortOrder
 }
 
 export type ItemMinOrderByAggregateInput = {
@@ -542,10 +610,14 @@ export type ItemMinOrderByAggregateInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   deleted_at?: Prisma.SortOrder
+  import_batch_id?: Prisma.SortOrder
+  import_row_number?: Prisma.SortOrder
+  import_reference?: Prisma.SortOrder
 }
 
 export type ItemSumOrderByAggregateInput = {
   difficulty?: Prisma.SortOrder
+  import_row_number?: Prisma.SortOrder
 }
 
 export type ItemScalarRelationFilter = {
@@ -673,6 +745,9 @@ export type ItemCreateWithoutItem_optionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
   item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
@@ -694,6 +769,9 @@ export type ItemUncheckedCreateWithoutItem_optionsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
@@ -731,6 +809,9 @@ export type ItemUpdateWithoutItem_optionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
@@ -752,6 +833,9 @@ export type ItemUncheckedUpdateWithoutItem_optionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
@@ -773,6 +857,9 @@ export type ItemCreateWithoutItem_dimension_weightsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
@@ -794,6 +881,9 @@ export type ItemUncheckedCreateWithoutItem_dimension_weightsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
@@ -831,6 +921,9 @@ export type ItemUpdateWithoutItem_dimension_weightsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
@@ -852,6 +945,9 @@ export type ItemUncheckedUpdateWithoutItem_dimension_weightsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
@@ -873,6 +969,9 @@ export type ItemCreateWithoutItem_collection_itemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
   item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
@@ -894,6 +993,9 @@ export type ItemUncheckedCreateWithoutItem_collection_itemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
@@ -931,6 +1033,9 @@ export type ItemUpdateWithoutItem_collection_itemsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
@@ -952,6 +1057,9 @@ export type ItemUncheckedUpdateWithoutItem_collection_itemsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
@@ -973,6 +1081,9 @@ export type ItemCreateWithoutAssessment_itemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
   item_dimension_weights?: Prisma.ItemDimensionWeightCreateNestedManyWithoutItemInput
@@ -994,6 +1105,9 @@ export type ItemUncheckedCreateWithoutAssessment_itemsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedCreateNestedManyWithoutItemInput
@@ -1031,6 +1145,9 @@ export type ItemUpdateWithoutAssessment_itemsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUpdateManyWithoutItemNestedInput
@@ -1052,6 +1169,9 @@ export type ItemUncheckedUpdateWithoutAssessment_itemsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
   item_dimension_weights?: Prisma.ItemDimensionWeightUncheckedUpdateManyWithoutItemNestedInput
@@ -1073,6 +1193,9 @@ export type ItemCreateWithoutPractice_responsesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
@@ -1094,6 +1217,9 @@ export type ItemUncheckedCreateWithoutPractice_responsesInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
@@ -1131,6 +1257,9 @@ export type ItemUpdateWithoutPractice_responsesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
@@ -1152,6 +1281,9 @@ export type ItemUncheckedUpdateWithoutPractice_responsesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
@@ -1173,6 +1305,9 @@ export type ItemCreateWithoutSrs_stateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
@@ -1194,6 +1329,9 @@ export type ItemUncheckedCreateWithoutSrs_stateInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
@@ -1231,6 +1369,9 @@ export type ItemUpdateWithoutSrs_stateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
@@ -1252,6 +1393,9 @@ export type ItemUncheckedUpdateWithoutSrs_stateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
@@ -1273,6 +1417,9 @@ export type ItemCreateWithoutItem_statisticsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemCreateNestedManyWithoutItemInput
@@ -1294,6 +1441,9 @@ export type ItemUncheckedCreateWithoutItem_statisticsInput = {
   created_at?: Date | string
   updated_at?: Date | string
   deleted_at?: Date | string | null
+  import_batch_id?: string | null
+  import_row_number?: number | null
+  import_reference?: string | null
   assessment_items?: Prisma.AssessmentItemUncheckedCreateNestedManyWithoutItemInput
   item_options?: Prisma.ItemOptionUncheckedCreateNestedManyWithoutItemInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedCreateNestedManyWithoutItemInput
@@ -1331,6 +1481,9 @@ export type ItemUpdateWithoutItem_statisticsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUpdateManyWithoutItemNestedInput
@@ -1352,6 +1505,9 @@ export type ItemUncheckedUpdateWithoutItem_statisticsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  import_batch_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  import_row_number?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  import_reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assessment_items?: Prisma.AssessmentItemUncheckedUpdateManyWithoutItemNestedInput
   item_options?: Prisma.ItemOptionUncheckedUpdateManyWithoutItemNestedInput
   item_collection_items?: Prisma.ItemCollectionItemUncheckedUpdateManyWithoutItemNestedInput
@@ -1458,6 +1614,9 @@ export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  import_batch_id?: boolean
+  import_row_number?: boolean
+  import_reference?: boolean
   assessment_items?: boolean | Prisma.Item$assessment_itemsArgs<ExtArgs>
   item_options?: boolean | Prisma.Item$item_optionsArgs<ExtArgs>
   item_collection_items?: boolean | Prisma.Item$item_collection_itemsArgs<ExtArgs>
@@ -1481,6 +1640,9 @@ export type ItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  import_batch_id?: boolean
+  import_row_number?: boolean
+  import_reference?: boolean
 }, ExtArgs["result"]["item"]>
 
 export type ItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1496,6 +1658,9 @@ export type ItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  import_batch_id?: boolean
+  import_row_number?: boolean
+  import_reference?: boolean
 }, ExtArgs["result"]["item"]>
 
 export type ItemSelectScalar = {
@@ -1511,9 +1676,12 @@ export type ItemSelectScalar = {
   created_at?: boolean
   updated_at?: boolean
   deleted_at?: boolean
+  import_batch_id?: boolean
+  import_row_number?: boolean
+  import_reference?: boolean
 }
 
-export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "item_type_key" | "stem_json" | "explanation_json" | "difficulty" | "status" | "tags" | "created_by_membership_id" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["item"]>
+export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "item_type_key" | "stem_json" | "explanation_json" | "difficulty" | "status" | "tags" | "created_by_membership_id" | "created_at" | "updated_at" | "deleted_at" | "import_batch_id" | "import_row_number" | "import_reference", ExtArgs["result"]["item"]>
 export type ItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessment_items?: boolean | Prisma.Item$assessment_itemsArgs<ExtArgs>
   item_options?: boolean | Prisma.Item$item_optionsArgs<ExtArgs>
@@ -1551,6 +1719,12 @@ export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     created_at: Date
     updated_at: Date
     deleted_at: Date | null
+    /**
+     * Set when the question was imported from a spreadsheet (migration 133).
+     */
+    import_batch_id: string | null
+    import_row_number: number | null
+    import_reference: string | null
   }, ExtArgs["result"]["item"]>
   composites: {}
 }
@@ -1993,6 +2167,9 @@ export interface ItemFieldRefs {
   readonly created_at: Prisma.FieldRef<"Item", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"Item", 'DateTime'>
   readonly deleted_at: Prisma.FieldRef<"Item", 'DateTime'>
+  readonly import_batch_id: Prisma.FieldRef<"Item", 'String'>
+  readonly import_row_number: Prisma.FieldRef<"Item", 'Int'>
+  readonly import_reference: Prisma.FieldRef<"Item", 'String'>
 }
     
 
