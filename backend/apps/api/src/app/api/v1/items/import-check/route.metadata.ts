@@ -8,6 +8,7 @@ export const postItemImportCheckRouteMetadata = {
   permission: "item.create",
   entitlement: null,
   audit: "none",
+  auditExempt: "read_only",
   rateLimit: "tenantMutation",
   idempotency: "none",
   resourceLoader: async ({ ctx }) => loadItemCreateResourceRef({ ctx }),
