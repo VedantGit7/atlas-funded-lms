@@ -35,7 +35,7 @@ export const POST = createTenantRoute<
 >({
   metadata: setCustomFieldValueMetadata,
   params: paramsSchema,
-  input: setCustomFieldValueBodySchema,
+  body: setCustomFieldValueBodySchema,
   output: customFieldValueResponseSchema,
   handler: async ({ tx, ctx, params, input }) => setCustomFieldValue(tx, ctx, params["id"], input),
 });

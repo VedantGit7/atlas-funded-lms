@@ -30,7 +30,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: updatePollMetadata,
   params: paramsSchema,
-  input: updatePollBodySchema,
+  body: updatePollBodySchema,
   output: pollResponseSchema,
   handler: async ({ tx, ctx, params, input }) => updatePoll(tx, ctx, params["id"], input),
 });

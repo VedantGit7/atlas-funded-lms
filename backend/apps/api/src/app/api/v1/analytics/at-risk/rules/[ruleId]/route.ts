@@ -15,7 +15,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: updateAtRiskRuleMetadata,
   params: updateAtRiskRuleParamsSchema,
-  input: updateAtRiskRuleBodySchema,
+  body: updateAtRiskRuleBodySchema,
   output: atRiskRuleResponseSchema,
   handler: async ({ tx, ctx, params, input }) => updateAtRiskRule(tx, ctx, params["ruleId"], input),
 });

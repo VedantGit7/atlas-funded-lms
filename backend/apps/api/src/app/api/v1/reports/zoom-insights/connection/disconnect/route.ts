@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof zoomConnectionDisconnectResponseSchema>
 >({
   metadata: mutateZoomConnectionMetadata,
-  input: zoomConnectionDisconnectBodySchema,
+  body: zoomConnectionDisconnectBodySchema,
   output: zoomConnectionDisconnectResponseSchema,
   handler: async ({ tx, ctx, input }) => disconnectZoomConnection(tx, ctx, input),
 });

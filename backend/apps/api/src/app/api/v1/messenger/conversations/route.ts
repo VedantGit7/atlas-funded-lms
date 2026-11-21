@@ -27,7 +27,7 @@ export const POST = createTenantRoute<
   z.output<typeof conversationResponseSchema>
 >({
   metadata: createConversationMetadata,
-  input: createConversationBodySchema,
+  body: createConversationBodySchema,
   output: conversationResponseSchema,
   handler: async ({ tx, ctx, input }) => createConversation(tx, ctx, input),
 });

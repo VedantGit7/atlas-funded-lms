@@ -30,7 +30,7 @@ export const POST = createTenantRoute<
   z.output<typeof createAttributionEventResponseSchema>
 >({
   metadata: createAttributionEventMetadata,
-  input: createAttributionEventBodySchema,
+  body: createAttributionEventBodySchema,
   output: createAttributionEventResponseSchema,
   handler: async ({ tx, ctx, input }) => createAttributionEvent(tx, ctx, input),
 });

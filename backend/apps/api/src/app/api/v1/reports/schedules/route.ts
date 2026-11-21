@@ -25,7 +25,7 @@ export const POST = createTenantRoute<
   z.output<typeof createReportScheduleResponseSchema>
 >({
   metadata: createReportScheduleMetadata,
-  input: createReportScheduleBodySchema,
+  body: createReportScheduleBodySchema,
   output: createReportScheduleResponseSchema,
   handler: async ({ tx, ctx, input }) => createReportSchedule(tx, ctx, input),
 });

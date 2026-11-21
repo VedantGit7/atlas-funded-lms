@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof zoomConnectionSyncResponseSchema>
 >({
   metadata: mutateZoomInsightsRosterMetadata,
-  input: zoomConnectionSyncBodySchema,
+  body: zoomConnectionSyncBodySchema,
   output: zoomConnectionSyncResponseSchema,
   handler: async ({ tx, ctx }) => syncZoomConnectionNow(tx, ctx),
 });

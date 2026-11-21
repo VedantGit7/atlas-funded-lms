@@ -30,7 +30,7 @@ export const POST = createTenantRoute<
   z.output<typeof createDestinationResponseSchema>
 >({
   metadata: createDestinationMetadata,
-  input: createDestinationBodySchema,
+  body: createDestinationBodySchema,
   output: createDestinationResponseSchema,
   handler: async ({ tx, ctx, input }) => createDestination(tx, ctx, input),
 });

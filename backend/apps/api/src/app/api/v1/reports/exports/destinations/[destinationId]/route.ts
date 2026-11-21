@@ -22,7 +22,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: updateDestinationMetadata,
   params: destinationParamsSchema,
-  input: updateDestinationBodySchema,
+  body: updateDestinationBodySchema,
   output: updateDestinationResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateDestination(tx, ctx, params["destinationId"], input),

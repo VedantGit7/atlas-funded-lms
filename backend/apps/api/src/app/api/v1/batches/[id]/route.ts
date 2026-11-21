@@ -30,7 +30,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: updateBatchMetadata,
   params: paramsSchema,
-  input: updateBatchBodySchema,
+  body: updateBatchBodySchema,
   output: batchResponseSchema,
   handler: async ({ tx, ctx, params, input }) => updateBatch(tx, ctx, params["id"], input),
 });

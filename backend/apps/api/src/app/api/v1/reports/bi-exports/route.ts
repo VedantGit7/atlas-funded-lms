@@ -27,7 +27,7 @@ export const POST = createTenantRoute<
   z.output<typeof createBiExportResponseSchema>
 >({
   metadata: createBiExportMetadata,
-  input: createBiExportBodySchema,
+  body: createBiExportBodySchema,
   output: createBiExportResponseSchema,
   handler: async ({ tx, ctx, input }) => createBiExportJob(tx, ctx, input),
 });

@@ -521,6 +521,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://generate:generate@127.0.0.1:5432/generate
       - run: pnpm check:route-metadata
+      - run: pnpm check:write-route-body
 
   prisma-boundary-check:
     name: prisma-boundary-check

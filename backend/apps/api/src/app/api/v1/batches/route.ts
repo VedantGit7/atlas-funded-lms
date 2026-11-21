@@ -25,7 +25,7 @@ export const POST = createTenantRoute<
   z.output<typeof batchResponseSchema>
 >({
   metadata: createBatchMetadata,
-  input: createBatchBodySchema,
+  body: createBatchBodySchema,
   output: batchResponseSchema,
   handler: async ({ tx, ctx, input }) => createBatch(tx, ctx, input),
 });

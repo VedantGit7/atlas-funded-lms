@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof zoomConnectionWebhookTestResponseSchema>
 >({
   metadata: mutateZoomInsightsRosterMetadata,
-  input: zoomConnectionSyncBodySchema,
+  body: zoomConnectionSyncBodySchema,
   output: zoomConnectionWebhookTestResponseSchema,
   handler: async ({ tx, ctx }) => sendZoomWebhookTest(tx, ctx),
 });

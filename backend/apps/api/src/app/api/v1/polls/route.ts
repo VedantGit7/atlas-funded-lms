@@ -22,7 +22,7 @@ export const POST = createTenantRoute<
   z.output<typeof pollResponseSchema>
 >({
   metadata: createPollMetadata,
-  input: createPollBodySchema,
+  body: createPollBodySchema,
   output: pollResponseSchema,
   handler: async ({ tx, ctx, input }) => createPoll(tx, ctx, input),
 });

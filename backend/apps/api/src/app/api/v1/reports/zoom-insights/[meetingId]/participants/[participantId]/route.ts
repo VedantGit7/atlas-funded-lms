@@ -35,7 +35,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: mutateZoomInsightsRosterMetadata,
   params: zoomParticipantParamsSchema,
-  input: zoomParticipantMatchBodySchema,
+  body: zoomParticipantMatchBodySchema,
   output: zoomParticipantMatchResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     mutateZoomMeetingParticipantMatch(tx, ctx, params["meetingId"], params["participantId"], input),

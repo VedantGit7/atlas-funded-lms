@@ -27,7 +27,7 @@ export const POST = createTenantRoute<
   z.output<typeof createPaymentOrderResponseSchema>
 >({
   metadata: createPaymentOrderMetadata,
-  input: createPaymentOrderBodySchema,
+  body: createPaymentOrderBodySchema,
   output: createPaymentOrderResponseSchema,
   handler: async ({ tx, ctx, input }) => createPaymentOrder(tx, ctx, input),
 });

@@ -35,7 +35,7 @@ export const DELETE = createTenantRoute<
 >({
   metadata: mutateBatchesRosterMetadata,
   params: batchLearnerParamsSchema,
-  input: removeBatchLearnerBodySchema,
+  body: removeBatchLearnerBodySchema,
   output: removeBatchLearnerResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     removeBatchLearner(tx, ctx, params["batchId"], params["membershipId"], input),

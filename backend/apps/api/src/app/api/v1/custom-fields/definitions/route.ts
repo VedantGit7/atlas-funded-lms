@@ -28,7 +28,7 @@ export const POST = createTenantRoute<
   z.output<typeof customFieldDefinitionResponseSchema>
 >({
   metadata: createCustomFieldDefinitionMetadata,
-  input: createCustomFieldDefinitionBodySchema,
+  body: createCustomFieldDefinitionBodySchema,
   output: customFieldDefinitionResponseSchema,
   handler: async ({ tx, ctx, input }) => createCustomFieldDefinition(tx, ctx, input),
 });

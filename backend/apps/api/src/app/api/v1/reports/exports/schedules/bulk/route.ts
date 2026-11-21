@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof schedulesRosterBulkResponseSchema>
 >({
   metadata: bulkMutateSchedulesMetadata,
-  input: schedulesRosterBulkBodySchema,
+  body: schedulesRosterBulkBodySchema,
   output: schedulesRosterBulkResponseSchema,
   handler: async ({ tx, ctx, input }) => bulkMutateSchedules(tx, ctx, input),
 });
