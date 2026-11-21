@@ -20,6 +20,7 @@ export declare const securityHeadersRule: {
 
 export declare const scormFramingHeadersRule: typeof securityHeadersRule;
 export declare const formFramingHeadersRule: typeof securityHeadersRule;
+export declare const localFileFramingHeadersRule: typeof securityHeadersRule;
 export declare const CSP_REPORT_PATH: string;
 export declare function buildDocumentCsp(
   nonce: string,

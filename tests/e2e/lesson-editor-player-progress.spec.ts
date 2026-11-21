@@ -7,14 +7,13 @@ const webRoot = resolve(import.meta.dirname, "../../frontend/apps/web/src");
 const lessonPaths = [
   "app/studio/courses/[id]/lessons/[lessonId]/page.tsx",
   "app/courses/[id]/lessons/[lessonId]/page.tsx",
-  "features/studio/lessons/lesson-editor.tsx",
-  "features/studio/lessons/lesson-settings-form.tsx",
-  "features/studio/lessons/lesson-content-editor.tsx",
-  "features/studio/lessons/lesson-asset-panel.tsx",
-  "features/studio/lessons/lesson-preview-panel.tsx",
+  "features/studio/courses/inline-lesson-editor/inline-lesson-editor.tsx",
+  "features/studio/courses/inline-lesson-editor/lesson-article-workspace.tsx",
   "features/studio/lessons/delete-lesson-dialog.tsx",
   "features/lessons/lesson-player-shell.tsx",
   "features/lessons/lesson-content-viewer.tsx",
+  "features/lessons/lesson-body.tsx",
+  "features/lessons/article-markdown.tsx",
   "features/lessons/lesson-asset-list.tsx",
   "features/lessons/lesson-progress-panel.tsx",
   "features/lessons/lesson-next-action.tsx",
@@ -50,13 +49,23 @@ describe("lesson editor player progress e2e wiring", () => {
     expect(source).not.toMatch(/tenant_id|tenantId|membershipId|userId/);
   });
 
-  it("studio lesson editor breadcrumb links course builder", () => {
+  it("opens lessons in the course builder, the one lesson editor", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/studio/lessons/lesson-editor.tsx"),
+      resolve(webRoot, "app/studio/courses/[id]/lessons/[lessonId]/page.tsx"),
       "utf8",
     );
-    expect(source).toContain("Course Builder");
-    expect(source).toContain("/studio/courses/");
+    expect(source).toContain("redirect(");
+    expect(source).toContain("/editor?");
+    expect(existsSync(resolve(webRoot, "features/studio/lessons/lesson-editor.tsx"))).toBe(false);
+  });
+
+  it("shows the Studio preview with the learner lesson body", () => {
+    const source = readFileSync(
+      resolve(webRoot, "features/studio/courses/inline-lesson-editor/inline-lesson-editor.tsx"),
+      "utf8",
+    );
+    expect(source).toContain("LessonBody");
+    expect(source).toContain("playerContent");
   });
 
   it("lesson player supports next/previous navigation", () => {

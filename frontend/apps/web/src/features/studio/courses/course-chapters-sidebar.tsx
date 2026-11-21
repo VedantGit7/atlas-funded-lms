@@ -56,6 +56,8 @@ type CourseChaptersSidebarProps = {
   modules: ModuleItem[];
   editable: boolean;
   selectedLessonId?: string | null;
+  /** The section to open first; defaults to the first one. */
+  initialExpandedModuleId?: string | null;
   addingLessonModuleId?: string | null;
   lessonsRefreshModuleId?: string | null;
   onChanged: (modules: ModuleItem[]) => void;
@@ -130,6 +132,7 @@ export function CourseChaptersSidebar({
   modules,
   editable,
   selectedLessonId = null,
+  initialExpandedModuleId = null,
   addingLessonModuleId = null,
   lessonsRefreshModuleId = null,
   onChanged,
@@ -148,9 +151,10 @@ export function CourseChaptersSidebar({
   const visibilityChangeable = canChangeContentVisibility(courseStatus);
   const visibilityNotice = modules.length > 0 ? contentVisibilityNotice(courseStatus) : null;
   const showActionMenus = editable || visibilityChangeable;
-  const [expandedModuleIds, setExpandedModuleIds] = useState<Set<string>>(
-    () => new Set(modules[0]?.id ? [modules[0].id] : []),
-  );
+  const [expandedModuleIds, setExpandedModuleIds] = useState<Set<string>>(() => {
+    const first = initialExpandedModuleId ?? modules[0]?.id;
+    return new Set(first ? [first] : []);
+  });
   const [lessonsByModule, setLessonsByModule] = useState<Record<string, LessonOutlineItem[]>>({});
   const [lessonsLoadingIds, setLessonsLoadingIds] = useState<Set<string>>(new Set());
   const lessonsByModuleRef = useRef(lessonsByModule);

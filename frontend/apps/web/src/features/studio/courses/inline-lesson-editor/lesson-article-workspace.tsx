@@ -1,15 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import {} from "lucide-react";
 import { ClientApiError, clientApi } from "../../../../lib/client-api";
 import type { z } from "zod";
 import type { studioLessonDetailSchema } from "@atlas/contracts/lessons/lesson-schemas";
-import {
-  inlineLessonPrimaryDarkButtonClassName,
-  inlineLessonSecondaryButtonClassName,
-} from "./inline-lesson-editor-shared";
+import { inlineLessonPrimaryDarkButtonClassName } from "./inline-lesson-editor-shared";
 import { MarkdownToolbar } from "./markdown-toolbar";
 
 type StudioLessonDetail = z.infer<typeof studioLessonDetailSchema>;
@@ -17,23 +12,33 @@ type StudioLessonDetail = z.infer<typeof studioLessonDetailSchema>;
 type LessonArticleWorkspaceProps = {
   lesson: StudioLessonDetail;
   editable: boolean;
+  onSaved?: () => void;
 };
+
+/**
+ * The article's text as the author wrote it.
+ *
+ * The API returns an article's content as `{ body }`. This editor used to show
+ * that object as JSON and save the JSON back as the text, wrapping it again on
+ * every save (QA review 1 C5). It now edits the body itself.
+ */
+export function articleTextOf(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (content && typeof content === "object" && !Array.isArray(content)) {
+    const body = (content as Record<string, unknown>)["body"];
+    if (typeof body === "string") return body;
+  }
+  return "";
+}
 
 function formatError(error: unknown): string {
   if (error instanceof ClientApiError) return error.message;
   return "Failed to save article.";
 }
 
-export function LessonArticleWorkspace({ lesson, editable }: LessonArticleWorkspaceProps) {
-  const router = useRouter();
+export function LessonArticleWorkspace({ lesson, editable, onSaved }: LessonArticleWorkspaceProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [content, setContent] = useState(
-    typeof lesson.content === "string"
-      ? lesson.content
-      : lesson.content != null
-        ? JSON.stringify(lesson.content, null, 2)
-        : "",
-  );
+  const [content, setContent] = useState(() => articleTextOf(lesson.content));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -43,27 +48,14 @@ export function LessonArticleWorkspace({ lesson, editable }: LessonArticleWorksp
     setSaving(true);
     setError(null);
     try {
-      await clientApi.put(
-        `/api/v1/lessons/${lesson.id}`,
-        { content: content.trim() ? content : undefined },
-        "lesson-article-save",
-      );
+      await clientApi.put(`/api/v1/lessons/${lesson.id}`, { content }, "lesson-article-save");
       setSaved(true);
+      onSaved?.();
     } catch (saveError) {
       setError(formatError(saveError));
     } finally {
       setSaving(false);
     }
-  }
-
-  async function handlePublish() {
-    if (!editable || saving) return;
-
-    // Save first
-    await handleSave();
-
-    // Navigate to full lesson editor
-    router.push(`/studio/courses/${lesson.courseId}/lessons/${lesson.id}`);
   }
 
   return (
@@ -83,7 +75,7 @@ export function LessonArticleWorkspace({ lesson, editable }: LessonArticleWorksp
         <textarea
           ref={textareaRef}
           className="min-h-[20rem] w-full resize-y border-none bg-transparent text-sm leading-relaxed text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)]"
-          placeholder="Article Title (Start writing your article content here)"
+          placeholder="Write the article here. Use the toolbar for bold, italic, links and lists."
           value={content}
           disabled={!editable}
           onChange={(event) => {
@@ -97,16 +89,6 @@ export function LessonArticleWorkspace({ lesson, editable }: LessonArticleWorksp
         {saved ? (
           <span className="mr-auto text-xs font-medium text-[var(--admin-success)]">Saved</span>
         ) : null}
-        <button
-          type="button"
-          className={`${inlineLessonSecondaryButtonClassName} border-[var(--admin-primary)] text-[var(--admin-primary)] hover:bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))]`}
-          disabled={!editable || saving}
-          onClick={() => {
-            void handlePublish();
-          }}
-        >
-          Publish
-        </button>
         <button
           type="button"
           className={inlineLessonPrimaryDarkButtonClassName}

@@ -72,6 +72,10 @@ describe("F13 document CSP", () => {
     }
     expect(policy.formFramingHeadersRule.source).toBe("/f/:token");
     expect(policy.scormFramingHeadersRule.headers[0]?.value).toBe("SAMEORIGIN");
+    expect(policy.localFileFramingHeadersRule).toEqual({
+      source: "/api/v1/storage/local/download",
+      headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+    });
   });
 
   it("uses a nonce and explicit providers without broad HTTPS or production script exceptions", () => {
@@ -109,6 +113,21 @@ describe("F13 document CSP", () => {
       expect(csp).toContain(origin);
     expect(csp).not.toContain("public-key");
     expect(csp).not.toContain("/42");
+  });
+
+  it("lets PDF lessons be framed from storage, and nothing else new", () => {
+    const csp = build(nonce, {
+      NODE_ENV: "production",
+      R2_ACCOUNT_ID: "account123",
+      R2_PUBLIC_ENDPOINT: "https://assets.example.com",
+    });
+    const frameSrc = csp
+      .split(";")
+      .map((part) => part.trim())
+      .find((part) => part.startsWith("frame-src "));
+    expect(frameSrc).toBe(
+      "frame-src 'self' https://www.youtube.com https://player.vimeo.com https://api.razorpay.com https://checkout.razorpay.com https://assets.example.com https://account123.r2.cloudflarestorage.com",
+    );
   });
 
   it.each([

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { unwrapBodyText } from "./lesson-player-content";
 import type { CourseLifecycleStatus } from "../courses/course-state-guards";
 
 type Tx = {
@@ -137,6 +138,13 @@ function mapContentFields(contentJson: unknown): {
   delete rest["type"];
   delete rest["lessonType"];
   delete rest["isPreview"];
+  // The Studio editor shows the article text as the author wrote it, even for
+  // a lesson saved by the old editors before migration 134 repaired it.
+  if (typeof rest["body"] === "string") {
+    const body = unwrapBodyText(rest["body"]);
+    if (body === null) delete rest["body"];
+    else rest["body"] = body;
+  }
   const content =
     Object.keys(rest).length > 0 ? rest : parsed["body"] != null ? parsed["body"] : null;
 
@@ -156,7 +164,9 @@ export function buildLessonContentJson(input: {
   if (input.isPreview !== undefined) patch["isPreview"] = input.isPreview;
   if (input.content !== undefined) {
     if (typeof input.content === "string") {
-      patch["body"] = input.content;
+      // Undo the old editors' {"body": …} wrapping (see unwrapBodyText).
+      const body = unwrapBodyText(input.content);
+      if (body !== null) patch["body"] = body;
     } else if (input.content && typeof input.content === "object") {
       Object.assign(patch, input.content as Record<string, unknown>);
     }
@@ -188,7 +198,9 @@ export function mergeLessonContentJson(
   }
   if (input.content !== undefined) {
     if (typeof input.content === "string") {
-      merged["body"] = input.content;
+      // Undo the old editors' {"body": …} wrapping (see unwrapBodyText).
+      const body = unwrapBodyText(input.content);
+      if (body !== null) merged["body"] = body;
     } else if (
       input.content &&
       typeof input.content === "object" &&

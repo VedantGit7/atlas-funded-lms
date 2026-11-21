@@ -5,6 +5,7 @@ import { withSentryConfig } from "@sentry/nextjs/config";
 import {
   securityHeadersRule,
   scormFramingHeadersRule,
+  localFileFramingHeadersRule,
 } from "../../../configs/security-headers.mjs";
 
 const apiDir = path.dirname(fileURLToPath(import.meta.url));
@@ -24,7 +25,11 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
   // Next types `headers` as returning a promise; there is nothing to await here.
   headers() {
-    return Promise.resolve([securityHeadersRule, scormFramingHeadersRule]);
+    return Promise.resolve([
+      securityHeadersRule,
+      scormFramingHeadersRule,
+      localFileFramingHeadersRule,
+    ]);
   },
   allowedDevOrigins: ["127.0.0.1", "*.localhost.test", "*.localhost"],
   experimental: {

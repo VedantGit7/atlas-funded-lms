@@ -16,6 +16,12 @@ export const formFramingHeadersRule = {
   source: "/f/:token",
   headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
 };
+// PDF lessons are framed by the player. Deployed files come from storage on
+// its own origin; this route serves them only in local development.
+export const localFileFramingHeadersRule = {
+  source: "/api/v1/storage/local/download",
+  headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+};
 export const CSP_REPORT_PATH = "/api/v1/public/security/csp-report";
 
 function localDevelopment(env) {
@@ -142,6 +148,8 @@ export function buildDocumentCsp(nonce, env = process.env, { sameOriginFrame = f
       "https://player.vimeo.com",
       "https://api.razorpay.com",
       "https://checkout.razorpay.com",
+      // PDF lessons are shown in a frame straight from storage (signed URL).
+      ...storage,
       ...extra("CSP_FRAME_ORIGINS"),
     ]),
     `frame-ancestors ${sameOriginFrame ? "'self'" : "'none'"}`,

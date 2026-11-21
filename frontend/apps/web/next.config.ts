@@ -4,6 +4,7 @@ import {
   securityHeadersRule,
   scormFramingHeadersRule,
   formFramingHeadersRule,
+  localFileFramingHeadersRule,
 } from "../../../configs/security-headers.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -65,6 +66,7 @@ const nextConfig: NextConfig = {
       securityHeadersRule,
       scormFramingHeadersRule,
       formFramingHeadersRule,
+      localFileFramingHeadersRule,
       {
         source: "/fonts/cormorant-garamond/v21/:path*",
         headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
