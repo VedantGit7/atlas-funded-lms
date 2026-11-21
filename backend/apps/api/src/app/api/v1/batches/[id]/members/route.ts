@@ -17,7 +17,7 @@ export const POST = createTenantRoute<
 >({
   metadata: assignBatchMemberMetadata,
   params: paramsSchema,
-  input: assignBatchMemberBodySchema,
+  body: assignBatchMemberBodySchema,
   output: assignBatchMemberResponseSchema,
   handler: async ({ tx, ctx, params, input }) => assignBatchMember(tx, ctx, params["id"], input),
 });

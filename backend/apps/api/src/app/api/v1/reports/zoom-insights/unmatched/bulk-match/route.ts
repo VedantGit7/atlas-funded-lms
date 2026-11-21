@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof zoomUnmatchedBulkMatchResponseSchema>
 >({
   metadata: mutateZoomInsightsRosterMetadata,
-  input: zoomUnmatchedBulkMatchBodySchema,
+  body: zoomUnmatchedBulkMatchBodySchema,
   output: zoomUnmatchedBulkMatchResponseSchema,
   handler: async ({ tx, ctx, input }) => bulkMatchZoomUnmatched(tx, ctx, input),
 });

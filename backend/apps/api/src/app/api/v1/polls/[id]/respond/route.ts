@@ -14,7 +14,7 @@ export const POST = createTenantRoute<
 >({
   metadata: respondPollMetadata,
   params: paramsSchema,
-  input: respondPollBodySchema,
+  body: respondPollBodySchema,
   output: respondPollResponseSchema,
   handler: async ({ tx, ctx, params, input }) => respondToPoll(tx, ctx, params["id"], input),
 });

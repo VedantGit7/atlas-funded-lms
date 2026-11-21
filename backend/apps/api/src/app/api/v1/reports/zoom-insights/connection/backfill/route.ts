@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof zoomConnectionBackfillResponseSchema>
 >({
   metadata: mutateZoomInsightsRosterMetadata,
-  input: zoomConnectionBackfillBodySchema,
+  body: zoomConnectionBackfillBodySchema,
   output: zoomConnectionBackfillResponseSchema,
   handler: async ({ tx, ctx, input }) => backfillZoomConnection(tx, ctx, input),
 });

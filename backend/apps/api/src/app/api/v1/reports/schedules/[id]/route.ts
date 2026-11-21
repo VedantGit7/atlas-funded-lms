@@ -19,7 +19,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: updateReportScheduleMetadata,
   params: reportScheduleParamsSchema,
-  input: updateReportScheduleBodySchema,
+  body: updateReportScheduleBodySchema,
   output: updateReportScheduleResponseSchema,
   handler: async ({ tx, ctx, params, input }) => updateReportSchedule(tx, ctx, params.id, input),
 });

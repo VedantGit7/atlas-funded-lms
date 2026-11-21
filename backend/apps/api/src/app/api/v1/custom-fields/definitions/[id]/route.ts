@@ -24,7 +24,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: updateCustomFieldDefinitionMetadata,
   params: paramsSchema,
-  input: updateCustomFieldDefinitionBodySchema,
+  body: updateCustomFieldDefinitionBodySchema,
   output: customFieldDefinitionResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateCustomFieldDefinition(tx, ctx, params["id"], input),

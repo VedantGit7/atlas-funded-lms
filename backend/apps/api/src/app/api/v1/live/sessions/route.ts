@@ -25,7 +25,7 @@ export const POST = createTenantRoute<
   z.output<typeof liveSessionResponseSchema>
 >({
   metadata: createLiveSessionMetadata,
-  input: createLiveSessionBodySchema,
+  body: createLiveSessionBodySchema,
   output: liveSessionResponseSchema,
   handler: async ({ tx, ctx, input }) => createLiveSession(tx, ctx, input),
 });

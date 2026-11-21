@@ -9,7 +9,7 @@ export const POST = createTenantRoute<
   z.output<typeof connectZoomResponseSchema>
 >({
   metadata: connectZoomMetadata,
-  input: connectZoomBodySchema,
+  body: connectZoomBodySchema,
   output: connectZoomResponseSchema,
   handler: async ({ tx, ctx, input }) => connectZoom(tx, ctx, input),
 });

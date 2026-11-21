@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof exportBuilderPreviewResponseSchema>
 >({
   metadata: previewExportBuilderMetadata,
-  input: exportBuilderPreviewBodySchema,
+  body: exportBuilderPreviewBodySchema,
   output: exportBuilderPreviewResponseSchema,
   handler: async ({ tx, ctx, input }) => previewExportBuilder(tx, ctx, input),
 });

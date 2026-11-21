@@ -34,7 +34,7 @@ export const POST = createTenantRoute<
 >({
   metadata: sendMessageMetadata,
   params: paramsSchema,
-  input: sendMessageBodySchema,
+  body: sendMessageBodySchema,
   output: messageResponseSchema,
   handler: async ({ tx, ctx, params, input }) => sendMessage(tx, ctx, params["id"], input),
 });

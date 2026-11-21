@@ -28,7 +28,7 @@ export const POST = createTenantRoute<
   z.output<typeof createCustomReportDefinitionResponseSchema>
 >({
   metadata: createCustomReportDefinitionMetadata,
-  input: createCustomReportDefinitionBodySchema,
+  body: createCustomReportDefinitionBodySchema,
   output: createCustomReportDefinitionResponseSchema,
   handler: async ({ tx, ctx, input }) => createCustomReportDefinition(tx, ctx, input),
 });

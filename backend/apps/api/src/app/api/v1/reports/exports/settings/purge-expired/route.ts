@@ -12,7 +12,7 @@ export const POST = createTenantRoute<
   z.output<typeof purgeExpiredResponseSchema>
 >({
   metadata: purgeExpiredExportsMetadata,
-  input: purgeExpiredBodySchema,
+  body: purgeExpiredBodySchema,
   output: purgeExpiredResponseSchema,
   handler: async ({ tx, ctx }) => purgeExpiredExportFiles(tx, ctx),
 });

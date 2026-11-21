@@ -35,7 +35,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: mutateCustomFieldRosterMetadata,
   params: customFieldLearnerParamsSchema,
-  input: updateCustomFieldLearnerValuesBodySchema,
+  body: updateCustomFieldLearnerValuesBodySchema,
   output: updateCustomFieldLearnerValuesResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateCustomFieldLearnerValues(tx, ctx, params["membershipId"], input),

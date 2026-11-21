@@ -15,7 +15,7 @@ export const POST = createTenantRoute<
 >({
   metadata: retryExportRunMetadata,
   params: exportRunDetailParamsSchema,
-  input: exportRunActionBodySchema,
+  body: exportRunActionBodySchema,
   output: retryExportRunResponseSchema,
   handler: async ({ tx, ctx, params, input }) => retryExportRun(tx, ctx, params["runId"], input),
 });

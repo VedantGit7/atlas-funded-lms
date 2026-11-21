@@ -15,7 +15,7 @@ export const POST = createTenantRoute<
 >({
   metadata: cancelExportRunMetadata,
   params: exportRunDetailParamsSchema,
-  input: exportRunActionBodySchema,
+  body: exportRunActionBodySchema,
   output: cancelExportRunResponseSchema,
   handler: async ({ tx, ctx, params, input }) => cancelExportRun(tx, ctx, params["runId"], input),
 });

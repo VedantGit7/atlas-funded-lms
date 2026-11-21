@@ -28,7 +28,7 @@ export const PATCH = createTenantRoute<
   z.output<typeof zoomMatchingRulesResponseSchema>
 >({
   metadata: updateZoomMatchingRulesMetadata,
-  input: zoomMatchingRulesBodySchema,
+  body: zoomMatchingRulesBodySchema,
   output: zoomMatchingRulesResponseSchema,
   handler: async ({ tx, ctx, input }) => updateZoomMatchingRules(tx, ctx, input),
 });

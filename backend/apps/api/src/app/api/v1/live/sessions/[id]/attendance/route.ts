@@ -32,7 +32,7 @@ export const POST = createTenantRoute<
 >({
   metadata: checkInLiveAttendanceMetadata,
   params: paramsSchema,
-  input: checkInAttendanceBodySchema,
+  body: checkInAttendanceBodySchema,
   output: checkInAttendanceResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     checkInLiveAttendance(tx, ctx, params["id"], input),

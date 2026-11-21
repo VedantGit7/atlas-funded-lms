@@ -37,7 +37,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: updateLiveSessionMetadata,
   params: paramsSchema,
-  input: updateLiveSessionBodySchema,
+  body: updateLiveSessionBodySchema,
   output: liveSessionResponseSchema,
   handler: async ({ tx, ctx, params, input }) => updateLiveSession(tx, ctx, params["id"], input),
 });

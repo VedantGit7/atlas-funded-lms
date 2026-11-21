@@ -12,7 +12,7 @@ export const PATCH = createTenantRoute<
   z.output<typeof zoomConnectionScheduleResponseSchema>
 >({
   metadata: mutateZoomConnectionMetadata,
-  input: zoomConnectionScheduleBodySchema,
+  body: zoomConnectionScheduleBodySchema,
   output: zoomConnectionScheduleResponseSchema,
   handler: async ({ tx, ctx, input }) => updateZoomConnectionSchedule(tx, ctx, input),
 });

@@ -32,7 +32,7 @@ export const PUT = createTenantRoute<
   z.output<typeof updateExportSettingsResponseSchema>
 >({
   metadata: updateExportSettingsMetadata,
-  input: updateExportSettingsBodySchema,
+  body: updateExportSettingsBodySchema,
   output: updateExportSettingsResponseSchema,
   handler: async ({ tx, ctx, input }) => updateExportSettings(tx, ctx, input),
 });

@@ -35,7 +35,7 @@ export const PATCH = createTenantRoute<
 >({
   metadata: mutateLiveClassAttendanceRosterMetadata,
   params: liveClassAttendeeParamsSchema,
-  input: updateLiveClassAttendeeStatusBodySchema,
+  body: updateLiveClassAttendeeStatusBodySchema,
   output: updateLiveClassAttendeeStatusResponseSchema,
   handler: async ({ tx, ctx, params, input }) =>
     updateLiveClassAttendeeStatus(tx, ctx, params["sessionId"], params["attendeeId"], input),
