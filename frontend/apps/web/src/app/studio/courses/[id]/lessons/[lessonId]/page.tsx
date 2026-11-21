@@ -1,56 +1,60 @@
+import { redirect } from "next/navigation";
 import type { z } from "zod";
 import { PageGate } from "../../../../../../components/patterns/PageGate";
-import { LessonEditorLazy } from "../../../../../../features/studio/lessons/lesson-editor-lazy";
 import { ServerApiError, serverApi } from "../../../../../../lib/server-api";
-import type { studioCourseDetailResponseSchema } from "@atlas/contracts/courses/course-authoring-schemas";
 import type { studioLessonDetailResponseSchema } from "@atlas/contracts/lessons/lesson-schemas";
 
-type StudioCourseDetailResponse = z.infer<typeof studioCourseDetailResponseSchema>;
 type StudioLessonDetailResponse = z.infer<typeof studioLessonDetailResponseSchema>;
 
-type StudioLessonEditorPageProps = {
+type StudioLessonPageProps = {
   params: Promise<{ id: string; lessonId: string }>;
 };
 
-export default async function StudioLessonEditorPage({ params }: StudioLessonEditorPageProps) {
+/**
+ * Lessons are edited in one place: the course builder. This address used to
+ * open a second, separate lesson editor (QA review 1 C18); links to it now open
+ * the builder with the lesson selected.
+ */
+export default async function StudioLessonPage({ params }: StudioLessonPageProps) {
   const { id: courseId, lessonId } = await params;
 
+  let moduleId: string;
   try {
-    const [course, lesson] = await Promise.all([
-      serverApi.get<StudioCourseDetailResponse>(`/api/v1/courses/${courseId}?view=studio`),
-      serverApi.get<StudioLessonDetailResponse>(`/api/v1/lessons/${lessonId}?view=studio`),
-    ]);
-
-    return (
-      <PageGate state="ready" title="Lesson editor">
-        <LessonEditorLazy
-          courseId={courseId}
-          courseTitle={course.data.title}
-          initialLesson={lesson.data}
-        />
-      </PageGate>
+    const lesson = await serverApi.get<StudioLessonDetailResponse>(
+      `/api/v1/lessons/${encodeURIComponent(lessonId)}?view=studio`,
     );
+    if (lesson.data.courseId !== courseId) {
+      return (
+        <PageGate
+          state="not_found"
+          title="Lesson"
+          notFoundMessage="Lesson not found or access denied."
+        />
+      );
+    }
+    moduleId = lesson.data.moduleId;
   } catch (error) {
     if (error instanceof ServerApiError && (error.status === 403 || error.status === 404)) {
       return (
         <PageGate
           state="not_found"
-          title="Lesson editor"
+          title="Lesson"
           notFoundMessage="Lesson not found or access denied."
         />
       );
     }
-
     if (error instanceof ServerApiError) {
       return (
         <PageGate
           state="error"
-          title="Lesson editor"
+          title="Lesson"
           errorMessage={`Failed to load lesson. Request ID: ${error.requestId}`}
         />
       );
     }
-
     throw error;
   }
+
+  const query = new URLSearchParams({ lesson: lessonId, module: moduleId });
+  redirect(`/studio/courses/${encodeURIComponent(courseId)}/editor?${query.toString()}`);
 }

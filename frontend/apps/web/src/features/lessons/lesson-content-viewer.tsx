@@ -2,7 +2,7 @@
 
 import type { z } from "zod";
 import type { learnerLessonDetailSchema } from "@atlas/contracts/lessons/lesson-schemas";
-import { LessonVideoEmbed } from "./lesson-video-embed";
+import { LessonBody } from "./lesson-body";
 
 type LearnerLessonDetail = z.infer<typeof learnerLessonDetailSchema>;
 
@@ -10,30 +10,14 @@ type LessonContentViewerProps = {
   lesson: LearnerLessonDetail;
 };
 
+/** The learner's view of a lesson's content (see LessonBody). */
 export function LessonContentViewer({ lesson }: LessonContentViewerProps) {
-  const body =
-    typeof lesson.content === "string"
-      ? lesson.content
-      : lesson.content != null
-        ? JSON.stringify(lesson.content, null, 2)
-        : "";
-
   return (
-    <section className="space-y-4">
-      {lesson.videoProvider && lesson.videoUrl ? (
-        <LessonVideoEmbed
-          provider={lesson.videoProvider}
-          url={lesson.videoUrl}
-          className="aspect-video w-full rounded border"
-        />
-      ) : null}
-      {body ? (
-        <article className="prose max-w-none whitespace-pre-wrap rounded border p-4">
-          {body}
-        </article>
-      ) : (
-        <p role="status">This lesson has no content yet.</p>
-      )}
-    </section>
+    <LessonBody
+      title={lesson.title}
+      content={lesson.content}
+      videoProvider={lesson.videoProvider}
+      videoUrl={lesson.videoUrl}
+    />
   );
 }

@@ -166,6 +166,58 @@ export const lessonProgressStateSchema = z.object({
   lastSeenAt: z.iso.datetime().nullable(),
 });
 
+/** A lesson's main file, signed for a short time so the player can show it. */
+export const lessonPlayerFileSchema = z.object({
+  name: z.string(),
+  url: z.string(),
+  contentType: z.string().nullable(),
+  expiresAt: z.string().nullable(),
+});
+export type LessonPlayerFile = z.infer<typeof lessonPlayerFileSchema>;
+
+/**
+ * What a lesson shows, by kind (see lesson-player-content.ts). Every kind may
+ * carry `body`: article text, or notes shown with a video, file or quiz.
+ * Internal fields of content_json (discussion thread, storage references,
+ * settings) never appear here.
+ */
+export const lessonPlayerContentSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("article"), body: z.string().nullable() }),
+  z.object({ kind: z.literal("video"), body: z.string().nullable() }),
+  z.object({
+    kind: z.literal("quiz"),
+    assessmentId: z.string().nullable(),
+    body: z.string().nullable(),
+  }),
+  z.object({
+    kind: z.literal("live"),
+    live: z
+      .object({
+        provider: z.enum(["custom", "zoom", "teams"]).nullable(),
+        meetingUrl: z.string().nullable(),
+        scheduledAt: z.string().nullable(),
+        instructions: z.string().nullable(),
+      })
+      .nullable(),
+    body: z.string().nullable(),
+  }),
+  z.object({
+    kind: z.literal("file"),
+    fileType: z.enum(["audio", "pdf", "slides", "scorm"]),
+    file: lessonPlayerFileSchema.nullable(),
+    body: z.string().nullable(),
+  }),
+  z.object({ kind: z.literal("assignment"), body: z.string().nullable() }),
+]);
+export type LessonPlayerContent = z.infer<typeof lessonPlayerContentSchema>;
+
+/** The lesson's on/off switches set in Studio (comments, downloads, transcript). */
+export const lessonFeaturesSchema = z.object({
+  allowComments: z.boolean().optional(),
+  enableDownloads: z.boolean().optional(),
+  showTranscript: z.boolean().optional(),
+});
+
 export const learnerLessonDetailSchema = z.object({
   id: z.uuid(),
   courseId: z.uuid(),
@@ -174,12 +226,17 @@ export const learnerLessonDetailSchema = z.object({
   title: z.string(),
   description: z.string().nullable().optional(),
   lessonType: z.string().nullable().optional(),
-  content: z.unknown().nullable().optional(),
+  content: lessonPlayerContentSchema.nullable().optional(),
   videoProvider: videoProviderSchema.nullable().optional(),
   videoUrl: z.url().nullable().optional(),
   durationSeconds: z.number().int().nullable().optional(),
   position: z.number().int(),
   progress: lessonProgressStateSchema.nullable().optional(),
+  // Declared so they reach the learner: an undeclared key is dropped when the
+  // route validates its output, so these switches were never applied.
+  features: lessonFeaturesSchema.optional(),
+  thumbnailUrl: z.string().nullable().optional(),
+  transcriptText: z.string().nullable().optional(),
   navigation: z.object({
     previousLessonId: z.uuid().nullable(),
     nextLessonId: z.uuid().nullable(),
@@ -203,6 +260,8 @@ export const studioLessonDetailSchema = z.object({
   status: publishStatusStudioSchema,
   isPreview: z.boolean().optional(),
   tags: z.array(tagSummarySchema).optional(),
+  /** Exactly what a learner will see, for the Studio preview. */
+  playerContent: lessonPlayerContentSchema.optional(),
 });
 
 export const learnerLessonDetailResponseSchema = z.object({

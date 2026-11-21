@@ -15,11 +15,21 @@ type ModuleItem = z.infer<typeof studioModuleOutlineItemSchema>;
 type CourseEditorProps = {
   initialCourse: CourseDetail;
   initialModules: ModuleItem[];
+  /** A lesson to open straight away (links to a lesson land here). */
+  initialLesson?: { lessonId: string; moduleId: string } | null;
 };
 
-export function CourseEditor({ initialCourse, initialModules }: CourseEditorProps) {
+export function CourseEditor({
+  initialCourse,
+  initialModules,
+  initialLesson = null,
+}: CourseEditorProps) {
   const [modules, setModules] = useState(initialModules);
-  const [workspace, setWorkspace] = useState<CourseEditorWorkspaceState>({ mode: "empty" });
+  const [workspace, setWorkspace] = useState<CourseEditorWorkspaceState>(() =>
+    initialLesson && initialModules.some((module) => module.id === initialLesson.moduleId)
+      ? { mode: "edit-lesson", lessonId: initialLesson.lessonId, moduleId: initialLesson.moduleId }
+      : { mode: "empty" },
+  );
   const [lessonsRefreshModuleId, setLessonsRefreshModuleId] = useState<string | null>(null);
   const editable = initialCourse.status === "DRAFT";
 
@@ -72,6 +82,7 @@ export function CourseEditor({ initialCourse, initialModules }: CourseEditorProp
           modules={modules}
           editable={editable}
           selectedLessonId={selectedLessonId}
+          initialExpandedModuleId={workspace.mode === "edit-lesson" ? workspace.moduleId : null}
           addingLessonModuleId={addingLessonModuleId}
           lessonsRefreshModuleId={lessonsRefreshModuleId}
           onLessonsRefreshed={() => {

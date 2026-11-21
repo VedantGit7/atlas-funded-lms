@@ -21,7 +21,7 @@ import { LessonLiveWorkspace } from "./lesson-live-workspace";
 import { LessonSectionQuizWorkspace } from "./lesson-section-quiz-workspace";
 import { LessonUploadWorkspace } from "./lesson-upload-workspace";
 import { InlineLessonSettingsPanel } from "./inline-lesson-settings-panel";
-import { LessonPreviewPanel } from "../../lessons/lesson-preview-panel";
+import { LessonBody } from "../../../lessons/lesson-body";
 import { normalizeLessonTypeForEditor, type InlineLessonEditorType } from "./lesson-type-meta";
 
 type StudioLessonDetail = z.infer<typeof studioLessonDetailSchema>;
@@ -71,6 +71,18 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
       setLesson(null);
     } finally {
       setLoading(false);
+    }
+  }, [lessonId]);
+
+  /** Re-reads the lesson after a save, without the loading screen, so the preview stays current. */
+  const refreshLesson = useCallback(async () => {
+    try {
+      const response = await clientApi.get<{ data: StudioLessonDetail }>(
+        `/api/v1/lessons/${lessonId}?view=studio`,
+      );
+      setLesson(response.data);
+    } catch {
+      // The editor keeps what it has; the next open reloads.
     }
   }, [lessonId]);
 
@@ -142,14 +154,6 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
   const embedDraftReady = Boolean(
     embedDraftProvider && canEmbedLessonVideo(embedDraftProvider, embedUrl),
   );
-  const previewContent =
-    typeof lesson.content === "string"
-      ? lesson.content
-      : lesson.content && typeof lesson.content === "object" && !Array.isArray(lesson.content)
-        ? typeof (lesson.content as Record<string, unknown>)["body"] === "string"
-          ? ((lesson.content as Record<string, unknown>)["body"] as string)
-          : JSON.stringify(lesson.content, null, 2)
-        : "";
 
   return (
     <div className={`flex min-h-0 flex-1 flex-col overflow-hidden ${inlineExpandClassName}`}>
@@ -160,7 +164,7 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
           title={lesson.title}
           lessonType={lesson.lessonType}
           editable={editable}
-          showPreview={editorType !== "section_quiz"}
+          showPreview
           onDeleted={onDeleted}
           onOpenSettings={() => {
             setShowEmbed(false);
@@ -194,7 +198,24 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
                 Close
               </button>
             </div>
-            <LessonPreviewPanel lesson={lesson} content={previewContent} />
+            <article className="mx-auto max-w-2xl space-y-4">
+              <header className="space-y-2 border-b border-[var(--admin-border)] pb-4">
+                <h3 className="text-xl font-semibold text-[var(--admin-on-surface)]">
+                  {lesson.title}
+                </h3>
+                {lesson.description ? (
+                  <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                    {lesson.description}
+                  </p>
+                ) : null}
+              </header>
+              <LessonBody
+                title={lesson.title}
+                content={lesson.playerContent}
+                videoProvider={lesson.videoProvider}
+                videoUrl={lesson.videoUrl}
+              />
+            </article>
           </div>
         </div>
       ) : null}
@@ -308,7 +329,13 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
                   />
                 ) : null}
                 {editorType === "article" ? (
-                  <LessonArticleWorkspace lesson={lesson} editable={editable} />
+                  <LessonArticleWorkspace
+                    lesson={lesson}
+                    editable={editable}
+                    onSaved={() => {
+                      void refreshLesson();
+                    }}
+                  />
                 ) : null}
                 {editorType === "section_quiz" ? (
                   <LessonSectionQuizWorkspace lesson={lesson} editable={editable} />

@@ -44,6 +44,9 @@ import {
 } from "./lesson-progress-guards";
 import { listTagIdsForLessons, listTagsForLesson, mapTagSummary } from "../tags/tags.service";
 import { parseContentMetadata, getEffectiveFeatures } from "./lesson-content-metadata";
+import { findStorageReferenceById } from "./lesson-assets.repository";
+import { buildPlayerContent } from "./lesson-player-content";
+import type { LessonPlayerFile } from "./lesson-schemas";
 import { canManageCourse } from "../courses/course-studio-access";
 
 type ServiceCtx = {
@@ -344,6 +347,66 @@ export async function createLesson(
   };
 }
 
+/**
+ * The lesson's main file (PDF, audio, slides), signed for download.
+ *
+ * Only a ready file uploaded for this very lesson is served: a reference from
+ * another lesson, or one still uploading, gives null. Signing failures also
+ * give null, so the player shows "file unavailable" instead of failing.
+ */
+async function signPrimaryFile(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  lessonId: string,
+  contentJson: unknown,
+): Promise<LessonPlayerFile | null> {
+  const metadata = parseContentMetadata(contentJson);
+  const referenceId = metadata.primaryAssetReferenceId;
+  if (typeof referenceId !== "string" || !referenceId.trim()) return null;
+
+  try {
+    const reference = await findStorageReferenceById({ tx, storageReferenceId: referenceId });
+    if (!reference || reference.status !== "READY" || reference.resourceId !== lessonId) {
+      return null;
+    }
+    const signed = await createLessonAssetDownload(
+      tx,
+      { tenantId: ctx.tenantId },
+      { assetReferenceId: referenceId },
+    );
+    return {
+      name: reference.fileName,
+      url: signed.data.url,
+      contentType: reference.contentType,
+      expiresAt: signed.data.expiresAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function playerContentFor(
+  tx: TenantTx,
+  ctx: ServiceCtx,
+  lesson: {
+    id: string;
+    contentJson: unknown;
+    videoUrl: string | null;
+    videoProvider: string | null;
+  },
+) {
+  const lessonType = resolveLessonType({
+    contentJson: lesson.contentJson,
+    videoUrl: lesson.videoUrl,
+    videoProvider: lesson.videoProvider,
+  });
+  return buildPlayerContent({
+    lessonType,
+    contentJson: lesson.contentJson,
+    primaryFile: await signPrimaryFile(tx, ctx, lesson.id, lesson.contentJson),
+  });
+}
+
 export async function getLessonForEditor(tx: TenantTx, ctx: ServiceCtx, lessonId: string) {
   const lesson = await requireOwnedLesson(tx, ctx, lessonId);
   const content = mapContentFields(lesson.contentJson);
@@ -374,6 +437,7 @@ export async function getLessonForEditor(tx: TenantTx, ctx: ServiceCtx, lessonId
       status: lesson.status,
       isPreview: content.isPreview,
       tags: tags.map(mapTagSummary),
+      playerContent: await playerContentFor(tx, ctx, lesson),
     },
   };
 }
@@ -456,7 +520,7 @@ export async function getLessonForPlayer(
         videoUrl: lesson.videoUrl,
         videoProvider: lesson.videoProvider,
       }),
-      content: content.content,
+      content: await playerContentFor(tx, ctx, lesson),
       videoProvider: asVideoProvider(lesson.videoProvider),
       videoUrl: lesson.videoUrl,
       durationSeconds: lesson.durationSeconds,

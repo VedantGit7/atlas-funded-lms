@@ -68,9 +68,6 @@ describe("studio route integration wiring", () => {
       readFileSync(resolve(webRoot, "app/studio/assessments/[id]/page.tsx"), "utf8"),
     ).toContain("AssessmentBuilderLazy");
     expect(
-      readFileSync(resolve(webRoot, "app/studio/courses/[id]/lessons/[lessonId]/page.tsx"), "utf8"),
-    ).toContain("LessonEditorLazy");
-    expect(
       readFileSync(resolve(webRoot, "app/studio/learning-paths/[id]/page.tsx"), "utf8"),
     ).toContain("LearningPathBuilderLazy");
   });

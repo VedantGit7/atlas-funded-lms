@@ -28,6 +28,8 @@ export function localEnv() {
     ATLAS_APP_LOGIN_PASSWORD: "atlas_e2e_app_only",
     ATLAS_PLATFORM_LOGIN_PASSWORD: "atlas_e2e_platform_only",
     STORAGE_PROVIDER: "local-fs",
+    // Signed local file links go through the web app, which forwards /api/v1.
+    STORAGE_LOCAL_PUBLIC_ORIGIN: "http://fundedbeyond.localhost:3100",
     NODE_ENV: "development",
     NEXT_TELEMETRY_DISABLED: "1",
   };
