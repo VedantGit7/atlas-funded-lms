@@ -369,6 +369,15 @@ export function supportsAutoCheck(itemTypeKey: string): boolean {
   );
 }
 
+function readStringRecord(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    ),
+  );
+}
+
 function normalizeString(value: unknown): string {
   if (typeof value !== "string") return "";
   return value.trim().toLowerCase();
@@ -396,10 +405,10 @@ export function scorePreviewAnswer(args: {
         : null;
     return {
       kind: "manual",
-      title: "Manual grading in production",
+      title: "Marked by an instructor",
       detail: rubric
-        ? `Instructors would score against this rubric: ${rubric}`
-        : "Learner responses for this type are queued for instructor review.",
+        ? `An instructor marks learners' answers against this rubric: ${rubric}`
+        : "An instructor marks learners' answers to this question.",
     };
   }
 
@@ -407,15 +416,15 @@ export function scorePreviewAnswer(args: {
     return {
       kind: "neutral",
       title: "Preview only",
-      detail: "This item type does not have automatic scoring configured yet.",
+      detail: "This type of question can't be checked automatically yet.",
     };
   }
 
   if (!answerJson) {
     return {
       kind: "incorrect",
-      title: "No response",
-      detail: "Select or enter an answer before checking.",
+      title: "No answer yet",
+      detail: "Answer the question first, then check it.",
     };
   }
 
@@ -427,8 +436,8 @@ export function scorePreviewAnswer(args: {
         (selected === answerKey["correctOptionId"] ||
           options.find((option) => option.id === selected)?.isCorrect === true);
       return correct
-        ? { kind: "correct", title: "Correct", detail: "Selected option matches the answer key." }
-        : { kind: "incorrect", title: "Incorrect", detail: "Selected option does not match." };
+        ? { kind: "correct", title: "Correct", detail: "That's the right option." }
+        : { kind: "incorrect", title: "Incorrect", detail: "That's not the right option." };
     }
     case "mcq_multi": {
       const selected = Array.isArray(answerJson["selectedOptionIds"])
@@ -444,21 +453,25 @@ export function scorePreviewAnswer(args: {
           : options.filter((option) => option.isCorrect).map((option) => option.id);
       const correct = compareSets(selected, correctIds);
       return correct
-        ? { kind: "correct", title: "Correct", detail: "All correct options selected." }
+        ? {
+            kind: "correct",
+            title: "Correct",
+            detail: "You picked every right option and nothing else.",
+          }
         : {
             kind: "incorrect",
             title: "Incorrect",
-            detail: "Selection does not match the answer key.",
+            detail: "Not quite: check which options are right.",
           };
     }
     case "true_false": {
       const isCorrect = answerJson["value"] === answerKey["value"];
       return isCorrect
-        ? { kind: "correct", title: "Correct", detail: "Response matches the answer key value." }
+        ? { kind: "correct", title: "Correct", detail: "That's right." }
         : {
             kind: "incorrect",
             title: "Incorrect",
-            detail: "Response does not match the answer key value.",
+            detail: `That's not right. The answer is ${answerKey["value"] === false ? "False" : "True"}.`,
           };
     }
     case "fill_blank": {
@@ -468,30 +481,38 @@ export function scorePreviewAnswer(args: {
         : [normalizeString(answerKey["value"])];
       const isCorrect = accepted.includes(value) && value.length > 0;
       return isCorrect
-        ? { kind: "correct", title: "Correct", detail: "Response matches an accepted value." }
+        ? { kind: "correct", title: "Correct", detail: "That's an accepted answer." }
         : {
             kind: "incorrect",
             title: "Incorrect",
-            detail: "Response is not among accepted values.",
+            detail: "That isn't one of the accepted answers.",
           };
     }
-    case "matching":
-    case "ordering": {
-      const field = itemTypeKey === "matching" ? "pairs" : "order";
+    case "matching": {
+      // Pair by pair, in any order, as the server grades it.
+      const given = readStringRecord(answerJson["pairs"]);
+      const expected = readStringRecord(answerKey["pairs"]);
+      const keys = Object.keys(expected);
       const isCorrect =
-        JSON.stringify(answerJson[field] ?? null) === JSON.stringify(answerKey[field] ?? null) &&
-        answerJson[field] != null &&
-        answerKey[field] != null;
+        keys.length > 0 &&
+        Object.keys(given).length === keys.length &&
+        keys.every((left) => given[left] === expected[left]);
       return isCorrect
-        ? {
-            kind: "correct",
-            title: "Correct",
-            detail: "Structured response matches the answer key.",
-          }
+        ? { kind: "correct", title: "Correct", detail: "Every pair is matched correctly." }
+        : { kind: "incorrect", title: "Incorrect", detail: "Some pairs aren't matched correctly." };
+    }
+    case "ordering": {
+      const isCorrect =
+        JSON.stringify(answerJson["order"] ?? null) ===
+          JSON.stringify(answerKey["order"] ?? null) &&
+        answerJson["order"] != null &&
+        answerKey["order"] != null;
+      return isCorrect
+        ? { kind: "correct", title: "Correct", detail: "The steps are in the right order." }
         : {
             kind: "incorrect",
             title: "Incorrect",
-            detail: "Structured response does not match the answer key.",
+            detail: "The steps aren't in the right order yet.",
           };
     }
     case "swipe": {
@@ -510,18 +531,12 @@ export function scorePreviewAnswer(args: {
         ? {
             kind: "correct",
             title: "Correct",
-            detail:
-              action === "known"
-                ? "Known (swipe right) matches the answer key."
-                : "Unknown (swipe left) matches the answer key.",
+            detail: `That's right: this card is marked ${action === "known" ? "Known" : "Unknown"}.`,
           }
         : {
             kind: "incorrect",
-            title: "Needs review",
-            detail:
-              action === "known"
-                ? "Known (swipe right) does not match the configured answer key direction."
-                : "Unknown (swipe left) does not match the configured answer key direction.",
+            title: "Incorrect",
+            detail: `This card should be marked ${expectedDirection === "right" ? "Known (swipe right)" : "Unknown (swipe left)"}.`,
           };
     }
     default:

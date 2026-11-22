@@ -46,9 +46,10 @@ test.describe("J03 learner assessment lifecycle", () => {
         new RegExp(`/attempts/${attemptId}$`),
         coldRouteNavigationOptions(),
       );
-      await expect(
-        page.getByRole("heading", { name: "Assessment attempt", exact: true }),
-      ).toBeVisible(coldRouteNavigationOptions());
+      // The runner is headed by the quiz's own title (S1.3).
+      await expect(page.getByRole("heading", { level: 1, name: /^F16 Assessment / })).toBeVisible(
+        coldRouteNavigationOptions(),
+      );
       await waitForHydration(page);
 
       return attemptId;
@@ -68,7 +69,7 @@ test.describe("J03 learner assessment lifecycle", () => {
       expect(await saved.json()).toMatchObject({
         data: { assessmentItemId: fixture.assessmentItemId, savedAt: expect.any(String) },
       });
-      await expect(page.getByText("Autosave: Saved", { exact: true })).toBeVisible();
+      await expect(page.getByText("All answers saved", { exact: true })).toBeVisible();
 
       const savedAttempt = await page.request.get(`/api/v1/attempts/${attemptId}`);
       expect(savedAttempt.status()).toBe(200);
@@ -92,22 +93,20 @@ test.describe("J03 learner assessment lifecycle", () => {
       await waitForHydration(page);
     });
     await probePhase("J03 submit", async () => {
-      const submitButton = page.getByRole("button", { name: "Submit attempt", exact: true });
+      const submitButton = page.getByRole("button", { name: "Submit answers", exact: true });
       await submitButton.focus();
       await expect(submitButton).toBeFocused();
-      page.once("dialog", async (dialog) => {
-        expect(dialog.type()).toBe("confirm");
-        expect(dialog.message()).toBe(
-          "Submit attempt? You cannot change answers after submission.",
-        );
-        await dialog.accept();
-      });
+      // QA review 1 C7: the app's own dialog, not the browser's confirm box.
+      await page.keyboard.press("Enter");
+      const dialog = page.getByRole("dialog", { name: "Submit your answers?" });
+      await expect(dialog).toBeVisible();
+      await expect(dialog).toContainText("You can't change answers after you submit.");
       const submitResponse = page.waitForResponse(
         (response) =>
           new URL(response.url()).pathname === `/api/v1/attempts/${attemptId}/submit` &&
           response.request().method() === "POST",
       );
-      await page.keyboard.press("Enter");
+      await dialog.getByRole("button", { name: "Submit answers", exact: true }).click();
       const submitted = await submitResponse;
       expect(submitted.status()).toBe(200);
       expect(submitted.request().postDataJSON()).toEqual({});
@@ -126,15 +125,13 @@ test.describe("J03 learner assessment lifecycle", () => {
         new RegExp(`/attempts/${attemptId}/result$`),
         coldRouteNavigationOptions(),
       );
-      await expect(
-        page.getByRole("heading", { name: "Attempt result", exact: true }),
-      ).toBeVisible();
-      await expect(page.getByText("GRADED", { exact: true })).toBeVisible();
+      await expect(page.getByText("Quiz result", { exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { level: 1, name: /^F16 Assessment / })).toBeVisible();
       await expect(page.getByText("100%", { exact: true })).toBeVisible();
       await expect(page.getByText("Passed", { exact: true })).toBeVisible();
+      await expect(page.getByText("Paris", { exact: true })).toBeVisible();
 
       await page.reload();
-      await expect(page.getByText("GRADED", { exact: true })).toBeVisible();
       await expect(page.getByText("100%", { exact: true })).toBeVisible();
       await expect(page.getByText("Passed", { exact: true })).toBeVisible();
       const persistedAttempt = await page.request.get(`/api/v1/attempts/${attemptId}`);

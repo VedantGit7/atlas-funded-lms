@@ -27,6 +27,7 @@ import {
   assessmentsRepository,
   buildAssessmentConfigJson,
   extractAssessmentConfig,
+  extraAttemptsGranted,
   readCreatedByMembershipId,
   readDescription,
   readItemRequired,
@@ -321,8 +322,10 @@ export async function getLearnerAssessmentOverview(
   });
 
   const itemCount = await assessmentsRepository.countAssessmentItems(tx, assessmentId);
-  const attemptsRemaining =
-    config.attemptsAllowed > attemptsUsed ? config.attemptsAllowed - attemptsUsed : 0;
+  // Extra attempts an instructor granted count here too, as they do when starting.
+  const allowed =
+    config.attemptsAllowed + extraAttemptsGranted(assessment.config_json, ctx.actorMembershipId);
+  const attemptsRemaining = allowed > attemptsUsed ? allowed - attemptsUsed : 0;
 
   return {
     data: {

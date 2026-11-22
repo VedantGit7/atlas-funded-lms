@@ -6,6 +6,7 @@ import { ClipboardCheck, Download, ExternalLink, FileText, Music, Video } from "
 import type { z } from "zod";
 import type { lessonPlayerContentSchema } from "@atlas/contracts/lessons/lesson-schemas";
 import { ArticleMarkdown } from "./article-markdown";
+import { LessonQuizCard } from "./lesson-quiz-card";
 import { LessonVideoEmbed } from "./lesson-video-embed";
 
 type LessonPlayerContent = z.infer<typeof lessonPlayerContentSchema>;
@@ -17,6 +18,8 @@ type LessonBodyProps = {
   content: LessonPlayerContent | null | undefined;
   videoProvider?: string | null | undefined;
   videoUrl?: string | null | undefined;
+  /** The Studio preview: buttons that act for a learner (Start quiz) are off. */
+  preview?: boolean;
 };
 
 /** A live class can be joined from this long before it starts. */
@@ -235,7 +238,13 @@ function FileLesson({
  * Studio preview, so authors see exactly what learners see. Never shows raw
  * data: anything missing gets a plain sentence instead.
  */
-export function LessonBody({ title, content, videoProvider, videoUrl }: LessonBodyProps) {
+export function LessonBody({
+  title,
+  content,
+  videoProvider,
+  videoUrl,
+  preview = false,
+}: LessonBodyProps) {
   const hasVideo = Boolean(videoProvider && videoUrl);
   const video =
     hasVideo && videoProvider && videoUrl ? (
@@ -261,6 +270,18 @@ export function LessonBody({ title, content, videoProvider, videoUrl }: LessonBo
       );
 
     case "quiz":
+      if (content.assessmentId && content.quiz) {
+        return (
+          <div className="space-y-6">
+            <LessonQuizCard
+              assessmentId={content.assessmentId}
+              quiz={content.quiz}
+              preview={preview}
+            />
+            <Notes body={content.body} />
+          </div>
+        );
+      }
       return (
         <div className="space-y-6">
           <section className={cardClassName} aria-label="Quiz">

@@ -21,6 +21,7 @@ type LessonPlayerShellProps = {
 };
 
 export function LessonPlayerShell({ courseTitle, lesson }: LessonPlayerShellProps) {
+  const completedByQuiz = lesson.content?.kind === "quiz" && Boolean(lesson.content.assessmentId);
   const features = lesson.features ?? {
     allowComments: true,
     enableDownloads: true,
@@ -72,7 +73,7 @@ export function LessonPlayerShell({ courseTitle, lesson }: LessonPlayerShellProp
         <LessonProgressPanel />
 
         <div className="hidden flex-wrap items-center gap-3 md:flex">
-          <MarkCompleteButton />
+          <MarkCompleteButton completedByQuiz={completedByQuiz} />
           <LessonNextAction
             courseId={lesson.courseId}
             previousLessonId={lesson.navigation.previousLessonId}
@@ -84,7 +85,7 @@ export function LessonPlayerShell({ courseTitle, lesson }: LessonPlayerShellProp
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/95 p-3 backdrop-blur md:hidden">
         <div className="mx-auto flex max-w-3xl flex-col gap-2">
-          <MarkCompleteButton compact />
+          <MarkCompleteButton compact completedByQuiz={completedByQuiz} />
           <LessonNextAction
             compact
             courseId={lesson.courseId}

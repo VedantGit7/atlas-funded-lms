@@ -20,6 +20,7 @@ import {
   upsertLessonProgress,
 } from "./lesson-progress.repository";
 import { findLessonWithModuleAndCourse } from "./lessons.repository";
+import { quizAssessmentIdOf, quizLessonNeedsPass } from "./quiz-lessons";
 
 type ServiceCtx = {
   tenantId: string;
@@ -33,6 +34,10 @@ export async function recordLessonProgress(
   lessonId: string,
   input: LessonProgressBody,
   resource?: ResourceRef,
+  options: {
+    /** Set when passing the lesson's quiz completes it (quiz-lesson-completion.ts). */
+    completedByQuiz?: boolean;
+  } = {},
 ) {
   const loaded = getLoadedLessonProjection(tx, ctx, lessonId, resource);
   const lesson = loaded?.lesson ?? (await findLessonWithModuleAndCourse({ tx, lessonId }));
@@ -79,6 +84,17 @@ export async function recordLessonProgress(
 
   const existingStatus = existing?.status ?? "not_started";
   const existingPct = existing?.progressPct ?? 0;
+
+  // A quiz lesson is completed by passing its quiz; "Mark complete" used to
+  // let a learner skip it (QA review 1 C6). Repeating a completion is fine.
+  if (
+    input.completed === true &&
+    existingStatus !== "completed" &&
+    options.completedByQuiz !== true &&
+    quizAssessmentIdOf(lesson) !== null
+  ) {
+    throw quizLessonNeedsPass();
+  }
   const completed = input.completed === true || existingStatus === "completed";
 
   const positionSeconds =

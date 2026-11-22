@@ -1,4 +1,5 @@
 import type { PresentationOrder } from "./presentation-order";
+import { newChoiceSalt } from "./attempt-choices";
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 
@@ -32,6 +33,11 @@ export type AttemptMetadata = {
   dueAt?: string;
   /** Item and option order drawn at start (audit M9). Absent on older attempts. */
   presentation?: PresentationOrder;
+  /**
+   * Hides matching and ordering ids from the learner (see attempt-choices.ts).
+   * Absent on attempts started before it existed; added on their next read.
+   */
+  choiceSalt?: string;
   draftAnswers?: Record<
     string,
     {
@@ -271,6 +277,7 @@ export const attemptsRepository = {
     const metadata: AttemptMetadata = {
       ...(args.dueAt ? { dueAt: args.dueAt } : {}),
       presentation: args.presentation,
+      choiceSalt: newChoiceSalt(),
     };
 
     await tx.$executeRaw`

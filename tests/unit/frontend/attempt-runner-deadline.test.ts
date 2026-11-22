@@ -99,7 +99,7 @@ function render(dueInMs: number) {
 }
 
 function timerText() {
-  return /Time remaining: (\d\d:\d\d)/.exec(container.textContent ?? "")?.[1];
+  return /Time left: (\d\d:\d\d)/.exec(container.textContent ?? "")?.[1];
 }
 
 function submitCalls() {

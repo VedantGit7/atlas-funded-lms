@@ -104,6 +104,14 @@ vi.mock(
   },
 );
 
+// The quiz's lesson lookups (S1.3) run SQL this fake database doesn't have.
+vi.mock("../../../backend/apps/api/src/server/lessons/quiz-lessons", () => ({
+  findQuizLessonsForMember: vi.fn(async () => []),
+}));
+vi.mock("../../../backend/apps/api/src/server/lessons/quiz-lesson-completion", () => ({
+  completeQuizLessonsForPass: vi.fn(async () => []),
+}));
+
 vi.mock(
   "../../../backend/apps/api/src/server/attempts/attempts.repository",
   async (importOriginal) => {
@@ -117,6 +125,7 @@ vi.mock(
       attemptsRepository: {
         findById: vi.fn(async (_tx: unknown, id: string) => read(id)),
         findByIdForUpdate: vi.fn(async (_tx: unknown, id: string) => read(id)),
+        listAnswersForAttempt: vi.fn(async () => []),
         updateMetadata: vi.fn(async (_tx: unknown, id: string, metadata: unknown) => {
           const row = attempts.get(id);
           if (row) row.metadata_json = metadata;

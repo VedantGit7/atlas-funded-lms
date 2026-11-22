@@ -17,6 +17,11 @@ import {
   type GradingResultJson,
 } from "./grading.repository";
 import { getTimelineForAttempt } from "../proctoring/proctoring.service";
+import {
+  assessmentsRepository,
+  extractAssessmentConfig,
+} from "../assessments/assessments.repository";
+import { completeQuizLessonsForPass } from "../lessons/quiz-lesson-completion";
 
 type ServiceCtx = {
   tenantId: string;
@@ -388,6 +393,18 @@ export async function gradeGradingTask(
       ? `${idempotencyKey}:assessment.graded:${task.id}`
       : `${ctx.requestId}:assessment.graded:${task.id}`,
   });
+
+  // A pass completes the quiz's lessons, as an automatic grade does (QA review 2 H23).
+  if (nextAttemptStatus === "GRADED" && scorePercent != null) {
+    const assessment = await assessmentsRepository.findById(tx, attempt.assessmentId);
+    const config = assessment ? extractAssessmentConfig(assessment.config_json) : null;
+    if (config && scorePercent >= config.passMarkPercent) {
+      await completeQuizLessonsForPass(tx, ctx, {
+        assessmentId: attempt.assessmentId,
+        membershipId: attempt.membershipId,
+      });
+    }
+  }
 
   return buildGradeReplayResult({
     taskId: task.id,

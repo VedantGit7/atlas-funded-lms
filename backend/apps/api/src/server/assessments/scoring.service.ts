@@ -5,6 +5,10 @@ const OBJECTIVE_ITEM_TYPES = new Set([
   "fill_blank",
   "matching",
   "ordering",
+  // A card the learner marks Known (right) or Unknown (left). It used to fall
+  // through to manual grading, so one card in a quiz held the whole score back
+  // although the preview already checked it against the key.
+  "swipe",
 ]);
 
 const MANUAL_ITEM_TYPES = new Set(["short_answer", "long_answer", "file_upload", "assignment"]);
@@ -170,6 +174,16 @@ function scoreObjectiveItem(
         JSON.stringify(order ?? null) === JSON.stringify(expected ?? null) &&
         order != null &&
         expected != null;
+      return {
+        isCorrect: correct,
+        pointsAwarded: correct ? item.points : 0,
+        requiresManualGrading: false,
+      };
+    }
+    case "swipe": {
+      const action = answerJson["action"];
+      const expected = answerKey["direction"] === "left" ? "unknown" : "known";
+      const correct = (action === "known" || action === "unknown") && action === expected;
       return {
         isCorrect: correct,
         pointsAwarded: correct ? item.points : 0,
