@@ -430,4 +430,19 @@ suite("quizzes inside lessons and the attempt (S1.3)", () => {
     );
     expect(await lessonStatus(course.lessonIds[1] ?? "")).toBe("completed");
   });
+
+  it("completes a quiz lesson on the next visit when the quiz was passed earlier", async () => {
+    // The learner passed this quiz above, before enrolling in this course (and
+    // learners on staging passed quizzes before passing completed lessons).
+    const later = await createCourse(fixture, [quiz.assessmentId]);
+    const lessonId = later.lessonIds[0] ?? "";
+    expect(await lessonStatus(lessonId)).toBe("not_started");
+
+    // Opening the lesson records progress, which completes it.
+    const saved = await asLearner((tx) =>
+      recordLessonProgress(tx, learnerCtx(fixture), lessonId, {}),
+    );
+    expect(saved.data.status).toBe("completed");
+    expect(await lessonStatus(lessonId)).toBe("completed");
+  });
 });

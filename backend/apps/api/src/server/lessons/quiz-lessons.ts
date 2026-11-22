@@ -1,6 +1,10 @@
 import type { TenantTx } from "@atlas/db";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import { resolveLessonType } from "./lessons.repository";
+import {
+  assessmentsRepository,
+  extractAssessmentConfig,
+} from "../assessments/assessments.repository";
 
 /**
  * Quiz lessons: a lesson whose content is a quiz (QA review 1 C6, review 2 C5
@@ -42,6 +46,25 @@ export function quizLessonNeedsPass(): AtlasHttpError {
     status: 409,
     message: "Pass the quiz to complete this lesson.",
   });
+}
+
+/** Whether the member has a graded attempt at or above the quiz's pass mark. */
+export async function hasPassedQuiz(
+  tx: TenantTx,
+  args: { assessmentId: string; membershipId: string },
+): Promise<boolean> {
+  const assessment = await assessmentsRepository.findById(tx, args.assessmentId);
+  if (!assessment) return false;
+  const { passMarkPercent } = extractAssessmentConfig(assessment.config_json);
+  const passed = await tx.attempt.count({
+    where: {
+      assessment_id: args.assessmentId,
+      membership_id: args.membershipId,
+      status: "GRADED",
+      score_pct: { gte: passMarkPercent },
+    },
+  });
+  return passed > 0;
 }
 
 export type QuizLesson = { lessonId: string; courseId: string; title: string };

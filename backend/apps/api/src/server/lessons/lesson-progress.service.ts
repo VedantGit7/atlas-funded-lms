@@ -20,7 +20,7 @@ import {
   upsertLessonProgress,
 } from "./lesson-progress.repository";
 import { findLessonWithModuleAndCourse } from "./lessons.repository";
-import { quizAssessmentIdOf, quizLessonNeedsPass } from "./quiz-lessons";
+import { hasPassedQuiz, quizAssessmentIdOf, quizLessonNeedsPass } from "./quiz-lessons";
 
 type ServiceCtx = {
   tenantId: string;
@@ -86,16 +86,20 @@ export async function recordLessonProgress(
   const existingPct = existing?.progressPct ?? 0;
 
   // A quiz lesson is completed by passing its quiz; "Mark complete" used to
-  // let a learner skip it (QA review 1 C6). Repeating a completion is fine.
-  if (
-    input.completed === true &&
-    existingStatus !== "completed" &&
-    options.completedByQuiz !== true &&
-    quizAssessmentIdOf(lesson) !== null
-  ) {
-    throw quizLessonNeedsPass();
+  // let a learner skip it (QA review 1 C6). A learner who passed earlier
+  // (before passing completed lessons, or before enrolling in this course)
+  // completes it on their next visit: the lesson page records progress on
+  // every visit. Repeating a completion is fine.
+  let markCompleted = input.completed === true;
+  const quizId = quizAssessmentIdOf(lesson);
+  if (quizId && existingStatus !== "completed" && options.completedByQuiz !== true) {
+    if (await hasPassedQuiz(tx, { assessmentId: quizId, membershipId: ctx.actorMembershipId })) {
+      markCompleted = true;
+    } else if (markCompleted) {
+      throw quizLessonNeedsPass();
+    }
   }
-  const completed = input.completed === true || existingStatus === "completed";
+  const completed = markCompleted || existingStatus === "completed";
 
   const positionSeconds =
     input.positionSeconds !== undefined
@@ -131,7 +135,7 @@ export async function recordLessonProgress(
   if (
     isFirstCompletion({
       existingStatus,
-      completed: input.completed === true,
+      completed: markCompleted,
     })
   ) {
     await markEnrollmentCompletedIfAllLessonsDone({
