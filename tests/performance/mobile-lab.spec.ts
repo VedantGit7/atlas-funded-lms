@@ -200,7 +200,7 @@ test("synthetic mobile lab collects critical learner routes with real interactio
       await answer.focus();
       await answer.press("Space");
       expect((await saved).status()).toBe(200);
-      await expect(page.getByText("Autosave: Saved", { exact: true })).toBeVisible();
+      await expect(page.getByText("All answers saved", { exact: true })).toBeVisible();
     });
     assertLabCoverage(samples, routes);
   } finally {
