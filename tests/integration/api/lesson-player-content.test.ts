@@ -129,7 +129,8 @@ describeWithDb("lesson player content", () => {
     let sent = learnerLessonDetailResponseSchema.parse(
       await asLearner(fixture, fixture.publishedLessonId),
     );
-    expect(sent.data.content).toEqual({ kind: "quiz", assessmentId, body: null });
+    // The id names no quiz, so there is no summary card (S1.3 adds one for real quizzes).
+    expect(sent.data.content).toEqual({ kind: "quiz", assessmentId, body: null, quiz: null });
 
     await setLesson(fixture, fixture.publishedLessonId, {
       type: "live",

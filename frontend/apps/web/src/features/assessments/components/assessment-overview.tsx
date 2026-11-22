@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import type { z } from "zod";
-import { ClientApiError, clientApi } from "../../../lib/client-api";
 import type { learnerAssessmentOverviewSchema } from "../assessment-response-schemas";
+import { useStartAttempt } from "../lib/use-start-attempt";
 import { ProctoringConsentModal } from "./proctoring-consent-modal";
 
 type Overview = z.infer<typeof learnerAssessmentOverviewSchema>;
@@ -13,53 +11,14 @@ type AssessmentOverviewProps = {
   overview: Overview;
 };
 
-function consentLevel(proctoringLevel: number): 1 | 2 | 3 {
-  if (proctoringLevel >= 3) return 3;
-  if (proctoringLevel >= 2) return 2;
-  return 1;
-}
-
 export function AssessmentOverviewPanel({ overview }: AssessmentOverviewProps) {
-  const router = useRouter();
-  const [starting, setStarting] = useState(false);
-  const [consentOpen, setConsentOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const level = overview.config.proctoringLevel;
   const proctoringEnabled = level >= 1 || overview.config.l1ProctoringEnabled;
-
-  async function startAttempt(withConsent: boolean) {
-    setStarting(true);
-    setError(null);
-    try {
-      const body = withConsent
-        ? {
-            consent: {
-              consentedAt: new Date().toISOString(),
-              level: consentLevel(level >= 1 ? level : 1),
-            },
-          }
-        : {};
-      const response = await clientApi.post<{ data: { id: string } }>(
-        `/api/v1/assessments/${overview.id}/attempts`,
-        body,
-        "attempt-start",
-      );
-      setConsentOpen(false);
-      router.push(`/attempts/${response.data.id}`);
-    } catch (err) {
-      setError(err instanceof ClientApiError ? err.message : "Unable to start attempt.");
-      setStarting(false);
-    }
-  }
-
-  function handleStartClick() {
-    if (proctoringEnabled) {
-      setConsentOpen(true);
-      return;
-    }
-    void startAttempt(false);
-  }
+  const attempt = useStartAttempt({
+    assessmentId: overview.id,
+    proctoringLevel: proctoringEnabled ? Math.max(level, 1) : 0,
+  });
+  const { starting, error } = attempt;
 
   const canStart = overview.attemptsRemaining == null || overview.attemptsRemaining > 0;
 
@@ -111,21 +70,17 @@ export function AssessmentOverviewPanel({ overview }: AssessmentOverviewProps) {
         type="button"
         className="rounded border px-4 py-2"
         disabled={!canStart || starting}
-        onClick={handleStartClick}
+        onClick={attempt.start}
       >
         {starting ? "Starting..." : "Start attempt"}
       </button>
 
       <ProctoringConsentModal
-        open={consentOpen}
+        open={attempt.consentOpen}
         confirming={starting}
-        level={consentLevel(level >= 1 ? level : 1)}
-        onCancel={() => {
-          if (!starting) setConsentOpen(false);
-        }}
-        onConfirm={() => {
-          void startAttempt(true);
-        }}
+        level={attempt.consentLevel}
+        onCancel={attempt.cancelConsent}
+        onConfirm={attempt.confirmConsent}
       />
     </div>
   );

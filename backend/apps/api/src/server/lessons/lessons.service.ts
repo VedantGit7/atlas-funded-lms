@@ -46,6 +46,7 @@ import { listTagIdsForLessons, listTagsForLesson, mapTagSummary } from "../tags/
 import { parseContentMetadata, getEffectiveFeatures } from "./lesson-content-metadata";
 import { findStorageReferenceById } from "./lesson-assets.repository";
 import { buildPlayerContent } from "./lesson-player-content";
+import { loadQuizSummary } from "./quiz-summary";
 import type { LessonPlayerFile } from "./lesson-schemas";
 import { canManageCourse } from "../courses/course-studio-access";
 
@@ -394,17 +395,30 @@ async function playerContentFor(
     videoUrl: string | null;
     videoProvider: string | null;
   },
+  /** `learner`: the quiz card shows the viewer's attempts. `studio`: nobody's. */
+  viewer: "learner" | "studio",
 ) {
   const lessonType = resolveLessonType({
     contentJson: lesson.contentJson,
     videoUrl: lesson.videoUrl,
     videoProvider: lesson.videoProvider,
   });
-  return buildPlayerContent({
+  const content = buildPlayerContent({
     lessonType,
     contentJson: lesson.contentJson,
     primaryFile: await signPrimaryFile(tx, ctx, lesson.id, lesson.contentJson),
   });
+  if (content.kind === "quiz" && content.assessmentId) {
+    return {
+      ...content,
+      quiz: await loadQuizSummary(tx, {
+        tenantId: ctx.tenantId,
+        assessmentId: content.assessmentId,
+        membershipId: viewer === "learner" ? ctx.actorMembershipId : null,
+      }),
+    };
+  }
+  return content;
 }
 
 export async function getLessonForEditor(tx: TenantTx, ctx: ServiceCtx, lessonId: string) {
@@ -437,7 +451,7 @@ export async function getLessonForEditor(tx: TenantTx, ctx: ServiceCtx, lessonId
       status: lesson.status,
       isPreview: content.isPreview,
       tags: tags.map(mapTagSummary),
-      playerContent: await playerContentFor(tx, ctx, lesson),
+      playerContent: await playerContentFor(tx, ctx, lesson, "studio"),
     },
   };
 }
@@ -520,7 +534,7 @@ export async function getLessonForPlayer(
         videoUrl: lesson.videoUrl,
         videoProvider: lesson.videoProvider,
       }),
-      content: await playerContentFor(tx, ctx, lesson),
+      content: await playerContentFor(tx, ctx, lesson, "learner"),
       videoProvider: asVideoProvider(lesson.videoProvider),
       videoUrl: lesson.videoUrl,
       durationSeconds: lesson.durationSeconds,

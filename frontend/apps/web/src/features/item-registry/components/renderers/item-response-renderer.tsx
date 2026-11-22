@@ -35,9 +35,42 @@ export type ItemResponseRendererProps = {
   disabled?: boolean;
   swipeResetToken?: number;
   showStem?: boolean;
+  /**
+   * A matching or ordering question's items in a real attempt, from the
+   * server, with opaque ids (QA review 1 N1). Without it (the author's
+   * preview) they are read from the answer key.
+   */
+  choices?: ResponseChoices | undefined;
 };
 
 type LabeledId = { id: string; label: string };
+
+export type ResponseChoices =
+  | { kind: "matching"; left: LabeledId[]; right: LabeledId[] }
+  | { kind: "ordering"; items: LabeledId[] };
+
+function hashString(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+/**
+ * The preview's starting order for ordering steps: mixed up, and never the
+ * correct order (QA review 1 M47: the preview showed the answer). Stable for
+ * the same steps, so the preview doesn't jump on every render.
+ */
+export function previewOrderingStart(items: LabeledId[]): LabeledId[] {
+  if (items.length < 2) return items;
+  const mixed = [...items].sort(
+    (a, b) => hashString(`${a.id}:${a.label}`) - hashString(`${b.id}:${b.label}`),
+  );
+  const unchanged = mixed.every((item, index) => item.id === items[index]?.id);
+  return unchanged ? [...mixed.slice(1), ...mixed.slice(0, 1)] : mixed;
+}
 
 function readLabelMap(value: Record<string, unknown> | undefined): Record<string, string> {
   if (value?.["items"] && typeof value["items"] === "object" && !Array.isArray(value["items"])) {
@@ -79,15 +112,7 @@ function readOrderingItems(answerKey: Record<string, unknown> | undefined): Labe
     : [];
   const labels = readLabelMap(answerKey ?? {});
 
-  if (order.length > 0) {
-    return order.map((id) => ({ id, label: labels[id] ?? id }));
-  }
-
-  return [
-    { id: "step-1", label: "First step" },
-    { id: "step-2", label: "Second step" },
-    { id: "step-3", label: "Third step" },
-  ];
+  return order.map((id) => ({ id, label: labels[id] ?? id }));
 }
 
 export function ItemResponseRenderer({
@@ -101,6 +126,7 @@ export function ItemResponseRenderer({
   disabled = false,
   swipeResetToken = 0,
   showStem = true,
+  choices,
 }: ItemResponseRendererProps) {
   const [state, setState] = useState<ItemResponseUiState>(() =>
     responseFromWire(itemTypeKey, savedAnswer),
@@ -147,6 +173,7 @@ export function ItemResponseRenderer({
     disabled,
     answerKey,
     mode,
+    choices,
   });
 
   if (!showStem) {
@@ -176,6 +203,7 @@ function renderInteraction(args: {
   disabled: boolean;
   answerKey: Record<string, unknown>;
   mode: "preview" | "attempt";
+  choices: ResponseChoices | undefined;
 }) {
   const {
     itemTypeKey,
@@ -186,6 +214,8 @@ function renderInteraction(args: {
     choiceClass,
     disabled,
     answerKey,
+    mode,
+    choices,
   } = args;
 
   if (itemTypeKey === "true_false" && state.type === "true_false") {
@@ -269,12 +299,21 @@ function renderInteraction(args: {
   }
 
   if (itemTypeKey === "ordering" && state.type === "ordering") {
+    const items =
+      choices?.kind === "ordering"
+        ? choices.items
+        : previewOrderingStart(readOrderingItems(answerKey));
+    if (items.length === 0) {
+      return (
+        <p className="text-sm text-[var(--admin-on-surface-variant)]">
+          {mode === "attempt" ? "This question has no steps." : "Add steps to see them here."}
+        </p>
+      );
+    }
     return (
       <OrderingResponseEditor
-        items={readOrderingItems(answerKey)}
-        order={
-          state.order.length > 0 ? state.order : readOrderingItems(answerKey).map((item) => item.id)
-        }
+        items={items}
+        order={state.order.length > 0 ? state.order : items.map((item) => item.id)}
         disabled={disabled}
         onChange={(order) => {
           updateState({ type: "ordering", order });
@@ -284,7 +323,17 @@ function renderInteraction(args: {
   }
 
   if (itemTypeKey === "matching" && state.type === "matching") {
-    const { leftItems, rightItems } = readMatchingLists(answerKey);
+    const { leftItems, rightItems } =
+      choices?.kind === "matching"
+        ? { leftItems: choices.left, rightItems: choices.right }
+        : readMatchingLists(answerKey);
+    if (leftItems.length === 0) {
+      return (
+        <p className="text-sm text-[var(--admin-on-surface-variant)]">
+          {mode === "attempt" ? "This question has no pairs." : "Add pairs to see them here."}
+        </p>
+      );
+    }
     return (
       <MatchingResponseEditor
         leftItems={leftItems}
@@ -406,7 +455,7 @@ function OrderingResponseEditor({
   return (
     <div className="space-y-2">
       <p className="text-xs text-[var(--admin-on-surface-variant)]">
-        Drag steps into the correct order.
+        Use the arrows to put the steps in the correct order.
       </p>
       <ul className="space-y-2">
         {displayOrder.map((id, index) => {
@@ -426,7 +475,7 @@ function OrderingResponseEditor({
               <button
                 type="button"
                 disabled={disabled || index === 0}
-                aria-label="Move up"
+                aria-label={`Move "${item.label}" up`}
                 onClick={() => {
                   move(index, -1);
                 }}
@@ -437,7 +486,7 @@ function OrderingResponseEditor({
               <button
                 type="button"
                 disabled={disabled || index === displayOrder.length - 1}
-                aria-label="Move down"
+                aria-label={`Move "${item.label}" down`}
                 onClick={() => {
                   move(index, 1);
                 }}
@@ -475,6 +524,7 @@ function MatchingResponseEditor({
         >
           <span className="text-sm font-semibold text-[var(--admin-on-surface)]">{left.label}</span>
           <select
+            aria-label={`Match for "${left.label}"`}
             disabled={disabled}
             value={pairs[left.id] ?? ""}
             onChange={(event) => {

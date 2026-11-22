@@ -5,6 +5,7 @@ import type { SaveAnswerInput } from "../assessments/schemas";
 import {
   assessmentsRepository,
   extractAssessmentConfig,
+  extraAttemptsGranted,
   readCreatedByMembershipId,
   readItemRequired,
 } from "../assessments/assessments.repository";
@@ -38,6 +39,15 @@ import {
   readPresentationOrder,
   type PresentationOrder,
 } from "./presentation-order";
+import {
+  decodeChoiceAnswer,
+  encodeChoiceAnswer,
+  newChoiceSalt,
+  presentChoices,
+} from "./attempt-choices";
+import { reviewItem } from "./attempt-review";
+import { completeQuizLessonsForPass } from "../lessons/quiz-lesson-completion";
+import { findQuizLessonsForMember } from "../lessons/quiz-lessons";
 
 type ServiceCtx = {
   tenantId: string;
@@ -159,12 +169,47 @@ async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<Sco
   return items;
 }
 
+function optionLabel(optionJson: unknown, position: number): string {
+  const label =
+    optionJson && typeof optionJson === "object" && !Array.isArray(optionJson)
+      ? (optionJson as Record<string, unknown>)["label"]
+      : null;
+  return typeof label === "string" && label.trim() ? label : `Option ${String(position)}`;
+}
+
+function isManualGradingType(itemTypeKey: string): boolean {
+  return (
+    itemTypeKey === "short_answer" ||
+    itemTypeKey === "long_answer" ||
+    itemTypeKey === "file_upload" ||
+    itemTypeKey === "assignment"
+  );
+}
+
+/**
+ * The attempt's questions.
+ *
+ * `runner`: for answering. Matching and ordering questions carry their items
+ * as opaque, shuffled choices (attempt-choices.ts), and saved answers use the
+ * same tokens. `review`: after submission, when the quiz allows review. Each
+ * question carries its answer and the correct one in words (attempt-review.ts).
+ */
 async function buildRunnerItems(
   tx: TenantTx,
   attempt: Pick<AttemptRow, "id" | "assessment_id">,
   metadata: AttemptMetadata,
   config: ReturnType<typeof extractAssessmentConfig>,
+  mode: "runner" | "review" = "runner",
 ) {
+  const graded =
+    mode === "review"
+      ? new Map(
+          (await attemptsRepository.listAnswersForAttempt(tx, attempt.id)).map((row) => [
+            row.assessment_item_id,
+            row,
+          ]),
+        )
+      : new Map<string, never>();
   const rows = await assessmentsRepository.listAssessmentItems(tx, attempt.assessment_id);
   // Audit M9: the order drawn at start, the same on every fetch.
   const order = readPresentationOrder(metadata.presentation);
@@ -187,6 +232,7 @@ async function buildRunnerItems(
     }
 
     const { item } = found;
+    const answerKey = decodeExplanationJson(item.explanation_json).answerKeyJson;
     const options = orderOptions(found.options, {
       order,
       attemptId: attempt.id,
@@ -195,6 +241,41 @@ async function buildRunnerItems(
     });
 
     const draft = metadata.draftAnswers?.[row.id];
+    const saved = draft?.answerJson ?? null;
+    const salt = metadata.choiceSalt;
+    const choices =
+      mode === "runner" && salt
+        ? presentChoices({
+            itemTypeKey: item.item_type_key,
+            answerKey,
+            salt,
+            assessmentItemId: row.id,
+          })
+        : null;
+    const points = Number(row.points);
+
+    let review = null;
+    if (mode === "review") {
+      const answerRow = graded.get(row.id);
+      const manual = isManualGradingType(item.item_type_key);
+      review = {
+        isCorrect: manual ? null : (answerRow?.is_correct ?? false),
+        pointsAwarded: manual ? null : Number(answerRow?.points_awarded ?? 0),
+        points,
+        markedByInstructor: manual,
+        ...reviewItem({
+          itemTypeKey: item.item_type_key,
+          answerKeyJson: answerKey,
+          options: found.options.map((option) => ({
+            id: option.id,
+            label: optionLabel(option.option_json, option.position),
+            isCorrect: option.is_correct ?? null,
+            position: option.position,
+          })),
+          answerJson: saved,
+        }),
+      };
+    }
 
     items.push({
       id: row.item_id,
@@ -202,7 +283,7 @@ async function buildRunnerItems(
       itemId: row.item_id,
       itemTypeKey: item.item_type_key,
       position: row.position,
-      points: Number(row.points),
+      points,
       required: readItemRequired(row.config_json),
       contentJson: item.stem_json as Record<string, unknown>,
       options: options.map((option) => ({
@@ -210,11 +291,51 @@ async function buildRunnerItems(
         optionJson: option.option_json as Record<string, unknown>,
         position: option.position,
       })),
-      savedAnswer: draft?.answerJson ?? null,
+      savedAnswer:
+        saved && choices && salt
+          ? encodeChoiceAnswer({
+              itemTypeKey: item.item_type_key,
+              salt,
+              assessmentItemId: row.id,
+              answerJson: saved,
+            })
+          : saved,
+      ...(choices ? { choices } : {}),
+      ...(review ? { review } : {}),
     });
   }
 
   return items;
+}
+
+/**
+ * Attempts started before choice salts existed get one on their next read, so
+ * their matching and ordering questions can be answered. Locked, because a
+ * save rewrites the metadata too.
+ */
+async function ensureChoiceSalt(tx: TenantTx, attempt: AttemptRow): Promise<AttemptRow> {
+  if (parseAttemptMetadata(attempt.metadata_json).choiceSalt) return attempt;
+  const locked = await attemptsRepository.findByIdForUpdate(tx, attempt.id);
+  if (!locked || locked.status !== "STARTED") return locked ?? attempt;
+  const metadata = parseAttemptMetadata(locked.metadata_json);
+  if (metadata.choiceSalt) return locked;
+  const next: AttemptMetadata = { ...metadata, choiceSalt: newChoiceSalt() };
+  await attemptsRepository.updateMetadata(tx, locked.id, next);
+  return { ...locked, metadata_json: next };
+}
+
+/** The first course lesson this quiz belongs to, for the learner's way back. */
+async function lessonLinkFor(
+  tx: TenantTx,
+  attempt: Pick<AttemptRow, "assessment_id" | "membership_id">,
+) {
+  const [lesson] = await findQuizLessonsForMember(tx, {
+    assessmentId: attempt.assessment_id,
+    membershipId: attempt.membership_id,
+  });
+  return lesson
+    ? { courseId: lesson.courseId, lessonId: lesson.lessonId, title: lesson.title }
+    : null;
 }
 
 export async function startAttempt(
@@ -260,22 +381,7 @@ export async function startAttempt(
   }
 
   const config = extractAssessmentConfig(assessment.config_json);
-  const grantsRaw =
-    assessment.config_json &&
-    typeof assessment.config_json === "object" &&
-    !Array.isArray(assessment.config_json)
-      ? (assessment.config_json as Record<string, unknown>)["learnerAttemptGrants"]
-      : null;
-  const extraGranted =
-    grantsRaw &&
-    typeof grantsRaw === "object" &&
-    !Array.isArray(grantsRaw) &&
-    typeof (grantsRaw as Record<string, unknown>)[ctx.actorMembershipId] === "number"
-      ? Math.max(
-          0,
-          Math.floor((grantsRaw as Record<string, unknown>)[ctx.actorMembershipId] as number),
-        )
-      : 0;
+  const extraGranted = extraAttemptsGranted(assessment.config_json, ctx.actorMembershipId);
   const attemptsUsed = await attemptsRepository.countAttemptsForMembership(tx, {
     assessmentId,
     membershipId: ctx.actorMembershipId,
@@ -355,6 +461,10 @@ export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: strin
     attempt = (await attemptsRepository.findById(tx, attemptId)) ?? attempt;
   }
 
+  if (attempt.status === "STARTED" && attempt.membership_id === ctx.actorMembershipId) {
+    attempt = await ensureChoiceSalt(tx, attempt);
+  }
+
   const assessment = await assessmentsRepository.findById(tx, attempt.assessment_id);
   if (!assessment) {
     throw assessmentNotFound();
@@ -363,6 +473,8 @@ export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: strin
   const config = extractAssessmentConfig(assessment.config_json);
   const metadata = parseAttemptMetadata(attempt.metadata_json);
   const serverNow = new Date().toISOString();
+  const lesson =
+    attempt.membership_id === ctx.actorMembershipId ? await lessonLinkFor(tx, attempt) : null;
   const scorePercent = attempt.score_pct != null ? Number(attempt.score_pct) : null;
   const passed = scorePercent != null ? scorePercent >= config.passMarkPercent : null;
   const requiresManualGrading = attempt.status === "SUBMITTED" && scorePercent == null;
@@ -384,6 +496,8 @@ export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: strin
     proctoringLevel: config.proctoringLevel,
     l1ProctoringEnabled: config.l1ProctoringEnabled,
     passMarkPercent: config.passMarkPercent,
+    title: assessment.title,
+    lesson,
   };
 
   if (attempt.status === "STARTED") {
@@ -398,7 +512,7 @@ export async function getAttempt(tx: TenantTx, ctx: ServiceCtx, attemptId: strin
   return {
     data: {
       ...base,
-      items: reviewAllowed ? await buildRunnerItems(tx, attempt, metadata, config) : [],
+      items: reviewAllowed ? await buildRunnerItems(tx, attempt, metadata, config, "review") : [],
       canReviewAnswers: reviewAllowed,
       scorePercent,
       passed,
@@ -454,13 +568,31 @@ export async function saveAttemptAnswer(
     throw invalidAttemptItem();
   }
 
+  // Matching and ordering answers arrive in the attempt's opaque tokens and
+  // are stored with the real ids, so grading is unchanged (attempt-choices.ts).
+  let answerJson = input.answerJson;
+  if (metadata.choiceSalt) {
+    const loaded = (await itemRegistryRepository.loadItemsWithOptions(tx, [input.itemId])).get(
+      input.itemId,
+    );
+    if (loaded) {
+      answerJson = decodeChoiceAnswer({
+        itemTypeKey: loaded.item.item_type_key,
+        answerKey: decodeExplanationJson(loaded.item.explanation_json).answerKeyJson,
+        salt: metadata.choiceSalt,
+        assessmentItemId: assessmentItem.id,
+        answerJson: input.answerJson,
+      });
+    }
+  }
+
   const savedAt = new Date().toISOString();
   const nextMetadata: AttemptMetadata = {
     ...metadata,
     draftAnswers: {
       ...(metadata.draftAnswers ?? {}),
       [assessmentItem.id]: {
-        answerJson: input.answerJson,
+        answerJson,
         updatedAt: savedAt,
       },
     },
@@ -468,7 +600,7 @@ export async function saveAttemptAnswer(
       ...(metadata.idempotencyAnswers ?? {}),
       [idempotencyKey]: {
         assessmentItemId: assessmentItem.id,
-        answerJson: input.answerJson,
+        answerJson,
         savedAt,
       },
     },
@@ -732,6 +864,14 @@ async function finalizeLockedAttempt(
     },
     idempotencyKey: `${ctx.requestId}:assessment.submitted:${attemptId}`,
   });
+
+  // Passing completes the quiz's lessons (QA review 2 H23).
+  if (passed === true) {
+    await completeQuizLessonsForPass(tx, ctx, {
+      assessmentId: attempt.assessment_id,
+      membershipId: attempt.membership_id,
+    });
+  }
 
   return resultPayload;
 }

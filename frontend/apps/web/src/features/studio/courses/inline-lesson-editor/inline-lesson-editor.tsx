@@ -214,6 +214,7 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
                 content={lesson.playerContent}
                 videoProvider={lesson.videoProvider}
                 videoUrl={lesson.videoUrl}
+                preview
               />
             </article>
           </div>

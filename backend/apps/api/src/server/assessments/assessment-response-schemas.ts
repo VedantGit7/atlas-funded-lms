@@ -108,6 +108,36 @@ const safeOptionSchema = z.object({
   position: z.number().int(),
 });
 
+const choiceLabelSchema = z.object({ id: z.string(), label: z.string() });
+
+/**
+ * A matching or ordering question's items, with opaque ids, for answering
+ * (QA review 1 N1; see attempts/attempt-choices.ts).
+ */
+export const attemptChoicesSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("matching"),
+    left: z.array(choiceLabelSchema),
+    right: z.array(choiceLabelSchema),
+  }),
+  z.object({ kind: z.literal("ordering"), items: z.array(choiceLabelSchema) }),
+]);
+
+/**
+ * A question after submission, in words (QA review 2 H23; see
+ * attempts/attempt-review.ts). Sent only when the quiz allows review.
+ */
+export const attemptItemReviewSchema = z.object({
+  isCorrect: z.boolean().nullable(),
+  pointsAwarded: z.number().nullable(),
+  points: z.number(),
+  markedByInstructor: z.boolean(),
+  yourAnswer: z.array(z.string()),
+  correctAnswer: z.array(z.string()),
+  correctAnswerLabel: z.string(),
+  explanation: z.string().nullable(),
+});
+
 const runnerItemSchema = z.object({
   id: z.uuid(),
   assessmentItemId: z.uuid(),
@@ -119,6 +149,15 @@ const runnerItemSchema = z.object({
   contentJson: z.record(z.string(), z.unknown()),
   options: z.array(safeOptionSchema),
   savedAnswer: z.record(z.string(), z.unknown()).nullable(),
+  choices: attemptChoicesSchema.optional(),
+  review: attemptItemReviewSchema.optional(),
+});
+
+/** The course lesson a quiz belongs to, for the learner's way back. */
+export const attemptLessonLinkSchema = z.object({
+  courseId: z.uuid(),
+  lessonId: z.uuid(),
+  title: z.string(),
 });
 
 export const attemptRunnerResponseSchema = z.object({
@@ -139,6 +178,8 @@ export const attemptRunnerResponseSchema = z.object({
     passed: z.boolean().nullable().optional(),
     requiresManualGrading: z.boolean().optional(),
     passMarkPercent: z.number().optional(),
+    title: z.string().optional(),
+    lesson: attemptLessonLinkSchema.nullable().optional(),
   }),
 });
 

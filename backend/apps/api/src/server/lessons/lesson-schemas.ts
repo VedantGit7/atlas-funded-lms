@@ -176,6 +176,37 @@ export const lessonPlayerFileSchema = z.object({
 export type LessonPlayerFile = z.infer<typeof lessonPlayerFileSchema>;
 
 /**
+ * A quiz lesson's card before the quiz starts: the rules, and where the
+ * learner stands (see quiz-summary.ts). In the Studio preview the learner
+ * fields describe nobody: no attempts, not passed.
+ */
+export const lessonQuizSummarySchema = z.object({
+  title: z.string(),
+  /** False while the quiz is not published: learners can't start it yet. */
+  available: z.boolean(),
+  questionCount: z.number().int(),
+  passMarkPercent: z.number(),
+  timeLimitSeconds: z.number().int().nullable(),
+  attemptsAllowed: z.number().int(),
+  attemptsUsed: z.number().int(),
+  attemptsRemaining: z.number().int(),
+  /** 0 when not proctored; otherwise the level the learner must agree to. */
+  proctoringLevel: z.number().int().min(0).max(3),
+  inProgressAttemptId: z.string().nullable(),
+  bestScorePercent: z.number().nullable(),
+  passed: z.boolean(),
+  lastAttempt: z
+    .object({
+      id: z.string(),
+      status: z.enum(["SUBMITTED", "GRADED"]),
+      scorePercent: z.number().nullable(),
+      passed: z.boolean().nullable(),
+    })
+    .nullable(),
+});
+export type LessonQuizSummary = z.infer<typeof lessonQuizSummarySchema>;
+
+/**
  * What a lesson shows, by kind (see lesson-player-content.ts). Every kind may
  * carry `body`: article text, or notes shown with a video, file or quiz.
  * Internal fields of content_json (discussion thread, storage references,
@@ -188,6 +219,7 @@ export const lessonPlayerContentSchema = z.discriminatedUnion("kind", [
     kind: z.literal("quiz"),
     assessmentId: z.string().nullable(),
     body: z.string().nullable(),
+    quiz: lessonQuizSummarySchema.nullable().optional(),
   }),
   z.object({
     kind: z.literal("live"),

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { z } from "zod";
+import { ConfirmDialog } from "../../../components/patterns/ConfirmDialog";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { captureProductEvent } from "../../../observability/capture-product-event";
 import type { attemptRunnerResponseSchema } from "../assessment-response-schemas";
@@ -24,6 +25,25 @@ type AttemptRunnerProps = {
 /** Longest the auto-submit waits for in-flight autosaves before submitting anyway. */
 const AUTO_SUBMIT_SAVE_WAIT_MS = 5_000;
 
+/** Pause after a card is answered before moving on, so the learner sees it land. */
+const CARD_ADVANCE_MS = 450;
+
+/** Question types answered in one gesture, which move on by themselves (QA review 1 m42). */
+const ADVANCES_ON_ANSWER = new Set(["swipe"]);
+
+function autosaveLabel(state: "idle" | "saving" | "saved" | "error"): string {
+  switch (state) {
+    case "saving":
+      return "Saving…";
+    case "saved":
+      return "All answers saved";
+    case "error":
+      return "Not saved. Check your connection; your next answer retries.";
+    default:
+      return "Answers save as you go";
+  }
+}
+
 export function formatRemaining(remainingMs: number): string {
   if (remainingMs <= 0) return "00:00";
   const totalSeconds = Math.floor(remainingMs / 1000);
@@ -38,7 +58,9 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [submitting, setSubmitting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const advanceTimerRef = useRef<number | null>(null);
   // Server clock minus client clock, measured once when the attempt payload arrives. Audit
   // finding H1: this used to be recomputed every second against the same `serverNow`, which
   // pinned "now" to the moment the page loaded, so the countdown never moved.
@@ -54,6 +76,27 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
 
   const activeItem: RunnerItem | undefined = attempt.items[activeIndex];
   const activeVisual = getItemTypeVisual(activeItem?.itemTypeKey ?? "mcq_single");
+  const answeredCount = attempt.items.filter((item) => item.savedAnswer).length;
+  const unansweredCount = attempt.items.length - answeredCount;
+  const isLast = activeIndex >= attempt.items.length - 1;
+  const backHref = attempt.lesson
+    ? `/courses/${attempt.lesson.courseId}/lessons/${attempt.lesson.lessonId}`
+    : `/assessments/${attempt.assessmentId}`;
+
+  useEffect(
+    () => () => {
+      if (advanceTimerRef.current != null) window.clearTimeout(advanceTimerRef.current);
+    },
+    [],
+  );
+
+  function goTo(index: number) {
+    if (advanceTimerRef.current != null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+    setActiveIndex(Math.min(Math.max(index, 0), Math.max(attempt.items.length - 1, 0)));
+  }
 
   const remainingMs = attempt.dueAt
     ? new Date(attempt.dueAt).getTime() - (clientNowMs + serverOffsetMs)
@@ -186,43 +229,44 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
     }
   }
 
-  async function handleSubmit() {
-    if (!timeUp && !window.confirm("Submit attempt? You cannot change answers after submission.")) {
+  // QA review 1 C7: the browser's own confirm box (which test tools dismiss as
+  // Cancel, so Submit seemed to do nothing) is replaced by the app's dialog.
+  function handleSubmit() {
+    if (timeUp) {
+      void submitAttempt({ auto: false });
       return;
     }
-    await submitAttempt({ auto: false });
+    setConfirmOpen(true);
   }
 
   return (
     <div className="admin-theme space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 shadow-sm">
         <div>
-          <p className="text-sm text-[var(--admin-on-surface-variant)]">Attempt in progress</p>
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">
+            {answeredCount} of {attempt.items.length} answered
+          </p>
           <h1 className="text-2xl font-semibold text-[var(--admin-on-surface)]">
-            Assessment attempt
+            {attempt.title ?? "Quiz"}
           </h1>
         </div>
         <div className="text-right text-sm text-[var(--admin-on-surface-variant)]">
-          {timerLabel ? <p>Time remaining: {timerLabel}</p> : null}
-          <p>
-            Autosave:{" "}
-            <span
-              className={
-                autosaveState === "saved"
-                  ? "font-semibold text-[var(--admin-success)]"
-                  : autosaveState === "error"
-                    ? "font-semibold text-[var(--admin-danger)]"
-                    : "font-semibold text-[var(--admin-on-surface)]"
-              }
-            >
-              {autosaveState === "saving"
-                ? "Saving..."
+          {timerLabel ? (
+            <p className="font-semibold text-[var(--admin-on-surface)]">
+              Time left: <span className="tabular-nums">{timerLabel}</span>
+            </p>
+          ) : null}
+          <p
+            role="status"
+            className={
+              autosaveState === "error"
+                ? "font-semibold text-[var(--admin-danger)]"
                 : autosaveState === "saved"
-                  ? "Saved"
-                  : autosaveState === "error"
-                    ? "Error"
-                    : "Idle"}
-            </span>
+                  ? "text-[var(--admin-success)]"
+                  : undefined
+            }
+          >
+            {autosaveLabel(autosaveState)}
           </p>
         </div>
       </header>
@@ -272,9 +316,20 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
                   isCorrect: null,
                   position: option.position,
                 }))}
+                choices={activeItem.choices}
                 onAnswerChange={(answerJson) => {
                   if (!answerJson) return;
                   saveAnswer(activeItem, answerJson);
+                  if (ADVANCES_ON_ANSWER.has(activeItem.itemTypeKey) && !isLast) {
+                    if (advanceTimerRef.current != null) {
+                      window.clearTimeout(advanceTimerRef.current);
+                    }
+                    const next = activeIndex + 1;
+                    advanceTimerRef.current = window.setTimeout(() => {
+                      advanceTimerRef.current = null;
+                      setActiveIndex(next);
+                    }, CARD_ADVANCE_MS);
+                  }
                 }}
                 mode="attempt"
                 disabled={timeUp}
@@ -284,6 +339,32 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
           ) : (
             <p className="text-[var(--admin-on-surface-variant)]">No questions available.</p>
           )}
+
+          {attempt.items.length > 1 ? (
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] pt-4">
+              <button
+                type="button"
+                className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-40"
+                disabled={activeIndex === 0}
+                onClick={() => {
+                  goTo(activeIndex - 1);
+                }}
+              >
+                Previous
+              </button>
+              {isLast ? null : (
+                <button
+                  type="button"
+                  className="rounded-xl bg-[var(--admin-primary)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] transition-opacity hover:opacity-90"
+                  onClick={() => {
+                    goTo(activeIndex + 1);
+                  }}
+                >
+                  Next question
+                </button>
+              )}
+            </div>
+          ) : null}
         </section>
 
         <nav className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 shadow-sm">
@@ -298,8 +379,10 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
                       ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary-container)_35%,var(--admin-surface))] font-semibold text-[var(--admin-primary)]"
                       : "border-[var(--admin-border)] bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
                   }`}
+                  aria-label={`Question ${String(index + 1)}${item.savedAnswer ? ", answered" : ", not answered"}`}
+                  aria-current={index === activeIndex ? "step" : undefined}
                   onClick={() => {
-                    setActiveIndex(index);
+                    goTo(index);
                   }}
                 >
                   {index + 1}
@@ -311,18 +394,20 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
         </nav>
       </div>
 
-      {error ? <p className="text-sm text-[var(--admin-danger)]">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="text-sm text-[var(--admin-danger)]">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
           className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] motion-safe:active:scale-[0.98] disabled:opacity-60"
           disabled={submitting}
-          onClick={() => {
-            void handleSubmit();
-          }}
+          onClick={handleSubmit}
         >
-          {submitting ? "Submitting..." : "Submit attempt"}
+          {submitting ? "Submitting…" : "Submit answers"}
         </button>
         {attempt.proctoringLevel >= 3 ? (
           <button
@@ -336,12 +421,32 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
           </button>
         ) : null}
         <Link
-          href={`/assessments/${attempt.assessmentId}`}
+          href={backHref}
           className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)]"
         >
-          Back to overview
+          {attempt.lesson ? "Back to lesson" : "Back to quiz"}
         </Link>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Submit your answers?"
+        description={
+          unansweredCount > 0
+            ? `${unansweredCount === 1 ? "1 question has" : `${String(unansweredCount)} questions have`} no answer and will count as wrong. You can't change answers after you submit.`
+            : "You can't change answers after you submit."
+        }
+        confirmLabel="Submit answers"
+        cancelLabel="Keep answering"
+        busy={submitting}
+        onCancel={() => {
+          setConfirmOpen(false);
+        }}
+        onConfirm={() => {
+          setConfirmOpen(false);
+          void submitAttempt({ auto: false });
+        }}
+      />
     </div>
   );
 }

@@ -346,7 +346,8 @@ function OrderingKeyEditor({
     if (order.length > 0) {
       return order.map((id) => ({ id, label: labels[id] ?? id }));
     }
-    return defaultLabeledItems("step", ["First step", "Second step", "Third step"]);
+    // Empty steps with placeholders (QA review 1 m24), not values that could be saved by mistake.
+    return defaultLabeledItems("step", ["", "", ""]);
   });
 
   const didSeedRef = useRef(false);
@@ -395,6 +396,8 @@ function OrderingKeyEditor({
             <input
               type="text"
               value={item.label}
+              placeholder={`Step ${String(index + 1)}`}
+              aria-label={`Step ${String(index + 1)}`}
               onChange={(event) => {
                 emit(
                   items.map((entry) =>
@@ -477,8 +480,8 @@ function readMatchingMeta(value: Record<string, unknown>): {
 
   if (leftItems.length === 0 && rightItems.length === 0) {
     return {
-      leftItems: defaultLabeledItems("left", ["Term A", "Term B"]),
-      rightItems: defaultLabeledItems("right", ["Definition 1", "Definition 2"]),
+      leftItems: defaultLabeledItems("left", ["", ""]),
+      rightItems: defaultLabeledItems("right", ["", ""]),
     };
   }
 

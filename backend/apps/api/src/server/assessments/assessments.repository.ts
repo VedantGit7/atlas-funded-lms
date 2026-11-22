@@ -171,6 +171,15 @@ export function extractAssessmentConfig(configJson: unknown): AssessmentConfig {
   };
 }
 
+/** Extra attempts an instructor granted this learner beyond the quiz's limit. */
+export function extraAttemptsGranted(configJson: unknown, membershipId: string): number {
+  if (!configJson || typeof configJson !== "object" || Array.isArray(configJson)) return 0;
+  const grants = (configJson as Record<string, unknown>)["learnerAttemptGrants"];
+  if (!grants || typeof grants !== "object" || Array.isArray(grants)) return 0;
+  const granted = (grants as Record<string, unknown>)[membershipId];
+  return typeof granted === "number" ? Math.max(0, Math.floor(granted)) : 0;
+}
+
 export function readItemRequired(configJson: unknown): boolean {
   if (!configJson || typeof configJson !== "object" || Array.isArray(configJson)) {
     return true;
