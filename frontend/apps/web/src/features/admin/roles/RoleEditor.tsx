@@ -333,16 +333,18 @@ export function RoleEditor({ role }: RoleEditorProps) {
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <button
-            type="button"
-            disabled={busy || role.isSystem}
-            onClick={() => {
-              setConfirmDelete(true);
-            }}
-            className="rounded-lg border border-[var(--admin-danger)] px-6 py-2.5 text-sm font-semibold text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)]/10 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Delete role
-          </button>
+          {role.isSystem ? null : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setConfirmDelete(true);
+              }}
+              className="rounded-lg border border-[var(--admin-danger)] px-6 py-2.5 text-sm font-semibold text-[var(--admin-danger)] transition-colors hover:bg-[var(--admin-danger)]/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Delete role
+            </button>
+          )}
           <Link
             href="/admin/roles"
             className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-2.5 text-sm font-semibold text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)]"

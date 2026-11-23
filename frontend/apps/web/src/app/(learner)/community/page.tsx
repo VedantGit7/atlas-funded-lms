@@ -3,6 +3,7 @@ import { CommunityExperience } from "../../../features/community/components/Comm
 import type { FeedPost } from "../../../features/community/components/PostCard";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import { communityServerApi } from "@/modules/community/community.server-api";
+import { notInAcademyMessage } from "@/lib/plan-messages";
 
 type CommunityPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -80,7 +81,7 @@ export default async function CommunityPage({ searchParams }: CommunityPageProps
           <PageGate
             state="denied"
             title="Community"
-            deniedMessage="Community is not enabled for this tenant."
+            deniedMessage={notInAcademyMessage("Community")}
           />
         );
       }

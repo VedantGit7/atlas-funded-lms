@@ -2,6 +2,7 @@ import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
 import { HallOfFameView } from "../../../features/community/components/HallOfFameView";
 import { ServerApiError } from "../../../lib/server-api";
 import { loadHallOfFamePageData } from "../../../lib/server/hall-of-fame-projection";
+import { notInAcademyMessage } from "@/lib/plan-messages";
 
 export default async function HallOfFamePage() {
   try {
@@ -30,7 +31,7 @@ export default async function HallOfFamePage() {
           <PageGate
             state="denied"
             title="Hall of Fame"
-            deniedMessage="Community recognition is not enabled for this tenant."
+            deniedMessage={notInAcademyMessage("The Hall of Fame")}
           />
         );
       }

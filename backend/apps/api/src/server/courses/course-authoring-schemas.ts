@@ -108,6 +108,8 @@ export const studioCourseDetailSchema = z.object({
   accessTier: courseAccessTierSchema,
   priceCents: z.number().int().nonnegative().nullable(),
   currency: z.string().length(3).nullable(),
+  /** Who created the course: the "Course creator" when no instructors are named. */
+  createdByMembershipId: z.uuid().nullable().optional(),
   updatedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });

@@ -81,7 +81,7 @@ describe("entitlement before can", () => {
     expect(envelope.status).toBe(403);
     expect(envelope.body.error).toEqual({
       code: "ENTITLEMENT_REQUIRED",
-      message: "This feature is not enabled for this tenant.",
+      message: "This isn't included in your academy's plan.",
       requestId: "req_test",
     });
   });

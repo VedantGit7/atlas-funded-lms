@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Globe, Plus, X } from "lucide-react";
 import { checkboxClassName } from "../../../../features/admin/roles/role-editor-shared";
 import { ClientApiError, clientApi } from "../../../../lib/client-api";
+import { notOnPlanMessage } from "../../../../lib/plan-messages";
 import {
   fieldClassName,
   labelClassName,
@@ -60,7 +61,7 @@ export function AddDomainDialog({ customDomainEntitled }: AddDomainDialogProps) 
 
   async function submitDomain() {
     if (!customDomainEntitled) {
-      setErrorMessage("Custom domains require the branding.custom_domain.enable entitlement.");
+      setErrorMessage(notOnPlanMessage("Custom domains"));
       return;
     }
 
@@ -147,8 +148,8 @@ export function AddDomainDialog({ customDomainEntitled }: AddDomainDialogProps) 
                 <p
                   className={`${statusBannerClassName} border-[var(--admin-warning)]/30 bg-[var(--admin-warning)]/10 text-[var(--admin-warning)]`}
                 >
-                  Custom domains are not enabled for this tenant. Atlas fallback subdomains remain
-                  available without this entitlement.
+                  Custom domains aren&apos;t included in your academy&apos;s plan. Atlas fallback
+                  subdomains remain available without this entitlement.
                 </p>
               ) : (
                 <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">

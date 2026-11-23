@@ -11,6 +11,8 @@ type ShellAccessBlockedScreenProps = Readonly<{
   title: string;
   description: string;
   requestId: string;
+  /** Where to go instead, e.g. back to learning. */
+  action?: { href: string; label: string };
 }>;
 
 function LockIcon() {
@@ -38,6 +40,7 @@ export function ShellAccessBlockedScreen({
   title,
   description,
   requestId,
+  action,
 }: ShellAccessBlockedScreenProps) {
   const { darkMode, toggleDark } = useFbaTheme();
   const academyName = branding.publicName ?? branding.issuerName ?? "Academy";
@@ -105,6 +108,15 @@ export function ShellAccessBlockedScreen({
           >
             {description}
           </p>
+
+          {action ? (
+            <Link
+              href={action.href}
+              className="mb-8 inline-flex items-center justify-center rounded-lg bg-[var(--fba-ind)] px-5 py-2.5 text-sm font-semibold text-white no-underline transition-[filter] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--fba-ind)] focus-visible:ring-offset-2"
+            >
+              {action.label}
+            </Link>
+          ) : null}
 
           <div className="mx-auto mb-8 h-px w-12 bg-[var(--fba-bdr)]" />
 

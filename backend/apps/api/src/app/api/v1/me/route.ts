@@ -11,13 +11,12 @@ import {
   toSafeErrorEnvelope,
   type RouteMetadata,
 } from "@atlas/api";
-import { createTenantResourceRef } from "@atlas/authorization";
+import { createTenantResourceRef, loadMembershipRolesAndStudioAccess } from "@atlas/authorization";
 import { toSessionSafeIdentity } from "@atlas/auth";
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import {
   findMemberProfile,
-  listMembershipRoles,
   meMembershipOutputSchema,
   requireActiveMembership,
 } from "@atlas/membership";
@@ -108,7 +107,7 @@ export async function GET(req: NextRequest) {
               input: undefined,
               handler: async ({ tx, ctx, resource }) => {
                 const loaded = profileProjections.get(resource, tx, ctx);
-                const [profile, roles] = await Promise.all([
+                const [profile, access] = await Promise.all([
                   loaded !== undefined
                     ? loaded
                     : findMemberProfile({
@@ -116,14 +115,21 @@ export async function GET(req: NextRequest) {
                         tenantId: ctx.tenantId,
                         membershipId: ctx.actorMembershipId,
                       }),
-                  listMembershipRoles({
+                  // Roles and Studio access in one statement (QA S1.7): /me is on
+                  // every page load and keeps its round-trip budget.
+                  loadMembershipRolesAndStudioAccess({
                     tx,
                     tenantId: ctx.tenantId,
                     membershipId: ctx.actorMembershipId,
                   }),
                 ]);
 
-                return { membership, profile, roles };
+                return {
+                  membership,
+                  profile,
+                  roles: access.roles,
+                  studioAccess: access.studioAccess,
+                };
               },
             });
             return { ...handled, principal };
@@ -143,6 +149,7 @@ export async function GET(req: NextRequest) {
           id: result.membership.membershipId,
           status: "ACTIVE",
           roleKeys: result.roles.map((role) => role.key),
+          studioAccess: result.studioAccess,
         },
         profile: result.profile
           ? {

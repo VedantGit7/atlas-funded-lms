@@ -22,6 +22,22 @@ export async function archiveManageLearner(tx: TenantTx, ctx: ServiceCtx, member
   });
   assertTargetIsNotOwner(hasOwner);
 
+  // This is the learner archive: admins are managed on the Members page, and
+  // archiving one from here could lock the academy out (QA review 1 M12).
+  const hasAdmin = await membershipHasRoleKey({
+    tx,
+    tenantId: ctx.tenantId,
+    membershipId,
+    roleKey: "admin",
+  });
+  if (hasAdmin) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "Admins can't be archived as learners. Change their role on the Members page first.",
+    });
+  }
+
   await requireMembershipById({
     tx,
     tenantId: ctx.tenantId,

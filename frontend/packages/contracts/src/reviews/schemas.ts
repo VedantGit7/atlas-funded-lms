@@ -24,6 +24,8 @@ export const courseReviewItemSchema = z.object({
   rating: z.number().int().min(1).max(5),
   comment: z.string().nullable(),
   authorName: z.string().nullable(),
+  /** Added by the academy, not a learner (owner decision D8): shown with a label. */
+  addedByAcademy: z.boolean(),
   mine: z.boolean(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),

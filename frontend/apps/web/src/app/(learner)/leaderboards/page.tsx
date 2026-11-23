@@ -2,6 +2,7 @@ import { PageGate, PageHeader } from "../../../components/patterns/PageGate";
 import { LeaderboardTable } from "../../../features/gamification/components/LeaderboardTable";
 import { ServerApiError } from "../../../lib/server-api";
 import { gamificationServerApi } from "@/modules/gamification/gamification.server-api";
+import { notInAcademyMessage } from "@/lib/plan-messages";
 
 type LeaderboardsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -80,7 +81,7 @@ export default async function LeaderboardsPage({ searchParams }: LeaderboardsPag
           <PageGate
             state="denied"
             title="Leaderboards"
-            deniedMessage="Gamification is not enabled for this tenant."
+            deniedMessage={notInAcademyMessage("Leaderboards")}
           />
         );
       }

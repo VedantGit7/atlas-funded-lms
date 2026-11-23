@@ -2,6 +2,7 @@ import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { outbox } from "@atlas/events";
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import { hasStudioAccess } from "@atlas/authorization";
 import {
   courseNotFound,
   courseSlugConflict,
@@ -48,6 +49,7 @@ import {
   type CourseLifecycleStatus,
 } from "./course-state-guards";
 import { canManageCourse, canManageEveryCourse } from "./course-studio-access";
+import { assertNewInstructorsAreStaff } from "./course-instructors";
 
 type ServiceCtx = {
   tenantId: string;
@@ -90,6 +92,7 @@ function mapStudioCourseDetail(course: {
   description: string | null;
   status: string;
   metadataJson: Record<string, unknown> | null;
+  createdByMembershipId: string | null;
   updatedAt: Date;
   createdAt: Date;
 }) {
@@ -112,6 +115,7 @@ function mapStudioCourseDetail(course: {
     accessTier: pricing.accessTier,
     priceCents: pricing.priceCents,
     currency: pricing.currency,
+    createdByMembershipId: course.createdByMembershipId,
     updatedAt: course.updatedAt.toISOString(),
     createdAt: course.createdAt.toISOString(),
   };
@@ -122,6 +126,22 @@ export async function listStudioCourses(
   ctx: ServiceCtx,
   query: StudioCourseListQuery,
 ) {
+  // Studio is for authors (QA review 1 C20): a learner used to get an empty
+  // Studio course list instead of a refusal.
+  if (
+    !(await hasStudioAccess({
+      tx,
+      tenantId: ctx.tenantId,
+      membershipId: ctx.actorMembershipId,
+    }))
+  ) {
+    throw new AtlasHttpError({
+      code: "PERMISSION_DENIED",
+      status: 403,
+      message: "Studio is for instructors and academy staff.",
+    });
+  }
+
   const result = await listStudioCoursesPaginated({
     tx,
     ownerMembershipId: (await canManageEveryCourse(tx, ctx)) ? null : ctx.actorMembershipId,
@@ -158,6 +178,15 @@ export async function createCourseDraft(tx: TenantTx, ctx: ServiceCtx, input: Cr
 
   if (await courseSlugExists({ tx, slug })) {
     throw courseSlugConflict();
+  }
+
+  if (input.tags !== undefined) {
+    await assertNewInstructorsAreStaff({
+      tx,
+      tenantId: ctx.tenantId,
+      nextTags: input.tags,
+      previousTags: null,
+    });
   }
 
   const metadata = buildMetadataPatch({
@@ -235,6 +264,15 @@ export async function updateCourse(
     if (await courseSlugExists({ tx, slug: input.slug, excludeCourseId: courseId })) {
       throw courseSlugConflict();
     }
+  }
+
+  if (input.tags !== undefined) {
+    await assertNewInstructorsAreStaff({
+      tx,
+      tenantId: ctx.tenantId,
+      nextTags: input.tags,
+      previousTags: metadataProjection(course.metadataJson).tags,
+    });
   }
 
   const metadataPatch = buildMetadataPatch({

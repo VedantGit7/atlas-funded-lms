@@ -8,6 +8,7 @@ import {
 } from "../general-settings/general-settings-shared";
 import { analyticsAlertErrorClassName } from "../../analytics/analytics-admin-shared";
 import { PageGate } from "../../../components/patterns/PageGate";
+import { notOnPlanMessage } from "../../../lib/plan-messages";
 import { ClientApiError } from "../../../lib/client-api";
 
 /**
@@ -20,8 +21,17 @@ import { ClientApiError } from "../../../lib/client-api";
  * screens (batches, polls, live sessions, custom fields, messenger, devices)
  * behaved differently from the other 219 for the same underlying condition.
  */
+/** The academy's plan leaves this out: a plan matter, not a permission one (QA review 1 C14). */
+export function isNotOnPlan(error: unknown): boolean {
+  return error instanceof ClientApiError && error.code === "ENTITLEMENT_REQUIRED";
+}
+
 export function isAuthorizationDenied(error: unknown): boolean {
-  return error instanceof ClientApiError && (error.status === 401 || error.status === 403);
+  return (
+    error instanceof ClientApiError &&
+    (error.status === 401 || error.status === 403) &&
+    !isNotOnPlan(error)
+  );
 }
 
 function toErrorMessage(error: unknown, fallback: string): string {
@@ -47,6 +57,10 @@ export function AdminDomainPageShell({
 }: AdminDomainPageShellProps) {
   // A denial replaces the page rather than annotating it: rendering the normal
   // controls under a banner invites the user to retry actions they cannot perform.
+  if (isNotOnPlan(error)) {
+    return <PageGate state="denied" title={title} deniedMessage={notOnPlanMessage(title)} />;
+  }
+
   if (isAuthorizationDenied(error)) {
     return <PageGate state="denied" title={title} />;
   }

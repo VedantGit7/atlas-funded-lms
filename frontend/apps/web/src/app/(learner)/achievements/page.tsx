@@ -10,6 +10,7 @@ import { StreakPanel } from "../../../features/gamification/components/StreakPan
 import { XpLedgerTimeline } from "../../../features/gamification/components/XpLedgerTimeline";
 import { ServerApiError } from "../../../lib/server-api";
 import { gamificationServerApi } from "@/modules/gamification/gamification.server-api";
+import { notInAcademyMessage } from "@/lib/plan-messages";
 
 export default async function AchievementsPage() {
   try {
@@ -118,7 +119,7 @@ export default async function AchievementsPage() {
           <PageGate
             state="denied"
             title="Achievements"
-            deniedMessage="Gamification is not enabled for this tenant."
+            deniedMessage={notInAcademyMessage("Achievements")}
           />
         );
       }

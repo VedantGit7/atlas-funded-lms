@@ -6,6 +6,7 @@ import {
   type ModerationNavigationProjection,
 } from "./moderation-navigation-projection";
 import { ServerApiError, serverApi } from "../server-api";
+import { notOnPlanMessage } from "../plan-messages";
 
 export type ModerationShellMemberProjection = {
   membershipId: string;
@@ -71,7 +72,7 @@ export async function loadModerationShellContext(): Promise<ModerationShellConte
         kind: "entitlement_blocked",
         requestId: gate.tenant.requestId,
         branding,
-        message: "Community moderation requires the community entitlement.",
+        message: notOnPlanMessage("Community moderation"),
       };
     }
 
@@ -126,7 +127,7 @@ export async function loadModerationShellContext(): Promise<ModerationShellConte
         kind: "entitlement_blocked",
         requestId: gate.tenant.requestId,
         branding,
-        message: "Community moderation requires the community entitlement.",
+        message: notOnPlanMessage("Community moderation"),
       };
     }
 

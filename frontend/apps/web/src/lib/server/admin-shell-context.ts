@@ -43,6 +43,9 @@ export type AdminShellContext =
       reason: string;
     };
 
+export const ADMIN_NO_ACCESS_MESSAGE =
+  "The admin area is for academy owners and administrators. If you need it, ask your academy's owner.";
+
 export async function loadAdminShellContext(): Promise<AdminShellContext> {
   let gate;
   try {
@@ -91,16 +94,8 @@ export async function loadAdminShellContext(): Promise<AdminShellContext> {
       me = await serverApi.get("/api/v1/me");
     }
 
-    if (!me.data.identity.mfaEnabled) {
-      return {
-        kind: "session_assurance_blocked",
-        requestId: gate.tenant.requestId,
-        branding,
-        message:
-          "Admin console access requires multi-factor authentication on your account. Enable MFA and sign in again.",
-      };
-    }
-
+    // Role first, then MFA: a learner was told to set up MFA, as if that would
+    // open the admin area (QA review 1 M39).
     const roleKeys = me.data.membership.roleKeys;
     const isTenantAdmin = roleKeys.includes("owner") || roleKeys.includes("admin");
     if (!isTenantAdmin) {
@@ -109,8 +104,17 @@ export async function loadAdminShellContext(): Promise<AdminShellContext> {
         requestId: gate.tenant.requestId,
         branding,
         reason: "forbidden",
+        message: ADMIN_NO_ACCESS_MESSAGE,
+      };
+    }
+
+    if (!me.data.identity.mfaEnabled) {
+      return {
+        kind: "session_assurance_blocked",
+        requestId: gate.tenant.requestId,
+        branding,
         message:
-          "You do not have tenant admin membership for this academy. Contact your academy administrator for access.",
+          "Admin console access requires multi-factor authentication on your account. Enable MFA and sign in again.",
       };
     }
 

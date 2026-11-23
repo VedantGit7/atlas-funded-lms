@@ -3,6 +3,7 @@ import { AdminPageGate } from "../../../components/patterns/AdminPageGate";
 import { AnalyticsDashboard } from "../../../features/analytics/components/analytics-dashboard";
 import type { assessmentListResponseSchema } from "../../../features/assessments/assessment-response-schemas";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
+import { notOnPlanMessage } from "@/lib/plan-messages";
 
 type AssessmentListResponse = z.infer<typeof assessmentListResponseSchema>;
 
@@ -42,7 +43,7 @@ export default async function AdminAnalyticsPage() {
           screenId="T21"
           state="denied"
           title="Analytics"
-          deniedMessage="Advanced analytics requires the analytics.dashboard.view entitlement."
+          deniedMessage={notOnPlanMessage("Advanced analytics")}
         />
       );
     }

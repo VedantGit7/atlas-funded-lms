@@ -13,6 +13,8 @@ export type CourseReviewRecord = {
   comment: string | null;
   authorName: string | null;
   membershipId: string;
+  /** The academy's own review (D8): shown labelled, not counted in the average. */
+  addedByAcademy: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -23,6 +25,7 @@ function mapRow(row: {
   comment: string | null;
   author_name: string | null;
   membership_id: string;
+  added_by_academy: boolean;
   created_at: Date;
   updated_at: Date;
 }): CourseReviewRecord {
@@ -32,6 +35,7 @@ function mapRow(row: {
     comment: row.comment,
     authorName: row.author_name,
     membershipId: row.membership_id,
+    addedByAcademy: row.added_by_academy,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -68,6 +72,7 @@ export async function upsertCourseReview(args: {
       rating = excluded.rating,
       comment = excluded.comment,
       status = 'PENDING',
+      added_by_academy = false,
       updated_at = now()
     returning id::text, created_at, updated_at, (xmax = 0) as created
   `;
@@ -93,6 +98,7 @@ export async function findMyCourseReview(args: {
       comment: string | null;
       author_name: string | null;
       membership_id: string;
+      added_by_academy: boolean;
       created_at: Date;
       updated_at: Date;
     }>
@@ -103,6 +109,7 @@ export async function findMyCourseReview(args: {
       cr.comment,
       mp.display_name as author_name,
       cr.membership_id::text,
+      cr.added_by_academy,
       cr.created_at,
       cr.updated_at
     from course_reviews cr
@@ -129,6 +136,7 @@ export async function getCourseReviewAggregate(args: {
     from course_reviews cr
     where cr.course_id = ${args.courseId}::uuid
       and coalesce(cr.status, 'APPROVED') = 'APPROVED'
+      and not cr.added_by_academy
   `;
 
   const row = rows[0];
@@ -156,6 +164,7 @@ export async function listCourseReviews(args: {
       comment: string | null;
       author_name: string | null;
       membership_id: string;
+      added_by_academy: boolean;
       created_at: Date;
       updated_at: Date;
     }>
@@ -166,6 +175,7 @@ export async function listCourseReviews(args: {
       cr.comment,
       mp.display_name as author_name,
       cr.membership_id::text,
+      cr.added_by_academy,
       cr.created_at,
       cr.updated_at
     from course_reviews cr

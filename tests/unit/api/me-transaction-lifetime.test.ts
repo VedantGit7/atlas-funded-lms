@@ -49,7 +49,13 @@ vi.mock("@atlas/membership", async () => ({
   findMemberProfile: mocks.profile,
   listMembershipRoles: mocks.roles,
 }));
-vi.mock("@atlas/authorization", () => ({ createTenantResourceRef: (value: unknown) => value }));
+vi.mock("@atlas/authorization", () => ({
+  createTenantResourceRef: (value: unknown) => value,
+  loadMembershipRolesAndStudioAccess: async () => ({
+    roles: (await mocks.roles()) as Array<{ key: string }>,
+    studioAccess: false,
+  }),
+}));
 vi.mock("@atlas/api", async () => ({
   toSafeErrorEnvelope: (await import("@atlas/core/http/errors")).toSafeErrorEnvelope,
   runProtectedTenantRouteHandler: mocks.protected,
@@ -165,7 +171,12 @@ describe("identity route transaction lifetime", () => {
           mfaEnabled: true,
           globalStatus: "active",
         },
-        membership: { id: "membership", status: "ACTIVE", roleKeys: ["learner"] },
+        membership: {
+          id: "membership",
+          status: "ACTIVE",
+          roleKeys: ["learner"],
+          studioAccess: false,
+        },
         profile: { id: "profile", displayName: "Learner", avatarUrl: null },
       },
     });

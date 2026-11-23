@@ -44,6 +44,6 @@ export function privateSpacesEntitlementRequired(): AtlasHttpError {
   return new AtlasHttpError({
     code: "PERMISSION_DENIED",
     status: 403,
-    message: "Private community spaces are not enabled for this tenant.",
+    message: "Private community spaces aren't included in your academy's plan.",
   });
 }

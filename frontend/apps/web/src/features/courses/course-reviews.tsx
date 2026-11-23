@@ -9,6 +9,8 @@ type ReviewItem = {
   rating: number;
   comment: string | null;
   authorName: string | null;
+  /** The academy's own review (owner decision D8), shown with a label. */
+  addedByAcademy?: boolean;
   mine: boolean;
   createdAt: string;
   updatedAt: string;
@@ -211,7 +213,9 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
           {state && state.items.length > 0 ? (
             <ul className="space-y-3">
               {state.items.map((review) => {
-                const name = review.authorName?.trim() || "Learner";
+                const name = review.addedByAcademy
+                  ? "The academy"
+                  : review.authorName?.trim() || "Learner";
                 return (
                   <li key={review.id} className="rounded-2xl border border-border bg-card p-5">
                     <div className="flex items-center gap-3">
@@ -227,6 +231,11 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
                           {review.mine ? (
                             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
                               You
+                            </span>
+                          ) : null}
+                          {review.addedByAcademy ? (
+                            <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                              Added by the academy
                             </span>
                           ) : null}
                         </div>

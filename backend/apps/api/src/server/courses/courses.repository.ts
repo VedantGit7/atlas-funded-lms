@@ -198,11 +198,15 @@ async function queryPublishedCourses(args: {
           select round(avg(cr.rating)::numeric, 2)::float8
           from course_reviews cr
           where cr.course_id = c.id
+            and coalesce(cr.status, 'APPROVED') = 'APPROVED'
+            and not cr.added_by_academy
         ) as rating_average,
         (
           select count(*)::bigint
           from course_reviews cr
           where cr.course_id = c.id
+            and coalesce(cr.status, 'APPROVED') = 'APPROVED'
+            and not cr.added_by_academy
         ) as rating_count
       from courses c
       left join enrollments e
@@ -273,11 +277,15 @@ async function queryPublishedCourses(args: {
           select round(avg(cr.rating)::numeric, 2)::float8
           from course_reviews cr
           where cr.course_id = c.id
+            and coalesce(cr.status, 'APPROVED') = 'APPROVED'
+            and not cr.added_by_academy
         ) as rating_average,
         (
           select count(*)::bigint
           from course_reviews cr
           where cr.course_id = c.id
+            and coalesce(cr.status, 'APPROVED') = 'APPROVED'
+            and not cr.added_by_academy
         ) as rating_count
       from courses c
       left join enrollments e
@@ -347,11 +355,15 @@ async function queryPublishedCourses(args: {
         select round(avg(cr.rating)::numeric, 2)::float8
         from course_reviews cr
         where cr.course_id = c.id
+          and coalesce(cr.status, 'APPROVED') = 'APPROVED'
+          and not cr.added_by_academy
       ) as rating_average,
       (
         select count(*)::bigint
         from course_reviews cr
         where cr.course_id = c.id
+          and coalesce(cr.status, 'APPROVED') = 'APPROVED'
+          and not cr.added_by_academy
       ) as rating_count
     from courses c
     left join enrollments e

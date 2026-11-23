@@ -1328,6 +1328,7 @@ export const CourseReviewScalarFieldEnum = {
   comment: 'comment',
   status: 'status',
   admin_note: 'admin_note',
+  added_by_academy: 'added_by_academy',
   created_at: 'created_at',
   updated_at: 'updated_at'
 } as const

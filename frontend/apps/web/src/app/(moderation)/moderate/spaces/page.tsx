@@ -6,6 +6,7 @@ import { ServerApiError, serverApi } from "../../../../lib/server-api";
 import { resolveModerationSpaceVisibilityOptions } from "../../../../lib/server/moderation-navigation-projection";
 import { communityServerApi } from "@/modules/community/community.server-api";
 import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements";
+import { notOnPlanMessage } from "@/lib/plan-messages";
 
 export default async function ModerateSpacesPage() {
   try {
@@ -23,7 +24,7 @@ export default async function ModerateSpacesPage() {
         <PageGate
           state="denied"
           title="Community spaces"
-          deniedMessage="Community moderation requires the community entitlement."
+          deniedMessage={notOnPlanMessage("Community moderation")}
         />
       );
     }
@@ -48,22 +49,22 @@ export default async function ModerateSpacesPage() {
       </PageGate>
     );
   } catch (error) {
+    if (error instanceof ServerApiError && error.code === "ENTITLEMENT_REQUIRED") {
+      return (
+        <PageGate
+          state="denied"
+          title="Community spaces"
+          deniedMessage={notOnPlanMessage("Community moderation")}
+        />
+      );
+    }
+
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
         <PageGate
           state="denied"
           title="Community spaces"
           deniedMessage="You do not have permission to manage community spaces."
-        />
-      );
-    }
-
-    if (error instanceof ServerApiError && error.code === "ENTITLEMENT_REQUIRED") {
-      return (
-        <PageGate
-          state="denied"
-          title="Community spaces"
-          deniedMessage="Community moderation requires the community entitlement."
         />
       );
     }

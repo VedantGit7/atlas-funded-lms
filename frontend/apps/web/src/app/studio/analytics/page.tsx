@@ -4,6 +4,7 @@ import { PageGate } from "../../../components/patterns/PageGate";
 import { StudioAnalyticsClient } from "../../../features/analytics/studio-analytics-client";
 import type { assessmentListResponseSchema } from "../../../features/assessments/assessment-response-schemas";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
+import { notOnPlanMessage } from "@/lib/plan-messages";
 
 type CourseOption = { id: string; title: string };
 type AssessmentOption = { id: string; title: string };
@@ -41,7 +42,7 @@ export default async function StudioAnalyticsPage() {
         <PageGate
           state="denied"
           title="Studio Analytics"
-          deniedMessage="Advanced analytics requires the analytics.dashboard.view entitlement."
+          deniedMessage={notOnPlanMessage("Advanced analytics")}
         />
       );
     }
@@ -73,7 +74,7 @@ export default async function StudioAnalyticsPage() {
         <PageGate
           state="denied"
           title="Studio Analytics"
-          deniedMessage="Advanced analytics requires the analytics.dashboard.view entitlement."
+          deniedMessage={notOnPlanMessage("Advanced analytics")}
         />
       );
     }

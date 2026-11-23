@@ -141,15 +141,14 @@ export function RolesTable({ roles }: RolesTableProps) {
                         Edit
                       </Link>
                       {deleteLocked ? (
-                        <button
-                          type="button"
-                          disabled
-                          title="System roles cannot be deleted"
-                          className="inline-flex cursor-not-allowed items-center gap-1 text-sm font-semibold text-[var(--admin-danger)] opacity-40"
+                        // Built-in roles can't be deleted, so no Delete is offered (QA review 1 M11).
+                        <span
+                          title="Built-in roles can't be deleted"
+                          className="inline-flex items-center gap-1 text-xs font-medium text-[var(--admin-on-surface-variant)]"
                         >
                           <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                          Delete
-                        </button>
+                          Built-in
+                        </span>
                       ) : (
                         <button
                           type="button"

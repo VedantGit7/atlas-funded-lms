@@ -30,6 +30,8 @@ export const meMembershipOutputSchema = z.object({
       id: z.string(),
       status: z.literal("ACTIVE"),
       roleKeys: z.array(z.string()),
+      /** Whether this member may use Studio: holds a course, question, assessment or grading permission (QA S1.7). */
+      studioAccess: z.boolean(),
     }),
     profile: z
       .object({

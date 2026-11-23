@@ -26,7 +26,8 @@ export function toSafeErrorEnvelope(
       body: {
         error: {
           code: error.code,
-          message: "This feature is not enabled for this tenant.",
+          // QA review 1 C14: a plan limit, not a permission ("no access").
+          message: "This isn't included in your academy's plan.",
           requestId,
         },
       },

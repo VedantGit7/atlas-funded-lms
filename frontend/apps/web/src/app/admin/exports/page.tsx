@@ -2,6 +2,7 @@ import { AdminPageGate } from "../../../components/patterns/AdminPageGate";
 import { ExportJobsPanel } from "../../../features/data-rights/components/export-jobs-panel";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type { ExportJobItem } from "../../../features/data-rights/api";
+import { notOnPlanMessage } from "@/lib/plan-messages";
 
 export default async function AdminExportsPage() {
   try {
@@ -27,7 +28,7 @@ export default async function AdminExportsPage() {
           screenId="T23"
           state="denied"
           title="Data Exports"
-          deniedMessage="Data export requires the data.export.enable entitlement."
+          deniedMessage={notOnPlanMessage("Data export")}
         />
       );
     }
