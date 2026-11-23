@@ -1,6 +1,7 @@
 import { outbox } from "@atlas/events";
 import type { TenantTx } from "@atlas/db";
 import { resolveAuthorizedSearchResult } from "./search-access-resolver";
+import { getRegisteredSearchSourceAdapters } from "./search-source-registry";
 import { searchListResponseSchema, searchQuerySchema, SEARCH_SOURCE_TYPES } from "./search.dto";
 import {
   SEARCH_REINDEX_REQUESTED_EVENT,
@@ -19,6 +20,13 @@ export async function querySearch(tx: TenantTx, ctx: ServiceCtx, rawQuery: unkno
 
   if (query.q && query.q.length > 0 && query.q.length < 2) {
     throw invalidSearchQuery("Query must be at least 2 characters.");
+  }
+
+  // Every result is checked by its source (course, post, certificate). With no
+  // sources loaded every result was dropped and search silently returned
+  // nothing (QA review 1 C9); fail loudly instead.
+  if (getRegisteredSearchSourceAdapters().length === 0) {
+    throw new Error("SEARCH_SOURCES_NOT_REGISTERED");
   }
 
   if (!query.q) {
