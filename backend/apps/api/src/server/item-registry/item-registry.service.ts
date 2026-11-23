@@ -9,6 +9,7 @@ import {
 } from "./item-definition.contract";
 import type {
   AddCollectionItemInput,
+  AddCollectionItemsInput,
   BulkDeleteItemsInput,
   BulkItemStatusInput,
   CreateItemCollectionInput,
@@ -715,11 +716,14 @@ export const itemRegistryService = {
     }
 
     try {
+      const position =
+        input.position ??
+        (await itemRegistryRepository.maxCollectionPosition(tx, collectionId)) + 1;
       const row = await itemRegistryRepository.addItemToCollection(tx, {
         tenantId: ctx.tenantId,
         collectionId,
         itemId: input.itemId,
-        position: input.position,
+        position,
         ...(input.weight !== undefined ? { weight: input.weight } : {}),
       });
 
@@ -751,6 +755,76 @@ export const itemRegistryService = {
 
       throw error;
     }
+  },
+
+  /**
+   * Adds many questions at the end of a collection, in the order sent (QA
+   * review 1 C8: the picker adds in bulk). Questions already in the
+   * collection, repeated in the request, or no longer in the bank are skipped.
+   */
+  async addItemsToCollection(
+    tx: TenantTx,
+    ctx: ServiceCtx,
+    collectionId: string,
+    input: AddCollectionItemsInput,
+  ) {
+    const collection = await itemRegistryRepository.findCollectionById(tx, collectionId);
+    if (!collection) {
+      throw itemCollectionNotFound();
+    }
+
+    const present = new Set(
+      (await itemRegistryRepository.listCollectionItems(tx, collectionId)).map(
+        (row) => row.item_id,
+      ),
+    );
+    const requested = [...new Set(input.itemIds)];
+    const existing = await itemRegistryRepository.listCollectionItemSummaries(tx, requested);
+    const toAdd = requested.filter((id) => !present.has(id) && existing.has(id));
+
+    let position = await itemRegistryRepository.maxCollectionPosition(tx, collectionId);
+    const added = [];
+    for (const itemId of toAdd) {
+      position += 1;
+      let row;
+      try {
+        row = await itemRegistryRepository.addItemToCollection(tx, {
+          tenantId: ctx.tenantId,
+          collectionId,
+          itemId,
+          position,
+        });
+      } catch (error) {
+        // Someone else added to this collection at the same moment.
+        if (isUniqueViolation(error)) {
+          throw collectionItemConflict("This collection changed while adding. Try again.");
+        }
+        throw error;
+      }
+      added.push({
+        id: row.id,
+        collectionId: row.collection_id,
+        itemId: row.item_id,
+        position: row.position,
+        weight: row.weight?.toString() ?? null,
+        item: existing.get(itemId) ?? null,
+      });
+    }
+
+    if (added.length > 0) {
+      await auditWriter.write(tx, auditActor(ctx), {
+        action: "item_collection.item_added",
+        target: { type: "item_collection", id: collectionId },
+        before: null,
+        after: {
+          itemIds: added.map((entry) => entry.itemId),
+          positions: added.map((entry) => entry.position),
+        },
+        metadata: { bulk: true, skipped: input.itemIds.length - added.length },
+      });
+    }
+
+    return { data: { added, skipped: input.itemIds.length - added.length } };
   },
 
   async removeItemFromCollection(
@@ -801,6 +875,10 @@ export const itemRegistryService = {
     }
 
     const rows = await itemRegistryRepository.listCollectionItems(tx, collectionId);
+    const summaries = await itemRegistryRepository.listCollectionItemSummaries(
+      tx,
+      rows.map((row) => row.item_id),
+    );
 
     return {
       data: rows.map((row) => ({
@@ -809,6 +887,7 @@ export const itemRegistryService = {
         itemId: row.item_id,
         position: row.position,
         weight: row.weight?.toString() ?? null,
+        item: summaries.get(row.item_id) ?? null,
       })),
     };
   },

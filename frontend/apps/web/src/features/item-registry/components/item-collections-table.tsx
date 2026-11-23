@@ -6,8 +6,11 @@ import {
   AlertCircle,
   ClipboardList,
   Dumbbell,
+  Eye,
+  EyeOff,
   FolderOpen,
   Inbox,
+  Info,
   Layers,
   LayoutPanelLeft,
   Link2,
@@ -17,6 +20,8 @@ import {
   X,
 } from "lucide-react";
 import { primaryButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
+import { createClientUuid } from "../../../lib/client-api";
+import { QuestionPickerDialog, questionTypeName } from "./question-picker-dialog";
 import {
   STATUS_CONFIG,
   STATUS_LABELS,
@@ -27,14 +32,22 @@ import {
   labelClass,
   panelClassName,
   panelScrollClassName,
+  secondaryButtonClassName,
   sectionHeaderClassName,
 } from "../../learning-paths/learning-path-studio-shared";
 import {
   formatItemRegistryApiError,
   itemRegistryApi,
+  type CollectionItemEntry,
   type ItemCollectionDto,
   type ItemDto,
 } from "../api";
+
+/**
+ * The question types Practice shows from a deck (practice.repository.ts);
+ * other types in a deck are kept but never reach learners there.
+ */
+export const PRACTICE_ITEM_TYPES = new Set(["swipe", "matching", "mcq_single", "true_false"]);
 
 const COLLECTION_TYPE_CONFIG = {
   deck: {
@@ -105,10 +118,6 @@ function itemTypeBadgeClassName(itemTypeKey: string): string {
   );
 }
 
-function formatItemTypeLabel(itemTypeKey: string): string {
-  return itemTypeKey.replaceAll("_", " ");
-}
-
 function collectionTypeSegmentButtonClassName(isSelected: boolean): string {
   if (isSelected) {
     return `${typeSegmentButtonBase} bg-[var(--admin-surface)] text-[var(--admin-primary)] shadow-sm`;
@@ -118,12 +127,10 @@ function collectionTypeSegmentButtonClassName(isSelected: boolean): string {
 
 type ItemCollectionsTableProps = {
   collections: ItemCollectionDto[];
-  items: ItemDto[];
 };
 
 export function ItemCollectionsTable({
   collections: initialCollections,
-  items,
 }: ItemCollectionsTableProps) {
   const [collections, setCollections] = useState(initialCollections);
   const [error, setError] = useState<string | null>(null);
@@ -134,16 +141,15 @@ export function ItemCollectionsTable({
     "deck",
   );
   const [selectedCollectionId, setSelectedCollectionId] = useState(initialCollections[0]?.id ?? "");
-  const [selectedItemId, setSelectedItemId] = useState(items[0]?.id ?? "");
-  const [position, setPosition] = useState(1);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editSlug, setEditSlug] = useState("");
   const [editType, setEditType] = useState<"deck" | "quiz_bank" | "practice_set">("deck");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const [collectionItems, setCollectionItems] = useState<
-    Array<{ id: string; itemId: string; position: number }>
-  >([]);
+  const [collectionItems, setCollectionItems] = useState<CollectionItemEntry[]>([]);
   const [itemsLoading, setItemsLoading] = useState(false);
 
   useEffect(() => {
@@ -159,13 +165,7 @@ export function ItemCollectionsTable({
       .listCollectionItems(selectedCollectionId)
       .then((response) => {
         if (!cancelled) {
-          setCollectionItems(
-            response.data.map((entry) => ({
-              id: entry.id,
-              itemId: entry.itemId,
-              position: entry.position,
-            })),
-          );
+          setCollectionItems(response.data);
         }
       })
       .catch((err: unknown) => {
@@ -224,31 +224,98 @@ export function ItemCollectionsTable({
     }
   }
 
-  async function onAddItem() {
-    if (!selectedCollectionId || !selectedItemId) return;
+  /** Adds the picked questions at the end of the collection (QA review 1 C8). */
+  async function onAddItems(picked: ItemDto[]) {
+    if (!selectedCollectionId || picked.length === 0) return;
 
     setPending(true);
-    setError(null);
+    setPickerError(null);
+    setNotice(null);
 
     try {
-      await itemRegistryApi.addItemToCollection(selectedCollectionId, {
-        itemId: selectedItemId,
-        position,
-      });
+      const response = await itemRegistryApi.addItemsToCollection(
+        selectedCollectionId,
+        picked.map((item) => item.id),
+      );
+      const added = response.data.added.length;
+      setCollectionItems((current) => [...current, ...response.data.added]);
       setCollections((current) =>
         current.map((collection) =>
           collection.id === selectedCollectionId
-            ? { ...collection, itemCount: (collection.itemCount ?? 0) + 1 }
+            ? { ...collection, itemCount: (collection.itemCount ?? 0) + added }
             : collection,
         ),
       );
+      setPickerOpen(false);
+      setNotice(
+        `Added ${String(added)} question${added === 1 ? "" : "s"}.` +
+          (response.data.skipped > 0
+            ? ` ${String(response.data.skipped)} ${response.data.skipped === 1 ? "was" : "were"} already in this collection.`
+            : ""),
+      );
+    } catch (err) {
+      setPickerError(formatItemRegistryApiError(err));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  /**
+   * Publishes the draft questions in the collection (QA review 1 M51: a draft
+   * question in a deck never reaches learners, with no hint why).
+   */
+  async function onPublishDrafts(itemIds: string[]) {
+    if (itemIds.length === 0) return;
+    setPending(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const response = await itemRegistryApi.bulkSetItemStatus(
+        { status: "PUBLISHED", itemIds },
+        createClientUuid(),
+      );
       const refreshed = await itemRegistryApi.listCollectionItems(selectedCollectionId);
-      setCollectionItems(
-        refreshed.data.map((entry) => ({
-          id: entry.id,
-          itemId: entry.itemId,
-          position: entry.position,
-        })),
+      setCollectionItems(refreshed.data);
+      const { updated, skipped } = response.data;
+      setNotice(
+        `Published ${String(updated)} question${updated === 1 ? "" : "s"}.` +
+          (skipped > 0
+            ? ` ${String(skipped)} belong${skipped === 1 ? "s" : ""} to another author and ${skipped === 1 ? "is" : "are"} still a draft.`
+            : ""),
+      );
+    } catch (err) {
+      setError(formatItemRegistryApiError(err));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  /** Publishes or unpublishes the collection (QA review 1 M51: there was no control). */
+  async function onSetCollectionStatus(collectionId: string, status: "PUBLISHED" | "DRAFT") {
+    setPending(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const response = await itemRegistryApi.updateItemCollection(
+        collectionId,
+        { status },
+        // The page says what publishing does for learners.
+        { silent: true },
+      );
+      setCollections((current) =>
+        current.map((collection) =>
+          collection.id === collectionId ? { ...collection, ...response.data } : collection,
+        ),
+      );
+      const isDeck = response.data.collectionType === "deck";
+      setNotice(
+        status === "PUBLISHED"
+          ? isDeck
+            ? "Published. Learners now see this deck in Practice."
+            : "Published."
+          : isDeck
+            ? "Unpublished. Learners no longer see this deck in Practice."
+            : "Unpublished.",
       );
     } catch (err) {
       setError(formatItemRegistryApiError(err));
@@ -324,6 +391,15 @@ export function ItemCollectionsTable({
         </div>
       )}
 
+      {notice ? (
+        <p
+          role="status"
+          className="shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--admin-success)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-success)_10%,var(--admin-surface))] px-3 py-2.5 text-sm text-[var(--admin-on-surface)]"
+        >
+          {notice}
+        </p>
+      ) : null}
+
       <div className="grid min-h-0 min-w-0 flex-1 gap-4 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
         <div className={`${collectionsPanelClassName} min-w-0`}>
           <div className={sectionHeaderClassName}>
@@ -386,6 +462,11 @@ export function ItemCollectionsTable({
                         <span className={`${badgeClassName} ${typeCfg.className}`}>
                           <TypeIcon className="h-3 w-3" aria-hidden="true" />
                           {typeCfg.label}
+                        </span>
+                        <span
+                          className={`${badgeClassName} ${STATUS_CONFIG[collection.status] ?? ""}`}
+                        >
+                          {STATUS_LABELS[collection.status] ?? collection.status}
                         </span>
                         <span className="inline-flex items-center gap-1 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                           <Link2 className="h-2.5 w-2.5 shrink-0 opacity-60" aria-hidden="true" />
@@ -494,15 +575,15 @@ export function ItemCollectionsTable({
                     Build your first collection
                   </p>
                   <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                    Group reusable items into decks, quiz banks, or practice sets — then wire them
-                    into assessments.
+                    Group questions into decks, practice sets or quiz banks. A published deck shows
+                    to learners in Practice.
                   </p>
                 </div>
                 <ol className="w-full max-w-xs space-y-2.5 text-left text-sm">
                   {[
                     { step: "1", text: "Name and type your collection on the left" },
-                    { step: "2", text: "Add items from your item bank" },
-                    { step: "3", text: "Use the collection in quizzes and courses" },
+                    { step: "2", text: "Add questions from your Item Bank" },
+                    { step: "3", text: "Publish it so learners see it in Practice" },
                   ].map(({ step, text }) => (
                     <li
                       key={step}
@@ -579,17 +660,53 @@ export function ItemCollectionsTable({
                         </button>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPendingDeleteId(selected.id);
-                      }}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-destructive/10 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40"
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden="true" />
-                      Delete
-                    </button>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      {selected.status === "PUBLISHED" ? (
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => {
+                            void onSetCollectionStatus(selected.id, "DRAFT");
+                          }}
+                          className={secondaryButtonClassName}
+                        >
+                          <EyeOff className="h-4 w-4" aria-hidden="true" />
+                          Unpublish
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={pending || collectionItems.length === 0}
+                          title={collectionItems.length === 0 ? "Add questions first" : undefined}
+                          onClick={() => {
+                            void onSetCollectionStatus(selected.id, "PUBLISHED");
+                          }}
+                          className={primaryButtonClassName}
+                        >
+                          <Eye className="h-4 w-4" aria-hidden="true" />
+                          Publish
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPendingDeleteId(selected.id);
+                        }}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-destructive/10 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40"
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                        Delete
+                      </button>
+                    </div>
                   </div>
+                  <CollectionNotices
+                    collectionType={selected.collectionType}
+                    entries={collectionItems}
+                    pending={pending}
+                    onPublishDrafts={(ids) => {
+                      void onPublishDrafts(ids);
+                    }}
+                  />
 
                   <div className={sectionHeaderClassName}>
                     <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
@@ -623,7 +740,7 @@ export function ItemCollectionsTable({
                             No items in this collection
                           </p>
                           <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
-                            Add items from your bank using the form below
+                            Use &ldquo;Add questions&rdquo; below to pick them from your Item Bank.
                           </p>
                         </div>
                       </div>
@@ -646,14 +763,10 @@ export function ItemCollectionsTable({
                           </thead>
                           <tbody className="divide-y divide-[var(--admin-border)]">
                             {collectionItems.map((entry) => {
-                              const itemData = items.find((it) => it.id === entry.itemId);
-                              const stemValue = itemData
-                                ? (itemData.contentJson as { stem?: unknown }).stem
-                                : null;
-                              const stem =
-                                typeof stemValue === "string"
-                                  ? stemValue
-                                  : entry.itemId.slice(0, 8);
+                              const itemData = entry.item ?? null;
+                              const stem = itemData
+                                ? (itemData.stem ?? "Question with no text")
+                                : "Removed from the Item Bank";
                               const typeKey = itemData?.itemTypeKey ?? "";
                               return (
                                 <tr
@@ -667,13 +780,20 @@ export function ItemCollectionsTable({
                                     <p className="truncate text-[var(--admin-on-surface)]">
                                       {stem}
                                     </p>
+                                    {itemData && itemData.status !== "PUBLISHED" ? (
+                                      <span
+                                        className={`${badgeClassName} mt-1 ${STATUS_CONFIG[itemData.status] ?? ""}`}
+                                      >
+                                        {STATUS_LABELS[itemData.status] ?? itemData.status}
+                                      </span>
+                                    ) : null}
                                   </td>
                                   <td className="px-3 py-3">
                                     {itemData ? (
                                       <span
                                         className={`${badgeClassName} ${itemTypeBadgeClassName(typeKey)}`}
                                       >
-                                        {formatItemTypeLabel(typeKey)}
+                                        {questionTypeName(typeKey)}
                                       </span>
                                     ) : null}
                                   </td>
@@ -704,69 +824,22 @@ export function ItemCollectionsTable({
 
                   <div className={insetFormShellClassName}>
                     <div className={insetFormInnerClassName}>
-                      <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-[var(--admin-on-surface-variant)]">
-                        Add item
-                      </p>
-                      <div className="flex flex-wrap items-end gap-3">
-                        <div className="min-w-[180px] flex-1">
-                          <label className={labelClass} htmlFor="collection-add-item">
-                            Item
-                          </label>
-                          <select
-                            id="collection-add-item"
-                            value={selectedItemId}
-                            onChange={(e) => {
-                              setSelectedItemId(e.target.value);
-                            }}
-                            className={inputClass}
-                            disabled={items.length === 0}
-                          >
-                            {items.length === 0 ? (
-                              <option value="">No items in bank — create items first</option>
-                            ) : (
-                              items.map((item) => {
-                                const s = (item.contentJson as { stem?: unknown }).stem;
-                                const label =
-                                  typeof s === "string" && s ? s.slice(0, 50) : item.id.slice(0, 8);
-                                return (
-                                  <option key={item.id} value={item.id}>
-                                    {label}
-                                  </option>
-                                );
-                              })
-                            )}
-                          </select>
-                        </div>
-                        <div className="w-20">
-                          <label className={labelClass} htmlFor="collection-add-position">
-                            Position
-                          </label>
-                          <input
-                            id="collection-add-position"
-                            type="number"
-                            min={1}
-                            value={position}
-                            onChange={(e) => {
-                              setPosition(Number(e.target.value));
-                            }}
-                            className={inputClass}
-                          />
-                        </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-xs text-[var(--admin-on-surface-variant)]">
+                          Search the whole Item Bank and add several questions at once. New
+                          questions go to the end.
+                        </p>
                         <button
                           type="button"
-                          disabled={
-                            pending ||
-                            !selectedCollectionId ||
-                            !selectedItemId ||
-                            items.length === 0
-                          }
+                          disabled={pending || !selectedCollectionId}
                           onClick={() => {
-                            void onAddItem();
+                            setPickerError(null);
+                            setPickerOpen(true);
                           }}
                           className={primaryButtonClassName}
                         >
                           <PlusCircle className="h-4 w-4" aria-hidden="true" />
-                          Add
+                          Add questions
                         </button>
                       </div>
                     </div>
@@ -777,6 +850,25 @@ export function ItemCollectionsTable({
           )}
         </div>
       </div>
+
+      <QuestionPickerDialog
+        open={pickerOpen}
+        title="Add questions to this collection"
+        addedIds={new Set(collectionItems.map((entry) => entry.itemId))}
+        busy={pending}
+        error={pickerError}
+        note={
+          collections.find((c) => c.id === selectedCollectionId)?.collectionType === "deck"
+            ? "Practice shows true/false, single-choice, matching and swipe questions from a deck, once they are published."
+            : null
+        }
+        onCancel={() => {
+          setPickerOpen(false);
+        }}
+        onConfirm={(picked) => {
+          void onAddItems(picked);
+        }}
+      />
 
       {editingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
@@ -930,6 +1022,68 @@ export function ItemCollectionsTable({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * What keeps questions in this collection from learners: drafts (with a
+ * button to publish them) and, in a deck, types Practice doesn't show
+ * (QA review 1 M41, M51).
+ */
+export function CollectionNotices({
+  collectionType,
+  entries,
+  pending,
+  onPublishDrafts,
+}: {
+  collectionType: string;
+  entries: CollectionItemEntry[];
+  pending: boolean;
+  onPublishDrafts: (itemIds: string[]) => void;
+}) {
+  const drafts = entries.filter((entry) => entry.item && entry.item.status !== "PUBLISHED");
+  const unsupported =
+    collectionType === "deck"
+      ? entries.filter((entry) => entry.item && !PRACTICE_ITEM_TYPES.has(entry.item.itemTypeKey))
+      : [];
+  if (drafts.length === 0 && unsupported.length === 0) return null;
+
+  return (
+    <div className="shrink-0 space-y-2 border-b border-[var(--admin-border)] px-5 py-3">
+      {drafts.length > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--admin-on-surface)]">
+          <p className="flex items-start gap-2">
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-warning)]"
+              aria-hidden="true"
+            />
+            {drafts.length === 1 ? "1 question is" : `${String(drafts.length)} questions are`} not
+            published. Learners only see published questions.
+          </p>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => {
+              onPublishDrafts(drafts.map((entry) => entry.itemId));
+            }}
+            className={secondaryButtonClassName}
+          >
+            Publish {drafts.length === 1 ? "it" : `these ${String(drafts.length)}`}
+          </button>
+        </div>
+      ) : null}
+      {unsupported.length > 0 ? (
+        <p className="flex items-start gap-2 text-sm text-[var(--admin-on-surface)]">
+          <Info
+            className="mt-0.5 h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"
+            aria-hidden="true"
+          />
+          {unsupported.length === 1 ? "1 question" : `${String(unsupported.length)} questions`}{" "}
+          won&apos;t show in Practice: decks use true/false, single-choice, matching and swipe
+          questions.
+        </p>
+      ) : null}
     </div>
   );
 }

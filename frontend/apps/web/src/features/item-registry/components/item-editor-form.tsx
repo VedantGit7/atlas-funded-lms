@@ -73,7 +73,14 @@ export function ItemEditorForm({
   dimensionWeights,
   competencyDimensions,
 }: Props) {
-  const [itemTypeKey, setItemTypeKey] = useState(item?.itemTypeKey ?? itemTypes[0]?.key ?? "");
+  // A new question starts as single-answer multiple choice, the most common
+  // type, not the first alphabetically ("File upload"; QA review 1 m21).
+  const [itemTypeKey, setItemTypeKey] = useState(
+    item?.itemTypeKey ??
+      itemTypes.find((type) => type.key === "mcq_single")?.key ??
+      itemTypes[0]?.key ??
+      "",
+  );
   const [stem, setStem] = useState(
     typeof item?.contentJson === "object" &&
       item.contentJson !== null &&

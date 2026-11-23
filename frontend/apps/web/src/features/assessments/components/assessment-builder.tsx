@@ -41,18 +41,17 @@ import {
   toggleThumbClassName,
   toggleTrackClassName,
 } from "../assessment-studio-shared";
+import {
+  QuestionPickerDialog,
+  questionTypeName,
+} from "../../item-registry/components/question-picker-dialog";
+import type { ItemDto } from "../../item-registry/api";
 import { AssessmentBuilderPreview } from "./assessment-builder-preview";
 
 type AssessmentDetail = z.infer<typeof assessmentDetailSchema>;
-type ItemOption = {
-  id: string;
-  itemTypeKey: string;
-  contentJson: Record<string, unknown>;
-};
 
 type AssessmentBuilderProps = {
   initialAssessment: AssessmentDetail;
-  availableItems: ItemOption[];
 };
 
 function formatError(error: unknown): string {
@@ -91,7 +90,7 @@ function ToggleRow({
   );
 }
 
-export function AssessmentBuilder({ initialAssessment, availableItems }: AssessmentBuilderProps) {
+export function AssessmentBuilder({ initialAssessment }: AssessmentBuilderProps) {
   const router = useRouter();
   const [assessment, setAssessment] = useState(initialAssessment);
   const [title, setTitle] = useState(assessment.title);
@@ -110,8 +109,9 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
     assessment.config.proctoringLevel,
   );
   const [showAnswersPolicy, setShowAnswersPolicy] = useState(assessment.config.showAnswersPolicy);
-  const [selectedItemId, setSelectedItemId] = useState(availableItems[0]?.id ?? "");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [items, setItems] = useState(assessment.items);
+  const addedIds = useMemo(() => new Set(items.map((item) => item.itemId)), [items]);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -225,28 +225,22 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
     }
   }
 
-  function addItem() {
-    if (!selectedItemId) return;
-    if (items.some((item) => item.itemId === selectedItemId)) {
-      setError("Item already added to assessment.");
-      return;
-    }
-
-    const source = availableItems.find((item) => item.id === selectedItemId);
-    if (!source) return;
-
+  /** Adds the picked questions at the end, in the order shown in the picker. */
+  function addItems(picked: ItemDto[]) {
+    const fresh = picked.filter((item) => !addedIds.has(item.id));
     setItems((current) => [
       ...current,
-      {
+      ...fresh.map((source, index) => ({
         id: createClientUuid(),
         itemId: source.id,
-        position: nextPosition,
+        position: nextPosition + index,
         points: 1,
         required: true,
         itemTypeKey: source.itemTypeKey,
-        contentJson: source.contentJson,
-      },
+        contentJson: source.contentJson as Record<string, unknown>,
+      })),
     ]);
+    setPickerOpen(false);
     setError(null);
   }
 
@@ -358,7 +352,7 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
 
             {items.length === 0 ? (
               <div className="px-5 py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">
-                No items added yet. Select an item from the item bank below.
+                No questions yet. Use &ldquo;Add questions&rdquo; to pick them from the Item Bank.
               </div>
             ) : (
               <ol className="divide-y divide-[var(--admin-border)]">
@@ -373,7 +367,7 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded bg-[color-mix(in_srgb,var(--admin-primary-container)_55%,var(--admin-surface))] px-1.5 py-0.5 text-[10px] font-bold uppercase text-[var(--admin-primary)]">
-                          {item.itemTypeKey ?? "item"}
+                          {item.itemTypeKey ? questionTypeName(item.itemTypeKey) : "Question"}
                         </span>
                         <p className="text-sm font-medium text-[var(--admin-on-surface)]">
                           {itemDisplayTitle(item.contentJson)}
@@ -423,38 +417,34 @@ export function AssessmentBuilder({ initialAssessment, availableItems }: Assessm
             )}
 
             {editable ? (
-              <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 sm:flex-row sm:items-center">
-                <select
-                  className={`${inputClass} min-w-0 flex-1`}
-                  value={selectedItemId}
-                  onChange={(event) => {
-                    setSelectedItemId(event.target.value);
-                  }}
-                >
-                  {availableItems.length === 0 ? (
-                    <option value="">No items in item bank</option>
-                  ) : (
-                    availableItems.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.itemTypeKey} — {itemDisplayTitle(item.contentJson)}
-                      </option>
-                    ))
-                  )}
-                </select>
+              <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-[var(--admin-on-surface-variant)]">
+                  Search the whole Item Bank and add several questions at once. Save to keep them.
+                </p>
                 <button
                   type="button"
                   className={`${primaryButtonClassName} shrink-0`}
-                  disabled={!selectedItemId}
-                  onClick={addItem}
+                  onClick={() => {
+                    setPickerOpen(true);
+                  }}
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
-                  Add item
+                  Add questions
                 </button>
               </div>
             ) : null}
           </div>
 
           <AssessmentBuilderPreview title={title} description={description} items={items} />
+          <QuestionPickerDialog
+            open={pickerOpen}
+            title="Add questions to this quiz"
+            addedIds={addedIds}
+            onCancel={() => {
+              setPickerOpen(false);
+            }}
+            onConfirm={addItems}
+          />
         </section>
 
         <aside className="space-y-4">

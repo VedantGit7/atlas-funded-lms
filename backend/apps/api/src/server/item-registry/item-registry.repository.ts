@@ -1,6 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 
+/** The question behind a collection entry (see listCollectionItemSummaries). */
+export type CollectionItemSummary = {
+  stem: string | null;
+  itemTypeKey: string;
+  status: "DRAFT" | "REVIEW" | "PUBLISHED" | "ARCHIVED";
+};
+
 type ListedItemRow = {
   id: string;
   item_type_key: string;
@@ -844,5 +851,39 @@ export const itemRegistryRepository = {
         weight: true,
       },
     });
+  },
+
+  /** The questions behind collection entries: text, type and status. */
+  async listCollectionItemSummaries(tx: TenantTx, itemIds: string[]) {
+    if (itemIds.length === 0) return new Map<string, CollectionItemSummary>();
+    const rows = await tx.item.findMany({
+      where: { id: { in: itemIds }, deleted_at: null },
+      select: { id: true, item_type_key: true, stem_json: true, status: true },
+    });
+    return new Map(
+      rows.map((row): [string, CollectionItemSummary] => {
+        const stem =
+          row.stem_json && typeof row.stem_json === "object" && !Array.isArray(row.stem_json)
+            ? (row.stem_json as Record<string, unknown>)["stem"]
+            : null;
+        return [
+          row.id,
+          {
+            stem: typeof stem === "string" && stem.trim() ? stem.trim() : null,
+            itemTypeKey: row.item_type_key,
+            status: row.status,
+          },
+        ];
+      }),
+    );
+  },
+
+  /** The highest position used in a collection, or 0 when it is empty. */
+  async maxCollectionPosition(tx: TenantTx, collectionId: string): Promise<number> {
+    const result = await tx.itemCollectionItem.aggregate({
+      where: { collection_id: collectionId },
+      _max: { position: true },
+    });
+    return result._max.position ?? 0;
   },
 };

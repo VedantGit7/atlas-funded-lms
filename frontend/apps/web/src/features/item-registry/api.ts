@@ -1,7 +1,7 @@
 "use client";
 
 import type { z } from "zod";
-import { ClientApiError, clientApi } from "../../lib/client-api";
+import { ClientApiError, clientApi, type ClientApiMutationOptions } from "../../lib/client-api";
 import type {
   bulkDeleteItemsResponseSchema,
   bulkItemStatusResponseSchema,
@@ -13,6 +13,7 @@ import type {
   itemCollectionDetailResponseSchema,
   collectionItemResponseSchema,
   collectionItemListResponseSchema,
+  collectionItemsAddResponseSchema,
 } from "./item-registry-response-schemas";
 import type {
   ImportItemRowsResponse,
@@ -46,6 +47,8 @@ type ItemCollectionListResponse = z.infer<typeof itemCollectionListResponseSchem
 type ItemCollectionDetailResponse = z.infer<typeof itemCollectionDetailResponseSchema>;
 type CollectionItemResponse = z.infer<typeof collectionItemResponseSchema>;
 type CollectionItemListResponse = z.infer<typeof collectionItemListResponseSchema>;
+type CollectionItemsAddResponse = z.infer<typeof collectionItemsAddResponseSchema>;
+export type CollectionItemEntry = CollectionItemListResponse["data"][number];
 
 type CreateItemBody = z.infer<typeof CreateItemBodySchema>;
 type UpdateItemBody = z.infer<typeof UpdateItemBodySchema>;
@@ -177,11 +180,13 @@ export async function createItemCollection(
 export async function updateItemCollection(
   collectionId: string,
   body: UpdateItemCollectionBody,
+  options?: ClientApiMutationOptions,
 ): Promise<ItemCollectionDetailResponse> {
   return clientApi.put<ItemCollectionDetailResponse>(
     `/api/v1/item-collections/${collectionId}`,
     body,
     `update-item-collection-${collectionId}`,
+    options,
   );
 }
 
@@ -193,6 +198,23 @@ export async function addItemToCollection(
     `/api/v1/item-collections/${collectionId}/items`,
     body,
     "add-collection-item",
+  );
+}
+
+/**
+ * Adds many questions at the end of a collection, in order. Questions already
+ * in it are skipped and counted (data.skipped).
+ */
+export async function addItemsToCollection(
+  collectionId: string,
+  itemIds: string[],
+): Promise<CollectionItemsAddResponse> {
+  return clientApi.post<CollectionItemsAddResponse>(
+    `/api/v1/item-collections/${collectionId}/items/bulk`,
+    { itemIds },
+    "add-collection-items",
+    // The page says what was added and what was skipped.
+    { silent: true },
   );
 }
 
@@ -329,6 +351,7 @@ export const itemRegistryApi = {
   createItemCollection,
   updateItemCollection,
   addItemToCollection,
+  addItemsToCollection,
   listCollectionItems,
   removeItemFromCollection,
   deleteItemCollection,

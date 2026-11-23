@@ -124,12 +124,25 @@ export const itemCollectionDeleteResponseSchema = z.object({
   }),
 });
 
+/**
+ * The question a collection entry points at, so the collection shows its real
+ * text and status for any question, not only those on the first page of the
+ * bank (QA review 1 C8, M51).
+ */
+export const collectionItemSummarySchema = z.object({
+  stem: z.string().nullable(),
+  itemTypeKey: z.string(),
+  status: PublishStatusSchema,
+});
+
 export const collectionItemDtoSchema = z.object({
   id: z.uuid(),
   collectionId: z.uuid(),
   itemId: z.uuid(),
   position: z.number().int(),
   weight: z.string().nullable(),
+  /** Present in collection item lists. */
+  item: collectionItemSummarySchema.nullable().optional(),
 });
 
 export const collectionItemResponseSchema = z.object({
@@ -146,4 +159,15 @@ export const collectionItemRemoveResponseSchema = z.object({
 
 export const collectionItemListResponseSchema = z.object({
   data: z.array(collectionItemDtoSchema),
+});
+
+/**
+ * added: entries created, in the order sent. skipped: questions already in
+ * the collection or no longer in the bank.
+ */
+export const collectionItemsAddResponseSchema = z.object({
+  data: z.object({
+    added: z.array(collectionItemDtoSchema),
+    skipped: z.number().int().nonnegative(),
+  }),
 });
