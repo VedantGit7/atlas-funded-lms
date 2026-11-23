@@ -8,6 +8,11 @@ type SearchResultCardProps = {
 };
 
 export function SearchResultCard({ result }: SearchResultCardProps) {
+  // A course with no description gets its title as the snippet; don't repeat it.
+  const snippet =
+    result.snippet && result.snippet.trim().toLowerCase() !== result.title.trim().toLowerCase()
+      ? result.snippet
+      : null;
   return (
     <article className="rounded-lg border p-4">
       <div className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">
@@ -18,7 +23,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
           {result.title}
         </Link>
       </h2>
-      {result.snippet ? <p className="mt-2 text-sm text-foreground">{result.snippet}</p> : null}
+      {snippet ? <p className="mt-2 text-sm text-foreground">{snippet}</p> : null}
     </article>
   );
 }

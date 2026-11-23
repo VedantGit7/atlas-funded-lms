@@ -1,6 +1,6 @@
 "use client";
 
-import type { SubmitEvent } from "react";
+import { useEffect, useRef, type SubmitEvent } from "react";
 
 type SearchQueryFormProps = {
   initialQuery: string;
@@ -12,6 +12,13 @@ function readFormValue(value: FormDataEntryValue | null): string {
 }
 
 export function SearchQueryForm({ initialQuery, initialType }: SearchQueryFormProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Arriving from the header's search box with nothing typed yet: be ready to type.
+  useEffect(() => {
+    if (!initialQuery) inputRef.current?.focus();
+  }, [initialQuery]);
+
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -36,6 +43,7 @@ export function SearchQueryForm({ initialQuery, initialType }: SearchQueryFormPr
       <label className="flex flex-col gap-1 text-sm">
         <span>Search</span>
         <input
+          ref={inputRef}
           name="q"
           type="search"
           defaultValue={initialQuery}
