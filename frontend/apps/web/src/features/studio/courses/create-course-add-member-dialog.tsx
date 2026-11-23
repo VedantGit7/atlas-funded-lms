@@ -347,30 +347,56 @@ function mapMemberListItemToInstructor(
   };
 }
 
-export async function loadInstructorMembers(): Promise<InstructorMember[]> {
-  try {
-    const response = await clientApi.get<MembersListResponse>("/api/v1/members?limit=100");
+/** The roles that teach. Learners are never offered as instructors (QA review 1 C17, review 2 H3). */
+export const INSTRUCTOR_ROLE_KEYS = ["owner", "admin", "instructor"] as const;
 
-    return response.data.items
+async function loadCurrentMemberAsInstructor(): Promise<InstructorMember> {
+  const me = await clientApi.get<{
+    data: {
+      membership: { id: string };
+      profile: { displayName: string | null; avatarUrl: string | null } | null;
+      identity: { email: string | null };
+    };
+  }>("/api/v1/me");
+  const email = me.data.identity.email ?? "";
+  return {
+    membershipId: me.data.membership.id,
+    displayName: me.data.profile?.displayName?.trim() || email.split("@")[0] || "You",
+    email,
+    avatarUrl: me.data.profile?.avatarUrl ?? null,
+  };
+}
+
+/**
+ * Who can be a course's instructor: active staff (owner, admin, instructor),
+ * with the current member first. It used to be the first 100 members of any
+ * role, learners and load-test accounts included, with the first one picked.
+ * Members who can't list people (instructors) get just themselves.
+ */
+export async function loadInstructorMembers(): Promise<InstructorMember[]> {
+  const current = await loadCurrentMemberAsInstructor();
+  let staff: InstructorMember[];
+  try {
+    const pages = await Promise.all(
+      INSTRUCTOR_ROLE_KEYS.map((role) =>
+        clientApi.get<MembersListResponse>(
+          `/api/v1/members?${new URLSearchParams({ limit: "100", status: "ACTIVE", role }).toString()}`,
+        ),
+      ),
+    );
+    staff = pages
+      .flatMap((page) => page.data.items)
       .map(mapMemberListItemToInstructor)
       .filter((member) => member.email.length > 0 || member.displayName.length > 0);
   } catch {
-    const me = await clientApi.get<{
-      data: {
-        membership: { id: string };
-        profile: { displayName: string | null; avatarUrl: string | null } | null;
-        identity: { email: string | null };
-      };
-    }>("/api/v1/me");
-
-    const email = me.data.identity.email ?? "";
-    return [
-      {
-        membershipId: me.data.membership.id,
-        displayName: me.data.profile?.displayName?.trim() || "You",
-        email,
-        avatarUrl: me.data.profile?.avatarUrl ?? null,
-      },
-    ];
+    staff = [];
   }
+
+  const byId = new Map<string, InstructorMember>();
+  for (const member of [current, ...staff]) {
+    if (!byId.has(member.membershipId)) byId.set(member.membershipId, member);
+  }
+  const [first, ...rest] = [...byId.values()];
+  rest.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  return first ? [first, ...rest] : rest;
 }

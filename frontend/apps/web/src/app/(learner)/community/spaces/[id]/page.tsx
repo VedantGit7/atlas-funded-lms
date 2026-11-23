@@ -3,6 +3,7 @@ import { CommunityExperience } from "../../../../../features/community/component
 import type { FeedPost } from "../../../../../features/community/components/PostCard";
 import { ServerApiError, serverApi } from "../../../../../lib/server-api";
 import { communityServerApi } from "@/modules/community/community.server-api";
+import { notInAcademyMessage } from "@/lib/plan-messages";
 
 type SpacePageProps = {
   params: Promise<{ id: string }>;
@@ -70,7 +71,7 @@ export default async function CommunitySpacePage({ params }: SpacePageProps) {
           <PageGate
             state="denied"
             title="Community space"
-            deniedMessage="Community is not enabled for this tenant."
+            deniedMessage={notInAcademyMessage("Community")}
           />
         );
       }

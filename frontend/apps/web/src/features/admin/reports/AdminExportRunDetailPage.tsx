@@ -1136,7 +1136,7 @@ function ExportRunDetailScreen({ runId: runIdProp, initialDetail }: ExportRunDet
                   ? "Downloads will appear here."
                   : failed
                     ? "The export failed before generation."
-                    : "Download access logging is not enabled for this tenant yet."}
+                    : "Download access logging isn't switched on for your academy yet."}
               </p>
             </div>
           ) : (

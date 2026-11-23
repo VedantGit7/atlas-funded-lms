@@ -7,4 +7,5 @@ export * from "./authorization.repository";
 export * from "./ownership-predicates";
 export * from "./relationship-predicates";
 export * from "./can";
+export * from "./area-access";
 export * from "./route-metadata";

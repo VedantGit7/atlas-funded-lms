@@ -24,6 +24,58 @@ export async function permissionExists(args: {
 }
 
 /**
+ * Which of `permissionKeys` the membership holds, by role grant or a live ALLOW
+ * override, less any live DENY override: the same rules as `can()`, for many
+ * keys at once and without a resource. Used to decide which areas (such as
+ * Studio) a member may enter, not to authorize an action.
+ */
+export async function listHeldPermissionKeys(args: {
+  tx: Tx;
+  tenantId: string;
+  membershipId: string;
+  permissionKeys: readonly string[];
+}): Promise<string[]> {
+  if (args.permissionKeys.length === 0) return [];
+  const keys = [...args.permissionKeys];
+  const rows = await args.tx.$queryRaw<Array<{ key: string }>>`
+      with granted as (
+        select rp.permission_key as key
+        from user_roles ur
+        join roles r
+          on r.id = ur.role_id
+         and r.tenant_id = ur.tenant_id
+         and r.deleted_at is null
+        join role_permissions rp
+          on rp.role_id = r.id
+         and rp.tenant_id = r.tenant_id
+        where ur.tenant_id = ${args.tenantId}::uuid
+          and ur.membership_id = ${args.membershipId}::uuid
+          and rp.permission_key = any(${keys}::text[])
+        union
+        select po.permission_key as key
+        from permission_overrides po
+        where po.tenant_id = ${args.tenantId}::uuid
+          and po.membership_id = ${args.membershipId}::uuid
+          and po.permission_key = any(${keys}::text[])
+          and po.effect = 'ALLOW'
+          and (po.expires_at is null or po.expires_at > now())
+      )
+      select distinct g.key
+      from granted g
+      where not exists (
+        select 1
+        from permission_overrides po
+        where po.tenant_id = ${args.tenantId}::uuid
+          and po.membership_id = ${args.membershipId}::uuid
+          and po.permission_key = g.key
+          and po.effect = 'DENY'
+          and (po.expires_at is null or po.expires_at > now())
+      )
+    `;
+  return rows.map((row) => row.key);
+}
+
+/**
  * Everything `can()` reads, in one round trip (audit §3.1): whether the
  * permission is in the catalogue, the membership's effective override (a live
  * DENY wins, then the newest ALLOW), and the roles granting it. Each part is

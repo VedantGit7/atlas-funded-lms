@@ -48,6 +48,26 @@ function statusTone(
   return "neutral";
 }
 
+/**
+ * This page manages learners only. Staff are managed on the Members page; an
+ * owner or admin suspended or archived from here could lock the academy out
+ * (QA review 1 M12).
+ */
+const STAFF_ROLE_KEYS = new Set(["owner", "admin"]);
+
+export function isStaffMember(member: MemberRow): boolean {
+  return (member.roles ?? []).some((role) => STAFF_ROLE_KEYS.has(role.key));
+}
+
+const PAGE_SIZE = 50;
+
+/** "Showing 50 of 506 learners" — the total is the server's, not the page's (QA review 2 H5). */
+export function learnerCountLabel(shown: number, total: number | null): string {
+  const noun = (count: number) => (count === 1 ? "learner" : "learners");
+  if (total === null || total <= shown) return `${String(shown)} ${noun(shown)}`;
+  return `Showing ${String(shown)} of ${String(total)} ${noun(total)}`;
+}
+
 function statusLabel(member: MemberRow): string {
   if (member.archivedAt) return "Archived";
   return member.status.charAt(0) + member.status.slice(1).toLowerCase();
@@ -61,24 +81,55 @@ export function ManageArchiveLearnersPanel() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
   const [archiveApiAvailable, setArchiveApiAvailable] = useState<boolean | null>(null);
+  const [total, setTotal] = useState<number | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchPage = useCallback(
+    async (cursor: string | null) => {
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE), role: "learner" });
+      if (query.trim()) params.set("search", query.trim());
+      if (cursor) params.set("cursor", cursor);
+      return clientApi.get<MembersListResponse>(`/api/v1/members?${params.toString()}`);
+    },
+    [query],
+  );
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ limit: "100" });
-      if (query.trim()) params.set("search", query.trim());
-      const response = await clientApi.get<MembersListResponse>(
-        `/api/v1/members?${params.toString()}`,
-      );
+      const response = await fetchPage(null);
       setItems(response.data.items);
+      setTotal(response.data.totalCount);
+      setNextCursor(response.data.pageInfo.hasNextPage ? response.data.pageInfo.nextCursor : null);
     } catch (caught) {
       setError(formatError(caught));
       setItems([]);
+      setTotal(null);
+      setNextCursor(null);
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [fetchPage]);
+
+  async function loadMore() {
+    if (!nextCursor) return;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const response = await fetchPage(nextCursor);
+      setItems((current) => {
+        const seen = new Set(current.map((member) => member.id));
+        return [...current, ...response.data.items.filter((member) => !seen.has(member.id))];
+      });
+      setNextCursor(response.data.pageInfo.hasNextPage ? response.data.pageInfo.nextCursor : null);
+    } catch (caught) {
+      setError(formatError(caught));
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -89,15 +140,9 @@ export function ManageArchiveLearnersPanel() {
     };
   }, [loadMembers]);
 
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return items;
-    return items.filter((member) => {
-      const email = (memberEmail(member) ?? "").toLowerCase();
-      const name = (member.profile?.displayName ?? "").toLowerCase();
-      return name.includes(normalized) || email.includes(normalized);
-    });
-  }, [items, query]);
+  // The server searches and filters to learners; staff who also hold the
+  // learner role are still left out here.
+  const filtered = useMemo(() => items.filter((member) => !isStaffMember(member)), [items]);
 
   async function executeAction(action: ConfirmAction) {
     setBusyId(action.member.id);
@@ -204,7 +249,7 @@ export function ManageArchiveLearnersPanel() {
         <div className={manageTableCardClassName}>
           <div className="border-b border-[var(--admin-border)] px-4 py-3">
             <p className="text-sm text-[var(--admin-on-surface-variant)]">
-              {filtered.length} {filtered.length === 1 ? "learner" : "learners"}
+              {learnerCountLabel(filtered.length, total)}
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -271,6 +316,23 @@ export function ManageArchiveLearnersPanel() {
               </tbody>
             </table>
           </div>
+          {nextCursor ? (
+            <div className="flex justify-center border-t border-[var(--admin-border)] px-4 py-3">
+              <button
+                type="button"
+                disabled={loadingMore}
+                onClick={() => {
+                  void loadMore();
+                }}
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] disabled:opacity-50"
+              >
+                {loadingMore ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : null}
+                Show {PAGE_SIZE} more
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -324,10 +386,10 @@ function confirmDescription(action: ConfirmAction | null): string {
   if (!action) return "";
   const name = memberLabel(action.member);
   if (action.type === "suspend") {
-    return `${name} will lose access until reactivated.`;
+    return `${name} can't sign in until you reactivate them on the Members page. Their enrollments and progress are kept.`;
   }
   if (action.type === "archive") {
-    return `${name} will be archived. Progress and history are preserved.`;
+    return `${name} is archived: they can't sign in and leave learner lists and reports. Their progress and history are kept, and you can unarchive them here.`;
   }
   return `${name} will be unarchived and regain access.`;
 }

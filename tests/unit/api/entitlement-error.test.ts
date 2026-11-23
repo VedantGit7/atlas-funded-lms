@@ -13,7 +13,7 @@ describe("EntitlementRequiredError envelope", () => {
       body: {
         error: {
           code: "ENTITLEMENT_REQUIRED",
-          message: "This feature is not enabled for this tenant.",
+          message: "This isn't included in your academy's plan.",
           requestId: "req_test",
         },
       },

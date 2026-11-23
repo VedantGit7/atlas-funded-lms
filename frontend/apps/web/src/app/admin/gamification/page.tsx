@@ -16,6 +16,7 @@ import type {
 } from "../../../features/gamification/components/RewardsShopPanel";
 import type { SeasonalEventDto } from "../../../features/gamification/components/SeasonalEventsPanel";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
+import { notOnPlanMessage } from "@/lib/plan-messages";
 
 type MemberListItem = MembersListResponse["data"]["items"][number];
 type LeaderboardListResponse = z.infer<typeof leaderboardListResponseSchema>;
@@ -96,7 +97,7 @@ export default async function AdminGamificationPage() {
           screenId="T14"
           state="denied"
           title="Gamification Config"
-          deniedMessage="Gamification requires the gamification.enable entitlement on your tenant plan."
+          deniedMessage={notOnPlanMessage("Gamification")}
         />
       );
     }

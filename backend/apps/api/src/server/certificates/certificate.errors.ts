@@ -92,7 +92,7 @@ export function certificateEntitlementRequired(): AtlasHttpError {
   return new AtlasHttpError({
     code: "PERMISSION_DENIED",
     status: 403,
-    message: "Certification is not enabled for this tenant.",
+    message: "Certificates aren't included in your academy's plan.",
   });
 }
 

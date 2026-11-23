@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { ClientApiError } from "../../../lib/client-api";
 import { PageGate } from "../../../components/patterns/PageGate";
-import { isAuthorizationDenied } from "../domain/admin-domain-shared";
+import { isAuthorizationDenied, isNotOnPlan } from "../domain/admin-domain-shared";
+import { notOnPlanMessage } from "../../../lib/plan-messages";
 import {
   fetchConversationMessages,
   fetchConversations,
@@ -105,8 +106,19 @@ export function ManageLearnerSupportPanel() {
   // A 401/403 replaces the panel rather than annotating it, matching the
   // server-rendered admin pages. Previously every failure, denial included,
   // rendered as an inline banner above a fully interactive inbox.
+  // Switched off by the plan, not by permission (QA review 1 C14).
+  if (isNotOnPlan(error)) {
+    return (
+      <PageGate
+        state="denied"
+        title="Learner support"
+        deniedMessage={notOnPlanMessage("Learner support")}
+      />
+    );
+  }
+
   if (isAuthorizationDenied(error)) {
-    return <PageGate state="denied" title="Messenger" />;
+    return <PageGate state="denied" title="Learner support" />;
   }
 
   const selectedConversation = conversations.find((item) => item.id === selectedId) ?? null;

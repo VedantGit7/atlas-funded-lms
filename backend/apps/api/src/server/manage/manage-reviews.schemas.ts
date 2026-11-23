@@ -21,6 +21,8 @@ export const manageReviewItemSchema = z.object({
   comment: z.string().nullable(),
   status: z.enum(REVIEW_MODERATION_STATUSES),
   adminNote: z.string().nullable(),
+  /** The academy's own review, added here; learners see it labelled (D8). */
+  addedByAcademy: z.boolean(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -32,7 +34,6 @@ export const manageReviewsListResponseSchema = z.object({
 export const createManageReviewBodySchema = z
   .object({
     courseId: z.uuid(),
-    membershipId: z.uuid().optional(),
     rating: z.number().int().min(1).max(5),
     comment: z.string().trim().min(1).max(2000).optional(),
     status: z.enum(REVIEW_MODERATION_STATUSES).default("APPROVED"),

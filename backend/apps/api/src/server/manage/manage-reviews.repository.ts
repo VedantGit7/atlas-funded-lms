@@ -12,6 +12,7 @@ export type ManageReviewRow = {
   comment: string | null;
   status: string;
   admin_note: string | null;
+  added_by_academy: boolean;
   created_at: Date;
   updated_at: Date;
 };
@@ -36,6 +37,7 @@ export const manageReviewsRepository = {
         cr.comment,
         coalesce(cr.status, 'APPROVED') as status,
         cr.admin_note,
+        cr.added_by_academy,
         cr.created_at,
         cr.updated_at
       from course_reviews cr
@@ -75,6 +77,7 @@ export const manageReviewsRepository = {
         cr.comment,
         coalesce(cr.status, 'APPROVED') as status,
         cr.admin_note,
+        cr.added_by_academy,
         cr.created_at,
         cr.updated_at
       from course_reviews cr
@@ -136,11 +139,12 @@ export const manageReviewsRepository = {
       comment: string | null;
       status: string;
     },
-  ): Promise<string> {
+  ): Promise<{ id: string } | { conflict: "own_learner_review" }> {
     const id = randomUUID();
-    await tx.$executeRaw`
+    const written = await tx.$queryRaw<Array<{ id: string }>>`
       insert into course_reviews (
-        id, tenant_id, course_id, membership_id, rating, comment, status, created_at, updated_at
+        id, tenant_id, course_id, membership_id, rating, comment, status, added_by_academy,
+        created_at, updated_at
       )
       values (
         ${id}::uuid,
@@ -150,6 +154,7 @@ export const manageReviewsRepository = {
         ${args.rating},
         ${args.comment},
         ${args.status},
+        true,
         now(),
         now()
       )
@@ -159,13 +164,10 @@ export const manageReviewsRepository = {
         comment = excluded.comment,
         status = excluded.status,
         updated_at = now()
+      where course_reviews.added_by_academy
+      returning id::text
     `;
-    const existing = await tx.$queryRaw<Array<{ id: string }>>`
-      select id::text from course_reviews
-      where course_id = ${args.courseId}::uuid
-        and membership_id = ${args.membershipId}::uuid
-      limit 1
-    `;
-    return existing[0]?.id ?? id;
+    const row = written[0];
+    return row ? { id: row.id } : { conflict: "own_learner_review" };
   },
 };

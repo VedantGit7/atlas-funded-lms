@@ -33,8 +33,10 @@ function serializeReview(review: CourseReviewRecord, viewerMembershipId: string)
     id: review.id,
     rating: review.rating,
     comment: review.comment,
-    authorName: review.authorName,
-    mine: review.membershipId === viewerMembershipId,
+    // The academy's own review is labelled, not credited to the admin who wrote it (D8).
+    authorName: review.addedByAcademy ? null : review.authorName,
+    addedByAcademy: review.addedByAcademy,
+    mine: !review.addedByAcademy && review.membershipId === viewerMembershipId,
     createdAt: review.createdAt.toISOString(),
     updatedAt: review.updatedAt.toISOString(),
   };

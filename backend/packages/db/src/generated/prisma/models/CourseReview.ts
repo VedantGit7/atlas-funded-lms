@@ -43,6 +43,7 @@ export type CourseReviewMinAggregateOutputType = {
   comment: string | null
   status: string | null
   admin_note: string | null
+  added_by_academy: boolean | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -56,6 +57,7 @@ export type CourseReviewMaxAggregateOutputType = {
   comment: string | null
   status: string | null
   admin_note: string | null
+  added_by_academy: boolean | null
   created_at: Date | null
   updated_at: Date | null
 }
@@ -69,6 +71,7 @@ export type CourseReviewCountAggregateOutputType = {
   comment: number
   status: number
   admin_note: number
+  added_by_academy: number
   created_at: number
   updated_at: number
   _all: number
@@ -92,6 +95,7 @@ export type CourseReviewMinAggregateInputType = {
   comment?: true
   status?: true
   admin_note?: true
+  added_by_academy?: true
   created_at?: true
   updated_at?: true
 }
@@ -105,6 +109,7 @@ export type CourseReviewMaxAggregateInputType = {
   comment?: true
   status?: true
   admin_note?: true
+  added_by_academy?: true
   created_at?: true
   updated_at?: true
 }
@@ -118,6 +123,7 @@ export type CourseReviewCountAggregateInputType = {
   comment?: true
   status?: true
   admin_note?: true
+  added_by_academy?: true
   created_at?: true
   updated_at?: true
   _all?: true
@@ -218,6 +224,7 @@ export type CourseReviewGroupByOutputType = {
   comment: string | null
   status: string
   admin_note: string | null
+  added_by_academy: boolean
   created_at: Date
   updated_at: Date
   _count: CourseReviewCountAggregateOutputType | null
@@ -254,6 +261,7 @@ export type CourseReviewWhereInput = {
   comment?: Prisma.StringNullableFilter<"CourseReview"> | string | null
   status?: Prisma.StringFilter<"CourseReview"> | string
   admin_note?: Prisma.StringNullableFilter<"CourseReview"> | string | null
+  added_by_academy?: Prisma.BoolFilter<"CourseReview"> | boolean
   created_at?: Prisma.DateTimeFilter<"CourseReview"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CourseReview"> | Date | string
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
@@ -269,6 +277,7 @@ export type CourseReviewOrderByWithRelationInput = {
   comment?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   admin_note?: Prisma.SortOrderInput | Prisma.SortOrder
+  added_by_academy?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   course?: Prisma.CourseOrderByWithRelationInput
@@ -288,6 +297,7 @@ export type CourseReviewWhereUniqueInput = Prisma.AtLeast<{
   comment?: Prisma.StringNullableFilter<"CourseReview"> | string | null
   status?: Prisma.StringFilter<"CourseReview"> | string
   admin_note?: Prisma.StringNullableFilter<"CourseReview"> | string | null
+  added_by_academy?: Prisma.BoolFilter<"CourseReview"> | boolean
   created_at?: Prisma.DateTimeFilter<"CourseReview"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CourseReview"> | Date | string
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
@@ -303,6 +313,7 @@ export type CourseReviewOrderByWithAggregationInput = {
   comment?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   admin_note?: Prisma.SortOrderInput | Prisma.SortOrder
+  added_by_academy?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   _count?: Prisma.CourseReviewCountOrderByAggregateInput
@@ -324,6 +335,7 @@ export type CourseReviewScalarWhereWithAggregatesInput = {
   comment?: Prisma.StringNullableWithAggregatesFilter<"CourseReview"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"CourseReview"> | string
   admin_note?: Prisma.StringNullableWithAggregatesFilter<"CourseReview"> | string | null
+  added_by_academy?: Prisma.BoolWithAggregatesFilter<"CourseReview"> | boolean
   created_at?: Prisma.DateTimeWithAggregatesFilter<"CourseReview"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"CourseReview"> | Date | string
 }
@@ -334,6 +346,7 @@ export type CourseReviewCreateInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
   course: Prisma.CourseCreateNestedOneWithoutCourse_reviewsInput
@@ -349,6 +362,7 @@ export type CourseReviewUncheckedCreateInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -359,6 +373,7 @@ export type CourseReviewUpdateInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   course?: Prisma.CourseUpdateOneRequiredWithoutCourse_reviewsNestedInput
@@ -374,6 +389,7 @@ export type CourseReviewUncheckedUpdateInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -387,6 +403,7 @@ export type CourseReviewCreateManyInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -397,6 +414,7 @@ export type CourseReviewUpdateManyMutationInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -410,6 +428,7 @@ export type CourseReviewUncheckedUpdateManyInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -439,6 +458,7 @@ export type CourseReviewCountOrderByAggregateInput = {
   comment?: Prisma.SortOrder
   status?: Prisma.SortOrder
   admin_note?: Prisma.SortOrder
+  added_by_academy?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -456,6 +476,7 @@ export type CourseReviewMaxOrderByAggregateInput = {
   comment?: Prisma.SortOrder
   status?: Prisma.SortOrder
   admin_note?: Prisma.SortOrder
+  added_by_academy?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -469,6 +490,7 @@ export type CourseReviewMinOrderByAggregateInput = {
   comment?: Prisma.SortOrder
   status?: Prisma.SortOrder
   admin_note?: Prisma.SortOrder
+  added_by_academy?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
 }
@@ -567,6 +589,7 @@ export type CourseReviewCreateWithoutMembershipInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
   course: Prisma.CourseCreateNestedOneWithoutCourse_reviewsInput
@@ -579,6 +602,7 @@ export type CourseReviewUncheckedCreateWithoutMembershipInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -621,6 +645,7 @@ export type CourseReviewScalarWhereInput = {
   comment?: Prisma.StringNullableFilter<"CourseReview"> | string | null
   status?: Prisma.StringFilter<"CourseReview"> | string
   admin_note?: Prisma.StringNullableFilter<"CourseReview"> | string | null
+  added_by_academy?: Prisma.BoolFilter<"CourseReview"> | boolean
   created_at?: Prisma.DateTimeFilter<"CourseReview"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"CourseReview"> | Date | string
 }
@@ -631,6 +656,7 @@ export type CourseReviewCreateWithoutCourseInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
   membership: Prisma.MembershipCreateNestedOneWithoutCourse_reviewsInput
@@ -643,6 +669,7 @@ export type CourseReviewUncheckedCreateWithoutCourseInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -680,6 +707,7 @@ export type CourseReviewCreateManyMembershipInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -690,6 +718,7 @@ export type CourseReviewUpdateWithoutMembershipInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   course?: Prisma.CourseUpdateOneRequiredWithoutCourse_reviewsNestedInput
@@ -702,6 +731,7 @@ export type CourseReviewUncheckedUpdateWithoutMembershipInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -713,6 +743,7 @@ export type CourseReviewUncheckedUpdateManyWithoutMembershipInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -724,6 +755,7 @@ export type CourseReviewCreateManyCourseInput = {
   comment?: string | null
   status?: string
   admin_note?: string | null
+  added_by_academy?: boolean
   created_at?: Date | string
   updated_at?: Date | string
 }
@@ -734,6 +766,7 @@ export type CourseReviewUpdateWithoutCourseInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   membership?: Prisma.MembershipUpdateOneRequiredWithoutCourse_reviewsNestedInput
@@ -746,6 +779,7 @@ export type CourseReviewUncheckedUpdateWithoutCourseInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -757,6 +791,7 @@ export type CourseReviewUncheckedUpdateManyWithoutCourseInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   admin_note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  added_by_academy?: Prisma.BoolFieldUpdateOperationsInput | boolean
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -772,6 +807,7 @@ export type CourseReviewSelect<ExtArgs extends runtime.Types.Extensions.Internal
   comment?: boolean
   status?: boolean
   admin_note?: boolean
+  added_by_academy?: boolean
   created_at?: boolean
   updated_at?: boolean
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
@@ -787,6 +823,7 @@ export type CourseReviewSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   comment?: boolean
   status?: boolean
   admin_note?: boolean
+  added_by_academy?: boolean
   created_at?: boolean
   updated_at?: boolean
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
@@ -802,6 +839,7 @@ export type CourseReviewSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   comment?: boolean
   status?: boolean
   admin_note?: boolean
+  added_by_academy?: boolean
   created_at?: boolean
   updated_at?: boolean
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
@@ -817,11 +855,12 @@ export type CourseReviewSelectScalar = {
   comment?: boolean
   status?: boolean
   admin_note?: boolean
+  added_by_academy?: boolean
   created_at?: boolean
   updated_at?: boolean
 }
 
-export type CourseReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "course_id" | "membership_id" | "rating" | "comment" | "status" | "admin_note" | "created_at" | "updated_at", ExtArgs["result"]["courseReview"]>
+export type CourseReviewOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "course_id" | "membership_id" | "rating" | "comment" | "status" | "admin_note" | "added_by_academy" | "created_at" | "updated_at", ExtArgs["result"]["courseReview"]>
 export type CourseReviewInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   membership?: boolean | Prisma.MembershipDefaultArgs<ExtArgs>
@@ -850,6 +889,10 @@ export type $CourseReviewPayload<ExtArgs extends runtime.Types.Extensions.Intern
     comment: string | null
     status: string
     admin_note: string | null
+    /**
+     * Added by an admin in Manage › Ratings & Reviews, shown as "Added by the academy" (migration 135).
+     */
+    added_by_academy: boolean
     created_at: Date
     updated_at: Date
   }, ExtArgs["result"]["courseReview"]>
@@ -1285,6 +1328,7 @@ export interface CourseReviewFieldRefs {
   readonly comment: Prisma.FieldRef<"CourseReview", 'String'>
   readonly status: Prisma.FieldRef<"CourseReview", 'String'>
   readonly admin_note: Prisma.FieldRef<"CourseReview", 'String'>
+  readonly added_by_academy: Prisma.FieldRef<"CourseReview", 'Boolean'>
   readonly created_at: Prisma.FieldRef<"CourseReview", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"CourseReview", 'DateTime'>
 }

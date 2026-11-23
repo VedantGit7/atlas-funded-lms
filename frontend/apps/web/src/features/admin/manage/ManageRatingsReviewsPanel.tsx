@@ -27,8 +27,14 @@ type ManageReviewItem = {
   rating: number;
   comment: string | null;
   status: ReviewStatus;
+  /** The academy's own review (owner decision D8): labelled for learners, not in the average. */
+  addedByAcademy: boolean;
   createdAt: string;
 };
+
+/** Shown in the add dialog and on each academy review (QA review 1 M18, D8). */
+export const ACADEMY_REVIEW_NOTE =
+  "Learners see this review labelled “Added by the academy”. It isn't counted in the course's star rating.";
 
 type ReviewsListResponse = {
   data: { items: ManageReviewItem[] };
@@ -179,7 +185,7 @@ export function ManageRatingsReviewsPanel() {
             }}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
-            Add review
+            Add academy review
           </button>
         </div>
       </div>
@@ -221,12 +227,25 @@ export function ManageRatingsReviewsPanel() {
                     </td>
                     <td className={manageTableTdClassName}>
                       <div className="min-w-0">
-                        <p className="font-medium">{authorLabel(item)}</p>
-                        {item.authorEmail ? (
-                          <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                            {item.authorEmail}
-                          </p>
-                        ) : null}
+                        {item.addedByAcademy ? (
+                          <>
+                            <span className="inline-flex items-center rounded-md bg-[color-mix(in_srgb,var(--admin-primary)_12%,var(--admin-surface))] px-2 py-0.5 text-xs font-semibold text-[var(--admin-primary)]">
+                              Added by the academy
+                            </span>
+                            <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
+                              by {authorLabel(item)}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-medium">{authorLabel(item)}</p>
+                            {item.authorEmail ? (
+                              <p className="text-xs text-[var(--admin-on-surface-variant)]">
+                                {item.authorEmail}
+                              </p>
+                            ) : null}
+                          </>
+                        )}
                       </div>
                     </td>
                     <td className={manageTableTdClassName}>
@@ -260,13 +279,16 @@ export function ManageRatingsReviewsPanel() {
                             }}
                           />
                         ) : null}
-                        <ActionButton
-                          label="Edit"
-                          disabled={busyId === item.id}
-                          onClick={() => {
-                            setEditTarget(item);
-                          }}
-                        />
+                        {item.addedByAcademy ? (
+                          // A learner's rating and words are theirs to change.
+                          <ActionButton
+                            label="Edit"
+                            disabled={busyId === item.id}
+                            onClick={() => {
+                              setEditTarget(item);
+                            }}
+                          />
+                        ) : null}
                         <ActionButton
                           label="Delete"
                           tone="danger"
@@ -383,7 +405,7 @@ function EmptyReviews({ hasQuery }: { hasQuery: boolean }) {
       <p className="max-w-sm text-sm text-[var(--admin-on-surface-variant)]">
         {hasQuery
           ? "Try adjusting your search or status filter."
-          : "Learner ratings and reviews will appear here once submitted."}
+          : "Learners' ratings and reviews appear here once they're submitted."}
       </p>
     </div>
   );
@@ -397,6 +419,7 @@ function ReviewFormDialog({
   initialComment,
   busy,
   submitLabel,
+  note,
   onClose,
   onSubmit,
 }: {
@@ -407,6 +430,7 @@ function ReviewFormDialog({
   initialComment: string;
   busy: boolean;
   submitLabel: string;
+  note?: string;
   onClose: () => void;
   onSubmit: (values: { courseId: string; rating: number; comment: string }) => Promise<void>;
 }) {
@@ -496,6 +520,10 @@ function ReviewFormDialog({
           </button>
         </div>
 
+        {note ? (
+          <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">{note}</p>
+        ) : null}
+
         <form className="mt-4 space-y-4" onSubmit={(event) => void handleSubmit(event)}>
           {!initialCourseId ? (
             <label className="block text-sm">
@@ -583,11 +611,12 @@ function CreateReviewDialog({
   return (
     <ReviewFormDialog
       open={open}
-      title="Add review"
+      title="Add an academy review"
       initialRating={5}
       initialComment=""
       busy={busy}
-      submitLabel="Create"
+      submitLabel="Add review"
+      note={ACADEMY_REVIEW_NOTE}
       onClose={onClose}
       onSubmit={async (values) => {
         setBusy(true);
@@ -601,6 +630,7 @@ function CreateReviewDialog({
               status: "APPROVED",
             },
             "review-create",
+            { successMessage: "Academy review added" },
           );
           onCreated(response.data);
         } catch (caught) {
@@ -646,7 +676,8 @@ function EditReviewDialog({
   return (
     <ReviewFormDialog
       open
-      title="Edit review"
+      title="Edit academy review"
+      note={ACADEMY_REVIEW_NOTE}
       initialCourseId={item.courseId}
       initialRating={item.rating}
       initialComment={item.comment ?? ""}
@@ -664,6 +695,7 @@ function EditReviewDialog({
               comment: values.comment || null,
             },
             `review-edit-${item.id}`,
+            { successMessage: "Academy review saved" },
           );
           onSaved(response.data);
         } catch (caught) {

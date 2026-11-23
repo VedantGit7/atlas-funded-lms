@@ -5,6 +5,7 @@ import { loadPublicBootstrap } from "../../../lib/server/bootstrap";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
 import type { z } from "zod";
 import type { certificateListResponseSchema } from "@atlas/contracts/certificates/certificate.dto";
+import { notInAcademyMessage } from "@/lib/plan-messages";
 
 type CertificateListResponse = z.infer<typeof certificateListResponseSchema>;
 
@@ -50,7 +51,7 @@ export default async function LearnerCertificatesPage() {
         <PageGate
           state="denied"
           title="Certificates"
-          deniedMessage="Certification is not enabled for this tenant."
+          deniedMessage={notInAcademyMessage("Certificates")}
         />
       );
     }

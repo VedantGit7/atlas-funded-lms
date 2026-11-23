@@ -34,6 +34,9 @@ export type StudioShellContext =
       reason: string;
     };
 
+export const STUDIO_NO_ACCESS_MESSAGE =
+  "Studio is where instructors and academy staff build courses. If you need it, ask your academy's administrator to give you an instructor role.";
+
 export async function loadStudioShellContext(): Promise<StudioShellContext> {
   const gate = await runTenantStateGate();
 
@@ -54,13 +57,25 @@ export async function loadStudioShellContext(): Promise<StudioShellContext> {
     const [me, navigation] = await Promise.all([
       serverApi.get<{
         data: {
-          membership: { id: string; status: string };
+          membership: { id: string; status: string; studioAccess?: boolean };
           profile: { displayName: string | null; avatarUrl: string | null } | null;
           identity: { mfaEnabled: boolean };
         };
       }>("/api/v1/me"),
       loadStudioNavigationProjection(),
     ]);
+
+    // Studio is for people who build or grade content (QA review 1 C20, m44):
+    // a learner used to get the whole Studio, and saving failed silently.
+    if (me.data.membership.studioAccess === false) {
+      return {
+        kind: "membership_blocked",
+        requestId: gate.tenant.requestId,
+        branding,
+        reason: "forbidden",
+        message: STUDIO_NO_ACCESS_MESSAGE,
+      };
+    }
 
     return {
       kind: "ready",
@@ -114,7 +129,7 @@ export async function loadStudioShellContext(): Promise<StudioShellContext> {
       requestId: gate.tenant.requestId,
       branding,
       reason: "forbidden",
-      message: "You do not have instructor studio access.",
+      message: STUDIO_NO_ACCESS_MESSAGE,
     };
   }
 }

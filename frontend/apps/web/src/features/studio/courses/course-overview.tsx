@@ -11,7 +11,8 @@ import type {
 } from "@atlas/contracts/courses/course-authoring-schemas";
 import type { studioLessonOutlineItemSchema } from "@atlas/contracts/lessons/lesson-schemas";
 import { memberInitials } from "./admin-form-dropdown-shared";
-import { loadInstructorMembers, type InstructorMember } from "./create-course-add-member-dialog";
+import type { InstructorMember } from "./create-course-add-member-dialog";
+import { resolveInstructorMembersByIds } from "./course-instructors-client";
 import {
   courseDetailCardClassName,
   courseDetailMutedTextClassName,
@@ -284,16 +285,19 @@ export function CourseOverview({ course, modules, courseId }: CourseOverviewProp
   useEffect(() => {
     let cancelled = false;
 
+    // The named instructors, or else whoever created the course. It used to
+    // fall back to the first member listed, which could be any learner (QA
+    // review 2 H3).
     async function loadCreators() {
-      const members = await loadInstructorMembers();
-      if (cancelled) return;
-
-      const selected =
+      const ids =
         instructorIds.length > 0
-          ? members.filter((member) => instructorIds.includes(member.membershipId))
-          : members.slice(0, 1);
-
-      setCreators(selected);
+          ? instructorIds
+          : course.createdByMembershipId
+            ? [course.createdByMembershipId]
+            : [];
+      const { instructors } = await resolveInstructorMembersByIds(ids);
+      if (cancelled) return;
+      setCreators(instructors);
     }
 
     void loadCreators();
@@ -301,7 +305,7 @@ export function CourseOverview({ course, modules, courseId }: CourseOverviewProp
     return () => {
       cancelled = true;
     };
-  }, [instructorIds.join("|")]);
+  }, [instructorIds.join("|"), course.createdByMembershipId]);
 
   const primaryCreator = creators[0];
 

@@ -1495,6 +1495,8 @@ model CourseReview {
   comment       String?
   status        String   @default("APPROVED")
   admin_note    String?
+  /// Added by an admin in Manage › Ratings & Reviews, shown as "Added by the academy" (migration 135).
+  added_by_academy Boolean @default(false)
   created_at    DateTime @default(now()) @db.Timestamptz(6)
   updated_at    DateTime @updatedAt @db.Timestamptz(6)
 

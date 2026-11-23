@@ -2,7 +2,10 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ShellAccessBlockedScreen } from "../../components/patterns/errors/ShellAccessBlockedScreen";
-import { loadAdminShellContext } from "../../lib/server/admin-shell-context";
+import {
+  ADMIN_NO_ACCESS_MESSAGE,
+  loadAdminShellContext,
+} from "../../lib/server/admin-shell-context";
 import { buildTenantUnavailableUrl } from "../../lib/tenant-unavailable-redirect";
 import { redirectUnauthenticatedToLogin } from "../../lib/server/shell-auth-redirect";
 import { TenantAdminShellClient } from "./TenantAdminShellClient";
@@ -31,9 +34,14 @@ export async function TenantAdminShellGate({ children }: TenantAdminShellGatePro
     return (
       <ShellAccessBlockedScreen
         branding={context.branding}
-        title="Admin access unavailable"
+        title={
+          context.message === ADMIN_NO_ACCESS_MESSAGE
+            ? "You don't have access"
+            : "Admin access unavailable"
+        }
         description={context.message}
         requestId={context.requestId}
+        action={{ href: "/", label: "Go to your learning" }}
       />
     );
   }

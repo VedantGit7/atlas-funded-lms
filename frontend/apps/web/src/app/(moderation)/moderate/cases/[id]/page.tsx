@@ -4,6 +4,7 @@ import { ModerationCaseDetailClient } from "../../../../../features/moderation/c
 import { ServerApiError, serverApi } from "../../../../../lib/server-api";
 import type { z } from "zod";
 import type { moderationCaseListResponseSchema } from "@atlas/contracts/moderation/moderation.dto";
+import { notOnPlanMessage } from "@/lib/plan-messages";
 
 type ModerationCaseListResponse = z.infer<typeof moderationCaseListResponseSchema>;
 
@@ -44,22 +45,22 @@ export default async function ModerationCaseDetailPage({ params }: PageProps) {
       );
     }
 
+    if (error instanceof ServerApiError && error.code === "ENTITLEMENT_REQUIRED") {
+      return (
+        <PageGate
+          state="denied"
+          title="Moderation case"
+          deniedMessage={notOnPlanMessage("Community moderation")}
+        />
+      );
+    }
+
     if (error instanceof ServerApiError && (error.status === 401 || error.status === 403)) {
       return (
         <PageGate
           state="denied"
           title="Moderation case"
           deniedMessage="You do not have permission to access this moderation case."
-        />
-      );
-    }
-
-    if (error instanceof ServerApiError && error.code === "ENTITLEMENT_REQUIRED") {
-      return (
-        <PageGate
-          state="denied"
-          title="Moderation case"
-          deniedMessage="Community moderation requires the community entitlement."
         />
       );
     }
