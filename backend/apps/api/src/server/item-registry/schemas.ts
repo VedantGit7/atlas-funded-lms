@@ -149,8 +149,21 @@ export const ItemCollectionParamsSchema = z.object({
 
 export const AddCollectionItemBodySchema = z.object({
   itemId: IdSchema,
-  position: z.number().int().min(1).max(1000),
+  /** Leave out to add the question at the end (QA review 1 C8). */
+  position: z.number().int().min(1).max(1000).optional(),
   weight: z.coerce.number().min(0).max(9999).optional(),
+});
+
+/** At most this many questions are added to a collection in one request. */
+export const COLLECTION_BULK_ADD_MAX = 100;
+
+/**
+ * Add many questions to a collection at once, at the end, in this order
+ * (QA review 1 C8). Questions already in it, or no longer in the bank, are
+ * skipped and counted.
+ */
+export const AddCollectionItemsBodySchema = z.object({
+  itemIds: z.array(IdSchema).min(1).max(COLLECTION_BULK_ADD_MAX),
 });
 
 export const DeleteCollectionItemBodySchema = z.object({
@@ -167,4 +180,5 @@ export type CreateItemCollectionInput = z.infer<typeof CreateItemCollectionBodyS
 export type UpdateItemCollectionInput = z.infer<typeof UpdateItemCollectionBodySchema>;
 export type ListItemCollectionsQuery = z.infer<typeof ListItemCollectionsQuerySchema>;
 export type AddCollectionItemInput = z.infer<typeof AddCollectionItemBodySchema>;
+export type AddCollectionItemsInput = z.infer<typeof AddCollectionItemsBodySchema>;
 export type DeleteCollectionItemInput = z.infer<typeof DeleteCollectionItemBodySchema>;

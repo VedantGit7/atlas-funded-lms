@@ -2,20 +2,16 @@ import type { z } from "zod";
 import { PageGate } from "../../../components/patterns/PageGate";
 import { ItemCollectionsTable } from "../../../features/item-registry/components/item-collections-table";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
-import type {
-  itemCollectionListResponseSchema,
-  itemListResponseSchema,
-} from "../../../features/item-registry/item-registry-response-schemas";
+import type { itemCollectionListResponseSchema } from "../../../features/item-registry/item-registry-response-schemas";
 
 type ItemCollectionListResponse = z.infer<typeof itemCollectionListResponseSchema>;
-type ItemListResponse = z.infer<typeof itemListResponseSchema>;
 
 export default async function ItemCollectionsPage() {
   try {
-    const [collections, items] = await Promise.all([
-      serverApi.get<ItemCollectionListResponse>("/api/v1/item-collections"),
-      serverApi.get<ItemListResponse>("/api/v1/items"),
-    ]);
+    // Questions are picked from the whole Item Bank in the page (QA review 1 C8).
+    const collections = await serverApi.get<ItemCollectionListResponse>(
+      "/api/v1/item-collections?limit=100",
+    );
 
     return (
       <PageGate state="ready" title="Item Collections">
@@ -25,11 +21,12 @@ export default async function ItemCollectionsPage() {
               Item Collections
             </h1>
             <p className="mt-0.5 max-w-2xl text-sm text-[var(--admin-on-surface-variant)]">
-              Build quiz banks, practice sets, and swipe decks from reusable items.
+              Group questions into decks, practice sets and quiz banks. Publish a deck to show it to
+              learners in Practice.
             </p>
           </div>
           <div className="min-h-0 flex-1">
-            <ItemCollectionsTable collections={collections.data} items={items.data} />
+            <ItemCollectionsTable collections={collections.data} />
           </div>
         </main>
       </PageGate>
