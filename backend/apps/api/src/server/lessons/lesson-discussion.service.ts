@@ -8,7 +8,11 @@ import {
   mergeContentMetadata,
   parseContentMetadata,
 } from "./lesson-content-metadata";
-import { findLessonWithModuleAndCourse, updateLessonRecord } from "./lessons.repository";
+import {
+  findLessonWithModuleAndCourse,
+  isLessonLearnerVisible,
+  updateLessonRecord,
+} from "./lessons.repository";
 import { lessonEnrollmentRequired, lessonNotFound } from "./lessons.errors";
 import { findEnrollmentForMembership } from "../courses/courses.repository";
 
@@ -25,7 +29,7 @@ async function requireLearnerLesson(tx: TenantTx, ctx: ServiceCtx, lessonId: str
     throw lessonNotFound();
   }
 
-  if (lesson.courseStatus !== "PUBLISHED" || lesson.status !== "PUBLISHED") {
+  if (!isLessonLearnerVisible(lesson)) {
     throw lessonNotFound();
   }
 

@@ -7,6 +7,7 @@ import type {
   studioModuleOutlineItemSchema,
 } from "@atlas/contracts/courses/course-authoring-schemas";
 import { CourseChaptersSidebar } from "./course-chapters-sidebar";
+import { canEditCourseContent } from "./content-visibility";
 import { CourseEditorWorkspace, type CourseEditorWorkspaceState } from "./course-editor-workspace";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
@@ -31,7 +32,14 @@ export function CourseEditor({
       : { mode: "empty" },
   );
   const [lessonsRefreshModuleId, setLessonsRefreshModuleId] = useState<string | null>(null);
-  const editable = initialCourse.status === "DRAFT";
+  // Bumped when the outline publishes, shows or hides something, so the open
+  // lesson re-reads who can see it.
+  const [visibilityVersion, setVisibilityVersion] = useState(0);
+  const handleVisibilityChanged = useCallback(() => {
+    setVisibilityVersion((version) => version + 1);
+  }, []);
+  // Sections and lessons can be added and edited in a live course too (QA S1.6).
+  const editable = canEditCourseContent(initialCourse.status);
 
   const handleStartAddLesson = useCallback((moduleId: string, moduleTitle: string) => {
     setWorkspace({ mode: "add-lesson", moduleId, moduleTitle });
@@ -72,6 +80,8 @@ export function CourseEditor({
           onCancelAddLesson={handleCancelAddLesson}
           onLessonCreated={handleLessonCreated}
           onLessonDeleted={handleLessonDeleted}
+          onLessonStatusChanged={setLessonsRefreshModuleId}
+          visibilityVersion={visibilityVersion}
         />
       </section>
 
@@ -92,6 +102,7 @@ export function CourseEditor({
           onStartAddLesson={handleStartAddLesson}
           onSelectLesson={handleSelectLesson}
           onLessonDeleted={handleLessonDeleted}
+          onVisibilityChanged={handleVisibilityChanged}
         />
       </aside>
     </div>

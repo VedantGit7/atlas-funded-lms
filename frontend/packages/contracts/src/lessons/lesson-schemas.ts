@@ -290,6 +290,9 @@ export const studioLessonDetailSchema = z.object({
   durationSeconds: z.number().int().nullable().optional(),
   position: z.number().int(),
   status: publishStatusStudioSchema,
+  /** The section's and course's status: what editing and publishing this lesson does depends on them. */
+  moduleStatus: publishStatusStudioSchema,
+  courseStatus: publishStatusStudioSchema,
   isPreview: z.boolean().optional(),
   tags: z.array(tagSummarySchema).optional(),
   /** Exactly what a learner will see, for the Studio preview. */

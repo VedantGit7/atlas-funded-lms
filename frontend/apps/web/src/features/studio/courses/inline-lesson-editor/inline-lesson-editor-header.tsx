@@ -85,7 +85,7 @@ export function InlineLessonEditorHeader({
                 }}
               >
                 <Trash2 className="h-4 w-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
-                Move To Trash
+                Move to Trash
               </button>
             ) : null}
           </div>

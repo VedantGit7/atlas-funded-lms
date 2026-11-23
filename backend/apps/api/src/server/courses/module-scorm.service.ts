@@ -47,6 +47,18 @@ async function requireEditableScormModule(tx: TenantTx, ctx: ServiceCtx, moduleI
 
   assertModuleEditable(module.courseStatus);
 
+  // Swapping the package of a section learners are taking would reset their
+  // attempts mid-way: in a live course, only a draft or hidden SCORM section
+  // takes a new package.
+  if (module.courseStatus === "PUBLISHED" && module.status === "PUBLISHED") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message:
+        "Learners are using this SCORM package. Add a new SCORM section, or hide this one first.",
+    });
+  }
+
   if (module.contentKind !== "scorm") {
     throw new AtlasHttpError({
       code: "VALIDATION_ERROR",

@@ -20,9 +20,26 @@ export type LessonRow = {
   durationSeconds: number | null;
   position: number;
   status: CourseLifecycleStatus;
+  /** The section's status: learners see a lesson only in a published section. */
+  moduleStatus: CourseLifecycleStatus;
   courseStatus: CourseLifecycleStatus;
   createdByMembershipId: string | null;
 };
+
+/**
+ * Whether a learner may open this lesson: it, its section and its course are
+ * all published. A published lesson in a hidden or draft section used to
+ * open from a direct link (found in QA S1.6).
+ */
+export function isLessonLearnerVisible(
+  lesson: Pick<LessonRow, "status" | "moduleStatus" | "courseStatus">,
+): boolean {
+  return (
+    lesson.courseStatus === "PUBLISHED" &&
+    lesson.moduleStatus === "PUBLISHED" &&
+    lesson.status === "PUBLISHED"
+  );
+}
 
 function parseLessonContentJson(value: unknown): Record<string, unknown> | null {
   if (value == null) return null;
@@ -234,6 +251,7 @@ export async function findLessonWithModuleAndCourse(args: {
       duration_seconds: number | null;
       position: number;
       status: string;
+      module_status: string;
       course_status: string;
       created_by_membership_id: string | null;
     }>
@@ -251,6 +269,7 @@ export async function findLessonWithModuleAndCourse(args: {
       l.duration_seconds,
       l.position,
       l.status::text,
+      m.status::text as module_status,
       c.status::text as course_status,
       c.created_by_membership_id::text
     from lessons l
@@ -283,6 +302,7 @@ export async function findLessonWithModuleAndCourse(args: {
     durationSeconds: row.duration_seconds,
     position: row.position,
     status: row.status as CourseLifecycleStatus,
+    moduleStatus: row.module_status as CourseLifecycleStatus,
     courseStatus: row.course_status as CourseLifecycleStatus,
     createdByMembershipId: row.created_by_membership_id,
   };

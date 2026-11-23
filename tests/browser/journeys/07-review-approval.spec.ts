@@ -34,6 +34,17 @@ test.describe("J07 review changes", () => {
         headers: { "idempotency-key": randomUUID() },
       });
       expect(module.status()).toBe(200);
+      // A course needs a lesson before it can be submitted (QA review 1 M22).
+      const { data: section } = (await module.json()) as { data: { id: string } };
+      const lesson = await author.request.post(`/api/v1/modules/${section.id}/lessons`, {
+        data: {
+          title: "Review lesson",
+          videoProvider: "youtube",
+          videoUrl: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+        },
+        headers: { "idempotency-key": randomUUID() },
+      });
+      expect(lesson.status()).toBe(200);
       const submission = await author.request.post(`/api/v1/courses/${course.id}/publish`, {
         data: {},
         headers: { "idempotency-key": randomUUID() },

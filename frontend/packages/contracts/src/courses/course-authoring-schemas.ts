@@ -298,6 +298,8 @@ export const contentVisibilityResponseSchema = z.object({
     id: z.uuid(),
     status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
     visible: z.boolean(),
+    /** Sections only: draft lessons published along with a section in a live course. */
+    lessonsPublished: z.number().int().nonnegative().optional(),
   }),
 });
 

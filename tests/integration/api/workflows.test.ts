@@ -17,6 +17,7 @@ import {
   listReviewQueue,
 } from "../../../backend/apps/api/src/server/workflows/workflows.service";
 import {
+  addSectionWithLesson,
   adminCtx,
   authoringTenantTx,
   createCourseAuthoringFixture,
@@ -45,7 +46,7 @@ describeWithDb("workflow integration", () => {
     const admin = adminCtx(fixture, "req_list_queue_admin");
 
     await withTenantTx(authoringTenantTx(fixture), async (tx) => {
-      await createCourseModule(tx, instructor, fixture.draftCourseId, { title: "Queue Module" });
+      await addSectionWithLesson(tx, instructor, fixture.draftCourseId, "Queue Module");
       await submitCourseForReview(tx, instructor, fixture.draftCourseId, {});
     });
 
@@ -65,7 +66,7 @@ describeWithDb("workflow integration", () => {
     const admin = adminCtx(fixture, "req_approve_course_admin");
 
     const submitted = await withTenantTx(authoringTenantTx(fixture), async (tx) => {
-      await createCourseModule(tx, instructor, fixture.draftCourseId, { title: "Approve Module" });
+      await addSectionWithLesson(tx, instructor, fixture.draftCourseId, "Approve Module");
       return submitCourseForReview(tx, instructor, fixture.draftCourseId, { reason: "Ready" });
     });
 
@@ -139,7 +140,7 @@ describeWithDb("workflow integration", () => {
     const admin = adminCtx(fixture, "req_return_course_admin");
 
     const submitted = await withTenantTx(authoringTenantTx(fixture), async (tx) => {
-      await createCourseModule(tx, instructor, fixture.draftCourseId, { title: "Return Module" });
+      await addSectionWithLesson(tx, instructor, fixture.draftCourseId, "Return Module");
       return submitCourseForReview(tx, instructor, fixture.draftCourseId, {});
     });
 
@@ -172,7 +173,7 @@ describeWithDb("workflow integration", () => {
     const admin = adminCtx(fixture, "req_stale_transition_admin");
 
     const submitted = await withTenantTx(authoringTenantTx(fixture), async (tx) => {
-      await createCourseModule(tx, instructor, fixture.draftCourseId, { title: "Stale Module" });
+      await addSectionWithLesson(tx, instructor, fixture.draftCourseId, "Stale Module");
       return submitCourseForReview(tx, instructor, fixture.draftCourseId, {});
     });
 
@@ -213,7 +214,7 @@ describeWithDb("workflow integration", () => {
     const admin = adminCtx(fixture, "req_workflow_outbox_admin");
 
     const submitted = await withTenantTx(authoringTenantTx(fixture), async (tx) => {
-      await createCourseModule(tx, instructor, fixture.draftCourseId, { title: "Outbox Module" });
+      await addSectionWithLesson(tx, instructor, fixture.draftCourseId, "Outbox Module");
       return submitCourseForReview(tx, instructor, fixture.draftCourseId, {});
     });
 

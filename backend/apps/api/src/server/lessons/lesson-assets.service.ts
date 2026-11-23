@@ -5,6 +5,7 @@ import { createLessonAssetDownload } from "@atlas/storage/lesson-asset.service";
 import { findEnrollmentForMembership } from "../courses/courses.repository";
 import type { CreateLessonAssetBody, LessonDetailQuery } from "./lesson-schemas";
 import { lessonAssetNotFound, lessonEnrollmentRequired, lessonNotFound } from "./lessons.errors";
+import { assertLessonEditable } from "../courses/course-state-guards";
 import {
   findLessonAssetById,
   findStorageReferenceById,
@@ -12,7 +13,7 @@ import {
   listLessonAssets,
   softDeleteLessonAsset,
 } from "./lesson-assets.repository";
-import { findLessonWithModuleAndCourse } from "./lessons.repository";
+import { findLessonWithModuleAndCourse, isLessonLearnerVisible } from "./lessons.repository";
 import { canManageCourse } from "../courses/course-studio-access";
 
 type ServiceCtx = {
@@ -47,7 +48,7 @@ async function requireLearnerLesson(tx: TenantTx, ctx: ServiceCtx, lessonId: str
     throw lessonNotFound();
   }
 
-  if (lesson.courseStatus !== "PUBLISHED" || lesson.status !== "PUBLISHED") {
+  if (!isLessonLearnerVisible(lesson)) {
     throw lessonNotFound();
   }
 
@@ -150,13 +151,7 @@ export async function attachLessonAsset(
 ) {
   const lesson = await requireStudioLesson(tx, ctx, lessonId);
 
-  if (lesson.courseStatus !== "DRAFT") {
-    throw new AtlasHttpError({
-      code: "VALIDATION_ERROR",
-      status: 409,
-      message: "Lesson assets can only be attached while the parent course is editable.",
-    });
-  }
+  assertLessonEditable(lesson.courseStatus);
 
   let objectKeyOrUrl = input.objectKeyOrUrl ?? null;
   const metadata: Record<string, unknown> = { ...(input.metadata ?? {}) };

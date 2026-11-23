@@ -79,7 +79,7 @@ export function publishNote(status: CourseDetail["status"]): string {
     case "REVIEW":
       return "This course is in review. It goes live for learners once a reviewer approves it.";
     case "PUBLISHED":
-      return "Unpublishing takes a live course back to draft so you can edit it. Enrolled learners keep their enrollment and progress, but can't open the course until it is approved again.";
+      return "Unpublishing takes a live course back to draft. Enrolled learners keep their enrollment and progress, but see that the course is being updated until it is approved again.";
     default:
       return "This course is archived, so it can't be published or unpublished.";
   }
@@ -339,7 +339,8 @@ export function CourseSettingsPublishCoursePanel({
       />
 
       <p className={`${builderHelperClassName} mt-6 leading-relaxed`}>
-        {publishNote(course.status)} To hide one section or lesson instead, use its menu in the{" "}
+        {publishNote(course.status)} To add, change, publish or hide sections and lessons while
+        learners keep access, use the{" "}
         <Link
           href={`/studio/courses/${courseId}/editor`}
           prefetch={false}

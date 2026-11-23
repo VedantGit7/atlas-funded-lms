@@ -8,6 +8,16 @@ export function courseNotFound(): AtlasHttpError {
   });
 }
 
+/** An enrolled learner opened a course that is back in draft or in review. */
+export function courseBeingUpdated(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "COURSE_BEING_UPDATED",
+    status: 409,
+    message:
+      "This course is being updated. Your progress is saved, and you can continue when it's back.",
+  });
+}
+
 export function courseEnrollmentDenied(): AtlasHttpError {
   return new AtlasHttpError({
     code: "PERMISSION_DENIED",
@@ -44,7 +54,7 @@ export function moduleDeleteConflict(): AtlasHttpError {
   return new AtlasHttpError({
     code: "VALIDATION_ERROR",
     status: 409,
-    message: "Module cannot be deleted while lessons exist.",
+    message: "Move or trash this section's lessons first. Only an empty section can go to Trash.",
   });
 }
 

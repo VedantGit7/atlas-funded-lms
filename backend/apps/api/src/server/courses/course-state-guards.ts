@@ -74,12 +74,40 @@ export function assertCourseArchivable(
   }
 }
 
+/**
+ * Sections and lessons can be added, edited, moved and trashed while the
+ * course is a draft or live (QA review 1 C27, review 2 C2 and C3). In a live
+ * course, new ones start as drafts that learners can't see until they're
+ * published one by one; edits to published lessons reach learners on save.
+ * Only review (the reviewer is looking at a fixed course) and archive lock it.
+ */
+export function canEditCourseContent(status: CourseLifecycleStatus): boolean {
+  return status === "DRAFT" || status === "PUBLISHED";
+}
+
+export function assertCourseContentEditable(status: CourseLifecycleStatus): void {
+  if (status === "REVIEW") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "This course is in review. You can edit its content after the review.",
+    });
+  }
+  if (!canEditCourseContent(status)) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 409,
+      message: "This course is archived. Restore it to edit its content.",
+    });
+  }
+}
+
 export function assertModuleEditable(courseStatus: CourseLifecycleStatus): void {
-  assertCourseEditable(courseStatus);
+  assertCourseContentEditable(courseStatus);
 }
 
 export function assertLessonEditable(courseStatus: CourseLifecycleStatus): void {
-  assertCourseEditable(courseStatus);
+  assertCourseContentEditable(courseStatus);
 }
 
 export function validateLessonPositions(positions: number[]): void {

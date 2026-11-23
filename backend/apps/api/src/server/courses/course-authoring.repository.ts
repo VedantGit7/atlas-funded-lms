@@ -330,6 +330,84 @@ export async function setCourseModuleStatus(args: {
   `;
 }
 
+/** Publishing a section in a live course publishes its draft lessons too; hidden ones stay hidden. */
+export async function publishDraftLessonsInModule(args: {
+  tx: Tx;
+  moduleId: string;
+}): Promise<number> {
+  const updated = await args.tx.$executeRaw`
+    update lessons
+    set status = 'PUBLISHED'::"PublishStatus",
+        updated_at = now()
+    where module_id = ${args.moduleId}::uuid
+      and deleted_at is null
+      and status in ('DRAFT'::"PublishStatus", 'REVIEW'::"PublishStatus")
+  `;
+  return Number(updated);
+}
+
+/**
+ * Unpublishing a course returns its published sections and lessons to draft,
+ * so a draft course holds only draft and hidden content and the next approval
+ * publishes it again (QA review 2 C2). Hidden content stays hidden.
+ */
+export async function returnCourseContentToDraft(args: {
+  tx: Tx;
+  courseId: string;
+}): Promise<{ modules: number; lessons: number }> {
+  const modules = await args.tx.$executeRaw`
+    update course_modules
+    set status = 'DRAFT'::"PublishStatus",
+        updated_at = now()
+    where course_id = ${args.courseId}::uuid
+      and deleted_at is null
+      and status = 'PUBLISHED'::"PublishStatus"
+  `;
+  const lessons = await args.tx.$executeRaw`
+    update lessons l
+    set status = 'DRAFT'::"PublishStatus",
+        updated_at = now()
+    from course_modules m
+    where l.module_id = m.id
+      and m.course_id = ${args.courseId}::uuid
+      and l.deleted_at is null
+      and l.status = 'PUBLISHED'::"PublishStatus"
+  `;
+  return { modules: Number(modules), lessons: Number(lessons) };
+}
+
+/**
+ * What a learner would get: lessons and ready SCORM packages in sections that
+ * aren't hidden. A course needs at least one to be submitted (QA review 1 M22).
+ */
+export async function countLearnableCourseContent(args: {
+  tx: Tx;
+  courseId: string;
+}): Promise<number> {
+  const rows = await args.tx.$queryRaw<Array<{ count: number }>>`
+    select (
+      (select count(*)
+         from lessons l
+         join course_modules m on m.id = l.module_id
+        where m.course_id = ${args.courseId}::uuid
+          and m.deleted_at is null
+          and m.status <> 'ARCHIVED'::"PublishStatus"
+          and m.content_kind = 'STANDARD'::"CourseModuleContentKind"
+          and l.deleted_at is null
+          and l.status <> 'ARCHIVED'::"PublishStatus")
+      +
+      (select count(*)
+         from course_modules m
+        where m.course_id = ${args.courseId}::uuid
+          and m.deleted_at is null
+          and m.status <> 'ARCHIVED'::"PublishStatus"
+          and m.content_kind = 'SCORM'::"CourseModuleContentKind"
+          and m.scorm_launch_path is not null)
+    )::int as count
+  `;
+  return rows[0]?.count ?? 0;
+}
+
 export async function archiveCourseRecord(args: { tx: Tx; courseId: string }): Promise<void> {
   await args.tx.$executeRaw`
     update courses

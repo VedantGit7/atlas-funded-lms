@@ -1,5 +1,9 @@
 import type { z } from "zod";
 import { PageGate } from "../../../components/patterns/PageGate";
+import {
+  COURSE_BEING_UPDATED,
+  CourseBeingUpdated,
+} from "../../../features/courses/course-being-updated";
 import { CourseDetail } from "../../../features/courses/course-detail";
 import { CourseCouponChecker } from "../../../features/courses/CourseCouponChecker";
 import { CourseStorePricing } from "../../../features/courses/CourseStorePricing";
@@ -40,6 +44,10 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
     );
   } catch (error) {
     if (error instanceof ServerApiError) {
+      if (error.code === COURSE_BEING_UPDATED) {
+        return <CourseBeingUpdated />;
+      }
+
       if (error.status === 404 || error.status === 403) {
         return (
           <PageGate

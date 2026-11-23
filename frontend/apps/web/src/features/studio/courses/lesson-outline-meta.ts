@@ -65,7 +65,35 @@ export const hiddenContentBadge: LessonOutlineBadge = {
     "border border-dashed border-[var(--admin-outline)] bg-[var(--admin-surface)] text-[var(--admin-on-surface-variant)]",
 };
 
-export function resolveLessonBadges(lesson: LessonOutlineItem): LessonOutlineBadge[] {
+/**
+ * Shown on a section or lesson added to a live course and not published yet.
+ * In a draft course everything is unpublished until approval, so nothing is
+ * badged there but hidden content (QA review 2 H10: an "Unpublished" badge in
+ * a draft course looked like a hide switch, and approval published it).
+ */
+export const draftContentBadge: LessonOutlineBadge = {
+  key: "draft",
+  label: "Draft",
+  className:
+    "bg-[color-mix(in_srgb,var(--admin-warning)_14%,var(--admin-surface))] text-[var(--admin-warning)]",
+};
+
+/** The visibility badge for a section or lesson, if any. */
+export function contentStatusBadge(
+  status: PublishStatus,
+  courseStatus: PublishStatus,
+): LessonOutlineBadge | null {
+  if (status === "ARCHIVED") return hiddenContentBadge;
+  if (courseStatus === "PUBLISHED" && (status === "DRAFT" || status === "REVIEW")) {
+    return draftContentBadge;
+  }
+  return null;
+}
+
+export function resolveLessonBadges(
+  lesson: LessonOutlineItem,
+  courseStatus: PublishStatus,
+): LessonOutlineBadge[] {
   const badges: LessonOutlineBadge[] = [];
 
   if (lesson.lessonType === "live") {
@@ -77,22 +105,8 @@ export function resolveLessonBadges(lesson: LessonOutlineItem): LessonOutlineBad
     });
   }
 
-  if (lesson.status === "DRAFT") {
-    badges.push({
-      key: "unpublished",
-      label: "Unpublished",
-      className: "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]",
-    });
-  } else if (lesson.status === "ARCHIVED") {
-    badges.push(hiddenContentBadge);
-  } else if (lesson.status === "REVIEW") {
-    badges.push({
-      key: "review",
-      label: "In review",
-      className:
-        "bg-[color-mix(in_srgb,var(--admin-warning)_14%,var(--admin-surface))] text-[var(--admin-warning)]",
-    });
-  }
+  const status = contentStatusBadge(lesson.status, courseStatus);
+  if (status) badges.push(status);
 
   return badges;
 }

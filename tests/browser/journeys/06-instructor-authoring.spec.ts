@@ -57,8 +57,20 @@ test.describe("J06 instructor authoring and independent review", () => {
         response.request().method() === "POST",
     );
     await chapter.getByRole("button", { name: "Create", exact: true }).click();
-    expect((await moduleCreation).status()).toBe(200);
+    const createdModule = await moduleCreation;
+    expect(createdModule.status()).toBe(200);
     await expect(page.getByText("1. Browser chapter", { exact: true })).toBeVisible();
+    // A course needs a lesson before it can be submitted (QA review 1 M22).
+    const { data: section } = (await createdModule.json()) as { data: { id: string } };
+    const lesson = await page.request.post(`/api/v1/modules/${section.id}/lessons`, {
+      data: {
+        title: "Browser lesson",
+        videoProvider: "youtube",
+        videoUrl: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+      },
+      headers: { "idempotency-key": randomUUID() },
+    });
+    expect(lesson.status()).toBe(200);
     await page.goto(`/studio/courses/${course.id}/settings?section=publish-course`);
     await waitForHydration(page);
     const live = page

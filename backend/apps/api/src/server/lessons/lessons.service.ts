@@ -24,6 +24,7 @@ import {
   findLessonWithModuleAndCourse,
   findNextLessonPosition,
   insertLesson,
+  isLessonLearnerVisible,
   lessonSlugExists,
   listLessonsForModuleBuilder,
   listPublishedLessonNavigation,
@@ -449,6 +450,8 @@ export async function getLessonForEditor(tx: TenantTx, ctx: ServiceCtx, lessonId
       durationSeconds: lesson.durationSeconds,
       position: lesson.position,
       status: lesson.status,
+      moduleStatus: lesson.moduleStatus,
+      courseStatus: lesson.courseStatus,
       isPreview: content.isPreview,
       tags: tags.map(mapTagSummary),
       playerContent: await playerContentFor(tx, ctx, lesson, "studio"),
@@ -469,7 +472,7 @@ export async function getLessonForPlayer(
     throw lessonNotFound();
   }
 
-  if (lesson.courseStatus !== "PUBLISHED" || lesson.status !== "PUBLISHED") {
+  if (!isLessonLearnerVisible(lesson)) {
     throw lessonNotFound();
   }
 

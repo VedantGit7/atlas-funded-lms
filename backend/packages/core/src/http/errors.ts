@@ -31,6 +31,10 @@ export type AtlasErrorCode =
   // (audit finding H5).
   | "MFA_REQUIRED"
   | "PAYMENT_REQUIRED"
+  // 409. An enrolled learner opened a course its academy has taken offline to
+  // update. Distinct from PERMISSION_DENIED so the page can say "being
+  // updated" instead of "not found" (QA S1.6).
+  | "COURSE_BEING_UPDATED"
   | "VALIDATION_ERROR"
   // 429. Distinct from INTERNAL_ERROR so clients can back off instead of
   // treating a throttle as a server fault (audit finding L4).
