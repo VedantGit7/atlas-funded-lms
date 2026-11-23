@@ -19,7 +19,7 @@ import {
   markEnrollmentCompletedIfAllLessonsDone,
   upsertLessonProgress,
 } from "./lesson-progress.repository";
-import { findLessonWithModuleAndCourse } from "./lessons.repository";
+import { findLessonWithModuleAndCourse, isLessonLearnerVisible } from "./lessons.repository";
 import { hasPassedQuiz, quizAssessmentIdOf, quizLessonNeedsPass } from "./quiz-lessons";
 
 type ServiceCtx = {
@@ -46,7 +46,7 @@ export async function recordLessonProgress(
     throw lessonNotFound();
   }
 
-  if (lesson.courseStatus !== "PUBLISHED" || lesson.status !== "PUBLISHED") {
+  if (!isLessonLearnerVisible(lesson)) {
     throw lessonNotFound();
   }
 

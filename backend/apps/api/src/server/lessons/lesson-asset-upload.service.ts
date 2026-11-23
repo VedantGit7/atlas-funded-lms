@@ -16,6 +16,7 @@ import type { AssetPurpose } from "@atlas/storage/schemas/storage-policy";
 import { assertAllowedSize } from "@atlas/storage/size-policy";
 import { findLessonWithModuleAndCourse } from "./lessons.repository";
 import { lessonNotFound } from "./lessons.errors";
+import { assertLessonEditable } from "../courses/course-state-guards";
 import { lessonAssetBlobBodySchema, type LessonAssetBlobBody } from "./lesson-schemas";
 import { canManageCourse } from "../courses/course-studio-access";
 
@@ -101,13 +102,7 @@ async function requireEditableStudioLesson(tx: TenantTx, ctx: ServiceCtx, lesson
     throw lessonNotFound();
   }
 
-  if (lesson.courseStatus !== "DRAFT") {
-    throw new AtlasHttpError({
-      code: "VALIDATION_ERROR",
-      status: 409,
-      message: "Lesson uploads are only allowed while the parent course is editable.",
-    });
-  }
+  assertLessonEditable(lesson.courseStatus);
 
   return lesson;
 }

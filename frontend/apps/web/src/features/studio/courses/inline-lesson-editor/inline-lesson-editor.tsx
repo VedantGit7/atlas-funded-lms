@@ -21,6 +21,8 @@ import { LessonLiveWorkspace } from "./lesson-live-workspace";
 import { LessonSectionQuizWorkspace } from "./lesson-section-quiz-workspace";
 import { LessonUploadWorkspace } from "./lesson-upload-workspace";
 import { InlineLessonSettingsPanel } from "./inline-lesson-settings-panel";
+import { LessonStatusStrip } from "./lesson-status-strip";
+import { canEditCourseContent } from "../content-visibility";
 import { LessonBody } from "../../../lessons/lesson-body";
 import { normalizeLessonTypeForEditor, type InlineLessonEditorType } from "./lesson-type-meta";
 
@@ -30,6 +32,10 @@ type InlineLessonEditorProps = {
   courseId: string;
   lessonId: string;
   onDeleted: () => void;
+  /** The lesson was published, shown or hidden here: the outline should refresh. */
+  onStatusChanged?: () => void;
+  /** Changes when the outline publishes, shows or hides content: re-read the lesson's status. */
+  visibilityVersion?: number;
 };
 
 function formatError(error: unknown): string {
@@ -48,7 +54,13 @@ function isUploadType(
   );
 }
 
-export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLessonEditorProps) {
+export function InlineLessonEditor({
+  courseId,
+  lessonId,
+  onDeleted,
+  onStatusChanged,
+  visibilityVersion = 0,
+}: InlineLessonEditorProps) {
   const [lesson, setLesson] = useState<StudioLessonDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +103,12 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
     setViewMode("editor");
     setShowEmbed(false);
   }, [loadLesson, lessonId]);
+
+  // Publishing or hiding this lesson's section from the outline changes what
+  // its status line should say.
+  useEffect(() => {
+    if (visibilityVersion > 0) void refreshLesson();
+  }, [refreshLesson, visibilityVersion]);
 
   async function saveEmbedUrl() {
     if (!lesson || !embedUrl.trim()) return;
@@ -148,7 +166,9 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
   }
 
   const editorType = normalizeLessonTypeForEditor(lesson.lessonType);
-  const editable = lesson.status === "DRAFT";
+  // Edit rights follow the course, not the lesson: a published lesson in a
+  // draft or live course can be edited (QA review 2 C2; S1.6).
+  const editable = canEditCourseContent(lesson.courseStatus);
   const showAttachments = editorType !== "section_quiz";
   const embedDraftProvider = embedUrl.trim() ? inferVideoProviderFromUrl(embedUrl) : null;
   const embedDraftReady = Boolean(
@@ -172,6 +192,19 @@ export function InlineLessonEditor({ courseId, lessonId, onDeleted }: InlineLess
           }}
           onOpenPreview={() => {
             setShowPreview(true);
+          }}
+        />
+      ) : null}
+
+      {viewMode === "editor" ? (
+        <LessonStatusStrip
+          lessonId={lesson.id}
+          status={lesson.status}
+          moduleStatus={lesson.moduleStatus}
+          courseStatus={lesson.courseStatus}
+          onChanged={(status) => {
+            setLesson((current) => (current ? { ...current, status } : current));
+            onStatusChanged?.();
           }}
         />
       ) : null}

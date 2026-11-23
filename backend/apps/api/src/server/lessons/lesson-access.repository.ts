@@ -19,6 +19,7 @@ type LessonAccessRow = {
   duration_seconds: number | null;
   position: number;
   status: string;
+  module_status: string;
   course_tenant_id: string;
   course_slug: string;
   course_title: string;
@@ -63,6 +64,7 @@ export async function findLessonWithCourseAndEnrollment(args: {
       l.duration_seconds,
       l.position,
       l.status::text,
+      m.status::text as module_status,
       c.tenant_id::text as course_tenant_id,
       c.slug as course_slug,
       c.title as course_title,
@@ -114,6 +116,7 @@ export async function findLessonWithCourseAndEnrollment(args: {
       durationSeconds: row.duration_seconds,
       position: row.position,
       status: row.status as CourseLifecycleStatus,
+      moduleStatus: row.module_status as CourseLifecycleStatus,
       courseStatus: row.course_status as CourseLifecycleStatus,
       createdByMembershipId: row.course_created_by_membership_id,
     },

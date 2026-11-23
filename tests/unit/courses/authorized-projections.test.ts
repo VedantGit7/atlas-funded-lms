@@ -91,6 +91,7 @@ const lesson = {
   courseId: "course-a",
   moduleId: "module-a",
   status: "PUBLISHED",
+  moduleStatus: "PUBLISHED",
   courseStatus: "PUBLISHED",
   contentJson: null,
   durationSeconds: 100,

@@ -15,6 +15,9 @@ type CourseEditorWorkspaceProps = {
   onCancelAddLesson: () => void;
   onLessonCreated: (moduleId: string, lessonId: string) => void;
   onLessonDeleted: (moduleId: string, lessonId: string) => void;
+  onLessonStatusChanged?: (moduleId: string) => void;
+  /** Changes when the outline publishes, shows or hides content. */
+  visibilityVersion?: number;
 };
 
 export function CourseEditorWorkspace({
@@ -23,6 +26,8 @@ export function CourseEditorWorkspace({
   onCancelAddLesson,
   onLessonCreated,
   onLessonDeleted,
+  onLessonStatusChanged,
+  visibilityVersion = 0,
 }: CourseEditorWorkspaceProps) {
   if (workspace.mode === "add-lesson") {
     return (
@@ -43,6 +48,10 @@ export function CourseEditorWorkspace({
         onDeleted={() => {
           onLessonDeleted(workspace.moduleId, workspace.lessonId);
         }}
+        onStatusChanged={() => {
+          onLessonStatusChanged?.(workspace.moduleId);
+        }}
+        visibilityVersion={visibilityVersion}
       />
     );
   }

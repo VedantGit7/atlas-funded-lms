@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
 import { submitCourseForReview } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
-import { createCourseModule } from "../../../backend/apps/api/src/server/courses/course-authoring.service";
 import { findCourseAuthProjection } from "../../../backend/apps/api/src/server/courses/courses.repository";
 import {
+  addSectionWithLesson,
   createCourseAuthoringFixture,
   instructorCtx,
   authoringTenantTx,
@@ -18,7 +18,7 @@ describeWithDb("course publish integration", () => {
     const ctx = instructorCtx(fixture, "req_publish_course");
 
     const result = await withTenantTx(authoringTenantTx(fixture), async (tx) => {
-      await createCourseModule(tx, ctx, fixture.draftCourseId, { title: "Publish Module" });
+      await addSectionWithLesson(tx, ctx, fixture.draftCourseId, "Publish Module");
       return submitCourseForReview(tx, ctx, fixture.draftCourseId, {});
     });
 
@@ -46,7 +46,7 @@ describeWithDb("course publish integration", () => {
     const ctx = instructorCtx(fixture, "req_publish_audit");
 
     await withTenantTx(authoringTenantTx(fixture), async (tx) => {
-      await createCourseModule(tx, ctx, fixture.draftCourseId, { title: "Audit Module" });
+      await addSectionWithLesson(tx, ctx, fixture.draftCourseId, "Audit Module");
       await submitCourseForReview(tx, ctx, fixture.draftCourseId, { reason: "Ready" });
 
       const rows = await tx.$queryRaw<Array<{ action: string }>>`

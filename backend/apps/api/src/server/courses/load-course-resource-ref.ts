@@ -1,7 +1,7 @@
 import { createTenantResourceRef, type ResourceRef } from "@atlas/authorization";
 import type { TenantTx } from "@atlas/db";
 import { findModuleWithCourse } from "./course-authoring.repository";
-import { courseNotFound, moduleNotFound } from "./courses.errors";
+import { courseBeingUpdated, courseNotFound, moduleNotFound } from "./courses.errors";
 import { findCourseAuthProjection, findEnrollmentForMembership } from "./courses.repository";
 import type { findLessonWithModuleAndCourse } from "../lessons/lessons.repository";
 import { findLessonWithCourseAndEnrollment } from "../lessons/lesson-access.repository";
@@ -60,17 +60,28 @@ export async function loadCourseResourceRef(args: {
     throw courseNotFound();
   }
 
-  if (args.requirePublished !== false && course.status !== "PUBLISHED") {
-    throw courseNotFound();
-  }
-
   const enrollment = await findEnrollmentForMembership({
     tx: args.tx,
     courseId: args.courseId,
     membershipId: args.ctx.actorMembershipId,
   });
 
+  if (args.requirePublished !== false && course.status !== "PUBLISHED") {
+    throw offlineCourseError(course.status, enrollment);
+  }
+
   return courseResourceRef({ tx: args.tx, ctx: args.ctx, course, enrollment });
+}
+
+/**
+ * A learner asking for a course that isn't live. Its own enrolled learners are
+ * told it's being updated (it was unpublished to edit, or is in review again);
+ * everyone else gets "not found", as for a course that never went live.
+ */
+function offlineCourseError(status: string, enrollment: unknown) {
+  return enrollment && (status === "DRAFT" || status === "REVIEW")
+    ? courseBeingUpdated()
+    : courseNotFound();
 }
 
 /** The course's resource ref from its loaded projection and the member's enrollment. */
@@ -220,7 +231,9 @@ export async function loadLessonParentCourseResourceRef(args: {
   const { lesson, course, enrollment } = found;
 
   if (args.requirePublished !== false && lesson.courseStatus !== "PUBLISHED") {
-    throw lessonNotFound();
+    throw enrollment && course.tenantId === args.ctx.tenantId
+      ? offlineCourseError(lesson.courseStatus, enrollment)
+      : lessonNotFound();
   }
 
   if (course.tenantId !== args.ctx.tenantId) {

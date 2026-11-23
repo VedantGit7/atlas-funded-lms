@@ -21,6 +21,16 @@ import { TRASH_RETENTION_DAYS } from "@atlas/contracts/content-trash/content-tra
 
 import { clientApi, createClientUuid } from "../../../lib/client-api";
 
+/**
+ * What a restore or permanent delete says. The generic message was built from
+ * the request key and read "Trash Restore 97ab9cf8 … created successfully"
+ * (QA review 2 H28).
+ */
+export function trashActionMessage(action: "restore" | "purge", kind: ContentTrashKind): string {
+  const noun = kind === "courses" ? "Course" : kind === "sections" ? "Section" : "Lesson";
+  return action === "restore" ? `${noun} restored` : `${noun} deleted for good`;
+}
+
 const TABS: Array<{ kind: ContentTrashKind; label: string; icon: typeof BookOpen }> = [
   { kind: "courses", label: "Courses", icon: BookOpen },
   { kind: "sections", label: "Sections", icon: Layers },
@@ -134,12 +144,14 @@ export function AdminTrashPanel({ initial }: { initial: ContentTrashListResponse
           "/api/v1/content-trash",
           { kind: item.kind, id: item.id },
           `trash-restore-${createClientUuid()}`,
+          { successMessage: trashActionMessage("restore", item.kind) },
         );
       } else {
         await clientApi.post(
           "/api/v1/content-trash/purge",
           { kind: item.kind, id: item.id },
           `trash-purge-${createClientUuid()}`,
+          { successMessage: trashActionMessage("purge", item.kind) },
         );
       }
       setItemsByKind((prev) => ({

@@ -23,6 +23,7 @@ import {
   archiveCourseRecord,
   buildMetadataPatch,
   countActiveEnrollments,
+  countLearnableCourseContent,
   countModuleLessons,
   courseSlugExists,
   findModuleWithCourse,
@@ -549,6 +550,16 @@ export async function submitCourseForReview(
 
   const modules = await listCourseModulesForBuilder({ tx, courseId });
   validateModulePositions(modules.map((item) => item.position));
+
+  // QA review 1 M22: an empty course could be submitted, approved and published.
+  if ((await countLearnableCourseContent({ tx, courseId })) === 0) {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message:
+        "Add at least one lesson before submitting this course. Hidden sections and lessons don't count.",
+    });
+  }
 
   const workflow = await findWorkflowDefinitionByKey({ tx, key: "course.publish" });
   if (!workflow) {

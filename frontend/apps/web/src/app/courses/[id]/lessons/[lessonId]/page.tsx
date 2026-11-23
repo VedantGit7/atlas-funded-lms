@@ -1,5 +1,9 @@
 import type { z } from "zod";
 import { PageGate } from "../../../../../components/patterns/PageGate";
+import {
+  COURSE_BEING_UPDATED,
+  CourseBeingUpdated,
+} from "../../../../../features/courses/course-being-updated";
 import { LessonPlayerShell } from "../../../../../features/lessons/lesson-player-shell";
 import { ServerApiError, serverApi } from "../../../../../lib/server-api";
 import type { courseDetailResponseSchema } from "@atlas/contracts/courses/schemas";
@@ -38,6 +42,10 @@ export default async function LessonPlayerPage({ params }: LessonPlayerPageProps
     );
   } catch (error) {
     if (error instanceof ServerApiError) {
+      if (error.code === COURSE_BEING_UPDATED) {
+        return <CourseBeingUpdated />;
+      }
+
       if (error.status === 404 || error.status === 403) {
         return (
           <PageGate

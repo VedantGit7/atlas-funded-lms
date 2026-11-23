@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assertCourseArchivable,
+  assertCourseContentEditable,
   assertCourseEditable,
   assertCoursePublishable,
   assertModuleEditable,
@@ -23,9 +24,11 @@ describe("course state guards", () => {
     expect(() => assertCourseArchivable("DRAFT", false)).not.toThrow();
   });
 
-  it("inherits course editability for modules", () => {
+  it("lets sections and lessons change in draft and live courses, not in review or archive", () => {
     expect(() => assertModuleEditable("DRAFT")).not.toThrow();
-    expect(() => assertModuleEditable("REVIEW")).toThrow();
+    expect(() => assertModuleEditable("PUBLISHED")).not.toThrow();
+    expect(() => assertModuleEditable("REVIEW")).toThrow(/in review/);
+    expect(() => assertCourseContentEditable("ARCHIVED")).toThrow(/archived/);
   });
 
   it("accepts empty module list positions", () => {

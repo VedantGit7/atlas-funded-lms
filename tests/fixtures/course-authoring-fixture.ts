@@ -4,7 +4,10 @@ import {
   assignSystemRoleToMembership,
   seedTenantAccessControl,
 } from "@atlas/access";
-import { withTenantTx } from "@atlas/db";
+import { withTenantTx, type TenantTx } from "@atlas/db";
+import { createCourseModule } from "../../backend/apps/api/src/server/courses/course-authoring.service";
+import { createLesson } from "../../backend/apps/api/src/server/lessons/lessons.service";
+import { createLessonBodySchema } from "../../backend/apps/api/src/server/lessons/lesson-schemas";
 import {
   createTenantIsolationFixture,
   tenantCtx,
@@ -285,4 +288,28 @@ export function authoringTenantTx(
     actorMembershipId: membershipId,
     requestId,
   };
+}
+
+/**
+ * A section with one video lesson, through the studio services. A course
+ * needs a lesson before it can be submitted for review (QA review 1 M22).
+ */
+export async function addSectionWithLesson(
+  tx: TenantTx,
+  ctx: { tenantId: string; actorMembershipId: string; requestId: string },
+  courseId: string,
+  title = "Section",
+) {
+  const section = await createCourseModule(tx, ctx, courseId, { title });
+  const lesson = await createLesson(
+    tx,
+    ctx,
+    section.data.id,
+    createLessonBodySchema.parse({
+      title: `${title} lesson`,
+      videoProvider: "youtube",
+      videoUrl: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+    }),
+  );
+  return { sectionId: section.data.id, lessonId: lesson.data.id };
 }

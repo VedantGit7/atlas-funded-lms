@@ -44,14 +44,18 @@ vi.mock("../../../frontend/apps/web/src/lib/client-api", () => ({
 
 import {
   canChangeContentVisibility,
+  canEditCourseContent,
+  contentVisibilityAction,
   contentVisibilityNotice,
   isContentHidden,
   unpublishWarning,
   updateLessonVisibility,
   updateModuleVisibility,
-  visibilityActionLabel,
+  visibilityResultMessage,
 } from "../../../frontend/apps/web/src/features/studio/courses/content-visibility";
 import { resolveLessonBadges } from "../../../frontend/apps/web/src/features/studio/courses/lesson-outline-meta";
+import { lessonEditorStatus } from "../../../frontend/apps/web/src/features/studio/courses/inline-lesson-editor/lesson-status-strip";
+import { trashActionMessage } from "../../../frontend/apps/web/src/features/admin/trash/AdminTrashPanel";
 import {
   CourseSettingsPublishCoursePanel,
   publishNote,
@@ -74,24 +78,131 @@ describe("content visibility helpers", () => {
     expect(canChangeContentVisibility("PUBLISHED")).toBe(true);
     expect(canChangeContentVisibility("REVIEW")).toBe(false);
     expect(canChangeContentVisibility("ARCHIVED")).toBe(false);
-    expect(visibilityActionLabel(true)).toBe("Show to learners");
-    expect(visibilityActionLabel(false)).toBe("Hide from learners");
     expect(contentVisibilityNotice("REVIEW")).toMatch(/after the review/);
-    expect(contentVisibilityNotice("PUBLISHED")).toMatch(/straight away/);
+    expect(contentVisibilityNotice("PUBLISHED")).toMatch(/stay as drafts until you publish them/);
   });
 
-  it("badges a hidden lesson", () => {
-    const badges = resolveLessonBadges({
-      id: lessonId,
-      slug: "lesson",
-      title: "Lesson",
-      position: 1,
-      status: "ARCHIVED",
-      lessonType: "video",
-      videoUrl: null,
-      durationSeconds: null,
-    } as Parameters<typeof resolveLessonBadges>[0]);
-    expect(badges.map((badge) => badge.label)).toEqual(["Hidden"]);
+  // QA review 1 C27, review 2 C2, C3: a live course's content can be edited.
+  it("allows editing content in draft and live courses only", () => {
+    expect(canEditCourseContent("DRAFT")).toBe(true);
+    expect(canEditCourseContent("PUBLISHED")).toBe(true);
+    expect(canEditCourseContent("REVIEW")).toBe(false);
+    expect(canEditCourseContent("ARCHIVED")).toBe(false);
+  });
+
+  // QA review 2 H10: one control per section or lesson.
+  it("offers one action: publish a draft in a live course, otherwise show or hide", () => {
+    const action = (
+      status: "DRAFT" | "PUBLISHED" | "ARCHIVED",
+      courseStatus: "DRAFT" | "PUBLISHED",
+    ) => contentVisibilityAction({ kind: "Lesson", status, courseStatus });
+    expect(action("DRAFT", "PUBLISHED")).toEqual({ label: "Publish lesson", visible: true });
+    expect(
+      contentVisibilityAction({ kind: "Section", status: "DRAFT", courseStatus: "PUBLISHED" }),
+    ).toEqual({ label: "Publish section", visible: true });
+    expect(action("PUBLISHED", "PUBLISHED")).toEqual({
+      label: "Hide from learners",
+      visible: false,
+    });
+    expect(action("ARCHIVED", "PUBLISHED")).toEqual({ label: "Show to learners", visible: true });
+    expect(action("DRAFT", "DRAFT")).toEqual({ label: "Hide from learners", visible: false });
+    expect(action("ARCHIVED", "DRAFT")).toEqual({ label: "Show to learners", visible: true });
+  });
+
+  it("badges drafts only in a live course, and hidden content everywhere", () => {
+    const lesson = (status: "DRAFT" | "PUBLISHED" | "ARCHIVED") =>
+      ({
+        id: lessonId,
+        slug: "lesson",
+        title: "Lesson",
+        position: 1,
+        status,
+        lessonType: "video",
+        videoUrl: null,
+        durationSeconds: null,
+      }) as Parameters<typeof resolveLessonBadges>[0];
+    const labels = (
+      status: "DRAFT" | "PUBLISHED" | "ARCHIVED",
+      courseStatus: "DRAFT" | "PUBLISHED",
+    ) => resolveLessonBadges(lesson(status), courseStatus).map((badge) => badge.label);
+    expect(labels("ARCHIVED", "DRAFT")).toEqual(["Hidden"]);
+    expect(labels("ARCHIVED", "PUBLISHED")).toEqual(["Hidden"]);
+    expect(labels("DRAFT", "PUBLISHED")).toEqual(["Draft"]);
+    // Everything in a draft course is unpublished: no badge (it read like a hide switch).
+    expect(labels("DRAFT", "DRAFT")).toEqual([]);
+    expect(labels("PUBLISHED", "PUBLISHED")).toEqual([]);
+  });
+
+  it("says what a visibility change did", () => {
+    const result = (status: "DRAFT" | "PUBLISHED" | "ARCHIVED", lessonsPublished?: number) => ({
+      id: moduleId,
+      status,
+      visible: status !== "ARCHIVED",
+      ...(lessonsPublished !== undefined ? { lessonsPublished } : {}),
+    });
+    expect(
+      visibilityResultMessage({
+        kind: "Section",
+        before: "DRAFT",
+        result: result("PUBLISHED", 3),
+        courseStatus: "PUBLISHED",
+      }),
+    ).toBe("Section published, with 3 lessons. Learners can see it now.");
+    expect(
+      visibilityResultMessage({
+        kind: "Lesson",
+        before: "ARCHIVED",
+        result: result("PUBLISHED"),
+        courseStatus: "PUBLISHED",
+      }),
+    ).toBe("Lesson is visible to learners");
+    expect(
+      visibilityResultMessage({
+        kind: "Lesson",
+        before: "PUBLISHED",
+        result: result("ARCHIVED"),
+        courseStatus: "PUBLISHED",
+      }),
+    ).toBe("Lesson hidden from learners");
+    expect(
+      visibilityResultMessage({
+        kind: "Lesson",
+        before: "ARCHIVED",
+        result: result("DRAFT"),
+        courseStatus: "DRAFT",
+      }),
+    ).toBe("Lesson will be visible once the course is approved");
+  });
+
+  it("tells the author in the lesson editor who sees the lesson", () => {
+    expect(
+      lessonEditorStatus({
+        status: "PUBLISHED",
+        moduleStatus: "PUBLISHED",
+        courseStatus: "PUBLISHED",
+      }),
+    ).toMatchObject({ tone: "live", action: { label: "Hide from learners" } });
+    expect(
+      lessonEditorStatus({ status: "DRAFT", moduleStatus: "PUBLISHED", courseStatus: "PUBLISHED" }),
+    ).toMatchObject({ tone: "draft", action: { label: "Publish lesson", visible: true } });
+    expect(
+      lessonEditorStatus({ status: "PUBLISHED", moduleStatus: "DRAFT", courseStatus: "PUBLISHED" })
+        ?.text,
+    ).toMatch(/its section isn't/);
+    expect(
+      lessonEditorStatus({ status: "DRAFT", moduleStatus: "DRAFT", courseStatus: "REVIEW" }),
+    ).toMatchObject({ tone: "locked", action: null });
+    // A draft course says nothing: everything waits for review.
+    expect(
+      lessonEditorStatus({ status: "DRAFT", moduleStatus: "DRAFT", courseStatus: "DRAFT" }),
+    ).toBeNull();
+  });
+
+  // QA review 2 H28: the restore toast was built from an internal ID.
+  it("names what Trash restored or deleted", () => {
+    expect(trashActionMessage("restore", "lessons")).toBe("Lesson restored");
+    expect(trashActionMessage("restore", "sections")).toBe("Section restored");
+    expect(trashActionMessage("purge", "courses")).toBe("Course deleted for good");
   });
 
   it("names how many learners lose access when a course is unpublished", () => {
@@ -103,21 +214,22 @@ describe("content visibility helpers", () => {
 
   it("calls the section and lesson visibility routes with an idempotent PUT", async () => {
     mockPut.mockResolvedValue({ data: { id: moduleId, status: "ARCHIVED", visible: false } });
-    await updateModuleVisibility({ moduleId, visible: false, courseStatus: "PUBLISHED" });
+    await updateModuleVisibility({ moduleId, visible: false });
+    // Silent: the caller says what happened, from the result.
     expect(mockPut).toHaveBeenLastCalledWith(
       `/api/v1/modules/${moduleId}/visibility`,
       { visible: false },
       "module-visibility",
-      { successMessage: "Section hidden from learners" },
+      { silent: true },
     );
 
     mockPut.mockResolvedValue({ data: { id: lessonId, status: "DRAFT", visible: true } });
-    await updateLessonVisibility({ lessonId, visible: true, courseStatus: "DRAFT" });
+    await updateLessonVisibility({ lessonId, visible: true });
     expect(mockPut).toHaveBeenLastCalledWith(
       `/api/v1/lessons/${lessonId}/visibility`,
       { visible: true },
       "lesson-visibility",
-      { successMessage: "Lesson will be visible once the course is approved" },
+      { silent: true },
     );
   });
 });
@@ -194,6 +306,7 @@ describe("unpublish course panel", () => {
     expect(mockPost).not.toHaveBeenCalled();
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog?.textContent).toMatch(/3 enrolled learners will lose access/);
+    expect(dialog?.textContent).toMatch(/use the course editor instead/);
 
     const confirm = [...(dialog?.querySelectorAll("button") ?? [])].find(
       (button) => button.textContent?.trim() === "Unpublish",
@@ -220,6 +333,7 @@ describe("publish wording and course header state", () => {
     expect(publishNote("DRAFT")).toMatch(/^Publishing sends the course for review/);
     expect(publishNote("REVIEW")).toMatch(/^This course is in review/);
     expect(publishNote("PUBLISHED")).toMatch(/^Unpublishing takes a live course back to draft/);
+    expect(publishNote("PUBLISHED")).toMatch(/being updated/);
     expect(publishNote("ARCHIVED")).toMatch(/archived/);
   });
 

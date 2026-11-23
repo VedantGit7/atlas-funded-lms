@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { TRASH_RETENTION_DAYS } from "@atlas/contracts/content-trash/content-trash.contract";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { outlineButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 
@@ -18,7 +19,7 @@ type DeleteLessonDialogProps = {
 
 function formatError(error: unknown): string {
   if (error instanceof ClientApiError) return error.message;
-  return "Delete failed.";
+  return "Couldn't move the lesson to Trash. Try again.";
 }
 
 export function DeleteLessonDialog({
@@ -53,7 +54,9 @@ export function DeleteLessonDialog({
     setBusy(true);
     setError(null);
     try {
-      await clientApi.delete(`/api/v1/lessons/${lessonId}`, "lesson-delete");
+      await clientApi.delete(`/api/v1/lessons/${lessonId}`, "lesson-delete", {
+        successMessage: "Lesson moved to Trash",
+      });
       onClose();
       if (inline && onDeleted) {
         onDeleted();
@@ -89,16 +92,17 @@ export function DeleteLessonDialog({
       >
         <div className="flex flex-col items-center px-8 pb-2 pt-8 text-center">
           <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--admin-danger)_14%,var(--admin-surface))]">
-            <AlertTriangle className="h-8 w-8 text-[var(--admin-danger)]" aria-hidden="true" />
+            <Trash2 className="h-8 w-8 text-[var(--admin-danger)]" aria-hidden="true" />
           </div>
           <h2
             id="delete-lesson-title"
             className="mb-2 text-lg font-semibold text-[var(--admin-on-surface)]"
           >
-            Delete this lesson?
+            Move this lesson to Trash?
           </h2>
           <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
-            This removes the lesson from the course. Learner progress records are preserved.
+            Learners stop seeing it straight away, and their progress is kept. You can restore it
+            from Trash for {TRASH_RETENTION_DAYS} days; after that it&apos;s deleted for good.
           </p>
           {error ? (
             <p role="alert" className="mt-4 text-sm text-[var(--admin-danger)]">
@@ -124,14 +128,8 @@ export function DeleteLessonDialog({
             }}
             disabled={busy}
           >
-            {busy ? "Deleting…" : "Delete lesson"}
+            {busy ? "Moving…" : "Move to Trash"}
           </button>
-        </div>
-
-        <div className="border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-8 py-2 text-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-on-surface-variant)]">
-            Action cannot be undone
-          </span>
         </div>
       </div>
     </div>

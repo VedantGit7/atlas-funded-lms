@@ -116,7 +116,7 @@ export async function restoreTrashedLesson(args: { tx: Tx; id: string }): Promis
         and deleted_at > now() - (${TRASH_RETENTION_DAYS}::text || ' days')::interval
     ),
     next_pos as (
-      select coalesce(max(l.position), -1) + 1 as position
+      select coalesce(max(l.position), 0) + 1 as position
       from lessons l
       join target t on t.module_id = l.module_id
       where l.deleted_at is null

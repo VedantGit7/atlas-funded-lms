@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
 import { submitCourseForReview } from "../../backend/apps/api/src/server/courses/course-authoring.service";
-import { createCourseModule } from "../../backend/apps/api/src/server/courses/course-authoring.service";
 import {
   actOnWorkflowTransition,
   listReviewQueue,
 } from "../../backend/apps/api/src/server/workflows/workflows.service";
 import {
+  addSectionWithLesson,
   adminCtx,
   authoringTenantTx,
   createCourseAuthoringFixture,
@@ -27,9 +27,7 @@ describeWithDb("workflow tenant isolation", () => {
     const instructor = instructorCtx(fixtureA, "req_iso_list");
 
     await withTenantTx(authoringTenantTx(fixtureA), async (tx) => {
-      await createCourseModule(tx, instructor, fixtureA.draftCourseId, {
-        title: "Tenant A Module",
-      });
+      await addSectionWithLesson(tx, instructor, fixtureA.draftCourseId, "Tenant A Module");
       await submitCourseForReview(tx, instructor, fixtureA.draftCourseId, {});
     });
 
@@ -51,7 +49,7 @@ describeWithDb("workflow tenant isolation", () => {
     const instructor = instructorCtx(fixtureA, "req_iso_transition");
 
     const submitted = await withTenantTx(authoringTenantTx(fixtureA), async (tx) => {
-      await createCourseModule(tx, instructor, fixtureA.draftCourseId, { title: "Tenant A Only" });
+      await addSectionWithLesson(tx, instructor, fixtureA.draftCourseId, "Tenant A Only");
       return submitCourseForReview(tx, instructor, fixtureA.draftCourseId, {});
     });
 

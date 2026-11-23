@@ -5,6 +5,8 @@ import { AtlasHttpError } from "@atlas/core/http/errors";
 import {
   countActiveEnrollments,
   findModuleWithCourse,
+  publishDraftLessonsInModule,
+  returnCourseContentToDraft,
   setCourseModuleStatus,
   updateCourseStatus,
 } from "./course-authoring.repository";
@@ -16,21 +18,25 @@ import { lessonNotFound } from "../lessons/lessons.errors";
 
 /**
  * Publishing and hiding course content (decided 6 November 2026, after launch
- * plan 5.1):
+ * plan 5.1; live-course editing added 23 November 2026, QA S1.6):
  *
- * - A module or lesson can be hidden or shown at any time except while its
- *   course is in review (the reviewer is looking at a fixed course) or
- *   archived. It takes effect at once, without a review: editing content needs
- *   the course back in draft, so "Show" can only bring back content a reviewer
- *   has already approved.
- * - Hidden is ARCHIVED. Learners see only PUBLISHED modules and lessons, and
+ * - Each section and lesson has one visibility control. It works while the
+ *   course is a draft or live, not while it's in review (the reviewer is
+ *   looking at a fixed course) or archived, and takes effect at once.
+ * - Hidden is ARCHIVED. Learners see only PUBLISHED sections and lessons, and
  *   approving a course publishes only DRAFT and REVIEW ones, so a hidden item
  *   stays hidden through approval.
  * - Shown is PUBLISHED in a live course, and DRAFT in a draft course, where the
  *   next approval publishes it.
- * - A live course can be unpublished: it goes back to draft (editable, and
- *   submitted for review again to go live), and its enrolled learners lose
- *   access until then. Enrollments and progress are kept.
+ * - A live course can be edited without taking it away from learners: new
+ *   sections and lessons start as DRAFT, which learners don't see, and
+ *   "Publish" (showing them) makes them PUBLISHED one by one. Publishing a
+ *   section publishes its draft lessons too. Edits to published lessons reach
+ *   learners when saved.
+ * - A live course can also be unpublished: it goes back to draft with its
+ *   published content (submitted for review again to go live), and its
+ *   enrolled learners see "being updated" until then. Enrollments and progress
+ *   are kept.
  *
  * Who may do this is the route's `course.publish` check: the course's own
  * instructor, or a role that bypasses resource checks (admins, owners).
@@ -92,19 +98,26 @@ export async function setModuleVisibility(
   if (locked) throw locked;
 
   const status = statusFor(module.courseStatus, input.visible);
-  if (module.status !== status) {
-    await setCourseModuleStatus({ tx, moduleId, status });
+  // In a live course, a section's draft lessons go live with it.
+  const lessonsPublished =
+    status === "PUBLISHED" ? await publishDraftLessonsInModule({ tx, moduleId }) : 0;
+  if (module.status !== status || lessonsPublished > 0) {
+    if (module.status !== status) await setCourseModuleStatus({ tx, moduleId, status });
     await auditWriter.write(tx, auditCtx(ctx), {
       action: input.visible ? "course_module.shown" : "course_module.hidden",
       target: { type: "course_module", id: moduleId },
       before: { status: module.status },
       after: { status },
       reason: null,
-      metadata: { courseId: module.courseId, courseStatus: module.courseStatus },
+      metadata: {
+        courseId: module.courseId,
+        courseStatus: module.courseStatus,
+        lessonsPublished,
+      },
     });
   }
 
-  return { data: { id: moduleId, status, visible: input.visible } };
+  return { data: { id: moduleId, status, visible: input.visible, lessonsPublished } };
 }
 
 export async function setLessonVisibility(
@@ -176,6 +189,7 @@ export async function unpublishCourse(
 
   const activeEnrollments = await countActiveEnrollments({ tx, courseId });
   await updateCourseStatus({ tx, courseId, status: "DRAFT" });
+  const returnedToDraft = await returnCourseContentToDraft({ tx, courseId });
   const unpublishedAt = new Date().toISOString();
 
   await auditWriter.write(tx, auditCtx(ctx), {
@@ -184,7 +198,11 @@ export async function unpublishCourse(
     before: { status: course.status },
     after: { status: "DRAFT" },
     reason: input.reason ?? null,
-    metadata: { activeEnrollments },
+    metadata: {
+      activeEnrollments,
+      modulesReturnedToDraft: returnedToDraft.modules,
+      lessonsReturnedToDraft: returnedToDraft.lessons,
+    },
   });
 
   // Search drops the course: its index projection is empty once it isn't PUBLISHED.

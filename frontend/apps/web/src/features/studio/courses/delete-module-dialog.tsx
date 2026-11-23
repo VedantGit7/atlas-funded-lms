@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
+import { TRASH_RETENTION_DAYS } from "@atlas/contracts/content-trash/content-trash.contract";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { outlineButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 
@@ -15,7 +16,7 @@ type DeleteModuleDialogProps = {
 
 function formatError(error: unknown): string {
   if (error instanceof ClientApiError) return error.message;
-  return "Delete failed.";
+  return "Couldn't move the section to Trash. Try again.";
 }
 
 export function DeleteModuleDialog({
@@ -50,7 +51,9 @@ export function DeleteModuleDialog({
     setBusy(true);
     setError(null);
     try {
-      await clientApi.delete(`/api/v1/modules/${moduleId ?? ""}`, "module-delete");
+      await clientApi.delete(`/api/v1/modules/${moduleId ?? ""}`, "module-delete", {
+        successMessage: "Section moved to Trash",
+      });
       onDeleted();
       onClose();
     } catch (deleteError) {
@@ -86,11 +89,13 @@ export function DeleteModuleDialog({
             id="delete-module-title"
             className="mb-2 text-lg font-semibold text-[var(--admin-on-surface)]"
           >
-            Delete this module?
+            Move this section to Trash?
           </h2>
           <p className="text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
-            <span className="font-medium text-[var(--admin-on-surface)]">{moduleTitle}</span> and
-            its lessons will be removed from this course. Learner progress records are preserved.
+            <span className="font-medium text-[var(--admin-on-surface)]">{moduleTitle}</span> leaves
+            the course. You can restore it from Trash for {TRASH_RETENTION_DAYS} days; after that
+            it&apos;s deleted for good. Only an empty section can go to Trash, so move or trash its
+            lessons first.
           </p>
           {error ? (
             <p role="alert" className="mt-4 text-sm text-[var(--admin-danger)]">
@@ -116,14 +121,8 @@ export function DeleteModuleDialog({
             }}
             disabled={busy}
           >
-            {busy ? "Deleting…" : "Delete module"}
+            {busy ? "Moving…" : "Move to Trash"}
           </button>
-        </div>
-
-        <div className="border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-8 py-2 text-center">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--admin-on-surface-variant)]">
-            Action cannot be undone
-          </span>
         </div>
       </div>
     </div>

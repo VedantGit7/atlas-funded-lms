@@ -1,5 +1,9 @@
 import type { z } from "zod";
 import { PageGate } from "../../../../../components/patterns/PageGate";
+import {
+  COURSE_BEING_UPDATED,
+  CourseBeingUpdated,
+} from "../../../../../features/courses/course-being-updated";
 import { ScormModulePlayerShell } from "../../../../../features/courses/scorm-module-player-shell";
 import { ServerApiError, serverApi } from "../../../../../lib/server-api";
 import type { courseDetailResponseSchema } from "@atlas/contracts/courses/schemas";
@@ -48,6 +52,10 @@ export default async function ScormModulePlayerPage({ params }: ScormModulePlaye
     );
   } catch (error) {
     if (error instanceof ServerApiError) {
+      if (error.code === COURSE_BEING_UPDATED) {
+        return <CourseBeingUpdated />;
+      }
+
       if (error.status === 404 || error.status === 403) {
         return (
           <PageGate
