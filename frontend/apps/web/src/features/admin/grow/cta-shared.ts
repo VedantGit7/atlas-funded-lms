@@ -123,6 +123,38 @@ export function ctaStatusLabel(status: CtaStatus): string {
   return "Draft";
 }
 
+/**
+ * A CTA link is a full web address or a page on the academy's site, such as
+ * /courses (QA review 2 H31). Same rule as the server.
+ */
+export function isValidCtaLink(value: string): boolean {
+  const link = value.trim();
+  if (/^\/(?![/\\])\S*$/.test(link)) return true;
+  try {
+    const url = new URL(link);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+/** Whether the link is needed depends on the CTA type (QA review 2 H31). */
+export function ctaLinkLabel(type: CtaType): string {
+  if (type === "STICKY" || type === "SLIDE_IN") return "Link";
+  return "Link (optional)";
+}
+
+export function ctaLinkHint(type: CtaType): string {
+  switch (type) {
+    case "POPUP":
+      return "Needed only when no form is connected. A page on your site (/courses) or a full web address.";
+    case "EMBEDDED_BUTTON":
+      return "Needed only when the button doesn't open a pop-up. A page on your site (/courses) or a full web address.";
+    default:
+      return "Where the button sends people: a page on your site (/courses) or a full web address. Needed to publish.";
+  }
+}
+
 export function ctaTypeLabel(type: CtaType): string {
   switch (type) {
     case "POPUP":

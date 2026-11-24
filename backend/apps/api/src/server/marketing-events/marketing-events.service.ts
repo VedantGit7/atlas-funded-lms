@@ -16,6 +16,10 @@ import {
   updateMarketingEventBodySchema,
 } from "./marketing-events.schemas";
 import { marketingEventsRepository, type MarketingEventRow } from "./marketing-events.repository";
+import { readTenantDefaultTimezone } from "../tenant-settings/tenant-settings.service";
+import { resolveTenantPublicSiteUrl } from "../../lib/account-security-orchestrator";
+import { queueMarketingEventEmail } from "./marketing-event-email";
+import { safeTimeZone } from "./marketing-event-time";
 
 function notFound(message = "Event not found.") {
   return new AtlasHttpError({ code: "PERMISSION_DENIED", status: 404, message });
@@ -42,7 +46,12 @@ function parseOptionalDate(value: string | null | undefined): Date | null {
   return parseRequiredDate(value, "end date");
 }
 
-function toDto(row: MarketingEventRow) {
+/** The academy's time zone: event times are shown and emailed in it (QA review 2 H29). */
+async function academyTimeZone(tx: TenantTx): Promise<string> {
+  return safeTimeZone(await readTenantDefaultTimezone(tx));
+}
+
+function toDto(row: MarketingEventRow, timeZone: string) {
   const endsAt = row.ends_at;
   const isPast = endsAt != null && endsAt.getTime() < Date.now();
   return {
@@ -57,6 +66,7 @@ function toDto(row: MarketingEventRow) {
     joinUrl: row.join_url,
     coverImageUrl: row.cover_image_url,
     reminderMinutesBefore: row.reminder_minutes_before,
+    timeZone,
     registrationCount: Number(row.registration_count ?? 0),
     isPast,
     publishedAt: row.published_at?.toISOString() ?? null,
@@ -65,7 +75,7 @@ function toDto(row: MarketingEventRow) {
   };
 }
 
-function toPublicDto(row: MarketingEventRow) {
+function toPublicDto(row: MarketingEventRow, timeZone: string) {
   return {
     id: row.id,
     title: row.title,
@@ -76,6 +86,7 @@ function toPublicDto(row: MarketingEventRow) {
     linkUrl: row.link_url,
     joinUrl: row.join_url,
     coverImageUrl: row.cover_image_url,
+    timeZone,
   };
 }
 
@@ -99,17 +110,18 @@ function assertSchedule(startsAt: Date, endsAt: Date | null) {
 
 export async function listMarketingEvents(tx: TenantTx, _ctx: ServiceCtx, rawQuery: unknown) {
   const query = marketingEventsListQuerySchema.parse(rawQuery ?? {});
-  const [rows, summary] = await Promise.all([
+  const [rows, summary, timeZone] = await Promise.all([
     marketingEventsRepository.list(tx, {
       status: query.status,
       ...(query.q ? { q: query.q } : {}),
       limit: query.limit,
     }),
     marketingEventsRepository.summary(tx),
+    academyTimeZone(tx),
   ]);
   return marketingEventsListResponseSchema.parse({
     data: {
-      items: rows.map(toDto),
+      items: rows.map((row) => toDto(row, timeZone)),
       summary: {
         liveCount: summary.live_count,
         draftCount: summary.draft_count,
@@ -125,7 +137,7 @@ export async function listMarketingEvents(tx: TenantTx, _ctx: ServiceCtx, rawQue
 
 export async function getMarketingEvent(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   return marketingEventResponseSchema.parse({
-    data: toDto(await requireEvent(tx, id)),
+    data: toDto(await requireEvent(tx, id), await academyTimeZone(tx)),
   });
 }
 
@@ -142,7 +154,7 @@ export async function createMarketingEvent(tx: TenantTx, ctx: ServiceCtx, rawBod
     createdByMembershipId: ctx.actorMembershipId,
   });
   return marketingEventResponseSchema.parse({
-    data: toDto(await requireEvent(tx, id)),
+    data: toDto(await requireEvent(tx, id), await academyTimeZone(tx)),
   });
 }
 
@@ -171,8 +183,16 @@ export async function updateMarketingEvent(
     reminderMinutesBefore:
       body.reminderMinutesBefore === undefined ? null : body.reminderMinutesBefore,
   });
+  const reminder = body.reminderMinutesBefore ?? null;
+  if (
+    existing.starts_at.getTime() !== startsAt.getTime() ||
+    existing.reminder_minutes_before !== reminder
+  ) {
+    // Reminders already sent were for the old time; each one is due again.
+    await marketingEventsRepository.resetReminders(tx, id);
+  }
   return marketingEventResponseSchema.parse({
-    data: toDto(await requireEvent(tx, id)),
+    data: toDto(await requireEvent(tx, id), await academyTimeZone(tx)),
   });
 }
 
@@ -182,7 +202,7 @@ export async function publishMarketingEvent(tx: TenantTx, _ctx: ServiceCtx, id: 
   const existing = await requireEvent(tx, id);
   await marketingEventsRepository.setStatus(tx, existing.id, "LIVE");
   return marketingEventResponseSchema.parse({
-    data: toDto(await requireEvent(tx, id)),
+    data: toDto(await requireEvent(tx, id), await academyTimeZone(tx)),
   });
 }
 
@@ -190,7 +210,7 @@ export async function unpublishMarketingEvent(tx: TenantTx, _ctx: ServiceCtx, id
   await requireEvent(tx, id);
   await marketingEventsRepository.setStatus(tx, id, "UNPUBLISHED");
   return marketingEventResponseSchema.parse({
-    data: toDto(await requireEvent(tx, id)),
+    data: toDto(await requireEvent(tx, id), await academyTimeZone(tx)),
   });
 }
 
@@ -232,31 +252,57 @@ export async function listMarketingEventRegistrations(tx: TenantTx, _ctx: Servic
 }
 
 export async function listPublicMarketingEvents(tx: TenantTx) {
-  const rows = await marketingEventsRepository.listLiveUpcoming(tx, 20);
+  const [rows, timeZone] = await Promise.all([
+    marketingEventsRepository.listLiveUpcoming(tx, 20),
+    academyTimeZone(tx),
+  ]);
   return publicMarketingEventsListResponseSchema.parse({
-    data: { items: rows.map(toPublicDto) },
+    data: { items: rows.map((row) => toPublicDto(row, timeZone)) },
   });
 }
 
 export async function getPublicMarketingEvent(tx: TenantTx, id: string) {
   const row = await requireEvent(tx, id);
   if (row.status !== "LIVE") throw notFound();
-  return publicMarketingEventResponseSchema.parse({ data: toPublicDto(row) });
+  return publicMarketingEventResponseSchema.parse({
+    data: toPublicDto(row, await academyTimeZone(tx)),
+  });
 }
 
-export async function registerPublicMarketingEvent(tx: TenantTx, id: string, rawBody: unknown) {
+/**
+ * Public registration. A new registration queues its confirmation email in the
+ * same transaction (QA review 2 H29: the page said "Check your email" and no
+ * email was sent). Registering again sends nothing, so the form can't be used
+ * to email someone over and over.
+ */
+export async function registerPublicMarketingEvent(
+  tx: TenantTx,
+  ctx: { tenantId: string; requestId: string },
+  id: string,
+  rawBody: unknown,
+  options: { siteUrl: string | null },
+) {
   const body = registerPublicMarketingEventBodySchema.parse(rawBody);
   const event = await requireEvent(tx, id);
   if (event.status !== "LIVE") throw notFound("Event is not open for registration.");
   if (event.ends_at && event.ends_at.getTime() < Date.now()) {
     throw validationError("This event has already ended.");
   }
+  const name = emptyToNull(body.name);
   const result = await marketingEventsRepository.upsertRegistration(tx, {
     eventId: id,
     email: body.email,
-    name: emptyToNull(body.name),
+    name,
     source: body.source,
   });
+  if (!result.alreadyRegistered) {
+    await queueMarketingEventEmail(tx, ctx, {
+      kind: "confirmation",
+      event,
+      registration: { id: result.id, email: body.email.trim().toLowerCase(), name },
+      siteUrl: options.siteUrl,
+    });
+  }
   return registerPublicMarketingEventResponseSchema.parse({
     data: {
       registered: true as const,
@@ -264,6 +310,15 @@ export async function registerPublicMarketingEvent(tx: TenantTx, id: string, raw
       alreadyRegistered: result.alreadyRegistered,
     },
   });
+}
+
+/** The academy's site for links in event emails; null when it has none. */
+async function siteUrlFor(tx: TenantTx, tenantId: string): Promise<string | null> {
+  try {
+    return await resolveTenantPublicSiteUrl(tx, tenantId);
+  } catch {
+    return null;
+  }
 }
 
 /** Used by workflow engine — no Zod body, internal call. */
@@ -276,18 +331,61 @@ export async function registerMarketingEventFromWorkflow(
     membershipId?: string | null;
     contactId?: string | null;
   },
+  ctx?: { tenantId: string; requestId: string; actorMembershipId?: string | null },
 ) {
   const event = await marketingEventsRepository.findById(tx, args.eventId);
   if (!event || event.status !== "LIVE") {
     return { ok: false as const, reason: "Event not found or not Live." };
   }
+  const name = emptyToNull(args.name);
   const result = await marketingEventsRepository.upsertRegistration(tx, {
     eventId: args.eventId,
     email: args.email,
-    name: emptyToNull(args.name),
+    name,
     source: "WORKFLOW",
     membershipId: args.membershipId ?? null,
     contactId: args.contactId ?? null,
   });
+  if (!result.alreadyRegistered && ctx) {
+    await queueMarketingEventEmail(tx, ctx, {
+      kind: "confirmation",
+      event,
+      registration: { id: result.id, email: args.email.trim().toLowerCase(), name },
+      siteUrl: await siteUrlFor(tx, ctx.tenantId),
+    });
+  }
   return { ok: true as const, alreadyRegistered: result.alreadyRegistered };
+}
+
+/**
+ * Queues the reminders now due for one academy (the worker calls this every
+ * sweep). Each registration's reminder is queued once; the mark is written in
+ * the same transaction as the queued email.
+ */
+export async function queueDueMarketingEventReminders(
+  tx: TenantTx,
+  ctx: { tenantId: string; requestId: string },
+  limit = 50,
+): Promise<number> {
+  const due = await marketingEventsRepository.lockDueReminders(tx, limit);
+  if (due.length === 0) return 0;
+  const siteUrl = await siteUrlFor(tx, ctx.tenantId);
+  const events = new Map<string, MarketingEventRow | null>();
+  let queued = 0;
+  for (const row of due) {
+    if (!events.has(row.event_id)) {
+      events.set(row.event_id, await marketingEventsRepository.findById(tx, row.event_id));
+    }
+    const event = events.get(row.event_id);
+    if (!event) continue;
+    await queueMarketingEventEmail(tx, ctx, {
+      kind: "reminder",
+      event,
+      registration: { id: row.registration_id, email: row.email, name: row.name },
+      siteUrl,
+    });
+    await marketingEventsRepository.markReminderQueued(tx, row.registration_id);
+    queued += 1;
+  }
+  return queued;
 }

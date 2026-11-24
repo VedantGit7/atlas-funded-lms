@@ -2,14 +2,26 @@ import { z } from "zod";
 
 export const formStatusSchema = z.enum(["DRAFT", "LIVE", "UNPUBLISHED"]);
 export const formKindSchema = z.enum(["LEAD", "SIGNUP"]);
+/**
+ * Field types a form can ask for (QA review 2 H30). "password" is gone: a
+ * sign-up form starts the academy's real sign-up, where the password is chosen
+ * from the emailed link, and a lead form has no use for one.
+ */
 export const formFieldTypeSchema = z.enum([
   "email",
-  "password",
   "text",
   "textarea",
   "phone",
   "number",
+  "date",
+  "select",
+  "radio",
+  "checkboxes",
+  "consent",
 ]);
+
+/** Types whose answers come from the field's options. */
+export const FORM_CHOICE_FIELD_TYPES = ["select", "radio", "checkboxes"] as const;
 
 export const formFieldSchema = z
   .object({
@@ -18,6 +30,8 @@ export const formFieldSchema = z
     label: z.string().trim().min(1).max(200),
     placeholder: z.string().trim().max(200).nullable().optional(),
     fieldType: formFieldTypeSchema,
+    /** Choices for dropdown, multiple-choice and checkbox fields. */
+    options: z.array(z.string().trim().min(1).max(200)).max(50).optional(),
     required: z.boolean(),
     isSystem: z.boolean().optional().default(false),
     sortOrder: z.number().int().min(0).max(500),
@@ -175,7 +189,16 @@ export const publicMarketingFormResponseSchema = z.object({
 
 export const publicSubmitFormBodySchema = z
   .object({
-    answers: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])),
+    answers: z.record(
+      z.string(),
+      z.union([
+        z.string().max(10_000),
+        z.number(),
+        z.boolean(),
+        z.null(),
+        z.array(z.string().max(200)).max(50),
+      ]),
+    ),
     source: z.enum(["LINK", "WEBSITE", "CTA"]).optional().default("LINK"),
   })
   .strict();
@@ -185,5 +208,7 @@ export const publicSubmitFormResponseSchema = z.object({
     submitted: z.literal(true),
     thankYouHtml: z.string().nullable(),
     redirectUrl: z.string().nullable(),
+    /** Sign-up forms: the link to finish creating the account was emailed. */
+    signupEmailSent: z.boolean(),
   }),
 });

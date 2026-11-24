@@ -7,6 +7,8 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronLeft,
+  Copy,
+  ExternalLink,
   GripVertical,
   Info,
   Link2,
@@ -24,6 +26,7 @@ import {
   formFieldTypeLabel,
   formStatusLabel,
   formSubmissionsHref,
+  isChoiceFieldType,
   newField,
   type FormDto,
   type FormField,
@@ -33,6 +36,54 @@ import {
 type ConfigTab = "field" | "appearance";
 
 const LABEL_CLASS = `${MESSENGER_WIZARD_LABEL_CLASS} !mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]`;
+
+/** Types that show a placeholder inside the input. */
+function hasPlaceholder(fieldType: FormFieldType): boolean {
+  return !["radio", "checkboxes", "consent", "date"].includes(fieldType);
+}
+
+/** How a field looks on the canvas: close to what visitors will see. */
+function FieldPreview({ field }: { field: FormField }) {
+  const muted = "text-[var(--admin-on-surface-variant)]";
+  if (field.fieldType === "consent") {
+    return (
+      <span className={`flex items-start gap-3 text-base ${muted}`}>
+        <span className="mt-1 h-4 w-4 shrink-0 rounded border-2 border-[var(--admin-outline)]" />
+        Ticked to agree
+      </span>
+    );
+  }
+  if (field.fieldType === "radio" || field.fieldType === "checkboxes") {
+    const round = field.fieldType === "radio";
+    return (
+      <span className="block space-y-2">
+        {(field.options?.length ? field.options : ["No options yet"]).map((option) => (
+          <span key={option} className={`flex items-center gap-3 text-base ${muted}`}>
+            <span
+              className={`h-4 w-4 shrink-0 border-2 border-[var(--admin-outline)] ${round ? "rounded-full" : "rounded"}`}
+            />
+            {option}
+          </span>
+        ))}
+      </span>
+    );
+  }
+  const text =
+    field.fieldType === "select"
+      ? field.placeholder || "Choose one"
+      : field.fieldType === "date"
+        ? "dd / mm / yyyy"
+        : field.placeholder ||
+          (field.fieldType === "email" ? "email@company.com" : "Type your answer here...");
+  return (
+    <span
+      className={`flex w-full items-center justify-between border-b-2 border-[var(--admin-border)] py-3 text-lg ${muted} ${field.fieldType === "textarea" ? "min-h-20 items-start" : ""}`}
+    >
+      {text}
+      {field.fieldType === "select" ? <ArrowDown className="h-4 w-4" aria-hidden="true" /> : null}
+    </span>
+  );
+}
 
 function StatusPill({ status }: { status: FormDto["status"] }) {
   const tone = status === "LIVE" ? "success" : status === "UNPUBLISHED" ? "warning" : "neutral";
@@ -106,6 +157,8 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
   const [redirectUrl, setRedirectUrl] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -211,7 +264,16 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
     if (!form) return;
     const response = await clientApi.patch<{ data: FormDto }>(
       `/api/v1/marketing/forms/${form.id}/fields`,
-      { fields },
+      {
+        fields: fields.map((field) =>
+          isChoiceFieldType(field.fieldType)
+            ? {
+                ...field,
+                options: (field.options ?? []).map((option) => option.trim()).filter(Boolean),
+              }
+            : { ...field, options: undefined },
+        ),
+      },
       "form-fields",
     );
     setForm(response.data);
@@ -272,15 +334,30 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
     }
   }
 
-  async function copyLink() {
+  // QA review 2 H30: the link was only copied, so it was lost when copying
+  // failed. It is shown now, with Copy and Open next to it.
+  function toggleShare() {
     if (!form) return;
-    const url = `${window.location.origin}${form.sharePath}`;
+    setShareUrl(`${window.location.origin}${form.sharePath}`);
+    setShareOpen((open) => !open);
+  }
+
+  async function copyLink() {
     try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Share link copied.");
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied.");
     } catch {
-      toast.error("Could not copy link.");
+      toast.error("Couldn't copy. Select the link and copy it yourself.");
     }
+  }
+
+  function updateFieldType(field: FormField, fieldType: FormFieldType) {
+    const patch: Partial<FormField> = { fieldType };
+    if (isChoiceFieldType(fieldType) && !field.options?.length) {
+      patch.options = ["Option 1", "Option 2"];
+    }
+    if (!hasPlaceholder(fieldType)) patch.placeholder = "";
+    updateField(field.id, patch);
   }
 
   async function onDelete() {
@@ -363,13 +440,14 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
           <button
             type="button"
             disabled={form.status !== "LIVE" || busy}
-            onClick={() => {
-              void copyLink();
-            }}
+            title={form.status === "LIVE" ? undefined : "Publish the form to get its link"}
+            aria-expanded={shareOpen}
+            aria-controls="form-share-link"
+            onClick={toggleShare}
             className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-1.5 text-[12px] font-bold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Link2 className="h-4 w-4" aria-hidden="true" />
-            Generate link
+            Share link
           </button>
           <div className="hidden h-6 w-px bg-[var(--admin-border)] sm:block" aria-hidden="true" />
           <PublishSwitch
@@ -393,6 +471,50 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
           </button>
         </div>
       </header>
+
+      {shareOpen && live ? (
+        <div
+          id="form-share-link"
+          className="flex flex-col gap-2 border-b border-[var(--admin-border)] px-4 py-3 sm:flex-row sm:items-center sm:px-6"
+        >
+          <label
+            htmlFor="form-share-url"
+            className="shrink-0 text-[12px] font-bold text-[var(--admin-on-surface)]"
+          >
+            Public link
+          </label>
+          <input
+            id="form-share-url"
+            readOnly
+            value={shareUrl}
+            onFocus={(event) => {
+              event.currentTarget.select();
+            }}
+            className={`${MESSENGER_WIZARD_FIELD_CLASS} min-w-0 flex-1 font-mono text-xs`}
+          />
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                void copyLink();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--admin-border)] px-3 py-2 text-[12px] font-bold text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-low)]"
+            >
+              <Copy className="h-4 w-4" aria-hidden="true" />
+              Copy
+            </button>
+            <a
+              href={shareUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--admin-border)] px-3 py-2 text-[12px] font-bold text-[var(--admin-on-surface)] hover:bg-[var(--admin-surface-low)]"
+            >
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              Open
+            </a>
+          </div>
+        </div>
+      ) : null}
 
       <div className="flex items-center gap-2 border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2 text-[12px] italic text-[var(--admin-on-surface-variant)] sm:px-6">
         <Info className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -498,24 +620,13 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
                       active ? "ring-2 ring-[var(--admin-primary)]/30" : "",
                     ].join(" ")}
                   >
-                    <p className="text-[17px] font-semibold text-[var(--admin-on-surface)]">
+                    <span className="block text-[17px] font-semibold text-[var(--admin-on-surface)]">
                       {String(index + 1)}. {field.label}{" "}
                       {field.required ? (
                         <span className="text-[var(--admin-primary)]">*</span>
                       ) : null}
-                    </p>
-                    {field.fieldType === "textarea" ? (
-                      <div className="min-h-20 w-full border-b-2 border-[var(--admin-border)] py-3 text-lg text-[var(--admin-on-surface-variant)]">
-                        {field.placeholder || "Type your answer here..."}
-                      </div>
-                    ) : (
-                      <div className="w-full border-b-2 border-[var(--admin-border)] py-3 text-lg text-[var(--admin-on-surface-variant)]">
-                        {field.placeholder ||
-                          (field.fieldType === "email"
-                            ? "email@company.com"
-                            : "Type your answer here...")}
-                      </div>
-                    )}
+                    </span>
+                    <FieldPreview field={field} />
                   </button>
                 );
               })}
@@ -577,34 +688,6 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
                       {formFieldTypeLabel(selectedField.fieldType)}
                     </span>
                   </div>
-                  <div>
-                    <label htmlFor="field-label" className={LABEL_CLASS}>
-                      Field label
-                    </label>
-                    <input
-                      id="field-label"
-                      value={selectedField.label}
-                      disabled={live || busy}
-                      onChange={(event) => {
-                        updateField(selectedField.id, { label: event.target.value });
-                      }}
-                      className={MESSENGER_WIZARD_FIELD_CLASS}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="field-placeholder" className={LABEL_CLASS}>
-                      Placeholder (optional)
-                    </label>
-                    <input
-                      id="field-placeholder"
-                      value={selectedField.placeholder ?? ""}
-                      disabled={live || busy}
-                      onChange={(event) => {
-                        updateField(selectedField.id, { placeholder: event.target.value });
-                      }}
-                      className={MESSENGER_WIZARD_FIELD_CLASS}
-                    />
-                  </div>
                   {!selectedField.isSystem ? (
                     <AdminSelectDropdown
                       id="field-type"
@@ -614,11 +697,84 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
                       disabled={live || busy}
                       options={[...FORM_FIELD_TYPE_OPTIONS]}
                       onChange={(value) => {
-                        updateField(selectedField.id, {
-                          fieldType: value as FormFieldType,
-                        });
+                        updateFieldType(selectedField, value as FormFieldType);
                       }}
                     />
+                  ) : null}
+                  <div>
+                    <label htmlFor="field-label" className={LABEL_CLASS}>
+                      {selectedField.fieldType === "consent"
+                        ? "What people agree to"
+                        : "Field label"}
+                    </label>
+                    {selectedField.fieldType === "consent" ? (
+                      <textarea
+                        id="field-label"
+                        value={selectedField.label}
+                        disabled={live || busy}
+                        onChange={(event) => {
+                          updateField(selectedField.id, { label: event.target.value });
+                        }}
+                        className={`${MESSENGER_WIZARD_FIELD_CLASS} min-h-20`}
+                      />
+                    ) : (
+                      <input
+                        id="field-label"
+                        value={selectedField.label}
+                        disabled={live || busy}
+                        onChange={(event) => {
+                          updateField(selectedField.id, { label: event.target.value });
+                        }}
+                        className={MESSENGER_WIZARD_FIELD_CLASS}
+                      />
+                    )}
+                    {selectedField.fieldType === "consent" ? (
+                      <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
+                        Shown next to the checkbox, for example &ldquo;I agree to receive emails
+                        about new courses&rdquo;.
+                      </p>
+                    ) : null}
+                  </div>
+                  {isChoiceFieldType(selectedField.fieldType) ? (
+                    <div>
+                      <label htmlFor="field-options" className={LABEL_CLASS}>
+                        Options
+                      </label>
+                      <textarea
+                        id="field-options"
+                        value={(selectedField.options ?? []).join("\n")}
+                        disabled={live || busy}
+                        onChange={(event) => {
+                          updateField(selectedField.id, {
+                            options: event.target.value.split("\n"),
+                          });
+                        }}
+                        aria-describedby="field-options-hint"
+                        className={`${MESSENGER_WIZARD_FIELD_CLASS} min-h-28`}
+                      />
+                      <p
+                        id="field-options-hint"
+                        className="mt-1 text-xs text-[var(--admin-on-surface-variant)]"
+                      >
+                        One option per line.
+                      </p>
+                    </div>
+                  ) : null}
+                  {hasPlaceholder(selectedField.fieldType) ? (
+                    <div>
+                      <label htmlFor="field-placeholder" className={LABEL_CLASS}>
+                        Placeholder (optional)
+                      </label>
+                      <input
+                        id="field-placeholder"
+                        value={selectedField.placeholder ?? ""}
+                        disabled={live || busy}
+                        onChange={(event) => {
+                          updateField(selectedField.id, { placeholder: event.target.value });
+                        }}
+                        className={MESSENGER_WIZARD_FIELD_CLASS}
+                      />
+                    </div>
                   ) : null}
                   <div className="flex items-center justify-between py-1">
                     <span className="text-[12px] font-bold text-[var(--admin-on-surface)]">

@@ -2,7 +2,6 @@
 
 import { SafeHtml } from "@/components/SafeHtml";
 import { useEffect, useState, type SyntheticEvent } from "react";
-import { toast } from "@/lib/client-api";
 import type { FormField, FormKind } from "@/features/admin/grow/forms-shared";
 
 type PublicForm = {
@@ -20,8 +19,203 @@ type SubmitResult = {
   submitted: true;
   thankYouHtml: string | null;
   redirectUrl: string | null;
+  signupEmailSent: boolean;
 };
 
+type Answer = string | string[] | boolean;
+
+const INPUT_CLASS =
+  "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30";
+
+function initialAnswer(field: FormField): Answer {
+  if (field.fieldType === "checkboxes") return [];
+  if (field.fieldType === "consent") return false;
+  return "";
+}
+
+function inputType(field: FormField): string {
+  switch (field.fieldType) {
+    case "email":
+      return "email";
+    case "number":
+      return "number";
+    case "phone":
+      return "tel";
+    case "date":
+      return "date";
+    default:
+      return "text";
+  }
+}
+
+function autoComplete(field: FormField): string | undefined {
+  if (field.fieldType === "email") return "email";
+  if (field.fieldType === "phone") return "tel";
+  if (field.key === "name" || field.key === "full_name") return "name";
+  return undefined;
+}
+
+function RequiredMark({ required }: { required: boolean }) {
+  return required ? (
+    <span className="text-destructive-text" aria-hidden="true">
+      {" "}
+      *
+    </span>
+  ) : null;
+}
+
+function FieldInput({
+  field,
+  value,
+  onChange,
+}: {
+  field: FormField;
+  value: Answer;
+  onChange: (value: Answer) => void;
+}) {
+  const options = field.options ?? [];
+
+  if (field.fieldType === "consent") {
+    return (
+      <label className="flex items-start gap-3 text-sm text-foreground">
+        <input
+          id={field.key}
+          type="checkbox"
+          required={field.required}
+          checked={value === true}
+          aria-labelledby={`${field.key}-label`}
+          onChange={(e) => {
+            onChange(e.target.checked);
+          }}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+        />
+        <span id={`${field.key}-label`}>
+          {field.label}
+          <RequiredMark required={field.required} />
+        </span>
+      </label>
+    );
+  }
+
+  if (field.fieldType === "radio" || field.fieldType === "checkboxes") {
+    const multiple = field.fieldType === "checkboxes";
+    const selected = Array.isArray(value) ? value : [];
+    return (
+      <fieldset>
+        <legend className="mb-2 block text-sm font-medium text-foreground">
+          {field.label}
+          <RequiredMark required={field.required} />
+        </legend>
+        <div className="space-y-2">
+          {options.map((option, index) => (
+            <label
+              key={option}
+              className="flex items-center gap-3 text-sm text-foreground"
+              htmlFor={`${field.key}-${String(index)}`}
+            >
+              <input
+                id={`${field.key}-${String(index)}`}
+                type={multiple ? "checkbox" : "radio"}
+                name={field.key}
+                value={option}
+                // A required radio group needs one choice; checkboxes are
+                // checked on submit, since the browser can't require "any one".
+                required={!multiple && field.required}
+                checked={multiple ? selected.includes(option) : value === option}
+                onChange={(e) => {
+                  if (!multiple) {
+                    onChange(option);
+                    return;
+                  }
+                  onChange(
+                    e.target.checked
+                      ? [...selected, option]
+                      : selected.filter((entry) => entry !== option),
+                  );
+                }}
+                className="h-4 w-4 shrink-0 accent-primary"
+              />
+              {option}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+    );
+  }
+
+  const label = (
+    <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor={field.key}>
+      {field.label}
+      <RequiredMark required={field.required} />
+    </label>
+  );
+  const text = typeof value === "string" ? value : "";
+
+  if (field.fieldType === "select") {
+    return (
+      <div>
+        {label}
+        <select
+          id={field.key}
+          required={field.required}
+          value={text}
+          onChange={(e) => {
+            onChange(e.target.value);
+          }}
+          className={INPUT_CLASS}
+        >
+          <option value="">{field.placeholder || "Choose one"}</option>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
+  if (field.fieldType === "textarea") {
+    return (
+      <div>
+        {label}
+        <textarea
+          id={field.key}
+          required={field.required}
+          placeholder={field.placeholder ?? undefined}
+          value={text}
+          onChange={(e) => {
+            onChange(e.target.value);
+          }}
+          className={`${INPUT_CLASS} min-h-24`}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {label}
+      <input
+        id={field.key}
+        type={inputType(field)}
+        required={field.required}
+        autoComplete={autoComplete(field)}
+        placeholder={field.placeholder ?? undefined}
+        value={text}
+        onChange={(e) => {
+          onChange(e.target.value);
+        }}
+        className={INPUT_CLASS}
+      />
+    </div>
+  );
+}
+
+/**
+ * The public form at /f/…, shown inside the academy's own site header
+ * (QA review 1 m12: the page had no logo or branding).
+ */
 export function PublicMarketingFormClient({
   token,
   source = "LINK",
@@ -32,8 +226,9 @@ export function PublicMarketingFormClient({
   const [form, setForm] = useState<PublicForm | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [busy, setBusy] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [done, setDone] = useState<SubmitResult | null>(null);
 
   useEffect(() => {
@@ -50,16 +245,17 @@ export function PublicMarketingFormClient({
         );
         const json = (await response.json()) as { data?: PublicForm; error?: { message?: string } };
         if (!response.ok) {
-          throw new Error(json.error?.message ?? "Form not available.");
+          throw new Error(json.error?.message ?? "This form isn't available.");
         }
         if (!cancelled && json.data) {
           setForm(json.data);
-          const initial: Record<string, string> = {};
-          for (const field of json.data.fields) initial[field.key] = "";
+          const initial: Record<string, Answer> = {};
+          for (const field of json.data.fields) initial[field.key] = initialAnswer(field);
           setAnswers(initial);
         }
       } catch (caught) {
-        if (!cancelled) setError(caught instanceof Error ? caught.message : "Form not available.");
+        if (!cancelled)
+          setError(caught instanceof Error ? caught.message : "This form isn't available.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -73,7 +269,18 @@ export function PublicMarketingFormClient({
   async function onSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form) return;
+    const missingChoice = form.fields.find(
+      (field) =>
+        field.fieldType === "checkboxes" &&
+        field.required &&
+        !(Array.isArray(answers[field.key]) && (answers[field.key] as string[]).length > 0),
+    );
+    if (missingChoice) {
+      setSubmitError(`Choose at least one option for ${missingChoice.label}.`);
+      return;
+    }
     setBusy(true);
+    setSubmitError(null);
     try {
       const response = await fetch(
         `/api/v1/public/marketing/forms/${encodeURIComponent(token)}/submit`,
@@ -88,89 +295,68 @@ export function PublicMarketingFormClient({
         data?: SubmitResult;
         error?: { message?: string };
       };
-      if (!response.ok) {
-        throw new Error(json.error?.message ?? "Submit failed.");
+      if (!response.ok || !json.data) {
+        throw new Error(json.error?.message ?? "Your answers weren't sent. Try again.");
       }
-      if (!json.data) throw new Error("Submit failed.");
       setDone(json.data);
       if (json.data.redirectUrl) {
         window.location.assign(json.data.redirectUrl);
       }
     } catch (caught) {
-      toast.error(caught instanceof Error ? caught.message : "Submit failed.");
+      setSubmitError(
+        caught instanceof Error ? caught.message : "Your answers weren't sent. Try again.",
+      );
     } finally {
       setBusy(false);
     }
   }
 
   if (loading) {
-    return <p className="p-8 text-sm text-muted-foreground">Loading form…</p>;
+    return (
+      <p className="mx-auto max-w-lg px-6 py-16 text-sm text-muted-foreground">Loading form…</p>
+    );
   }
   if (error || !form) {
-    return <p className="p-8 text-sm text-destructive-text">{error ?? "Form not available."}</p>;
+    return (
+      <div className="mx-auto max-w-lg px-6 py-16">
+        <h1 className="text-2xl font-semibold text-foreground">Form unavailable</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {error ?? "This form isn't available."}
+        </p>
+      </div>
+    );
   }
+
+  const card = "rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8";
+
   if (done && !done.redirectUrl) {
     return (
-      <div className="mx-auto max-w-lg space-y-4 p-8">
-        <h1 className="text-2xl font-semibold">{form.title}</h1>
-        {done.thankYouHtml ? (
-          <SafeHtml html={done.thankYouHtml} variant="inline" />
-        ) : (
-          <p className="text-foreground">Thanks — your response was submitted.</p>
-        )}
+      <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
+        <div className={`${card} space-y-4`} role="status">
+          <h1 className="text-2xl font-semibold text-foreground">{form.title}</h1>
+          {done.signupEmailSent ? (
+            <p className="text-foreground">
+              Check your email for the link to finish creating your account. You&rsquo;ll choose
+              your password there.
+            </p>
+          ) : null}
+          {done.thankYouHtml ? (
+            <SafeHtml html={done.thankYouHtml} variant="inline" />
+          ) : done.signupEmailSent ? null : (
+            <p className="text-foreground">Thanks, your answers were sent.</p>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 p-8">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{form.title}</h1>
-        {form.description ? <p className="text-muted-foreground">{form.description}</p> : null}
-      </header>
-      <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
-        {form.fields.map((field) => (
-          <div key={field.id}>
-            <label className="mb-1.5 block text-sm font-medium" htmlFor={field.key}>
-              {field.label}
-              {field.required ? " *" : ""}
-            </label>
-            {field.fieldType === "textarea" ? (
-              <textarea
-                id={field.key}
-                required={field.required}
-                placeholder={field.placeholder ?? undefined}
-                value={answers[field.key] ?? ""}
-                onChange={(e) => {
-                  setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }));
-                }}
-                className="min-h-24 w-full rounded-lg border border-input px-3 py-2.5 text-sm"
-              />
-            ) : (
-              <input
-                id={field.key}
-                type={
-                  field.fieldType === "password"
-                    ? "password"
-                    : field.fieldType === "email"
-                      ? "email"
-                      : field.fieldType === "number"
-                        ? "number"
-                        : field.fieldType === "phone"
-                          ? "tel"
-                          : "text"
-                }
-                required={field.required}
-                placeholder={field.placeholder ?? undefined}
-                value={answers[field.key] ?? ""}
-                onChange={(e) => {
-                  setAnswers((prev) => ({ ...prev, [field.key]: e.target.value }));
-                }}
-                className="w-full rounded-lg border border-input px-3 py-2.5 text-sm"
-              />
-            )}
-          </div>
-        ))}
+    <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
+      <div className={`${card} space-y-6`}>
+        <header className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">{form.title}</h1>
+          {form.description ? <p className="text-muted-foreground">{form.description}</p> : null}
+        </header>
         {form.kind === "SIGNUP" && form.googleSignupEnabled ? (
           <div className="space-y-3">
             <a
@@ -199,19 +385,36 @@ export function PublicMarketingFormClient({
             </a>
             <div className="relative py-1 text-center text-xs text-muted-foreground">
               <span className="relative z-[1] bg-card px-2">or</span>
-              <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-muted" />
+              <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-border" />
             </div>
           </div>
         ) : null}
-        <button
-          type="submit"
-          disabled={busy}
-          className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold disabled:opacity-60"
-          style={{ backgroundColor: form.buttonColor, color: form.buttonTextColor }}
-        >
-          {busy ? "Submitting…" : form.buttonText}
-        </button>
-      </form>
+        <form onSubmit={(e) => void onSubmit(e)} className="space-y-5">
+          {form.fields.map((field) => (
+            <FieldInput
+              key={field.id}
+              field={field}
+              value={answers[field.key] ?? initialAnswer(field)}
+              onChange={(value) => {
+                setAnswers((prev) => ({ ...prev, [field.key]: value }));
+              }}
+            />
+          ))}
+          {submitError ? (
+            <p role="alert" className="text-sm font-medium text-destructive-text">
+              {submitError}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={busy}
+            className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:opacity-60"
+            style={{ backgroundColor: form.buttonColor, color: form.buttonTextColor }}
+          >
+            {busy ? "Sending…" : form.buttonText}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

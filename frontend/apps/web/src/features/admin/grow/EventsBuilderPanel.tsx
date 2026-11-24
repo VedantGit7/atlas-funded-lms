@@ -1,5 +1,6 @@
 "use client";
 
+import { EventTimeZoneHint } from "./EventTimeZoneHint";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -679,6 +680,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
                   />
                 </div>
               </div>
+              <EventTimeZoneHint id="event-times-hint" academyTimeZone={event.timeZone} />
               <div>
                 <label htmlFor="event-location" className={MESSENGER_WIZARD_LABEL_CLASS}>
                   Location
@@ -709,6 +711,9 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
                     setReminderMinutes(value);
                   }}
                 />
+                <p className="mt-1.5 text-xs text-[var(--admin-on-surface-variant)]">
+                  Everyone registered gets a reminder email this long before the event starts.
+                </p>
               </div>
               <div>
                 <label htmlFor="event-join-url" className={MESSENGER_WIZARD_LABEL_CLASS}>

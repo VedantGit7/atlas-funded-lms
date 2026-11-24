@@ -275,4 +275,46 @@ export const marketingEventsRepository = {
     `;
     return { id, alreadyRegistered: false as const };
   },
+
+  /**
+   * Registrations whose reminder is due: the event is Live, has a reminder,
+   * hasn't started, and its reminder time has come. People who registered
+   * after the reminder time are left out (their confirmation just arrived).
+   * Locked so two sweeps can't queue the same reminder.
+   */
+  async lockDueReminders(tx: TenantTx, limit: number) {
+    return tx.$queryRaw<
+      Array<{ registration_id: string; event_id: string; email: string; name: string | null }>
+    >`
+      select r.id::text as registration_id, r.event_id::text as event_id, r.email, r.name
+      from marketing_event_registrations r
+      join marketing_events e on e.id = r.event_id
+      where e.status = 'LIVE'
+        and e.reminder_minutes_before is not null
+        and e.starts_at > now()
+        and e.starts_at - make_interval(mins => e.reminder_minutes_before) <= now()
+        and r.created_at < e.starts_at - make_interval(mins => e.reminder_minutes_before)
+        and r.reminder_queued_at is null
+      order by e.starts_at asc, r.created_at asc
+      limit ${limit}
+      for update of r skip locked
+    `;
+  },
+
+  async markReminderQueued(tx: TenantTx, registrationId: string) {
+    await tx.$executeRaw`
+      update marketing_event_registrations
+      set reminder_queued_at = now()
+      where id = ${registrationId}::uuid
+    `;
+  },
+
+  /** A new start time or reminder setting means each reminder is due again. */
+  async resetReminders(tx: TenantTx, eventId: string) {
+    await tx.$executeRaw`
+      update marketing_event_registrations
+      set reminder_queued_at = null
+      where event_id = ${eventId}::uuid and reminder_queued_at is not null
+    `;
+  },
 };

@@ -13,6 +13,8 @@ export type MarketingEventDto = {
   joinUrl: string | null;
   coverImageUrl: string | null;
   reminderMinutesBefore: number | null;
+  /** The academy's IANA time zone. */
+  timeZone: string;
   registrationCount: number;
   isPast: boolean;
   publishedAt: string | null;
@@ -51,6 +53,7 @@ export type PublicMarketingEventDto = {
   linkUrl: string | null;
   joinUrl: string | null;
   coverImageUrl: string | null;
+  timeZone: string;
 };
 
 export const EVENTS_LIST_HREF = "/admin/marketing/events";
@@ -133,6 +136,51 @@ export function formatEventRelativeFromNow(value: string | null | undefined): st
     : months === 1
       ? "in 1 month"
       : `in ${String(months)} months`;
+}
+
+function safeTimeZone(timeZone: string | null | undefined): string | undefined {
+  if (!timeZone) return undefined;
+  try {
+    new Intl.DateTimeFormat(undefined, { timeZone });
+    return timeZone;
+  } catch {
+    return undefined;
+  }
+}
+
+/** "India Standard Time" for the zone, at that date. */
+export function timeZoneLongName(timeZone: string | null | undefined, at: Date): string {
+  const zone = safeTimeZone(timeZone);
+  const part = new Intl.DateTimeFormat(undefined, { timeZone: zone, timeZoneName: "long" })
+    .formatToParts(at)
+    .find((entry) => entry.type === "timeZoneName");
+  return part?.value ?? zone ?? "";
+}
+
+/**
+ * An event's time in the academy's time zone, with the zone named (QA review
+ * 2 H29: the page showed a time with no zone). Dates and times use the
+ * reader's language; the zone is always the academy's.
+ */
+export function formatEventWhen(
+  startsAt: string,
+  endsAt: string | null,
+  timeZone: string | null | undefined,
+): string {
+  const zone = safeTimeZone(timeZone);
+  const start = new Date(startsAt);
+  if (Number.isNaN(start.getTime())) return startsAt;
+  const day = (date: Date) =>
+    date.toLocaleDateString(undefined, { timeZone: zone, dateStyle: "full" });
+  const time = (date: Date) =>
+    date.toLocaleTimeString(undefined, { timeZone: zone, hour: "numeric", minute: "2-digit" });
+  const zoneName = timeZoneLongName(zone, start);
+  const startLabel = `${day(start)}, ${time(start)}`;
+  if (!endsAt) return `${startLabel} (${zoneName})`;
+  const end = new Date(endsAt);
+  if (Number.isNaN(end.getTime())) return `${startLabel} (${zoneName})`;
+  const endLabel = day(end) === day(start) ? time(end) : `${day(end)}, ${time(end)}`;
+  return `${startLabel} – ${endLabel} (${zoneName})`;
 }
 
 export function formatEventCount(value: number): string {

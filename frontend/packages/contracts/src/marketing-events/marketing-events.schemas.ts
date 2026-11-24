@@ -15,6 +15,8 @@ export const marketingEventDtoSchema = z.object({
   joinUrl: z.string().nullable(),
   coverImageUrl: z.string().nullable(),
   reminderMinutesBefore: z.number().int().nullable(),
+  /** The academy's IANA time zone; event times are shown in it. */
+  timeZone: z.string(),
   registrationCount: z.number().int().nonnegative(),
   isPast: z.boolean(),
   publishedAt: z.iso.datetime().nullable(),
@@ -111,6 +113,8 @@ export const publicMarketingEventDtoSchema = z.object({
   linkUrl: z.string().nullable(),
   joinUrl: z.string().nullable(),
   coverImageUrl: z.string().nullable(),
+  /** The academy's IANA time zone; the page shows the time in it, named. */
+  timeZone: z.string(),
 });
 
 export const publicMarketingEventsListResponseSchema = z.object({

@@ -1,10 +1,14 @@
 import type { TenantTx } from "@atlas/db";
 import type { TenantSeoSettings, VideoQuality } from "./tenant-settings.contract";
 
+// The tenants table has no row-level security, so these must name the academy:
+// without the filter, the read returned whichever academy came first and the
+// update changed every academy's time zone (found in QA step S1.14).
 export async function readTenantDefaultTimezone(tx: TenantTx): Promise<string> {
   const rows = await tx.$queryRaw<Array<{ default_timezone: string }>>`
     select default_timezone
     from tenants
+    where id = app.current_tenant_id()
     limit 1
   `;
 
@@ -19,6 +23,7 @@ export async function updateTenantDefaultTimezone(
     update tenants
     set default_timezone = ${timezone},
         updated_at = now()
+    where id = app.current_tenant_id()
   `;
 
   return { timezone };

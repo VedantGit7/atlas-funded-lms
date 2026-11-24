@@ -203,13 +203,17 @@ async function executeAction(args: {
         message: "No email available to register for the marketing event.",
       });
     } else {
-      const result = await registerMarketingEventFromWorkflow(args.tx, {
-        eventId: config.eventId,
-        email,
-        name,
-        membershipId: args.run.membership_id,
-        contactId: typeof payload["contactId"] === "string" ? payload["contactId"] : null,
-      });
+      const result = await registerMarketingEventFromWorkflow(
+        args.tx,
+        {
+          eventId: config.eventId,
+          email,
+          name,
+          membershipId: args.run.membership_id,
+          contactId: typeof payload["contactId"] === "string" ? payload["contactId"] : null,
+        },
+        args.ctx,
+      );
       await marketingWorkflowRepository.insertLog(args.tx, {
         runId: args.run.id,
         nodeId: args.node.id,

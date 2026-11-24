@@ -62,6 +62,7 @@ export const APPROVED_EVENT_TYPES = new Set<string>([
   "marketing.form_submitted",
   "marketing.webhook_dispatch_requested",
   "marketing.workflow_email_requested",
+  "marketing.event_email_requested",
 ]);
 
 export function assertApprovedEventType(eventType: string): void {
