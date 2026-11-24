@@ -58,5 +58,14 @@ export function resolveDocumentDescription(source: TenantTitleSource): string {
   return `${title.replace(/\s+LMS$/i, "")} learning platform`;
 }
 
+/**
+ * "FundedBeyond Academy Admin", never "FundedBeyond Academy Academy Admin"
+ * when the academy's name already ends in "Academy" (QA review 1 m2).
+ */
+export function academyAreaLabel(publicName: string, area: "Admin" | "Studio"): string {
+  const base = publicName.replace(/\s*\b(Academy|LMS)\s*$/i, "").trim();
+  return base ? `${base} Academy ${area}` : `Academy ${area}`;
+}
+
 /** Admin shell home — brand mark / wordmark must always navigate here. */
 export const ADMIN_DASHBOARD_HREF = "/admin" as const;

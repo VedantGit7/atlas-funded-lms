@@ -9,7 +9,6 @@ import {
   GraduationCap,
   LogOut,
   Menu,
-  Search,
   Settings,
   ShieldCheck,
   Trash2,
@@ -18,12 +17,13 @@ import {
 } from "lucide-react";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import type { AdminNavItem } from "../../../features/admin/admin-navigation";
+import { AdminHeaderSearch } from "../../../features/admin/search/AdminHeaderSearch";
 import { AdminNotificationPopover } from "../../../features/notifications/components/AdminNotificationPopover";
 import { performAtlasLogout } from "../../../lib/auth/perform-logout";
 import { DeviceSessionCapture } from "../../observability/DeviceSessionCapture";
 import { resolveTenantLogoUrl } from "../../../lib/brand";
 import { TenantBrandMark } from "../../patterns/TenantBrandMark";
-import { ADMIN_DASHBOARD_HREF } from "../../../lib/branding/document-title";
+import { ADMIN_DASHBOARD_HREF, academyAreaLabel } from "../../../lib/branding/document-title";
 import { ThemeModeToggle } from "../../ThemeModeToggle";
 import { AccountMenu, type AccountMenuItem } from "../shared/AccountMenu";
 import { AdminConfirmDialog } from "./AdminConfirmDialog";
@@ -465,21 +465,7 @@ export function AdminShell({
             <Menu className="h-5 w-5" aria-hidden="true" />
           </button>
 
-          <div className="relative hidden max-w-md flex-1 sm:block">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[var(--admin-on-surface-variant)]"
-              aria-hidden="true"
-            />
-            <label className="sr-only" htmlFor="admin-shell-search">
-              Search admin
-            </label>
-            <input
-              id="admin-shell-search"
-              type="search"
-              placeholder="Search members, content, or settings"
-              className="w-full rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface)] py-2 pl-10 pr-4 text-sm text-[var(--admin-on-surface)] placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/40"
-            />
-          </div>
+          <AdminHeaderSearch navigationItems={navigationItems} />
 
           <div className="ml-auto flex items-center gap-4">
             <Link
@@ -557,7 +543,7 @@ export function AdminShell({
 
         <footer className="flex flex-col gap-2 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-4 text-xs sm:flex-row sm:items-center sm:justify-between md:px-8">
           <span className="font-semibold text-[var(--admin-on-surface-variant)]">
-            {publicName} Academy Admin
+            {academyAreaLabel(publicName, "Admin")}
           </span>
           <span className="text-[var(--admin-on-surface-variant)]/70">
             &copy; {new Date().getFullYear()} {publicName}. All rights reserved.

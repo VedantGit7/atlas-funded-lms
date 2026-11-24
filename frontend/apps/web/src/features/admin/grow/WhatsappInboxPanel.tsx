@@ -42,6 +42,24 @@ export function WhatsappInboxPanel() {
   const [simulatePhone, setSimulatePhone] = useState("");
   const [simulateBody, setSimulateBody] = useState("");
   const [simulateName, setSimulateName] = useState("");
+  // "Simulate inbound" is a development tool (QA review 2 H8): shown only where
+  // the server says the mock tools exist.
+  const [devToolsAvailable, setDevToolsAvailable] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void clientApi
+      .get<{ data: { devToolsAvailable?: boolean } }>("/api/v1/marketing/whatsapp/connection")
+      .then((response) => {
+        if (!cancelled) setDevToolsAvailable(response.data.devToolsAvailable === true);
+      })
+      .catch(() => {
+        if (!cancelled) setDevToolsAvailable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const loadConversations = useCallback(async () => {
     setLoadingList(true);
@@ -155,15 +173,17 @@ export function WhatsappInboxPanel() {
             View and reply to WhatsApp conversations from learners.
           </p>
         </div>
-        <button
-          type="button"
-          className={`${manageSecondaryButtonClassName} shrink-0`}
-          onClick={() => {
-            setSimulateOpen(true);
-          }}
-        >
-          Simulate inbound
-        </button>
+        {devToolsAvailable ? (
+          <button
+            type="button"
+            className={`${manageSecondaryButtonClassName} shrink-0`}
+            onClick={() => {
+              setSimulateOpen(true);
+            }}
+          >
+            Simulate inbound
+          </button>
+        ) : null}
       </header>
 
       <div className="grid min-h-[28rem] grid-cols-1 overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm lg:grid-cols-[minmax(14rem,18rem)_minmax(0,1fr)]">

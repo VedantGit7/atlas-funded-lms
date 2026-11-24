@@ -359,7 +359,9 @@ export function LearnerShellClient({
         />
       ) : null}
 
-      <span className="sr-only">Request ID: {requestId}</span>
+      {/* Kept for support in the page source, not read out or shown: an internal
+          request ID belongs in error states only (QA review 1 m37). */}
+      <span hidden data-request-id={requestId} />
       <MarketingCtaRuntime isAuthenticated />
     </div>
   );

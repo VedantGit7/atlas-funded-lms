@@ -16,6 +16,7 @@ import { LazyMarketingSnippets } from "../features/marketing/LazyMarketingSnippe
 import { loadTenantThemeRuntime } from "@atlas/tenant-theme";
 import { ThemeInitScript } from "../components/ThemeInitScript";
 import { resolveDocumentDescription, resolveDocumentTitle } from "../lib/branding/document-title";
+import { pageDocumentTitle } from "../lib/branding/page-title";
 import { loadPublicBootstrap } from "../lib/server/bootstrap";
 import { resolveAppearanceHtmlProps } from "../lib/server/resolve-appearance-html";
 import { hasSessionCookie } from "../lib/server/has-session-cookie";
@@ -39,9 +40,11 @@ export async function generateMetadata(): Promise<Metadata> {
     // No resolvable tenant (e.g. the base Atlas host): keep the product defaults.
   }
 
+  // Pages without a title of their own are named after their menu entry (QA review 1 m1).
+  const pathname = (await headers()).get("x-atlas-pathname") ?? "";
   return {
     title: {
-      default: title,
+      default: pageDocumentTitle(pathname, title),
       template: `%s · ${title}`,
     },
     description,

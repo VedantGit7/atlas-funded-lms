@@ -119,7 +119,7 @@ export default async function AchievementsPage() {
           <PageGate
             state="denied"
             title="Achievements"
-            deniedMessage={notInAcademyMessage("Achievements")}
+            deniedMessage={notInAcademyMessage("Achievements", { plural: true })}
           />
         );
       }

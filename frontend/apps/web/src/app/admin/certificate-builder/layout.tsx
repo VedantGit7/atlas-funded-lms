@@ -8,14 +8,15 @@ import {
 } from "../../../lib/branding/document-title";
 import { loadPublicBootstrap } from "../../../lib/server/bootstrap";
 
-/** Relative title so the root/admin template keeps "{Tenant} LMS" in the tab. */
+/** "Certificate Studio · {Tenant} LMS"; pages under it use "%s · {Tenant} LMS". */
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const bootstrap = await loadPublicBootstrap();
     const tenantTitle = resolveDocumentTitle(bootstrap);
     return {
+      // Absolute, or the admin layout's template repeats the academy name (QA review 1 m1).
       title: {
-        default: `Certificate Studio · ${tenantTitle}`,
+        absolute: `Certificate Studio · ${tenantTitle}`,
         template: `%s · ${tenantTitle}`,
       },
       description: resolveDocumentDescription(bootstrap),

@@ -1,4 +1,5 @@
 import { AtlasHttpError } from "@atlas/core/http/errors";
+import { isDeployedRuntime } from "@atlas/core/config/runtime-environment";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { notificationRepository } from "../notifications/notification.repository";
@@ -82,6 +83,23 @@ function parseButtons(
     );
 }
 
+/**
+ * The mock provider and simulated inbound messages are for building the
+ * feature locally. Staging and production show and accept neither (QA review
+ * 2 H8: academy staff saw "Mock (dev)" and "Connect (mock)").
+ */
+export function whatsappDevToolsAvailable(): boolean {
+  return !isDeployedRuntime();
+}
+
+function devToolsOnly(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "PERMISSION_DENIED",
+    status: 404,
+    message: "Not found.",
+  });
+}
+
 function toConnectionDto(row: WhatsappConnectionRow | null) {
   if (!row || row.status !== "CONNECTED") {
     return {
@@ -96,6 +114,7 @@ function toConnectionDto(row: WhatsappConnectionRow | null) {
       messagingLimit: row?.messaging_limit ?? 250,
       connectedAt: row?.connected_at?.toISOString() ?? null,
       hasCredentials: Boolean(row?.access_token_ciphertext),
+      devToolsAvailable: whatsappDevToolsAvailable(),
     };
   }
   return {
@@ -110,6 +129,7 @@ function toConnectionDto(row: WhatsappConnectionRow | null) {
     messagingLimit: row.messaging_limit,
     connectedAt: row.connected_at?.toISOString() ?? null,
     hasCredentials: Boolean(row.access_token_ciphertext),
+    devToolsAvailable: whatsappDevToolsAvailable(),
   };
 }
 
@@ -197,6 +217,7 @@ export async function getWhatsappConnection(tx: TenantTx, _ctx: ServiceCtx) {
 }
 
 export async function connectWhatsappMock(tx: TenantTx, _ctx: ServiceCtx, rawBody: unknown) {
+  if (!whatsappDevToolsAvailable()) throw devToolsOnly();
   const body = connectWhatsappMockBodySchema.parse(rawBody);
   await whatsappRepository.upsertConnection(tx, {
     status: "CONNECTED",
@@ -668,6 +689,7 @@ export async function replyWhatsappConversation(
 }
 
 export async function simulateWhatsappInbound(tx: TenantTx, ctx: ServiceCtx, rawBody: unknown) {
+  if (!whatsappDevToolsAvailable()) throw devToolsOnly();
   await requireConnected(tx);
   const body = simulateWhatsappInboundBodySchema.parse(rawBody);
   const conversationId = await whatsappRepository.upsertConversation(tx, {
