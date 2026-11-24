@@ -37,6 +37,7 @@ export const gradingQueueItemSchema = z.object({
   status: gradingTaskStatusSchema,
   assessmentTitle: z.string(),
   learnerDisplayName: z.string(),
+  learnerEmail: z.string().nullable(),
   itemType: z.string(),
   possiblePoints: z.number(),
   submittedAt: z.string().nullable(),
@@ -97,6 +98,7 @@ export const gradingTaskDetailSchema = z.object({
   learner: z.object({
     membershipId: z.uuid(),
     displayName: z.string(),
+    email: z.string().nullable(),
   }),
   answers: z.array(gradingAnswerItemSchema),
   possiblePoints: z.number(),

@@ -89,8 +89,15 @@ function DashboardLearnerTable({ learners }: { learners: CourseLearnerRow[] }) {
                 key={row.enrollmentId}
                 className="transition-colors hover:bg-[var(--admin-surface-high)]"
               >
-                <td className="px-5 py-3 font-medium text-[var(--admin-on-surface)]">
-                  {row.displayName}
+                <td className="px-5 py-3">
+                  <span className="block font-medium text-[var(--admin-on-surface)]">
+                    {row.displayName}
+                  </span>
+                  {row.email && row.email !== row.displayName ? (
+                    <span className="block text-xs text-[var(--admin-on-surface-variant)]">
+                      {row.email}
+                    </span>
+                  ) : null}
                 </td>
                 <td className="px-5 py-3 text-[var(--admin-on-surface-variant)]">
                   {new Date(row.enrolledAt).toLocaleDateString()}

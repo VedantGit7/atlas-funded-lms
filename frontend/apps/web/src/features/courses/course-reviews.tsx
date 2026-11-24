@@ -12,6 +12,8 @@ type ReviewItem = {
   /** The academy's own review (owner decision D8), shown with a label. */
   addedByAcademy?: boolean;
   mine: boolean;
+  /** Learner reviews wait for the academy's approval before they are listed. */
+  status?: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: string;
   updatedAt: string;
 };
@@ -62,6 +64,31 @@ function Stars({ value, className = "" }: { value: number; className?: string })
   );
 }
 
+function MyReviewStatus({ status }: { status: ReviewItem["status"] }) {
+  if (status === "PENDING") {
+    return (
+      <p
+        role="status"
+        className="mt-2 rounded-lg border border-[color-mix(in_srgb,var(--warning)_40%,var(--border))] bg-[color-mix(in_srgb,var(--warning)_10%,transparent)] px-3 py-2 text-sm text-foreground"
+      >
+        Your review is waiting for approval. It will show here once the academy approves it.
+      </p>
+    );
+  }
+  if (status === "REJECTED") {
+    return (
+      <p role="status" className="mt-2 text-sm text-muted-foreground">
+        The academy didn&rsquo;t publish your review. You can edit it and submit it again.
+      </p>
+    );
+  }
+  return (
+    <p role="status" className="mt-2 text-sm text-muted-foreground">
+      Your review is published. Updating it sends it for approval again.
+    </p>
+  );
+}
+
 export function CourseReviews({ courseId, canReview }: { courseId: string; canReview: boolean }) {
   const [state, setState] = useState<ReviewsResponse["data"] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,7 +130,9 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
         { rating, ...(comment.trim() ? { comment: comment.trim() } : {}) },
         "course-review",
       );
-      toast.success("Thanks for your review.");
+      // Reviews are checked before they appear (QA review 2 H21), so say so
+      // rather than leave "No reviews yet" looking like it was lost.
+      toast.success("Thanks. Your review will appear once the academy approves it.");
       await load();
     } catch {
       toast.error("Could not save your review. Please try again.");
@@ -152,6 +181,7 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
               <p className="text-sm font-bold text-foreground">
                 {state?.myReview ? "Update your review" : "Write a review"}
               </p>
+              {state?.myReview ? <MyReviewStatus status={state.myReview.status} /> : null}
               <div
                 className="mt-3 flex items-center gap-1"
                 role="radiogroup"

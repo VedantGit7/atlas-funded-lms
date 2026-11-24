@@ -193,6 +193,9 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
                     <span className="font-semibold text-[var(--admin-on-surface)]">
                       {task.learner.displayName}
                     </span>
+                    {task.learner.email && task.learner.email !== task.learner.displayName ? (
+                      <span className="ml-1">({task.learner.email})</span>
+                    ) : null}
                   </p>
                 </div>
               </div>

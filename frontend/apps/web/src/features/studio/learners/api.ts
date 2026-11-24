@@ -29,7 +29,10 @@ type CertificateDetailResponse = z.infer<typeof certificateDetailResponseSchema>
 export type CourseLearnerRow = {
   enrollmentId: string;
   membershipId: string;
+  /** The learner's name, or their email when they have not set one. */
   displayName: string;
+  /** Shown under the name so learners with the same name can be told apart. */
+  email: string | null;
   enrolledAt: string;
   progressPct: number;
   completedLessons: number;
@@ -68,7 +71,9 @@ export async function fetchCourseLearnerRoster(courseId: string): Promise<Course
     return {
       enrollmentId: enrollment.id,
       membershipId: enrollment.membershipId,
-      displayName: enrollment.displayName?.trim() || "Learner",
+      // A learner without a display name is shown by email, not as "Learner" (QA review 2 H15).
+      displayName: enrollment.displayName?.trim() || enrollment.email || "Learner",
+      email: enrollment.email,
       enrolledAt: enrollment.enrolledAt,
       progressPct: progressRow?.progressPct ?? 0,
       completedLessons: progressRow?.completedLessons ?? 0,

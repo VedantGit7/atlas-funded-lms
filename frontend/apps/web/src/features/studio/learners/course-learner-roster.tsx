@@ -45,24 +45,33 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
   const [templates, setTemplates] = useState<CertificateTemplateOption[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [certMessage, setCertMessage] = useState<string | null>(null);
+  const [certificatesAvailable, setCertificatesAvailable] = useState(true);
 
   const loadRoster = useCallback(async () => {
     setLoading(true);
     setErrorMessage(null);
-    try {
-      const [roster, templateList] = await Promise.all([
-        fetchCourseLearnerRoster(courseId),
-        fetchPublishedCertificateTemplates(),
-      ]);
-      setRows(roster);
-      setTemplates(templateList);
-      setSelectedTemplateId((current) => current || templateList[0]?.id || "");
-    } catch (error) {
-      setErrorMessage(formatStudioLearnerApiError(error));
+    // The roster loads on its own: certificate templates are optional, and when
+    // certificates are off their API refuses, which used to fail the whole
+    // roster (QA review 2 H14).
+    const [roster, templateList] = await Promise.allSettled([
+      fetchCourseLearnerRoster(courseId),
+      fetchPublishedCertificateTemplates(),
+    ]);
+    if (roster.status === "fulfilled") {
+      setRows(roster.value);
+    } else {
+      setErrorMessage(formatStudioLearnerApiError(roster.reason));
       setRows([]);
-    } finally {
-      setLoading(false);
     }
+    if (templateList.status === "fulfilled") {
+      setCertificatesAvailable(true);
+      setTemplates(templateList.value);
+      setSelectedTemplateId((current) => current || templateList.value[0]?.id || "");
+    } else {
+      setCertificatesAvailable(false);
+      setTemplates([]);
+    }
+    setLoading(false);
   }, [courseId]);
 
   useEffect(() => {
@@ -112,27 +121,29 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
     setAttempts([]);
     setCertMessage(null);
 
-    try {
-      const [competencyResponse, attemptSummaries] = await Promise.all([
-        fetchMemberCompetencySnapshot(row.membershipId),
-        fetchLearnerAttemptSummaries(row.membershipId),
-      ]);
+    // Each part loads on its own, so competency being off doesn't hide attempts.
+    const [competencyResult, attemptsResult] = await Promise.allSettled([
+      fetchMemberCompetencySnapshot(row.membershipId),
+      fetchLearnerAttemptSummaries(row.membershipId),
+    ]);
+    if (competencyResult.status === "fulfilled") {
       setCompetency(
-        competencyResponse.data.scores.map((score) => ({
+        competencyResult.value.data.scores.map((score) => ({
           dimensionKey: score.dimensionKey,
           dimensionName: score.dimensionName,
           score: score.score,
         })),
       );
-      setAttempts(attemptSummaries);
-    } catch (error) {
-      const message = formatStudioLearnerApiError(error);
-      setCompetencyError(message);
-      setAttemptsError(message);
-    } finally {
-      setCompetencyLoading(false);
-      setAttemptsLoading(false);
+    } else {
+      setCompetencyError(formatStudioLearnerApiError(competencyResult.reason));
     }
+    if (attemptsResult.status === "fulfilled") {
+      setAttempts(attemptsResult.value);
+    } else {
+      setAttemptsError(formatStudioLearnerApiError(attemptsResult.reason));
+    }
+    setCompetencyLoading(false);
+    setAttemptsLoading(false);
   }
 
   if (loading) {
@@ -167,7 +178,12 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
             <tbody>
               {rows.map((row) => (
                 <tr key={row.enrollmentId} className="border-t">
-                  <td>{row.displayName}</td>
+                  <td>
+                    <span className="block font-medium">{row.displayName}</span>
+                    {row.email && row.email !== row.displayName ? (
+                      <span className="block text-xs opacity-70">{row.email}</span>
+                    ) : null}
+                  </td>
                   <td>{new Date(row.enrolledAt).toLocaleDateString()}</td>
                   <td>{row.progressPct}%</td>
                   <td>
@@ -212,6 +228,9 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
         >
           <h2 id="learner-drill-in-heading" className="font-semibold">
             {selectedRow.displayName}
+            {selectedRow.email && selectedRow.email !== selectedRow.displayName ? (
+              <span className="ml-2 text-sm font-normal opacity-70">{selectedRow.email}</span>
+            ) : null}
           </h2>
 
           <div>
@@ -268,44 +287,46 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
             ) : null}
           </div>
 
-          <div className="space-y-2">
-            <h3 className="font-medium">Issue certificate</h3>
-            {templates.length === 0 ? (
-              <p className="text-sm opacity-80">No published certificate templates available.</p>
-            ) : (
-              <div className="flex flex-wrap items-end gap-2">
-                <label className="space-y-1 text-sm">
-                  <span>Template</span>
-                  <select
-                    className="block rounded border px-2 py-1"
-                    value={selectedTemplateId}
-                    onChange={(event) => {
-                      setSelectedTemplateId(event.target.value);
+          {certificatesAvailable ? (
+            <div className="space-y-2">
+              <h3 className="font-medium">Issue certificate</h3>
+              {templates.length === 0 ? (
+                <p className="text-sm opacity-80">No published certificate templates available.</p>
+              ) : (
+                <div className="flex flex-wrap items-end gap-2">
+                  <label className="space-y-1 text-sm">
+                    <span>Template</span>
+                    <select
+                      className="block rounded border px-2 py-1"
+                      value={selectedTemplateId}
+                      onChange={(event) => {
+                        setSelectedTemplateId(event.target.value);
+                      }}
+                    >
+                      {templates.map((template) => (
+                        <option key={template.id} value={template.id}>
+                          {template.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    disabled={issueCertificateMutation.isPending || !selectedTemplateId}
+                    onClick={() => {
+                      issueCertificateMutation.mutate({
+                        membershipId: selectedRow.membershipId,
+                        templateId: selectedTemplateId,
+                      });
                     }}
                   >
-                    {templates.map((template) => (
-                      <option key={template.id} value={template.id}>
-                        {template.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button
-                  type="button"
-                  disabled={issueCertificateMutation.isPending || !selectedTemplateId}
-                  onClick={() => {
-                    issueCertificateMutation.mutate({
-                      membershipId: selectedRow.membershipId,
-                      templateId: selectedTemplateId,
-                    });
-                  }}
-                >
-                  {issueCertificateMutation.isPending ? "Issuing…" : "Issue certificate"}
-                </button>
-              </div>
-            )}
-            {certMessage ? <p className="text-sm">{certMessage}</p> : null}
-          </div>
+                    {issueCertificateMutation.isPending ? "Issuing…" : "Issue certificate"}
+                  </button>
+                </div>
+              )}
+              {certMessage ? <p className="text-sm">{certMessage}</p> : null}
+            </div>
+          ) : null}
         </section>
       ) : null}
     </div>

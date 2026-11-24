@@ -1,11 +1,14 @@
 import type { z } from "zod";
 import { PageGate } from "../../components/patterns/PageGate";
 import { CourseCatalog } from "../../features/courses/course-catalog";
+import { LearningPathCards } from "../../features/learning-paths/components/LearningPathCards";
 import type { CourseFilterValues } from "../../features/courses/course-filters";
 import { ServerApiError, serverApi } from "../../lib/server-api";
 import type { courseListResponseSchema } from "@atlas/contracts/courses/schemas";
+import type { learningPathListResponseSchema } from "@atlas/contracts/learning-paths/learning-path.schemas";
 
 type CourseListResponse = z.infer<typeof courseListResponseSchema>;
+type LearningPathListResponse = z.infer<typeof learningPathListResponseSchema>;
 
 type CoursesPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -61,10 +64,29 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const path = query.size > 0 ? `/api/v1/courses?${query.toString()}` : "/api/v1/courses";
 
   try {
-    const catalog = await serverApi.get<CourseListResponse>(path);
+    const filtered = query.size > 0;
+    const [catalog, paths] = await Promise.all([
+      serverApi.get<CourseListResponse>(path),
+      // Published learning paths sit above the courses on the unfiltered
+      // catalogue (QA review 2 H19). The catalogue still shows without them.
+      filtered
+        ? Promise.resolve(null)
+        : serverApi
+            .get<LearningPathListResponse>("/api/v1/learning-paths?limit=6")
+            .catch(() => null),
+    ]);
 
     return (
       <PageGate state="ready" title="Course catalog">
+        {paths && paths.data.items.length > 0 ? (
+          <div className="mb-8">
+            <LearningPathCards
+              paths={paths.data.items}
+              heading="Learning paths"
+              description="Follow a path to take courses and assessments in order."
+            />
+          </div>
+        ) : null}
         <CourseCatalog
           initialItems={catalog.data.items}
           pageInfo={catalog.data.pageInfo}

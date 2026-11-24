@@ -12,9 +12,41 @@ type PathStepListProps = {
   steps: PathStep[];
   progressSteps?: ProgressStep[];
   enrolledAt?: string | null;
+  /** Before the learner starts the path every step reads as locked; say why. */
+  enrolled?: boolean;
 };
 
-export function PathStepList({ steps, progressSteps = [], enrolledAt }: PathStepListProps) {
+const STEP_TYPE_LABELS: Record<PathStep["stepType"], string> = {
+  course: "Course",
+  assessment: "Assessment",
+  path: "Learning path",
+};
+
+/** Plain words for a step's state (QA review 2 H19: "course · in_progress"). */
+export function stepStatusLabel(
+  progress: ProgressStep | undefined,
+  enrolled: boolean,
+  position: number,
+): string {
+  if (!enrolled) return position === 1 ? "First step" : "Unlocks as you go";
+  switch (progress?.progressStatus) {
+    case "completed":
+      return "Completed";
+    case "in_progress":
+      return "In progress";
+    case "unlocked":
+      return "Ready to start";
+    default:
+      return "Locked";
+  }
+}
+
+export function PathStepList({
+  steps,
+  progressSteps = [],
+  enrolledAt,
+  enrolled = true,
+}: PathStepListProps) {
   const progressByStep = new Map(progressSteps.map((step) => [step.stepId, step]));
 
   return (
@@ -29,8 +61,8 @@ export function PathStepList({ steps, progressSteps = [], enrolledAt }: PathStep
                 <p className="text-xs uppercase tracking-wide opacity-70">Step {step.position}</p>
                 <h3 className="font-medium">{step.title}</h3>
                 <p className="text-sm opacity-80">
-                  {step.stepType}
-                  {progress ? ` · ${progress.progressStatus}` : ""}
+                  {STEP_TYPE_LABELS[step.stepType]} ·{" "}
+                  {stepStatusLabel(progress, enrolled, step.position)}
                 </p>
               </div>
               {!locked && progress?.href ? (

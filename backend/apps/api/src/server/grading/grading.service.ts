@@ -96,7 +96,9 @@ function mapQueueItem(row: Awaited<ReturnType<typeof gradingRepository.listTasks
     id: row.id,
     status: mapDbStatusToApi(row.status),
     assessmentTitle: row.assessment_title,
-    learnerDisplayName: row.learner_display_name?.trim() || "Learner",
+    // A learner without a display name is shown by email, not as "Learner" (QA review 2 H15).
+    learnerDisplayName: row.learner_display_name?.trim() || row.learner_email || "Learner",
+    learnerEmail: row.learner_email,
     itemType: row.item_type_key,
     possiblePoints: Number(row.manual_possible_points ?? 0),
     submittedAt: row.submitted_at?.toISOString() ?? null,
@@ -161,10 +163,7 @@ export async function getGradingTaskDetail(tx: TenantTx, ctx: ServiceCtx, taskId
   });
   const manualPossiblePoints = manualAnswers.reduce((sum, item) => sum + item.points, 0);
   const existingResult = parseGradingResult(task.result_json);
-  const learnerDisplayName = await gradingRepository.loadLearnerDisplayName(
-    tx,
-    attempt.membershipId,
-  );
+  const learner = await gradingRepository.loadLearnerIdentity(tx, attempt.membershipId);
   const proctoring = await getTimelineForAttempt(tx, ctx, attempt.id);
 
   return {
@@ -184,7 +183,8 @@ export async function getGradingTaskDetail(tx: TenantTx, ctx: ServiceCtx, taskId
       },
       learner: {
         membershipId: attempt.membershipId,
-        displayName: learnerDisplayName,
+        displayName: learner.displayName,
+        email: learner.email,
       },
       answers: manualAnswers.map((item) => ({
         assessmentItemId: item.assessmentItemId,

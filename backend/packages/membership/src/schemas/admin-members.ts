@@ -111,6 +111,13 @@ export const suspendMemberResponseSchema = z.object({
   }),
 });
 
+export const reactivateMemberResponseSchema = z.object({
+  data: z.object({
+    id: z.uuid(),
+    status: z.enum(["ACTIVE", "INVITED"]),
+  }),
+});
+
 export const removeMemberResponseSchema = z.object({
   data: z.object({
     id: z.uuid(),

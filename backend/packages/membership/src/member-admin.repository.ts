@@ -462,6 +462,30 @@ export async function refreshInviteTokenRecord(args: {
   };
 }
 
+/**
+ * Lifts a suspension. A member who had joined goes back to ACTIVE; one who
+ * was suspended before accepting an invitation goes back to INVITED.
+ */
+export async function reactivateMembershipRecord(args: {
+  tx: Tx;
+  tenantId: string;
+  membershipId: string;
+}): Promise<{ id: string; status: "ACTIVE" | "INVITED" } | null> {
+  const rows = await args.tx.$queryRaw<Array<{ id: string; status: "ACTIVE" | "INVITED" }>>`
+    update memberships
+    set
+      status = (case when joined_at is not null then 'ACTIVE' else 'INVITED' end)::"MembershipStatus",
+      suspended_at = null,
+      updated_at = now()
+    where tenant_id = ${args.tenantId}::uuid
+      and id = ${args.membershipId}::uuid
+      and status = 'SUSPENDED'
+    returning id::text, status::text as status
+  `;
+
+  return rows[0] ?? null;
+}
+
 export async function suspendMembershipRecord(args: {
   tx: Tx;
   tenantId: string;

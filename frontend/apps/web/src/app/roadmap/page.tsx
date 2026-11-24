@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, RouteOff } from "lucide-react";
 import type { z } from "zod";
 import { PageGate } from "../../components/patterns/PageGate";
+import { LearningPathCards } from "../../features/learning-paths/components/LearningPathCards";
 import { RoadmapJourney } from "../../features/learning-paths/components/RoadmapJourney";
 import { ServerApiError, serverApi } from "../../lib/server-api";
 import type {
@@ -12,23 +13,45 @@ import type {
 type LearningPathListResponse = z.infer<typeof learningPathListResponseSchema>;
 type PathProgressResponse = z.infer<typeof pathProgressResponseSchema>;
 
+/**
+ * The learner's "Learning paths" page: the academy's roadmap, if it has one,
+ * then every other published path (QA review 2 H19: published paths that
+ * weren't the roadmap had no way in).
+ */
 export default async function RoadmapPage() {
   try {
-    const paths = await serverApi.get<LearningPathListResponse>(
-      "/api/v1/learning-paths?type=roadmap&limit=10",
-    );
-    const roadmap = paths.data.items[0];
+    const paths = await serverApi.get<LearningPathListResponse>("/api/v1/learning-paths?limit=50");
+    const roadmap = paths.data.items.find((path) => path.pathType === "roadmap");
+    const otherPaths = paths.data.items.filter((path) => path.id !== roadmap?.id);
+
+    if (!roadmap && otherPaths.length > 0) {
+      return (
+        <PageGate state="ready" title="Learning paths">
+          <div className="mx-auto max-w-3xl space-y-6 pb-16">
+            <header>
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+                Learning paths
+              </h1>
+              <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                Step-by-step sequences of courses and assessments. Pick one to see its steps.
+              </p>
+            </header>
+            <LearningPathCards paths={otherPaths} heading="All paths" />
+          </div>
+        </PageGate>
+      );
+    }
 
     if (!roadmap) {
       return (
-        <PageGate state="ready" title="Roadmap">
+        <PageGate state="ready" title="Learning paths">
           <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <RouteOff className="h-6 w-6" aria-hidden="true" />
             </span>
-            <h1 className="mt-3 text-lg font-bold text-foreground">No roadmap yet</h1>
+            <h1 className="mt-3 text-lg font-bold text-foreground">No learning paths yet</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Your academy has not published a learning roadmap. Browse the catalog to start
+              Your academy hasn&rsquo;t published a learning path yet. Browse the catalog to start
               learning in the meantime.
             </p>
             <Link
@@ -47,7 +70,7 @@ export default async function RoadmapPage() {
     );
 
     return (
-      <PageGate state="ready" title="Roadmap">
+      <PageGate state="ready" title="Learning paths">
         <div className="mx-auto max-w-3xl space-y-8 pb-16">
           <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -78,6 +101,11 @@ export default async function RoadmapPage() {
             nextAction={progress.data.nextAction}
             steps={progress.data.steps}
           />
+          <LearningPathCards
+            paths={otherPaths}
+            heading="More learning paths"
+            description="Other step-by-step paths from your academy."
+          />
         </div>
       </PageGate>
     );
@@ -86,8 +114,8 @@ export default async function RoadmapPage() {
       return (
         <PageGate
           state="denied"
-          title="Roadmap"
-          deniedMessage="You do not have permission to view the roadmap."
+          title="Learning paths"
+          deniedMessage="You do not have permission to view learning paths."
         />
       );
     }
@@ -96,8 +124,8 @@ export default async function RoadmapPage() {
       return (
         <PageGate
           state="error"
-          title="Roadmap"
-          errorMessage={`Failed to load roadmap. Request ID: ${error.requestId}`}
+          title="Learning paths"
+          errorMessage={`Failed to load learning paths. Request ID: ${error.requestId}`}
         />
       );
     }

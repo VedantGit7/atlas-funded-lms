@@ -177,6 +177,8 @@ export async function listEnrollmentsForCourse(args: {
     courseId: string;
     membershipId: string;
     displayName: string | null;
+    /** The learner's sign-in email, so staff can tell learners apart (QA review 2 H15). */
+    email: string | null;
     status: string;
     enrolledAt: Date;
   }>;
@@ -191,6 +193,7 @@ export async function listEnrollmentsForCourse(args: {
       course_id: string;
       membership_id: string;
       display_name: string | null;
+      email: string | null;
       status: string;
       enrolled_at: Date;
     }>
@@ -200,12 +203,17 @@ export async function listEnrollmentsForCourse(args: {
       e.course_id::text,
       e.membership_id::text,
       mp.display_name,
+      ap.email,
       e.status,
       e.enrolled_at
     from enrollments e
     left join member_profiles mp
       on mp.membership_id = e.membership_id
      and mp.tenant_id = e.tenant_id
+    left join memberships m
+      on m.id = e.membership_id
+     and m.tenant_id = e.tenant_id
+    left join auth_principals ap on ap.id = m.auth_principal_id
     where e.course_id = ${args.courseId}::uuid
       and e.status = 'active'
       and (
@@ -227,6 +235,7 @@ export async function listEnrollmentsForCourse(args: {
       courseId: row.course_id,
       membershipId: row.membership_id,
       displayName: row.display_name,
+      email: row.email,
       status: row.status,
       enrolledAt: row.enrolled_at,
     })),

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronUp, ListOrdered, PlusCircle, Save, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, ListOrdered, PlusCircle, RotateCw, Trash2 } from "lucide-react";
 import { primaryButtonClassName } from "../../../app/admin/branding/_components/branding-admin-shared";
 import {
   resourcesForStepType,
@@ -39,6 +39,17 @@ type PathStepSequencerProps = {
   busy?: boolean;
 };
 
+/** Wait this long after the last change before saving the steps. */
+const AUTOSAVE_DELAY_MS = 900;
+
+const STEP_TYPE_LABELS: Record<PathStepType, string> = {
+  course: "Course",
+  assessment: "Assessment",
+  path: "Path",
+};
+
+type SaveState = "saved" | "pending" | "saving" | "error";
+
 const STEP_TYPE_OPTIONS = [
   { value: "course" as const, label: "Course" },
   { value: "assessment" as const, label: "Assessment" },
@@ -74,6 +85,12 @@ export function PathStepSequencer({
   const [newStepType, setNewStepType] = useState<PathStepType>("course");
   const [newStepRefId, setNewStepRefId] = useState("");
   const [saving, setSaving] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>("saved");
+  // What the server has: autosave compares against this, not the props, which
+  // only catch up after the page refreshes.
+  const lastSavedRef = useRef(initialSteps);
+  const stepsRef = useRef(steps);
+  stepsRef.current = steps;
 
   const {
     courses,
@@ -86,11 +103,23 @@ export function PathStepSequencer({
   const resources = useMemo(() => ({ courses, assessments, paths }), [courses, assessments, paths]);
 
   useEffect(() => {
-    setSteps(initialSteps);
+    // Take the server's copy only when nothing changed here since the last
+    // save, so a refresh never throws away what someone is typing.
+    if (stepsEqual(stepsRef.current, lastSavedRef.current)) {
+      setSteps(initialSteps);
+    }
+    lastSavedRef.current = initialSteps;
   }, [initialSteps]);
 
-  const isDirty = !stepsEqual(steps, initialSteps);
-  const pending = busy || saving;
+  const unsaved = !stepsEqual(
+    normalizeStepPositions(steps),
+    normalizeStepPositions(lastSavedRef.current),
+  );
+  // Steps save on their own (QA review 2 H19: changes were lost unless someone
+  // found a separate "Save steps" button). The page stays editable meanwhile;
+  // only another save elsewhere on the page locks it.
+  const pending = busy && !saving;
+  const canSave = steps.every((step) => step.title.trim().length > 0);
 
   function updateStep(stepId: string, patch: Partial<PathStepDraft>) {
     setSteps((current) =>
@@ -130,26 +159,58 @@ export function PathStepSequencer({
   }
 
   async function handleSave() {
-    const normalized = normalizeStepPositions(steps);
+    const normalized = normalizeStepPositions(stepsRef.current);
     setSaving(true);
+    setSaveState("saving");
     try {
       await onSaveSteps(normalized);
-      setSteps(normalized);
+      lastSavedRef.current = normalized;
+      setSaveState(
+        stepsEqual(normalizeStepPositions(stepsRef.current), normalized) ? "saved" : "pending",
+      );
+    } catch {
+      setSaveState("error");
     } finally {
       setSaving(false);
     }
   }
+
+  useEffect(() => {
+    if (!unsaved || saving || !canSave) return;
+    setSaveState("pending");
+    const timer = setTimeout(() => {
+      void handleSave();
+    }, AUTOSAVE_DELAY_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+    // handleSave reads the latest steps through a ref.
+  }, [steps, unsaved, saving, canSave]);
 
   return (
     <div className={panelClassName}>
       <div className={sectionHeaderClassName}>
         <h2 className={cardSectionTitleClassName}>Steps</h2>
         <div className="flex items-center gap-2">
-          {isDirty ? (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
-              Unsaved
-            </span>
-          ) : null}
+          <span
+            role="status"
+            aria-live="polite"
+            className={`text-[11px] font-semibold ${
+              saveState === "error"
+                ? "text-red-600 dark:text-red-400"
+                : "text-[var(--admin-on-surface-variant)]"
+            }`}
+          >
+            {saveState === "saving"
+              ? "Saving…"
+              : saveState === "error"
+                ? "Couldn't save"
+                : unsaved && !canSave
+                  ? "Give every step a title to save"
+                  : unsaved
+                    ? "Unsaved changes"
+                    : "All changes saved"}
+          </span>
           <span className="rounded-full bg-[color-mix(in_srgb,var(--admin-primary-container)_55%,var(--admin-surface))] px-2 py-0.5 text-[10px] font-bold text-[var(--admin-primary)]">
             {steps.length}
           </span>
@@ -225,7 +286,7 @@ export function PathStepSequencer({
                               <span
                                 className={`${badgeClassName} ${STEP_TYPE_CONFIG[step.stepType] ?? "bg-[var(--admin-surface-high)] text-[var(--admin-on-surface-variant)]"}`}
                               >
-                                {step.stepType}
+                                {STEP_TYPE_LABELS[step.stepType]}
                               </span>
                               <button
                                 type="button"
@@ -352,18 +413,18 @@ export function PathStepSequencer({
             </ol>
           )}
 
-          {isDirty ? (
+          {saveState === "error" ? (
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
-                disabled={pending}
+                disabled={pending || saving}
                 onClick={() => {
                   void handleSave();
                 }}
                 className={`${primaryButtonClassName} px-4 py-2`}
               >
-                <Save className="h-4 w-4" aria-hidden="true" />
-                {saving ? "Saving steps..." : "Save steps"}
+                <RotateCw className="h-4 w-4" aria-hidden="true" />
+                Try saving again
               </button>
             </div>
           ) : null}

@@ -15,6 +15,8 @@ export type CourseReviewRecord = {
   membershipId: string;
   /** The academy's own review (D8): shown labelled, not counted in the average. */
   addedByAcademy: boolean;
+  /** Learner reviews wait for approval before they are shown (QA review 2 H21). */
+  status: "PENDING" | "APPROVED" | "REJECTED";
   createdAt: Date;
   updatedAt: Date;
 };
@@ -26,6 +28,7 @@ function mapRow(row: {
   author_name: string | null;
   membership_id: string;
   added_by_academy: boolean;
+  status: string | null;
   created_at: Date;
   updated_at: Date;
 }): CourseReviewRecord {
@@ -36,6 +39,8 @@ function mapRow(row: {
     authorName: row.author_name,
     membershipId: row.membership_id,
     addedByAcademy: row.added_by_academy,
+    status:
+      row.status === "PENDING" || row.status === "REJECTED" ? row.status : ("APPROVED" as const),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -99,6 +104,7 @@ export async function findMyCourseReview(args: {
       author_name: string | null;
       membership_id: string;
       added_by_academy: boolean;
+      status: string | null;
       created_at: Date;
       updated_at: Date;
     }>
@@ -110,6 +116,7 @@ export async function findMyCourseReview(args: {
       mp.display_name as author_name,
       cr.membership_id::text,
       cr.added_by_academy,
+      cr.status,
       cr.created_at,
       cr.updated_at
     from course_reviews cr
@@ -165,6 +172,7 @@ export async function listCourseReviews(args: {
       author_name: string | null;
       membership_id: string;
       added_by_academy: boolean;
+      status: string | null;
       created_at: Date;
       updated_at: Date;
     }>
@@ -176,6 +184,7 @@ export async function listCourseReviews(args: {
       mp.display_name as author_name,
       cr.membership_id::text,
       cr.added_by_academy,
+      cr.status,
       cr.created_at,
       cr.updated_at
     from course_reviews cr

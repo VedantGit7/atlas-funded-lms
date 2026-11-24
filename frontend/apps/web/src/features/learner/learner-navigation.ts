@@ -10,7 +10,7 @@ export type LearnerNavItem = {
 export const LEARNER_PRIMARY_NAV: readonly LearnerNavItem[] = [
   { href: "/", label: "Home", mobilePrimary: true },
   { href: "/courses", label: "Courses", mobilePrimary: true },
-  { href: "/roadmap", label: "Roadmap" },
+  { href: "/roadmap", label: "Learning paths" },
   { href: "/practice", label: "Practice", mobilePrimary: true },
   { href: "/readiness", label: "Readiness" },
   { href: "/progress", label: "Progress" },

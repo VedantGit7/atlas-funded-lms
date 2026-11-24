@@ -17,6 +17,7 @@ import {
   refreshInviteTokenRecord,
   removeMembershipRecord,
   requireMembershipById,
+  reactivateMembershipRecord,
   suspendMembershipRecord,
   updateMemberProfileRecord,
 } from "./member-admin.repository";
@@ -378,6 +379,72 @@ export async function suspendMember(tx: TenantTx, ctx: ServiceCtx, membershipId:
       suspendedAt: updated.suspendedAt.toISOString(),
     },
   };
+}
+
+/**
+ * Undoes a suspension (QA review 2 H22: the member page could suspend a
+ * learner, and nothing could bring them back).
+ */
+export async function reactivateMember(tx: TenantTx, ctx: ServiceCtx, membershipId: string) {
+  const before = await requireMembershipById({
+    tx,
+    tenantId: ctx.tenantId,
+    membershipId,
+  });
+  if (before.status !== "SUSPENDED") {
+    throw new AtlasHttpError({
+      code: "VALIDATION_ERROR",
+      status: 400,
+      message: "Only a suspended member can be reactivated.",
+    });
+  }
+
+  const updated = await reactivateMembershipRecord({
+    tx,
+    tenantId: ctx.tenantId,
+    membershipId,
+  });
+  if (!updated) {
+    throw memberNotFound();
+  }
+
+  await auditWriter.write(
+    tx,
+    {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      platformPrincipalId: null,
+      requestId: ctx.requestId,
+    },
+    {
+      action: "identity.membership.status_changed",
+      target: { type: "membership", id: membershipId },
+      before: { status: before.status },
+      after: { status: updated.status },
+      reason: null,
+      metadata: {},
+    },
+  );
+
+  await outbox.publish(tx, {
+    ctx: {
+      tenantId: ctx.tenantId,
+      actorMembershipId: ctx.actorMembershipId,
+      requestId: ctx.requestId,
+    },
+    eventType: "membership.status_changed",
+    aggregateType: "membership",
+    aggregateId: membershipId,
+    payload: {
+      tenantId: ctx.tenantId,
+      membershipId,
+      beforeStatus: before.status,
+      afterStatus: updated.status,
+    },
+    idempotencyKey: `${ctx.requestId}:membership-reactivated:${membershipId}`,
+  });
+
+  return { data: { id: updated.id, status: updated.status } };
 }
 
 export async function removeMember(tx: TenantTx, ctx: ServiceCtx, membershipId: string) {

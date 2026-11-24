@@ -103,6 +103,8 @@ export async function listEnrollments(tx: TenantTx, ctx: ServiceCtx, query: Enro
           courseId: item.courseId,
           membershipId: item.membershipId,
           displayName: item.displayName,
+          // Staff can tell learners apart (QA review 2 H15).
+          email: item.email,
           status: item.status,
           enrolledAt: item.enrolledAt.toISOString(),
         })),
@@ -125,6 +127,7 @@ export async function listEnrollments(tx: TenantTx, ctx: ServiceCtx, query: Enro
         courseId: item.courseId,
         membershipId: item.membershipId,
         displayName: item.displayName,
+        email: null,
         status: item.status,
         enrolledAt: item.enrolledAt.toISOString(),
       })),

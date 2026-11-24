@@ -1,4 +1,4 @@
-import { Calendar } from "lucide-react";
+import { Activity, Calendar } from "lucide-react";
 import {
   formatJoinedDate,
   memberInitials,
@@ -12,6 +12,8 @@ type MemberIdentityHeaderProps = {
   status: string;
   joinedAt: string | null;
   avatarUrl: string | null;
+  /** Last time the learner opened a lesson. */
+  lastActiveAt?: string | null;
 };
 
 export function MemberIdentityHeader({
@@ -20,8 +22,16 @@ export function MemberIdentityHeader({
   status,
   joinedAt,
   avatarUrl,
+  lastActiveAt = null,
 }: MemberIdentityHeaderProps) {
   const joinedLabel = formatJoinedDate(joinedAt);
+  const lastActive = lastActiveAt
+    ? new Date(lastActiveAt).toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
@@ -49,15 +59,23 @@ export function MemberIdentityHeader({
               {statusLabel(status)}
             </span>
           </div>
-          {email ? (
+          {email && email !== displayName ? (
             <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">{email}</p>
           ) : null}
-          {joinedLabel ? (
-            <div className="mt-4 flex items-center gap-1.5 text-[var(--admin-on-surface-variant)]">
-              <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="text-xs font-semibold">{joinedLabel}</span>
-            </div>
-          ) : null}
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[var(--admin-on-surface-variant)]">
+            {joinedLabel ? (
+              <span className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="text-xs font-semibold">{joinedLabel}</span>
+              </span>
+            ) : null}
+            <span className="flex items-center gap-1.5">
+              <Activity className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="text-xs font-semibold">
+                {lastActive ? `Last studied ${lastActive}` : "Hasn’t studied yet"}
+              </span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
