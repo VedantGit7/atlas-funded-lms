@@ -15,6 +15,8 @@ export type ConnectionDto = {
   messagingLimit: number;
   connectedAt: string | null;
   hasCredentials: boolean;
+  /** The mock provider and "Simulate inbound" exist in local development only. */
+  devToolsAvailable: boolean;
 };
 
 export type TemplateButton = {

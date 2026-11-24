@@ -228,6 +228,7 @@ export async function enrollInProduct(
     PRODUCT_ENDPOINTS[type].enrollments(encodeURIComponent(productId)),
     body,
     `product-enroll-${type}-${productId}`,
+    { successMessage: "You're enrolled" },
   );
 }
 

@@ -51,7 +51,7 @@ export default async function LearnerCertificatesPage() {
         <PageGate
           state="denied"
           title="Certificates"
-          deniedMessage={notInAcademyMessage("Certificates")}
+          deniedMessage={notInAcademyMessage("Certificates", { plural: true })}
         />
       );
     }

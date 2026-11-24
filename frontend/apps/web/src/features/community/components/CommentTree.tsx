@@ -178,6 +178,7 @@ export function CommentTree({
       `/api/v1/posts/${postId}/comments`,
       parentCommentId ? { bodyJson: toBody(text), parentCommentId } : { bodyJson: toBody(text) },
       "community-comment",
+      { successMessage: "Comment posted" },
     );
     updateComments([...comments, response.data]);
     setReplyingToId(null);
@@ -188,6 +189,7 @@ export function CommentTree({
       `/api/v1/comments/${commentId}`,
       { bodyJson: toBody(text) },
       "community-comment-update",
+      { successMessage: "Comment updated" },
     );
     updateComments(comments.map((comment) => (comment.id === commentId ? response.data : comment)));
     setEditingId(null);

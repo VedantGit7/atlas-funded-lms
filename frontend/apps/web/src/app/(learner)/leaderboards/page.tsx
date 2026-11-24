@@ -81,7 +81,7 @@ export default async function LeaderboardsPage({ searchParams }: LeaderboardsPag
           <PageGate
             state="denied"
             title="Leaderboards"
-            deniedMessage={notInAcademyMessage("Leaderboards")}
+            deniedMessage={notInAcademyMessage("Leaderboards", { plural: true })}
           />
         );
       }

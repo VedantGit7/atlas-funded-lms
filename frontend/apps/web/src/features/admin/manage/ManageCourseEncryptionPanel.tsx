@@ -97,6 +97,7 @@ export function ManageCourseEncryptionPanel() {
           tags: mergeEncryptedTags(detail.data.tags, toggle.encrypted),
         },
         `course-encryption-${toggle.course.id}`,
+        { successMessage: "Encryption setting saved" },
       );
       setPendingToggle(null);
       setCourses((previous) =>

@@ -157,6 +157,7 @@ export function ManageArchiveLearnersPanel() {
               `/api/v1/manage/learners/${action.member.id}/archive`,
               null,
               `learner-archive-${action.member.id}`,
+              { successMessage: "Learner archived" },
             );
             setArchiveApiAvailable(true);
           } catch (caught) {
@@ -184,6 +185,7 @@ export function ManageArchiveLearnersPanel() {
             `/api/v1/manage/learners/${action.member.id}/unarchive`,
             null,
             `learner-unarchive-${action.member.id}`,
+            { successMessage: "Learner unarchived" },
           );
         } catch (caught) {
           if (caught instanceof ClientApiError && caught.status === 404) {

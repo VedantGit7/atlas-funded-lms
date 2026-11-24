@@ -200,6 +200,7 @@ export async function startReportExportRun(body: {
       params: body.params ?? {},
     },
     `report-export-run-${body.definitionKey}`,
+    { successMessage: "Export started" },
   );
 
   return {
@@ -230,6 +231,7 @@ export async function createCustomReportDefinition(body: {
     "/api/v1/reports/definitions",
     body,
     `custom-report-${body.title}`,
+    { successMessage: "Report saved" },
   );
 
   return {
@@ -295,7 +297,9 @@ export async function createBiExportJob(body: {
   format?: "csv" | "jsonl" | undefined;
   params?: Record<string, string | undefined> | undefined;
 }) {
-  return clientApi.post("/api/v1/reports/bi-exports", body, `bi-export-${body.datasetKey}`);
+  return clientApi.post("/api/v1/reports/bi-exports", body, `bi-export-${body.datasetKey}`, {
+    successMessage: "Export started",
+  });
 }
 
 export async function startReportRun(definitionKey: string, params: Record<string, string>) {
@@ -369,7 +373,9 @@ export async function createReportSchedule(body: {
       formats: string[];
       isActive: boolean;
     };
-  }>("/api/v1/reports/schedules", body, `report-schedule-${body.definitionKey}`);
+  }>("/api/v1/reports/schedules", body, `report-schedule-${body.definitionKey}`, {
+    successMessage: "Report scheduled",
+  });
 }
 
 export async function fetchReportSchedules(category: string) {

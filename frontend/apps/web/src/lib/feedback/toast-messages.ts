@@ -20,6 +20,7 @@ export type ToastAction =
   | "attached"
   | "moved"
   | "set"
+  | "added"
   | "invited";
 
 type ToastDefinition = {
@@ -111,9 +112,9 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "course-archive": { label: "Course", action: "archived" },
   "course-enroll-student": { label: "Student", action: "enrolled" },
   "course-create": { label: "Course", action: "created" },
-  "module-delete": { label: "Module", action: "deleted" },
-  "module-create": { label: "Module", action: "created" },
-  "module-update": { label: "Module", action: "updated" },
+  "module-delete": { label: "Section", action: "deleted" },
+  "module-create": { label: "Section", action: "created" },
+  "module-update": { label: "Section", action: "updated" },
   "lesson-delete": { label: "Lesson", action: "deleted" },
   "lesson-create": { label: "Lesson", action: "created" },
   "lesson-settings-save": { label: "Lesson settings", action: "saved" },
@@ -129,12 +130,12 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "lesson-asset-link": { label: "Link attachment", action: "attached" },
   "lesson-asset-delete": { label: "Attachment", action: "removed" },
   "lesson-editor-save": { label: "Lesson", action: "saved" },
-  "chapter-create": { label: "Chapter", action: "created" },
+  "chapter-create": { label: "Section", action: "created" },
   "branding-update": { label: "Branding", action: "updated" },
   "branding-restore": { label: "Branding version", action: "restored" },
   "branding-publish": { label: "Branding", action: "published" },
   "theme-update": { label: "Theme", action: "updated" },
-  "config-update": { label: "Tenant configuration", action: "updated" },
+  "config-update": { label: "Settings", action: "updated" },
   "config-publish": { label: "Configuration", action: "published" },
   "domain-delete": { label: "Domain", action: "deleted" },
   "domain-set-primary": { label: "Primary domain", action: "set" },
@@ -161,12 +162,12 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "issue-certificate": { label: "Certificate", action: "issued" },
   "revoke-certificate": { label: "Certificate", action: "revoked" },
   "enrollment-create": { label: "Enrollment", action: "created" },
-  "create-item": { label: "Item", action: "created" },
-  "update-item": { label: "Item", action: "updated" },
-  "delete-item": { label: "Item", action: "deleted" },
-  "delete-item-collection": { label: "Item collection", action: "deleted" },
-  "create-item-collection": { label: "Item collection", action: "created" },
-  "update-item-collection": { label: "Item collection", action: "updated" },
+  "create-item": { label: "Question", action: "created" },
+  "update-item": { label: "Question", action: "updated" },
+  "delete-item": { label: "Question", action: "deleted" },
+  "delete-item-collection": { label: "Collection", action: "deleted" },
+  "create-item-collection": { label: "Collection", action: "created" },
+  "update-item-collection": { label: "Collection", action: "updated" },
   "path-create": { label: "Learning path", action: "created" },
   "path-update": { label: "Learning path", action: "updated" },
   "path-publish": { label: "Learning path", action: "submitted" },
@@ -196,7 +197,7 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "change-password": { label: "Password", action: "updated" },
   "change-email": { label: "Email", action: "updated" },
   "unlink-identity": { label: "Connected account", action: "removed" },
-  "mfa-unenroll": { label: "MFA factor", action: "removed" },
+  "mfa-unenroll": { label: "Two-step sign-in", action: "removed" },
   "streak-freeze": { label: "Streak freeze", action: "saved" },
   "readiness-policy-update": { label: "Readiness policy", action: "updated" },
   "competency-dimension-create": { label: "Competency dimension", action: "created" },
@@ -204,7 +205,7 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "scoring-profile-create": { label: "Scoring profile", action: "created" },
   "scoring-profile-update": { label: "Scoring profile", action: "updated" },
   "scoring-config-publish": { label: "Scoring configuration", action: "published" },
-  "course-member-add": { label: "Course member", action: "created" },
+  "course-member-add": { label: "Course member", action: "added" },
   "lesson-tag-create": { label: "Lesson tag", action: "created" },
   "course-tag-create": { label: "Course tag", action: "created" },
   "lesson-tag-detach": { label: "Lesson tag", action: "removed" },
@@ -220,8 +221,8 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "create-extension-registration": { label: "Extension", action: "created" },
   "update-extension-registration": { label: "Extension", action: "updated" },
   "delete-extension-registration": { label: "Extension", action: "deleted" },
-  "add-collection-item": { label: "Collection item", action: "created" },
-  "remove-collection-item": { label: "Collection item", action: "removed" },
+  "add-collection-item": { label: "Question", action: "added" },
+  "remove-collection-item": { label: "Question", action: "removed" },
   "put-dimension-weights": { label: "Dimension weights", action: "updated" },
   "badge-create": { label: "Badge", action: "created" },
   "leaderboard-create": { label: "Leaderboard", action: "created" },
@@ -244,18 +245,6 @@ function isUuidSegment(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-function titleCaseWords(words: string[]): string {
-  return words
-    .filter(Boolean)
-    .map((word) => {
-      if (word === "seo") return "SEO";
-      if (word === "mfa") return "MFA";
-      if (word === "ios") return "iOS";
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(" ");
-}
-
 function inferActionFromPrefix(prefix: string, method: MutationHttpMethod): ToastAction {
   const separator = prefix.lastIndexOf("-");
   const suffix = prefix.slice(separator + 1);
@@ -268,43 +257,6 @@ function inferActionFromPrefix(prefix: string, method: MutationHttpMethod): Toas
   if (method === "DELETE") return "deleted";
   if (method === "POST") return "created";
   return "updated";
-}
-
-function normalizePrefix(prefix: string): string {
-  const parts = prefix.split("-").filter(Boolean);
-  for (;;) {
-    const last = parts.at(-1);
-    if (last === undefined) break;
-    if (!Object.hasOwn(ACTION_SUFFIXES, last) && !isUuidSegment(last)) break;
-    parts.pop();
-  }
-  return parts.join("-");
-}
-
-function humanizePrefix(prefix: string): string {
-  const normalized = normalizePrefix(prefix);
-  if (!normalized) return "Changes";
-
-  const special: Record<string, string> = {
-    "course-pricing-plans": "Pricing plans",
-    "course-ratings-reviews": "Ratings & reviews",
-    "course-discussions-bookmarks": "Discussions & bookmarks",
-    "workflow-definition": "Workflow",
-    "notification-template": "Notification template",
-    "certificate-template": "Certificate template",
-    "item-collection": "Item collection",
-    "learning-path": "Learning path",
-    "feature-flag": "Feature flag",
-    "automation-rule": "Automation rule",
-    "community-space": "Community space",
-    "lesson-settings": "Lesson settings",
-    "lesson-asset": "Attachment",
-    "cancel-enrollment": "Enrollment",
-  };
-
-  if (special[normalized]) return special[normalized];
-
-  return titleCaseWords(normalized.split("-"));
 }
 
 export function formatToastSuccessMessage(label: string, action: ToastAction): string {
@@ -349,11 +301,11 @@ export function resolveMutationSuccessToast(
   }
 
   if (key.startsWith("cancel-enrollment-")) {
-    return formatToastSuccessMessage("Enrollment", "removed");
+    return "Enrollment cancelled";
   }
 
   if (key.startsWith("update-item-collection-")) {
-    return formatToastSuccessMessage("Item collection", "updated");
+    return formatToastSuccessMessage("Collection", "updated");
   }
 
   if (key.startsWith("badge-update-")) {
@@ -384,7 +336,10 @@ export function resolveMutationSuccessToast(
     return "Deletion request processed successfully";
   }
 
-  const label = humanizePrefix(key);
-  const action = inferActionFromPrefix(key, method);
-  return formatToastSuccessMessage(label, action);
+  // Anything else says nothing. Messages used to be made up from the request's
+  // internal key: "Device Session Capture created successfully" on every page,
+  // "Coupon Validate … created", "Email Campaign created" for a delete (QA
+  // review 1 M16, review 2 H1). A screen that wants a confirmation passes
+  // successMessage where it makes the request.
+  return null;
 }

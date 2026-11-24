@@ -7,12 +7,19 @@
  * Staff are told it's the plan and who can change it; learners, who can't,
  * are told it isn't available.
  */
-export function notOnPlanMessage(feature: string): string {
-  return `${feature} isn't included in your academy's plan. The academy owner can add it.`;
+type FeatureWording = { plural?: boolean };
+
+function isnt(options?: FeatureWording): string {
+  return options?.plural ? "aren't" : "isn't";
 }
 
-export function notInAcademyMessage(feature: string): string {
-  return `${feature} isn't available in this academy.`;
+/** Pass `{ plural: true }` for names like "Leaderboards": "Leaderboards aren't …". */
+export function notOnPlanMessage(feature: string, options?: FeatureWording): string {
+  return `${feature} ${isnt(options)} included in your academy's plan. The academy owner can add ${options?.plural ? "them" : "it"}.`;
+}
+
+export function notInAcademyMessage(feature: string, options?: FeatureWording): string {
+  return `${feature} ${isnt(options)} available in this academy.`;
 }
 
 export const PLAN_GATE_TITLE = "Not on your plan";

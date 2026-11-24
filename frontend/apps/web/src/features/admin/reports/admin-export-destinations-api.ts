@@ -144,6 +144,7 @@ export async function createDestination(body: CreateDestinationBody) {
     "/api/v1/reports/exports/destinations",
     body,
     `destination-create-${body.kind}`,
+    { successMessage: "Destination added" },
   );
 }
 
@@ -167,6 +168,7 @@ export async function updateDestination(
     `/api/v1/reports/exports/destinations/${id}`,
     body,
     `destination-update-${id}`,
+    { successMessage: "Destination saved" },
   );
 }
 

@@ -8,6 +8,7 @@ import {
   resolveDocumentTitle,
 } from "../../lib/branding/document-title";
 import { loadPublicBootstrap } from "../../lib/server/bootstrap";
+import { pageDocumentTitle } from "../../lib/branding/page-title";
 
 export const dynamic = "force-dynamic";
 
@@ -20,9 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     const bootstrap = await loadPublicBootstrap();
     const title = resolveDocumentTitle(bootstrap);
+    const pathname = (await headers()).get("x-atlas-pathname") ?? "";
+    // Absolute: the root layout's "%s · title" template applied to this title
+    // gave "FundedBeyond LMS · FundedBeyond LMS" on every admin page (QA review 1 m1).
     return {
       title: {
-        default: title,
+        absolute: pageDocumentTitle(pathname, title),
         template: `%s · ${title}`,
       },
       description: resolveDocumentDescription(bootstrap),

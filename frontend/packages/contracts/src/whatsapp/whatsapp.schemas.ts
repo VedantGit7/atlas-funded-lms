@@ -17,6 +17,8 @@ export const whatsappConnectionDtoSchema = z.object({
   messagingLimit: z.number().int(),
   connectedAt: z.iso.datetime().nullable(),
   hasCredentials: z.boolean(),
+  /** The mock provider and "Simulate inbound": development only (QA review 2 H8). */
+  devToolsAvailable: z.boolean(),
 });
 
 export const whatsappConnectionResponseSchema = z.object({

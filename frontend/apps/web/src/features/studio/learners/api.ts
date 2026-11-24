@@ -165,5 +165,6 @@ export async function issueCourseCertificate(input: {
       source: { type: "course", id: input.courseId },
     },
     `issue-cert-${input.recipientMembershipId}`,
+    { successMessage: "Certificate issued" },
   );
 }

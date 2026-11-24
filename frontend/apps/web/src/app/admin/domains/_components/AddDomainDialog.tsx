@@ -61,7 +61,7 @@ export function AddDomainDialog({ customDomainEntitled }: AddDomainDialogProps) 
 
   async function submitDomain() {
     if (!customDomainEntitled) {
-      setErrorMessage(notOnPlanMessage("Custom domains"));
+      setErrorMessage(notOnPlanMessage("Custom domains", { plural: true }));
       return;
     }
 

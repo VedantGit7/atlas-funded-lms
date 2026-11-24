@@ -69,6 +69,8 @@ export async function deleteLearningPath(pathId: string): Promise<{ data: { id: 
   return clientApi.delete<{ data: { id: string; deleted: true } }>(
     `/api/v1/learning-paths/${pathId}`,
     "path-delete",
+    undefined,
+    { successMessage: "Learning path deleted" },
   );
 }
 

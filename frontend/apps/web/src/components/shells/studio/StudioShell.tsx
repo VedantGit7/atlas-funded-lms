@@ -9,7 +9,7 @@ import type { StudioNavItem } from "../../../features/studio/studio-navigation";
 import { performAtlasLogout } from "../../../lib/auth/perform-logout";
 import { resolveTenantLogoUrl } from "../../../lib/brand";
 import { TenantBrandMark } from "../../patterns/TenantBrandMark";
-import { ADMIN_DASHBOARD_HREF } from "../../../lib/branding/document-title";
+import { ADMIN_DASHBOARD_HREF, academyAreaLabel } from "../../../lib/branding/document-title";
 import { ThemeModeToggle } from "../../ThemeModeToggle";
 import { AdminConfirmDialog } from "../admin/AdminConfirmDialog";
 import { createNavIsActive } from "../shared/shell-utils";
@@ -345,7 +345,7 @@ export function StudioShell({
 
         <footer className="flex flex-col gap-2 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-4 text-xs sm:flex-row sm:items-center sm:justify-between md:px-8">
           <span className="font-semibold text-[var(--admin-on-surface-variant)]">
-            {publicName} Academy Studio
+            {academyAreaLabel(publicName, "Studio")}
           </span>
           <span className="text-[var(--admin-on-surface-variant)]/70">
             &copy; {new Date().getFullYear()} {publicName}. All rights reserved.

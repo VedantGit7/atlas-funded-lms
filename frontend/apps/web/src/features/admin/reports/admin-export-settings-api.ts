@@ -102,6 +102,7 @@ export async function updateExportSettings(body: {
     "/api/v1/reports/exports/settings",
     body,
     "export-settings-update",
+    { successMessage: "Export settings saved" },
   );
 }
 
@@ -122,5 +123,6 @@ export async function purgeExpiredExportFiles() {
     "/api/v1/reports/exports/settings/purge-expired",
     {},
     "export-settings-purge-expired",
+    { successMessage: "Expired exports deleted" },
   );
 }

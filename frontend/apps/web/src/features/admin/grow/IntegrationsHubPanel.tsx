@@ -26,7 +26,6 @@ import { generalSettingsBackLinkClassName } from "../general-settings/general-se
 import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./push-wizard-chrome";
 import {
   INTEGRATION_EVENT_HINTS,
-  INTEGRATIONS_HREF,
   MARKETING_HREF,
   deliveryStatusTone,
   formatIntegrationDateTime,
@@ -975,10 +974,6 @@ export function IntegrationsHubPanel() {
           </div>
         </section>
       ) : null}
-
-      <p className="text-xs text-[var(--admin-on-surface-variant)]">
-        Path: <span className="font-mono">{INTEGRATIONS_HREF}</span>
-      </p>
 
       {addEndpointOpen ? (
         <div

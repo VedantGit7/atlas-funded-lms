@@ -96,6 +96,7 @@ export async function saveTemplateDesign(
         templateJson: input.templateJson,
       },
       "studio-template-update",
+      { successMessage: "Template saved" },
     );
   }
 
@@ -107,6 +108,7 @@ export async function saveTemplateDesign(
       templateJson: input.templateJson,
     },
     "studio-template-create",
+    { successMessage: "Template created" },
   );
 }
 
@@ -118,6 +120,7 @@ export async function publishTemplateDesign(
     `/api/v1/certificate-templates/${id}/publish`,
     body,
     "studio-template-publish",
+    { successMessage: "Template published" },
   );
 }
 
@@ -133,6 +136,7 @@ export async function approveTemplateDesign(
     `/api/v1/certificate-templates/${id}/approve`,
     body,
     "studio-template-approve",
+    { successMessage: "Template approved" },
   );
 }
 

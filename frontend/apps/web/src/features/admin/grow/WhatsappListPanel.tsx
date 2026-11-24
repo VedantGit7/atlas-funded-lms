@@ -77,7 +77,7 @@ export function WhatsappListPanel() {
   const router = useRouter();
   const [connection, setConnection] = useState<ConnectionDto | null>(null);
   const [connectionLoading, setConnectionLoading] = useState(true);
-  const [connectTab, setConnectTab] = useState<ConnectTab>("mock");
+  const [connectTab, setConnectTab] = useState<ConnectTab>("meta");
   const [connectBusy, setConnectBusy] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
@@ -271,7 +271,7 @@ export function WhatsappListPanel() {
         {},
         "whatsapp-disconnect",
       );
-      setConnection({
+      setConnection((current) => ({
         status: "DISCONNECTED",
         providerMode: "mock",
         displayName: null,
@@ -283,7 +283,8 @@ export function WhatsappListPanel() {
         messagingLimit: 0,
         connectedAt: null,
         hasCredentials: false,
-      });
+        devToolsAvailable: current?.devToolsAvailable ?? false,
+      }));
       setMoreOpen(false);
       toast.success("WhatsApp disconnected.");
     } catch (caught) {
@@ -360,7 +361,8 @@ export function WhatsappListPanel() {
           >
             {(
               [
-                ["mock", "Mock (dev)"],
+                // The mock provider is for local development only (QA review 2 H8).
+                ...(connection?.devToolsAvailable ? ([["mock", "Mock (dev)"]] as const) : []),
                 ["meta", "Meta Cloud API"],
               ] as const
             ).map(([id, label]) => {
@@ -393,7 +395,7 @@ export function WhatsappListPanel() {
             })}
           </div>
 
-          {connectTab === "mock" ? (
+          {connectTab === "mock" && connection?.devToolsAvailable ? (
             <div className="space-y-4 pt-2">
               <label className="block">
                 <span className={LABEL_CLASS}>Display name</span>

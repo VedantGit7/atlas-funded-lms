@@ -97,6 +97,7 @@ export function CourseSettingsStorePricingPanel({
           }),
         },
         `course-${platform}-pricing-update`,
+        { successMessage: "Pricing saved" },
       );
       return response.data;
     },

@@ -1304,6 +1304,7 @@ export async function mutateInsightAlerts(slug: string, body: InsightAlertsMutat
     `/api/v1/insights/${encodeURIComponent(slug)}/alerts`,
     body,
     "insights-alerts",
+    { successMessage: "Alert settings saved" },
   );
 }
 
@@ -1530,6 +1531,7 @@ export async function mutateInsightDigests(slug: string, body: InsightDigestsMut
     `/api/v1/insights/${encodeURIComponent(slug)}/digests`,
     body,
     "insights-digests",
+    { successMessage: "Digest settings saved" },
   );
 }
 
@@ -1588,5 +1590,6 @@ export async function mutateInsightSettings(slug: string, body: InsightSettingsM
     `/api/v1/insights/${encodeURIComponent(slug)}/settings`,
     body,
     "insights-settings",
+    { successMessage: "Insight settings saved" },
   );
 }

@@ -71,6 +71,7 @@ export function CourseSettingsGamificationPanel({
           tags: mergeCourseGamificationIntoTags(course.tags, nextForm),
         },
         "course-gamification-update",
+        { successMessage: "Gamification settings saved" },
       );
       return response.data;
     },

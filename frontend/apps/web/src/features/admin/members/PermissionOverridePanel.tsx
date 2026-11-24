@@ -124,6 +124,7 @@ export function PermissionOverridePanel({ membershipId, overrides }: PermissionO
           reason: reason.trim() || null,
         },
         "permission-override-create",
+        { successMessage: "Permission override added" },
       );
       closeCreateForm();
       router.refresh();
@@ -142,6 +143,8 @@ export function PermissionOverridePanel({ membershipId, overrides }: PermissionO
       await clientApi.delete(
         `/api/v1/permission-overrides/${overrideId}`,
         "permission-override-delete",
+        undefined,
+        { successMessage: "Permission override removed" },
       );
       router.refresh();
     } catch (error) {

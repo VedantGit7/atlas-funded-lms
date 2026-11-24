@@ -470,6 +470,7 @@ export function MembersTable({
             `/api/v1/members/${memberId}/roles`,
             { roleId },
             "member-assign-role",
+            { successMessage: "Role assigned" },
           );
         } catch (error) {
           failures += 1;
