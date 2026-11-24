@@ -137,7 +137,7 @@ export function FormsCreatePanel() {
                     id: "SIGNUP" as const,
                     title: "Sign-up form",
                     description:
-                      "Includes system-locked email and password fields for learner account creation.",
+                      "Asks for email, name and agreement to your terms, then emails the link to finish creating a learner account.",
                     Icon: Lock,
                   },
                 ] as const
