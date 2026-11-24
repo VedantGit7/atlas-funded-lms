@@ -104,7 +104,9 @@ export async function fetchBatches() {
 }
 
 export async function createBatch(body: { key: string; name: string }) {
-  return clientApi.post<{ data: Batch }>("/api/v1/batches", body, `batch-${body.key}`);
+  return clientApi.post<{ data: Batch }>("/api/v1/batches", body, `batch-${body.key}`, {
+    successMessage: "Batch created",
+  });
 }
 
 export async function fetchBatch(batchId: string) {
@@ -120,6 +122,7 @@ export async function updateBatch(
     `/api/v1/batches/${encodeURIComponent(batchId)}`,
     body,
     `batch-update-${batchId}`,
+    { successMessage: "Batch saved" },
   );
 }
 
@@ -127,6 +130,8 @@ export async function deleteBatch(batchId: string) {
   return clientApi.delete<{ data: { deleted: boolean } }>(
     `/api/v1/batches/${encodeURIComponent(batchId)}`,
     `batch-delete-${batchId}`,
+    undefined,
+    { successMessage: "Batch deleted" },
   );
 }
 
@@ -135,6 +140,7 @@ export async function assignBatchMember(batchId: string, membershipId: string) {
     `/api/v1/batches/${encodeURIComponent(batchId)}/members`,
     { membershipId },
     `batch-member-${batchId}`,
+    { successMessage: "Learner added to the batch" },
   );
 }
 
@@ -156,6 +162,7 @@ export async function createPoll(body: {
       })),
     },
     `poll-${body.title}`,
+    { successMessage: "Poll created" },
   );
 }
 
@@ -188,6 +195,7 @@ export async function updatePoll(
     `/api/v1/polls/${encodeURIComponent(pollId)}`,
     body,
     `poll-update-${pollId}`,
+    { successMessage: "Poll saved" },
   );
 }
 
@@ -195,6 +203,8 @@ export async function deletePoll(pollId: string) {
   return clientApi.delete<{ data: { deleted: boolean } }>(
     `/api/v1/polls/${encodeURIComponent(pollId)}`,
     `poll-delete-${pollId}`,
+    undefined,
+    { successMessage: "Poll deleted" },
   );
 }
 
@@ -207,6 +217,7 @@ export async function createLiveSession(body: { title: string; scheduledAt?: str
     "/api/v1/live/sessions",
     body,
     `live-session-${body.title}`,
+    { successMessage: "Live session saved" },
   );
 }
 
@@ -231,6 +242,7 @@ export async function createCustomFieldDefinition(body: {
     "/api/v1/custom-fields/definitions",
     body,
     `custom-field-${body.key}`,
+    { successMessage: "Custom field saved" },
   );
 }
 
@@ -262,6 +274,7 @@ export async function setCustomFieldValue(
     `/api/v1/custom-fields/definitions/${encodeURIComponent(definitionId)}/values`,
     body,
     `custom-field-value-${definitionId}`,
+    { successMessage: "Saved" },
   );
 }
 
@@ -280,6 +293,7 @@ export async function sendConversationMessage(conversationId: string, body: stri
     `/api/v1/messenger/conversations/${encodeURIComponent(conversationId)}/messages`,
     { body },
     `message-${conversationId}`,
+    { successMessage: "Message sent" },
   );
 }
 

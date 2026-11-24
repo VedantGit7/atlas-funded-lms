@@ -123,6 +123,7 @@ export async function bulkTagAction(
     "/api/v1/tags/bulk",
     input,
     "tag-bulk",
+    { successMessage: "Tags updated" },
   );
   return response.data;
 }
@@ -153,6 +154,7 @@ export async function mergeTags(input: {
     "/api/v1/tags/merge",
     input,
     "tag-merge",
+    { successMessage: "Tags merged" },
   );
   return response.data;
 }

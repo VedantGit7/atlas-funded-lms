@@ -58,6 +58,7 @@ export function MemberRoleEditor({
         `/api/v1/members/${membershipId}/roles`,
         { roleId: selectedRoleId },
         "member-role-assign",
+        { successMessage: "Role assigned" },
       );
       router.refresh();
     } catch (error) {
@@ -80,6 +81,8 @@ export function MemberRoleEditor({
       await clientApi.delete(
         `/api/v1/members/${membershipId}/roles/${roleId}`,
         "member-role-revoke",
+        undefined,
+        { successMessage: "Role removed" },
       );
       router.refresh();
     } catch (error) {

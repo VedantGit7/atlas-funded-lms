@@ -76,17 +76,14 @@ describe("mutation notification wording", () => {
     expect(resolveMutationSuccessToast("lesson-progress-save", "PATCH")).toBeNull();
   });
 
-  it("uses written confirmations for actions whose screens show none", () => {
-    expect(resolveMutationSuccessToast("member-role-assign", "POST")).toBe("Role assigned");
-    expect(resolveMutationSuccessToast("permission-override-delete", "DELETE")).toBe(
-      "Permission override removed",
+  it("leaves written confirmations to the screens that make the request", () => {
+    // The shared table ships to every page, learner pages included; messages
+    // for admin actions are passed as successMessage where the request is made.
+    expect(resolveMutationSuccessToast("member-role-assign", "POST")).toBeNull();
+    expect(resolveMutationSuccessToast("batch-delete-abc123", "DELETE")).toBeNull();
+    expect(resolveMutationSuccessToast("member-role-assign", "POST", "Role assigned")).toBe(
+      "Role assigned",
     );
-    expect(resolveMutationSuccessToast("badge-revoke-abc123", "POST")).toBe("Badge revoked");
-    // The longest matching prefix wins.
-    expect(resolveMutationSuccessToast("batch-delete-abc123", "DELETE")).toBe("Batch deleted");
-    expect(resolveMutationSuccessToast("batch-abc123", "POST")).toBe("Batch created");
-    expect(resolveMutationSuccessToast("course-ios-pricing-update", "PUT")).toBe("Pricing saved");
-    expect(resolveMutationSuccessToast("progress-export-create", "POST")).toBe("Export started");
     expect(resolveMutationSuccessToast("cancel-enrollment-abc123", "DELETE")).toBe(
       "Enrollment cancelled",
     );

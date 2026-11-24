@@ -133,6 +133,7 @@ export function ManageDiscussionsPanel() {
         `/api/v1/moderation/cases/${decision.caseItem.id}/decide`,
         body,
         `moderation-decide-${decision.caseItem.id}`,
+        { successMessage: "Decision saved" },
       );
       setPendingDecision(null);
       setItems((previous) => previous.filter((row) => row.id !== decision.caseItem.id));

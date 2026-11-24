@@ -58,6 +58,7 @@ export function LessonCommentsPanel({ lessonId }: LessonCommentsPanelProps) {
         `/api/v1/lessons/${lessonId}/comments`,
         { bodyJson },
         "lesson-comment-create",
+        { successMessage: "Comment posted" },
       );
       setComments((current) => [...current, response.data]);
       setDraft("");

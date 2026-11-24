@@ -132,6 +132,7 @@ export async function updateReportSchedule(
     `/api/v1/reports/schedules/${id}`,
     body,
     `schedule-update-${id}`,
+    { successMessage: "Schedule saved" },
   );
 }
 
@@ -139,13 +140,17 @@ export async function deleteReportSchedule(id: string) {
   return clientApi.delete<{ data: { deleted: true; id: string } }>(
     `/api/v1/reports/schedules/${id}`,
     `schedule-delete-${id}`,
+    undefined,
+    { successMessage: "Schedule deleted" },
   );
 }
 
 export async function runScheduleNow(id: string) {
   return clientApi.post<{
     data: { scheduleId: string; runId: string; status: string };
-  }>(`/api/v1/reports/exports/schedules/${id}/run`, {}, `schedule-run-now-${id}`);
+  }>(`/api/v1/reports/exports/schedules/${id}/run`, {}, `schedule-run-now-${id}`, {
+    successMessage: "Export started",
+  });
 }
 
 export async function bulkMutateSchedules(body: {
@@ -159,7 +164,9 @@ export async function bulkMutateSchedules(body: {
       failed: number;
       runIds?: string[];
     };
-  }>("/api/v1/reports/exports/schedules/bulk", body, `schedules-bulk-${body.action}`);
+  }>("/api/v1/reports/exports/schedules/bulk", body, `schedules-bulk-${body.action}`, {
+    successMessage: "Schedules updated",
+  });
 }
 
 export type ScheduleDetailRun = {
@@ -262,5 +269,6 @@ export async function duplicateSchedule(scheduleId: string) {
     `/api/v1/reports/exports/schedules/${scheduleId}/duplicate`,
     {},
     `schedule-duplicate-${scheduleId}`,
+    { successMessage: "Schedule duplicated" },
   );
 }

@@ -241,99 +241,6 @@ const IDEMPOTENCY_TOASTS: Record<string, ToastDefinition> = {
   "platform-support-open": { label: "Support session", action: "created" },
 };
 
-/**
- * Confirmations for actions whose screens show none of their own, keyed by the
- * request's idempotency key. Written for the person who did it, in their words.
- * Keys built with an id (`badge-update-${id}`) are matched by prefix, longest
- * first.
- */
-const WRITTEN_MESSAGES: Record<string, string> = {
-  "active-devices-policy-block-delete": "Device block removed",
-  "active-devices-policy-override-delete": "Device override removed",
-  "avatar-confirm": "Profile photo updated",
-  "avatar-remove": "Profile photo removed",
-  "badge-manual-award-bulk": "Badges awarded",
-  "batches-roster-remove-learner": "Learner removed from the batch",
-  "certificate-brand-kit-delete": "Brand kit deleted",
-  "community-comment": "Comment posted",
-  "community-comment-update": "Comment updated",
-  "competency-bands-replace": "Bands saved",
-  "competency-dimension-delete": "Dimension deleted",
-  "course-backup-create": "Backup started",
-  "course-gamification-update": "Gamification settings saved",
-  "custom-field-segment-delete": "Segment deleted",
-  "export-settings-purge-expired": "Expired exports deleted",
-  "export-settings-update": "Export settings saved",
-  "insights-alerts": "Alert settings saved",
-  "insights-digests": "Digest settings saved",
-  "insights-settings": "Insight settings saved",
-  "lesson-comment-create": "Comment posted",
-  "locale-remove": "Language removed",
-  "member-assign-role": "Role assigned",
-  "member-role-assign": "Role assigned",
-  "member-role-revoke": "Role removed",
-  "path-delete": "Learning path deleted",
-  "permission-override-create": "Permission override added",
-  "permission-override-delete": "Permission override removed",
-  "readiness-policy": "Readiness policy saved",
-  "studio-template-approve": "Template approved",
-  "studio-template-create": "Template created",
-  "studio-template-delete": "Template deleted",
-  "studio-template-publish": "Template published",
-  "studio-template-update": "Template saved",
-  "tag-bulk": "Tags updated",
-  "tag-merge": "Tags merged",
-};
-
-const WRITTEN_PREFIX_MESSAGES: ReadonlyArray<readonly [string, string]> = [
-  ["badge-revoke-", "Badge revoked"],
-  ["badge-update-", "Badge saved"],
-  ["batch-delete-", "Batch deleted"],
-  ["batch-member-", "Learner added to the batch"],
-  ["batch-update-", "Batch saved"],
-  ["batch-", "Batch created"],
-  ["bi-export-", "Export started"],
-  ["course-encryption-", "Encryption setting saved"],
-  ["custom-field-value-", "Saved"],
-  ["custom-field-", "Custom field saved"],
-  ["custom-report-", "Report saved"],
-  ["destination-create-", "Destination added"],
-  ["destination-update-", "Destination saved"],
-  ["issue-cert-", "Certificate issued"],
-  ["learner-archive-", "Learner archived"],
-  ["learner-unarchive-", "Learner unarchived"],
-  ["live-session-", "Live session saved"],
-  ["message-", "Message sent"],
-  ["moderation-decide-", "Decision saved"],
-  ["poll-delete-", "Poll deleted"],
-  ["poll-update-", "Poll saved"],
-  ["poll-", "Poll created"],
-  ["product-enroll-", "You're enrolled"],
-  ["report-export-run-", "Export started"],
-  ["report-schedule-", "Report scheduled"],
-  ["review-delete-", "Review deleted"],
-  ["review-status-", "Review updated"],
-  ["schedule-delete-", "Schedule deleted"],
-  ["schedule-duplicate-", "Schedule duplicated"],
-  ["schedule-run-now-", "Export started"],
-  ["schedule-update-", "Schedule saved"],
-  ["schedules-bulk-", "Schedules updated"],
-  ["sub-school-delete-", "Sub-school deleted"],
-  ["tag-delete-", "Tag deleted"],
-];
-
-function writtenMessageFor(key: string): string | null {
-  const exact = WRITTEN_MESSAGES[key];
-  if (exact) return exact;
-  if (/^course-[a-z]+-pricing-update$/.test(key)) return "Pricing saved";
-  if (key.endsWith("-export-create")) return "Export started";
-  let best: readonly [string, string] | undefined;
-  for (const entry of WRITTEN_PREFIX_MESSAGES) {
-    if (key.startsWith(entry[0]) && (!best || entry[0].length > best[0].length)) best = entry;
-  }
-  return best ? best[1] : null;
-}
-
 function isUuidSegment(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
@@ -429,13 +336,10 @@ export function resolveMutationSuccessToast(
     return "Deletion request processed successfully";
   }
 
-  const written = writtenMessageFor(key);
-  if (written) return written;
-
   // Anything else says nothing. Messages used to be made up from the request's
   // internal key: "Device Session Capture created successfully" on every page,
   // "Coupon Validate … created", "Email Campaign created" for a delete (QA
   // review 1 M16, review 2 H1). A screen that wants a confirmation passes
-  // successMessage, or has its key written below.
+  // successMessage where it makes the request.
   return null;
 }

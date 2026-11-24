@@ -20,6 +20,7 @@ export const readinessApiClient = {
       "/api/v1/readiness-policy",
       body,
       "readiness-policy",
+      { successMessage: "Readiness policy saved" },
     );
   },
 

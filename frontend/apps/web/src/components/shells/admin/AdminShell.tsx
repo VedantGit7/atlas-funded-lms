@@ -2,6 +2,7 @@
 
 import { MfaStepUpProvider } from "../../security/MfaStepUpProvider";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
@@ -17,7 +18,7 @@ import {
 } from "lucide-react";
 import type { PublicTenantBranding } from "@atlas/tenant-branding";
 import type { AdminNavItem } from "../../../features/admin/admin-navigation";
-import { AdminHeaderSearch } from "../../../features/admin/search/AdminHeaderSearch";
+
 import { AdminNotificationPopover } from "../../../features/notifications/components/AdminNotificationPopover";
 import { performAtlasLogout } from "../../../lib/auth/perform-logout";
 import { DeviceSessionCapture } from "../../observability/DeviceSessionCapture";
@@ -45,6 +46,20 @@ import {
   isAdminSalesPath,
 } from "../../../features/admin/grow/admin-sales-catalog";
 import { ADMIN_REPORTS_HREF } from "../../../features/admin/reports/admin-reports-catalog";
+
+/**
+ * Loaded on its own, after the page: the search and the settings catalogue it
+ * searches would otherwise add to the first load of every page this shell can
+ * render, learner account pages included (learner bundle ratchet, H16).
+ */
+const AdminHeaderSearch = dynamic(
+  () =>
+    import("../../../features/admin/search/AdminHeaderSearch").then((mod) => mod.AdminHeaderSearch),
+  {
+    ssr: false,
+    loading: () => <div className="hidden max-w-md flex-1 sm:block" aria-hidden="true" />,
+  },
+);
 
 const ACCOUNT_MENU_ITEMS: AccountMenuItem[] = [
   { href: "/profile", label: "Profile", icon: UserRound },

@@ -116,6 +116,7 @@ export function ManageRatingsReviewsPanel() {
         `/api/v1/manage/reviews/${item.id}`,
         { status },
         `review-status-${item.id}`,
+        { successMessage: "Review updated" },
       );
       setItems((previous) => previous.map((row) => (row.id === item.id ? response.data : row)));
     } catch (caught) {
@@ -129,7 +130,12 @@ export function ManageRatingsReviewsPanel() {
     setBusyId(item.id);
     setError(null);
     try {
-      await clientApi.delete(`/api/v1/manage/reviews/${item.id}`, `review-delete-${item.id}`);
+      await clientApi.delete(
+        `/api/v1/manage/reviews/${item.id}`,
+        `review-delete-${item.id}`,
+        undefined,
+        { successMessage: "Review deleted" },
+      );
       setDeleteTarget(null);
       setItems((previous) => previous.filter((row) => row.id !== item.id));
     } catch (caught) {

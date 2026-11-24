@@ -63,6 +63,8 @@ export async function deleteCompetencyDimension(
   return clientApi.delete<DeleteDimensionResponse>(
     `/api/v1/competency-dimensions/${dimensionId}`,
     "competency-dimension-delete",
+    undefined,
+    { successMessage: "Dimension deleted" },
   );
 }
 
@@ -103,6 +105,7 @@ export async function replaceProfileBands(
     `/api/v1/scoring-profiles/${profileId}/bands`,
     body,
     "competency-bands-replace",
+    { successMessage: "Bands saved" },
   );
 }
 
