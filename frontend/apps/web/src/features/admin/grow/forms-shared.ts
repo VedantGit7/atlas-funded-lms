@@ -1,6 +1,16 @@
 export type FormStatus = "DRAFT" | "LIVE" | "UNPUBLISHED";
 export type FormKind = "LEAD" | "SIGNUP";
-export type FormFieldType = "email" | "password" | "text" | "textarea" | "phone" | "number";
+export type FormFieldType =
+  | "email"
+  | "text"
+  | "textarea"
+  | "phone"
+  | "number"
+  | "date"
+  | "select"
+  | "radio"
+  | "checkboxes"
+  | "consent";
 
 export type FormField = {
   id: string;
@@ -8,6 +18,8 @@ export type FormField = {
   label: string;
   placeholder?: string | null;
   fieldType: FormFieldType;
+  /** Choices for dropdown, multiple-choice and checkbox fields. */
+  options?: string[];
   required: boolean;
   isSystem?: boolean;
   sortOrder: number;
@@ -81,8 +93,17 @@ export const FORM_FIELD_TYPE_OPTIONS = [
   { value: "email", label: "Email" },
   { value: "phone", label: "Phone" },
   { value: "number", label: "Number" },
-  { value: "password", label: "Password" },
+  { value: "date", label: "Date" },
+  { value: "select", label: "Dropdown" },
+  { value: "radio", label: "Multiple choice" },
+  { value: "checkboxes", label: "Checkboxes" },
+  { value: "consent", label: "Consent checkbox" },
 ] as const;
+
+/** Field types whose answers are picked from the field's options. */
+export function isChoiceFieldType(fieldType: FormFieldType): boolean {
+  return fieldType === "select" || fieldType === "radio" || fieldType === "checkboxes";
+}
 
 export function formFieldTypeLabel(fieldType: FormFieldType): string {
   return (
@@ -102,7 +123,12 @@ export function formSubmissionSourceLabel(source: string): string {
 export function answerDisplayValue(value: unknown): string {
   if (value == null) return "—";
   if (typeof value === "string") return value.trim() || "—";
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "number") return String(value);
+  if (Array.isArray(value)) {
+    const items = value.filter((item) => typeof item === "string" && item.trim());
+    return items.length ? items.join(", ") : "—";
+  }
   try {
     return JSON.stringify(value);
   } catch {

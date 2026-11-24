@@ -34,6 +34,7 @@ export type MarketingEventRegistrationMinAggregateOutputType = {
   name: string | null
   source: string | null
   created_at: Date | null
+  reminder_queued_at: Date | null
 }
 
 export type MarketingEventRegistrationMaxAggregateOutputType = {
@@ -46,6 +47,7 @@ export type MarketingEventRegistrationMaxAggregateOutputType = {
   name: string | null
   source: string | null
   created_at: Date | null
+  reminder_queued_at: Date | null
 }
 
 export type MarketingEventRegistrationCountAggregateOutputType = {
@@ -58,6 +60,7 @@ export type MarketingEventRegistrationCountAggregateOutputType = {
   name: number
   source: number
   created_at: number
+  reminder_queued_at: number
   _all: number
 }
 
@@ -72,6 +75,7 @@ export type MarketingEventRegistrationMinAggregateInputType = {
   name?: true
   source?: true
   created_at?: true
+  reminder_queued_at?: true
 }
 
 export type MarketingEventRegistrationMaxAggregateInputType = {
@@ -84,6 +88,7 @@ export type MarketingEventRegistrationMaxAggregateInputType = {
   name?: true
   source?: true
   created_at?: true
+  reminder_queued_at?: true
 }
 
 export type MarketingEventRegistrationCountAggregateInputType = {
@@ -96,6 +101,7 @@ export type MarketingEventRegistrationCountAggregateInputType = {
   name?: true
   source?: true
   created_at?: true
+  reminder_queued_at?: true
   _all?: true
 }
 
@@ -181,6 +187,7 @@ export type MarketingEventRegistrationGroupByOutputType = {
   name: string | null
   source: string
   created_at: Date
+  reminder_queued_at: Date | null
   _count: MarketingEventRegistrationCountAggregateOutputType | null
   _min: MarketingEventRegistrationMinAggregateOutputType | null
   _max: MarketingEventRegistrationMaxAggregateOutputType | null
@@ -214,6 +221,7 @@ export type MarketingEventRegistrationWhereInput = {
   name?: Prisma.StringNullableFilter<"MarketingEventRegistration"> | string | null
   source?: Prisma.StringFilter<"MarketingEventRegistration"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingEventRegistration"> | Date | string
+  reminder_queued_at?: Prisma.DateTimeNullableFilter<"MarketingEventRegistration"> | Date | string | null
   contact?: Prisma.XOR<Prisma.MarketingContactNullableScalarRelationFilter, Prisma.MarketingContactWhereInput> | null
   event?: Prisma.XOR<Prisma.MarketingEventScalarRelationFilter, Prisma.MarketingEventWhereInput>
   membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
@@ -229,6 +237,7 @@ export type MarketingEventRegistrationOrderByWithRelationInput = {
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  reminder_queued_at?: Prisma.SortOrderInput | Prisma.SortOrder
   contact?: Prisma.MarketingContactOrderByWithRelationInput
   event?: Prisma.MarketingEventOrderByWithRelationInput
   membership?: Prisma.MembershipOrderByWithRelationInput
@@ -248,6 +257,7 @@ export type MarketingEventRegistrationWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringNullableFilter<"MarketingEventRegistration"> | string | null
   source?: Prisma.StringFilter<"MarketingEventRegistration"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingEventRegistration"> | Date | string
+  reminder_queued_at?: Prisma.DateTimeNullableFilter<"MarketingEventRegistration"> | Date | string | null
   contact?: Prisma.XOR<Prisma.MarketingContactNullableScalarRelationFilter, Prisma.MarketingContactWhereInput> | null
   event?: Prisma.XOR<Prisma.MarketingEventScalarRelationFilter, Prisma.MarketingEventWhereInput>
   membership?: Prisma.XOR<Prisma.MembershipNullableScalarRelationFilter, Prisma.MembershipWhereInput> | null
@@ -263,6 +273,7 @@ export type MarketingEventRegistrationOrderByWithAggregationInput = {
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  reminder_queued_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.MarketingEventRegistrationCountOrderByAggregateInput
   _max?: Prisma.MarketingEventRegistrationMaxOrderByAggregateInput
   _min?: Prisma.MarketingEventRegistrationMinOrderByAggregateInput
@@ -281,6 +292,7 @@ export type MarketingEventRegistrationScalarWhereWithAggregatesInput = {
   name?: Prisma.StringNullableWithAggregatesFilter<"MarketingEventRegistration"> | string | null
   source?: Prisma.StringWithAggregatesFilter<"MarketingEventRegistration"> | string
   created_at?: Prisma.DateTimeWithAggregatesFilter<"MarketingEventRegistration"> | Date | string
+  reminder_queued_at?: Prisma.DateTimeNullableWithAggregatesFilter<"MarketingEventRegistration"> | Date | string | null
 }
 
 export type MarketingEventRegistrationCreateInput = {
@@ -289,6 +301,7 @@ export type MarketingEventRegistrationCreateInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
   contact?: Prisma.MarketingContactCreateNestedOneWithoutMarketing_event_registrationsInput
   event: Prisma.MarketingEventCreateNestedOneWithoutMarketing_event_registrationsInput
   membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_event_registrationsInput
@@ -304,6 +317,7 @@ export type MarketingEventRegistrationUncheckedCreateInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationUpdateInput = {
@@ -312,6 +326,7 @@ export type MarketingEventRegistrationUpdateInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contact?: Prisma.MarketingContactUpdateOneWithoutMarketing_event_registrationsNestedInput
   event?: Prisma.MarketingEventUpdateOneRequiredWithoutMarketing_event_registrationsNestedInput
   membership?: Prisma.MembershipUpdateOneWithoutMarketing_event_registrationsNestedInput
@@ -327,6 +342,7 @@ export type MarketingEventRegistrationUncheckedUpdateInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationCreateManyInput = {
@@ -339,6 +355,7 @@ export type MarketingEventRegistrationCreateManyInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationUpdateManyMutationInput = {
@@ -347,6 +364,7 @@ export type MarketingEventRegistrationUpdateManyMutationInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationUncheckedUpdateManyInput = {
@@ -359,6 +377,7 @@ export type MarketingEventRegistrationUncheckedUpdateManyInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationListRelationFilter = {
@@ -387,6 +406,7 @@ export type MarketingEventRegistrationCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   source?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  reminder_queued_at?: Prisma.SortOrder
 }
 
 export type MarketingEventRegistrationMaxOrderByAggregateInput = {
@@ -399,6 +419,7 @@ export type MarketingEventRegistrationMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   source?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  reminder_queued_at?: Prisma.SortOrder
 }
 
 export type MarketingEventRegistrationMinOrderByAggregateInput = {
@@ -411,6 +432,7 @@ export type MarketingEventRegistrationMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   source?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
+  reminder_queued_at?: Prisma.SortOrder
 }
 
 export type MarketingEventRegistrationCreateNestedManyWithoutMembershipInput = {
@@ -545,6 +567,7 @@ export type MarketingEventRegistrationCreateWithoutMembershipInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
   contact?: Prisma.MarketingContactCreateNestedOneWithoutMarketing_event_registrationsInput
   event: Prisma.MarketingEventCreateNestedOneWithoutMarketing_event_registrationsInput
 }
@@ -557,6 +580,7 @@ export type MarketingEventRegistrationUncheckedCreateWithoutMembershipInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationCreateOrConnectWithoutMembershipInput = {
@@ -598,6 +622,7 @@ export type MarketingEventRegistrationScalarWhereInput = {
   name?: Prisma.StringNullableFilter<"MarketingEventRegistration"> | string | null
   source?: Prisma.StringFilter<"MarketingEventRegistration"> | string
   created_at?: Prisma.DateTimeFilter<"MarketingEventRegistration"> | Date | string
+  reminder_queued_at?: Prisma.DateTimeNullableFilter<"MarketingEventRegistration"> | Date | string | null
 }
 
 export type MarketingEventRegistrationCreateWithoutContactInput = {
@@ -606,6 +631,7 @@ export type MarketingEventRegistrationCreateWithoutContactInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
   event: Prisma.MarketingEventCreateNestedOneWithoutMarketing_event_registrationsInput
   membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_event_registrationsInput
 }
@@ -618,6 +644,7 @@ export type MarketingEventRegistrationUncheckedCreateWithoutContactInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationCreateOrConnectWithoutContactInput = {
@@ -652,6 +679,7 @@ export type MarketingEventRegistrationCreateWithoutEventInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
   contact?: Prisma.MarketingContactCreateNestedOneWithoutMarketing_event_registrationsInput
   membership?: Prisma.MembershipCreateNestedOneWithoutMarketing_event_registrationsInput
 }
@@ -664,6 +692,7 @@ export type MarketingEventRegistrationUncheckedCreateWithoutEventInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationCreateOrConnectWithoutEventInput = {
@@ -700,6 +729,7 @@ export type MarketingEventRegistrationCreateManyMembershipInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationUpdateWithoutMembershipInput = {
@@ -708,6 +738,7 @@ export type MarketingEventRegistrationUpdateWithoutMembershipInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contact?: Prisma.MarketingContactUpdateOneWithoutMarketing_event_registrationsNestedInput
   event?: Prisma.MarketingEventUpdateOneRequiredWithoutMarketing_event_registrationsNestedInput
 }
@@ -720,6 +751,7 @@ export type MarketingEventRegistrationUncheckedUpdateWithoutMembershipInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationUncheckedUpdateManyWithoutMembershipInput = {
@@ -730,6 +762,7 @@ export type MarketingEventRegistrationUncheckedUpdateManyWithoutMembershipInput 
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationCreateManyContactInput = {
@@ -740,6 +773,7 @@ export type MarketingEventRegistrationCreateManyContactInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationUpdateWithoutContactInput = {
@@ -748,6 +782,7 @@ export type MarketingEventRegistrationUpdateWithoutContactInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   event?: Prisma.MarketingEventUpdateOneRequiredWithoutMarketing_event_registrationsNestedInput
   membership?: Prisma.MembershipUpdateOneWithoutMarketing_event_registrationsNestedInput
 }
@@ -760,6 +795,7 @@ export type MarketingEventRegistrationUncheckedUpdateWithoutContactInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationUncheckedUpdateManyWithoutContactInput = {
@@ -770,6 +806,7 @@ export type MarketingEventRegistrationUncheckedUpdateManyWithoutContactInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationCreateManyEventInput = {
@@ -780,6 +817,7 @@ export type MarketingEventRegistrationCreateManyEventInput = {
   name?: string | null
   source?: string
   created_at?: Date | string
+  reminder_queued_at?: Date | string | null
 }
 
 export type MarketingEventRegistrationUpdateWithoutEventInput = {
@@ -788,6 +826,7 @@ export type MarketingEventRegistrationUpdateWithoutEventInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contact?: Prisma.MarketingContactUpdateOneWithoutMarketing_event_registrationsNestedInput
   membership?: Prisma.MembershipUpdateOneWithoutMarketing_event_registrationsNestedInput
 }
@@ -800,6 +839,7 @@ export type MarketingEventRegistrationUncheckedUpdateWithoutEventInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MarketingEventRegistrationUncheckedUpdateManyWithoutEventInput = {
@@ -810,6 +850,7 @@ export type MarketingEventRegistrationUncheckedUpdateManyWithoutEventInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.StringFieldUpdateOperationsInput | string
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reminder_queued_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -824,6 +865,7 @@ export type MarketingEventRegistrationSelect<ExtArgs extends runtime.Types.Exten
   name?: boolean
   source?: boolean
   created_at?: boolean
+  reminder_queued_at?: boolean
   contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
   event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
   membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
@@ -839,6 +881,7 @@ export type MarketingEventRegistrationSelectCreateManyAndReturn<ExtArgs extends 
   name?: boolean
   source?: boolean
   created_at?: boolean
+  reminder_queued_at?: boolean
   contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
   event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
   membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
@@ -854,6 +897,7 @@ export type MarketingEventRegistrationSelectUpdateManyAndReturn<ExtArgs extends 
   name?: boolean
   source?: boolean
   created_at?: boolean
+  reminder_queued_at?: boolean
   contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
   event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
   membership?: boolean | Prisma.MarketingEventRegistration$membershipArgs<ExtArgs>
@@ -869,9 +913,10 @@ export type MarketingEventRegistrationSelectScalar = {
   name?: boolean
   source?: boolean
   created_at?: boolean
+  reminder_queued_at?: boolean
 }
 
-export type MarketingEventRegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "event_id" | "contact_id" | "membership_id" | "email" | "name" | "source" | "created_at", ExtArgs["result"]["marketingEventRegistration"]>
+export type MarketingEventRegistrationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenant_id" | "event_id" | "contact_id" | "membership_id" | "email" | "name" | "source" | "created_at" | "reminder_queued_at", ExtArgs["result"]["marketingEventRegistration"]>
 export type MarketingEventRegistrationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   contact?: boolean | Prisma.MarketingEventRegistration$contactArgs<ExtArgs>
   event?: boolean | Prisma.MarketingEventDefaultArgs<ExtArgs>
@@ -905,6 +950,10 @@ export type $MarketingEventRegistrationPayload<ExtArgs extends runtime.Types.Ext
     name: string | null
     source: string
     created_at: Date
+    /**
+     * Set when the event reminder email was queued, so it goes out once.
+     */
+    reminder_queued_at: Date | null
   }, ExtArgs["result"]["marketingEventRegistration"]>
   composites: {}
 }
@@ -1340,6 +1389,7 @@ export interface MarketingEventRegistrationFieldRefs {
   readonly name: Prisma.FieldRef<"MarketingEventRegistration", 'String'>
   readonly source: Prisma.FieldRef<"MarketingEventRegistration", 'String'>
   readonly created_at: Prisma.FieldRef<"MarketingEventRegistration", 'DateTime'>
+  readonly reminder_queued_at: Prisma.FieldRef<"MarketingEventRegistration", 'DateTime'>
 }
     
 

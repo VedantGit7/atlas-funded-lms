@@ -7,6 +7,7 @@ import { purgeExpiredProctoringMedia } from "../server/proctoring/proctoring-med
 import { finalizeExpiredAttemptsForTenant } from "../server/attempts/attempt-deadline-sweep";
 import { tickDueReportSchedulesForTenant } from "../server/reports/reports-tick.service";
 import { expireDueCertificatesForTenant } from "../server/certificates/certificate-expiry.service";
+import { queueDueMarketingEventReminders } from "../server/marketing-events/marketing-events.service";
 import {
   createFxRateLoader,
   refreshFxRatesForTenantIfStale,
@@ -87,6 +88,8 @@ export type SweepResult = {
   abandonedUploadsPurged: number;
   /** Due deletion requests whose member was erased this sweep (launch plan 5.7). */
   membersErased: number;
+  /** Event reminder emails queued this sweep (QA review 2 H29). */
+  eventRemindersQueued: number;
 };
 
 export async function listAllRetentionTenantIds(): Promise<string[]> {
@@ -140,6 +143,7 @@ const RETENTION_COUNTERS: Record<
   | "fxRatesRefreshed"
   | "abandonedUploadsPurged"
   | "membersErased"
+  | "eventRemindersQueued"
 > = {
   "usage-meter-drain": "usageEventsProcessed",
   "usage-events-prune": "usageEventsPruned",
@@ -153,6 +157,7 @@ const RETENTION_COUNTERS: Record<
   "fx-rate-refresh": "fxRatesRefreshed",
   "abandoned-upload-purge": "abandonedUploadsPurged",
   "member-erasure": "membersErased",
+  "event-reminders": "eventRemindersQueued",
 };
 
 /** Tasks whose full batch means a backlog, so the worker should sweep again soon. */
@@ -160,6 +165,7 @@ const SATURATING_TASKS = new Set([
   "usage-meter-drain",
   "usage-events-prune",
   "attempt-deadline-finalize",
+  "event-reminders",
 ]);
 
 export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
@@ -253,6 +259,19 @@ export function defaultRetentionTasks(batchLimit = 25): RetentionTask[] {
       name: "report-schedule-tick",
       run: async ({ tenantId, requestId }) =>
         tickDueReportSchedulesForTenant({ tenantId, requestId: `${requestId}:${tenantId}` }),
+    },
+    {
+      // Event reminders the admin chose ("1 hour before"). They were saved and
+      // never sent (QA review 2 H29); each sweep queues the ones now due.
+      name: "event-reminders",
+      run: async ({ tenantId, requestId }) =>
+        withTenantTx({ tenantId, requestId, allowAnonymousTenantRead: true }, async (tx) =>
+          queueDueMarketingEventReminders(
+            tx,
+            { tenantId, requestId: `${requestId}:${tenantId}` },
+            batchLimit,
+          ),
+        ),
     },
     {
       // Audit M5: was a daily cron that expired every tenant's certificates in
@@ -358,6 +377,7 @@ export async function runOutboxSweep(options: SweepOptions): Promise<SweepResult
     fxRatesRefreshed: 0,
     abandonedUploadsPurged: 0,
     membersErased: 0,
+    eventRemindersQueued: 0,
   };
 
   const tenantIds = await listTenants();

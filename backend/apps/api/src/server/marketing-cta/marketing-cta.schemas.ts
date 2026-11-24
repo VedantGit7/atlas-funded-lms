@@ -6,6 +6,29 @@ export const ctaAudienceSchema = z.enum(["ALL", "ANONYMOUS", "LEARNERS"]);
 export const ctaFrequencySchema = z.enum(["REPEAT", "ONCE"]);
 export const ctaTriggerSchema = z.enum(["PAGE_LOAD", "ELAPSED"]);
 
+/**
+ * Where a CTA's button goes: a full web address (http or https) or a page on
+ * the academy's own site such as /courses (QA review 2 H31: a site path was
+ * refused with "Invalid request"). Other schemes, such as javascript:, and
+ * protocol-relative //host links are refused.
+ */
+export const ctaLinkSchema = z
+  .string()
+  .trim()
+  .max(2000)
+  .refine(
+    (value) => {
+      if (/^\/(?![/\\])\S*$/.test(value)) return true;
+      try {
+        const url = new URL(value);
+        return url.protocol === "https:" || url.protocol === "http:";
+      } catch {
+        return false;
+      }
+    },
+    { message: "Enter a full web address (https://…) or a page on your site, like /courses." },
+  );
+
 export const ctaTargetingSchema = z
   .object({
     includeUrls: z.array(z.string().trim().max(2000)).max(50).default([]),
@@ -112,7 +135,7 @@ export const updateMarketingCtaDesignBodySchema = z
     buttonColor: z.string().trim().min(3).max(32),
     buttonTextColor: z.string().trim().min(3).max(32),
     backgroundColor: z.string().trim().min(3).max(32),
-    linkUrl: z.union([z.url().max(2000), z.literal(""), z.null()]).optional(),
+    linkUrl: z.union([z.literal(""), ctaLinkSchema, z.null()]).optional(),
     formId: z.uuid().optional().nullable(),
     linkedPopupCtaId: z.uuid().optional().nullable(),
   })

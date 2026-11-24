@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPublicRouteHandler, resolveRequestTenant } from "@atlas/api";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
+import { requestOrigin } from "../../../../../../../../lib/auth-email";
 import { registerPublicMarketingEvent } from "../../../../../../../../server/marketing-events/marketing-events.service";
 import { routeMetadata } from "./route.metadata";
 
@@ -24,7 +25,11 @@ export const POST = createPublicRouteHandler(routeMetadata, async ({ req, reques
       requestId,
       allowAnonymousTenantRead: true,
     },
-    async (tx) => registerPublicMarketingEvent(tx, id, body),
+    async (tx) =>
+      registerPublicMarketingEvent(tx, { tenantId: tenant.tenantId, requestId }, id, body, {
+        // The confirmation email links back to the academy the person is on.
+        siteUrl: requestOrigin(req),
+      }),
   );
   return NextResponse.json(result, { status: 200 });
 });

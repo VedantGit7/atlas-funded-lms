@@ -1,6 +1,10 @@
 import type { OutboxHandler } from "@atlas/events/services/outbox-worker.service";
 import { MARKETING_WORKFLOW_EMAIL_REQUESTED_EVENT } from "../server/marketing-workflows/marketing-workflow-email.events";
 import { marketingWorkflowEmailOutboxHandlers } from "../server/marketing-workflows/marketing-workflow-email.worker";
+import {
+  MARKETING_EVENT_EMAIL_REQUESTED_EVENT,
+  marketingEventEmailOutboxHandlers,
+} from "../server/marketing-events/marketing-event-email";
 import { withPostHogProductHandlers } from "@atlas/observability/posthog/outbox-mapper";
 
 import {
@@ -299,6 +303,8 @@ export function createMarketingWorkflowOutboxConsumers(): Record<string, OutboxH
     MARKETING_WORKFLOW_EMAIL_REQUESTED_EVENT,
     marketingWorkflowEmailOutboxHandlers,
   );
+  // Event registration confirmations and reminders (QA review 2 H29).
+  appendHandlers(map, MARKETING_EVENT_EMAIL_REQUESTED_EVENT, marketingEventEmailOutboxHandlers);
 
   return map;
 }

@@ -19,9 +19,12 @@ import { MESSENGER_WIZARD_FIELD_CLASS, MESSENGER_WIZARD_LABEL_CLASS } from "./pu
 import {
   CTA_LIST_HREF,
   MARKETING_HREF,
+  ctaLinkHint,
+  ctaLinkLabel,
   ctaStatusLabel,
   ctaTypeLabel,
   defaultTargeting,
+  isValidCtaLink,
   embedButtonSnippet,
   formatCtaCount,
   type CtaDto,
@@ -442,6 +445,10 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
 
   async function saveDesign() {
     if (!cta) return;
+    if (linkUrl.trim() && !isValidCtaLink(linkUrl)) {
+      toast.error("Enter a full web address (https://…) or a page on your site, like /courses.");
+      return;
+    }
     setBusy(true);
     try {
       const response = await clientApi.patch<{ data: CtaDto }>(
@@ -836,7 +843,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
               </div>
               <div>
                 <label htmlFor="cta-design-link-url" className={MESSENGER_WIZARD_LABEL_CLASS}>
-                  Link URL (optional)
+                  {ctaLinkLabel(cta.ctaType)}
                 </label>
                 <input
                   id="cta-design-link-url"
@@ -846,8 +853,22 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
                   }}
                   className={MESSENGER_WIZARD_FIELD_CLASS}
                   disabled={live}
-                  placeholder="https://"
+                  placeholder="/courses or https://…"
+                  aria-describedby="cta-design-link-hint"
+                  aria-invalid={linkUrl.trim() !== "" && !isValidCtaLink(linkUrl)}
                 />
+                <p
+                  id="cta-design-link-hint"
+                  className={`mt-1 text-xs ${
+                    linkUrl.trim() !== "" && !isValidCtaLink(linkUrl)
+                      ? "text-[var(--admin-danger)]"
+                      : "text-[var(--admin-on-surface-variant)]"
+                  }`}
+                >
+                  {linkUrl.trim() !== "" && !isValidCtaLink(linkUrl)
+                    ? "Enter a full web address (https://…) or a page on your site, like /courses."
+                    : ctaLinkHint(cta.ctaType)}
+                </p>
               </div>
 
               {cta.ctaType === "POPUP" ? (
@@ -1051,7 +1072,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
             <strong className="text-[var(--admin-on-surface)]">{ctaStatusLabel(cta.status)}</strong>
             . Configure design and targeting before going Live.
             {cta.ctaType === "POPUP" && !cta.formId && !cta.linkUrl
-              ? " Pop-up needs a Live form or a link URL before you can publish."
+              ? " Connect a Live form or add a link before you can publish this pop-up."
               : null}
             {cta.ctaType === "POPUP" && !cta.formId && cta.linkUrl
               ? " Link-only pop-up: visitors will see the headline and button (no form)."

@@ -236,13 +236,15 @@ export async function publishMarketingCta(tx: TenantTx, _ctx: ServiceCtx, id: st
     !existing.linked_popup_cta_id &&
     !existing.link_url
   ) {
-    throw validationError("Embedded button needs a linked pop-up CTA or link URL.");
+    throw validationError("Choose a pop-up for this button to open, or add a link.");
   }
   if (existing.cta_type === "POPUP" && !existing.form_id && !existing.link_url) {
-    throw validationError("Pop-up needs a connected Live form or a link URL before publishing.");
+    throw validationError("Connect a Live form or add a link before publishing this pop-up.");
   }
   if ((existing.cta_type === "STICKY" || existing.cta_type === "SLIDE_IN") && !existing.link_url) {
-    throw validationError("Add a link URL before publishing this CTA.");
+    throw validationError(
+      "Add a link before publishing: this banner needs somewhere to send people.",
+    );
   }
   await marketingCtaRepository.setStatus(tx, id, "LIVE");
   return marketingCtaResponseSchema.parse({ data: toDto(await requireCta(tx, id)) });

@@ -4036,7 +4036,8 @@ export const MarketingEventRegistrationScalarFieldEnum = {
   email: 'email',
   name: 'name',
   source: 'source',
-  created_at: 'created_at'
+  created_at: 'created_at',
+  reminder_queued_at: 'reminder_queued_at'
 } as const
 
 export type MarketingEventRegistrationScalarFieldEnum = (typeof MarketingEventRegistrationScalarFieldEnum)[keyof typeof MarketingEventRegistrationScalarFieldEnum]

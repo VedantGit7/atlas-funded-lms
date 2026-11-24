@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { AtlasHttpError } from "@atlas/core/http/errors";
 import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
@@ -6,6 +7,7 @@ import {
   createMarketingFormBodySchema,
   deleteMarketingFormBodySchema,
   deleteMarketingFormResponseSchema,
+  FORM_CHOICE_FIELD_TYPES,
   formFieldSchema,
   marketingContactsListQuerySchema,
   marketingContactsListResponseSchema,
@@ -23,7 +25,6 @@ import {
 import {
   defaultLeadFields,
   defaultSignupFields,
-  hashPassword,
   marketingFormsRepository,
   parseFields,
   type FormField,
@@ -58,7 +59,9 @@ function toDto(row: MarketingFormRow) {
     thankYouHtml: row.thank_you_html,
     redirectEnabled: row.redirect_enabled,
     redirectUrl: row.redirect_url,
-    fields: parseFields(row.fields_json).map((field) => formFieldSchema.parse(field)),
+    fields: ensureSystemFields(formKind(row), parseFields(row.fields_json)).map((field) =>
+      formFieldSchema.parse(field),
+    ),
     submissionCount: Number(row.submission_count ?? 0),
     publishedAt: row.published_at?.toISOString() ?? null,
     createdAt: row.created_at.toISOString(),
@@ -76,6 +79,34 @@ function assertEditable(row: MarketingFormRow) {
   if (row.status === "LIVE") {
     throw validationError("Unpublish the form before editing fields or appearance.");
   }
+}
+
+function formKind(row: MarketingFormRow): "LEAD" | "SIGNUP" {
+  return row.kind === "SIGNUP" ? "SIGNUP" : "LEAD";
+}
+
+const CHOICE_TYPES = new Set<string>(FORM_CHOICE_FIELD_TYPES);
+
+/** Choice fields keep their options (at least one); other fields drop them. */
+function normalizeFieldsForSave(fields: FormField[]): FormField[] {
+  const keys = new Set<string>();
+  return fields.map((field) => {
+    if (keys.has(field.key)) {
+      throw validationError(`Two fields use the key "${field.key}". Remove one of them.`);
+    }
+    keys.add(field.key);
+    if (CHOICE_TYPES.has(field.fieldType)) {
+      const options = [...new Set((field.options ?? []).map((option) => option.trim()))].filter(
+        Boolean,
+      );
+      if (options.length === 0) {
+        throw validationError(`Add at least one option to "${field.label}".`);
+      }
+      return { ...field, options };
+    }
+    const { options: _options, ...rest } = field;
+    return rest;
+  });
 }
 
 function ensureSystemFields(kind: "LEAD" | "SIGNUP", fields: FormField[]): FormField[] {
@@ -164,7 +195,7 @@ export async function updateMarketingFormFields(
   const body = updateMarketingFormFieldsBodySchema.parse(rawBody);
   const existing = await requireForm(tx, id);
   assertEditable(existing);
-  const fields = ensureSystemFields(existing.kind as "LEAD" | "SIGNUP", body.fields);
+  const fields = ensureSystemFields(formKind(existing), normalizeFieldsForSave(body.fields));
   await marketingFormsRepository.updateFields(tx, { id, fields });
   return marketingFormResponseSchema.parse({ data: toDto(await requireForm(tx, id)) });
 }
@@ -192,9 +223,15 @@ export async function updateMarketingFormAppearance(
 
 export async function publishMarketingForm(tx: TenantTx, _ctx: ServiceCtx, id: string) {
   const existing = await requireForm(tx, id);
-  const fields = parseFields(existing.fields_json);
+  const fields = ensureSystemFields(formKind(existing), parseFields(existing.fields_json));
   if (!fields.some((field) => field.key === "email")) {
     throw validationError("Form must include an email field.");
+  }
+  const emptyChoice = fields.find(
+    (field) => CHOICE_TYPES.has(field.fieldType) && (field.options ?? []).length === 0,
+  );
+  if (emptyChoice) {
+    throw validationError(`Add at least one option to "${emptyChoice.label}" before publishing.`);
   }
   await marketingFormsRepository.setStatus(tx, id, "LIVE");
   return marketingFormResponseSchema.parse({ data: toDto(await requireForm(tx, id)) });
@@ -306,54 +343,160 @@ export async function getPublicMarketingForm(tx: TenantTx, token: string) {
   });
 }
 
+function isBlankAnswer(value: unknown): boolean {
+  return (
+    value == null ||
+    value === false ||
+    (typeof value === "string" && value.trim() === "") ||
+    (Array.isArray(value) && value.length === 0)
+  );
+}
+
+const emailAnswerSchema = z.email();
+
+/** One answer, checked against its field's type. Undefined means not answered. */
+function readAnswer(field: FormField, raw: unknown): unknown {
+  const label = field.label;
+  if (isBlankAnswer(raw)) {
+    if (field.required) {
+      throw validationError(
+        field.fieldType === "consent" ? `Tick "${label}" to continue.` : `${label} is required.`,
+      );
+    }
+    return undefined;
+  }
+  const options = field.options ?? [];
+  switch (field.fieldType) {
+    case "consent":
+      if (raw !== true && raw !== "true") throw validationError(`Tick "${label}" to continue.`);
+      return true;
+    case "checkboxes": {
+      const values = (Array.isArray(raw) ? raw : [raw]).map((value) => String(value).trim());
+      if (values.some((value) => !options.includes(value))) {
+        throw validationError(`Choose from the options for ${label}.`);
+      }
+      return [...new Set(values)];
+    }
+    case "select":
+    case "radio": {
+      const value = String(raw).trim();
+      if (!options.includes(value))
+        throw validationError(`Choose one of the options for ${label}.`);
+      return value;
+    }
+    case "number": {
+      const value = typeof raw === "number" ? raw : Number(String(raw).trim());
+      if (!Number.isFinite(value)) throw validationError(`${label} must be a number.`);
+      return value;
+    }
+    case "date": {
+      const value = String(raw).trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(Date.parse(`${value}T00:00:00Z`))) {
+        throw validationError(`${label} must be a date.`);
+      }
+      return value;
+    }
+    case "email": {
+      const value = String(raw).trim().toLowerCase();
+      if (!emailAnswerSchema.safeParse(value).success) {
+        throw validationError(`${label} must be an email address.`);
+      }
+      return value;
+    }
+    default:
+      if (Array.isArray(raw) || typeof raw === "boolean") {
+        throw validationError(`${label} must be text.`);
+      }
+      return String(raw).trim();
+  }
+}
+
+const NAME_KEYS = ["name", "full_name", "first_name"];
+
+/**
+ * The contact's name: a field keyed name, or a text field labelled "name".
+ * Contacts showed only an email because added fields get generated keys
+ * (QA review 2, forms).
+ */
+function contactNameFrom(fields: FormField[], answers: Record<string, unknown>): string | null {
+  for (const key of NAME_KEYS) {
+    const value = answers[key];
+    if (typeof value === "string" && value) return value;
+  }
+  const byLabel = fields.find(
+    (field) =>
+      field.fieldType === "text" &&
+      /\bname\b/i.test(field.label) &&
+      typeof answers[field.key] === "string",
+  );
+  return byLabel ? (answers[byLabel.key] as string) : null;
+}
+
+function contactPhoneFrom(fields: FormField[], answers: Record<string, unknown>): string | null {
+  const field = fields.find(
+    (entry) => entry.fieldType === "phone" && typeof answers[entry.key] === "string",
+  );
+  if (field) return answers[field.key] as string;
+  return typeof answers["phone"] === "string" ? answers["phone"] : null;
+}
+
+export type PublicFormSubmission = {
+  thankYouHtml: string | null;
+  redirectUrl: string | null;
+  /** Set for sign-up forms: who to send the academy's sign-up link to. */
+  signup: { email: string; displayName: string } | null;
+};
+
+export function publicSubmitFormResponse(
+  submission: PublicFormSubmission,
+  signupEmailSent: boolean,
+) {
+  return publicSubmitFormResponseSchema.parse({
+    data: {
+      submitted: true as const,
+      thankYouHtml: submission.thankYouHtml,
+      redirectUrl: submission.redirectUrl,
+      signupEmailSent,
+    },
+  });
+}
+
 export async function submitPublicMarketingForm(
   tx: TenantTx,
   ctx: { tenantId: string; requestId: string },
   token: string,
   rawBody: unknown,
-) {
+): Promise<PublicFormSubmission> {
   const body = publicSubmitFormBodySchema.parse(rawBody ?? {});
   const form = await marketingFormsRepository.findByShareToken(tx, token);
   if (!form || form.status !== "LIVE") throw notFound("Form is not available.");
 
-  const fields = parseFields(form.fields_json);
+  const kind = formKind(form);
+  const fields = ensureSystemFields(kind, parseFields(form.fields_json));
   const answers: Record<string, unknown> = {};
   for (const field of fields) {
-    const value = body.answers[field.key];
-    if (field.required && (value == null || String(value).trim() === "")) {
-      throw validationError(`${field.label} is required.`);
-    }
-    if (value != null) answers[field.key] = value;
+    const value = readAnswer(field, body.answers[field.key]);
+    if (value !== undefined) answers[field.key] = value;
   }
 
   const emailRaw = answers["email"];
   const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : "";
-  if (!email || !email.includes("@")) throw validationError("A valid email is required.");
-
-  let passwordHash: string | null = null;
-  if (form.kind === "SIGNUP") {
-    const password = answers["password"];
-    if (typeof password !== "string" || password.length < 8) {
-      throw validationError("Password must be at least 8 characters.");
-    }
-    passwordHash = hashPassword(password);
-    delete answers["password"];
+  if (!email || !emailAnswerSchema.safeParse(email).success) {
+    throw validationError("A valid email is required.");
   }
 
-  const displayName =
-    (typeof answers["name"] === "string" && answers["name"]) ||
-    (typeof answers["full_name"] === "string" && answers["full_name"]) ||
-    (typeof answers["first_name"] === "string" && answers["first_name"]) ||
-    null;
-  const phone = typeof answers["phone"] === "string" ? answers["phone"] : null;
+  const displayName = contactNameFrom(fields, answers);
+  if (kind === "SIGNUP" && (displayName?.trim().length ?? 0) < 2) {
+    throw validationError("Enter your full name.");
+  }
+  const phone = contactPhoneFrom(fields, answers);
 
   const contactId = await marketingFormsRepository.upsertContact(tx, {
     email,
     displayName,
     phone,
-    passwordHash,
     sourceFormId: form.id,
-    metadata: { lastAnswers: answers, kind: form.kind },
+    metadata: { lastAnswers: answers, kind },
   });
 
   const submissionId = await marketingFormsRepository.insertSubmission(tx, {
@@ -387,11 +530,12 @@ export async function submitPublicMarketingForm(
     idempotencyKey: `marketing.form_submitted:${submissionId}`,
   });
 
-  return publicSubmitFormResponseSchema.parse({
-    data: {
-      submitted: true as const,
-      thankYouHtml: form.thank_you_html,
-      redirectUrl: form.redirect_enabled ? form.redirect_url : null,
-    },
-  });
+  return {
+    thankYouHtml: form.thank_you_html,
+    redirectUrl: form.redirect_enabled ? form.redirect_url : null,
+    // Sign-up forms start the academy's real sign-up: the person gets the link
+    // that finishes it, where they choose a password (QA review 2 H30). Before,
+    // the form kept a password hash that nothing could sign in with.
+    signup: kind === "SIGNUP" && displayName ? { email, displayName: displayName.trim() } : null,
+  };
 }

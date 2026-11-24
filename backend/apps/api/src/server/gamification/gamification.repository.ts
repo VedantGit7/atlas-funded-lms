@@ -1112,6 +1112,7 @@ export const gamificationRepository = {
     const rows = await tx.$queryRaw<Array<{ display_name: string }>>`
       select display_name
       from tenants
+      where id = app.current_tenant_id()
       limit 1
     `;
     return rows[0]?.display_name ?? "Academy";

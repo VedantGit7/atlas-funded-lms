@@ -160,6 +160,7 @@ export async function main(): Promise<number> {
         sweep.fxRatesRefreshed > 0 ||
         sweep.abandonedUploadsPurged > 0 ||
         sweep.membersErased > 0 ||
+        sweep.eventRemindersQueued > 0 ||
         sweep.errors.length > 0
       ) {
         log("info", "worker.sweep.completed", {
@@ -174,6 +175,7 @@ export async function main(): Promise<number> {
           fxRatesRefreshed: sweep.fxRatesRefreshed,
           abandonedUploadsPurged: sweep.abandonedUploadsPurged,
           membersErased: sweep.membersErased,
+          eventRemindersQueued: sweep.eventRemindersQueued,
           delivered: sweep.delivered,
           failed: sweep.failed,
           skipped: sweep.skipped,

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, MapPin } from "lucide-react";
+import { formatEventWhen } from "../../../admin/grow/events-shared";
 
 type PublicEvent = {
   id: string;
@@ -14,21 +15,11 @@ type PublicEvent = {
   linkUrl: string | null;
   joinUrl: string | null;
   coverImageUrl: string | null;
+  /** The academy's time zone; the time is shown in it, named. */
+  timeZone: string;
 };
 
 type RegisterResult = { registered: true; eventId: string; alreadyRegistered: boolean };
-
-function formatRange(startsAt: string, endsAt: string | null): string {
-  const start = new Date(startsAt);
-  const startLabel = start.toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" });
-  if (endsAt === null) return startLabel;
-  const end = new Date(endsAt);
-  const sameDay = start.toDateString() === end.toDateString();
-  return `${startLabel} — ${end.toLocaleString(
-    undefined,
-    sameDay ? { timeStyle: "short" } : { dateStyle: "medium", timeStyle: "short" },
-  )}`;
-}
 
 /**
  * Public event page and registration.
@@ -140,7 +131,7 @@ export function PublicEventPage({ eventId }: { eventId: string }) {
         <div className="flex items-center gap-2">
           <CalendarDays className="h-4 w-4 shrink-0" aria-hidden="true" />
           <dt className="sr-only">When</dt>
-          <dd>{formatRange(event.startsAt, event.endsAt)}</dd>
+          <dd>{formatEventWhen(event.startsAt, event.endsAt, event.timeZone)}</dd>
         </div>
         {event.location === null ? null : (
           <div className="flex items-center gap-2">
@@ -163,7 +154,7 @@ export function PublicEventPage({ eventId }: { eventId: string }) {
         {result === null ? (
           <>
             <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-              We will email you the joining details.
+              We&rsquo;ll email you a confirmation with the joining details.
             </p>
             <form className="mt-4 space-y-3" onSubmit={(e) => void handleRegister(e)}>
               <label className="block text-sm">
@@ -211,7 +202,7 @@ export function PublicEventPage({ eventId }: { eventId: string }) {
             <p className="text-sm font-medium text-foreground">
               {result.alreadyRegistered
                 ? "You were already registered for this event."
-                : "You are registered. Check your email for the details."}
+                : `You're registered. We've emailed the details to ${email.trim()}.`}
             </p>
             {event.joinUrl === null ? null : (
               <a

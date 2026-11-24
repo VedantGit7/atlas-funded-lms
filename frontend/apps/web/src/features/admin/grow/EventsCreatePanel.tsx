@@ -1,5 +1,6 @@
 "use client";
 
+import { EventTimeZoneHint } from "./EventTimeZoneHint";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -156,6 +157,7 @@ export function EventsCreatePanel() {
             />
           </div>
         </div>
+        <EventTimeZoneHint id="event-create-times-hint" />
 
         <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4">
           <div className="mb-3 flex items-center gap-2">

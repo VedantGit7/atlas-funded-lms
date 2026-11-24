@@ -1,5 +1,4 @@
-import { randomBytes, scryptSync } from "node:crypto";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import type { z } from "zod";
 import type { formFieldSchema } from "./marketing-forms.schemas";
@@ -33,7 +32,6 @@ export type MarketingContactRow = {
   email: string;
   display_name: string | null;
   phone: string | null;
-  password_hash: string | null;
   source_form_id: string | null;
   source: string;
   metadata_json: unknown;
@@ -56,12 +54,6 @@ export type MarketingFormSubmissionRow = {
 
 export function createShareToken() {
   return randomBytes(18).toString("base64url");
-}
-
-export function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, 64).toString("hex");
-  return `scrypt$${salt}$${hash}`;
 }
 
 export function defaultLeadFields(): FormField[] {
@@ -92,21 +84,41 @@ export function defaultSignupFields(): FormField[] {
       sortOrder: 0,
     },
     {
-      id: "password",
-      key: "password",
-      label: "Password",
-      placeholder: "Create a password",
-      fieldType: "password",
+      id: "name",
+      key: "name",
+      label: "Full name",
+      placeholder: "Your name",
+      fieldType: "text",
       required: true,
       isSystem: true,
       sortOrder: 1,
     },
+    {
+      // The academy's sign-up needs this agreement before an account is made.
+      id: "accept_terms",
+      key: "accept_terms",
+      label: "I'm 18 or older and I agree to the Terms and Privacy Policy",
+      placeholder: null,
+      fieldType: "consent",
+      required: true,
+      isSystem: true,
+      sortOrder: 2,
+    },
   ];
 }
 
+/**
+ * Stored fields. Password fields saved before sign-up forms changed (QA
+ * review 2 H30) are dropped: nothing reads a password from a form any more.
+ */
 export function parseFields(raw: unknown): FormField[] {
   if (!Array.isArray(raw)) return [];
-  return raw as FormField[];
+  return (raw as unknown[]).filter(
+    (field): field is FormField =>
+      typeof field === "object" &&
+      field !== null &&
+      (field as Record<string, unknown>)["fieldType"] !== "password",
+  );
 }
 
 export const marketingFormsRepository = {
@@ -308,7 +320,6 @@ export const marketingFormsRepository = {
         c.email,
         c.display_name,
         c.phone,
-        c.password_hash,
         c.source_form_id::text,
         c.source,
         c.metadata_json,
@@ -355,7 +366,7 @@ export const marketingFormsRepository = {
     const normalized = email.trim().toLowerCase();
     const rows = await tx.$queryRaw<MarketingContactRow[]>`
       select
-        id::text, email, display_name, phone, password_hash, source_form_id::text, source,
+        id::text, email, display_name, phone, source_form_id::text, source,
         metadata_json, created_at, updated_at
       from marketing_contacts
       where lower(email) = ${normalized}
@@ -370,7 +381,6 @@ export const marketingFormsRepository = {
       email: string;
       displayName: string | null;
       phone: string | null;
-      passwordHash: string | null;
       sourceFormId: string;
       metadata: Record<string, unknown>;
     },
@@ -381,7 +391,6 @@ export const marketingFormsRepository = {
         update marketing_contacts
         set display_name = coalesce(${args.displayName}, display_name),
             phone = coalesce(${args.phone}, phone),
-            password_hash = coalesce(${args.passwordHash}, password_hash),
             source_form_id = ${args.sourceFormId}::uuid,
             metadata_json = ${JSON.stringify(args.metadata)}::jsonb,
             updated_at = now()
@@ -392,7 +401,7 @@ export const marketingFormsRepository = {
     const id = randomUUID();
     await tx.$executeRaw`
       insert into marketing_contacts (
-        id, tenant_id, email, display_name, phone, password_hash, source_form_id, source,
+        id, tenant_id, email, display_name, phone, source_form_id, source,
         metadata_json, created_at, updated_at
       ) values (
         ${id}::uuid,
@@ -400,7 +409,6 @@ export const marketingFormsRepository = {
         ${args.email.trim().toLowerCase()},
         ${args.displayName},
         ${args.phone},
-        ${args.passwordHash},
         ${args.sourceFormId}::uuid,
         'FORM',
         ${JSON.stringify(args.metadata)}::jsonb,

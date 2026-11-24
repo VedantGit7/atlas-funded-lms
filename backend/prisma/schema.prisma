@@ -4948,6 +4948,8 @@ model MarketingEventRegistration {
   name          String?
   source        String   @default("LINK")
   created_at    DateTime @default(now()) @db.Timestamptz(6)
+  /// Set when the event reminder email was queued, so it goes out once.
+  reminder_queued_at DateTime? @db.Timestamptz(6)
 
   // Composite tenant foreign keys (audit M3 coverage).
   contact MarketingContact? @relation(fields: [tenant_id, contact_id], references: [tenant_id, id], onDelete: Restrict, onUpdate: Restrict, map: "marketing_event_registrations_contact_id_tenant_fkey")
