@@ -12,7 +12,13 @@ type SubscriptionPanelProps = {
   issuerName: string | null;
 };
 
-const FRIENDLY_LABELS: Record<string, string> = {
+/**
+ * The features a learner can see and use, in plain words. The academy's plan
+ * also covers admin and back-office features ("reports.library.view"…); those
+ * mean nothing to a learner and were shown as made-up names like "Reports
+ * Library View" (QA review 2 H32), so anything not listed here is left out.
+ */
+const LEARNER_FEATURE_LABELS: Record<string, string> = {
   "community.enable": "Community & discussion",
   "certification.enable": "Certificates",
   "gamification.enable": "Achievements & rewards",
@@ -24,13 +30,8 @@ const FRIENDLY_LABELS: Record<string, string> = {
   "leaderboard.enable": "Leaderboards",
 };
 
-function friendlyLabel(key: string): string {
-  const known = FRIENDLY_LABELS[key];
-  if (known) return known;
-  return key
-    .replace(/\.enable$/u, "")
-    .replace(/[._-]+/gu, " ")
-    .replace(/\b\w/gu, (char) => char.toUpperCase());
+export function learnerFeatureLabel(key: string): string | null {
+  return LEARNER_FEATURE_LABELS[key] ?? null;
 }
 
 function formatExpiry(iso: string | null): string | null {
@@ -41,8 +42,11 @@ function formatExpiry(iso: string | null): string | null {
 }
 
 export function SubscriptionPanel({ entitlements, issuerName }: SubscriptionPanelProps) {
-  const enabled = entitlements.filter((entitlement) => entitlement.enabled);
-  const disabled = entitlements.filter((entitlement) => !entitlement.enabled);
+  const learnerFeatures = entitlements.filter(
+    (entitlement) => learnerFeatureLabel(entitlement.key) !== null,
+  );
+  const enabled = learnerFeatures.filter((entitlement) => entitlement.enabled);
+  const disabled = learnerFeatures.filter((entitlement) => !entitlement.enabled);
 
   return (
     <div className="space-y-6">
@@ -82,7 +86,7 @@ export function SubscriptionPanel({ entitlements, issuerName }: SubscriptionPane
                     />
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-[var(--acct-on-surface)]">
-                        {friendlyLabel(entitlement.key)}
+                        {learnerFeatureLabel(entitlement.key)}
                       </p>
                       {expiry ? (
                         <p className="mt-0.5 text-xs text-[var(--acct-on-surface-variant)]">
@@ -96,7 +100,8 @@ export function SubscriptionPanel({ entitlements, issuerName }: SubscriptionPane
             </ul>
           ) : (
             <p className="text-sm text-[var(--acct-on-surface-variant)]">
-              No premium features are currently enabled for your academy.
+              Your membership includes the academy&rsquo;s courses. No extra features are switched
+              on.
             </p>
           )}
         </div>
@@ -112,7 +117,7 @@ export function SubscriptionPanel({ entitlements, issuerName }: SubscriptionPane
                 className="inline-flex items-center gap-1.5 rounded-full border border-[var(--acct-border)] px-3 py-1 text-xs text-[var(--acct-on-surface-variant)]"
               >
                 <CircleSlash className="h-3.5 w-3.5" aria-hidden="true" />
-                {friendlyLabel(entitlement.key)}
+                {learnerFeatureLabel(entitlement.key)}
               </li>
             ))}
           </ul>

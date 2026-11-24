@@ -42,6 +42,7 @@ export default async function PathDetailPage({ params }: PathDetailPageProps) {
             steps={detail.data.steps}
             progressSteps={progress.data.steps}
             enrolledAt={progress.data.enrolledAt}
+            enrolled={progress.data.enrolled}
           />
         </main>
       </PageGate>

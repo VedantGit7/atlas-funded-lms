@@ -42,6 +42,8 @@ export const enrollmentListItemSchema = z.object({
   courseId: z.uuid(),
   membershipId: z.uuid(),
   displayName: z.string().nullable(),
+  /** The learner's sign-in email; only in a course roster, for staff. */
+  email: z.string().nullable(),
   status: z.string(),
   enrolledAt: z.iso.datetime(),
 });

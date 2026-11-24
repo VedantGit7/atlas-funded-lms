@@ -18,6 +18,7 @@ export type GradingTaskListRow = GradingTaskRow & {
   assessment_title: string;
   learner_membership_id: string;
   learner_display_name: string | null;
+  learner_email: string | null;
   item_type_key: string;
   manual_possible_points: unknown;
   submitted_at: Date | null;
@@ -189,6 +190,7 @@ export const gradingRepository = {
         asm.title as assessment_title,
         a.membership_id::text as learner_membership_id,
         mp.display_name as learner_display_name,
+        ap.email as learner_email,
         coalesce(min(items.item_type_key), 'short_answer') as item_type_key,
         coalesce(sum(case when items.item_type_key = any(${manualTypes}::text[]) then ai.points else 0 end), 0) as manual_possible_points,
         a.submitted_at
@@ -196,6 +198,8 @@ export const gradingRepository = {
       inner join attempts a on a.id = gt.attempt_id and a.tenant_id = gt.tenant_id
       inner join assessments asm on asm.id = a.assessment_id and asm.tenant_id = gt.tenant_id
       left join member_profiles mp on mp.membership_id = a.membership_id and mp.tenant_id = gt.tenant_id
+      left join memberships lm on lm.id = a.membership_id and lm.tenant_id = gt.tenant_id
+      left join auth_principals ap on ap.id = lm.auth_principal_id
       left join assessment_items ai on ai.assessment_id = a.assessment_id and ai.tenant_id = gt.tenant_id
       left join items on items.id = ai.item_id and items.tenant_id = gt.tenant_id
       where gt.tenant_id = ${args.tenantId}::uuid
@@ -207,7 +211,7 @@ export const gradingRepository = {
           or gt.assigned_to_membership_id = ${args.actorMembershipId}::uuid
           or (asm.config_json ->> 'createdByMembershipId') = ${args.actorMembershipId}
         )
-        and (${search}::text is null or asm.title ilike ${search} or coalesce(mp.display_name, '') ilike ${search})
+        and (${search}::text is null or asm.title ilike ${search} or coalesce(mp.display_name, '') ilike ${search} or coalesce(ap.email, '') ilike ${search})
         and (${args.cursor}::uuid is null or gt.id < ${args.cursor ?? null}::uuid)
       group by
         gt.id,
@@ -223,6 +227,7 @@ export const gradingRepository = {
         asm.title,
         a.membership_id,
         mp.display_name,
+        ap.email,
         a.submitted_at
       order by gt.created_at desc, gt.id desc
       limit ${args.limit + 1}
@@ -462,15 +467,21 @@ export const gradingRepository = {
     };
   },
 
-  async loadLearnerDisplayName(tx: TenantTx, membershipId: string): Promise<string> {
-    const rows = await tx.$queryRaw<Array<{ display_name: string | null }>>`
-      select display_name
-      from member_profiles
-      where membership_id = ${membershipId}::uuid
+  /** Name and email, so graders can tell learners apart (QA review 2 H15). */
+  async loadLearnerIdentity(
+    tx: TenantTx,
+    membershipId: string,
+  ): Promise<{ displayName: string; email: string | null }> {
+    const rows = await tx.$queryRaw<Array<{ display_name: string | null; email: string | null }>>`
+      select mp.display_name, ap.email
+      from memberships m
+      left join member_profiles mp on mp.membership_id = m.id and mp.tenant_id = m.tenant_id
+      left join auth_principals ap on ap.id = m.auth_principal_id
+      where m.id = ${membershipId}::uuid
       limit 1
     `;
-
-    return rows[0]?.display_name?.trim() || "Learner";
+    const email = rows[0]?.email ?? null;
+    return { displayName: rows[0]?.display_name?.trim() || email || "Learner", email };
   },
 };
 

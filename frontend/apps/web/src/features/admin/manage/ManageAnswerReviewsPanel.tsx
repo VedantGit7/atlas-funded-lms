@@ -203,7 +203,14 @@ export function ManageAnswerReviewsPanel() {
                     <td className={`${manageTableTdClassName} font-semibold`}>
                       {task.assessmentTitle}
                     </td>
-                    <td className={manageTableTdClassName}>{task.learnerDisplayName}</td>
+                    <td className={manageTableTdClassName}>
+                      <span className="block">{task.learnerDisplayName}</span>
+                      {task.learnerEmail && task.learnerEmail !== task.learnerDisplayName ? (
+                        <span className="block text-xs text-[var(--admin-on-surface-variant)]">
+                          {task.learnerEmail}
+                        </span>
+                      ) : null}
+                    </td>
                     <td className={manageTableTdClassName}>
                       <span className="rounded-md bg-[var(--admin-surface-high)] px-2 py-0.5 text-xs font-medium text-[var(--admin-on-surface-variant)]">
                         {task.itemType.replaceAll("_", " ")}

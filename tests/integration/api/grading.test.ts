@@ -160,6 +160,32 @@ describeWithDb("grading integration", () => {
     expect(detail.data.learner.displayName).toBeTruthy();
   });
 
+  // QA review 2 H15: every learner used to show as just "Learner".
+  it("names the learner by email when they have no display name", async () => {
+    const fixture = await publishAssessmentFixture(await createAssessmentFixture());
+    const { taskId } = await submitManualAttempt(fixture);
+    const instructor = instructorCtx(fixture, "req_grading_names");
+    await withTenantTx(authoringTenantTx(fixture), async (tx) => {
+      await tx.$executeRaw`
+        update member_profiles set display_name = null
+        where membership_id = ${fixture.learnerMembershipId}::uuid
+      `;
+    });
+
+    const queue = await withTenantTx(authoringTenantTx(fixture), async (tx) =>
+      listGradingTasks(tx, instructor, { assignedTo: "me", limit: 25 }),
+    );
+    const item = queue.data.find((task) => task.id === taskId);
+    expect(item?.learnerEmail).toMatch(/@/);
+    expect(item?.learnerDisplayName).toBe(item?.learnerEmail);
+
+    const detail = await withTenantTx(authoringTenantTx(fixture), async (tx) =>
+      getGradingTaskDetail(tx, instructor, taskId),
+    );
+    expect(detail.data.learner.email).toBe(item?.learnerEmail);
+    expect(detail.data.learner.displayName).toBe(item?.learnerEmail);
+  });
+
   it("grades task, writes audit and outbox, and updates attempt", async () => {
     const fixture = await publishAssessmentFixture(await createAssessmentFixture());
     const { taskId, attemptId } = await submitManualAttempt(fixture);

@@ -27,6 +27,8 @@ export const courseReviewItemSchema = z.object({
   /** Added by the academy, not a learner (owner decision D8): shown with a label. */
   addedByAcademy: z.boolean(),
   mine: z.boolean(),
+  /** PENDING until the academy approves it; only APPROVED reviews are listed. */
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

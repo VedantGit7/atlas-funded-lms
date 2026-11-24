@@ -141,8 +141,15 @@ export function GradingQueueTable({ tasks }: GradingQueueTableProps) {
                       >
                         {learnerInitials(task.learnerDisplayName)}
                       </span>
-                      <span className="text-[var(--admin-on-surface)]">
-                        {task.learnerDisplayName}
+                      <span className="min-w-0">
+                        <span className="block text-[var(--admin-on-surface)]">
+                          {task.learnerDisplayName}
+                        </span>
+                        {task.learnerEmail && task.learnerEmail !== task.learnerDisplayName ? (
+                          <span className="block truncate text-xs text-[var(--admin-on-surface-variant)]">
+                            {task.learnerEmail}
+                          </span>
+                        ) : null}
                       </span>
                     </div>
                   </td>

@@ -233,11 +233,23 @@ export function RoadmapJourney({
         </div>
 
         {steps.map((step, index) => {
-          const state = nodeStateOf(step, currentStepId);
+          // Before "Start path" the API reports every step as locked. Step 1
+          // is where the learner begins, so it isn't shown as locked behind
+          // "earlier steps" (QA review 1 m47).
+          const state: NodeState = enrolled
+            ? nodeStateOf(step, currentStepId)
+            : index === 0
+              ? "available"
+              : "locked";
           const left = index % 2 === 0;
           const Icon = STEP_ICON[step.stepType];
-          const clickable = state !== "locked" && step.href;
-          const reason = state === "locked" ? lockReason(step, enrolledAt) : null;
+          const clickable = enrolled && state !== "locked" && step.href;
+          const reason =
+            state !== "locked"
+              ? null
+              : enrolled
+                ? lockReason(step, enrolledAt)
+                : "Start the path, then finish the steps before this one to unlock it.";
 
           const circle =
             state === "current" ? (
@@ -282,7 +294,9 @@ export function RoadmapJourney({
                   : state === "completed"
                     ? "Completed"
                     : state === "available"
-                      ? "Available"
+                      ? enrolled
+                        ? "Available"
+                        : "Start here"
                       : "Locked"}
               </span>
               <h3

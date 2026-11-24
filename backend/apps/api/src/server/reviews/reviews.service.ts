@@ -37,6 +37,7 @@ function serializeReview(review: CourseReviewRecord, viewerMembershipId: string)
     authorName: review.addedByAcademy ? null : review.authorName,
     addedByAcademy: review.addedByAcademy,
     mine: !review.addedByAcademy && review.membershipId === viewerMembershipId,
+    status: review.status,
     createdAt: review.createdAt.toISOString(),
     updatedAt: review.updatedAt.toISOString(),
   };
