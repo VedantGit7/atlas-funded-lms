@@ -152,7 +152,12 @@ export const PublicAuthResponseSchema = z.object({
 
 export const PublicMfaVerifyRequestSchema = z
   .object({
-    code: z.string().trim().min(6).max(12),
+    // Plain wording: the form showed Zod's "Too small: expected string to have >=6 characters".
+    code: z
+      .string()
+      .trim()
+      .min(6, { error: "Enter the 6-digit code from your authenticator app." })
+      .max(12, { error: "That code is too long. Enter the 6-digit code from your app." }),
   })
   .strict();
 

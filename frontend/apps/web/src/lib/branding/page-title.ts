@@ -26,6 +26,11 @@ const PAGE_LABELS: ReadonlyArray<{ href: string; label: string }> = [
     label: item.title,
   })),
   { href: "/admin/settings", label: "Settings" },
+  // Learner pages reached from inside other pages rather than the menu.
+  { href: "/paths", label: "Learning paths" },
+  { href: "/profile", label: "Profile" },
+  { href: "/settings", label: "Settings" },
+  { href: "/help", label: "Help" },
 ];
 
 /** The label of the menu entry whose address is the longest prefix of `pathname`. */

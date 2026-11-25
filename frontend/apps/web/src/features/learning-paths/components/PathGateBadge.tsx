@@ -46,26 +46,45 @@ function gateLabel(gate: GateBadgeProps["gate"], enrolledAt?: string | null): st
         : typeof gate.config["minBandKey"] === "string"
           ? gate.config["minBandKey"]
           : "band";
-    return `Competency band: ${bandKey}`;
+    return `Reach the ${bandKey.replaceAll("_", " ")} competency band`;
   }
 
   if (gate.gateType === "time_based" && gate.state === "locked") {
     return timeBasedUnlockLabel(gate.config, enrolledAt);
   }
 
-  return gate.gateType.replaceAll("_", " ");
+  return GATE_REQUIREMENT[gate.gateType] ?? "Unlock condition";
+}
+
+/**
+ * What the learner has to do, in plain words (QA review 2 H19: the badge read
+ * "open · satisfied").
+ */
+const GATE_REQUIREMENT: Record<string, string> = {
+  open: "Open to everyone",
+  previous_step_completed: "Finish the step before",
+  assessment_passed: "Pass the assessment",
+  manual: "Approval from your academy",
+  time_based: "Unlocks after a set time",
+};
+
+const GATE_STATE: Record<GateBadgeProps["gate"]["state"], string> = {
+  satisfied: "done",
+  locked: "not yet",
+  pending: "waiting",
+};
+
+/** The badge text, e.g. "Pass the assessment · not yet". */
+export function gateBadgeText(gate: GateBadgeProps["gate"], enrolledAt?: string | null): string {
+  const label = gateLabel(gate, enrolledAt);
+  // "Open to everyone" needs no state; a locked time gate already says when.
+  const showState =
+    gate.gateType !== "open" && !(gate.gateType === "time_based" && gate.state === "locked");
+  return showState ? `${label} · ${GATE_STATE[gate.state]}` : label;
 }
 
 export function PathGateBadge({ gate, enrolledAt }: GateBadgeProps) {
   const variant =
     gate.state === "satisfied" ? "success" : gate.state === "pending" ? "warning" : "default";
-  const label = gateLabel(gate, enrolledAt);
-  const showState = !(gate.gateType === "time_based" && gate.state === "locked");
-
-  return (
-    <Badge variant={variant}>
-      {label}
-      {showState ? ` · ${gate.state}` : ""}
-    </Badge>
-  );
+  return <Badge variant={variant}>{gateBadgeText(gate, enrolledAt)}</Badge>;
 }
