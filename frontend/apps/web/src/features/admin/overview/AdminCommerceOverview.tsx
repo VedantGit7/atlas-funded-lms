@@ -301,7 +301,7 @@ export function AdminCommerceOverview({
           href="/studio/courses"
         />
         <KpiTile
-          label="Learners"
+          label="Active learners"
           value={formatCount(data.kpis.learnerCount)}
           href="/admin/members"
         />

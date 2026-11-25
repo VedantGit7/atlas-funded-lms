@@ -396,7 +396,7 @@ async function queryResourceUsage(
         ar.rollup_key as metric_key,
         case ar.rollup_key
           when 'usage.storage_gb' then 'Storage'
-          when 'usage.total_learners' then 'Total learners'
+          when 'usage.total_learners' then 'Active learners'
           when 'usage.products' then 'Products'
           when 'usage.questions' then 'Questions'
           when 'usage.test_submits' then 'Tests taken'
@@ -574,7 +574,7 @@ async function queryResourceUsage(
       ar.rollup_key as metric_key,
       case ar.rollup_key
         when 'usage.storage_gb' then 'Storage'
-        when 'usage.total_learners' then 'Total learners'
+        when 'usage.total_learners' then 'Active learners'
         when 'usage.products' then 'Products'
         when 'usage.questions' then 'Questions'
         when 'usage.test_submits' then 'Tests taken'

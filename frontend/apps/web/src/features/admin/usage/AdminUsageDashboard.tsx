@@ -93,7 +93,7 @@ export function AdminUsageDashboard({ summary }: AdminUsageDashboardProps) {
           planKnown={planKnown}
           format={(n) => formatNumber(n)}
         />
-        <KpiTile label="Total learners" value={formatNumber(summary.totalLearners)} />
+        <KpiTile label="Active learners" value={formatNumber(summary.totalLearners)} />
         <KpiTile
           label="Video hours"
           value={formatHours(summary.totalVideoHours)}
@@ -343,7 +343,7 @@ const CUMULATIVE_ROW_LABELS = [
   "DRM Tokens",
   "Message Sends",
   "Email Validations",
-  "Total Learners",
+  "Active learners",
   "Content Storage",
 ];
 
@@ -371,7 +371,7 @@ function CumulativeUsagesTable({ summary, now }: { summary: UsageSummary; now: D
         return isCurrent ? String(c.messageSends) : hist ? String(hist.messageSends) : "–";
       case "Email Validations":
         return isCurrent ? String(c.emailValidations) : hist ? String(hist.emailValidations) : "–";
-      case "Total Learners":
+      case "Active learners":
         return isCurrent ? String(c.totalLearners) : hist ? String(hist.totalLearners) : "–";
       case "Content Storage":
         return isCurrent ? formatGb(c.contentStorageGb) : hist ? formatGb(hist.storageGb) : "–";

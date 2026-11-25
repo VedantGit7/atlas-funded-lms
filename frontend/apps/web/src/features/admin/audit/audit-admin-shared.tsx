@@ -56,6 +56,8 @@ const AUDIT_ACTION_WORDS: Record<string, string> = {
 /** Code names for things that have a different name on screen (QA review 2 4.3.3). */
 function onScreenWords(words: string): string {
   return words
+    .replace(/\btenant config\b/g, "academy settings")
+    .replace(/\btenant\b/g, "academy")
     .replace(/\bcourse module\b/g, "section")
     .replace(/\bcourse lesson\b/g, "lesson")
     .replace(/\bitem bank\b/g, "question bank")

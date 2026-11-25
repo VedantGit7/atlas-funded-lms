@@ -4,6 +4,7 @@ import { readTenantAuditLog } from "@atlas/audit/services/audit-reader.service";
 import { withTenantTx, type TenantTx } from "@atlas/db";
 import { getUsageTierAMetrics } from "@atlas/domain-config/repositories/usage.repository";
 import { readTenantConfigVersions } from "@atlas/domain-config/services/tenant-config.service";
+import { getUsageSummary } from "@atlas/domain-config/services/usage.service";
 import { getMemberStats, suspendMember } from "@atlas/membership";
 import { getAdminOverview } from "../../../backend/apps/api/src/server/admin/admin-overview.service";
 import {
@@ -69,6 +70,31 @@ describeWithDb("vocabulary and counts (S2.4)", () => {
 
     const usage = await asAdmin(fixture, (tx) => getUsageTierAMetrics(tx));
     expect(usage.totalLearners).toBe(learners);
+  });
+
+  it("shows one active-learner and one monthly-active count per page (staging check)", async () => {
+    const fixture = await createCourseAuthoringFixture();
+    await asAdmin(fixture, (tx) =>
+      suspendMember(tx, adminCtx(fixture), fixture.learnerMembershipId),
+    );
+
+    const stats = await asAdmin(fixture, (tx) =>
+      getMemberStats(tx, { tenantId: fixture.tenantId }),
+    );
+    // The suspended learner is still a learner, just not an active one.
+    expect(stats.data.activeLearners).toBe(stats.data.totalLearners - 1);
+
+    // "Active learners" on the dashboard and the usage page is the same number
+    // as "(n active)" on the members page.
+    const overview = await asAdmin(fixture, (tx) =>
+      getAdminOverview(tx, { tenantId: fixture.tenantId }),
+    );
+    expect(overview.data.kpis.learnerCount).toBe(stats.data.activeLearners);
+    const summary = await asAdmin(fixture, (tx) => getUsageSummary(tx));
+    expect(summary.data.kpis.totalLearners).toBe(stats.data.activeLearners);
+
+    // The monthly-active tile and the chart headline come from one count.
+    expect(summary.data.kpis.averageMau).toBe(summary.data.mau.comparison.current);
   });
 
   it("names the person behind each audit entry and config version (4.3.2)", async () => {

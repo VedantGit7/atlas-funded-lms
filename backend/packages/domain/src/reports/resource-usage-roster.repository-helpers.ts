@@ -12,7 +12,7 @@ export const USAGE_HISTORY_KEYS = [
 
 export const METRIC_LABELS: Record<string, string> = {
   "usage.storage_gb": "Storage",
-  "usage.total_learners": "Total learners",
+  "usage.total_learners": "Active learners",
   "usage.products": "Products",
   "usage.questions": "Questions",
   "usage.test_submits": "Tests taken",

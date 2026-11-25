@@ -302,7 +302,7 @@ export const RESOURCE_USAGE_PERIOD_OPTIONS: Array<{
 export const RESOURCE_USAGE_METRIC_OPTIONS = [
   { value: "", label: "All metrics" },
   { value: "usage.storage_gb", label: "Storage" },
-  { value: "usage.total_learners", label: "Total learners" },
+  { value: "usage.total_learners", label: "Active learners" },
   { value: "usage.products", label: "Products" },
   { value: "usage.questions", label: "Questions" },
   { value: "usage.test_submits", label: "Tests taken" },
