@@ -41,6 +41,6 @@ export async function deleteCourseFaq(
     .map((item, index) => ({ ...item, position: index }));
 
   return saveCourseFaqs(course, nextItems, {
-    successMessage: `"${target.question}" deleted successfully`,
+    successMessage: `"${target.question}" deleted`,
   });
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { requestFailureMessage } from "../../../lib/feedback/unhandled-failure";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Loader2, Plus, Search, Trash2, X } from "lucide-react";
 import { clientApi, toast } from "../../../lib/client-api";
@@ -103,8 +104,8 @@ export function DeckEditorDialog({ deckId, deckTitle, onClose, onChanged }: Deck
       await clientApi.post(`/api/v1/me/decks/${deckId ?? ""}/items`, { itemId }, "deck-add-item");
       await loadDeckItems();
       onChanged();
-    } catch {
-      toast.error("Could not add that item.");
+    } catch (caught) {
+      toast.error(requestFailureMessage(caught));
     } finally {
       setBusyItemId(null);
     }
@@ -119,8 +120,8 @@ export function DeckEditorDialog({ deckId, deckTitle, onClose, onChanged }: Deck
       );
       await loadDeckItems();
       onChanged();
-    } catch {
-      toast.error("Could not remove that item.");
+    } catch (caught) {
+      toast.error(requestFailureMessage(caught));
     } finally {
       setBusyItemId(null);
     }

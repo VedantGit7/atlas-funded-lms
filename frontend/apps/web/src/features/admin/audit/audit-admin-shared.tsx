@@ -51,6 +51,8 @@ const AUDIT_ACTION_WORDS: Record<string, string> = {
   "api.mutation": "Change saved",
   "identity.membership.status_changed": "Member status changed",
   "identity.membership.password_reset_sent": "Password reset email sent",
+  // A review step: approved, sent back, published or withdrawn.
+  "workflow.transition": "Review status changed",
 };
 
 /** Code names for things that have a different name on screen (QA review 2 4.3.3). */

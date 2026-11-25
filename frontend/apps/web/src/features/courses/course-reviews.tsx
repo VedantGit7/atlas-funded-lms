@@ -1,5 +1,6 @@
 "use client";
 
+import { requestFailureMessage } from "../../lib/feedback/unhandled-failure";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Star } from "lucide-react";
 import { clientApi, toast } from "../../lib/client-api";
@@ -135,8 +136,8 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
       // rather than leave "No reviews yet" looking like it was lost.
       toast.success("Thanks. Your review will appear once the academy approves it.");
       await load();
-    } catch {
-      toast.error("Could not save your review. Please try again.");
+    } catch (caught) {
+      toast.error(requestFailureMessage(caught));
     } finally {
       setSubmitting(false);
     }

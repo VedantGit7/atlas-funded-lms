@@ -135,6 +135,7 @@ describe("plain words and real numbers (S2.4)", () => {
 
   it("names audit events, records and people in words (review 2 4.3.2)", () => {
     expect(humanizeAuditAction("certificate.issued")).toBe("Certificate issued");
+    expect(humanizeAuditAction("workflow.transition")).toBe("Review status changed");
     expect(humanizeAuditAction("item_import_batch.undone")).toBe("Question import batch undone");
     expect(humanizeAuditTarget("course_lesson")).toBe("Lesson");
     expect(humanizeAuditTarget("course_module")).toBe("Section");

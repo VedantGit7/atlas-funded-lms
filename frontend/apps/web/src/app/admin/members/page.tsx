@@ -60,7 +60,7 @@ function MembersMetrics({ stats }: { stats: MemberStatsResponse["data"] }) {
         icon={<Users className="h-5 w-5" aria-hidden="true" />}
         label="Total members"
         value={formatNumber(stats.totalMembers)}
-        hint={`${formatNumber(stats.totalLearners)} learners (${formatNumber(stats.activeLearners)} active) · ${formatNumber(stats.staffMembers)} staff`}
+        hint={`${formatNumber(stats.totalLearners)} ${stats.totalLearners === 1 ? "learner" : "learners"} (${formatNumber(stats.activeLearners)} active) · ${formatNumber(stats.staffMembers)} staff`}
       />
       <MetricCard
         icon={<Activity className="h-5 w-5" aria-hidden="true" />}

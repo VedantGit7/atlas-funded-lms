@@ -256,6 +256,7 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
         googleSignupEnabled: googleSignup,
       },
       "form-basics",
+      { silent: true },
     );
     setForm(response.data);
   }
@@ -275,6 +276,7 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
         ),
       },
       "form-fields",
+      { silent: true },
     );
     setForm(response.data);
     setFields(response.data.fields);
@@ -293,6 +295,7 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
         redirectUrl: redirectEnabled ? redirectUrl.trim() || null : null,
       },
       "form-appearance",
+      { silent: true },
     );
     setForm(response.data);
   }
@@ -307,7 +310,8 @@ export function FormsBuilderPanel({ formId }: { formId: string }) {
       await saveBasics();
       await saveFields();
       await saveAppearance();
-      toast.success("Progress saved.");
+      // One message for the whole save, not one per part (QA review 1 m11).
+      toast.success("Form saved.");
     } catch (caught) {
       toast.error(caught instanceof ClientApiError ? caught.message : "Could not save.");
     } finally {

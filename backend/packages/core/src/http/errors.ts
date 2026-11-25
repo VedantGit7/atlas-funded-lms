@@ -1,3 +1,5 @@
+import { describeValidationError } from "./validation-message";
+
 export type AtlasErrorCode =
   | "TENANT_NOT_FOUND"
   | "TENANT_UNAVAILABLE"
@@ -93,7 +95,9 @@ export function toSafeErrorEnvelope(
       body: {
         error: {
           code: "VALIDATION_ERROR" as const,
-          message: "Invalid request",
+          // Names the field and what it needs (QA S2.5): "Invalid request"
+          // left people with nothing to fix.
+          message: describeValidationError(error),
           requestId,
         },
       },
