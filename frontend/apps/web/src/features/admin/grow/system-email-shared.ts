@@ -1,3 +1,5 @@
+import { formatDate } from "../../../lib/format/academy-format";
+
 export type SystemEmailDto = {
   key: string;
   name: string;
@@ -31,7 +33,7 @@ export function formatSystemEmailDate(value: string | null | undefined): string 
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

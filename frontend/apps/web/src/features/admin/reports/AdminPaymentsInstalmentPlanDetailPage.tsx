@@ -30,6 +30,10 @@ import { AdminPaymentInstalmentRecordModal } from "./AdminPaymentInstalmentRecor
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import {
+  formatDate as academyFormatDate,
+  formatDateTime as academyFormatDateTime,
+} from "../../../lib/format/academy-format";
 
 type Props = {
   planId: string;
@@ -48,7 +52,7 @@ function formatDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return academyFormatDate(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
@@ -60,7 +64,7 @@ function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",

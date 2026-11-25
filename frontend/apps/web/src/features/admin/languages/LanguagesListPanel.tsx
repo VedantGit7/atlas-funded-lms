@@ -21,6 +21,7 @@ import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { ConfirmDialog } from "../../../components/patterns/ConfirmDialog";
 import { dropdownPanelSurfaceClassName } from "../../studio/courses/admin-form-dropdown-shared";
 import { languageName } from "./language-catalog";
+import { formatDate } from "../../../lib/format/academy-format";
 
 export type LanguageRow = {
   locale: string;
@@ -48,7 +49,7 @@ const ROWS_PER_PAGE_OPTIONS = [
 
 function formatUpdated(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return formatDate(new Date(iso), {
       day: "2-digit",
       month: "short",
       year: "numeric",

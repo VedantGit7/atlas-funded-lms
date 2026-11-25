@@ -37,6 +37,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type Props = {
   /** Optional; row click navigates to the purchasers route. Kept for backward compatibility. */
@@ -80,7 +81,7 @@ function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
 function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
     month: "short",
     day: "numeric",

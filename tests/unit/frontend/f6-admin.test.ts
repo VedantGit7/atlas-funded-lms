@@ -129,6 +129,6 @@ describe("F6 tenant admin", () => {
 
     expect(dashboard).toContain("/api/v1/audit?limit=6");
 
-    expect(dashboard).toContain("Latest tenant audit trail");
+    expect(dashboard).toContain("The latest changes in your academy");
   });
 });

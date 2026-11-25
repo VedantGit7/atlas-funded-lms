@@ -279,7 +279,7 @@ export function QuestionPickerDialog({
             <p className="px-5 py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">
               {debounced || itemTypeKey || status
                 ? "No questions match. Try other words or filters."
-                : "The Item Bank has no questions yet."}
+                : "The Question bank has no questions yet."}
             </p>
           ) : (
             <ul className="divide-y divide-[var(--admin-border)]">

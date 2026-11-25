@@ -21,6 +21,7 @@ import { AnalyticsMetricCard } from "./analytics-metric-card";
 import { AnalyticsTrendTable } from "./analytics-trend-table";
 import { FunnelStepList } from "./funnel-step-list";
 import { ItemStatisticsTable } from "./item-statistics-table";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type AnalyticsDashboardProps = {
   mode: "admin" | "studio";
@@ -287,7 +288,7 @@ export function AnalyticsDashboard({
               Summary
             </h2>
             <p className="text-sm text-foreground">
-              {dashboard.data.summary.totalEvents.toLocaleString()} tracked events between{" "}
+              {formatNumber(dashboard.data.summary.totalEvents)} tracked events between{" "}
               {dashboard.data.from} and {dashboard.data.to}.
             </p>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

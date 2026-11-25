@@ -12,6 +12,7 @@ import {
   rateAgainstHome,
   rateSentence,
 } from "./fx-rates-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type FxRates = {
   base: string;
@@ -137,7 +138,7 @@ export function FxRatesPanel({ homeCurrency }: { homeCurrency: string | null }) 
           <Clock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           {rates.asOf === null ? null : <span>Rates as of {rates.asOf}.</span>}
           {rates.fetchedAt === null ? null : (
-            <span>Last fetched {new Date(rates.fetchedAt).toLocaleString()}.</span>
+            <span>Last fetched {formatDateTime(new Date(rates.fetchedAt))}.</span>
           )}
         </p>
       ) : null}

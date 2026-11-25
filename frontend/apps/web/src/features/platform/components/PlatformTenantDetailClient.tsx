@@ -11,6 +11,7 @@ import {
   entitlementFromApi,
   type EntitlementDraft,
 } from "./PlatformEntitlementEditor";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type TenantDetail = {
   id: string;
@@ -489,7 +490,7 @@ export function PlatformTenantDetailClient({
                   <td className="py-2 pr-4">{job.status}</td>
                   <td className="py-2 pr-4">{job.step ?? "—"}</td>
                   <td className="py-2 pr-4">{job.safeErrorMessage ?? "—"}</td>
-                  <td className="py-2">{new Date(job.createdAt).toLocaleString()}</td>
+                  <td className="py-2">{formatDateTime(new Date(job.createdAt))}</td>
                 </tr>
               ))}
             </tbody>

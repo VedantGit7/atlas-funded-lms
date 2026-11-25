@@ -45,14 +45,19 @@ export function formatAbsolute(value: string | null, viewer: ViewerLocale): stri
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  // The viewer's local time, or UTC until hydration ends (see viewer-time).
-  const utc = viewer.timeZone === "UTC";
-  const y = utc ? date.getUTCFullYear() : date.getFullYear();
-  const m = String((utc ? date.getUTCMonth() : date.getMonth()) + 1).padStart(2, "0");
-  const d = String(utc ? date.getUTCDate() : date.getDate()).padStart(2, "0");
-  const hh = String(utc ? date.getUTCHours() : date.getHours()).padStart(2, "0");
-  const mm = String(utc ? date.getUTCMinutes() : date.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${d} ${hh}:${mm}`;
+  // "2026-11-25 18:30" in the academy's time zone (see viewer-time).
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: viewer.timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((entry) => entry.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}`;
 }
 
 export function formatRelative(value: string | null, viewer: ViewerLocale): string {

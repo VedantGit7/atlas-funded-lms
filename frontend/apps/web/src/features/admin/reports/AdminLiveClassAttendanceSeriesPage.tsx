@@ -49,6 +49,7 @@ import {
 } from "./admin-live-class-attendance-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type ModuleTab = "sessions" | "learners" | "series" | "exports";
 type DatePreset = "7d" | "30d" | "90d" | "custom";
@@ -101,7 +102,7 @@ function formatDateShortFor(value: string | null, viewer: ViewerLocale): string 
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

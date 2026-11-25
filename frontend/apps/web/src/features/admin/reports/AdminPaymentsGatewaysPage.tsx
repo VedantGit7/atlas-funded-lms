@@ -29,6 +29,7 @@ import {
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
   return `${(cents / 100).toLocaleString(viewer.locale, {
@@ -40,7 +41,7 @@ function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): 
 function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
     month: "short",
     day: "numeric",

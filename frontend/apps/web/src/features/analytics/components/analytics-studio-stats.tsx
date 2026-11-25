@@ -3,6 +3,7 @@
 import { AlertTriangle, CheckCircle2, FileText, Timer } from "lucide-react";
 import type { StudioSummaryMetrics } from "../analytics-studio-shared";
 import { statCardClassName, statLabelClassName } from "../analytics-studio-shared";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type AnalyticsStudioStatsProps = {
   metrics: StudioSummaryMetrics;
@@ -43,7 +44,7 @@ export function AnalyticsStudioStats({
         </div>
         <div className="mt-2 flex items-baseline gap-3">
           <span className="text-3xl font-bold tracking-tight text-[var(--admin-on-surface)]">
-            {metrics.totalSubmissions.toLocaleString()}
+            {formatNumber(metrics.totalSubmissions)}
           </span>
         </div>
         <p className="mt-2 text-[11px] text-[var(--admin-on-surface-variant)]">

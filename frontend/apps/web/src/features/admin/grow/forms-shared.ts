@@ -1,3 +1,5 @@
+import { formatDateTime } from "../../../lib/format/academy-format";
+
 export type FormStatus = "DRAFT" | "LIVE" | "UNPUBLISHED";
 export type FormKind = "LEAD" | "SIGNUP";
 export type FormFieldType =
@@ -168,7 +170,7 @@ export function formatFormDateTime(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

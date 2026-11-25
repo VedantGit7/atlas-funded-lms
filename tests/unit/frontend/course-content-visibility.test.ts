@@ -101,11 +101,11 @@ describe("content visibility helpers", () => {
       contentVisibilityAction({ kind: "Section", status: "DRAFT", courseStatus: "PUBLISHED" }),
     ).toEqual({ label: "Publish section", visible: true });
     expect(action("PUBLISHED", "PUBLISHED")).toEqual({
-      label: "Hide from learners",
+      label: "Hide",
       visible: false,
     });
     expect(action("ARCHIVED", "PUBLISHED")).toEqual({ label: "Show to learners", visible: true });
-    expect(action("DRAFT", "DRAFT")).toEqual({ label: "Hide from learners", visible: false });
+    expect(action("DRAFT", "DRAFT")).toEqual({ label: "Hide", visible: false });
     expect(action("ARCHIVED", "DRAFT")).toEqual({ label: "Show to learners", visible: true });
   });
 
@@ -181,7 +181,7 @@ describe("content visibility helpers", () => {
         moduleStatus: "PUBLISHED",
         courseStatus: "PUBLISHED",
       }),
-    ).toMatchObject({ tone: "live", action: { label: "Hide from learners" } });
+    ).toMatchObject({ tone: "live", action: { label: "Hide" } });
     expect(
       lessonEditorStatus({ status: "DRAFT", moduleStatus: "PUBLISHED", courseStatus: "PUBLISHED" }),
     ).toMatchObject({ tone: "draft", action: { label: "Publish lesson", visible: true } });

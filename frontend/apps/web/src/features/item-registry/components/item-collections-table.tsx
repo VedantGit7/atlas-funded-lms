@@ -582,7 +582,7 @@ export function ItemCollectionsTable({
                 <ol className="w-full max-w-xs space-y-2.5 text-left text-sm">
                   {[
                     { step: "1", text: "Name and type your collection on the left" },
-                    { step: "2", text: "Add questions from your Item Bank" },
+                    { step: "2", text: "Add questions from your Question bank" },
                     { step: "3", text: "Publish it so learners see it in Practice" },
                   ].map(({ step, text }) => (
                     <li
@@ -766,7 +766,7 @@ export function ItemCollectionsTable({
                               const itemData = entry.item ?? null;
                               const stem = itemData
                                 ? (itemData.stem ?? "Question with no text")
-                                : "Removed from the Item Bank";
+                                : "Removed from the Question bank";
                               const typeKey = itemData?.itemTypeKey ?? "";
                               return (
                                 <tr

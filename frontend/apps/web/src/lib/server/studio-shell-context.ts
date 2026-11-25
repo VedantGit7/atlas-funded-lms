@@ -6,10 +6,13 @@ import {
   type StudioNavigationProjection,
 } from "./studio-navigation-projection";
 import { ServerApiError, serverApi } from "../server-api";
+import { primaryRoleLabel } from "../../components/shells/shared/role-label";
 
 export type StudioShellMemberProjection = {
   membershipId: string;
   displayName: string | null;
+  /** Their most senior role, such as "Administrator" (shared/role-label.ts). */
+  roleLabel?: string;
   avatarUrl: string | null;
 };
 
@@ -57,7 +60,12 @@ export async function loadStudioShellContext(): Promise<StudioShellContext> {
     const [me, navigation] = await Promise.all([
       serverApi.get<{
         data: {
-          membership: { id: string; status: string; studioAccess?: boolean };
+          membership: {
+            id: string;
+            status: string;
+            studioAccess?: boolean;
+            roleKeys?: string[];
+          };
           profile: { displayName: string | null; avatarUrl: string | null } | null;
           identity: { mfaEnabled: boolean };
         };
@@ -85,6 +93,7 @@ export async function loadStudioShellContext(): Promise<StudioShellContext> {
         membershipId: me.data.membership.id,
         displayName: me.data.profile?.displayName ?? null,
         avatarUrl: me.data.profile?.avatarUrl ?? null,
+        roleLabel: primaryRoleLabel(me.data.membership.roleKeys),
       },
       mfaEnabled: me.data.identity.mfaEnabled,
       navigation,

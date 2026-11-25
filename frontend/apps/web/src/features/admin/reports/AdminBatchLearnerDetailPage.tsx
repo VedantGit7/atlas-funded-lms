@@ -31,6 +31,7 @@ import {
 } from "./admin-batches-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDateTime as academyFormatDateTime } from "../../../lib/format/academy-format";
 
 type LearnerTab = "attendance" | "exams" | "course";
 type RemoveReason = "transferred" | "withdrawn" | "administrative" | "other";
@@ -75,7 +76,7 @@ function formatDateFor(value: string | null | undefined, viewer: ViewerLocale): 
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -87,7 +88,7 @@ function formatDateTimeFor(value: string | null | undefined, viewer: ViewerLocal
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -465,7 +466,7 @@ function BatchLearnerReport({ batchId, membershipId, initialDetail }: BatchLearn
     for (const week of heatmapWeeks) {
       const first = week[0];
       if (!first) continue;
-      const month = new Date(`${first.date}T00:00:00Z`).toLocaleString(viewer.locale, {
+      const month = academyFormatDateTime(new Date(`${first.date}T00:00:00Z`), {
         timeZone: "UTC",
         month: "short",
       });

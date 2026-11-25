@@ -35,6 +35,7 @@ import { VirtualizedTable } from "../../../components/patterns/VirtualizedTable"
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { memberHasOwnerRole } from "./member-owner-guard";
 import { MEMBERS_LIST_REFRESH_EVENT } from "./members-events";
+import { formatDate } from "../../../lib/format/academy-format";
 
 export type MemberRow = {
   id: string;
@@ -121,7 +122,7 @@ function memberEmail(member: MemberRow): string | null {
 }
 
 function memberLabel(member: MemberRow): string {
-  return member.profile?.displayName ?? memberEmail(member) ?? `Member ${member.id.slice(0, 8)}`;
+  return member.profile?.displayName ?? memberEmail(member) ?? "Unnamed member";
 }
 
 function roleLabel(member: MemberRow): string | null {
@@ -136,7 +137,7 @@ function formatJoined(iso: string | null | undefined): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return formatDate(date, { year: "numeric", month: "short", day: "numeric" });
 }
 
 type Presence = "online" | "idle" | "offline";

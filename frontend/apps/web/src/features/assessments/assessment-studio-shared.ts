@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { Award, ClipboardPen, GraduationCap, HelpCircle, Stethoscope } from "lucide-react";
+import { formatDate } from "../../lib/format/academy-format";
 
 const successBadge =
   "bg-[color-mix(in_srgb,var(--admin-success)_14%,var(--admin-surface))] text-[var(--admin-success)]";
@@ -138,7 +139,7 @@ export const toggleThumbClassName =
   "pointer-events-none absolute left-0.5 top-0.5 block h-3.5 w-3.5 rounded-full bg-[var(--admin-surface)] shadow-sm transition-transform peer-checked:translate-x-[14px]";
 
 export function formatAssessmentDate(value: string): string {
-  return new Date(value).toLocaleDateString(undefined, {
+  return formatDate(new Date(value), {
     month: "short",
     day: "numeric",
     year: "numeric",

@@ -21,6 +21,7 @@ import {
   manageTableTdClassName,
   manageTableThClassName,
 } from "./manage-ui-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All statuses" },
@@ -38,7 +39,7 @@ function taskStatusTone(status: GradingQueueItem["status"]): "success" | "primar
 function formatSubmittedAt(iso: string | null): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(undefined, {
+    return formatDateTime(new Date(iso), {
       day: "2-digit",
       month: "short",
       hour: "2-digit",

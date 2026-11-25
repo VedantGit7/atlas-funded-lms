@@ -15,6 +15,7 @@ import {
 } from "../learners/api";
 import { useCourseDetailActions } from "./course-detail-context";
 import { courseDetailCardClassName, courseDetailMutedTextClassName } from "./course-detail-shared";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 type ModuleItem = z.infer<typeof studioModuleOutlineItemSchema>;
@@ -100,7 +101,7 @@ function DashboardLearnerTable({ learners }: { learners: CourseLearnerRow[] }) {
                   ) : null}
                 </td>
                 <td className="px-5 py-3 text-[var(--admin-on-surface-variant)]">
-                  {new Date(row.enrolledAt).toLocaleDateString()}
+                  {formatDate(new Date(row.enrolledAt))}
                 </td>
                 <td className="px-5 py-3 text-[var(--admin-on-surface)]">{row.progressPct}%</td>
                 <td className="px-5 py-3 text-[var(--admin-on-surface-variant)]">

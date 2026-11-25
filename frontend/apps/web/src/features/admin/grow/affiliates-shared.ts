@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 export type AffiliateAccessMode = "PUBLIC" | "PRIVATE";
 export type AffiliateTier = "STANDARD" | "PREMIUM";
@@ -147,7 +148,7 @@ export function formatAffiliateDate(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -158,7 +159,7 @@ export function formatAffiliateDateTime(value: string | null | undefined): strin
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -180,13 +181,13 @@ export function partnerInitials(
 export function partnerLabel(
   row: Pick<AffiliatePartner, "displayName" | "email" | "membershipId">,
 ): string {
-  return row.displayName?.trim() || row.email?.trim() || row.membershipId.slice(0, 8);
+  return row.displayName?.trim() || row.email?.trim() || "Unnamed member";
 }
 
 export function requestApplicantLabel(
   row: Pick<AffiliateRequest, "displayName" | "email" | "membershipId">,
 ): string {
-  return row.displayName?.trim() || row.email?.trim() || row.membershipId.slice(0, 8);
+  return row.displayName?.trim() || row.email?.trim() || "Unnamed member";
 }
 
 export function configFieldsEqual(a: AffiliateConfig, b: AffiliateConfig): boolean {

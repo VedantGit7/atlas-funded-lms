@@ -1,3 +1,5 @@
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
+
 export const ANNOUNCEMENTS_LIST_HREF = "/admin/marketing/messenger/announcements";
 export const ANNOUNCEMENTS_CREATE_HREF = "/admin/marketing/messenger/announcements/create";
 export const MESSENGER_HREF = "/admin/marketing/messenger";
@@ -30,7 +32,7 @@ export function formatAnnouncementDateTime(value: string | null | undefined): st
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(undefined, {
+  return academyDateTimeFormat({
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
@@ -40,7 +42,7 @@ export function formatAnnouncementDate(value: string | null | undefined): string
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(undefined, {
+  return academyDateTimeFormat({
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -53,7 +55,7 @@ export function formatAnnouncementMonthLabel(yearMonth: string): string {
   const year = Number(match[1]);
   const month = Number(match[2]);
   const date = new Date(Date.UTC(year, month - 1, 1));
-  return new Intl.DateTimeFormat(undefined, {
+  return academyDateTimeFormat({
     month: "short",
     year: "numeric",
     timeZone: "UTC",

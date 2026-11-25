@@ -34,6 +34,7 @@ import {
   insightTableRowClassName,
 } from "./admin-insights-shared";
 import { LIVE_ATTENDANCE_REPORT_HREF, liveAttendanceRateTone } from "./live-dashboard-meta";
+import { formatTime } from "../../../lib/format/academy-format";
 
 type LiveDashboardNowViewProps = {
   slug: string;
@@ -52,7 +53,7 @@ function formatClock(iso: string | null): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(undefined, {
+  return formatTime(date, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,

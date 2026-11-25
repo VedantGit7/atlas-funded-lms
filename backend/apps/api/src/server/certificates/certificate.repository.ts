@@ -379,10 +379,15 @@ export const certificateRepository = {
         c.created_at,
         c.updated_at,
         ct.name as template_name,
-        mp.display_name as recipient_label
+        -- A name, then the name printed on the certificate, then the email:
+        -- never the member ID (QA review 2 4.3.2).
+        coalesce(nullif(btrim(mp.display_name), ''), nullif(btrim(c.recipient_name), ''), ap.email)
+          as recipient_label
       from certificates c
       join certificate_templates ct on ct.id = c.template_id
       left join member_profiles mp on mp.membership_id = c.membership_id
+      left join memberships rm on rm.id = c.membership_id
+      left join auth_principals ap on ap.id = rm.auth_principal_id
       where c.tenant_id = ${args.tenantId}::uuid
         and (${args.membershipId ?? null}::uuid is null or c.membership_id = ${args.membershipId ?? null}::uuid)
         and (${args.status ?? null}::text is null or c.status = ${args.status ?? null})

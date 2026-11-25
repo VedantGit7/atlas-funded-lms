@@ -16,13 +16,15 @@ export async function findMemberProfile(args: {
       membership_id: string;
       display_name: string | null;
       avatar_key: string | null;
+      timezone: string | null;
     }>
   >`
     select
       id::text,
       membership_id::text,
       display_name,
-      avatar_key
+      avatar_key,
+      timezone
     from member_profiles
     where tenant_id = ${args.tenantId}::uuid
       and membership_id = ${args.membershipId}::uuid
@@ -40,6 +42,7 @@ export async function findMemberProfile(args: {
     membershipId: row.membership_id,
     displayName: row.display_name,
     avatarUrl: row.avatar_key,
+    timezone: row.timezone,
   };
 }
 

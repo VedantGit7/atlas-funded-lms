@@ -33,6 +33,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 type HistoryView = "table" | "chart";
 
@@ -95,10 +96,10 @@ function formatUnitBadge(unit: string): string {
   return unit.slice(0, 3).toUpperCase();
 }
 
-function formatPeriodLabelFor(period: string, viewer: ViewerLocale): string {
+function formatPeriodLabelFor(period: string, _viewer: ViewerLocale): string {
   const date = new Date(`${period}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     month: "short",
     year: "numeric",
     timeZone: "UTC",
@@ -118,7 +119,7 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -126,11 +127,11 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   });
 }
 
-function formatExactUtcFor(iso: string | null, viewer: ViewerLocale): string {
+function formatExactUtcFor(iso: string | null, _viewer: ViewerLocale): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     month: "short",
     day: "numeric",
     hour: "2-digit",

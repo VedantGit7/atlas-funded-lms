@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
+
 export type WorkflowStatus = "DRAFT" | "PUBLISHED" | "UNPUBLISHED";
 
 export type WorkflowNode = {
@@ -102,7 +104,7 @@ export function formatWorkflowDateTime(value: string | null | undefined): string
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -115,7 +117,7 @@ export function formatWorkflowDate(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

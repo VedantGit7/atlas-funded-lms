@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ClientApiError, clientApi, toast } from "../../../../lib/client-api";
 import type { PublicNewsfeedPostDto } from "../../../admin/grow/newsfeed-shared";
+import { formatDate } from "../../../../lib/format/academy-format";
 
 type PostResponse = { data: PublicNewsfeedPostDto };
 type SaveResponse = { data: { postId: string; saved: boolean } };
@@ -131,7 +132,7 @@ export function LearnerNewsfeedArticle({ slug }: { slug: string }) {
         </h1>
         <div className="flex flex-wrap gap-3 text-sm text-[var(--muted-foreground)]">
           {post.authorName ? <span>By {post.authorName}</span> : null}
-          {post.publishedAt ? <span>{new Date(post.publishedAt).toLocaleDateString()}</span> : null}
+          {post.publishedAt ? <span>{formatDate(new Date(post.publishedAt))}</span> : null}
         </div>
         {post.tags.length > 0 ? (
           <div className="flex flex-wrap gap-2 pt-1">

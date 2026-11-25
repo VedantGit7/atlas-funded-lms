@@ -13,6 +13,8 @@ export type MemberProfileProjection = {
   membershipId: string;
   displayName: string | null;
   avatarUrl: string | null;
+  /** The member's own IANA time zone, when they chose one. */
+  timezone?: string | null;
 };
 
 export type ActiveMembershipContext = {

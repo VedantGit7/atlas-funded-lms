@@ -49,6 +49,7 @@ import {
   insightTableHeadClassName,
   insightTableRowClassName,
 } from "./admin-insights-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type MessengerInsightChannelsViewProps = {
   slug: string;
@@ -89,7 +90,7 @@ function compactNumber(value: number): string {
 function formatAbsoluteDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     month: "short",
     day: "numeric",
     year: "numeric",

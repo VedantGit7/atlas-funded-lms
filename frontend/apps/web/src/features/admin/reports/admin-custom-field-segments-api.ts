@@ -97,7 +97,7 @@ export const LEARNER_SEGMENT_FIELDS: SegmentFieldOption[] = [
   {
     source: "learner",
     key: "enrollment_count",
-    label: "Enrolments",
+    label: "Enrollments",
     fieldType: "number",
     options: [],
   },

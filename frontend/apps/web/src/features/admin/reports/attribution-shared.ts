@@ -7,6 +7,7 @@ import type {
   AttributionEvent,
   AttributionGroup,
 } from "./attribution-api";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 /**
  * Presentation vocabulary for the attribution event log.
@@ -177,7 +178,7 @@ export function formatRevenueFor(
 export function formatTimestampFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
@@ -456,10 +457,10 @@ export function dailyAttributionRate(day: { total: number; attributed: number })
 }
 
 /** A UTC day, labelled the way the series is bucketed. */
-export function formatUtcDayFor(iso: string, viewer: ViewerLocale): string {
+export function formatUtcDayFor(iso: string, _viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     month: "short",
     day: "numeric",
     timeZone: "UTC",

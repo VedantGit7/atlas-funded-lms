@@ -41,6 +41,7 @@ import {
   newFilterId,
   themeFor,
 } from "./admin-new-export-shared";
+import { currentAcademyFormat } from "../../../lib/format/academy-format";
 
 /** The state, data loading and handlers behind AdminNewExportPage. */
 export function useNewExport(props: NewExportPageProps) {
@@ -102,7 +103,7 @@ export function useNewExport(props: NewExportPageProps) {
   const [scheduleCadence, setScheduleCadence] = useState("daily");
   const [scheduleCadenceOpen, setScheduleCadenceOpen] = useState(false);
   const [scheduleName, setScheduleName] = useState("");
-  const [scheduleTimezone, setScheduleTimezone] = useState("UTC");
+  const [scheduleTimezone, setScheduleTimezone] = useState(() => currentAcademyFormat().timeZone);
 
   const [preview, setPreview] = useState<ExportBuilderPreview | null>(null);
   const [previewBusy, setPreviewBusy] = useState(false);

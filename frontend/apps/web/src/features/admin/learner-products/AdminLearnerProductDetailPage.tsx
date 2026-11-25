@@ -168,8 +168,8 @@ export function AdminLearnerProductDetailPage({
       // is enrolled" — that is the answer to a different question.
       setEnrollmentsError(
         caught instanceof ClientApiError && caught.status === 403
-          ? "You do not have permission to view enrolments."
-          : "Could not load enrolments.",
+          ? "You do not have permission to view enrollments."
+          : "Could not load enrollments.",
       );
     } finally {
       setEnrollmentsLoading(false);
@@ -218,7 +218,7 @@ export function AdminLearnerProductDetailPage({
       await loadEnrollments();
     } catch (caught) {
       setEnrolError(
-        caught instanceof ClientApiError ? caught.message : "Could not enrol that learner.",
+        caught instanceof ClientApiError ? caught.message : "Could not enroll that learner.",
       );
     } finally {
       setEnrolling(false);

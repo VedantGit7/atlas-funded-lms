@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import type { competencySnapshotDtoSchema } from "@atlas/contracts/competency/competency-projection.schemas";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type CompetencySnapshot = z.infer<typeof competencySnapshotDtoSchema>;
 
@@ -36,7 +37,7 @@ export function CompetencyHistoryChart({ snapshots }: CompetencyHistoryChartProp
             {snapshots.map((snapshot) => (
               <tr key={snapshot.id} className="border-b align-top">
                 <td className="px-2 py-2 whitespace-nowrap">
-                  {new Date(snapshot.occurredAt).toLocaleString()}
+                  {formatDateTime(new Date(snapshot.occurredAt))}
                 </td>
                 <td className="px-2 py-2">{snapshot.scoringProfileKey}</td>
                 <td className="px-2 py-2">

@@ -33,6 +33,10 @@ import {
 } from "./admin-custom-field-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import {
+  formatDate,
+  formatDateTime as academyFormatDateTime,
+} from "../../../lib/format/academy-format";
 
 const filterInputClassName =
   "h-9 w-full rounded-sm border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-3 text-[13px] text-[var(--admin-on-surface)] outline-none transition-colors placeholder:text-[var(--admin-on-surface-variant)]/70 focus:border-[var(--admin-primary)] focus:ring-1 focus:ring-[var(--admin-primary)]";
@@ -92,7 +96,7 @@ function formatDateShortFor(value: string | null, viewer: ViewerLocale): string 
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
@@ -104,7 +108,7 @@ function formatDateTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",
@@ -1204,7 +1208,7 @@ function CustomFieldLearnerValuesReport({
                   </span>
                 </div>
                 <div className="flex flex-col gap-1 bg-[var(--admin-surface)] p-4">
-                  <span className={labelClassName}>Enrolments</span>
+                  <span className={labelClassName}>Enrollments</span>
                   <span className="font-mono text-[24px] leading-none font-medium tabular-nums text-[var(--admin-on-surface)]">
                     {formatCount(learner.enrollmentCount)}
                   </span>

@@ -12,6 +12,8 @@ type StudioShellClientProps = {
   member: {
     membershipId: string;
     displayName: string | null;
+    /** Their most senior role, such as "Administrator" (shared/role-label.ts). */
+    roleLabel?: string;
     avatarUrl: string | null;
   };
   navigationItems: StudioNavItem[];

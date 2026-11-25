@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ClientApiError, clientApi, toast } from "@/lib/client-api";
 import type { PublicNewsfeedPostDto } from "@/features/admin/grow/newsfeed-shared";
+import { formatDate as academyFormatDate } from "../../../../lib/format/academy-format";
 
 type FeedResponse = {
   data: {
@@ -19,7 +20,7 @@ function formatDate(value: string | null | undefined) {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, {
+  return academyFormatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

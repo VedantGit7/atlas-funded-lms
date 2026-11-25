@@ -5,7 +5,7 @@ export const SALES_PURCHASER_COLUMN_OPTIONS = [
   { key: "email", label: "Email" },
   { key: "amount_cents", label: "Amount" },
   { key: "currency", label: "Currency" },
-  { key: "enrolled_type", label: "Enrolment" },
+  { key: "enrolled_type", label: "Enrollment" },
   { key: "coupon_code", label: "Coupon" },
   { key: "payment_order_id", label: "Order" },
   { key: "purchased_at", label: "Purchased on" },
@@ -906,7 +906,7 @@ export async function upsertAffiliateProduct(body: {
       }>;
     };
   }>("/api/v1/sales/affiliates/products", body, "affiliate-product-upsert", {
-    successMessage: body.enabled ? "Affiliate programme enabled." : "Affiliate programme disabled.",
+    successMessage: body.enabled ? "Affiliate program enabled." : "Affiliate program disabled.",
   });
 }
 

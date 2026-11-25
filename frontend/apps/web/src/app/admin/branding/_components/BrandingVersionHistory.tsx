@@ -15,6 +15,7 @@ import {
   sectionTitleClassName,
   statusBannerClassName,
 } from "./branding-admin-shared";
+import { formatDateTime } from "../../../../lib/format/academy-format";
 
 type BrandingVersion = z.infer<typeof BrandingVersionViewSchema>;
 
@@ -133,7 +134,7 @@ export function BrandingVersionHistory({ versions }: BrandingVersionHistoryProps
                       v{version.version}
                     </td>
                     <td className="px-6 py-4 text-sm text-[var(--admin-on-surface-variant)]">
-                      {new Date(version.publishedAt).toLocaleString()}
+                      {formatDateTime(new Date(version.publishedAt))}
                     </td>
                     <td className="px-6 py-4 font-mono text-xs text-[var(--admin-on-surface-variant)]">
                       {authorId ?? UNKNOWN_AUTHOR}

@@ -24,6 +24,7 @@ import {
   SUB_SCHOOL_URL_SUFFIX,
   subSchoolDetailHref,
 } from "./sub-schools-shared";
+import { formatDate as academyFormatDate } from "../../../lib/format/academy-format";
 
 export type SubSchoolRow = {
   id: string;
@@ -55,7 +56,7 @@ const ROWS_PER_PAGE_OPTIONS = [
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return academyFormatDate(new Date(iso), {
       day: "2-digit",
       month: "short",
       year: "numeric",

@@ -34,7 +34,7 @@ type CourseModuleTreeProps = {
 
 function formatError(error: unknown): string {
   if (error instanceof ClientApiError) return error.message;
-  return "Module action failed.";
+  return "Section action failed.";
 }
 
 function initialExpandedIds(modules: ModuleItem[], selectedModuleId: string | null): Set<string> {

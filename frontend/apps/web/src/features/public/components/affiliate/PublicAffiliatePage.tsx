@@ -53,7 +53,7 @@ export function PublicAffiliatePage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
-      <h1 className="text-3xl font-semibold text-foreground">Affiliate programme</h1>
+      <h1 className="text-3xl font-semibold text-foreground">Affiliate program</h1>
 
       {failed || status === null ? (
         <p className="mt-4 text-sm text-[var(--muted-foreground)]">

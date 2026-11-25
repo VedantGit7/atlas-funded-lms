@@ -1,3 +1,5 @@
+import { formatDateTime } from "../../lib/format/academy-format";
+
 export function formatRelativeTime(iso: string): string {
   const date = new Date(iso);
   const diffMinutes = Math.round((date.getTime() - Date.now()) / (1000 * 60));
@@ -11,7 +13,7 @@ export function formatRelativeTime(iso: string): string {
   if (Math.abs(diffHours) < 48) {
     return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(diffHours, "hour");
   }
-  return date.toLocaleString();
+  return formatDateTime(date);
 }
 
 export function truncateText(value: string, maxLength = 80): string {

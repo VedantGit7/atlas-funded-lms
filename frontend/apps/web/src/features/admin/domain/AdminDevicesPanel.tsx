@@ -10,6 +10,7 @@ import {
 } from "../../analytics/analytics-admin-shared";
 import { fetchDeviceSessions, type DeviceSession } from "./admin-domain-api";
 import { AdminDomainPageShell, adminDomainCardClassName } from "./admin-domain-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export function AdminDevicesPanel() {
   const [sessions, setSessions] = useState<DeviceSession[]>([]);
@@ -74,7 +75,7 @@ export function AdminDevicesPanel() {
                     <td className="px-4 py-3 font-mono text-xs">{session.membershipId}</td>
                     <td className="px-4 py-3">{session.platform ?? "—"}</td>
                     <td className="px-4 py-3">{session.ipAddress ?? "—"}</td>
-                    <td className="px-4 py-3">{new Date(session.lastSeenAt).toLocaleString()}</td>
+                    <td className="px-4 py-3">{formatDateTime(new Date(session.lastSeenAt))}</td>
                   </tr>
                 ))}
               </tbody>

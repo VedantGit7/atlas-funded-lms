@@ -29,6 +29,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
+import { formatDateTime, formatTime } from "../../../lib/format/academy-format";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -68,7 +69,7 @@ function formatSessionWhen(
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  const formatted = date.toLocaleString(viewer.locale, {
+  const formatted = formatDateTime(date, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -82,7 +83,7 @@ function formatSessionWhen(
 function formatClock(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -823,7 +824,7 @@ export function AdminLiveSessionPollReportPage({
             </h3>
             <div className="space-y-3 text-[13px]">
               <div className="flex justify-between gap-3 border-b border-[var(--admin-border)] pb-2">
-                <span className="text-[var(--admin-on-surface-variant)]">Module</span>
+                <span className="text-[var(--admin-on-surface-variant)]">Section</span>
                 <span className="text-right font-medium text-[var(--admin-on-surface)]">
                   {data.session.courseTitle ?? "-"}
                 </span>

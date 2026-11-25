@@ -5,6 +5,7 @@ import { CourseReviews } from "./course-reviews";
 import { CoverArt } from "./course-card";
 import { type CourseAccessTier } from "./course-pricing";
 import { CoursePrice } from "./CoursePrice";
+import { formatDateTime } from "../../lib/format/academy-format";
 
 type CourseDetailData = {
   id: string;
@@ -70,7 +71,7 @@ export function CourseDetail({ course, modules, tagId }: CourseDetailProps) {
           {isEnrolled ? (
             <p className="text-sm opacity-80">
               You are enrolled
-              {course.enrolledAt ? ` since ${new Date(course.enrolledAt).toLocaleString()}` : ""}.
+              {course.enrolledAt ? ` since ${formatDateTime(new Date(course.enrolledAt))}` : ""}.
             </p>
           ) : (
             <EnrollCourseDialog
@@ -85,7 +86,7 @@ export function CourseDetail({ course, modules, tagId }: CourseDetailProps) {
       </header>
 
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Module outline</h2>
+        <h2 className="text-xl font-semibold">Sections</h2>
         {tagId ? (
           <div className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-foreground">
             Filtering lessons by tag.{" "}

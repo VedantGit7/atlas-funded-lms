@@ -10,6 +10,7 @@ import type {
 } from "@atlas/contracts/content-trash/content-trash.contract";
 
 import { clientApi } from "../../../lib/client-api";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 function ActivityEmptyIllustration() {
   return (
@@ -70,7 +71,7 @@ function ActivityEmptyIllustration() {
 }
 
 function formatTimestamp(iso: string): string {
-  return new Date(iso).toLocaleString(undefined, {
+  return formatDateTime(new Date(iso), {
     year: "numeric",
     month: "short",
     day: "numeric",

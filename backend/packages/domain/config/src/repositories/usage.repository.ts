@@ -62,12 +62,22 @@ export async function getUsageTierAMetrics(tx: TenantTx): Promise<UsageTierAMetr
         WHERE m.status = 'ACTIVE'
           AND m.last_active_at >= date_trunc('month', now())
       ) AS current_mau,
+      -- Learners are active members with no staff role, the same rule as the
+      -- member stats and the dashboard (QA review 1 M8, m13).
       (
-        SELECT COUNT(DISTINCT m.id)::int
+        SELECT COUNT(*)::int
         FROM memberships m
-        JOIN user_roles ur ON ur.membership_id = m.id
-        JOIN roles r ON r.id = ur.role_id AND r.key = 'learner'
         WHERE m.status = 'ACTIVE'
+          AND m.archived_at IS NULL
+          AND NOT EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            JOIN roles r ON r.tenant_id = ur.tenant_id AND r.id = ur.role_id
+            WHERE ur.tenant_id = m.tenant_id
+              AND ur.membership_id = m.id
+              AND r.deleted_at IS NULL
+              AND r.key <> 'learner'
+          )
       ) AS total_learners,
       (
         SELECT COALESCE(SUM(size_bytes), 0)::float8 / 1e9

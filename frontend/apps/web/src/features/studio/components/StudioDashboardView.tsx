@@ -18,6 +18,7 @@ import {
   studioGreeting,
   type ContentStatusSummary,
 } from "./studio-dashboard-shared";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 export type StudioDashboardViewProps = {
   displayName: string | null;
@@ -305,7 +306,7 @@ export function StudioDashboardView({
           />
           <QuickLink
             icon={Database}
-            label="Item bank"
+            label="Question bank"
             caption="Question repository"
             href="/studio/items"
           />
@@ -358,7 +359,7 @@ function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
                   width: `${((segment.value / total) * 100).toFixed(3)}%`,
                   backgroundColor: segment.color,
                 }}
-                title={`${segment.label}: ${segment.value.toLocaleString()}`}
+                title={`${segment.label}: ${formatNumber(segment.value)}`}
               />
             ) : null,
           )}

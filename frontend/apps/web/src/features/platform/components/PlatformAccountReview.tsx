@@ -4,6 +4,7 @@ import { useState, type SyntheticEvent } from "react";
 import { platformApi, PlatformApiError } from "../platform-api";
 import { usePlatformReason } from "./PlatformReasonProvider";
 import { PlatformReasonDialog, PlatformReasonGate } from "./PlatformReasonDialog";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 /**
  * P10 -- account review: find the account behind an email, and disable or
@@ -31,7 +32,7 @@ const STATUS_LABEL: Record<AccountStatus, string> = {
 };
 
 function formatDate(value: string | null): string {
-  return value ? new Date(value).toLocaleString() : "Never";
+  return value ? formatDateTime(new Date(value)) : "Never";
 }
 
 function describeError(error: unknown, fallback: string): string {

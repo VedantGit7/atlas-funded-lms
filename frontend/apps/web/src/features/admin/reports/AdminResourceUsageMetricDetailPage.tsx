@@ -11,6 +11,7 @@ import {
 } from "./admin-resource-usage-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-sm font-medium text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-high)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -54,10 +55,10 @@ function formatUnitSuffix(unit: string): string {
   return ` ${unit}`;
 }
 
-function formatPeriodLabelFor(period: string, viewer: ViewerLocale): string {
+function formatPeriodLabelFor(period: string, _viewer: ViewerLocale): string {
   const date = new Date(`${period}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     month: "short",
     year: "numeric",
     timeZone: "UTC",
@@ -77,7 +78,7 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

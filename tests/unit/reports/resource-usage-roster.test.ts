@@ -32,6 +32,7 @@ describe("resource usage roster dto", () => {
         meters: {
           storageGb: 12.5,
           activeUsers30d: 10,
+          activeLearners30d: 7,
           currentMau: 8,
           totalLearners: 40,
           testSubmits: 3,

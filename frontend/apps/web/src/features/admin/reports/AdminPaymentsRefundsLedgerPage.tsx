@@ -33,6 +33,7 @@ import { PaymentRefundHistory } from "./PaymentRefundHistory";
 import { refundBalanceLabel, refundOutcomeTitle } from "./refund-submission";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDateTime as academyFormatDateTime } from "../../../lib/format/academy-format";
 
 const PAGE_SIZE = PAYMENT_REFUNDS_DEFAULTS.limit;
 
@@ -71,7 +72,7 @@ function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",

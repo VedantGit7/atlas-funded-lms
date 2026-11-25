@@ -213,10 +213,10 @@ export function AdminLearnerProductEnrollmentsPage({
       setTotalCount(0);
       setError(
         caught instanceof ClientApiError && caught.status === 403
-          ? "You do not have permission to view enrolments."
+          ? "You do not have permission to view enrollments."
           : caught instanceof ClientApiError
             ? caught.message
-            : "Could not load enrolments.",
+            : "Could not load enrollments.",
       );
     } finally {
       if (ticket === requestId.current) setLoading(false);
@@ -260,7 +260,7 @@ export function AdminLearnerProductEnrollmentsPage({
       if (updatedIds.length > 0) {
         setNotice(
           action === "revoke"
-            ? `${String(updatedIds.length)} ${updatedIds.length === 1 ? "enrolment" : "enrolments"} revoked.`
+            ? `${String(updatedIds.length)} ${updatedIds.length === 1 ? "enrollment" : "enrollments"} revoked.`
             : action === "restore"
               ? `${String(updatedIds.length)} restored.`
               : `Expiry updated on ${String(updatedIds.length)}.`,
@@ -269,14 +269,14 @@ export function AdminLearnerProductEnrollmentsPage({
       if (missingIds.length > 0) {
         setError(
           `${String(missingIds.length)} ${
-            missingIds.length === 1 ? "enrolment is" : "enrolments are"
+            missingIds.length === 1 ? "enrollment is" : "enrollments are"
           } no longer on this product and were skipped.`,
         );
       }
       await load();
     } catch (caught) {
       setError(
-        caught instanceof ClientApiError ? caught.message : "Could not update those enrolments.",
+        caught instanceof ClientApiError ? caught.message : "Could not update those enrollments.",
       );
     } finally {
       setActing(false);
@@ -300,7 +300,7 @@ export function AdminLearnerProductEnrollmentsPage({
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `enrolments-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.download = `enrollments-${new Date().toISOString().slice(0, 10)}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
     setNotice(`Exported ${String(chosen.length)} ${chosen.length === 1 ? "row" : "rows"}.`);
@@ -321,7 +321,7 @@ export function AdminLearnerProductEnrollmentsPage({
       await load();
     } catch (caught) {
       setEnrolError(
-        caught instanceof ClientApiError ? caught.message : "Could not enrol that learner.",
+        caught instanceof ClientApiError ? caught.message : "Could not enroll that learner.",
       );
     } finally {
       setEnrolling(false);
@@ -457,7 +457,7 @@ export function AdminLearnerProductEnrollmentsPage({
             }
             labelId="enrolment-type-filter"
             open={typeOpen}
-            panelAriaLabel="Enrolment type"
+            panelAriaLabel="Enrollment type"
             onToggle={() => {
               setTypeOpen((previous) => !previous);
             }}
@@ -580,8 +580,8 @@ export function AdminLearnerProductEnrollmentsPage({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
           {loading
-            ? "Loading enrolments…"
-            : `${String(totalCount)} ${totalCount === 1 ? "enrolment" : "enrolments"}${
+            ? "Loading enrollments…"
+            : `${String(totalCount)} ${totalCount === 1 ? "enrollment" : "enrollments"}${
                 filtered ? " match these filters" : ""
               }`}
         </p>
@@ -596,7 +596,7 @@ export function AdminLearnerProductEnrollmentsPage({
       {selected.size > 0 ? (
         <div className={catalogueBulkBarClassName}>
           <span className="text-sm font-semibold text-[var(--admin-on-surface)]">
-            {selected.size} {selected.size === 1 ? "enrolment" : "enrolments"} selected
+            {selected.size} {selected.size === 1 ? "enrollment" : "enrollments"} selected
           </span>
           <div className="flex flex-wrap items-center gap-2">
             <button
@@ -674,11 +674,11 @@ export function AdminLearnerProductEnrollmentsPage({
             <Users className="h-7 w-7" aria-hidden="true" />
           </span>
           <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">
-            {filtered ? "No enrolments match" : "Nobody is enrolled yet"}
+            {filtered ? "No enrollments match" : "Nobody is enrolled yet"}
           </h2>
           <p className="mt-2 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
             {filtered
-              ? "No enrolments match the current filters."
+              ? "No enrollments match the current filters."
               : "Learners placed into this product will appear here."}
           </p>
           {filtered ? (
@@ -931,7 +931,7 @@ function ExpiryDialog({
           Change expiry
         </h2>
         <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-          Applies to {count} selected {count === 1 ? "enrolment" : "enrolments"}.
+          Applies to {count} selected {count === 1 ? "enrollment" : "enrollments"}.
         </p>
 
         <label

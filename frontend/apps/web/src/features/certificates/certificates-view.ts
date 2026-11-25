@@ -10,6 +10,7 @@ import { Award, BookOpen, GraduationCap, Landmark, ScrollText, ShieldCheck } fro
 import type { LucideIcon } from "lucide-react";
 import type { z } from "zod";
 import type { certificateDtoSchema } from "@atlas/contracts/certificates/certificate.dto";
+import { formatDate } from "../../lib/format/academy-format";
 
 export type CertificateDto = z.infer<typeof certificateDtoSchema>;
 export type CertificateStatus = CertificateDto["status"];
@@ -67,7 +68,7 @@ export function certificateIcon(seed: string): LucideIcon {
 export function formatIssueDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return formatDate(date, { year: "numeric", month: "short", day: "numeric" });
 }
 
 export type ShareTargets = {

@@ -1,4 +1,5 @@
 import type { ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime, formatTime } from "../../../lib/format/academy-format";
 
 export function formatMoneyFor(cents: number, currency: string, viewer: ViewerLocale): string {
   return `${(cents / 100).toLocaleString(viewer.locale, {
@@ -18,7 +19,7 @@ export function formatAbsoluteFor(iso: string | null, viewer: ViewerLocale): str
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     day: "2-digit",
     month: "short",
@@ -32,7 +33,7 @@ export function formatClockFor(iso: string | null, viewer: ViewerLocale): string
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",
@@ -48,12 +49,12 @@ export function formatDayClockFor(
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return { day: "—", time: "" };
   return {
-    day: date.toLocaleDateString(viewer.locale, {
+    day: formatDate(date, {
       timeZone: viewer.timeZone,
       month: "short",
       day: "numeric",
     }),
-    time: date.toLocaleTimeString(viewer.locale, {
+    time: formatTime(date, {
       timeZone: viewer.timeZone,
       hour: "2-digit",
       minute: "2-digit",

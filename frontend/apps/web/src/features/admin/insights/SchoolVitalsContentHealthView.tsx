@@ -51,6 +51,7 @@ import {
   insightTableHeadClassName,
   insightTableRowClassName,
 } from "./admin-insights-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type SchoolVitalsContentHealthViewProps = {
   slug: string;
@@ -186,7 +187,7 @@ function formatSessionWhen(iso: string | null): string {
   if (!iso) return "n/a";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "n/a";
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     month: "short",
     day: "numeric",
     hour: "2-digit",

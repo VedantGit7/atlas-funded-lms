@@ -59,6 +59,7 @@ export const resourceUsageOverviewResponseSchema = z.object({
     meters: z.object({
       storageGb: z.number().nonnegative(),
       activeUsers30d: z.number().int().nonnegative(),
+      activeLearners30d: z.number().int().nonnegative(),
       currentMau: z.number().int().nonnegative(),
       totalLearners: z.number().int().nonnegative(),
       testSubmits: z.number().int().nonnegative(),

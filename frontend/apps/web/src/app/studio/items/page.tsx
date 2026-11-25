@@ -68,7 +68,7 @@ export default async function ItemBankPage({
     ]);
 
     return (
-      <PageGate state="ready" title="Item Bank">
+      <PageGate state="ready" title="Question bank">
         <main className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -111,7 +111,7 @@ export default async function ItemBankPage({
       return (
         <PageGate
           state="denied"
-          title="Item Bank"
+          title="Question bank"
           deniedMessage="You do not have permission to view the item bank."
         />
       );
@@ -121,7 +121,7 @@ export default async function ItemBankPage({
       return (
         <PageGate
           state="error"
-          title="Item Bank"
+          title="Question bank"
           errorMessage={`Failed to load items. Request ID: ${error.requestId}`}
         />
       );

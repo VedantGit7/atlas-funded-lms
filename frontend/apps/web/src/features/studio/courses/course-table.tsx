@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { z } from "zod";
 import { CourseStatusBadge } from "./course-status-badge";
 import type { studioCourseListItemSchema } from "@atlas/contracts/courses/course-authoring-schemas";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type CourseRow = z.infer<typeof studioCourseListItemSchema>;
 
@@ -37,7 +38,7 @@ export function CourseTable({ courses }: CourseTableProps) {
               <td>
                 <CourseStatusBadge status={course.status} />
               </td>
-              <td>{new Date(course.updatedAt).toLocaleString()}</td>
+              <td>{formatDateTime(new Date(course.updatedAt))}</td>
               <td>
                 <Link href={`/studio/courses/${course.id}`}>Open builder</Link>
                 {course.status === "PUBLISHED" ? (

@@ -29,6 +29,7 @@ import {
 } from "./admin-resource-usage-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const selectClassName =
   "h-9 min-w-[140px] rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] text-xs font-medium text-[var(--admin-on-surface)] hover:border-[var(--admin-outline)] focus-visible:border-[var(--admin-primary)] focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30";
@@ -111,7 +112,7 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

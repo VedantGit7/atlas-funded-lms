@@ -4,6 +4,7 @@ import {
   dailyAttributionRate,
   formatUtcDay,
 } from "../../../frontend/apps/web/src/features/admin/reports/attribution-shared";
+import { DEFAULT_ACADEMY_FORMAT } from "../../../frontend/apps/web/src/lib/format/academy-format";
 
 /**
  * The health chart's derived figures.
@@ -56,9 +57,10 @@ describe("barHeightPercent", () => {
 describe("formatUtcDay", () => {
   it("labels the day in UTC, not the reader's zone", () => {
     // The series is bucketed in UTC. Labelling in local time would show a
-    // different date than the bucket it belongs to.
+    // different date than the bucket it belongs to. Words follow the academy's
+    // locale, not the machine running the page.
     expect(formatUtcDay("2026-08-26T00:00:00.000Z")).toBe(
-      new Date("2026-08-26T00:00:00.000Z").toLocaleDateString(undefined, {
+      new Date("2026-08-26T00:00:00.000Z").toLocaleDateString(DEFAULT_ACADEMY_FORMAT.locale, {
         month: "short",
         day: "numeric",
         timeZone: "UTC",

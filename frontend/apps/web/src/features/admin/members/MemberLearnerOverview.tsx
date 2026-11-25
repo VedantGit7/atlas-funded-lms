@@ -3,6 +3,7 @@ import { BookOpen, ClipboardCheck, CreditCard, PlayCircle } from "lucide-react";
 import type { z } from "zod";
 import type { memberOverviewResponseSchema } from "@atlas/contracts/members/member-overview.schemas";
 import { cardClassName, cardHeaderClassName } from "./member-detail-shared";
+import { formatDate as academyFormatDate } from "../../../lib/format/academy-format";
 
 type Overview = z.infer<typeof memberOverviewResponseSchema>["data"];
 
@@ -10,7 +11,7 @@ function formatDate(iso: string | null): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return academyFormatDate(date, { day: "numeric", month: "short", year: "numeric" });
 }
 
 function formatMoney(amountCents: number, currency: string): string {

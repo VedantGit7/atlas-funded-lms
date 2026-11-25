@@ -13,6 +13,7 @@ import {
   manageTableTdClassName,
   manageTableThClassName,
 } from "./manage-ui-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type CourseOption = { id: string; title: string };
 type ModuleOption = { id: string; title: string };
@@ -48,7 +49,7 @@ function backupStatusTone(status: string): "success" | "primary" | "danger" | "n
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleString(undefined, {
+    return formatDateTime(new Date(iso), {
       day: "2-digit",
       month: "short",
       year: "numeric",

@@ -96,7 +96,13 @@ export async function loadAdminOverviewRaw(args: {
         where e.tenant_id = ${tenantId}::uuid
       )
       select
+        -- The academy's home currency first, so every screen shows the same one.
         coalesce(
+          (
+            select nullif(btrim(lbc.home_currency), '')
+            from learner_billing_config lbc
+            where lbc.tenant_id = ${tenantId}::uuid
+          ),
           (select currency from course_pricing where currency is not null limit 1),
           'INR'
         ) as currency,
@@ -108,12 +114,23 @@ export async function loadAdminOverviewRaw(args: {
             and c.deleted_at is null
             and c.status = 'PUBLISHED'
         ) as product_count,
+        -- Learners are members with no staff role, the same rule as the member
+        -- stats (QA review 1 M8): admins who also learn are not counted.
         (
           select count(*)::bigint
           from memberships m
           where m.tenant_id = ${tenantId}::uuid
             and m.status = 'ACTIVE'
             and m.archived_at is null
+            and not exists (
+              select 1
+              from user_roles ur
+              join roles r on r.tenant_id = ur.tenant_id and r.id = ur.role_id
+              where ur.tenant_id = m.tenant_id
+                and ur.membership_id = m.id
+                and r.deleted_at is null
+                and r.key <> 'learner'
+            )
         ) as learner_count,
         coalesce(es.enrollment_count, 0)::bigint as enrollment_count,
         coalesce(es.last_12_months_value_cents, 0)::bigint as last_12_months_value_cents,

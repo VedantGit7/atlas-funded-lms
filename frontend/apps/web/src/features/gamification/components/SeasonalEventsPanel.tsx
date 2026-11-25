@@ -17,6 +17,7 @@ import {
 } from "../gamification-admin-shared";
 import { GamificationAnimatedCollapsible } from "./GamificationAnimatedCollapsible";
 import { GamificationSelectField } from "./GamificationSelectField";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type SeasonalEventDto = {
   id: string;
@@ -430,9 +431,8 @@ export function SeasonalEventsPanel({
                       </span>
                     </p>
                     <p className="text-xs text-[var(--admin-on-surface-variant)]">
-                      {new Date(event.startsAt).toLocaleString()} →{" "}
-                      {new Date(event.endsAt).toLocaleString()} · ×{event.multiplier.xpMultiplier}{" "}
-                      XP
+                      {formatDateTime(new Date(event.startsAt))} →{" "}
+                      {formatDateTime(new Date(event.endsAt))} · ×{event.multiplier.xpMultiplier} XP
                       {event.linkedLeaderboardKey ? ` · board ${event.linkedLeaderboardKey}` : ""}
                       {event.linkedQuestIds.length > 0
                         ? ` · ${String(event.linkedQuestIds.length)} quest(s)`

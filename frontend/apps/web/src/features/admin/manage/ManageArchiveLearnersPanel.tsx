@@ -27,10 +27,7 @@ function formatError(error: unknown): string {
 
 function memberLabel(member: MemberRow): string {
   return (
-    member.profile?.displayName ??
-    member.invitedEmail ??
-    member.accountEmail ??
-    `Member ${member.id.slice(0, 8)}`
+    member.profile?.displayName ?? member.invitedEmail ?? member.accountEmail ?? "Unnamed member"
   );
 }
 

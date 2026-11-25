@@ -52,6 +52,7 @@ import {
 import { AdminPaymentsOverviewPanel } from "./AdminPaymentsOverviewPanel";
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type TabKey = "overview" | "transactions" | "instalment" | "gateways" | "invoices";
 
@@ -67,7 +68,7 @@ function formatDate(value: string | null): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString();
+  return formatDateTime(date);
 }
 
 function formatMoney(cents: number | null | undefined, currency = "USD"): string {

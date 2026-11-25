@@ -36,6 +36,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate as academyFormatDate } from "../../../lib/format/academy-format";
 
 const thClass =
   "px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]";
@@ -75,7 +76,7 @@ function formatDateFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString(viewer.locale, {
+  return academyFormatDate(d, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

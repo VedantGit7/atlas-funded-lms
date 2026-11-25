@@ -29,6 +29,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const VIEW_TABS: Array<{ key: CouponsListView; label: string }> = [
   { key: "all", label: "All coupons" },
@@ -70,7 +71,7 @@ function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
 function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
     month: "short",
     day: "numeric",

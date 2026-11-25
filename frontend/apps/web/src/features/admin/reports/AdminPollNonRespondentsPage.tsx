@@ -35,6 +35,7 @@ import {
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
+import { formatDateTime as academyFormatDateTime } from "../../../lib/format/academy-format";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -89,7 +90,7 @@ function formatDateTime(value: string | null | undefined, viewer: ViewerLocale):
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     month: "short",
     day: "numeric",
     year: "numeric",

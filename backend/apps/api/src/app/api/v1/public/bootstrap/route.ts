@@ -4,7 +4,10 @@ import { lookupTenantFromHost, resolveRequestHostFromHeaders } from "@atlas/tena
 import { withGlobalDb } from "@atlas/db/global-db";
 import { withTenantTx } from "@atlas/db/with-tenant-tx";
 import { readRuntimeBrandingProjection } from "@atlas/domain-branding";
-import { readTenantEmailChannel } from "../../../../../server/tenant-settings/tenant-settings.service";
+import {
+  readTenantDefaultTimezone,
+  readTenantEmailChannel,
+} from "../../../../../server/tenant-settings/tenant-settings.service";
 import { buildThemeCssVars, mapTenantThemeToSemanticPayload } from "@atlas/domain-branding";
 import { resolveBrandingAssetUrl } from "@atlas/storage";
 import { getLearnerBillingConfigRow } from "@atlas/domain-config/repositories/learner-billing.repository";
@@ -37,6 +40,8 @@ const bootstrapResponseSchema = z.object({
     modeDefault: z.enum(["system", "light", "dark"]).nullable(),
     themeCssVars: z.record(z.string(), z.string()).nullable(),
     homeCurrency: z.string().nullable(),
+    /** The academy time zone every date is shown in (QA review 1 M34). */
+    timeZone: z.string().nullable(),
     fxBase: z.string().nullable(),
     fxRates: z.record(z.string(), z.number()).nullable(),
   }),
@@ -69,6 +74,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
           modeDefault: null,
           themeCssVars: null,
           homeCurrency: null,
+          timeZone: null,
           fxBase: null,
           fxRates: null,
         },
@@ -84,6 +90,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
     logoDarkUrl,
     faviconUrl,
     homeCurrency,
+    timeZone,
     fxBase,
     fxRates,
   } = await withTenantTx(
@@ -94,13 +101,14 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
     },
     async (tx) => {
       const projection = await readRuntimeBrandingProjection(tx);
-      const [lightUrl, darkUrl, iconUrl, billingConfig, fx, support] = await Promise.all([
+      const [lightUrl, darkUrl, iconUrl, billingConfig, fx, support, zone] = await Promise.all([
         resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoLightRefId),
         resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.logoDarkRefId),
         resolveBrandingAssetUrl(tx, { tenantId: tenant.tenantId }, projection.faviconRefId),
         getLearnerBillingConfigRow(tx),
         getCachedFxRates(tx),
         readTenantEmailChannel(tx, "supportEmail"),
+        readTenantDefaultTimezone(tx),
       ]);
 
       return {
@@ -118,6 +126,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
         logoDarkUrl: darkUrl,
         faviconUrl: iconUrl,
         homeCurrency: billingConfig?.home_currency ?? null,
+        timeZone: zone,
         fxBase: fx.data.base,
         fxRates: Object.keys(fx.data.rates).length > 0 ? fx.data.rates : null,
       };
@@ -146,6 +155,7 @@ export const GET = createPublicRouteHandler(routeMetadata, async ({ req, request
       modeDefault: semantic?.modeDefault ?? null,
       themeCssVars,
       homeCurrency,
+      timeZone,
       fxBase,
       fxRates,
     },

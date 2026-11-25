@@ -11,7 +11,7 @@ export type StudioNavItem = {
 export const STUDIO_PRIMARY_NAV: readonly StudioNavItem[] = [
   { href: "/studio", label: "Dashboard", mobilePrimary: true },
   { href: "/studio/courses", label: "Courses", mobilePrimary: true },
-  { href: "/studio/items", label: "Item Bank" },
+  { href: "/studio/items", label: "Question bank" },
   { href: "/studio/item-collections", label: "Collections" },
   { href: "/studio/assessments", label: "Assessments", mobilePrimary: true },
   { href: "/studio/learning-paths", label: "Learning Paths" },

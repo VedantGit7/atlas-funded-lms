@@ -117,7 +117,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
             type: "step",
             number: 3,
             title: "Enroll in a course",
-            body: "Browse Courses to enroll in structured learning paths. Trial lessons may be available before purchase, depending on how your academy configured the catalog.",
+            body: "Browse Courses to enroll in structured learning paths. Free previews may be available before purchase, depending on how your academy configured the catalog.",
           },
           {
             type: "callout",
@@ -201,7 +201,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
         blocks: [
           {
             type: "p",
-            text: "Some roadmap nodes stay locked until prerequisites are complete (for example, finishing Module 1 before Module 2, or reaching a minimum diagnostic score). Locked items show requirements in the detail panel.",
+            text: "Some roadmap nodes stay locked until prerequisites are complete (for example, finishing Section 1 before Section 2, or reaching a minimum diagnostic score). Locked items show requirements in the detail panel.",
           },
           {
             type: "callout",
@@ -247,7 +247,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
             type: "step",
             number: 2,
             title: "Start a trial or enroll",
-            body: "Trial lessons are labeled in the curriculum. Full enrollment may require checkout or an invitation from your organization.",
+            body: "Free previews are labeled in the curriculum. Full enrollment may require checkout or an invitation from your organization.",
           },
           {
             type: "step",

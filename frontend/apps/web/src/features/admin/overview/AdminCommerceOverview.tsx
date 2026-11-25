@@ -18,6 +18,7 @@ import {
 import type { AdminOverviewResponse } from "@atlas/contracts/admin/admin-overview.contract";
 
 import { ADMIN_MODERATION_CASES_PATH } from "../../moderation/moderation-paths";
+import { formatDate, formatDateTime, formatNumber } from "../../../lib/format/academy-format";
 
 type OverviewData = AdminOverviewResponse["data"];
 type TabKey = "enrollments" | "learners" | "orders";
@@ -30,18 +31,18 @@ function formatMoney(cents: number, currency: string): string {
       maximumFractionDigits: 0,
     }).format(cents / 100);
   } catch {
-    return `${(cents / 100).toLocaleString()} ${currency}`;
+    return `${formatNumber(cents / 100)} ${currency}`;
   }
 }
 
 function formatCount(value: number): string {
-  return value.toLocaleString();
+  return formatNumber(value);
 }
 
 function monthLabel(monthKey: string): string {
   const [year, month] = monthKey.split("-").map(Number);
   if (!year || !month) return monthKey;
-  return new Date(Date.UTC(year, month - 1, 1)).toLocaleString(undefined, {
+  return formatDateTime(new Date(Date.UTC(year, month - 1, 1)), {
     month: "short",
     year: "2-digit",
     timeZone: "UTC",
@@ -295,7 +296,7 @@ export function AdminCommerceOverview({
           href="/studio/courses"
         />
         <KpiTile
-          label="Courses"
+          label="Published courses"
           value={formatCount(data.kpis.productCount)}
           href="/studio/courses"
         />
@@ -448,8 +449,7 @@ export function AdminCommerceOverview({
                       {event.name}
                     </p>
                     <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-                      {new Date(event.startsAt).toLocaleDateString()} –{" "}
-                      {new Date(event.endsAt).toLocaleDateString()}
+                      {formatDate(new Date(event.startsAt))} – {formatDate(new Date(event.endsAt))}
                       <span className="ml-2 uppercase tracking-wide">{event.status}</span>
                     </p>
                   </li>

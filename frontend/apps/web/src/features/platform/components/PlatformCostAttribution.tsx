@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type SyntheticEvent } from "
 import { platformApi } from "../platform-api";
 import { usePlatformReason } from "./PlatformReasonProvider";
 import { PlatformReasonGate } from "./PlatformReasonDialog";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 /**
  * P9 -- per-tenant cost attribution (DoD item 8).
@@ -156,7 +157,7 @@ function currentMonth(): string {
 function formatMonth(month: string): string {
   const [year, monthNumber] = month.split("-").map(Number);
   if (!year || !monthNumber) return month;
-  return new Date(Date.UTC(year, monthNumber - 1, 1)).toLocaleDateString("en-US", {
+  return formatDate(new Date(Date.UTC(year, monthNumber - 1, 1)), {
     month: "long",
     year: "numeric",
     timeZone: "UTC",
@@ -436,7 +437,7 @@ export function CostReport({ report }: { report: CostReportView }) {
         </ul>
         <p className="mt-3 text-xs text-muted-foreground">
           Storage and domains are measured at{" "}
-          {new Date(report.snapshotAt).toLocaleString("en-US", { timeZone: "UTC" })} UTC. Months are
+          {formatDateTime(new Date(report.snapshotAt), { timeZone: "UTC" })} UTC. Months are
           calendar months in UTC.
         </p>
       </details>

@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
+
 export type MarketingEmailStatus = "DRAFT" | "SCHEDULED" | "SENT";
 export type MarketingEmailAudienceType = "ALL" | "GROUP";
 
@@ -50,7 +52,7 @@ export function formatEmailDateTime(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -63,7 +65,7 @@ export function formatEmailDate(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

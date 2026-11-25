@@ -36,6 +36,7 @@ import {
 } from "./admin-reports-api";
 import { REPORT_MANAGE_LINKS, SCHEDULE_CADENCE_OPTIONS } from "./admin-report-section-shared";
 import type { AdminReportSlug } from "./admin-reports-catalog";
+import { formatDateTime, formatNumber } from "../../../lib/format/academy-format";
 
 type AdminReportSectionPageProps = {
   slug: string;
@@ -322,8 +323,8 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
 
       {preview?.totalRowCount != null && preview.totalRowCount > preview.rows.length ? (
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
-          Showing the first {preview.rows.length.toLocaleString()} of{" "}
-          {preview.totalRowCount.toLocaleString()} rows. Download the report for all of them.
+          Showing the first {formatNumber(preview.rows.length)} of{" "}
+          {formatNumber(preview.totalRowCount)} rows. Download the report for all of them.
         </p>
       ) : null}
 
@@ -438,7 +439,7 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
                   <tr key={schedule.id} className={analyticsTableRowClassName}>
                     <td className="px-4 py-3">{schedule.name}</td>
                     <td className="px-4 py-3 capitalize">{schedule.cadence}</td>
-                    <td className="px-4 py-3">{new Date(schedule.nextRunAt).toLocaleString()}</td>
+                    <td className="px-4 py-3">{formatDateTime(new Date(schedule.nextRunAt))}</td>
                     <td className="px-4 py-3 uppercase">{schedule.formats.join(", ")}</td>
                   </tr>
                 ))}
@@ -476,9 +477,9 @@ export function AdminReportSectionPage({ slug, title }: AdminReportSectionPagePr
                   <tr key={item.id} className={analyticsTableRowClassName}>
                     <td className="px-4 py-3">{item.definitionName}</td>
                     <td className="px-4 py-3 capitalize">{item.status}</td>
-                    <td className="px-4 py-3">{new Date(item.createdAt).toLocaleString()}</td>
+                    <td className="px-4 py-3">{formatDateTime(new Date(item.createdAt))}</td>
                     <td className="px-4 py-3">
-                      {item.completedAt ? new Date(item.completedAt).toLocaleString() : "—"}
+                      {item.completedAt ? formatDateTime(new Date(item.completedAt)) : "—"}
                     </td>
                   </tr>
                 ))}

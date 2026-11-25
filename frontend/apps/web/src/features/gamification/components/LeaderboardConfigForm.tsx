@@ -12,6 +12,7 @@ import {
   primaryButtonClassName,
 } from "../gamification-admin-shared";
 import { GamificationSelectField } from "./GamificationSelectField";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type LeaderboardDefinition = {
   id: string;
@@ -355,8 +356,7 @@ export function LeaderboardConfigForm({
           className={`rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] p-4 ${inlineExpandClassName}`}
         >
           <p className="text-xs text-[var(--admin-on-surface-variant)]">
-            Period {preview.periodKey} · calculated{" "}
-            {new Date(preview.calculatedAt).toLocaleString()}
+            Period {preview.periodKey} · calculated {formatDateTime(new Date(preview.calculatedAt))}
           </p>
           {preview.entries.length === 0 ? (
             <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">No entries yet.</p>

@@ -10,6 +10,7 @@ import {
   type BatchesRosterPayload,
 } from "./admin-batches-roster-api";
 import { type ViewerLocale } from "./viewer-time";
+import { formatDateTime as academyFormatDateTime } from "../../../lib/format/academy-format";
 
 export type ModuleTab = "batches" | "compare" | "exports";
 
@@ -48,7 +49,7 @@ export function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -60,7 +61,7 @@ export function formatDateTime(value: string | null, viewer: ViewerLocale): stri
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     month: "short",
     day: "numeric",
     year: "numeric",

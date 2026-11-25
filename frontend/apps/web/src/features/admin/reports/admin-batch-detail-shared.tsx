@@ -10,6 +10,7 @@ import {
   type BatchLearnerColumnKey,
 } from "./admin-batches-roster-api";
 import { type ViewerLocale } from "./viewer-time";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type DetailTab = BatchDetailTab;
 
@@ -65,7 +66,7 @@ export function formatDateFor(value: string | null | undefined, viewer: ViewerLo
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -77,7 +78,7 @@ export function formatDateTimeFor(value: string | null | undefined, viewer: View
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

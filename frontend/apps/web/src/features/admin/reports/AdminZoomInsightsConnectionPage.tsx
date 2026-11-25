@@ -41,6 +41,10 @@ import { downloadReportExport, pollReportRunUntilComplete } from "./admin-report
 import { ZoomMeetingsPanel } from "./ZoomMeetingsPanel";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import {
+  formatDate,
+  formatDateTime as academyFormatDateTime,
+} from "../../../lib/format/academy-format";
 
 type ModuleTab = "meetings" | "participants" | "unmatched" | "connection" | "exports";
 
@@ -79,7 +83,7 @@ function formatDateShortFor(value: string | null, viewer: ViewerLocale): string 
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
@@ -91,7 +95,7 @@ function formatDateTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

@@ -29,6 +29,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -87,7 +88,7 @@ function formatCompact(cents: number, viewer: ViewerLocale): string {
 function formatShortDate(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     month: "short",
     day: "numeric",
     timeZone: viewer.timeZone,
@@ -98,7 +99,7 @@ function formatTxDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",

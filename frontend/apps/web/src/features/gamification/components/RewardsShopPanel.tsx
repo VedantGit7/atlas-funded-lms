@@ -17,6 +17,7 @@ import {
   primaryButtonClassName,
 } from "../gamification-admin-shared";
 import { GamificationSelectField } from "./GamificationSelectField";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type RewardCurrency = {
   key: string;
@@ -697,7 +698,7 @@ export function RewardsShopPanel({
                       <td className="py-2 pr-3">{entry.rewardName}</td>
                       <td className="py-2 pr-3">{entry.memberLabel}</td>
                       <td className="py-2 pr-3">{entry.costAmount}</td>
-                      <td className="py-2 pr-3">{new Date(entry.redeemedAt).toLocaleString()}</td>
+                      <td className="py-2 pr-3">{formatDateTime(new Date(entry.redeemedAt))}</td>
                       <td className="py-2 pr-3">
                         <span
                           className={gamificationStatusBadgeClassName(

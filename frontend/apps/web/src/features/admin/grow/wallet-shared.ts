@@ -1,4 +1,5 @@
 import { formatMoney } from "./coupons-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type WalletDirection = "CREDIT" | "DEBIT";
 
@@ -95,7 +96,7 @@ export function formatWalletDateTime(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -114,5 +115,5 @@ export function learnerInitials(name: string | null | undefined, email: string |
 export function learnerLabel(
   account: Pick<WalletAccount, "displayName" | "email" | "membershipId">,
 ) {
-  return account.displayName?.trim() || account.email?.trim() || account.membershipId.slice(0, 8);
+  return account.displayName?.trim() || account.email?.trim() || "Unnamed member";
 }

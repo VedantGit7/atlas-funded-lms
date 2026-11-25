@@ -33,6 +33,7 @@ import {
   exportSelectTriggerClassName,
 } from "./export-dialog-kit";
 import { useNewExportForm } from "./use-new-export-form";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 const DATASET_OPTIONS: Array<{ value: CustomFieldExportDataset; label: string }> = [
   { value: "learner_roster", label: "Learners" },
@@ -300,7 +301,7 @@ export function CustomFieldNewExportModal({
                     ? [{ value: "", label: "No segments yet" }]
                     : segments.map((segment) => ({
                         value: segment.id,
-                        label: `${segment.name} (${(segment.matchedCount ?? 0).toLocaleString()})`,
+                        label: `${segment.name} (${formatNumber(segment.matchedCount ?? 0)})`,
                       }))
                 }
                 className={exportSelectTriggerClassName}
@@ -319,7 +320,7 @@ export function CustomFieldNewExportModal({
             <div className="mt-2 border-t border-[var(--admin-border)] pt-2 text-xs text-[var(--admin-on-surface-variant)]">
               Est. output rows:{" "}
               {dataset === "segment_members" && selectedSegment
-                ? `~${(selectedSegment.matchedCount ?? 0).toLocaleString()}`
+                ? `~${formatNumber(selectedSegment.matchedCount ?? 0)}`
                 : "depends on filters"}
             </div>
           </div>

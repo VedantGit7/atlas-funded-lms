@@ -41,6 +41,10 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import {
+  formatDate,
+  formatDateTime as academyFormatDateTime,
+} from "../../../lib/format/academy-format";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -94,7 +98,7 @@ function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(d, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -1100,7 +1104,7 @@ function BatchLiveSessionsReport({ batchId, initialSessions }: BatchLiveSessions
                           </div>
                           <p className="mt-1 font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                             {session.scheduledAt
-                              ? new Date(session.scheduledAt).toLocaleDateString(viewer.locale, {
+                              ? formatDate(new Date(session.scheduledAt), {
                                   timeZone: viewer.timeZone,
                                   month: "short",
                                   day: "numeric",

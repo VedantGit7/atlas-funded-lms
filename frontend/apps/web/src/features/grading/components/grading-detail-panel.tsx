@@ -35,6 +35,7 @@ import {
   primaryButtonClassName,
   sectionHeaderClassName,
 } from "../grading-studio-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type GradingDetailPanelProps = {
   task: GradingTaskDetail;
@@ -281,7 +282,7 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-                      {new Date(event.occurredAt).toLocaleString()}
+                      {formatDateTime(new Date(event.occurredAt))}
                     </p>
                     {event.summary ? (
                       <p className="mt-2 text-sm text-[var(--admin-on-surface-variant)]">

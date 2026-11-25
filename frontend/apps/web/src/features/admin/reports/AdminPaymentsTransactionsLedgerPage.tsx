@@ -45,6 +45,7 @@ import { AdminPaymentTransactionDrawer } from "./AdminPaymentTransactionDrawer";
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 type SavedView = "all" | "failed_today" | "refund_candidates" | "high_value";
 type DateField = "paid_at" | "created_at";
@@ -99,7 +100,7 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "Yesterday";
   if (days < 7) return `${String(days)} days ago`;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -110,7 +111,7 @@ function formatAbsoluteFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

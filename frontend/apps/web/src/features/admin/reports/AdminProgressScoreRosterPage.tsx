@@ -47,6 +47,7 @@ import { AdminProgressProductPicker } from "./AdminProgressProductPicker";
 import { AdminScoresProductPicker } from "./AdminScoresProductPicker";
 import type { ScoreLearnerResultStatus } from "./admin-progress-score-roster-api";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type MainTab = "progress" | "scores";
 type ProgressProduct = ProgressProductType;
@@ -70,11 +71,11 @@ const ENROLLED_TYPE_OPTIONS = [
   { value: "trial", label: "Trial" },
 ] as const;
 
-function formatDateFor(value: string | null, viewer: ViewerLocale): string {
+function formatDateFor(value: string | null, _viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale);
+  return formatDateTime(date);
 }
 
 function titleCase(value: string): string {

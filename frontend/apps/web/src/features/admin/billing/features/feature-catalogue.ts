@@ -139,7 +139,7 @@ export const FEATURE_CATALOGUE: readonly FeatureEntry[] = [
   {
     id: "item-bank",
     groupId: "authoring",
-    name: "Item Bank",
+    name: "Question bank",
     blurb: "Reusable question and content items organised into collections.",
     icon: Boxes,
     motif: "grid",
@@ -257,7 +257,7 @@ export const FEATURE_CATALOGUE: readonly FeatureEntry[] = [
     id: "analytics",
     groupId: "administration",
     name: "Analytics",
-    blurb: "Live dashboards for enrolments, progress, and completion.",
+    blurb: "Live dashboards for enrollments, progress, and completion.",
     icon: BarChart3,
     motif: "chart",
     accentToken: "--admin-lesson-video",

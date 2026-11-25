@@ -1,4 +1,5 @@
 import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements";
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
 
 export type EntitlementCatalogueEntry = {
   label: string;
@@ -207,7 +208,7 @@ export function formatEntitlementExpiry(
   }
 
   return {
-    label: new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(expires),
+    label: academyDateTimeFormat({ dateStyle: "medium" }).format(expires),
     urgent: false,
   };
 }

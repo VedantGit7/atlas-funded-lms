@@ -67,7 +67,7 @@ export function BuilderValidationPanel({
     },
     {
       id: "modules",
-      label: "Modules",
+      label: "Sections",
       detail: hasModules
         ? `${moduleCount} module${moduleCount === 1 ? "" : "s"} added`
         : "Add at least one module",

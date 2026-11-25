@@ -34,6 +34,8 @@ export const TenantConfigVersionViewSchema = z.object({
   id: z.uuid(),
   version: z.number().int().positive(),
   createdByMembershipId: z.uuid().nullable(),
+  /** Who published it, by name (QA review 2 4.3.2: not "Published by 92f3cd57"). */
+  createdByName: z.string().nullable().optional(),
   createdAt: z.iso.datetime(),
   isCurrent: z.boolean(),
 });

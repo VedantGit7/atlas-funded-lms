@@ -1,4 +1,5 @@
 import type { WorkflowQueueItem } from "./api";
+import { formatDateTime } from "../../lib/format/academy-format";
 
 export {
   badgeClassName,
@@ -103,7 +104,7 @@ export function submitterLabel(membershipId: string): string {
 }
 
 export function formatSubmittedAt(value: string): string {
-  return new Date(value).toLocaleString(undefined, {
+  return formatDateTime(new Date(value), {
     month: "short",
     day: "numeric",
     year: "numeric",

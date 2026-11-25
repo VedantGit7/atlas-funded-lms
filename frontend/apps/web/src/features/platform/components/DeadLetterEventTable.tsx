@@ -5,6 +5,7 @@ import { usePlatformReason } from "./PlatformReasonProvider";
 import { PlatformReasonDialog, PlatformReasonGate } from "./PlatformReasonDialog";
 import { loadDeadLetterListAction } from "../../../lib/server/platform-server-actions";
 import { platformApi } from "../platform-api";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type DeadLetterRow = {
   id: string;
@@ -118,7 +119,7 @@ export function DeadLetterEventTable() {
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-b border-border">
-                <td className="py-2 pr-4">{new Date(row.failedAt).toLocaleString()}</td>
+                <td className="py-2 pr-4">{formatDateTime(new Date(row.failedAt))}</td>
                 <td className="py-2 pr-4 font-mono text-xs">{row.tenantId?.slice(0, 8) ?? "—"}</td>
                 <td className="py-2 pr-4">{row.eventType}</td>
                 <td className="py-2 pr-4">{row.safeErrorMessage ?? row.errorCode ?? "—"}</td>

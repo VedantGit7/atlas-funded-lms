@@ -810,7 +810,7 @@ export function AdminResourceUsageDormantCourseDetailPage({ courseId, initialDat
           valueTone="warning"
         />
         <MeterCard
-          label="Enrolments"
+          label="Enrollments"
           value={formatCount(summary.enrolmentTotal)}
           caption={`${formatCount(summary.enrolmentActiveIn90d)} active in 90 days`}
         />

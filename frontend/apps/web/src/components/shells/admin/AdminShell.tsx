@@ -68,6 +68,8 @@ const ACCOUNT_MENU_ITEMS: AccountMenuItem[] = [
 type AdminShellMember = {
   membershipId: string;
   displayName: string | null;
+  /** Their most senior role, such as "Administrator" (shared/role-label.ts). */
+  roleLabel?: string;
   avatarUrl: string | null;
 };
 
@@ -523,7 +525,7 @@ export function AdminShell({
                       {displayName}
                     </p>
                     <p className="text-[11px] text-[var(--admin-on-surface-variant)]">
-                      Administrator
+                      {member.roleLabel ?? "Administrator"}
                     </p>
                   </div>
                   {member.avatarUrl ? (

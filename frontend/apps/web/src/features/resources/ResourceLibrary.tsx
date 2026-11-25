@@ -23,6 +23,7 @@ import type {
 import { clientApi } from "../../lib/client-api";
 import { ResourceCard } from "./ResourceCard";
 import { KIND_META, SORT_OPTIONS } from "./resource-view";
+import { formatNumber } from "../../lib/format/academy-format";
 
 type Facets = { categories: string[]; kinds: ResourceKind[] };
 
@@ -249,7 +250,7 @@ export function ResourceLibrary({
                 </button>
               ) : null}
               <span className="ml-auto text-sm text-muted-foreground">
-                {total.toLocaleString()} {total === 1 ? "resource" : "resources"}
+                {formatNumber(total)} {total === 1 ? "resource" : "resources"}
               </span>
             </div>
           )}

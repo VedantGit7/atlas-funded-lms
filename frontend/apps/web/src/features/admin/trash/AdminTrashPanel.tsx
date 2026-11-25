@@ -20,6 +20,7 @@ import type {
 import { TRASH_RETENTION_DAYS } from "@atlas/contracts/content-trash/content-trash.contract";
 
 import { clientApi, createClientUuid } from "../../../lib/client-api";
+import { formatDate } from "../../../lib/format/academy-format";
 
 /**
  * What a restore or permanent delete says. The generic message was built from
@@ -88,7 +89,7 @@ function TrashEmptyIllustration() {
 }
 
 function formatMovedOn(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return formatDate(new Date(iso), {
     year: "numeric",
     month: "short",
     day: "numeric",

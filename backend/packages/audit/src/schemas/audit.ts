@@ -22,6 +22,8 @@ export const AuditEntryViewSchema = z.object({
   targetId: z.uuid().nullable(),
   actorMembershipId: z.uuid().nullable(),
   platformPrincipalId: z.uuid().nullable(),
+  /** The acting member's name, or their email when they have not set one. */
+  actorName: z.string().nullable().optional(),
   requestId: z.string(),
   reason: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()).nullable(),

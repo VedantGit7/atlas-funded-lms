@@ -57,6 +57,7 @@ import {
   insightSegmentTrackClassName,
   insightShimmerClassName,
 } from "./admin-insights-shared";
+import { currentAcademyFormat } from "../../../lib/format/academy-format";
 
 type InsightDigestsViewProps = {
   slug: string;
@@ -158,7 +159,7 @@ function emptyForm(
     weekday: "mon",
     monthDay: 1,
     time: "08:00",
-    timezone: "UTC",
+    timezone: currentAcademyFormat().timeZone,
   };
 }
 

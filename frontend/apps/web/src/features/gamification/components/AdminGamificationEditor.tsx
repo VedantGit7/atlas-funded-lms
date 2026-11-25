@@ -47,6 +47,7 @@ import {
   type CourseOption,
   type LeaderboardDefinition,
 } from "./LeaderboardConfigForm";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type BadgeDefinition = {
   id: string;
@@ -959,7 +960,7 @@ export function AdminGamificationEditor({
                       >
                         <td className="py-2 pr-3">{item.badgeName}</td>
                         <td className="py-2 pr-3">{item.memberLabel}</td>
-                        <td className="py-2 pr-3">{new Date(item.awardedAt).toLocaleString()}</td>
+                        <td className="py-2 pr-3">{formatDateTime(new Date(item.awardedAt))}</td>
                         <td className="py-2 pr-3">
                           <span
                             className={gamificationStatusBadgeClassName(

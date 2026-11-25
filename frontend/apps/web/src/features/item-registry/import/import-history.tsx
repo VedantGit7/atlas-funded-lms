@@ -16,6 +16,7 @@ import {
 } from "../../studio/courses/courses-catalog-shared";
 import { listImportBatches, undoImportBatch } from "../api";
 import { runBulkStatus } from "../bulk-status";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 const PAGE_SIZE = 20;
 const CHANGED_EVENT = "atlas:item-import-changed";
@@ -55,7 +56,7 @@ function typeName(key: string): string {
 }
 
 function when(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", {
+  return formatDateTime(new Date(iso), {
     month: "short",
     day: "numeric",
     year: "numeric",

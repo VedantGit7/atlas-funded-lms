@@ -1,3 +1,5 @@
+import { formatDateTime } from "../../../lib/format/academy-format";
+
 export type WhatsappCampaignStatus = "DRAFT" | "SCHEDULED" | "SENT";
 export type WhatsappAudienceType = "ALL" | "GROUP";
 export type WhatsappTemplateStatus = "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
@@ -102,7 +104,7 @@ export function formatWhatsappDateTime(value: string | null | undefined): string
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

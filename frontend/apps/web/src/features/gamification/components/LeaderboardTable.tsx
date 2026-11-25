@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { GamificationSelectField } from "./GamificationSelectField";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type LeaderboardTableProps = {
   leaderboards: Array<{
@@ -148,7 +149,7 @@ export function LeaderboardTable({
       {detail ? (
         <>
           <p className="text-sm opacity-80">
-            Snapshot updated: {new Date(detail.calculatedAt).toLocaleString()}
+            Snapshot updated: {formatDateTime(new Date(detail.calculatedAt))}
           </p>
           <table className="w-full border-collapse text-sm">
             <thead>

@@ -5,6 +5,8 @@ export type ResourceUsagePeriod = "this_month" | "last_month" | "ytd";
 export type ResourceUsageMeters = {
   storageGb: number;
   activeUsers30d: number;
+  /** Learners (no staff role) active in the last 30 days. */
+  activeLearners30d: number;
   currentMau: number;
   totalLearners: number;
   testSubmits: number;

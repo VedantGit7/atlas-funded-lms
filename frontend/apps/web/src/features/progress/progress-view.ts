@@ -1,3 +1,5 @@
+import { formatDate, formatNumber } from "../../lib/format/academy-format";
+
 /**
  * Presentation + data-shaping helpers for the learner Progress surface.
  *
@@ -131,7 +133,7 @@ export function buildWeeklyXp(days: ActivityDay[], rangeEnd: string, weekCount =
 
 /** Thousands-grouped XP, e.g. 14280 -> "14,280". */
 export function formatXp(value: number): string {
-  return value.toLocaleString(undefined);
+  return formatNumber(value);
 }
 
 /** Zero-padded two-digit count for hero stats, e.g. 6 -> "06". */
@@ -143,14 +145,14 @@ export function padCount(value: number): string {
 export function formatShortDate(iso: string): string {
   const date = parseISODate(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 /** Full, human date for tooltips / captions, e.g. "Mar 4, 2026". */
 export function formatFullDate(iso: string): string {
   const date = parseISODate(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

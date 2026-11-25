@@ -26,6 +26,7 @@ import {
 } from "./export-dialog-kit";
 import { PolicyToggle } from "./report-exports-kit";
 import { useNewExportForm } from "./use-new-export-form";
+import { currentAcademyFormat } from "../../../lib/format/academy-format";
 
 const FORMATS = ["csv", "xlsx", "json"] as const;
 
@@ -67,7 +68,7 @@ export function ActiveDevicesNewExportModal({
       delivery: "download",
       cadence: "weekly",
       time: "07:00",
-      timezone: "UTC",
+      timezone: () => currentAcademyFormat().timeZone,
     },
   });
   const [selected, setSelected] = useState<Set<string>>(new Set());

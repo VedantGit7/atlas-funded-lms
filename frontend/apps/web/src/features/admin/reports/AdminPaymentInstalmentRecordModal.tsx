@@ -9,6 +9,7 @@ import {
   type PaymentInstalmentPlanItem,
   type PaymentInstalmentScheduleItem,
 } from "./admin-payments-roster-api";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type PaymentMethod = "gateway" | "bank" | "cash" | "adjustment";
 
@@ -35,7 +36,7 @@ type Props = {
 };
 
 function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+  return `${formatNumber(cents / 100, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { z } from "zod";
 import type { notificationInboxItemSchema } from "@atlas/contracts/notifications/notification.dto";
+import { academyDateTimeFormat } from "../../lib/format/academy-format";
 
 export type InboxItem = z.infer<typeof notificationInboxItemSchema>;
 
@@ -110,7 +111,7 @@ export function formatNotificationTimestamp(iso: string): string {
   const startOfYesterday = new Date(startOfToday);
   startOfYesterday.setDate(startOfYesterday.getDate() - 1);
 
-  const time = new Intl.DateTimeFormat(undefined, {
+  const time = academyDateTimeFormat({
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
@@ -133,7 +134,7 @@ export function formatNotificationTimestamp(iso: string): string {
     return `Yesterday at ${time}`;
   }
 
-  return new Intl.DateTimeFormat(undefined, {
+  return academyDateTimeFormat({
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -153,7 +154,7 @@ function groupLabelForDate(date: Date, now: Date): string {
   if (value === today) return "Today";
   if (value === yesterday) return "Yesterday";
 
-  return new Intl.DateTimeFormat(undefined, {
+  return academyDateTimeFormat({
     weekday: "long",
     month: "short",
     day: "numeric",

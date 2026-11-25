@@ -33,6 +33,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -67,7 +68,7 @@ function formatMoneyAmountFor(cents: number, viewer: ViewerLocale): string {
 function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
     month: "short",
     day: "numeric",
@@ -78,7 +79,7 @@ function formatShortDateFor(iso: string, viewer: ViewerLocale): string {
 function formatAbsoluteDateTimeFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

@@ -19,6 +19,7 @@ import {
   type QuestStepProgress,
 } from "../quest-shared";
 import { questOverallPercent, questStatusMeta } from "../gamification-view";
+import { formatDate } from "../../../lib/format/academy-format";
 
 export type LearnerQuest = QuestDto & {
   progressStatus: "not_started" | "in_progress" | "completed";
@@ -170,7 +171,7 @@ export function QuestProgressPanel({ quests }: QuestProgressPanelProps) {
                       <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
                         {percent}%
                         {quest.endsAt
-                          ? ` · Ends ${new Date(quest.endsAt).toLocaleDateString(undefined, {
+                          ? ` · Ends ${formatDate(new Date(quest.endsAt), {
                               month: "short",
                               day: "numeric",
                             })}`

@@ -35,6 +35,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type ProgrammeFilter = "all" | "enabled" | "disabled";
 type CommissionBand = "any" | "below_10" | "10_20" | "above_20";
@@ -66,7 +67,7 @@ const SORT_OPTIONS: Array<{ value: SortBy; label: string }> = [
 ];
 
 const DISABLE_REASONS: Array<{ value: Exclude<DisableReason, "">; label: string }> = [
-  { value: "restructuring", label: "Programme restructuring" },
+  { value: "restructuring", label: "Program restructuring" },
   { value: "temporary", label: "Temporary pause" },
   { value: "policy", label: "Policy violation" },
   { value: "other", label: "Other" },
@@ -83,7 +84,7 @@ function formatShortDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso.includes("T") ? iso : `${iso}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: iso.includes("T") ? viewer.timeZone : "UTC",
     month: "short",
     day: "numeric",
@@ -399,7 +400,7 @@ export function AdminAffiliateProductsPanel({
           ? caught.message
           : caught instanceof Error
             ? caught.message
-            : "Could not disable programme.",
+            : "Could not disable program.",
       );
     } finally {
       setBusy(false);
@@ -449,7 +450,7 @@ export function AdminAffiliateProductsPanel({
           ? caught.message
           : caught instanceof Error
             ? caught.message
-            : "Could not enable programme.",
+            : "Could not enable program.",
       );
     } finally {
       setBusy(false);
@@ -559,7 +560,7 @@ export function AdminAffiliateProductsPanel({
     if (programme !== "all") {
       chips.push({
         key: "programme",
-        label: `Programme: ${programme === "enabled" ? "Enabled" : "Disabled"}`,
+        label: `Program: ${programme === "enabled" ? "Enabled" : "Disabled"}`,
       });
     }
     if (commissionBand !== "any") {
@@ -784,13 +785,13 @@ export function AdminAffiliateProductsPanel({
 
               <div className="w-full sm:w-44">
                 <Select
-                  ariaLabel="Programme"
+                  ariaLabel="Program"
                   value={draftProgramme}
                   onValueChange={(value) => {
                     setDraftProgramme(value as ProgrammeFilter);
                   }}
                   options={[
-                    { value: "all", label: "Programme: All" },
+                    { value: "all", label: "Program: All" },
                     { value: "enabled", label: "Enabled" },
                     { value: "disabled", label: "Disabled" },
                   ]}
@@ -929,7 +930,7 @@ export function AdminAffiliateProductsPanel({
                         />
                       </th>
                       <th className="px-4 py-2 font-medium">Product</th>
-                      <th className="px-4 py-2 font-medium">Programme</th>
+                      <th className="px-4 py-2 font-medium">Program</th>
                       <th className="px-4 py-2 text-right font-medium">Commission rate</th>
                       <th className="px-4 py-2 text-right font-medium">Orders</th>
                       <th className="px-4 py-2 text-right font-medium">Revenue</th>
@@ -1023,8 +1024,8 @@ export function AdminAffiliateProductsPanel({
                                 disabled={busy}
                                 label={
                                   row.enabled
-                                    ? `Disable affiliate programme for ${row.productTitle}`
-                                    : `Enable affiliate programme for ${row.productTitle}`
+                                    ? `Disable affiliate program for ${row.productTitle}`
+                                    : `Enable affiliate program for ${row.productTitle}`
                                 }
                                 onToggle={() => {
                                   onToggleClick(row);

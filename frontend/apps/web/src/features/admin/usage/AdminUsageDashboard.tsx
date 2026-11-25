@@ -9,7 +9,7 @@ import {
   buildBuckets,
   buildMonthColumns,
   formatGb,
-  formatGrowthLabel,
+  mauGrowth,
   formatHours,
   formatLongDate,
   formatShortDate,
@@ -17,6 +17,7 @@ import {
   type Granularity,
   type UsageSummary,
 } from "./usage-dashboard-utils";
+import { formatDateTime, formatNumber } from "../../../lib/format/academy-format";
 
 type AdminUsageDashboardProps = {
   summary: UsageSummary;
@@ -36,6 +37,8 @@ const GRANULARITY_OPTIONS = [
 
 export function AdminUsageDashboard({ summary }: AdminUsageDashboardProps) {
   const now = useMemo(() => new Date(), []);
+  const planKnown = Boolean(summary.planName);
+  const mauPercent = usagePercent(summary.currentMau, summary.limits.mau);
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-16">
@@ -48,51 +51,75 @@ export function AdminUsageDashboard({ summary }: AdminUsageDashboardProps) {
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
           Usage Insights
         </h1>
-        <p className="text-sm text-[var(--admin-on-surface-variant)]">
-          Monitor your active learners, storage &amp; bandwidth. Plan active from{" "}
-          <span className="font-semibold text-[var(--admin-on-surface)]">
-            {formatLongDate(summary.planStartedAt)}
-          </span>
-          , next billing date is{" "}
-          <span className="font-semibold text-[var(--admin-on-surface)]">
-            {formatLongDate(summary.nextBillingAt)}
-          </span>
-          .
-        </p>
+        {planKnown ? (
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">
+            Your active learners, storage and video use against your plan. Plan active from{" "}
+            <span className="font-semibold text-[var(--admin-on-surface)]">
+              {formatLongDate(summary.planStartedAt)}
+            </span>
+            , next billing date{" "}
+            <span className="font-semibold text-[var(--admin-on-surface)]">
+              {formatLongDate(summary.nextBillingAt)}
+            </span>
+            .
+          </p>
+        ) : (
+          <p className="text-sm text-[var(--admin-on-surface-variant)]">
+            Your active learners, storage and video use. No plan is on record for your academy yet,
+            so there are no limits or billing dates to show. Your platform provider adds the plan.
+          </p>
+        )}
       </header>
+
+      {mauPercent != null && mauPercent > 100 ? (
+        <p
+          role="alert"
+          className="rounded-xl border border-[color-mix(in_srgb,var(--admin-danger)_28%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-danger)_10%,var(--admin-surface))] px-4 py-3 text-sm font-medium text-[var(--admin-danger)]"
+        >
+          {formatNumber(summary.currentMau)} people were active this month,{" "}
+          {formatNumber(mauPercent)}% of your plan&apos;s limit of{" "}
+          {formatNumber(summary.limits.mau ?? 0)}. Talk to your platform provider about a larger
+          plan.
+        </p>
+      ) : null}
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <KpiTile
-          label="Average MAU"
-          value={String(summary.currentMau)}
+          label="Monthly active users"
+          value={formatNumber(summary.currentMau)}
           hint
           used={summary.currentMau}
           limit={summary.limits.mau}
-          format={(n) => n.toLocaleString()}
+          planKnown={planKnown}
+          format={(n) => formatNumber(n)}
         />
-        <KpiTile label="Total Learners" value={String(summary.totalLearners)} />
+        <KpiTile label="Total learners" value={formatNumber(summary.totalLearners)} />
         <KpiTile
-          label="Total Video Hours"
+          label="Video hours"
           value={formatHours(summary.totalVideoHours)}
           hint
           used={summary.totalVideoHours}
           limit={summary.limits.videoHours}
+          planKnown={planKnown}
           format={formatHours}
         />
         <KpiTile
-          label="Total Storage Used"
+          label="Storage used"
           value={formatGb(summary.totalStorageGb)}
           used={summary.totalStorageGb}
           limit={summary.limits.storageGb}
+          planKnown={planKnown}
           format={formatGb}
         />
-        <KpiTile label="Subscribed Plan" value={summary.planName ?? "—"} emphasise />
+        <KpiTile label="Plan" value={summary.planName ?? "No plan on record"} emphasise />
       </section>
 
-      <p className="flex items-center gap-1.5 text-sm text-[var(--admin-on-surface-variant)]">
-        <Info className="h-4 w-4" aria-hidden="true" />
-        The data presented is from {formatShortDate(summary.planStartedAt)}
-      </p>
+      {summary.planStartedAt ? (
+        <p className="flex items-center gap-1.5 text-sm text-[var(--admin-on-surface-variant)]">
+          <Info className="h-4 w-4" aria-hidden="true" />
+          The data presented is from {formatShortDate(summary.planStartedAt)}
+        </p>
+      ) : null}
 
       <StorageAlert summary={summary} />
 
@@ -122,6 +149,7 @@ function KpiTile({
   emphasise = false,
   used,
   limit,
+  planKnown = true,
   format,
 }: {
   label: string;
@@ -130,11 +158,13 @@ function KpiTile({
   emphasise?: boolean;
   used?: number;
   limit?: number | null;
+  planKnown?: boolean;
   format?: (value: number) => string;
 }) {
   const percent = used != null ? usagePercent(used, limit ?? null) : null;
   const showBar = used != null && limit != null && limit > 0 && format != null;
   const showUnlimited = used != null && limit === null;
+  const over = percent != null && percent > 100;
 
   return (
     <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-3.5 shadow-sm">
@@ -152,16 +182,22 @@ function KpiTile({
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--admin-surface-high)]">
             <div
               className="h-full rounded-full motion-safe:transition-all"
-              style={{ width: `${String(percent)}%`, backgroundColor: limitBarColor(percent) }}
+              style={{
+                width: `${String(Math.min(100, percent))}%`,
+                backgroundColor: limitBarColor(percent),
+              }}
             />
           </div>
-          <p className="text-[10px] text-[var(--admin-on-surface-variant)]">
-            {format(used)} / {format(limit)} · {String(percent)}%
+          <p
+            className={`text-[10px] ${over ? "font-semibold text-[var(--admin-danger)]" : "text-[var(--admin-on-surface-variant)]"}`}
+          >
+            {format(used)} of {format(limit)} · {formatNumber(percent)}%
+            {over ? " · over your plan limit" : ""}
           </p>
         </div>
       ) : showUnlimited ? (
         <p className="mt-2 text-[10px] font-medium text-[var(--admin-on-surface-variant)]">
-          Unlimited
+          {planKnown ? "Unlimited" : "No limit set"}
         </p>
       ) : null}
     </div>
@@ -209,7 +245,7 @@ function MauChartPanel({ summary, now }: { summary: UsageSummary; now: Date }) {
     const byPeriod = new Map(series.map((point) => [point.period, point.value]));
     return buckets.map((bucket) => byPeriod.get(bucket.period) ?? 0);
   }, [buckets, granularity, summary.mau]);
-  const currentMonth = `${now.toLocaleString("en", { month: "short" })} ${String(now.getFullYear())}`;
+  const currentMonth = `${formatDateTime(now, { month: "short" })} ${String(now.getFullYear())}`;
 
   return (
     <section className={panelClassName} aria-labelledby="mau-heading">
@@ -259,6 +295,7 @@ function MauChartPanel({ summary, now }: { summary: UsageSummary; now: Date }) {
 function ComparisonTiles({ comparison }: { comparison: UsageSummary["mau"]["comparison"] }) {
   const fmt = (value: number | null) => (value == null ? "–" : String(value));
   const current = comparison.current;
+  const growth = mauGrowth(comparison);
   const tiles = [
     { label: "Current", value: String(current) },
     { label: "1 months ago", value: fmt(comparison.m1) },
@@ -282,11 +319,19 @@ function ComparisonTiles({ comparison }: { comparison: UsageSummary["mau"]["comp
       </div>
       <p className="flex items-center gap-1.5 text-sm text-[var(--admin-on-surface-variant)]">
         <TrendingUp className="h-4 w-4" aria-hidden="true" />
-        Your MAU has grown{" "}
-        <span className="font-semibold text-[var(--admin-success)]">
-          {formatGrowthLabel(current)}
-        </span>{" "}
-        over the last 9 months. Growth compares each period to your current balance.
+        {growth ? (
+          <span>
+            Monthly active users have {growth.percent >= 0 ? "grown" : "fallen"}{" "}
+            <span
+              className={`font-semibold ${growth.percent >= 0 ? "text-[var(--admin-success)]" : "text-[var(--admin-danger)]"}`}
+            >
+              {formatNumber(Math.abs(growth.percent))}%
+            </span>{" "}
+            since {growth.months === 1 ? "last month" : `${String(growth.months)} months ago`}.
+          </span>
+        ) : (
+          <span>There is no earlier month to compare with yet.</span>
+        )}
       </p>
     </div>
   );

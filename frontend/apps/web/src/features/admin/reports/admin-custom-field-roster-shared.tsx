@@ -10,6 +10,7 @@ import {
   type CustomFieldRosterPayload,
 } from "./admin-custom-field-roster-api";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 export function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -76,7 +77,7 @@ export function formatDateShort(value: string | null, viewer: ViewerLocale): str
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

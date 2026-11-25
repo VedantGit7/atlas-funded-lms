@@ -1,6 +1,7 @@
 import { csvRow } from "../../../lib/export/csv";
 import type { PaymentOrder, PaymentOrderFault } from "./payment-orders-api";
 import type { ViewerLocale } from "./viewer-time";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 /**
  * Presentation vocabulary for the payment order ledger.
@@ -89,7 +90,7 @@ export function formatTimestampFor(iso: string | null, viewer: ViewerLocale): st
   if (iso === null) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",

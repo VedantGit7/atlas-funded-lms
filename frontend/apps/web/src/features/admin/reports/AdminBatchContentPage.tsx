@@ -38,6 +38,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDateTime as academyFormatDateTime } from "../../../lib/format/academy-format";
 
 type ContentView = BatchContentView;
 type MessageMode = "stalled" | "selected";
@@ -109,7 +110,7 @@ function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(d, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

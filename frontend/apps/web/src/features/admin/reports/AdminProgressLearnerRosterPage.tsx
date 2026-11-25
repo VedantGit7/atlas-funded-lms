@@ -44,6 +44,7 @@ import { CohortActionsDrawer, type CohortDrawerMode } from "./CohortActionsDrawe
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 const ENROLLED_TYPE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "", label: "All types" },
@@ -138,14 +139,14 @@ function formatRelativeActivityFor(iso: string | null, viewer: ViewerLocale): st
       "day",
     );
   }
-  return date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone });
+  return formatDate(date, { timeZone: viewer.timeZone });
 }
 
 function formatAbsoluteDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     dateStyle: "medium",
     timeStyle: "short",

@@ -35,6 +35,7 @@ import { downloadReportExport, pollReportRunUntilComplete } from "./admin-report
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate as academyFormatDate } from "../../../lib/format/academy-format";
 
 const PAGE_SIZE_OPTIONS = [
   { value: "12", label: "12" },
@@ -80,7 +81,7 @@ function formatDateFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return academyFormatDate(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",

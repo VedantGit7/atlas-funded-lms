@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ClientApiError } from "../../../lib/client-api";
+import { currentAcademyFormat } from "../../../lib/format/academy-format";
 
 export type NewExportFormDefaults<
   TFormat extends string,
@@ -47,7 +48,7 @@ export function useNewExportForm<
   const [scheduleName, setScheduleName] = useState("");
   const [cadence, setCadence] = useState<TCadence>(defaults.cadence);
   const [time, setTime] = useState(defaults.time);
-  const [timezone, setTimezone] = useState("UTC");
+  const [timezone, setTimezone] = useState(() => currentAcademyFormat().timeZone);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

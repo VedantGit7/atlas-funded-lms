@@ -5,6 +5,7 @@ import { platformApi } from "../platform-api";
 import { usePlatformReason } from "./PlatformReasonProvider";
 import { PlatformReasonDialog, PlatformReasonGate } from "./PlatformReasonDialog";
 import { loadActiveSupportSessionsAction } from "../../../lib/server/platform-server-actions";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type SupportSession = {
   sessionId: string;
@@ -116,7 +117,7 @@ export function SupportSessionPanel() {
                   <div className="text-xs text-muted-foreground">{session.tenantSlug}</div>
                 </td>
                 <td className="py-2 pr-4">{session.sessionId.slice(0, 8)}</td>
-                <td className="py-2">{new Date(session.expiresAt).toLocaleString()}</td>
+                <td className="py-2">{formatDateTime(new Date(session.expiresAt))}</td>
               </tr>
             ))}
           </tbody>

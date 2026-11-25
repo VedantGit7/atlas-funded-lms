@@ -44,6 +44,7 @@ import {
   productToDraft,
 } from "./affiliates-admin-shared";
 import type { AffiliatesAdminView } from "./use-affiliates-admin";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 /** Programme settings: commission, cookie window, payouts and terms. */
 export function AffiliateSettingsTab({ view }: { view: AffiliatesAdminView }) {
@@ -319,8 +320,8 @@ export function AffiliateSettingsTab({ view }: { view: AffiliatesAdminView }) {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <StatCard
                 label="Active partners"
-                value={summary.activePartners.toLocaleString()}
-                hint={`${summary.totalPartners.toLocaleString()} total partners`}
+                value={formatNumber(summary.activePartners)}
+                hint={`${formatNumber(summary.totalPartners)} total partners`}
               />
               <StatCard
                 label="Unpaid commissions"
@@ -366,9 +367,9 @@ export function AffiliateProductsTab({ view }: { view: AffiliatesAdminView }) {
                 label="Unpaid commissions"
                 value={formatMoney(summary.unpaidCents, DEFAULT_CURRENCY)}
               />
-              <StatCard label="Active partners" value={summary.activePartners.toLocaleString()} />
-              <StatCard label="Enabled products" value={summary.enabledProducts.toLocaleString()} />
-              <StatCard label="Pending requests" value={summary.pendingRequests.toLocaleString()} />
+              <StatCard label="Active partners" value={formatNumber(summary.activePartners)} />
+              <StatCard label="Enabled products" value={formatNumber(summary.enabledProducts)} />
+              <StatCard label="Pending requests" value={formatNumber(summary.pendingRequests)} />
             </div>
           ) : null}
 
@@ -1133,8 +1134,8 @@ export function AffiliateRequestsTab({ view }: { view: AffiliatesAdminView }) {
         <div className="space-y-6">
           {summary ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <StatCard label="Pending requests" value={summary.pendingRequests.toLocaleString()} />
-              <StatCard label="Active partners" value={summary.activePartners.toLocaleString()} />
+              <StatCard label="Pending requests" value={formatNumber(summary.pendingRequests)} />
+              <StatCard label="Active partners" value={formatNumber(summary.activePartners)} />
               <StatCard
                 label="Unpaid commissions"
                 value={formatMoney(summary.unpaidCents, DEFAULT_CURRENCY)}
@@ -1294,9 +1295,9 @@ export function AffiliatePayoutsTab({ view }: { view: AffiliatesAdminView }) {
               />
               <StatCard
                 label="Partners with balance"
-                value={summary.partnersWithUnpaid.toLocaleString()}
+                value={formatNumber(summary.partnersWithUnpaid)}
               />
-              <StatCard label="Active partners" value={summary.activePartners.toLocaleString()} />
+              <StatCard label="Active partners" value={formatNumber(summary.activePartners)} />
             </div>
           ) : null}
 

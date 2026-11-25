@@ -65,6 +65,7 @@ import {
   SchoolVitalsSkeleton,
   schoolVitalsWidgetSpanClass,
 } from "./SchoolVitalsWidgets";
+import { formatTime } from "../../../lib/format/academy-format";
 
 const linkIconClassName = "h-4 w-4";
 
@@ -199,7 +200,7 @@ function clockLabel(iso: string | undefined): string | undefined {
   if (!iso) return undefined;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return undefined;
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return formatTime(date, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 const liveChipClassName =

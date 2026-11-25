@@ -22,6 +22,7 @@ import {
 import type { SubscriptionView } from "@atlas/domain-config/schemas/subscriptions";
 import { dropdownPanelSurfaceClassName } from "../../../studio/courses/admin-form-dropdown-shared";
 import { billingBackLinkClassName } from "../billing-admin-shared";
+import { academyDateTimeFormat } from "../../../../lib/format/academy-format";
 
 type AdminSubscriptionsPageProps = {
   subscriptions: SubscriptionView[];
@@ -42,16 +43,14 @@ type ColumnDef = {
   render: (row: SubscriptionView) => React.ReactNode;
 };
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
+// Built when used: the academy's time zone is known only while rendering.
+const dateFormatter = () =>
+  academyDateTimeFormat({ day: "2-digit", month: "short", year: "numeric" });
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "—" : dateFormatter.format(date);
+  return Number.isNaN(date.getTime()) ? "—" : dateFormatter().format(date);
 }
 
 function titleCase(value: string): string {

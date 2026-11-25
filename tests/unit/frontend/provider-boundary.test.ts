@@ -25,9 +25,12 @@ it("provides learner theme, currency and feedback without loading operational qu
     initialFxRates: { USD: 1, INR: 86 },
   });
   expect(state.queryLoads).toBe(0);
-  expect(rendered.type).toBe("theme-provider");
-  expect(rendered.props.children.type).toBe("currency-provider");
-  expect(rendered.props.children.props.initialDisplayCurrency).toBe("INR");
-  expect(rendered.props.children.props.children[0]).toBe(children);
-  expect(rendered.props.children.props.children[1].type).toBe("toast-viewport");
+  // The academy's date and money format wraps everything (S2.4).
+  expect(rendered.props.value).toMatchObject({ timeZone: "UTC", currency: "INR" });
+  const theme = rendered.props.children;
+  expect(theme.type).toBe("theme-provider");
+  expect(theme.props.children.type).toBe("currency-provider");
+  expect(theme.props.children.props.initialDisplayCurrency).toBe("INR");
+  expect(theme.props.children.props.children[0]).toBe(children);
+  expect(theme.props.children.props.children[1].type).toBe("toast-viewport");
 });

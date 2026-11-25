@@ -1,3 +1,5 @@
+import { formatDate, formatNumber } from "../../../lib/format/academy-format";
+
 type TrendRow = {
   rollupKey: string;
   periodStart: string;
@@ -39,8 +41,8 @@ export function AnalyticsTrendTable({ rows, caption }: AnalyticsTrendTableProps)
           {rows.map((row) => (
             <tr key={`${row.rollupKey}-${row.periodStart}`} className="border-b">
               <td className="px-3 py-2">{formatRollupLabel(row.rollupKey)}</td>
-              <td className="px-3 py-2">{new Date(row.periodStart).toLocaleDateString()}</td>
-              <td className="px-3 py-2">{row.count.toLocaleString()}</td>
+              <td className="px-3 py-2">{formatDate(new Date(row.periodStart))}</td>
+              <td className="px-3 py-2">{formatNumber(row.count)}</td>
             </tr>
           ))}
         </tbody>
