@@ -138,6 +138,8 @@ describe("plain words and real numbers (S2.4)", () => {
     expect(humanizeAuditAction("item_import_batch.undone")).toBe("Question import batch undone");
     expect(humanizeAuditTarget("course_lesson")).toBe("Lesson");
     expect(humanizeAuditTarget("course_module")).toBe("Section");
+    expect(humanizeAuditTarget("tenant_config")).toBe("Academy settings");
+    expect(humanizeAuditTarget("tenant_domain")).toBe("Academy domain");
     const ids = {
       actorMembershipId: "92f3cd57-0000-4000-8000-000000000000",
       platformPrincipalId: null,

@@ -64,7 +64,7 @@ const METRIC_CATALOG: Record<ResourceUsageMetricKey, MetricCatalogEntry> = {
     limitField: "storageGb",
   },
   "usage.total_learners": {
-    label: "Total learners",
+    label: "Active learners",
     unit: "count",
     category: "Learners",
     definition: "Count of learner memberships on this academy, including inactive seats.",

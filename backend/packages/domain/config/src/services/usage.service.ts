@@ -145,7 +145,9 @@ export async function getUsageSummary(tx: TenantTx): Promise<UsageSummaryRespons
       },
       limits,
       kpis: {
-        averageMau: metrics.currentMau,
+        // The same count the chart shows for this month, so the tile and
+        // the chart never disagree (staging showed 506 beside 507).
+        averageMau: comparison.current,
         totalLearners: metrics.totalLearners,
         totalVideoHours: 0,
         totalStorageGb: storageGb,

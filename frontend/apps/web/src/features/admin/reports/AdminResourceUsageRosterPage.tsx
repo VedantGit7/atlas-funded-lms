@@ -108,7 +108,7 @@ function downloadOverviewCsv(overview: ResourceUsageOverview) {
     ["Active users (30d)", String(meters.activeUsers30d)],
     ["Current MAU", String(meters.currentMau)],
     ["MAU limit", limits.mau == null ? "Unlimited" : String(limits.mau)],
-    ["Total learners", String(meters.totalLearners)],
+    ["Active learners", String(meters.totalLearners)],
     ["Learners active (30d)", String(meters.activeLearners30d)],
     ["Tests taken", String(meters.testSubmits)],
     ["Products", String(meters.products)],
@@ -688,7 +688,7 @@ export function AdminResourceUsageRosterPage({
                     className="block transition-opacity hover:opacity-90"
                   >
                     <h3 className="mb-2 text-[11px] font-medium tracking-wider text-[var(--admin-on-surface-variant)] uppercase">
-                      Total learners
+                      Active learners
                     </h3>
                     <p className="font-mono text-[32px] leading-none font-bold text-[var(--admin-on-surface)]">
                       {formatCount(meters.totalLearners, viewer)}

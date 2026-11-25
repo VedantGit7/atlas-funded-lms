@@ -20,7 +20,7 @@ export default async function AdminRolesPage() {
                 Roles &amp; Permissions
               </h1>
               <p className="text-base text-[var(--admin-on-surface-variant)]">
-                View tenant roles and manage custom role definitions.
+                The roles in your academy and what each one can do.
               </p>
             </div>
             <CreateRoleDialog />
