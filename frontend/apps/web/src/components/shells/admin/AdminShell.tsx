@@ -582,7 +582,8 @@ export function AdminShell({
         }}
       />
 
-      <span className="sr-only">Request ID: {requestId}</span>
+      {/* Kept for support lookups, not shown or read aloud (QA review 1 m1). */}
+      <span hidden data-request-id={requestId} />
     </div>
   );
 }
