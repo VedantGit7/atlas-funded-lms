@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./http/errors": "./src/http/errors.ts",
+    "./http/validation-message": "./src/http/validation-message.ts",
     "./http/headers": "./src/http/headers.ts",
     "./http/api-proxy": "./src/http/api-proxy.ts",
     "./id/uuid-v7": "./src/id/uuid-v7.ts",
