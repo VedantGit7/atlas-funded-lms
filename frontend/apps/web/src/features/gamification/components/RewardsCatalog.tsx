@@ -6,6 +6,7 @@ import { cn } from "@atlas/design-system";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import type { RewardType } from "@atlas/contracts/gamification/rewards.schemas";
 import { formatXp, humanizeKey, rewardTypeMeta } from "../gamification-view";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type Balance = {
   currencyKey: string;
@@ -279,7 +280,7 @@ export function RewardsCatalog({ balances, items, redemptions }: RewardsCatalogP
                   <span className="truncate text-foreground">{entry.rewardName}</span>
                   <span className="shrink-0 tabular-nums">
                     {entry.status === "fulfilled" ? "Fulfilled" : "Pending"} ·{" "}
-                    {new Date(entry.redeemedAt).toLocaleDateString(undefined, {
+                    {formatDate(new Date(entry.redeemedAt), {
                       month: "short",
                       day: "numeric",
                     })}

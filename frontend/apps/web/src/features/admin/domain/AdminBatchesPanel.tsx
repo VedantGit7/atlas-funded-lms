@@ -22,6 +22,7 @@ import {
   type Batch,
 } from "./admin-domain-api";
 import { AdminDomainPageShell, adminDomainCardClassName } from "./admin-domain-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export function AdminBatchesPanel() {
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -270,7 +271,7 @@ export function AdminBatchesPanel() {
                     <td className="px-4 py-3 font-mono text-xs">{batch.key}</td>
                     <td className="px-4 py-3">{batch.name}</td>
                     <td className="px-4 py-3 capitalize">{batch.status.toLowerCase()}</td>
-                    <td className="px-4 py-3">{new Date(batch.createdAt).toLocaleString()}</td>
+                    <td className="px-4 py-3">{formatDateTime(new Date(batch.createdAt))}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         <button

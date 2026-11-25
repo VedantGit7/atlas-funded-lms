@@ -3,6 +3,7 @@ import type { studioCourseDetailSchema } from "@atlas/contracts/courses/course-a
 import { mergeCourseAccessIntoTags, parseCourseAccessFromTags } from "./course-access-settings";
 import { PRICING_PLAN_DEFAULT_LOCATION } from "./pricing-plan-location-options";
 import { defaultPricingPlanOfferStartAt } from "./pricing-plan-datetime-utils";
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 
@@ -198,7 +199,7 @@ export function resolvePricingPlanExpiryDate(
 export function formatPricingPlanExpiryDate(isoDate: string): string {
   if (!isPricingPlanIsoDate(isoDate)) return isoDate;
   const date = new Date(`${isoDate}T00:00:00`);
-  return new Intl.DateTimeFormat(undefined, {
+  return academyDateTimeFormat({
     month: "short",
     day: "numeric",
     year: "numeric",

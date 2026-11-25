@@ -42,6 +42,7 @@ import {
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 function operatorLabel(operator: string): string {
   switch (operator) {
@@ -138,7 +139,7 @@ function formatDateShortFor(value: string | null, viewer: ViewerLocale): string 
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
@@ -441,7 +442,7 @@ function CustomFieldSegmentDetailReport({
   fieldLabels.set("learner:total_spent_cents", "Total spent");
   fieldLabels.set("learner:email", "Email");
   fieldLabels.set("learner:learner_name", "Learner");
-  fieldLabels.set("learner:enrollment_count", "Enrolments");
+  fieldLabels.set("learner:enrollment_count", "Enrollments");
   fieldLabels.set("learner:last_active_at", "Last active");
   fieldLabels.set("learner:signed_up_at", "Signed up");
 

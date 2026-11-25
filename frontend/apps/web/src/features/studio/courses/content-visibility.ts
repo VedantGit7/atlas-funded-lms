@@ -53,7 +53,7 @@ export function contentVisibilityAction(args: {
     return { label: `Publish ${args.kind.toLowerCase()}`, visible: true };
   }
   if (isContentHidden(args.status)) return { label: "Show to learners", visible: true };
-  return { label: "Hide from learners", visible: false };
+  return { label: "Hide", visible: false };
 }
 
 /** One line for the chapters panel explaining what changes do right now. */

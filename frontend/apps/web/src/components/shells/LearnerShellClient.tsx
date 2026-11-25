@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   Award,
   BarChart3,
@@ -53,6 +53,7 @@ import { LearnerNotificationPopover } from "../../features/notifications/compone
 import { ShellBottomNav } from "./shared/ShellBottomNav";
 import { ShellSkipLink } from "./shared/ShellSkipLink";
 import { isLearnerNavActive } from "./shared/shell-utils";
+import { AcademyFormatProvider, useAcademyFormat } from "../../lib/format/academy-format-context";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/": Home,
@@ -77,6 +78,7 @@ type LearnerShellClientProps = {
     membershipId: string;
     displayName: string | null;
     avatarUrl: string | null;
+    timezone?: string | null;
   };
   navigationItems: LearnerNavItem[];
   unreadNotificationCount: number | null;
@@ -223,6 +225,18 @@ export function LearnerShellClient({
   }
 
   const initials = (member.displayName?.trim() || "You").slice(0, 1).toUpperCase();
+  // Learners read times in their own time zone when they chose one, else the academy's.
+  const academyFormat = useAcademyFormat();
+  const learnerFormat = useMemo(() => {
+    const zone = member.timezone?.trim();
+    if (!zone) return academyFormat;
+    try {
+      new Intl.DateTimeFormat("en", { timeZone: zone });
+      return { ...academyFormat, timeZone: zone };
+    } catch {
+      return academyFormat;
+    }
+  }, [member.timezone, academyFormat]);
 
   return (
     <div className="learner-shell flex min-h-screen bg-background text-foreground">
@@ -329,7 +343,7 @@ export function LearnerShellClient({
         </header>
 
         <main id="main-content" className="flex-1 px-4 py-6 md:px-8">
-          {children}
+          <AcademyFormatProvider value={learnerFormat}>{children}</AcademyFormatProvider>
         </main>
       </div>
 

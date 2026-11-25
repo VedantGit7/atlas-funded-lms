@@ -72,11 +72,15 @@ export type UsageSummary = {
 };
 
 /** Percentage of a limit consumed, or null when the metric is unlimited. */
+/**
+ * The real share of the limit used, which can pass 100 (506 of 100 is 506%,
+ * not 100%: QA review 2 H6). Bars cap their own width.
+ */
 export function usagePercent(used: number, limit: number | null): number | null {
   if (limit == null || limit <= 0) {
     return null;
   }
-  return Math.min(100, Math.round((used / limit) * 100));
+  return Math.round((used / limit) * 100);
 }
 
 export type Granularity = "days" | "weeks" | "months";
@@ -172,6 +176,28 @@ export function formatHours(value: number): string {
 }
 
 /** Growth vs. current: current is the only real balance, history is unmetered. */
-export function formatGrowthLabel(current: number): string {
-  return current > 0 ? "Infinity%" : "0%";
+/**
+ * The change from the oldest month on record (up to 9 months back) to now, or
+ * null when there is no earlier month to compare with. It used to print
+ * "Infinity%" whenever there was any activity at all.
+ */
+export function mauGrowth(comparison: {
+  current: number;
+  m1: number | null;
+  m3: number | null;
+  m6: number | null;
+  m9: number | null;
+}): { percent: number; months: number } | null {
+  const earlier: Array<[number, number | null]> = [
+    [9, comparison.m9],
+    [6, comparison.m6],
+    [3, comparison.m3],
+    [1, comparison.m1],
+  ];
+  for (const [months, value] of earlier) {
+    if (value != null && value > 0) {
+      return { percent: Math.round(((comparison.current - value) / value) * 100), months };
+    }
+  }
+  return null;
 }

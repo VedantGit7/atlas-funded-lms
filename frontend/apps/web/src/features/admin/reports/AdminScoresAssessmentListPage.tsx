@@ -38,6 +38,7 @@ import { downloadReportExport, pollReportRunUntilComplete } from "./admin-report
 import { ProgressScoreReportTabs } from "./ProgressScoreReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const PRODUCT_TYPE_LABEL: Record<ScoreProductType, string> = {
   course: "Course",
@@ -125,7 +126,7 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
       "day",
     );
   }
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",

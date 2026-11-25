@@ -46,6 +46,7 @@ import {
   insightTableHeadClassName,
   insightTableRowClassName,
 } from "./admin-insights-shared";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 type MessengerInsightInboxViewProps = {
   slug: string;
@@ -80,7 +81,7 @@ async function copyText(text: string): Promise<boolean> {
 function formatAbsoluteDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -93,7 +94,7 @@ function formatPeriodShort(period: string | undefined): string {
   if (!period) return "";
   const date = new Date(`${period}T12:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 /** Human duration: `1h 14m`, `8d 4h`, `45m`, `12s`. */

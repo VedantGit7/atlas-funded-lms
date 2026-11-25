@@ -12,6 +12,8 @@ import { redirectPendingSecondFactorToLogin } from "./shell-auth-redirect";
 export type LearnerShellMemberProjection = {
   membershipId: string;
   displayName: string | null;
+  /** Their own time zone; learner pages show times in it (QA review 1 M34). */
+  timezone?: string | null;
   avatarUrl: string | null;
 };
 
@@ -67,7 +69,11 @@ export async function loadLearnerShellContext(): Promise<LearnerShellContext> {
     type MeShellResponse = {
       data: {
         membership: { id: string; status: string };
-        profile: { displayName: string | null; avatarUrl: string | null } | null;
+        profile: {
+          displayName: string | null;
+          avatarUrl: string | null;
+          timezone?: string | null;
+        } | null;
       };
     };
 
@@ -87,6 +93,7 @@ export async function loadLearnerShellContext(): Promise<LearnerShellContext> {
         membershipId: me.data.membership.id,
         displayName: me.data.profile?.displayName ?? null,
         avatarUrl: me.data.profile?.avatarUrl ?? null,
+        timezone: me.data.profile?.timezone ?? null,
       },
       navigation,
       unreadNotificationCount,

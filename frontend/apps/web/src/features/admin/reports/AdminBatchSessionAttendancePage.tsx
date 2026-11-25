@@ -50,6 +50,10 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import {
+  formatDateTime as academyFormatDateTime,
+  formatTime,
+} from "../../../lib/format/academy-format";
 
 type SortBy = "learner_name" | "joined_at" | "left_at" | "watch_pct" | "status" | "rejoins";
 type KindFilter = "any" | BatchLiveSessionAttendanceKind;
@@ -115,7 +119,7 @@ function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(d, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -129,7 +133,7 @@ function formatTimeOnlyFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleTimeString(viewer.locale, {
+  return formatTime(d, {
     timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",

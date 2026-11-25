@@ -18,6 +18,7 @@ import {
   formatActorLabel,
   formatAuditTimestamp,
   humanizeAuditAction,
+  humanizeAuditTarget,
   infoBannerClassName,
   labelClassName,
   matchesAuditSearch,
@@ -27,6 +28,8 @@ import {
   selectClassName,
   statusBannerClassName,
 } from "./audit-admin-shared";
+import { timeZoneName } from "../../../lib/format/academy-settings";
+import { useAcademyFormat } from "../../../lib/format/academy-format-context";
 
 type AuditEntryItem = z.infer<typeof AuditEntryViewSchema>;
 
@@ -58,6 +61,7 @@ export function AuditLogViewer({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const { timeZone } = useAcademyFormat();
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -131,7 +135,7 @@ export function AuditLogViewer({
             </span>
           </div>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[var(--admin-on-surface-variant)]">
-            Append-only tenant audit history with safe entry projections.
+            Every change made in your academy, newest first. Times are in {timeZoneName(timeZone)}.
           </p>
         </div>
         <button
@@ -245,16 +249,12 @@ export function AuditLogViewer({
                   <p className="truncate text-sm font-medium text-[var(--admin-on-surface)]">
                     {humanizeAuditAction(entry.action)}
                   </p>
-                  <span className={`${actionBadgeClassName} truncate`}>{entry.action}</span>
+                  <p className="truncate text-xs text-[var(--admin-on-surface-variant)]">
+                    by {formatActorLabel(entry)}
+                  </p>
                 </div>
                 <div className="min-w-0 text-sm text-[var(--admin-on-surface)]">
-                  <span className="font-medium">{entry.targetType}</span>
-                  {entry.targetId ? (
-                    <span className="text-[var(--admin-on-surface-variant)]">
-                      {" "}
-                      &middot; {entry.targetId.slice(0, 8)}
-                    </span>
-                  ) : null}
+                  <span className="font-medium">{humanizeAuditTarget(entry.targetType)}</span>
                 </div>
                 <div className="text-right">
                   <button
@@ -331,29 +331,16 @@ export function AuditLogViewer({
 
           <dl className="grid gap-4 sm:grid-cols-2">
             <div>
-              <dt className={detailLabelClassName}>Action</dt>
-              <dd className={detailValueClassName}>
-                <span className={actionBadgeClassName}>{selected.action}</span>
-              </dd>
-            </div>
-            <div>
               <dt className={detailLabelClassName}>Occurred</dt>
               <dd className={detailValueClassName}>{formatAuditTimestamp(selected.occurredAt)}</dd>
             </div>
             <div>
               <dt className={detailLabelClassName}>Target</dt>
-              <dd className={detailValueClassName}>
-                {selected.targetType}
-                {selected.targetId ? ` (${selected.targetId})` : ""}
-              </dd>
+              <dd className={detailValueClassName}>{humanizeAuditTarget(selected.targetType)}</dd>
             </div>
             <div>
               <dt className={detailLabelClassName}>Actor</dt>
               <dd className={detailValueClassName}>{formatActorLabel(selected)}</dd>
-            </div>
-            <div className="sm:col-span-2">
-              <dt className={detailLabelClassName}>Request ID</dt>
-              <dd className={`${detailValueClassName} font-mono text-xs`}>{selected.requestId}</dd>
             </div>
             {selected.reason ? (
               <div className="sm:col-span-2">
@@ -361,17 +348,46 @@ export function AuditLogViewer({
                 <dd className={detailValueClassName}>{selected.reason}</dd>
               </div>
             ) : null}
-            {selected.metadata ? (
-              <div className="sm:col-span-2">
-                <dt className={detailLabelClassName}>Metadata</dt>
-                <dd className="mt-1">
-                  <pre className={metadataPreClassName}>
-                    {JSON.stringify(selected.metadata, null, 2)}
-                  </pre>
+          </dl>
+
+          {/* For support: the codes a developer needs to trace this entry. */}
+          <details className="rounded-lg border border-[var(--admin-border)] px-4 py-3">
+            <summary className="cursor-pointer text-sm font-semibold text-[var(--admin-on-surface)]">
+              Details for support
+            </summary>
+            <dl className="mt-3 grid gap-4 sm:grid-cols-2">
+              <div>
+                <dt className={detailLabelClassName}>Event code</dt>
+                <dd className={detailValueClassName}>
+                  <span className={actionBadgeClassName}>{selected.action}</span>
                 </dd>
               </div>
-            ) : null}
-          </dl>
+              {selected.targetId ? (
+                <div>
+                  <dt className={detailLabelClassName}>Record ID</dt>
+                  <dd className={`${detailValueClassName} font-mono text-xs`}>
+                    {selected.targetId}
+                  </dd>
+                </div>
+              ) : null}
+              <div className="sm:col-span-2">
+                <dt className={detailLabelClassName}>Request ID</dt>
+                <dd className={`${detailValueClassName} font-mono text-xs`}>
+                  {selected.requestId}
+                </dd>
+              </div>
+              {selected.metadata ? (
+                <div className="sm:col-span-2">
+                  <dt className={detailLabelClassName}>Recorded data</dt>
+                  <dd className="mt-1">
+                    <pre className={metadataPreClassName}>
+                      {JSON.stringify(selected.metadata, null, 2)}
+                    </pre>
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          </details>
         </aside>
       ) : null}
     </section>

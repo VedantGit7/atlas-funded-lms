@@ -178,7 +178,7 @@ export function LearnerProductEnrolDrawer({
     <div className="fixed inset-0 z-[70] flex justify-end">
       <button
         type="button"
-        aria-label="Cancel enrolment"
+        aria-label="Cancel enrollment"
         tabIndex={-1}
         className="absolute inset-0 bg-[var(--admin-scrim)] backdrop-blur-sm motion-safe:animate-[admin-fade-in_0.15s_ease-out]"
         onClick={() => {
@@ -336,12 +336,12 @@ export function LearnerProductEnrolDrawer({
               </div>
 
               <DropdownField
-                label={<span className={fieldLabelClassName}>Enrolment type</span>}
+                label={<span className={fieldLabelClassName}>Enrollment type</span>}
                 labelId={typeFieldId}
                 open={typeOpen}
                 disabled={busy}
                 portalZIndex={85}
-                panelAriaLabel="Enrolment type"
+                panelAriaLabel="Enrollment type"
                 onToggle={() => {
                   setTypeOpen((previous) => !previous);
                 }}
@@ -453,7 +453,7 @@ function ConfirmStep({
         </span>
 
         <div>
-          <h3 className="text-base font-bold text-[var(--admin-on-surface)]">Confirm enrolment</h3>
+          <h3 className="text-base font-bold text-[var(--admin-on-surface)]">Confirm enrollment</h3>
           <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
             <span className="font-semibold text-[var(--admin-on-surface)]">{learnerName}</span> will
             be enrolled into{" "}
@@ -469,7 +469,7 @@ function ConfirmStep({
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3 px-4 py-2.5">
-            <dt className="text-[var(--admin-on-surface-variant)]">Enrolment type</dt>
+            <dt className="text-[var(--admin-on-surface-variant)]">Enrollment type</dt>
             <dd className="font-medium text-[var(--admin-on-surface)]">{enrolledType}</dd>
           </div>
           <div className="flex items-center justify-between gap-3 px-4 py-2.5">
@@ -511,7 +511,7 @@ function ConfirmStep({
           onClick={onConfirm}
           className={managePrimaryButtonClassName}
         >
-          {busy ? "Enrolling…" : "Confirm and enrol"}
+          {busy ? "Enrolling…" : "Confirm and enroll"}
         </button>
       </footer>
     </>

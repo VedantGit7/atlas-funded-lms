@@ -205,6 +205,11 @@ export async function listMembersPaginated(args: {
   };
 }
 
+/**
+ * One meaning of "learner" everywhere (QA review 1 M8): a member who holds no
+ * staff role. Owners, admins, instructors, moderators and any custom role are
+ * staff, even when they also hold the learner role.
+ */
 export async function getMemberStatsForTenant(args: {
   tx: Tx;
   tenantId: string;
@@ -216,6 +221,9 @@ export async function getMemberStatsForTenant(args: {
   suspendedMembers: number;
   activeNow: number;
   courseCompletionRate: number | null;
+  totalLearners: number;
+  activeLearners: number;
+  staffMembers: number;
 }> {
   const statusRows = await args.tx.$queryRaw<
     Array<{
@@ -224,8 +232,26 @@ export async function getMemberStatsForTenant(args: {
       pending_invites: bigint;
       suspended_members: bigint;
       active_now: bigint;
+      total_learners: bigint;
+      active_learners: bigint;
+      staff_members: bigint;
     }>
   >`
+    with members as (
+      select
+        m.*,
+        exists (
+          select 1
+          from user_roles ur
+          join roles r on r.tenant_id = ur.tenant_id and r.id = ur.role_id
+          where ur.tenant_id = m.tenant_id
+            and ur.membership_id = m.id
+            and r.deleted_at is null
+            and r.key <> 'learner'
+        ) as is_staff
+      from memberships m
+      where m.tenant_id = ${args.tenantId}::uuid
+    )
     select
       count(*) filter (where status <> 'REMOVED')::bigint as total_members,
       count(*) filter (where status = 'ACTIVE' and archived_at is null)::bigint as active_members,
@@ -236,9 +262,13 @@ export async function getMemberStatsForTenant(args: {
           and archived_at is null
           and last_active_at is not null
           and last_active_at >= now() - make_interval(mins => ${args.activeWindowMinutes})
-      )::bigint as active_now
-    from memberships
-    where tenant_id = ${args.tenantId}::uuid
+      )::bigint as active_now,
+      count(*) filter (where status <> 'REMOVED' and not is_staff)::bigint as total_learners,
+      count(*) filter (
+        where status = 'ACTIVE' and archived_at is null and not is_staff
+      )::bigint as active_learners,
+      count(*) filter (where status <> 'REMOVED' and is_staff)::bigint as staff_members
+    from members
   `;
 
   const completionRows = await args.tx.$queryRaw<
@@ -264,6 +294,9 @@ export async function getMemberStatsForTenant(args: {
     suspendedMembers: Number(status?.suspended_members ?? 0n),
     activeNow: Number(status?.active_now ?? 0n),
     courseCompletionRate: totalEnrollments > 0 ? completedEnrollments / totalEnrollments : null,
+    totalLearners: Number(status?.total_learners ?? 0n),
+    activeLearners: Number(status?.active_learners ?? 0n),
+    staffMembers: Number(status?.staff_members ?? 0n),
   };
 }
 

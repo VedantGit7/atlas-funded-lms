@@ -1,3 +1,5 @@
+import { formatNumber } from "../../../lib/format/academy-format";
+
 /**
  * Derived figures for the exchange-rate panel.
  *
@@ -60,8 +62,8 @@ export function rateAgainstHome(
 export function formatFxRate(rate: number): string {
   if (rate === 0) return "0";
   const magnitude = Math.abs(rate);
-  if (magnitude >= 1000) return rate.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  if (magnitude >= 1) return rate.toLocaleString(undefined, { maximumFractionDigits: 4 });
+  if (magnitude >= 1000) return formatNumber(rate, { maximumFractionDigits: 0 });
+  if (magnitude >= 1) return formatNumber(rate, { maximumFractionDigits: 4 });
   // Small rates keep four significant figures rather than four decimals, so a
   // very weak unit never rounds away to zero.
   return rate.toPrecision(4).replace(/0+$/, "").replace(/\.$/, "");

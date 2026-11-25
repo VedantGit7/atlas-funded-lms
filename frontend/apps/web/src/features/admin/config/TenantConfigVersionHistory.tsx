@@ -9,6 +9,7 @@ import {
   sectionTitleClassName,
 } from "../../../app/admin/branding/_components/branding-admin-shared";
 import { tableHeaderClassName } from "./config-admin-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type TenantConfigVersionHistoryProps = {
   versions: TenantConfigVersionView[];
@@ -89,10 +90,10 @@ export function TenantConfigVersionHistory({ versions }: TenantConfigVersionHist
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-[var(--admin-on-surface-variant)]">
-                        {new Date(version.createdAt).toLocaleString()}
+                        {formatDateTime(new Date(version.createdAt))}
                       </td>
-                      <td className="px-6 py-4 font-mono text-xs text-[var(--admin-on-surface-variant)]">
-                        {version.createdByMembershipId?.slice(0, 8) ?? UNKNOWN_PUBLISHER}
+                      <td className="px-6 py-4 text-sm text-[var(--admin-on-surface-variant)]">
+                        {version.createdByName ?? UNKNOWN_PUBLISHER}
                       </td>
                     </tr>
                   );

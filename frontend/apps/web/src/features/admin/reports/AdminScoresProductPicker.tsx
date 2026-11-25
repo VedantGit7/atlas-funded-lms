@@ -29,6 +29,7 @@ import {
 } from "./admin-progress-score-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 const PRODUCT_TABS: Array<{ key: ScoreProductType; label: string }> = [
   { key: "course", label: "Course quiz" },
@@ -107,14 +108,14 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
       "day",
     );
   }
-  return date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone });
+  return formatDate(date, { timeZone: viewer.timeZone });
 }
 
 function formatAbsoluteFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     dateStyle: "medium",
     timeStyle: "short",

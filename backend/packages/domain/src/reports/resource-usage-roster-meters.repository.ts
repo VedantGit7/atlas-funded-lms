@@ -54,6 +54,7 @@ export const resourceUsageRosterMetersRepository = {
       Array<{
         current_mau: number;
         active_users_30d: number;
+        active_learners_30d: number;
         total_learners: number;
         storage_gb: number;
         products: number;
@@ -74,12 +75,37 @@ export const resourceUsageRosterMetersRepository = {
           from tenant_active_days
           where day >= current_date - 29
         ) as active_users_30d,
+        -- Learners are active members with no staff role, the same rule as the
+        -- member stats and the dashboard (QA review 1 M8, m13).
         (
-          select count(distinct m.id)::int
+          select count(distinct tad.membership_id)::int
+          from tenant_active_days tad
+          join memberships m on m.id = tad.membership_id
+          where tad.day >= current_date - 29
+            and not exists (
+              select 1
+              from user_roles ur
+              join roles r on r.tenant_id = ur.tenant_id and r.id = ur.role_id
+              where ur.tenant_id = m.tenant_id
+                and ur.membership_id = m.id
+                and r.deleted_at is null
+                and r.key <> 'learner'
+            )
+        ) as active_learners_30d,
+        (
+          select count(*)::int
           from memberships m
-          join user_roles ur on ur.membership_id = m.id
-          join roles r on r.id = ur.role_id and r.key = 'learner'
           where m.status = 'ACTIVE'
+            and m.archived_at is null
+            and not exists (
+              select 1
+              from user_roles ur
+              join roles r on r.tenant_id = ur.tenant_id and r.id = ur.role_id
+              where ur.tenant_id = m.tenant_id
+                and ur.membership_id = m.id
+                and r.deleted_at is null
+                and r.key <> 'learner'
+            )
         ) as total_learners,
         (
           select coalesce(sum(size_bytes), 0)::float8 / 1e9
@@ -114,6 +140,7 @@ export const resourceUsageRosterMetersRepository = {
     return {
       storageGb: roundGb(row?.storage_gb ?? 0),
       activeUsers30d: row?.active_users_30d ?? 0,
+      activeLearners30d: row?.active_learners_30d ?? 0,
       currentMau: row?.current_mau ?? 0,
       totalLearners: row?.total_learners ?? 0,
       testSubmits: row?.test_submits ?? 0,

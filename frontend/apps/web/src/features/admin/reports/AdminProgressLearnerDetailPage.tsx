@@ -32,6 +32,7 @@ import {
 import { ResetProgressModal } from "./ResetProgressModal";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
 
 type AdminProgressLearnerDetailPageProps = {
   productType: ProgressProductType;
@@ -80,7 +81,7 @@ function formatAbsoluteFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
@@ -94,7 +95,7 @@ function formatExpiryChipFor(value: string | null, viewer: ViewerLocale): string
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return `Expires ${date.toLocaleDateString(viewer.locale, {
+  return `Expires ${formatDate(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
@@ -157,13 +158,13 @@ function chunkWeeks(
 
 function monthLabelsFor(
   days: ProgressLearnerDetail["activity"]["days"],
-  viewer: ViewerLocale,
+  _viewer: ViewerLocale,
 ): string[] {
   if (days.length === 0) return [];
   const labels: string[] = [];
   let lastMonth = "";
   for (const day of days) {
-    const month = new Date(`${day.date}T00:00:00Z`).toLocaleString(viewer.locale, {
+    const month = formatDateTime(new Date(`${day.date}T00:00:00Z`), {
       timeZone: "UTC",
       month: "short",
     });
@@ -887,7 +888,7 @@ function ProgressLearnerDetailReport({
                       <div className="mt-3 flex items-center justify-between border-t border-[var(--admin-border)] pt-3">
                         <span className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                           {assessment.submittedAt
-                            ? new Date(assessment.submittedAt).toLocaleDateString(viewer.locale, {
+                            ? formatDate(new Date(assessment.submittedAt), {
                                 timeZone: viewer.timeZone,
                                 day: "numeric",
                                 month: "short",

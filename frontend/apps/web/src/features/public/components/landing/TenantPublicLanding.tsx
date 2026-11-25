@@ -452,7 +452,7 @@ export function TenantPublicLanding({
                 title: "Company",
                 links: [
                   { label: "About", href: "#about" },
-                  { label: "Affiliate Programme", href: "/affiliate" },
+                  { label: "Affiliate Program", href: "/affiliate" },
                   { label: "Blog", href: "#" },
                   { label: "FAQ", href: "#faq" },
                   { label: "Contact", href: "#" },

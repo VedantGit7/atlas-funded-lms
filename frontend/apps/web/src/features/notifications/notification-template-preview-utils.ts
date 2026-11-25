@@ -1,9 +1,11 @@
+import { academyDateTimeFormat } from "../../lib/format/academy-format";
+
 const BOLD_PATTERN = /\*\*(.+?)\*\*/g;
 
 export function defaultSampleValueForVariable(name: string): string {
   const normalized = name.toLowerCase();
   if (normalized.includes("date") || normalized.includes("at")) {
-    return new Intl.DateTimeFormat(undefined, {
+    return academyDateTimeFormat({
       month: "short",
       day: "numeric",
       year: "numeric",

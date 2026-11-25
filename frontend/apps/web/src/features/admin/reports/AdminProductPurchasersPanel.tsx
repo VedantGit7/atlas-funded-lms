@@ -35,6 +35,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -94,7 +95,7 @@ function formatRelativeTimeFor(iso: string, viewer: ViewerLocale): string {
 function formatAbsoluteDateTimeFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -835,12 +836,12 @@ function ProductPurchasers({ courseId, initialData }: Props) {
                   />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--admin-on-surface-variant)]">Enrolment</span>
+                  <span className="text-xs text-[var(--admin-on-surface-variant)]">Enrollment</span>
                   <Select
                     value={draftEnrolledType}
                     onValueChange={setDraftEnrolledType}
                     options={ENROLLED_TYPE_OPTIONS}
-                    ariaLabel="Enrolment type"
+                    ariaLabel="Enrollment type"
                     className="h-9 min-w-[140px]"
                   />
                 </label>

@@ -20,6 +20,7 @@ import { pageDocumentTitle } from "../lib/branding/page-title";
 import { loadPublicBootstrap } from "../lib/server/bootstrap";
 import { resolveAppearanceHtmlProps } from "../lib/server/resolve-appearance-html";
 import { hasSessionCookie } from "../lib/server/has-session-cookie";
+import { loadAcademyFormat } from "../lib/format/load-academy-format";
 
 /**
  * Derives the tab title from the resolved tenant.
@@ -80,6 +81,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   // here lets `BrandLoadingScreen` show it with no data fetch of its own —
   // which is why the FundedBeyond loading screen was blank.
   const brandingStyle: Record<string, string> = {};
+  const academyFormat = await loadAcademyFormat();
   try {
     const bootstrap = await loadPublicBootstrap();
     displayCurrency = bootstrap.homeCurrency;
@@ -170,7 +172,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <ThemeInitScript {...(nonce ? { nonce } : {})} tenantModeDefault={theme.modeDefault} />
       </head>
       <body suppressHydrationWarning>
-        <AppProviders initialDisplayCurrency={displayCurrency} initialFxRates={fxRates}>
+        <AppProviders
+          initialDisplayCurrency={displayCurrency}
+          initialFxRates={fxRates}
+          academyFormat={academyFormat}
+        >
           <AnalyticsConsentBridge hasSession={hasSession}>
             <LazyMarketingSnippets />
             <BrowserSentryStarter />

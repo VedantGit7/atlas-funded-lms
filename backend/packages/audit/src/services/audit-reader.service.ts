@@ -19,6 +19,7 @@ function toResponse(
       targetId: row.target_id,
       actorMembershipId: row.actor_membership_id,
       platformPrincipalId: row.actor_principal_id,
+      actorName: row.actor_name ?? null,
       requestId: row.request_id,
       reason: row.reason,
       metadata: row.metadata_json as Record<string, unknown> | null,

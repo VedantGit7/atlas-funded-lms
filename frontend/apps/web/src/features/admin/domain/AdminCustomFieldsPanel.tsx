@@ -19,6 +19,7 @@ import {
   type CustomFieldValue,
 } from "./admin-domain-api";
 import { AdminDomainPageShell, adminDomainCardClassName } from "./admin-domain-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 const FIELD_TYPES = ["text", "number", "boolean", "select", "date"] as const;
 
@@ -319,7 +320,7 @@ export function AdminCustomFieldsPanel() {
                     <tr key={value.membershipId} className={analyticsTableRowClassName}>
                       <td className="px-4 py-3 font-mono text-xs">{value.membershipId}</td>
                       <td className="px-4 py-3">{JSON.stringify(value.valueJson)}</td>
-                      <td className="px-4 py-3">{new Date(value.updatedAt).toLocaleString()}</td>
+                      <td className="px-4 py-3">{formatDateTime(new Date(value.updatedAt))}</td>
                     </tr>
                   ))}
                 </tbody>

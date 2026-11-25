@@ -14,6 +14,7 @@ import {
   type CourseLearnerRow,
   type LearnerAttemptSummary,
 } from "./api";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type CourseLearnerRosterProps = {
   courseId: string;
@@ -184,7 +185,7 @@ export function CourseLearnerRoster({ courseId, courseTitle }: CourseLearnerRost
                       <span className="block text-xs opacity-70">{row.email}</span>
                     ) : null}
                   </td>
-                  <td>{new Date(row.enrolledAt).toLocaleDateString()}</td>
+                  <td>{formatDate(new Date(row.enrolledAt))}</td>
                   <td>{row.progressPct}%</td>
                   <td>
                     {row.completedLessons}/{row.totalLessons}

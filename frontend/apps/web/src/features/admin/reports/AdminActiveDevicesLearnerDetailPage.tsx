@@ -38,6 +38,7 @@ import { AdminActiveDevicesSessionDetailPage } from "./AdminActiveDevicesSession
 import { RevokeDeviceModal } from "./RevokeDeviceModal";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type AdminActiveDevicesLearnerDetailPageProps = {
   membershipId: string;
@@ -56,7 +57,7 @@ function formatAbsoluteFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",

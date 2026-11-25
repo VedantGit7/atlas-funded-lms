@@ -423,7 +423,7 @@ export function AdminLearnerProductsPage() {
       setEnrolFor(null);
     } catch (caught) {
       setEnrolError(
-        caught instanceof ClientApiError ? caught.message : "Could not enrol that learner.",
+        caught instanceof ClientApiError ? caught.message : "Could not enroll that learner.",
       );
     } finally {
       setEnrolling(false);

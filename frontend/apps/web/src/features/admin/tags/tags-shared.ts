@@ -1,5 +1,6 @@
 import { csvRow } from "../../../lib/export/csv";
 import type { Tag, TagVisibility } from "./tags-api";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 /**
  * Presentation vocabulary for the tag console.
@@ -254,7 +255,7 @@ export function findNearDuplicates(tags: Tag[], title: string, excludeId?: strin
 export function formatTagTimestamp(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

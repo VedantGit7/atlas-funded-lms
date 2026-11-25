@@ -1,4 +1,5 @@
 import type { DeletionRequestItem } from "./api";
+import { formatDate } from "../../lib/format/academy-format";
 
 export type DeletionDisplayStatus = DeletionRequestItem["status"];
 
@@ -55,7 +56,7 @@ export function formatRelativeTime(iso: string): string {
   if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
   const diffDays = Math.round(diffHours / 24);
   if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function formatTargetType(targetType: string): string {

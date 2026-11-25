@@ -15,6 +15,7 @@ import {
   type CustomFieldDetailText,
 } from "./admin-custom-field-roster-api";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 export const PAGE_SIZE = CUSTOM_FIELD_DETAIL_PAGE_SIZE;
 
@@ -56,7 +57,7 @@ export function formatDateShortFor(value: string | null, viewer: ViewerLocale): 
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",

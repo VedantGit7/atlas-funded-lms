@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime, formatTime } from "../../../lib/format/academy-format";
+
 export type MarketingEventStatus = "DRAFT" | "LIVE" | "UNPUBLISHED";
 export type MarketingEventRegistrationSource = "FORM" | "WORKFLOW" | "LINK" | "ADMIN";
 
@@ -77,7 +79,7 @@ export function formatEventDateTime(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -170,10 +172,9 @@ export function formatEventWhen(
   const zone = safeTimeZone(timeZone);
   const start = new Date(startsAt);
   if (Number.isNaN(start.getTime())) return startsAt;
-  const day = (date: Date) =>
-    date.toLocaleDateString(undefined, { timeZone: zone, dateStyle: "full" });
+  const day = (date: Date) => formatDate(date, { timeZone: zone, dateStyle: "full" });
   const time = (date: Date) =>
-    date.toLocaleTimeString(undefined, { timeZone: zone, hour: "numeric", minute: "2-digit" });
+    formatTime(date, { timeZone: zone, hour: "numeric", minute: "2-digit" });
   const zoneName = timeZoneLongName(zone, start);
   const startLabel = `${day(start)}, ${time(start)}`;
   if (!endsAt) return `${startLabel} (${zoneName})`;

@@ -32,6 +32,14 @@ import { AdminPageGate } from "../../components/patterns/AdminPageGate";
 import { AdminCommerceOverview } from "../../features/admin/overview/AdminCommerceOverview";
 import { ADMIN_MODERATION_CASES_PATH } from "../../features/moderation/moderation-paths";
 import { ServerApiError, serverApi } from "../../lib/server-api";
+import { formatDateTime, formatNumber } from "../../lib/format/academy-format";
+import { timeZoneName } from "../../lib/format/academy-settings";
+import { loadAcademyFormat } from "../../lib/format/load-academy-format";
+import {
+  formatActorLabel,
+  humanizeAuditAction,
+  humanizeAuditTarget,
+} from "../../features/admin/audit/audit-admin-shared";
 
 type WorkflowListResponse = z.infer<typeof workflowListResponseSchema>;
 type ProvisioningJobListResponse = z.infer<typeof ProvisioningJobListResponseSchema>;
@@ -68,7 +76,7 @@ function summarizeContentStatus(
 }
 
 function formatCount(value: number): string {
-  return value.toLocaleString();
+  return formatNumber(value);
 }
 
 /**
@@ -108,8 +116,9 @@ async function loadMemberActivation(): Promise<{
   const stats = await softGet(serverApi.get<MemberStatsResponse>("/api/v1/members/stats"));
   if (stats) {
     return {
-      memberCount: stats.data.totalMembers,
-      activeLearnerCount: stats.data.activeMembers,
+      // Learners only: staff who also hold the learner role are not counted (M8).
+      memberCount: stats.data.totalLearners,
+      activeLearnerCount: stats.data.activeLearners,
       ok: true,
     };
   }
@@ -252,7 +261,7 @@ function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
                   width: `${((segment.value / total) * 100).toFixed(3)}%`,
                   backgroundColor: segment.color,
                 }}
-                title={`${segment.label}: ${segment.value.toLocaleString()}`}
+                title={`${segment.label}: ${formatNumber(segment.value)}`}
               />
             ) : null,
           )}
@@ -277,6 +286,7 @@ function ContentPipeline({ summary }: { summary: ContentStatusSummary }) {
 }
 
 export default async function AdminDashboardPage() {
+  const academyFormat = await loadAcademyFormat();
   let memberCount = 0;
   let activeLearnerCount = 0;
   let roleCount = 0;
@@ -389,7 +399,7 @@ export default async function AdminDashboardPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold text-[var(--admin-on-surface)]">Overview</h1>
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            Operational health and setup shortcuts for tenant administration.
+            How your academy is doing, and shortcuts to set it up.
           </p>
         </div>
 
@@ -418,11 +428,11 @@ export default async function AdminDashboardPage() {
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--admin-success)]/15 px-3 py-1 text-sm font-semibold text-[var(--admin-success)]">
                   <span className="h-2 w-2 rounded-full bg-[var(--admin-success)]" />
-                  {formatCount(activeLearnerCount)} of {formatCount(memberCount)} members active
+                  {formatCount(activeLearnerCount)} of {formatCount(memberCount)} learners active
                 </span>
               </div>
               <p className="mt-3 max-w-md text-sm text-[var(--admin-on-surface-variant)]">
-                Share of the member roster currently active in the academy.
+                Share of your learners whose accounts are active. Staff are not counted.
               </p>
             </div>
 
@@ -481,7 +491,7 @@ export default async function AdminDashboardPage() {
             icon={Users}
             label="Active learners"
             value={formatCount(activeLearnerCount)}
-            caption="Currently active members"
+            caption="Active learner accounts, staff not counted"
             href="/admin/members"
             tone="primary"
           />
@@ -581,7 +591,7 @@ export default async function AdminDashboardPage() {
             <div>
               <h2 className="text-lg font-bold text-[var(--admin-on-surface)]">Recent activity</h2>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Latest tenant audit trail
+                The latest changes in your academy
               </p>
             </div>
             <Link
@@ -596,11 +606,11 @@ export default async function AdminDashboardPage() {
           {recentAudit.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left">
-                <caption className="sr-only">Recent tenant audit events</caption>
+                <caption className="sr-only">Recent changes in your academy</caption>
                 <thead>
                   <tr className="bg-[var(--admin-surface-low)] text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]">
                     <th scope="col" className="px-6 py-3">
-                      Time
+                      Time ({timeZoneName(academyFormat.timeZone)})
                     </th>
                     <th scope="col" className="px-6 py-3">
                       Action
@@ -620,27 +630,24 @@ export default async function AdminDashboardPage() {
                       className="transition-colors hover:bg-[var(--admin-surface-high)]/40"
                     >
                       <td className="px-6 py-4 text-sm text-[var(--admin-on-surface-variant)]">
-                        {new Date(entry.occurredAt).toLocaleString()}
+                        {formatDateTime(new Date(entry.occurredAt))}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="rounded-md bg-[var(--admin-surface-high)] px-2 py-1 font-mono text-xs text-[var(--admin-on-surface)]">
-                          {entry.action}
-                        </span>
+                        <p className="text-sm font-medium text-[var(--admin-on-surface)]">
+                          {humanizeAuditAction(entry.action)}
+                        </p>
+                        <p className="text-xs text-[var(--admin-on-surface-variant)]">
+                          by {formatActorLabel(entry)}
+                        </p>
                       </td>
                       <td className="px-6 py-4 text-sm text-[var(--admin-on-surface)]">
-                        {entry.targetType}
-                        {entry.targetId ? (
-                          <span className="text-[var(--admin-on-surface-variant)]">
-                            {" "}
-                            &middot; {entry.targetId.slice(0, 8)}
-                          </span>
-                        ) : null}
+                        {humanizeAuditTarget(entry.targetType)}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link
                           href="/admin/audit"
                           prefetch={false}
-                          aria-label={`Open audit detail for ${entry.action}`}
+                          aria-label={`Open the audit log for ${humanizeAuditAction(entry.action)}`}
                           className="inline-flex text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
                         >
                           <ArrowUpRight className="h-4 w-4" aria-hidden="true" />

@@ -213,8 +213,8 @@ export function LearnerProductsTable({
                       <button
                         type="button"
                         className={catalogueIconButtonClassName}
-                        title={`Enrol a learner into ${row.title}`}
-                        aria-label={`Enrol a learner into ${row.title}`}
+                        title={`Enroll a learner into ${row.title}`}
+                        aria-label={`Enroll a learner into ${row.title}`}
                         disabled={busy}
                         onClick={() => {
                           onEnrol(row);

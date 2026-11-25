@@ -38,6 +38,7 @@ import {
 } from "./admin-live-class-attendance-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDateTime, formatTime } from "../../../lib/format/academy-format";
 
 const secondaryButtonClassName =
   "inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-[var(--admin-outline)] bg-transparent px-4 text-[13px] font-semibold text-[var(--admin-on-surface)] transition-all hover:bg-[var(--admin-surface-low)] active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30 disabled:cursor-not-allowed disabled:opacity-50";
@@ -97,7 +98,7 @@ function formatScheduledFor(value: string | null, viewer: ViewerLocale): string 
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -110,7 +111,7 @@ function formatClockFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "--:--";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "--:--";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",

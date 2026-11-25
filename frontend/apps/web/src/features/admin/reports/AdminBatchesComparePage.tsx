@@ -36,6 +36,7 @@ import {
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, ownViewerLocale, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const MAX_SLOTS = BATCHES_COMPARE_MAX;
 const SAVE_KEY = "atlas.admin.batches.compare.saved";
@@ -177,7 +178,7 @@ function formatDateRangeFor(
   viewer: ViewerLocale,
 ): string {
   const fmt = (iso: string) =>
-    new Date(iso).toLocaleDateString("en-GB", {
+    formatDate(new Date(iso), {
       timeZone: viewer.timeZone,
       month: "short",
       year: "numeric",

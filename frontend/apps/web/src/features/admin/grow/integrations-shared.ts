@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
+
 export type MarketingIntegrationEventKey =
   | "sign_up"
   | "purchase"
@@ -82,7 +84,7 @@ export const INTEGRATION_EVENT_HINTS: Record<MarketingIntegrationEventKey, strin
   purchase: "Fires on paid enrollment / product purchase.",
   lesson_completed: "Reserved for lesson completion automations.",
   test_submit: "Reserved for test/quiz submission automations.",
-  trial_enrolment: "Reserved for trial product enrolments.",
+  trial_enrolment: "Reserved for trial product enrollments.",
   initiate_transaction: "Reserved for checkout start events.",
   profile_updated: "Reserved for learner profile updates.",
   custom_fields: "Reserved for custom field form completions.",
@@ -107,7 +109,7 @@ export function formatIntegrationRelativeTime(value: string | null | undefined):
     return hours === 1 ? "1 hour ago" : `${String(hours)} hours ago`;
   }
   if (deltaMs < 2 * day) return "Yesterday";
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -118,7 +120,7 @@ export function formatIntegrationDateTime(value: string | null | undefined): str
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

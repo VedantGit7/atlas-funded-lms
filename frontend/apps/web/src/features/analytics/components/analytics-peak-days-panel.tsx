@@ -3,6 +3,7 @@
 import { Download } from "lucide-react";
 import type { TrendPoint } from "../analytics-studio-shared";
 import { panelHeaderClassName, recessedPanelClassName } from "../analytics-studio-shared";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type AnalyticsPeakDaysPanelProps = {
   days: TrendPoint[];
@@ -67,7 +68,7 @@ export function AnalyticsPeakDaysPanel({
                 >
                   <td className="py-2 font-medium text-[var(--admin-on-surface)]">{day.label}</td>
                   <td className="py-2 text-right tabular-nums text-[var(--admin-on-surface)]">
-                    {day.count.toLocaleString()}
+                    {formatNumber(day.count)}
                   </td>
                 </tr>
               ))}

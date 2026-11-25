@@ -1,4 +1,5 @@
 import type { AnalyticsDashboardResponse } from "@atlas/domain/analytics/analytics.contract";
+import { formatDate } from "../../lib/format/academy-format";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -243,18 +244,18 @@ export function highlightRowKind(
 
 function formatShortDate(isoDate: string): string {
   const date = new Date(`${isoDate}T00:00:00Z`);
-  return date.toLocaleDateString(undefined, { weekday: "short" }).toUpperCase();
+  return formatDate(date, { weekday: "short" }).toUpperCase();
 }
 
 function formatLongDate(isoDate: string): string {
   const date = new Date(`${isoDate}T00:00:00Z`);
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 function formatMonthLabel(yearMonth: string): string {
   const [year, month] = yearMonth.split("-");
   const date = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
-  return date.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+  return formatDate(date, { month: "short", year: "2-digit" });
 }
 
 function weekStartKey(isoDate: string): string {

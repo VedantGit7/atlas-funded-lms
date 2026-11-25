@@ -74,6 +74,7 @@ vi.mock("@atlas/storage", async (importOriginal) => {
 
 vi.mock("../../backend/apps/api/src/server/tenant-settings/tenant-settings.service", () => ({
   readTenantEmailChannel: (...args: unknown[]) => mockReadTenantEmailChannel(...args),
+  readTenantDefaultTimezone: () => Promise.resolve("Asia/Kolkata"),
 }));
 
 vi.mock("@atlas/domain-config/repositories/learner-billing.repository", () => ({

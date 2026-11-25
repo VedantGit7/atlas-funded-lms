@@ -34,6 +34,10 @@ import {
 } from "./admin-zoom-insights-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import {
+  formatDateTime as academyFormatDateTime,
+  formatTime as academyFormatTime,
+} from "../../../lib/format/academy-format";
 
 type MemberSearchResult = {
   id: string;
@@ -118,7 +122,7 @@ function formatDateTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
@@ -132,7 +136,7 @@ function formatTimeFor(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(viewer.locale, {
+  return academyFormatTime(date, {
     timeZone: viewer.timeZone,
     hour: "numeric",
     minute: "2-digit",

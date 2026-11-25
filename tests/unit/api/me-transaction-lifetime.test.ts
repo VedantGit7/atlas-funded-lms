@@ -177,7 +177,7 @@ describe("identity route transaction lifetime", () => {
           roleKeys: ["learner"],
           studioAccess: false,
         },
-        profile: { id: "profile", displayName: "Learner", avatarUrl: null },
+        profile: { id: "profile", displayName: "Learner", avatarUrl: null, timezone: null },
       },
     });
     expect(mocks.protected).toHaveBeenCalledWith(

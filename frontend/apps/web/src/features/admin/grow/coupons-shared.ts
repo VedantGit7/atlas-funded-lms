@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
+
 export type CouponStatus = "DRAFT" | "ACTIVE" | "INACTIVE";
 export type CouponDiscountType = "PERCENT" | "FIXED";
 export type CouponVisibility = "PUBLIC" | "PRIVATE";
@@ -238,7 +240,7 @@ export function formatCouponDate(value: string | null | undefined): string {
   if (!value) return "No expiry";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -249,7 +251,7 @@ export function formatCouponDateTime(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

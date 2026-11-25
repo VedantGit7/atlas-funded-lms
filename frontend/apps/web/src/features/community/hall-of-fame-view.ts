@@ -13,6 +13,7 @@ import type {
   leaderboardDetailResponseSchema,
 } from "@atlas/contracts/gamification/gamification.schemas";
 import type { LeagueTier } from "../gamification/gamification-view";
+import { formatDate } from "../../lib/format/academy-format";
 
 export type HallOfFameBoard = z.infer<typeof leaderboardDefinitionDtoSchema>;
 export type HallOfFameLeaderboardDetail = z.infer<typeof leaderboardDetailResponseSchema>["data"];
@@ -52,7 +53,7 @@ export function entryDisplayName(entry: HallOfFameEntry): string {
 export function formatSnapshotDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 /** Flattens a structured post body into a plain-text excerpt for story cards. */

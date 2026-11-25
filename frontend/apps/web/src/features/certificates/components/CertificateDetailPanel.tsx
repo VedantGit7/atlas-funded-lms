@@ -10,6 +10,7 @@ import {
   outlineButtonClassName,
   type CertificateDto,
 } from "./certificate-template-admin-shared";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type CertificateDetailPanelProps = {
   certificate: CertificateDto | null;
@@ -26,7 +27,7 @@ export function CertificateDetailPanel({
 
   if (!certificate) return null;
 
-  const recipient = certificate.recipientLabel ?? certificate.membershipId;
+  const recipient = certificate.recipientLabel?.trim() || "Unnamed member";
 
   function copyCredentialId() {
     if (!certificate) return;
@@ -95,7 +96,7 @@ export function CertificateDetailPanel({
               Issued
             </dt>
             <dd className="text-sm font-medium text-[var(--admin-on-surface)]">
-              {new Date(certificate.issuedAt).toLocaleDateString(undefined, {
+              {formatDate(new Date(certificate.issuedAt), {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -108,7 +109,7 @@ export function CertificateDetailPanel({
                 Revoked
               </dt>
               <dd className="text-sm font-medium text-[var(--admin-danger)]">
-                {new Date(certificate.revokedAt).toLocaleDateString(undefined, {
+                {formatDate(new Date(certificate.revokedAt), {
                   year: "numeric",
                   month: "short",
                   day: "numeric",
@@ -129,9 +130,6 @@ export function CertificateDetailPanel({
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-[var(--admin-on-surface)]">
                 {recipient}
-              </p>
-              <p className="truncate font-mono text-[11px] text-[var(--admin-on-surface-variant)]">
-                {certificate.membershipId}
               </p>
             </div>
           </div>

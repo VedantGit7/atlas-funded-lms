@@ -95,6 +95,8 @@ export type TenantConfigVersionRow = {
   id: string;
   version: number;
   created_by_membership_id: string | null;
+  /** The publisher's name, or email when they have not set one. */
+  created_by_name: string | null;
   created_at: Date;
   current_version_id: string | null;
 };
@@ -105,11 +107,15 @@ export async function listTenantConfigVersions(tx: TenantTx): Promise<TenantConf
       tcv.id,
       tcv.version,
       tcv.created_by_membership_id,
+      COALESCE(NULLIF(BTRIM(mp.display_name), ''), ap.email) AS created_by_name,
       tcv.created_at,
       tc.current_version_id
     FROM tenant_config_version tcv
     LEFT JOIN tenant_config tc
       ON tc.tenant_id = tcv.tenant_id
+    LEFT JOIN memberships m ON m.id = tcv.created_by_membership_id
+    LEFT JOIN member_profiles mp ON mp.membership_id = m.id
+    LEFT JOIN auth_principals ap ON ap.id = m.auth_principal_id
     WHERE tcv.tenant_id = app.current_tenant_id()
     ORDER BY tcv.version DESC
     LIMIT 50

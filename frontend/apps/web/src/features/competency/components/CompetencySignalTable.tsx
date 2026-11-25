@@ -13,6 +13,7 @@ import {
   primaryButtonClassName,
   tableHeadClassName,
 } from "../competency-admin-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type CompetencySignal = z.infer<typeof competencySignalDtoSchema>;
 
@@ -115,7 +116,7 @@ export function CompetencySignalTable() {
                     className="transition-colors hover:bg-[var(--admin-surface-low)]"
                   >
                     <td className={`${monoClassName} whitespace-nowrap px-4 py-3 sm:px-5`}>
-                      {new Date(signal.occurredAt).toLocaleString()}
+                      {formatDateTime(new Date(signal.occurredAt))}
                     </td>
                     <td className="px-4 py-3 font-medium text-[var(--admin-on-surface)]">
                       {signal.dimensionKey}

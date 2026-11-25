@@ -33,6 +33,7 @@ import {
 } from "./admin-live-class-attendance-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatTime } from "../../../lib/format/academy-format";
 
 const POLL_INTERVAL_MS = 2500;
 
@@ -76,7 +77,7 @@ function formatClockFor(value: string | null | undefined, viewer: ViewerLocale):
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",

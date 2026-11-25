@@ -40,6 +40,10 @@ import {
   insightTableRowClassName,
 } from "./admin-insights-shared";
 import { marketingStatusTone, type MarketingStatusTone } from "./marketing-insight-meta";
+import {
+  formatDate,
+  formatDateTime as academyFormatDateTime,
+} from "../../../lib/format/academy-format";
 
 type Props = {
   slug: string;
@@ -236,7 +240,7 @@ function StatusPill({ status }: { status: string }) {
 function formatDateTime(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return academyFormatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -249,7 +253,7 @@ function formatPublishDate(value: string | null): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -260,7 +264,7 @@ function formatPeriodShort(period: string | undefined): string {
   if (!period) return "";
   const date = new Date(`${period}T12:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 function RunVolumePanel({ board }: { board: InsightMarketingWorkflowsBoard }) {

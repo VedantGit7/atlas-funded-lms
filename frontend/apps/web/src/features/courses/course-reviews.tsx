@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Star } from "lucide-react";
 import { clientApi, toast } from "../../lib/client-api";
+import { formatDate as academyFormatDate, formatNumber } from "../../lib/format/academy-format";
 
 type ReviewItem = {
   id: string;
@@ -31,7 +32,7 @@ type SubmitResponse = { data: { id: string; created: boolean } };
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return academyFormatDate(new Date(iso), {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -164,7 +165,7 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
               <Stars value={aggregate?.average ?? 0} className="mt-1 justify-center" />
               <div className="mt-1 text-xs text-muted-foreground">
                 {hasReviews
-                  ? `${(aggregate?.count ?? 0).toLocaleString()} ${aggregate?.count === 1 ? "review" : "reviews"}`
+                  ? `${formatNumber(aggregate?.count ?? 0)} ${aggregate?.count === 1 ? "review" : "reviews"}`
                   : "No reviews yet"}
               </div>
             </div>

@@ -8,6 +8,7 @@ import {
   selectClassName,
   statusBannerClassName,
 } from "../../../app/admin/branding/_components/branding-admin-shared";
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
 
 export {
   cardClassName,
@@ -45,38 +46,60 @@ export const detailLabelClassName =
 
 export const detailValueClassName = "mt-1 text-sm text-[var(--admin-on-surface)]";
 
+/** Events whose code says nothing useful when read as words. */
+const AUDIT_ACTION_WORDS: Record<string, string> = {
+  "api.mutation": "Change saved",
+  "identity.membership.status_changed": "Member status changed",
+  "identity.membership.password_reset_sent": "Password reset email sent",
+};
+
+/** Code names for things that have a different name on screen (QA review 2 4.3.3). */
+function onScreenWords(words: string): string {
+  return words
+    .replace(/\bcourse module\b/g, "section")
+    .replace(/\bcourse lesson\b/g, "lesson")
+    .replace(/\bitem bank\b/g, "question bank")
+    .replace(/\bitems?\b/g, (word) => (word === "items" ? "questions" : "question"));
+}
+
+/** "certificate.issued" as "Certificate issued": the event in words, not its code. */
 export function humanizeAuditAction(action: string): string {
-  return action
-    .split(".")
-    .map((segment) =>
-      segment
-        .split("_")
-        .filter(Boolean)
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" "),
-    )
-    .join(" · ");
+  const known = AUDIT_ACTION_WORDS[action];
+  if (known) return known;
+  const words = onScreenWords(action.split(/[._]+/).filter(Boolean).join(" ").toLowerCase());
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : "Change";
 }
 
 export function formatAuditTimestamp(iso: string): string {
   const date = new Date(iso);
-  return new Intl.DateTimeFormat("en", {
+  return academyDateTimeFormat({
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
 }
 
+/** Who did it, by name: never a raw ID (QA review 2 4.3.2). */
 export function formatActorLabel(entry: {
   actorMembershipId: string | null;
   platformPrincipalId: string | null;
+  actorName?: string | null | undefined;
 }): string {
-  if (entry.actorMembershipId) {
-    return `Member ${entry.actorMembershipId.slice(0, 8)}`;
-  }
-  if (entry.platformPrincipalId) {
-    return `Platform ${entry.platformPrincipalId.slice(0, 8)}`;
-  }
+  if (entry.actorName?.trim()) return entry.actorName.trim();
+  if (entry.actorMembershipId) return "A former member";
+  if (entry.platformPrincipalId) return "Platform support";
   return "System";
+}
+
+/** "course_lesson" as "Course lesson". */
+export function humanizeAuditTarget(targetType: string): string {
+  const words = onScreenWords(
+    targetType
+      .split(/[._\s-]+/)
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase(),
+  );
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : "Record";
 }
 
 export function matchesAuditSearch(

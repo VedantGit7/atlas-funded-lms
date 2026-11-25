@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { History, Loader2 } from "lucide-react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type LedgerItem = {
   points: number;
@@ -79,7 +80,7 @@ export function XpLedgerTimeline({ initialItems, initialCursor }: XpLedgerTimeli
                 <div className="min-w-0">
                   <p className="truncate text-sm text-foreground">{describeLedgerItem(item)}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(item.occurredAt).toLocaleString(undefined, {
+                    {formatDateTime(new Date(item.occurredAt), {
                       dateStyle: "medium",
                       timeStyle: "short",
                     })}

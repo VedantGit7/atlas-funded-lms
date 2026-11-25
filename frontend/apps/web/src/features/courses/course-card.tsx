@@ -15,6 +15,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import { formatNumber } from "../../lib/format/academy-format";
 
 export type CourseCardData = {
   id: string;
@@ -235,9 +236,7 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
                   aria-hidden="true"
                 />
                 <span className="font-bold text-foreground">{course.ratingAverage.toFixed(1)}</span>
-                {course.ratingCount > 0 ? (
-                  <span>({course.ratingCount.toLocaleString()})</span>
-                ) : null}
+                {course.ratingCount > 0 ? <span>({formatNumber(course.ratingCount)})</span> : null}
               </span>
             ) : (
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
@@ -247,7 +246,7 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
             {course.studentCount > 0 ? (
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                {course.studentCount.toLocaleString()}
+                {formatNumber(course.studentCount)}
               </span>
             ) : null}
           </div>

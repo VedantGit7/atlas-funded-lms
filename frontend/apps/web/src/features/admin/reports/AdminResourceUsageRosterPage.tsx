@@ -109,6 +109,7 @@ function downloadOverviewCsv(overview: ResourceUsageOverview) {
     ["Current MAU", String(meters.currentMau)],
     ["MAU limit", limits.mau == null ? "Unlimited" : String(limits.mau)],
     ["Total learners", String(meters.totalLearners)],
+    ["Learners active (30d)", String(meters.activeLearners30d)],
     ["Tests taken", String(meters.testSubmits)],
     ["Products", String(meters.products)],
     ["Questions", String(meters.questions)],
@@ -694,9 +695,9 @@ export function AdminResourceUsageRosterPage({
                     </p>
                     <p className="mt-2 font-mono text-[12px] text-[var(--admin-on-surface-variant)]">
                       <span className="font-medium text-[var(--admin-success)]">
-                        {formatCount(meters.activeUsers30d, viewer)}
+                        {formatCount(meters.activeLearners30d, viewer)}
                       </span>{" "}
-                      active currently
+                      active in the last 30 days
                     </p>
                   </Link>
                 </div>

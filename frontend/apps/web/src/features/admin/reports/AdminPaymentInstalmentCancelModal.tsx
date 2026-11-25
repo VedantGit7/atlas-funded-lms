@@ -9,6 +9,7 @@ import {
   type PaymentInstalmentCancelReason,
   type PaymentInstalmentPlanItem,
 } from "./admin-payments-roster-api";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 const REASONS: Array<{ value: PaymentInstalmentCancelReason; label: string }> = [
   { value: "too_expensive", label: "Too expensive" },
@@ -27,7 +28,7 @@ type Props = {
 };
 
 function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+  return `${formatNumber(cents / 100, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;

@@ -1,5 +1,6 @@
 import type { EntitlementView } from "@atlas/domain-config/schemas/entitlements";
 import { mergeEntitlementsWithCatalogue } from "../entitlements/entitlement-catalogue";
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
 
 export type BillingPlanSummary = {
   planTitle: string;
@@ -46,7 +47,7 @@ export function buildBillingPlanSummary(entitlements: EntitlementView[]): Billin
 
   let planDescription = `${activeCount} capabilities active on your plan.`;
   if (nearestExpiry) {
-    planDescription = `Active through ${new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(nearestExpiry)}.`;
+    planDescription = `Active through ${academyDateTimeFormat({ dateStyle: "long" }).format(nearestExpiry)}.`;
   }
 
   let expiryWarning: string | null = null;

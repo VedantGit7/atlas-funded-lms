@@ -33,6 +33,7 @@ import {
   typeSegmentButtonClassName,
   typeSegmentGroupClassName,
 } from "../learning-path-studio-shared";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type StudioLearningPathsPageProps = {
   paths: Array<{
@@ -221,7 +222,7 @@ export function LearningPathManager({ paths }: StudioLearningPathsPageProps) {
                           <p className="inline-flex items-center gap-1 text-xs text-[var(--admin-on-surface-variant)]">
                             <Calendar className="h-3 w-3 shrink-0 opacity-70" aria-hidden="true" />
                             Updated{" "}
-                            {new Date(path.updatedAt).toLocaleDateString("en-US", {
+                            {formatDate(new Date(path.updatedAt), {
                               month: "short",
                               day: "numeric",
                               year: "numeric",

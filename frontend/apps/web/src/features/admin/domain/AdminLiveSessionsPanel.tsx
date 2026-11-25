@@ -17,6 +17,7 @@ import {
   type LiveSession,
 } from "./admin-domain-api";
 import { AdminDomainPageShell, adminDomainCardClassName } from "./admin-domain-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export function AdminLiveSessionsPanel() {
   const [sessions, setSessions] = useState<Array<LiveSession & { attendanceCount?: number }>>([]);
@@ -154,7 +155,7 @@ export function AdminLiveSessionsPanel() {
                     <td className="px-4 py-3">{session.title}</td>
                     <td className="px-4 py-3 capitalize">{session.status}</td>
                     <td className="px-4 py-3">
-                      {session.scheduledAt ? new Date(session.scheduledAt).toLocaleString() : "—"}
+                      {session.scheduledAt ? formatDateTime(new Date(session.scheduledAt)) : "—"}
                     </td>
                     <td className="px-4 py-3 tabular-nums">{session.attendanceCount ?? 0}</td>
                   </tr>

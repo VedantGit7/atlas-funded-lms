@@ -6,6 +6,7 @@ import {
   analyticsFunnelPanelClassName,
   analyticsInsightBannerClassName,
 } from "../analytics-admin-shared";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type AnalyticsAdminFunnelProps = {
   stages: FunnelStageView[];
@@ -49,7 +50,7 @@ export function AnalyticsAdminFunnel({ stages, insight }: AnalyticsAdminFunnelPr
                 {stage.label}
               </span>
               <span className="font-mono text-[var(--admin-on-surface)]">
-                {stage.count.toLocaleString()} events
+                {formatNumber(stage.count)} events
               </span>
             </div>
             <div className="h-10 overflow-hidden rounded-sm bg-[var(--admin-border)]">

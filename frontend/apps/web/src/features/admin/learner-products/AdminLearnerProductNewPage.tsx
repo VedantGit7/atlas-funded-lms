@@ -103,7 +103,7 @@ const STATUS_CHOICES = [
   {
     value: "DRAFT",
     label: "Draft",
-    hint: "Not offered to learners. Admins can still enrol into it.",
+    hint: "Not offered to learners. Admins can still enroll into it.",
   },
   { value: "PUBLISHED", label: "Published", hint: "Offered to learners straight away." },
 ] as const;

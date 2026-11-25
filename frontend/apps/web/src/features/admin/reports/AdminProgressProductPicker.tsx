@@ -30,6 +30,7 @@ import {
 } from "./admin-progress-score-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const PRODUCT_TABS: Array<{ key: ProgressProductType; label: string }> = [
   { key: "course", label: "Course" },
@@ -47,8 +48,8 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
 ];
 
 const SORT_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "enrolled_count:desc", label: "Sort: Enrolments ↓" },
-  { value: "enrolled_count:asc", label: "Sort: Enrolments ↑" },
+  { value: "enrolled_count:desc", label: "Sort: Enrollments ↓" },
+  { value: "enrolled_count:asc", label: "Sort: Enrollments ↑" },
   { value: "avg_completion:desc", label: "Sort: Avg completion ↓" },
   { value: "avg_completion:asc", label: "Sort: Avg completion ↑" },
   { value: "last_activity:desc", label: "Sort: Last activity ↓" },
@@ -138,7 +139,7 @@ function formatRelativeActivityFor(iso: string | null, viewer: ViewerLocale): st
       "day",
     );
   }
-  return date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone });
+  return formatDate(date, { timeZone: viewer.timeZone });
 }
 
 function statusChipClass(status: ProductPublishStatus): string {
@@ -179,7 +180,7 @@ function CompletionSpread({ bands }: { bands: ProgressCompletionBands }) {
     return (
       <div
         className="flex h-1.5 w-full gap-0.5 bg-[var(--admin-surface-high)]"
-        title="No active enrolments"
+        title="No active enrollments"
       />
     );
   }
@@ -431,7 +432,7 @@ function ProgressProductPickerReport({
         <div className="flex flex-wrap items-center gap-3">
           <div
             className="inline-flex h-10 items-center gap-2 rounded-sm border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-sm font-semibold text-[var(--admin-on-surface)]"
-            title="Enrolment activity window applies on the overview signal band"
+            title="Enrollment activity window applies on the overview signal band"
           >
             <CalendarDays
               className="h-4 w-4 shrink-0 text-[var(--admin-on-surface-variant)]"

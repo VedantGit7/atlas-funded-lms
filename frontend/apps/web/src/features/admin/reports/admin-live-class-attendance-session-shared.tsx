@@ -10,6 +10,7 @@ import {
 import { ClientApiError } from "../../../lib/client-api";
 import { type LiveSessionDetail } from "./admin-live-class-attendance-roster-api";
 import { type ViewerLocale } from "./viewer-time";
+import { formatDateTime, formatTime } from "../../../lib/format/academy-format";
 
 export type MessageAudience = "absentees" | "selected" | "registrants";
 
@@ -79,7 +80,7 @@ export function formatDateFor(value: string | null | undefined, viewer: ViewerLo
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -97,7 +98,7 @@ export function formatTimeOnlyFor(value: string | null | undefined, viewer: View
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",

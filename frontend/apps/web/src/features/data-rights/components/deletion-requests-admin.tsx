@@ -75,6 +75,7 @@ import {
   totalDeletionPages,
   type DeletionDisplayStatus,
 } from "../deletion-requests-admin-utils";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type DeletionRequestsAdminProps = {
   initialRequests: DeletionRequestItem[];
@@ -420,7 +421,7 @@ function DetailsDialog({ request, onClose }: DetailsDialogProps) {
           <div className="flex justify-between gap-4">
             <dt className="text-[var(--admin-on-surface-variant)]">Requested</dt>
             <dd className="text-[var(--admin-on-surface)]">
-              {new Date(request.createdAt).toLocaleString()}
+              {formatDateTime(new Date(request.createdAt))}
             </dd>
           </div>
           {request.status === "SUCCEEDED" ? (
@@ -436,7 +437,7 @@ function DetailsDialog({ request, onClose }: DetailsDialogProps) {
             <div className="flex justify-between gap-4">
               <dt className="text-[var(--admin-on-surface-variant)]">Processed</dt>
               <dd className="text-[var(--admin-on-surface)]">
-                {new Date(request.completedAt).toLocaleString()}
+                {formatDateTime(new Date(request.completedAt))}
               </dd>
             </div>
           ) : null}

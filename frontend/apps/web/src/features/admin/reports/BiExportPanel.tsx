@@ -12,6 +12,7 @@ import {
 import { generalSettingsFormCardClassName } from "../general-settings/general-settings-shared";
 import { createBiExportJob, fetchBiExportJobs, type BiExportJob } from "./admin-reports-api";
 import { APPROVED_REPORT_DATASETS } from "./report-dataset-catalog";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export function BiExportPanel() {
   const [datasetKey, setDatasetKey] = useState<string>(APPROVED_REPORT_DATASETS[0].key);
@@ -142,7 +143,7 @@ export function BiExportPanel() {
                   <td className="px-4 py-3">{job.datasetKey}</td>
                   <td className="px-4 py-3 uppercase">{job.format}</td>
                   <td className="px-4 py-3 capitalize">{job.status}</td>
-                  <td className="px-4 py-3">{new Date(job.createdAt).toLocaleString()}</td>
+                  <td className="px-4 py-3">{formatDateTime(new Date(job.createdAt))}</td>
                   <td className="px-4 py-3">
                     {job.downloadUrl ? (
                       <a

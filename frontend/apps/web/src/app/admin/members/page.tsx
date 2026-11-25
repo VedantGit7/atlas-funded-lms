@@ -9,6 +9,7 @@ import { AdminPageGate } from "../../../components/patterns/AdminPageGate";
 import { InviteMemberDialog } from "../../../features/admin/members/InviteMemberDialog";
 import { MembersTable, type RoleOption } from "../../../features/admin/members/MembersTable";
 import { ServerApiError, serverApi } from "../../../lib/server-api";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 const PAGE_SIZE = 20;
 
@@ -58,13 +59,13 @@ function MembersMetrics({ stats }: { stats: MemberStatsResponse["data"] }) {
       <MetricCard
         icon={<Users className="h-5 w-5" aria-hidden="true" />}
         label="Total members"
-        value={stats.totalMembers.toLocaleString()}
-        hint={`${String(stats.activeMembers)} active`}
+        value={formatNumber(stats.totalMembers)}
+        hint={`${formatNumber(stats.totalLearners)} learners · ${formatNumber(stats.staffMembers)} staff · ${formatNumber(stats.activeMembers)} active`}
       />
       <MetricCard
         icon={<Activity className="h-5 w-5" aria-hidden="true" />}
         label="Active now"
-        value={stats.activeNow.toLocaleString()}
+        value={formatNumber(stats.activeNow)}
         hint="Active in the last 5 minutes"
       />
       <MetricCard
@@ -76,7 +77,7 @@ function MembersMetrics({ stats }: { stats: MemberStatsResponse["data"] }) {
       <MetricCard
         icon={<MailPlus className="h-5 w-5" aria-hidden="true" />}
         label="Pending invites"
-        value={stats.pendingInvites.toLocaleString()}
+        value={formatNumber(stats.pendingInvites)}
         hint="Awaiting acceptance"
       />
     </section>
@@ -108,7 +109,7 @@ export default async function AdminMembersPage() {
             <header className="space-y-1">
               <h1 className="text-2xl font-semibold text-[var(--admin-on-surface)]">Members</h1>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Manage tenant memberships, invitations, and member status.
+                Your academy's learners and staff, their invitations and access.
               </p>
             </header>
             <InviteMemberDialog availableRoles={availableRoles} />

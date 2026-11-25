@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import type { z } from "zod";
 import type { attemptRunnerResponseSchema } from "../assessment-response-schemas";
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
 
 type AttemptResult = z.infer<typeof attemptRunnerResponseSchema>["data"];
 type ResultItem = AttemptResult["items"][number];
@@ -27,9 +28,7 @@ function SubmittedAt({ iso }: { iso: string }) {
   const [label, setLabel] = useState<string | null>(null);
   useEffect(() => {
     setLabel(
-      new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(
-        new Date(iso),
-      ),
+      academyDateTimeFormat({ dateStyle: "medium", timeStyle: "short" }).format(new Date(iso)),
     );
   }, [iso]);
   return label ? (

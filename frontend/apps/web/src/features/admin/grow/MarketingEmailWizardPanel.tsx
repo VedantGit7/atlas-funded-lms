@@ -55,6 +55,7 @@ import {
   MessengerWizardFooter,
   MessengerWizardStepper,
 } from "./push-wizard-chrome";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type CampaignResponse = { data: MarketingEmailCampaignDto };
 type SendResponse = {
@@ -1198,7 +1199,7 @@ export function MarketingEmailWizardPanel({ campaignId }: MarketingEmailWizardPa
                           Email body (HTML supported)
                         </span>
                         <span className="text-[11px] font-bold text-[var(--admin-on-surface-variant)]">
-                          {bodyHtml.length.toLocaleString()} chars
+                          {formatNumber(bodyHtml.length)} chars
                         </span>
                       </div>
                       <textarea

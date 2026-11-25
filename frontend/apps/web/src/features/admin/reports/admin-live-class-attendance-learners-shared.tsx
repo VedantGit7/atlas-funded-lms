@@ -24,6 +24,7 @@ import {
 } from "./admin-live-class-attendance-roster-api";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 export type ModuleTab = "sessions" | "learners" | "series" | "exports";
 
@@ -124,7 +125,7 @@ export function formatDateFor(value: string | null, viewer: ViewerLocale): strin
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { ClientApiError, clientApi } from "../../lib/client-api";
+import { formatDateTime } from "../../lib/format/academy-format";
 
 type RespondentOption = { id: string; label: string; sortOrder: number };
 
@@ -124,7 +125,7 @@ export function LearnerPollCard({ pollId }: { pollId: string }) {
       )}
       {poll.closesAt === null ? null : (
         <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-          Closes {new Date(poll.closesAt).toLocaleString()}
+          Closes {formatDateTime(new Date(poll.closesAt))}
         </p>
       )}
 

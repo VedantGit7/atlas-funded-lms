@@ -20,6 +20,7 @@ import {
 import type { CSSProperties } from "react";
 import type { RewardType } from "@atlas/contracts/gamification/rewards.schemas";
 import { formatXp, humanizeKey } from "../progress/progress-view";
+import { formatDate } from "../../lib/format/academy-format";
 
 export { formatXp, humanizeKey };
 
@@ -143,7 +144,7 @@ export function formatEarnedDate(iso: string | null | undefined): string {
   if (!iso) return "Earned";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "Earned";
-  return `Earned ${date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
+  return `Earned ${formatDate(date, { month: "short", day: "numeric" })}`;
 }
 
 /**

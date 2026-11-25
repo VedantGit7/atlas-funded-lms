@@ -18,6 +18,8 @@ import { groupStudioNavigation, type StudioNavGroup } from "./studio-nav-groups"
 type StudioShellMember = {
   membershipId: string;
   displayName: string | null;
+  /** Their most senior role, such as "Administrator" (shared/role-label.ts). */
+  roleLabel?: string;
   avatarUrl: string | null;
 };
 
@@ -322,7 +324,9 @@ export function StudioShell({
                 <p className="text-sm font-bold leading-tight text-[var(--admin-on-surface)]">
                   {displayName}
                 </p>
-                <p className="text-[11px] text-[var(--admin-on-surface-variant)]">Instructor</p>
+                <p className="text-[11px] text-[var(--admin-on-surface-variant)]">
+                  {member.roleLabel ?? "Instructor"}
+                </p>
               </div>
               {member.avatarUrl ? (
                 <img

@@ -5,6 +5,7 @@ import {
   parseAutomationCondition,
 } from "@atlas/contracts/automation/automation.registry";
 import type { automationRuleDtoSchema } from "@atlas/contracts/automation/automation.dto";
+import { formatDateTime } from "../../lib/format/academy-format";
 
 type RuleDto = z.infer<typeof automationRuleDtoSchema>;
 
@@ -178,7 +179,7 @@ export function formatRelativeTime(iso: string): string {
   if (Math.abs(diffHours) < 24) {
     return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(diffHours, "hour");
   }
-  return date.toLocaleString();
+  return formatDateTime(date);
 }
 
 export function summarizeCondition(rule: RuleDto): string {

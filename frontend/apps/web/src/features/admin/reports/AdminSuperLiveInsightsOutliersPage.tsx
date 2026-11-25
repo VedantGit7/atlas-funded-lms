@@ -48,6 +48,7 @@ import {
 import { SuperLiveInsightsModuleTabs } from "./SuperLiveInsightsModuleTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
+import { formatDate as academyFormatDate } from "../../../lib/format/academy-format";
 
 type DatePreset = SuperLiveInsightsDatePreset;
 
@@ -103,7 +104,7 @@ function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(viewer.locale, {
+  return academyFormatDate(date, {
     day: "numeric",
     month: "short",
     year: "numeric",

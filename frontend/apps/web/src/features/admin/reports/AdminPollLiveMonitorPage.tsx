@@ -38,6 +38,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
+import { formatTime } from "../../../lib/format/academy-format";
 
 const POLL_INTERVAL_MS = 2500;
 
@@ -83,7 +84,7 @@ function formatClock(value: string | null | undefined, viewer: ViewerLocale): st
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",

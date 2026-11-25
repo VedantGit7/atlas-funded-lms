@@ -13,6 +13,7 @@ import {
   tableHeaderClassName,
   tableShellClassName,
 } from "../analytics-studio-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type AnalyticsAtRiskTableProps = {
   enabled?: boolean | undefined;
@@ -158,7 +159,7 @@ export function AnalyticsAtRiskTable({ enabled = true }: AnalyticsAtRiskTablePro
                     {alert.ruleName}
                   </td>
                   <td className="px-4 py-3 tabular-nums text-[var(--admin-on-surface-variant)]">
-                    {new Date(alert.triggeredAt).toLocaleString()}
+                    {formatDateTime(new Date(alert.triggeredAt))}
                   </td>
                   <td className="px-4 py-3">
                     <button

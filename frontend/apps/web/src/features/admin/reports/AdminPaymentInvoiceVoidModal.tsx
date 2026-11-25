@@ -5,6 +5,7 @@ import { useEffect, useId, useState } from "react";
 import { Select } from "@atlas/design-system";
 import { ClientApiError } from "../../../lib/client-api";
 import { voidPaymentInvoice, type PaymentInvoiceDetail } from "./admin-payments-roster-api";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type VoidReason = "issued_in_error" | "duplicate" | "amount_incorrect" | "order_refunded";
 
@@ -23,7 +24,7 @@ type Props = {
 };
 
 function formatMoney(cents: number, currency: string): string {
-  return `${(cents / 100).toLocaleString(undefined, {
+  return `${formatNumber(cents / 100, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${currency}`;

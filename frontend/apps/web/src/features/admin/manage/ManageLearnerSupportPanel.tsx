@@ -22,6 +22,7 @@ import {
   manageTableTdClassName,
   manageTableThClassName,
 } from "./manage-ui-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 function formatError(error: unknown): string {
   return error instanceof ClientApiError ? error.message : "Request failed.";
@@ -221,7 +222,7 @@ export function ManageLearnerSupportPanel() {
             </h2>
             {selectedConversation ? (
               <p className="mt-0.5 text-xs text-[var(--admin-on-surface-variant)]">
-                Updated {new Date(selectedConversation.updatedAt).toLocaleString()}
+                Updated {formatDateTime(new Date(selectedConversation.updatedAt))}
               </p>
             ) : null}
           </div>
@@ -257,7 +258,7 @@ export function ManageLearnerSupportPanel() {
                           className="border-b border-[var(--admin-border)] last:border-b-0"
                         >
                           <td className={`${manageTableTdClassName} whitespace-nowrap align-top`}>
-                            {new Date(message.sentAt).toLocaleString()}
+                            {formatDateTime(new Date(message.sentAt))}
                           </td>
                           <td className={`${manageTableTdClassName} align-top`}>{message.body}</td>
                         </tr>

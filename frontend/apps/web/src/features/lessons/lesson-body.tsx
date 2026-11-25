@@ -8,6 +8,7 @@ import type { lessonPlayerContentSchema } from "@atlas/contracts/lessons/lesson-
 import { ArticleMarkdown } from "./article-markdown";
 import { LessonQuizCard } from "./lesson-quiz-card";
 import { LessonVideoEmbed } from "./lesson-video-embed";
+import { academyDateTimeFormat } from "../../lib/format/academy-format";
 
 type LessonPlayerContent = z.infer<typeof lessonPlayerContentSchema>;
 type LiveDetails = Extract<LessonPlayerContent, { kind: "live" }>["live"];
@@ -66,7 +67,7 @@ function describeStart(scheduledAt: string | null): { label: string; start: Date
   const date = new Date(scheduledAt);
   if (Number.isNaN(date.getTime())) return { label: scheduledAt, start: null };
   const hasZone = /(?:z|[+-]\d{2}:?\d{2})$/i.test(scheduledAt);
-  const label = new Intl.DateTimeFormat(undefined, {
+  const label = academyDateTimeFormat({
     dateStyle: "full",
     timeStyle: "short",
     ...(hasZone ? {} : { timeZone: "UTC" }),

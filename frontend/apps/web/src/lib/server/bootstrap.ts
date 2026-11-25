@@ -19,6 +19,8 @@ export type PublicBootstrapData = {
   modeDefault: "system" | "light" | "dark" | null;
   themeCssVars: Record<string, string> | null;
   homeCurrency: string | null;
+  /** The academy time zone; absent from older API builds. */
+  timeZone?: string | null;
   fxBase: string | null;
   fxRates: Record<string, number> | null;
 };

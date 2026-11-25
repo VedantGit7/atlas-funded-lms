@@ -28,6 +28,7 @@ import { StudioDocPreview } from "./studio-doc-preview";
 import "./studio-home.css";
 import "../../../styles/inter.css";
 import "../../../styles/playfair-display.css";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type TemplateStatus = "DRAFT" | "REVIEW" | "PUBLISHED" | "ARCHIVED";
 
@@ -83,7 +84,7 @@ function formatRelativeTime(iso: string): string {
   if (hours < 24) return `Edited ${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `Edited ${days}d ago`;
-  return `Edited ${new Date(iso).toLocaleDateString()}`;
+  return `Edited ${formatDate(new Date(iso))}`;
 }
 
 function pageLabelFromDoc(doc: CertificateDesignDocument | undefined): string {

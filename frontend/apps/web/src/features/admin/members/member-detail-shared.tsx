@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { BadgeCheck, GraduationCap, MessageSquare, Shield, Star, User } from "lucide-react";
 import { PERMISSIONS } from "@atlas/access/seed/permission-catalogue";
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
 
 export const fieldClassName =
   "w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-2.5 text-sm text-[var(--admin-on-surface)] outline-none transition-all placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30";
@@ -22,7 +23,7 @@ export function formatJoinedDate(iso: string | null): string | null {
   if (!iso) return null;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return null;
-  return `Joined ${new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(date)}`;
+  return `Joined ${academyDateTimeFormat({ month: "short", year: "numeric" }).format(date)}`;
 }
 
 export function memberInitials(displayName: string | null, email: string | null): string {

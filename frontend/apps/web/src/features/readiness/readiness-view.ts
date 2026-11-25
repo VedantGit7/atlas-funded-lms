@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from "../../lib/format/academy-format";
+
 /**
  * Presentation helpers shared by the learner readiness surface.
  *
@@ -75,14 +77,14 @@ export function formatBandLabel(value: string | null | undefined): string {
 export function formatShortDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 /** Full timestamp for "last updated" style captions. */
 export function formatUpdatedAt(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     dateStyle: "medium",
     timeStyle: "short",
   });

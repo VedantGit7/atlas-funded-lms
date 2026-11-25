@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import type { publicVerifyResponseSchema } from "@atlas/contracts/certificates/certificate.dto";
 import { VerificationActions } from "./VerificationActions";
+import { formatDate as academyFormatDate } from "../../../lib/format/academy-format";
 
 type PublicVerifyData = z.infer<typeof publicVerifyResponseSchema>["data"];
 
@@ -87,7 +88,7 @@ function formatDate(value?: string): string | null {
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString(undefined, {
+  return academyFormatDate(date, {
     year: "numeric",
     month: "long",
     day: "numeric",

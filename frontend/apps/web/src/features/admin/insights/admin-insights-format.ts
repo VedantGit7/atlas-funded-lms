@@ -1,5 +1,9 @@
 import { csvEscape } from "@/lib/export/csv";
 import type { InsightDashboardRange } from "./admin-insights-api";
+import {
+  formatDate,
+  formatDateTime as academyFormatDateTime,
+} from "../../../lib/format/academy-format";
 
 let insightNumberLocale = "en-US";
 
@@ -46,15 +50,15 @@ export function formatPeriodLabel(period: string, range: InsightDashboardRange):
   const date = new Date(period.includes("T") ? period : `${period}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
   if (range === "30d") {
-    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    return formatDate(date, { month: "short", day: "numeric" });
   }
-  return date.toLocaleDateString(undefined, { month: "short" });
+  return formatDate(date, { month: "short" });
 }
 
 export function formatPeriodLong(period: string): string {
   const date = new Date(period.includes("T") ? period : `${period}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) return period;
-  return date.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  return formatDate(date, { month: "short", year: "numeric" });
 }
 
 export function widgetToCsv(
@@ -90,7 +94,7 @@ export function formatMutedUntil(value: string | null, now = new Date()): string
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   if (date.getTime() < now.getTime()) return "Expired";
-  return date.toLocaleString(undefined, {
+  return academyFormatDateTime(date, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -101,7 +105,7 @@ export function formatMutedUntil(value: string | null, now = new Date()): string
 export function formatDateTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString(undefined, {
+  return academyFormatDateTime(date, {
     month: "short",
     day: "numeric",
     hour: "2-digit",

@@ -1,3 +1,5 @@
+import { formatDate } from "../../../lib/format/academy-format";
+
 export type MessengerHubSummary = {
   email: {
     activeCount: number;
@@ -69,7 +71,7 @@ export function formatRelativeTime(iso: string): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.round(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     month: "short",
     day: "numeric",
   });

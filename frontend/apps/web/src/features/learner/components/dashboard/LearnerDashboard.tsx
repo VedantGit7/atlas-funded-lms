@@ -30,6 +30,10 @@ import { scoreBandLabel, scoreColor } from "./dashboard-model";
 import { HeroSceneMount, ProgressBar, RadialProgress, Reveal } from "./dashboard-ui";
 import { LearnerPromoSliderCarousel } from "./LearnerPromoSliderCarousel";
 import { LearnerEventsCountdown } from "./LearnerEventsCountdown";
+import {
+  formatDate as academyFormatDate,
+  formatNumber,
+} from "../../../../lib/format/academy-format";
 
 export type LearnerDashboardData = {
   displayName: string | null;
@@ -165,7 +169,7 @@ const STARTER_SUGGESTIONS: Array<{
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return academyFormatDate(new Date(iso), {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -223,7 +227,7 @@ export function LearnerDashboard({
           <span className="h-6 w-px bg-border" aria-hidden="true" />
           <StatChip
             icon={<Zap className="h-4 w-4 text-primary" fill="currentColor" />}
-            value={`${(data.xpTotal ?? 0).toLocaleString()} XP`}
+            value={`${formatNumber(data.xpTotal ?? 0)} XP`}
           />
         </div>
       </header>
@@ -300,7 +304,7 @@ export function LearnerDashboard({
                   <span className="font-bold text-primary">Level {data.level ?? 1}</span>
                   <span className="text-muted-foreground">
                     {data.xpForNextLevel != null && data.xpIntoLevel != null
-                      ? `${data.xpIntoLevel.toLocaleString()} / ${data.xpForNextLevel.toLocaleString()} XP`
+                      ? `${formatNumber(data.xpIntoLevel)} / ${formatNumber(data.xpForNextLevel)} XP`
                       : "Max level"}
                   </span>
                 </div>
@@ -308,7 +312,7 @@ export function LearnerDashboard({
                 {data.weeklyXp ? (
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <TrendingUp className="h-3.5 w-3.5 text-[var(--success)]" />+
-                    {data.weeklyXp.toLocaleString()} XP this week
+                    {formatNumber(data.weeklyXp)} XP this week
                   </p>
                 ) : null}
               </div>
@@ -552,7 +556,7 @@ export function LearnerDashboard({
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-bold text-primary">Level {data.level ?? 1}</span>
                   <span className="text-muted-foreground">
-                    {(data.xpTotal ?? 0).toLocaleString()} XP total
+                    {formatNumber(data.xpTotal ?? 0)} XP total
                   </span>
                 </div>
                 <ProgressBar value={data.levelProgressPercent} />

@@ -11,6 +11,7 @@ import {
   outlineButtonClassName,
 } from "../../../../features/certificates/components/certificate-template-admin-shared";
 import { ServerApiError, serverApi } from "../../../../lib/server-api";
+import { formatDateTime } from "../../../../lib/format/academy-format";
 
 type CertificateDetailResponse = z.infer<typeof certificateDetailResponseSchema>;
 
@@ -60,11 +61,11 @@ export default async function AdminCertificateDetailPage({
               <dl className="grid gap-px bg-[var(--admin-border)] sm:grid-cols-2">
                 {[
                   ["Template", certificate.templateName],
-                  ["Issued", new Date(certificate.issuedAt).toLocaleString()],
+                  ["Issued", formatDateTime(new Date(certificate.issuedAt))],
                   [
                     "Expires",
                     certificate.expiresAt
-                      ? new Date(certificate.expiresAt).toLocaleString()
+                      ? formatDateTime(new Date(certificate.expiresAt))
                       : "No expiration",
                   ],
                   ["Snapshot hash", certificate.designSnapshotHash ?? "Not recorded"],

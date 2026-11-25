@@ -1,3 +1,5 @@
+import { formatDate, formatNumber } from "../../../lib/format/academy-format";
+
 export type ReferralConfig = {
   enabled: boolean;
   referrerSignupCredits: number;
@@ -42,7 +44,7 @@ export function formatReferralDate(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -50,7 +52,7 @@ export function formatReferralDate(value: string | null | undefined): string {
 }
 
 export function formatCredits(value: number): string {
-  return value.toLocaleString();
+  return formatNumber(value);
 }
 
 export function learnerInitials(name: string | null | undefined, email: string | null | undefined) {
@@ -63,5 +65,5 @@ export function learnerInitials(name: string | null | undefined, email: string |
 export function learnerLabel(
   row: Pick<ReferralStatsItem, "displayName" | "email" | "membershipId">,
 ) {
-  return row.displayName?.trim() || row.email?.trim() || row.membershipId.slice(0, 8);
+  return row.displayName?.trim() || row.email?.trim() || "Unnamed member";
 }

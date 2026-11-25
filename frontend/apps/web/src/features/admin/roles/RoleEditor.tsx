@@ -16,6 +16,7 @@ import {
   checkboxClassName,
   fieldClassName,
   formatGroupLabel,
+  permissionLabel,
   formatRelativeUpdatedAt,
   groupIcon,
   lockedFieldClassName,
@@ -103,25 +104,22 @@ function EditablePermissionCard({
                 type="checkbox"
                 checked={isChecked}
                 disabled={disabled}
-                aria-label={permission.key}
+                aria-label={permissionLabel(permission)}
                 className={checkboxClassName}
                 onChange={() => {
                   onTogglePermission(permission.key);
                 }}
               />
               <span className="min-w-0 flex-1">
-                <code
+                <span
                   className={[
-                    "inline-block rounded px-1.5 py-0.5 font-mono text-xs",
+                    "block text-sm font-medium",
                     isChecked
-                      ? "bg-[var(--admin-primary-container)]/50 text-[var(--admin-primary-strong)]"
-                      : "bg-[var(--admin-surface-variant)] text-[var(--admin-on-surface-variant)]",
+                      ? "text-[var(--admin-primary-strong)]"
+                      : "text-[var(--admin-on-surface)]",
                   ].join(" ")}
                 >
-                  {permission.key}
-                </code>
-                <span className="mt-1 block text-sm text-[var(--admin-on-surface-variant)]">
-                  {permission.description}
+                  {permissionLabel(permission)}
                 </span>
               </span>
             </label>

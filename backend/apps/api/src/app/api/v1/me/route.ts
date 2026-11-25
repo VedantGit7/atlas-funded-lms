@@ -156,6 +156,7 @@ export async function GET(req: NextRequest) {
               id: result.profile.id,
               displayName: result.profile.displayName,
               avatarUrl: result.profile.avatarUrl,
+              timezone: result.profile.timezone ?? null,
             }
           : null,
       },

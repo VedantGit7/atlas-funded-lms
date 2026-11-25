@@ -38,6 +38,8 @@ export const meMembershipOutputSchema = z.object({
         id: z.string(),
         displayName: z.string().nullable(),
         avatarUrl: z.string().nullable(),
+        /** The member's own time zone, or null to use the academy's. */
+        timezone: z.string().nullable().optional(),
       })
       .nullable(),
   }),

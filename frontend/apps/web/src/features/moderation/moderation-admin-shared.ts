@@ -11,6 +11,7 @@ import {
   outlineButtonClassName,
   primaryButtonClassName,
 } from "../../app/admin/branding/_components/branding-admin-shared";
+import { currentAcademyFormat } from "../../lib/format/academy-format";
 
 export {
   alertErrorClassName,
@@ -81,6 +82,7 @@ export function formatModerationDateTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return new Intl.DateTimeFormat("en-GB", {
+    timeZone: currentAcademyFormat().timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

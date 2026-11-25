@@ -20,7 +20,7 @@ function errorMessage(error: unknown, fallback: string): string {
   return error instanceof ClientApiError ? error.message : fallback;
 }
 
-type Pending = "enrol" | "reset" | "suspend" | "reactivate" | null;
+type Pending = "enroll" | "reset" | "suspend" | "reactivate" | null;
 
 /**
  * What an admin can do for a learner from their page (QA review 2 H22):
@@ -44,7 +44,7 @@ export function MemberActions({
 }) {
   const router = useRouter();
   const [pending, setPending] = useState<Pending>(null);
-  const [confirming, setConfirming] = useState<Exclude<Pending, "enrol" | null> | null>(null);
+  const [confirming, setConfirming] = useState<Exclude<Pending, "enroll" | null> | null>(null);
   const [enrolOpen, setEnrolOpen] = useState(false);
   const [courses, setCourses] = useState<CourseOption[] | null>(null);
   const [courseError, setCourseError] = useState<string | null>(null);
@@ -75,24 +75,24 @@ export function MemberActions({
 
   async function enrol() {
     if (!courseId) return;
-    setPending("enrol");
+    setPending("enroll");
     try {
       await clientApi.post(
         `/api/v1/courses/${courseId}/enrollments`,
         { membershipId },
-        `member-enrol-${membershipId}-${courseId}`,
+        `member-enroll-${membershipId}-${courseId}`,
         { successMessage: `${displayName} enrolled` },
       );
       setEnrolOpen(false);
       router.refresh();
     } catch (error) {
-      toast.error(errorMessage(error, "Couldn't enrol this member."));
+      toast.error(errorMessage(error, "Couldn't enroll this member."));
     } finally {
       setPending(null);
     }
   }
 
-  async function run(action: Exclude<Pending, "enrol" | null>) {
+  async function run(action: Exclude<Pending, "enroll" | null>) {
     setPending(action);
     setConfirming(null);
     try {
@@ -124,7 +124,7 @@ export function MemberActions({
   }
 
   const confirmText: Record<
-    Exclude<Pending, "enrol" | null>,
+    Exclude<Pending, "enroll" | null>,
     { title: string; body: string; cta: string }
   > = {
     reset: {
@@ -255,7 +255,7 @@ export function MemberActions({
           <form
             role="dialog"
             aria-modal="true"
-            aria-labelledby="member-enrol-title"
+            aria-labelledby="member-enroll-title"
             className={`admin-theme w-full max-w-md space-y-4 bg-[var(--admin-surface)] p-5 shadow-xl ${dropdownPanelSurfaceClassName}`}
             onSubmit={(event) => {
               event.preventDefault();
@@ -309,7 +309,7 @@ export function MemberActions({
               <button
                 type="button"
                 className={buttonClassName}
-                disabled={pending === "enrol"}
+                disabled={pending === "enroll"}
                 onClick={() => {
                   setEnrolOpen(false);
                 }}
@@ -318,10 +318,10 @@ export function MemberActions({
               </button>
               <button
                 type="submit"
-                disabled={pending === "enrol" || !courseId}
+                disabled={pending === "enroll" || !courseId}
                 className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-primary)] disabled:opacity-50"
               >
-                {pending === "enrol" ? (
+                {pending === "enroll" ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : null}
                 Enrol

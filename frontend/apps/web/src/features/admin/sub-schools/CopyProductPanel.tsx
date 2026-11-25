@@ -6,6 +6,7 @@ import { generalSettingsBackLinkClassName } from "../general-settings/general-se
 import type { SubSchoolRow } from "./SubSchoolsListPanel";
 import { subSchoolCopyFlowHref, type CopyProductKind } from "./copy-product-flows";
 import { subSchoolDetailHref } from "./sub-schools-shared";
+import { formatDate } from "../../../lib/format/academy-format";
 
 export type CopyProductHistoryRow = {
   id: string;
@@ -48,7 +49,7 @@ export function mapProductCopyJobToHistoryRow(job: ProductCopyJobDto): CopyProdu
     source: job.sourceProductTitle,
     type: typeLabel,
     destination: job.destinationProductName,
-    date: new Date(job.createdAt).toLocaleDateString(undefined, {
+    date: formatDate(new Date(job.createdAt), {
       day: "2-digit",
       month: "short",
       year: "numeric",

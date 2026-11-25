@@ -46,6 +46,10 @@ import { downloadReportExport, pollReportRunUntilComplete } from "./admin-report
 import { PaymentsReportTabs } from "./PaymentsReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import {
+  formatDate as academyFormatDate,
+  formatDateTime as academyFormatDateTime,
+} from "../../../lib/format/academy-format";
 
 type DetailTab = "transactions" | "payouts" | "webhooks" | "configuration";
 
@@ -74,7 +78,7 @@ function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(viewer.locale, {
+  return academyFormatDateTime(date, {
     timeZone: viewer.timeZone,
     year: "2-digit",
     month: "short",
@@ -87,7 +91,7 @@ function formatDateTimeFor(iso: string | null, viewer: ViewerLocale): string {
 function formatDateFor(iso: string, viewer: ViewerLocale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return academyFormatDate(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",

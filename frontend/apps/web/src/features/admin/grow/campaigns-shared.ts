@@ -1,3 +1,5 @@
+import { formatDate } from "../../../lib/format/academy-format";
+
 export type CampaignGoal = "REACTIVATION" | "CONVERSION" | "ONBOARDING" | "RETENTION";
 
 export type CampaignStatus = "DRAFT" | "SCHEDULED" | "SENT";
@@ -160,7 +162,7 @@ export function formatCampaignDate(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

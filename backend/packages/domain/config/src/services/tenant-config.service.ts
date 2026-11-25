@@ -53,6 +53,7 @@ export async function readTenantConfigVersions(tx: TenantTx) {
       id: row.id,
       version: row.version,
       createdByMembershipId: row.created_by_membership_id,
+      createdByName: row.created_by_name ?? null,
       createdAt: row.created_at.toISOString(),
       isCurrent: row.current_version_id === row.id,
     })),

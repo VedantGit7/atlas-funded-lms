@@ -1,4 +1,5 @@
 import { BadgeCheck, Building2, CheckCircle2, CircleSlash, Info } from "lucide-react";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type Entitlement = {
   key: string;
@@ -38,7 +39,7 @@ function formatExpiry(iso: string | null): string | null {
   if (!iso) return null;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return formatDate(date, { year: "numeric", month: "short", day: "numeric" });
 }
 
 export function SubscriptionPanel({ entitlements, issuerName }: SubscriptionPanelProps) {

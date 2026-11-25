@@ -38,6 +38,7 @@ import { AnalyticsAdminDateRange } from "./analytics-admin-date-range";
 import { AnalyticsAdminFunnel } from "./analytics-admin-funnel";
 import { AnalyticsAdminMetricCards } from "./analytics-admin-metric-cards";
 import { ItemStatisticsTable } from "./item-statistics-table";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type AnalyticsAdminViewProps = {
   from: string;
@@ -267,7 +268,7 @@ export function AnalyticsAdminView({
                 ) : null}
 
                 <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                  {dashboard.data.summary.totalEvents.toLocaleString()} tracked events between{" "}
+                  {formatNumber(dashboard.data.summary.totalEvents)} tracked events between{" "}
                   {dashboard.data.from} and {dashboard.data.to}.
                 </p>
               </>

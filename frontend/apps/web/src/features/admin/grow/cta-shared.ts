@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
+
 export type CtaStatus = "DRAFT" | "LIVE" | "UNPUBLISHED";
 export type CtaType = "POPUP" | "STICKY" | "SLIDE_IN" | "EMBEDDED_BUTTON";
 export type CtaAudience = "ALL" | "ANONYMOUS" | "LEARNERS";
@@ -69,7 +71,7 @@ export function formatCtaDateTime(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -96,7 +98,7 @@ export function formatCtaRelativeTime(value: string | null | undefined): string 
     return hours === 1 ? "1 hour ago" : `${String(hours)} hours ago`;
   }
   if (deltaMs < 2 * day) return "Yesterday";
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

@@ -1,3 +1,5 @@
+import { formatDate } from "../../../lib/format/academy-format";
+
 export type WorkflowDefinitionItem = {
   id: string;
   key: string;
@@ -87,7 +89,7 @@ export function formatRelativeTime(iso: string): string {
   if (Math.abs(diffHours) < 48) {
     return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(diffHours, "hour");
   }
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 export function stateOptionsForValue(value: string) {

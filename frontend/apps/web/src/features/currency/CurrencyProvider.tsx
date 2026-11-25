@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { currentAcademyFormat, DEFAULT_CURRENCY } from "../../lib/format/academy-format";
 
 type CurrencyContextValue = {
   /** Tenant-wide display currency (home currency); every amount converts to it. */
@@ -16,13 +17,13 @@ type CurrencyContextValue = {
   setDisplayCurrency: (code: string) => void;
 };
 
-const FALLBACK_CURRENCY = "USD";
+const FALLBACK_CURRENCY = DEFAULT_CURRENCY;
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
 function formatIn(currency: string, amount: number): string {
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(currentAcademyFormat().locale, {
       style: "currency",
       currency,
       currencyDisplay: "narrowSymbol",

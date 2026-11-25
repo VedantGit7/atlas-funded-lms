@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { platformApi } from "../platform-api";
 import { usePlatformReason } from "./PlatformReasonProvider";
 import { PlatformReasonGate } from "./PlatformReasonDialog";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type AuditEntry = {
   id: string;
@@ -116,7 +117,7 @@ export function PlatformAuditTable() {
                 key={entry.id}
                 className={`border-b border-border ${isScopeTransition(entry) ? "bg-warning/10" : ""}`}
               >
-                <td className="py-2 pr-4">{new Date(entry.occurredAt).toLocaleString()}</td>
+                <td className="py-2 pr-4">{formatDateTime(new Date(entry.occurredAt))}</td>
                 <td className="py-2 pr-4 font-mono text-xs">{entry.action}</td>
                 <td className="py-2 pr-4">
                   {entry.targetType}

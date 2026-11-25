@@ -37,6 +37,7 @@ import { PollsReportTabs } from "./PollsReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
 import { csvEscape } from "@/lib/export/csv";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const MAX_SLOTS = POLLS_COMPARE_MAX_SLOTS;
 const SAVE_KEY = "atlas.admin.polls.compare.saved";
@@ -105,7 +106,7 @@ function formatMetric(value: number | null, format: MetricDef["format"], locale?
 
 function formatShortDate(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-GB", {
+  return formatDate(new Date(iso), {
     day: "numeric",
     month: "short",
     year: "numeric",

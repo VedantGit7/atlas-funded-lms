@@ -92,7 +92,7 @@ type DeleteLessonState = {
 
 function formatError(error: unknown): string {
   if (error instanceof ClientApiError) return error.message;
-  return "Chapter action failed.";
+  return "Section action failed.";
 }
 
 function LessonTypeIcon({ lesson }: { lesson: LessonOutlineItem }) {
@@ -481,7 +481,7 @@ export function CourseChaptersSidebar({
   return (
     <>
       <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-4 py-3.5">
-        <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Chapters</h2>
+        <h2 className="text-sm font-semibold text-[var(--admin-on-surface)]">Sections</h2>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">

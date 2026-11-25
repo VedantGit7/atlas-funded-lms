@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, Video } from "lucide-react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type ZoomMeeting = {
   id: string;
@@ -13,7 +14,7 @@ type ZoomMeeting = {
 };
 
 function formatWhen(value: string | null): string {
-  return value === null ? "—" : new Date(value).toLocaleString();
+  return value === null ? "—" : formatDateTime(new Date(value));
 }
 
 function durationLabel(startedAt: string | null, endedAt: string | null): string {

@@ -70,11 +70,11 @@ describe("admin console e2e wiring", () => {
   it("dashboard includes active learner and content status summaries", () => {
     const source = readFileSync(resolve(webRoot, "app/admin/page.tsx"), "utf8");
     // "Content status" and "Recent audit activity" were section headings that
-    // the dashboard renamed to "Studio content" and "Recent tenant audit
-    // events". The summaries are still there; only the copy moved, which is not
+    // the dashboard renamed to "Studio content" and "Recent changes in your
+    // academy". The summaries are still there; only the copy moved, which is not
     // a regression worth failing a build over.
     expect(source).toContain("Active learners");
     expect(source).toContain("Studio content");
-    expect(source).toContain("Recent tenant audit events");
+    expect(source).toContain("Recent changes in your academy");
   });
 });

@@ -1,15 +1,19 @@
 "use client";
 
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
+import {
+  currentAcademyFormat,
+  formatDateTime,
+  formatNumber,
+} from "../../../lib/format/academy-format";
+import { useAcademyFormat } from "../../../lib/format/academy-format-context";
 
 /*
- * Text that depends on the viewer's clock, locale or timezone ("5m ago",
- * "Oct 10, 05:30 PM", "1,00,000") would differ between a server-rendered page
- * and the browser's first render, which React reports as a hydration error.
- * Until hydration ends these render a fixed form: relative times measured from
- * when the server rendered, dates in UTC and numbers in en-US. Afterwards they
- * use the viewer's own settings, as they did when the page rendered only in
- * the browser.
+ * Dates and numbers are shown in the academy's time zone and locale
+ * (lib/format/academy-format.ts), the same on the server and in the browser,
+ * so they never cause a hydration error and an admin abroad still reads the
+ * academy's own times. Relative times ("5m ago") depend on the clock: until
+ * hydration ends they count from when the server rendered.
  */
 
 const subscribe = () => () => {};
@@ -47,9 +51,8 @@ function useViewerNow(): number {
 /**
  * How to format viewer-dependent text where a component will not do (helpers,
  * attributes, template strings): pass `locale` and `timeZone` to the `Intl` and
- * `toLocale*` calls and measure relative times from `now`. Until hydration ends
- * they are the fixed forms above; afterwards `locale` and `timeZone` are
- * undefined, which means the viewer's own.
+ * `toLocale*` calls and measure relative times from `now`. They are the
+ * academy's time zone and locale.
  */
 export type ViewerLocale = {
   locale: string | undefined;
@@ -58,11 +61,9 @@ export type ViewerLocale = {
 };
 
 export function useViewerLocale(): ViewerLocale {
-  const hydrated = useHydrated();
+  const { locale, timeZone } = useAcademyFormat();
   const now = useViewerNow();
-  return hydrated
-    ? { locale: undefined, timeZone: undefined, now }
-    : { locale: "en-US", timeZone: "UTC", now };
+  return { locale, timeZone, now };
 }
 
 /**
@@ -77,11 +78,12 @@ export function withViewer<A extends unknown[], R>(
 }
 
 /**
- * The viewer's own settings, for code that only runs after hydration, such as
- * a click handler or a CSV export.
+ * The same settings for code that only runs after hydration, such as a click
+ * handler or a CSV export.
  */
 export function ownViewerLocale(): ViewerLocale {
-  return { locale: undefined, timeZone: undefined, now: Date.now() };
+  const { locale, timeZone } = currentAcademyFormat();
+  return { locale, timeZone, now: Date.now() };
 }
 
 /** A relative time such as "5m ago", formatted by the report's own helper. */
@@ -95,29 +97,24 @@ export function RelativeTime({
   return <>{format(value, useViewerNow())}</>;
 }
 
-/** A date and time in the viewer's locale and timezone, such as "Oct 10, 05:30 PM". */
+/** A date and time in the academy's time zone, such as "10 Oct, 05:30 pm". */
 export function LocalDateTime({ value }: { value: string | null }) {
-  const hydrated = useHydrated();
+  const format = useAcademyFormat();
   if (!value) return null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
-  const options: Intl.DateTimeFormatOptions = {
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  };
   return (
     <>
-      {hydrated
-        ? date.toLocaleString(undefined, options)
-        : date.toLocaleString("en-US", { ...options, timeZone: "UTC" })}
+      {formatDateTime(
+        date,
+        { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" },
+        format,
+      )}
     </>
   );
 }
 
-/** A count grouped the viewer's way, such as "1,00,000" in India. */
+/** A count grouped the academy's way, such as "1,00,000" in India. */
 export function LocalCount({ value }: { value: number }) {
-  const hydrated = useHydrated();
-  return <>{hydrated ? value.toLocaleString() : value.toLocaleString("en-US")}</>;
+  return <>{formatNumber(value, undefined, useAcademyFormat())}</>;
 }

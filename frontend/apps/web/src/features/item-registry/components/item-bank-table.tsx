@@ -30,6 +30,7 @@ import { listItems, type ItemDto, type ItemListPage, type ItemTypeDto } from "..
 import { runBulkDelete, runBulkStatus } from "../bulk-status";
 import { BULK_ITEM_STATUS_MAX } from "../schemas";
 import { DEFAULT_ITEM_TYPE_VISUAL, getItemTypeVisual } from "./item-type-config";
+import { formatDate } from "../../../lib/format/academy-format";
 
 /** Questions fetched per page. */
 const PAGE_SIZE = 50;
@@ -255,7 +256,7 @@ function ItemRow({
             {formatItemRef(item.id)}
           </span>
           <span className="text-[11px] text-[var(--admin-on-surface-variant)]/60">
-            {new Date(item.updatedAt).toLocaleDateString("en-US", {
+            {formatDate(new Date(item.updatedAt), {
               month: "short",
               day: "numeric",
               year: "numeric",

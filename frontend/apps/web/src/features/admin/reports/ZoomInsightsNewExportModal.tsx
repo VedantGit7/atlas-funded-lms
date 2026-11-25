@@ -28,6 +28,7 @@ import {
   type InsightDatasetOption,
 } from "./insight-export-dialog-kit";
 import { useNewExportForm } from "./use-new-export-form";
+import { currentAcademyFormat } from "../../../lib/format/academy-format";
 
 const DATASET_OPTIONS: Array<InsightDatasetOption<ZoomExportDataset>> = [
   {
@@ -59,8 +60,9 @@ const DATE_PRESET_OPTIONS = [
   ["custom", "Custom range"],
 ] as const satisfies ReadonlyArray<readonly [ZoomExportDatePreset, string]>;
 
+/** Exports default to the academy's time zone, the one every screen shows. */
 function browserTimezone(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  return currentAcademyFormat().timeZone;
 }
 
 export function ZoomInsightsNewExportModal({

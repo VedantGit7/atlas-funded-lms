@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from "../../../lib/format/academy-format";
+
 export type PromoSliderStatus = "DRAFT" | "LIVE" | "UNPUBLISHED";
 export type PromoSlideImageFit = "COVER" | "CONTAIN" | "FILL";
 
@@ -71,7 +73,7 @@ export function formatPromoDateTime(value: string | null | undefined): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString(undefined, {
+  return formatDateTime(date, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -98,7 +100,7 @@ export function formatPromoRelativeTime(value: string | null | undefined): strin
     return hours === 1 ? "1 hour ago" : `${String(hours)} hours ago`;
   }
   if (deltaMs < 2 * day) return "Yesterday";
-  return date.toLocaleDateString(undefined, {
+  return formatDate(date, {
     year: "numeric",
     month: "short",
     day: "numeric",

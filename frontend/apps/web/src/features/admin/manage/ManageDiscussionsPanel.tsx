@@ -13,6 +13,7 @@ import {
   manageTableTdClassName,
   manageTableThClassName,
 } from "./manage-ui-shared";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type ModerationCaseItem = {
   id: string;
@@ -44,7 +45,7 @@ function formatError(error: unknown): string {
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleString(undefined, {
+    return formatDateTime(new Date(iso), {
       day: "2-digit",
       month: "short",
       year: "numeric",

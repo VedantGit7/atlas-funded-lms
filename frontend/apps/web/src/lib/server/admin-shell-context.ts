@@ -10,10 +10,13 @@ import {
   redirectPendingSecondFactorToLogin,
   redirectUnauthenticatedToLogin,
 } from "./shell-auth-redirect";
+import { primaryRoleLabel } from "../../components/shells/shared/role-label";
 
 export type AdminShellMemberProjection = {
   membershipId: string;
   displayName: string | null;
+  /** Their most senior role, such as "Administrator" (shared/role-label.ts). */
+  roleLabel?: string;
   avatarUrl: string | null;
 };
 
@@ -140,6 +143,7 @@ export async function loadAdminShellContext(): Promise<AdminShellContext> {
         membershipId: me.data.membership.id,
         displayName: me.data.profile?.displayName ?? null,
         avatarUrl: me.data.profile?.avatarUrl ?? null,
+        roleLabel: primaryRoleLabel(me.data.membership.roleKeys),
       },
       navigation,
     };

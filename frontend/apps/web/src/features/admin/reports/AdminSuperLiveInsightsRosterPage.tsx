@@ -57,6 +57,7 @@ import {
   SuperLiveInsightsModuleTabs,
   type SuperLiveInsightsTabId,
 } from "./SuperLiveInsightsModuleTabs";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type ModuleTab = SuperLiveInsightsTabId;
 type DatePreset = SuperLiveInsightsDatePreset;
@@ -118,7 +119,7 @@ function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     month: "short",
     day: "numeric",
     hour: "numeric",

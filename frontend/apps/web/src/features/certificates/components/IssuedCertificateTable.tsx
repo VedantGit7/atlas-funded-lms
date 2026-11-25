@@ -14,6 +14,7 @@ import {
   type CertificateDto,
   type CertificateStatus,
 } from "./certificate-template-admin-shared";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type IssuedCertificateTableProps = {
   certificates: CertificateDto[];
@@ -195,7 +196,7 @@ export function IssuedCertificateTable({
                       <CertificateStatusPill status={certificate.status} />
                     </td>
                     <td className="px-4 py-3 text-sm text-[var(--admin-on-surface-variant)]">
-                      {new Date(certificate.issuedAt).toLocaleDateString()}
+                      {formatDate(new Date(certificate.issuedAt))}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">

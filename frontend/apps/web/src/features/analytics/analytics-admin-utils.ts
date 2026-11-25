@@ -1,5 +1,6 @@
 import type { AnalyticsDashboardResponse } from "@atlas/domain/analytics/analytics.contract";
 import type { ChartGranularity, TrendPoint } from "./analytics-studio-shared";
+import { formatDate, formatNumber } from "../../lib/format/academy-format";
 
 export type AdminTab = "learning" | "community" | "assessment";
 
@@ -87,7 +88,7 @@ export function aggregateFunnelStages(
 
 export function formatDisplayDate(isoDate: string): string {
   const date = new Date(`${isoDate.slice(0, 10)}T00:00:00Z`);
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function metricsForTab(
@@ -206,7 +207,7 @@ function buildHero(
     key,
     label,
     value,
-    displayValue: value.toLocaleString(),
+    displayValue: formatNumber(value),
     deltaPercent,
     tone: deltaPercent == null ? "neutral" : deltaPercent >= 0 ? "up" : "down",
     sparkline: series.slice(-5),
@@ -296,13 +297,13 @@ export function largestFunnelDrop(stages: FunnelStageView[]): { from: string; to
 
 function formatShortDate(isoDate: string): string {
   const date = new Date(`${isoDate}T00:00:00Z`);
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric" });
 }
 
 function formatMonthLabel(yearMonth: string): string {
   const [year, month] = yearMonth.split("-");
   const date = new Date(Date.UTC(Number(year), Number(month) - 1, 1));
-  return date.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+  return formatDate(date, { month: "short", year: "2-digit" });
 }
 
 function weekStartKey(isoDate: string): string {

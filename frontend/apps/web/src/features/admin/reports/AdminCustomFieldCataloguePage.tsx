@@ -31,6 +31,7 @@ import {
 import { CustomFieldReportTabs } from "./CustomFieldReportTabs";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const TYPE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "", label: "All types" },
@@ -101,7 +102,7 @@ function formatDateShortFor(value: string | null, viewer: ViewerLocale): string 
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     year: "numeric",
     month: "short",

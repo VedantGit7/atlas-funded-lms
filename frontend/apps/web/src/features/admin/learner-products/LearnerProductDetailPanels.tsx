@@ -86,7 +86,7 @@ export function DetailSummaryBand({
             ? "Offered to learners."
             : status.toUpperCase() === "ARCHIVED"
               ? "Not offered to learners."
-              : "Not offered yet — admins can still enrol."}
+              : "Not offered yet — admins can still enroll."}
         </p>
       </div>
 

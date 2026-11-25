@@ -30,7 +30,13 @@ const UNLIMITED: UsageLimits = {
 };
 
 function planTierDefaults(planName: string | null): UsageLimits {
-  const normalized = (planName ?? "").toLowerCase();
+  // No plan on record: no limit is known, so none is shown. Assuming the
+  // Starter caps made a 100-learner limit appear that nobody agreed to (QA
+  // review 2 H6).
+  if (!planName?.trim()) {
+    return UNLIMITED;
+  }
+  const normalized = planName.toLowerCase();
   if (normalized.includes("enterprise")) {
     return UNLIMITED;
   }

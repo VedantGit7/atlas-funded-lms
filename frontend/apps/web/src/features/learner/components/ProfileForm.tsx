@@ -12,6 +12,8 @@ import {
 import { AccountSettingsToast } from "../../account-settings/account-settings-toast";
 import { useAccountTheme } from "../../account-settings/account-theme-context";
 import { COMMON_BCP47_LOCALES } from "../../locales/locales-common-locales";
+import { timeZoneName } from "../../../lib/format/academy-settings";
+import { useAcademyFormat } from "../../../lib/format/academy-format-context";
 
 type ProfileFormProps = {
   membershipId: string;
@@ -77,10 +79,18 @@ function formatTimezoneLabel(tz: string): string {
   }
 }
 
-const TIMEZONE_SELECT_OPTIONS: SettingsSelectOption[] = [
-  { value: "", label: "Not set" },
-  ...TIMEZONE_OPTIONS.map((tz) => ({ value: tz, label: formatTimezoneLabel(tz) })),
-];
+const TIMEZONE_CHOICES: SettingsSelectOption[] = TIMEZONE_OPTIONS.map((tz) => ({
+  value: tz,
+  label: formatTimezoneLabel(tz),
+}));
+
+/** No choice means the academy's time zone, named rather than "Not set" (QA review 1 m46). */
+function timezoneSelectOptions(academyTimeZone: string): SettingsSelectOption[] {
+  return [
+    { value: "", label: `Academy time (${timeZoneName(academyTimeZone)})` },
+    ...TIMEZONE_CHOICES,
+  ];
+}
 
 export function ProfileForm({
   membershipId,
@@ -97,6 +107,8 @@ export function ProfileForm({
   const [displayName, setDisplayName] = useState(initialDisplayName ?? "");
   const [bio, setBio] = useState(initialBio ?? "");
   const [timezone, setTimezone] = useState(initialTimezone ?? "");
+  const { timeZone: academyTimeZone } = useAcademyFormat();
+  const timezoneOptions = useMemo(() => timezoneSelectOptions(academyTimeZone), [academyTimeZone]);
   const [locale, setLocale] = useState(initialLocale ?? "");
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl ?? null);
   const [busy, setBusy] = useState(false);
@@ -364,7 +376,7 @@ export function ProfileForm({
                     ariaLabel="Timezone"
                     value={timezone}
                     onChange={setTimezone}
-                    options={TIMEZONE_SELECT_OPTIONS}
+                    options={timezoneOptions}
                     placeholder="Not set"
                   />
                 </div>

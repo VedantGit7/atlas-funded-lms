@@ -6,6 +6,8 @@ import { resourceUsageRosterStorageRepository } from "./resource-usage-roster-st
 export type ResourceUsageMeters = {
   storageGb: number;
   activeUsers30d: number;
+  /** Learners (no staff role) active in the last 30 days. */
+  activeLearners30d: number;
   currentMau: number;
   totalLearners: number;
   testSubmits: number;

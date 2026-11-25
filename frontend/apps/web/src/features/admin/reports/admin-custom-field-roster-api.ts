@@ -3,7 +3,7 @@ import { clientApi } from "../../../lib/client-api";
 export const CUSTOM_FIELD_BASE_COLUMN_OPTIONS = [
   { key: "learner_name", label: "Learner", pinned: true },
   { key: "email", label: "Email", pinned: false },
-  { key: "enrollment_count", label: "Enrolments", pinned: false },
+  { key: "enrollment_count", label: "Enrollments", pinned: false },
   { key: "total_spent_cents", label: "Total spent", pinned: false },
   { key: "last_active_at", label: "Last active on", pinned: false },
   { key: "signed_up_at", label: "Signed up on", pinned: false },

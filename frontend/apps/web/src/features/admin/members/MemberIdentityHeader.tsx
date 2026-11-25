@@ -5,6 +5,7 @@ import {
   statusBadgeClassName,
   statusLabel,
 } from "./member-detail-shared";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type MemberIdentityHeaderProps = {
   displayName: string;
@@ -26,7 +27,7 @@ export function MemberIdentityHeader({
 }: MemberIdentityHeaderProps) {
   const joinedLabel = formatJoinedDate(joinedAt);
   const lastActive = lastActiveAt
-    ? new Date(lastActiveAt).toLocaleDateString(undefined, {
+    ? formatDate(new Date(lastActiveAt), {
         day: "numeric",
         month: "short",
         year: "numeric",

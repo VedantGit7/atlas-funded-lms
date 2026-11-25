@@ -13,6 +13,7 @@ import {
   EyeOff,
   type LucideIcon,
 } from "lucide-react";
+import { formatDate } from "../../lib/format/academy-format";
 
 export type CommunityAuthor = {
   membershipId: string;
@@ -125,7 +126,7 @@ export function relativeTime(iso: string): string {
   const diffDays = Math.round(diffHours / 24);
   if (diffDays < 7) return `${String(diffDays)}d ago`;
 
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return formatDate(new Date(iso), { month: "short", day: "numeric" });
 }
 
 export type ThreadNode<T extends { id: string; parentCommentId?: string | null }> = T & {

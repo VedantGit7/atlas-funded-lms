@@ -32,6 +32,8 @@ import {
   type InsightDatasetOption,
 } from "./insight-export-dialog-kit";
 import { useNewExportForm } from "./use-new-export-form";
+import { formatNumber } from "../../../lib/format/academy-format";
+import { currentAcademyFormat } from "../../../lib/format/academy-format";
 
 const DATASET_OPTIONS: Array<InsightDatasetOption<RuExportDataset>> = [
   {
@@ -120,11 +122,12 @@ function defaultScopeModeForDataset(dataset: RuExportDataset): RuExportScopeMode
 
 function formatEstimate(value: number | null): string {
   if (value == null) return "Row count varies";
-  return `Produces ~${value.toLocaleString()} rows`;
+  return `Produces ~${formatNumber(value)} rows`;
 }
 
+/** Exports default to the academy's time zone, the one every screen shows. */
 function browserTimezone(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  return currentAcademyFormat().timeZone;
 }
 
 export function ResourceUsageNewExportModal({

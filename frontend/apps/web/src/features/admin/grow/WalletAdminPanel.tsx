@@ -32,6 +32,7 @@ import {
   type WalletDirection,
   type WalletTransaction,
 } from "./wallet-shared";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 const DASHBOARD_HREF = "/admin";
 
@@ -568,7 +569,7 @@ export function WalletAdminPanel() {
                       {formatWalletCreditsAsMoney(selected.balanceCredits, creditValue, currency)}
                     </span>
                     <span className="text-sm text-[var(--admin-on-surface-variant)]">
-                      {selected.balanceCredits.toLocaleString()} credits
+                      {formatNumber(selected.balanceCredits)} credits
                     </span>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-3">

@@ -15,6 +15,7 @@ import {
   tableHeaderClassName,
   tableShellClassName,
 } from "../analytics-studio-shared";
+import { formatNumber } from "../../../lib/format/academy-format";
 
 type SortKey = "accuracy" | "attempts" | "latency" | "label";
 type SortDirection = "asc" | "desc";
@@ -280,10 +281,8 @@ export function AnalyticsItemBreakdownTable({
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-4 tabular-nums">
-                      {item.attemptsCount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-4 tabular-nums">{item.correctCount.toLocaleString()}</td>
+                    <td className="px-4 py-4 tabular-nums">{formatNumber(item.attemptsCount)}</td>
+                    <td className="px-4 py-4 tabular-nums">{formatNumber(item.correctCount)}</td>
                     <td className="px-4 py-4">
                       <span
                         className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${accuracyBadgeClassName(item.accuracy)}`}

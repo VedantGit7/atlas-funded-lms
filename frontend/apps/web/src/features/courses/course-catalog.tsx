@@ -15,6 +15,7 @@ import {
 import { clientApi } from "../../lib/client-api";
 import { CourseCard, CoverArt, courseVisual, type CourseCardData } from "./course-card";
 import type { CourseFilterValues } from "./course-filters";
+import { formatNumber } from "../../lib/format/academy-format";
 
 type PageInfo = { nextCursor: string | null; hasNextPage: boolean };
 type CourseListResponse = { data: { items: CourseCardData[]; pageInfo: PageInfo } };
@@ -384,7 +385,7 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm text-muted-foreground lg:block">
-            {visible.length.toLocaleString()} {visible.length === 1 ? "course" : "courses"}
+            {formatNumber(visible.length)} {visible.length === 1 ? "course" : "courses"}
           </span>
           <div className="flex items-center gap-1 rounded-full border border-border p-1">
             {SORT_OPTIONS.map((option) => (
@@ -444,7 +445,7 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
             {loadingMore ? "Loading..." : "Load more"}
           </button>
           <p className="text-sm text-muted-foreground">
-            Showing {items.length.toLocaleString()} courses
+            Showing {formatNumber(items.length)} courses
           </p>
         </div>
       ) : null}
@@ -466,7 +467,7 @@ export function CourseCatalog({ initialItems, pageInfo, initialFilters }: Course
                 className="group flex w-[280px] shrink-0 flex-col"
               >
                 <span className="mb-1 text-[11px] font-semibold text-muted-foreground">
-                  {course.studentCount.toLocaleString()} learners enrolled
+                  {formatNumber(course.studentCount)} learners enrolled
                 </span>
                 <CoverArt
                   coverKey={course.coverKey}

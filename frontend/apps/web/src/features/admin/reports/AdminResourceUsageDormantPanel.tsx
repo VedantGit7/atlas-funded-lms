@@ -53,6 +53,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const SETTINGS_KEY = "atlas.resource-usage.dormancy-settings";
 
@@ -167,7 +168,7 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -179,7 +180,7 @@ function formatMonthYearFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     year: "numeric",
@@ -568,7 +569,7 @@ function ArchiveModal({
           </ul>
           <ul className="space-y-2 text-sm text-[var(--admin-on-surface)]">
             <li>Learners lose access to the course.</li>
-            <li>Enrolment and progress records are kept.</li>
+            <li>Enrollment and progress records are kept.</li>
             <li>Stored assets are retained unless you choose to delete them below.</li>
           </ul>
           <label className="grid gap-1.5">
@@ -1326,7 +1327,7 @@ function ResourceUsageDormant({ initialData }: DormantPanelProps) {
               options={STORAGE_OPTIONS}
             />
             <Select
-              ariaLabel="Enrolment filter"
+              ariaLabel="Enrollment filter"
               className={selectClassName}
               value={enrolmentFilter}
               onValueChange={(value) => {
@@ -1466,7 +1467,7 @@ function ResourceUsageDormant({ initialData }: DormantPanelProps) {
                 <th className="px-4 py-2.5 font-semibold">Status</th>
                 <th className="px-4 py-2.5 font-semibold">Lessons</th>
                 <th className="px-4 py-2.5 font-semibold">Storage</th>
-                <th className="px-4 py-2.5 font-semibold">Enrolments</th>
+                <th className="px-4 py-2.5 font-semibold">Enrollments</th>
                 <th className="px-4 py-2.5 font-semibold">Last activity</th>
                 <th className="px-4 py-2.5 font-semibold">Dormant for</th>
                 <th className="px-4 py-2.5 font-semibold">Created</th>
@@ -1609,7 +1610,7 @@ function ResourceUsageDormant({ initialData }: DormantPanelProps) {
                         </p>
                         {row.lastLearnerActivityAt ? (
                           <p className="mt-0.5 text-[10px] text-[var(--admin-on-surface-variant)]">
-                            {new Date(row.lastLearnerActivityAt).toLocaleDateString(viewer.locale, {
+                            {formatDate(new Date(row.lastLearnerActivityAt), {
                               timeZone: viewer.timeZone,
                               month: "short",
                               day: "numeric",

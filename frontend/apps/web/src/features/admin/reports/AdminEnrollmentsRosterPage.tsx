@@ -48,6 +48,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, type ViewerLocale } from "./viewer-time";
+import { formatDate as academyFormatDate } from "../../../lib/format/academy-format";
 
 function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -94,7 +95,7 @@ function formatDate(value: string | null, viewer: ViewerLocale): string {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(viewer.locale, {
+  return academyFormatDate(date, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -102,10 +103,10 @@ function formatDate(value: string | null, viewer: ViewerLocale): string {
   });
 }
 
-function formatDateInputLabel(from: string, to: string, viewer: ViewerLocale): string {
+function formatDateInputLabel(from: string, to: string, _viewer: ViewerLocale): string {
   if (!from && !to) return "Last 30 days";
   const fromLabel = from
-    ? new Date(`${from}T00:00:00.000Z`).toLocaleDateString(viewer.locale, {
+    ? academyFormatDate(new Date(`${from}T00:00:00.000Z`), {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -113,7 +114,7 @@ function formatDateInputLabel(from: string, to: string, viewer: ViewerLocale): s
       })
     : "Start";
   const toLabel = to
-    ? new Date(`${to}T00:00:00.000Z`).toLocaleDateString(viewer.locale, {
+    ? academyFormatDate(new Date(`${to}T00:00:00.000Z`), {
         month: "short",
         day: "numeric",
         year: "numeric",

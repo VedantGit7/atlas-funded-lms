@@ -1,4 +1,5 @@
 import { Badge } from "@atlas/design-system";
+import { formatDate } from "../../../lib/format/academy-format";
 
 type GateBadgeProps = {
   gate: {
@@ -11,7 +12,7 @@ type GateBadgeProps = {
 };
 
 function formatUnlockDate(date: Date): string {
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return formatDate(date, { month: "short", day: "numeric", year: "numeric" });
 }
 
 function timeBasedUnlockLabel(config: Record<string, unknown>, enrolledAt?: string | null): string {

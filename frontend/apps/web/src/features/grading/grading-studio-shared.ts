@@ -1,4 +1,5 @@
 import type { GradingQueueItem } from "./api";
+import { formatDate } from "../../lib/format/academy-format";
 
 const errorBadge =
   "bg-[color-mix(in_srgb,var(--admin-danger)_12%,var(--admin-surface))] text-[var(--admin-danger)]";
@@ -115,7 +116,7 @@ export function formatRelativeSubmittedAt(value: string | null): string {
   if (days === 1) return "Yesterday";
   if (days < 7) return `${String(days)} days ago`;
 
-  return new Date(value).toLocaleDateString(undefined, {
+  return formatDate(new Date(value), {
     month: "short",
     day: "numeric",
   });

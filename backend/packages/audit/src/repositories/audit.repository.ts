@@ -22,6 +22,8 @@ export type AuditEntryRow = {
   request_id: string;
   reason: string | null;
   metadata_json: unknown;
+  /** The acting member's name or email (tenant log only). */
+  actor_name?: string | null;
 };
 
 type AuditCursor = {
@@ -118,29 +120,34 @@ export async function listTenantAuditEntries(
 
   return tx.$queryRaw<AuditEntryRow[]>`
     SELECT
-      id,
-      occurred_at,
-      action,
-      target_type,
-      target_id,
-      actor_membership_id,
-      actor_principal_id,
-      request_id,
-      metadata_json->>'reason' AS reason,
-      metadata_json
-    FROM audit_entries
-    WHERE (${query.action ?? null}::text IS NULL OR action = ${query.action ?? null})
-      AND (${query.targetType ?? null}::text IS NULL OR target_type = ${query.targetType ?? null})
-      AND (${query.targetId ?? null}::text IS NULL OR target_id = ${query.targetId ?? null})
+      ae.id,
+      ae.occurred_at,
+      ae.action,
+      ae.target_type,
+      ae.target_id,
+      ae.actor_membership_id,
+      ae.actor_principal_id,
+      ae.request_id,
+      ae.metadata_json->>'reason' AS reason,
+      ae.metadata_json,
+      -- Names, not IDs, on the audit log (QA review 2 4.3.2).
+      COALESCE(NULLIF(BTRIM(mp.display_name), ''), ap.email) AS actor_name
+    FROM audit_entries ae
+    LEFT JOIN memberships m ON m.id = ae.actor_membership_id
+    LEFT JOIN member_profiles mp ON mp.membership_id = m.id
+    LEFT JOIN auth_principals ap ON ap.id = m.auth_principal_id
+    WHERE (${query.action ?? null}::text IS NULL OR ae.action = ${query.action ?? null})
+      AND (${query.targetType ?? null}::text IS NULL OR ae.target_type = ${query.targetType ?? null})
+      AND (${query.targetId ?? null}::text IS NULL OR ae.target_id = ${query.targetId ?? null})
       AND (
         ${cursor?.occurredAt ?? null}::timestamptz IS NULL
-        OR occurred_at < ${cursor?.occurredAt ?? null}::timestamptz
+        OR ae.occurred_at < ${cursor?.occurredAt ?? null}::timestamptz
         OR (
-          occurred_at = ${cursor?.occurredAt ?? null}::timestamptz
-          AND id < ${cursor?.id ?? null}::uuid
+          ae.occurred_at = ${cursor?.occurredAt ?? null}::timestamptz
+          AND ae.id < ${cursor?.id ?? null}::uuid
         )
       )
-    ORDER BY occurred_at DESC, id DESC
+    ORDER BY ae.occurred_at DESC, ae.id DESC
     LIMIT ${limitPlusOne}
   `;
 }

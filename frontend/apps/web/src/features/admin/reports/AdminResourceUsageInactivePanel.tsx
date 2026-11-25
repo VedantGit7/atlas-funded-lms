@@ -38,6 +38,7 @@ import {
 import { downloadReportExport, pollReportRunUntilComplete } from "./admin-reports-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import { formatDate } from "../../../lib/format/academy-format";
 
 const SETTINGS_KEY = "atlas.resource-usage.inactivity-settings";
 
@@ -110,7 +111,7 @@ const SORT_OPTIONS: Array<{ value: ResourceUsageInactiveSort; label: string }> =
   { value: "inactive_asc", label: "Inactive shortest ↑" },
   { value: "activity_asc", label: "Least recent activity" },
   { value: "name_asc", label: "Name A-Z" },
-  { value: "enrolments_desc", label: "Enrolments ↓" },
+  { value: "enrolments_desc", label: "Enrollments ↓" },
   { value: "signed_up_asc", label: "Signed up ↑" },
 ];
 const REASON_OPTIONS = [
@@ -134,7 +135,7 @@ const VIEW_TABS: Array<{
 const MERGE_TAGS = [
   { tag: "{{learner_name}}", label: "Learner name" },
   { tag: "{{days_inactive}}", label: "Days inactive" },
-  { tag: "{{enrolment_count}}", label: "Enrolment count" },
+  { tag: "{{enrolment_count}}", label: "Enrollment count" },
 ] as const;
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -171,7 +172,7 @@ function formatRelativeFor(iso: string | null, viewer: ViewerLocale): string {
   const days = Math.floor(hours / 24);
   if (days === 1) return "1 day ago";
   if (days < 30) return `${String(days)} days ago`;
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -183,7 +184,7 @@ function formatMonthYearFor(iso: string | null, viewer: ViewerLocale): string {
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     year: "numeric",
@@ -194,7 +195,7 @@ function formatAbsoluteDateFor(iso: string | null, viewer: ViewerLocale): string
   if (!iso) return "-";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString(viewer.locale, {
+  return formatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -539,7 +540,7 @@ function DeactivateModal({
           ) : null}
           <ul className="space-y-2 text-sm text-[var(--admin-on-surface)]">
             <li>The learner cannot sign in.</li>
-            <li>Enrolments, progress, and payment records are kept.</li>
+            <li>Enrollments, progress, and payment records are kept.</li>
             <li>The account can be reactivated later.</li>
           </ul>
           <label className="grid gap-1.5">
@@ -911,7 +912,7 @@ function SettingsDrawer({
             />
             <div className="space-y-1">
               <RoleToggle
-                label="Exclude learners with an active paid enrolment"
+                label="Exclude learners with an active paid enrollment"
                 checked={draft.excludeActivePaidEnrolment}
                 onChange={(checked) => {
                   onChange({ ...draft, excludeActivePaidEnrolment: checked });
@@ -1352,7 +1353,7 @@ function ResourceUsageInactive({ initialData }: InactivePanelProps) {
           label="Inactive over a year"
           value={formatCount(summary.inactiveOverYearCount)}
         />
-        <HeadlineCard label="Enrolments held" value={formatCount(summary.enrolmentsHeld)} />
+        <HeadlineCard label="Enrollments held" value={formatCount(summary.enrolmentsHeld)} />
         <HeadlineCard
           label="Paid learners among them"
           value={formatCount(summary.paidAmongThem)}
@@ -1430,7 +1431,7 @@ function ResourceUsageInactive({ initialData }: InactivePanelProps) {
               options={INACTIVE_FOR_OPTIONS}
             />
             <Select
-              ariaLabel="Enrolment filter"
+              ariaLabel="Enrollment filter"
               className={selectClassName}
               value={enrolmentFilter}
               onValueChange={(value) => {
@@ -1549,7 +1550,7 @@ function ResourceUsageInactive({ initialData }: InactivePanelProps) {
                 </th>
                 <th className="px-4 py-2.5 font-semibold">Learner</th>
                 <th className="px-4 py-2.5 font-semibold">Status</th>
-                <th className="px-4 py-2.5 font-semibold">Enrolments</th>
+                <th className="px-4 py-2.5 font-semibold">Enrollments</th>
                 <th className="px-4 py-2.5 font-semibold">Last active</th>
                 <th className="px-4 py-2.5 font-semibold">Inactive for</th>
                 <th className="px-4 py-2.5 font-semibold">Signed up</th>

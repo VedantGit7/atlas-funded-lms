@@ -35,6 +35,7 @@ import {
 } from "./admin-batches-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, type ViewerLocale } from "./viewer-time";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type Channel = "email" | "in_app";
 type TimingMode = "now" | "schedule";
@@ -87,7 +88,7 @@ function formatDateTimeFor(v: string | null | undefined, viewer: ViewerLocale) {
   if (!v) return "-";
   const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "-";
-  return d.toLocaleString(viewer.locale, {
+  return formatDateTime(d, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",

@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { ResourceKind, ResourceSort } from "@atlas/contracts/resources/schemas";
+import { formatDate } from "../../lib/format/academy-format";
 
 /**
  * Presentation metadata per resource kind. Tones are design tokens (never raw
@@ -76,7 +77,7 @@ export function formatBytes(bytes: number | null): string | null {
 export function formatResourceDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return formatDate(date, { year: "numeric", month: "short", day: "numeric" });
 }
 
 /** The left-hand meta caption under a card: size / source, matched to the kind. */

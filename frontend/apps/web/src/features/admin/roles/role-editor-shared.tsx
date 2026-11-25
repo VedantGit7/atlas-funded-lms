@@ -86,6 +86,25 @@ export function permissionGroupKey(key: string): string {
   return group && group.length > 0 ? group : "other";
 }
 
+/**
+ * A permission in words, such as "Invite academy members", never its code
+ * ("membership.invite": QA review 2 4.3.2 counted 173 codes in this editor).
+ */
+export function permissionLabel(permission: { key: string; description?: string | null }): string {
+  const description = permission.description?.trim();
+  if (description) {
+    return description.replace(
+      /\btenant(s?)\b/gi,
+      (word, plural: string) => (word.startsWith("T") ? "Academy" : "academy") + plural,
+    );
+  }
+  const words = permission.key
+    .split(/[._*]+/)
+    .filter(Boolean)
+    .join(" ");
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : permission.key;
+}
+
 export function formatGroupLabel(group: string): string {
   return group.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }

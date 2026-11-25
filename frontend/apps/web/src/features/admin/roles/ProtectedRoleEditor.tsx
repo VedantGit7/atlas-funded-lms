@@ -8,6 +8,7 @@ import {
   RoleEditorPageHeader,
   buildTenantPermissionGroups,
   formatGroupLabel,
+  permissionLabel,
   groupIcon,
   lockedCheckboxClassName,
   lockedFieldClassName,
@@ -75,11 +76,11 @@ function ProtectedPermissionCard({
               checked
               disabled
               readOnly
-              aria-label={permission.key}
+              aria-label={permissionLabel(permission)}
               className={lockedCheckboxClassName}
             />
             <span className="text-sm font-medium text-[var(--admin-on-surface)]">
-              {permission.description}
+              {permissionLabel(permission)}
             </span>
           </label>
         ))}

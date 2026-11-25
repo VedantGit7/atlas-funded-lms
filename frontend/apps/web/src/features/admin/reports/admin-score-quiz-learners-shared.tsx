@@ -13,6 +13,7 @@ import {
   type ScoreProductType,
 } from "./admin-progress-score-roster-api";
 import { type ViewerLocale } from "./viewer-time";
+import { formatDate, formatDateTime, formatTime } from "../../../lib/format/academy-format";
 
 export function defined<T>(value: T, message = "Expected value to be defined"): NonNullable<T> {
   if (value == null) {
@@ -95,7 +96,7 @@ export function formatSubmittedFor(
   if (iso) {
     const date = new Date(iso);
     if (Number.isNaN(date.getTime())) return "—";
-    return date.toLocaleString(viewer.locale, {
+    return formatDateTime(date, {
       timeZone: viewer.timeZone,
       month: "short",
       day: "numeric",
@@ -106,7 +107,7 @@ export function formatSubmittedFor(
   if (startedAt) {
     const date = new Date(startedAt);
     if (Number.isNaN(date.getTime())) return "—";
-    return `Started ${date.toLocaleDateString(viewer.locale, { timeZone: viewer.timeZone, month: "short", day: "numeric" })}`;
+    return `Started ${formatDate(date, { timeZone: viewer.timeZone, month: "short", day: "numeric" })}`;
   }
   return "—";
 }
@@ -115,7 +116,7 @@ export function formatClockFor(iso: string | null, viewer: ViewerLocale): string
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",

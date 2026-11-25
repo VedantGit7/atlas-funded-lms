@@ -34,6 +34,11 @@ import {
 } from "./admin-live-class-attendance-roster-api";
 import { useReportLoad } from "./use-report-load";
 import { useViewerLocale, withViewer, RenderedAtProvider, type ViewerLocale } from "./viewer-time";
+import {
+  formatDate as academyFormatDate,
+  formatDateTime,
+  formatTime,
+} from "../../../lib/format/academy-format";
 
 type AttendanceStatus = LiveAttendeeDetail["status"];
 
@@ -68,7 +73,7 @@ function formatDateFor(value: string | null | undefined, viewer: ViewerLocale): 
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString(viewer.locale, {
+  return formatDateTime(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -82,11 +87,11 @@ function formatDateShortFor(value: string | null | undefined, viewer: ViewerLoca
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  const day = (value: Date) => value.toLocaleDateString("en-CA", { timeZone: viewer.timeZone });
+  const day = (value: Date) => academyFormatDate(value, { timeZone: viewer.timeZone });
   if (day(date) === day(new Date(viewer.now))) {
     return "Today";
   }
-  return date.toLocaleDateString(viewer.locale, {
+  return academyFormatDate(date, {
     timeZone: viewer.timeZone,
     month: "short",
     day: "numeric",
@@ -97,7 +102,7 @@ function formatRegisteredChipFor(value: string | null | undefined, viewer: Viewe
   if (!value) return "Registered date unavailable";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Registered date unavailable";
-  return `Registered ${date.toLocaleDateString(viewer.locale, {
+  return `Registered ${academyFormatDate(date, {
     timeZone: viewer.timeZone,
     day: "numeric",
     month: "short",
@@ -109,7 +114,7 @@ function formatTimeOnlyFor(value: string | null | undefined, viewer: ViewerLocal
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleTimeString(viewer.locale, {
+  return formatTime(date, {
     timeZone: viewer.timeZone,
     hour: "2-digit",
     minute: "2-digit",

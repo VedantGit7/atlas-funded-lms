@@ -65,6 +65,10 @@ export const memberStatsResponseSchema = z.object({
     suspendedMembers: z.number().int().nonnegative(),
     activeNow: z.number().int().nonnegative(),
     courseCompletionRate: z.number().min(0).max(1).nullable(),
+    /** Members with no staff role (owner, admin, instructor, moderator or custom). */
+    totalLearners: z.number().int().nonnegative(),
+    activeLearners: z.number().int().nonnegative(),
+    staffMembers: z.number().int().nonnegative(),
   }),
 });
 

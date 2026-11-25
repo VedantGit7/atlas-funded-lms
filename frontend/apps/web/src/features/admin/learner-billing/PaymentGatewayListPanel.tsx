@@ -10,16 +10,15 @@ import type {
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { PaymentGatewayAddModal } from "./PaymentGatewayAddModal";
 import { PaymentGatewayLogo } from "./PaymentGatewayLogo";
+import { academyDateTimeFormat } from "../../../lib/format/academy-format";
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
+// Built when used: the academy's time zone is known only while rendering.
+const dateFormatter = () =>
+  academyDateTimeFormat({ day: "2-digit", month: "short", year: "numeric" });
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "—" : dateFormatter.format(date);
+  return Number.isNaN(date.getTime()) ? "—" : dateFormatter().format(date);
 }
 
 export function PaymentGatewayListPanel({

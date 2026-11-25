@@ -9,6 +9,7 @@ import {
   ghostButtonClassName,
   outlineButtonClassName,
 } from "../../../../features/certificates/components/certificate-template-admin-shared";
+import { formatNumber } from "../../../../lib/format/academy-format";
 
 type Counts = { issued: number; revoked: number; expired: number; suspended: number };
 
@@ -99,7 +100,7 @@ export default function CertificateAnalyticsPage() {
                     {label}
                   </p>
                   <p className="mt-3 text-4xl font-semibold tabular-nums text-[var(--admin-on-surface)]">
-                    {loading ? "—" : counts[key].toLocaleString()}
+                    {loading ? "—" : formatNumber(counts[key])}
                   </p>
                 </div>
                 <div

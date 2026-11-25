@@ -102,15 +102,15 @@ export function LessonSettingsBrandingSection({
       <div>
         <LessonSettingsFieldLabel
           label="Lesson Type"
-          helper="Select paid or trial lesson type. Trial lessons are free to enrol."
+          helper="Paid lessons need enrollment. A free preview is open to anyone viewing the course."
         />
         <LessonSettingsRadioGroup
           name="lesson-access-type"
           value={form.accessType}
           disabled={disabled}
           options={[
-            { value: "paid", label: "Paid Lesson" },
-            { value: "trial", label: "Trial Lesson" },
+            { value: "paid", label: "Enrolled learners only" },
+            { value: "trial", label: "Free preview" },
           ]}
           onChange={(value) => {
             onChange({ accessType: value });

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { formatMoney } from "../../admin/grow/coupons-shared";
 import { cancellationFlag } from "@/lib/effect-cancellation";
+import { formatDateTime } from "../../../lib/format/academy-format";
 
 type WalletTransaction = {
   id: string;
@@ -125,7 +126,7 @@ export function LearnerWalletPanel() {
                 {wallet.transactions.map((tx) => (
                   <tr key={tx.id} className="border-t">
                     <td className="px-3 py-2 whitespace-nowrap">
-                      {new Date(tx.createdAt).toLocaleString()}
+                      {formatDateTime(new Date(tx.createdAt))}
                     </td>
                     <td className="px-3 py-2">
                       {tx.direction === "CREDIT" ? "+" : "−"} {tx.reason.replaceAll("_", " ")}
