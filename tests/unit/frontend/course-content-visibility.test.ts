@@ -338,9 +338,7 @@ describe("publish wording and course header state", () => {
   });
 
   it("calls submitting a course for review a submission, not a publish", () => {
-    expect(resolveMutationSuccessToast("course-publish", "POST")).toBe(
-      "Course submitted successfully",
-    );
+    expect(resolveMutationSuccessToast("course-publish", "POST")).toBe("Course submitted");
   });
 
   it("shows the course's new status in the header after the page refreshes", async () => {

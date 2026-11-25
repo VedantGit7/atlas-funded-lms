@@ -25,6 +25,7 @@ import {
   type CourseAccessSettings,
 } from "./course-access-settings";
 import type { CourseSettingsFormSection } from "./course-settings-metadata";
+import { SavedNote, useRecentlySaved } from "./course-settings-shared";
 
 type CourseDetail = z.infer<typeof studioCourseDetailSchema>;
 
@@ -62,6 +63,8 @@ export function CourseSettingsForm({
     initialAccess.prerequisiteCourseIds.join(", "),
   );
   const [error, setError] = useState<string | null>(null);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const recentlySaved = useRecentlySaved(savedAt);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -102,6 +105,7 @@ export function CourseSettingsForm({
       setError(null);
     },
     onSuccess: (saved) => {
+      setSavedAt(Date.now());
       onSaved(saved);
     },
     onError: (submitError) => {
@@ -275,7 +279,8 @@ export function CourseSettingsForm({
       ) : null}
 
       {editable ? (
-        <div className="flex justify-end">
+        <div className="flex items-center justify-end gap-3">
+          <SavedNote shown={recentlySaved && !saveMutation.isPending} />
           <button
             type="submit"
             disabled={saveMutation.isPending}

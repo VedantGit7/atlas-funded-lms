@@ -436,7 +436,7 @@ export function ProfileForm({
       </form>
 
       <AccountSettingsToast
-        message="Profile updated successfully"
+        message="Profile saved"
         open={toastOpen}
         onClose={() => {
           setToastOpen(false);

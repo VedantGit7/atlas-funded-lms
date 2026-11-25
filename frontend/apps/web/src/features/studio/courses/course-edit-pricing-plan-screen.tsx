@@ -239,9 +239,7 @@ function CourseEditStandardPricingPlanScreen({
       }
 
       const updated = await saveCoursePricingPlans(course, nextItems, {
-        successMessage: isEditing
-          ? `"${title}" updated successfully`
-          : `"${title}" added successfully`,
+        successMessage: isEditing ? `"${title}" updated` : `"${title}" added`,
       });
       onSaved(updated);
     } catch (saveError) {

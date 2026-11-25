@@ -154,7 +154,7 @@ export function CopyProductWizardPanel({ subSchool, kind }: CopyProductWizardPan
       );
 
       if (response.data.status === "SUCCEEDED") {
-        toast.success(`“${response.data.destinationProductName}” was copied successfully.`);
+        toast.success(`“${response.data.destinationProductName}” copied.`);
       } else if (response.data.status === "FAILED") {
         toast.error(response.data.errorMessage ?? "Product copy failed.");
       } else {

@@ -37,8 +37,8 @@ export async function removeCourseInstructor(
 
   return saveCourseInstructors(course, nextIds, {
     successMessage: displayName
-      ? `"${displayName}" removed from instructors successfully`
-      : "Instructor removed successfully",
+      ? `"${displayName}" removed from instructors`
+      : "Instructor removed",
   });
 }
 
@@ -53,9 +53,7 @@ export async function attachCourseInstructor(
   }
 
   return saveCourseInstructors(course, [...membershipIds, membershipId], {
-    successMessage: displayName
-      ? `"${displayName}" added as instructor successfully`
-      : "Instructor added successfully",
+    successMessage: displayName ? `"${displayName}" added as an instructor` : "Instructor added",
   });
 }
 

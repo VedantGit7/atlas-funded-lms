@@ -81,7 +81,7 @@ export function CourseEditFaqScreen({
       }
 
       const updated = await saveCourseFaqs(course, nextItems, {
-        successMessage: isEditing ? "FAQ updated successfully" : "FAQ added successfully",
+        successMessage: isEditing ? "FAQ updated" : "FAQ added",
       });
       onSaved(updated);
     } catch (saveError) {

@@ -53,6 +53,6 @@ export async function deleteCoursePricingPlan(
   }
 
   return saveCoursePricingPlans(course, nextItems, {
-    successMessage: `"${target.title}" deleted successfully`,
+    successMessage: `"${target.title}" deleted`,
   });
 }

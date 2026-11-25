@@ -1,5 +1,6 @@
 "use client";
 
+import { requestFailureMessage } from "../../../lib/feedback/unhandled-failure";
 import { useEffect, useId, useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { clientApi, toast } from "../../../lib/client-api";
@@ -51,8 +52,8 @@ export function CreateDeckDialog({ open, onCancel, onCreated }: CreateDeckDialog
       await clientApi.post("/api/v1/me/decks", { title: trimmed }, "create-deck");
       toast.success("Deck created.");
       onCreated();
-    } catch {
-      toast.error("Could not create the deck. Please try again.");
+    } catch (caught) {
+      toast.error(requestFailureMessage(caught));
       setSaving(false);
     }
   }

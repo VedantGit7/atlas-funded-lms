@@ -1,11 +1,24 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { CheckCircle2, X, XCircle } from "lucide-react";
+import { reportUnhandledRequestFailure } from "../../lib/feedback/unhandled-failure";
 import { dismissToast, getToasts, subscribeToToasts } from "../../lib/feedback/toast-store";
 
 export function AppToastViewport() {
   const toasts = useSyncExternalStore(subscribeToToasts, getToasts, getToasts);
+
+  // A request that fails where the screen has no error handling used to fail
+  // silently (QA review 2 H33). Show its reason instead.
+  useEffect(() => {
+    const onUnhandled = (event: PromiseRejectionEvent) => {
+      if (reportUnhandledRequestFailure(event.reason)) event.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", onUnhandled);
+    return () => {
+      window.removeEventListener("unhandledrejection", onUnhandled);
+    };
+  }, []);
 
   if (toasts.length === 0) return null;
 
@@ -22,7 +35,7 @@ export function AppToastViewport() {
         return (
           <div
             key={item.id}
-            role="status"
+            role={isSuccess ? "status" : "alert"}
             className={[
               "pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm",
               isSuccess

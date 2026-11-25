@@ -1,5 +1,6 @@
 "use client";
 
+import { requestFailureMessage } from "../../../lib/feedback/unhandled-failure";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -141,8 +142,8 @@ export function RoadmapJourney({
         await clientApi.post(`/api/v1/learning-paths/${pathId}/enroll`, {}, "path-enroll");
         toast.success("You're enrolled. Let's begin.");
         router.refresh();
-      } catch {
-        toast.error("Could not start the path. Please try again.");
+      } catch (caught) {
+        toast.error(requestFailureMessage(caught));
         setEnrolling(false);
       }
       return;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Check, ChevronRight, Copy } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   fieldClassName,
   outlineButtonClassName,
@@ -51,6 +51,7 @@ export function CourseSettingsFormFooter({
   cancelDisabled = false,
   saveLabel = "Save",
 }: CourseSettingsFormFooterProps) {
+  const saved = useSavedConfirmation(saving, saveDisabled);
   return (
     <div className={courseSettingsStickyFooterClassName}>
       <div className="flex flex-wrap items-center justify-center gap-3">
@@ -70,9 +71,77 @@ export function CourseSettingsFormFooter({
         >
           Cancel
         </button>
+        {/* Only plain saves: Publish, Move to trash and Remove learners say
+            what they did in their own words. */}
+        <SavedNote shown={saved && saveLabel === "Save"} />
       </div>
     </div>
   );
+}
+
+/**
+ * True for a few seconds after a save that went through (QA review 1 m33:
+ * settings pages gave no "Saved"). A save went through when it finished and
+ * left nothing unsaved; a failed save leaves the changes in the form, so the
+ * Save button stays enabled and nothing is shown.
+ */
+/** The "✓ Saved" note on its own, for forms with their own Save button. */
+export function SavedNote({ shown }: { shown: boolean }) {
+  return (
+    <span
+      aria-live="polite"
+      className="inline-flex min-w-[4.5rem] items-center gap-1 text-sm font-medium text-[var(--admin-success)]"
+    >
+      {shown ? (
+        <>
+          <Check className="h-4 w-4" aria-hidden="true" />
+          Saved
+        </>
+      ) : null}
+    </span>
+  );
+}
+
+/** True for four seconds after `savedAt` changes to a time. */
+export function useRecentlySaved(savedAt: number | null): boolean {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (savedAt === null) return;
+    setShown(true);
+    const timer = setTimeout(() => {
+      setShown(false);
+    }, 4000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [savedAt]);
+  return shown;
+}
+
+function useSavedConfirmation(saving: boolean, saveDisabled: boolean): boolean {
+  const [saved, setSaved] = useState(false);
+  const savingRef = useRef(saving);
+  const endedAtRef = useRef(0);
+
+  useEffect(() => {
+    if (savingRef.current && !saving) endedAtRef.current = Date.now();
+    savingRef.current = saving;
+    if (saving || !saveDisabled) {
+      setSaved(false);
+      return;
+    }
+    // The saved course can arrive a moment after the request finishes.
+    if (Date.now() - endedAtRef.current > 2000) return;
+    setSaved(true);
+    const timer = setTimeout(() => {
+      setSaved(false);
+    }, 4000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [saving, saveDisabled]);
+
+  return saved;
 }
 
 type CourseSettingsMediaUploadProps = {

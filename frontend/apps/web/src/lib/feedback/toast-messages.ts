@@ -259,8 +259,9 @@ function inferActionFromPrefix(prefix: string, method: MutationHttpMethod): Toas
   return "updated";
 }
 
+/** "Branding saved": the thing and what happened to it, nothing more (QA S2.5). */
 export function formatToastSuccessMessage(label: string, action: ToastAction): string {
-  return `${label} ${action} successfully`;
+  return `${label} ${action}`;
 }
 
 function stripTrailingUuid(key: string): string {
@@ -325,15 +326,15 @@ export function resolveMutationSuccessToast(
   }
 
   if (key.startsWith("export-run-")) {
-    return "Export job queued successfully";
+    return "Export queued";
   }
 
   if (key.startsWith("deletion-file-") || key.startsWith("deletion-self-")) {
-    return "Deletion request filed successfully";
+    return "Deletion request filed";
   }
 
   if (key.startsWith("deletion-process-")) {
-    return "Deletion request processed successfully";
+    return "Deletion request processed";
   }
 
   // Anything else says nothing. Messages used to be made up from the request's

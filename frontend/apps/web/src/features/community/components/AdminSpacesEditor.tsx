@@ -19,11 +19,41 @@ type AdminSpacesEditorProps = {
 const DEFAULT_VISIBILITY_OPTIONS: SpaceVisibility[] = ["TENANT", "PUBLIC"];
 
 const VISIBILITY_LABELS: Record<SpaceVisibility, string> = {
-  TENANT: "Tenant",
+  TENANT: "Academy members",
   PUBLIC: "Public",
   PRIVATE: "Private",
-  UNLISTED: "Unlisted",
+  UNLISTED: "Unlisted (link only)",
 };
+
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** "Trading Q&A" as "trading-q-a". */
+export function spaceSlugFromName(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64)
+    .replace(/-+$/, "");
+}
+
+/**
+ * The server's rules, checked before sending so a bad web address is
+ * explained beside the field instead of failing after a round trip (QA
+ * review 2 H33: an invalid slug failed silently).
+ */
+export function spaceFormProblem(slug: string, name: string): string | null {
+  if (!name.trim()) return "Give the space a name.";
+  if (slug.length < 2) return "The web address needs at least 2 characters.";
+  if (slug.length > 64) return "The web address can be at most 64 characters.";
+  if (!SLUG_PATTERN.test(slug)) {
+    return "The web address can use only lowercase letters, numbers and single hyphens, like trading-questions.";
+  }
+  return null;
+}
+
+const fieldLabelClassName = "flex flex-col gap-1 text-sm font-medium";
 
 export function AdminSpacesEditor({
   initialSpaces,
@@ -35,7 +65,10 @@ export function AdminSpacesEditor({
   const [visibility, setVisibility] = useState<SpaceVisibility>(
     allowedVisibilityOptions[0] ?? "TENANT",
   );
+  const [slugEdited, setSlugEdited] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editSlug, setEditSlug] = useState("");
@@ -57,9 +90,10 @@ export function AdminSpacesEditor({
       setSpaces((current) => [...current, created]);
       setSlug("");
       setName("");
+      setSlugEdited(false);
     },
     onError: (err) => {
-      setError(err instanceof ClientApiError ? err.message : "Unable to create space.");
+      setError(err instanceof ClientApiError ? err.message : "The space couldn't be created.");
     },
   });
 
@@ -69,7 +103,7 @@ export function AdminSpacesEditor({
       return id;
     },
     onMutate: (id) => {
-      setError(null);
+      setListError(null);
       const previous = spaces;
       setSpaces((current) => current.filter((space) => space.id !== id));
       setPendingDeleteId(null);
@@ -82,7 +116,7 @@ export function AdminSpacesEditor({
       if (context?.previous) {
         setSpaces(context.previous);
       }
-      setError(err instanceof ClientApiError ? err.message : "Unable to delete space.");
+      setListError(err instanceof ClientApiError ? err.message : "The space couldn't be deleted.");
     },
   });
 
@@ -106,14 +140,18 @@ export function AdminSpacesEditor({
       return response.data;
     },
     onMutate: () => {
-      setError(null);
+      setEditError(null);
     },
     onSuccess: (updated) => {
       setSpaces((current) => current.map((space) => (space.id === updated.id ? updated : space)));
       setEditingId(null);
     },
     onError: (err) => {
-      setError(err instanceof ClientApiError ? err.message : "Unable to update space.");
+      setEditError(
+        err instanceof ClientApiError
+          ? err.message
+          : "Your changes to the space couldn't be saved.",
+      );
     },
   });
 
@@ -125,6 +163,11 @@ export function AdminSpacesEditor({
 
   function createSpace() {
     if (createSpaceMutation.isPending) return;
+    const problem = spaceFormProblem(slug, name);
+    if (problem) {
+      setError(problem);
+      return;
+    }
     createSpaceMutation.mutate();
   }
 
@@ -138,11 +181,16 @@ export function AdminSpacesEditor({
     setEditSlug(space.slug);
     setEditName(space.name);
     setEditVisibility(space.visibility);
-    setError(null);
+    setEditError(null);
   }
 
   function saveEdit() {
     if (!editingId || saveEditMutation.isPending) return;
+    const problem = spaceFormProblem(editSlug, editName);
+    if (problem) {
+      setEditError(problem);
+      return;
+    }
     saveEditMutation.mutate();
   }
 
@@ -151,54 +199,80 @@ export function AdminSpacesEditor({
       <section className="space-y-3 rounded-lg border p-4">
         <h2 className="font-medium">Create space</h2>
         <div className="grid gap-3 md:grid-cols-3">
-          <input
-            className="rounded border px-3 py-2 text-sm"
-            placeholder="slug"
-            value={slug}
-            onChange={(event) => {
-              setSlug(event.target.value);
-            }}
-          />
-          <input
-            className="rounded border px-3 py-2 text-sm"
-            placeholder="Name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-            }}
-          />
-          <select
-            className="rounded border px-3 py-2 text-sm"
-            value={visibility}
-            onChange={(event) => {
-              setVisibility(event.target.value as SpaceVisibility);
-            }}
-          >
-            {allowedVisibilityOptions.map((option) => (
-              <option key={option} value={option}>
-                {VISIBILITY_LABELS[option]}
-              </option>
-            ))}
-          </select>
+          <label className={fieldLabelClassName}>
+            Name
+            <input
+              className="rounded border px-3 py-2 text-sm font-normal"
+              placeholder="Trading questions"
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+                if (!slugEdited) setSlug(spaceSlugFromName(event.target.value));
+              }}
+            />
+          </label>
+          <label className={fieldLabelClassName}>
+            Web address
+            <input
+              className="rounded border px-3 py-2 text-sm font-normal"
+              placeholder="trading-questions"
+              aria-describedby="space-slug-help"
+              value={slug}
+              onChange={(event) => {
+                setSlug(event.target.value);
+                setSlugEdited(true);
+              }}
+            />
+            <span id="space-slug-help" className="text-xs font-normal text-muted-foreground">
+              Lowercase letters, numbers and hyphens. Filled in from the name.
+            </span>
+          </label>
+          <label className={fieldLabelClassName}>
+            Who can see it
+            <select
+              className="rounded border px-3 py-2 text-sm font-normal"
+              value={visibility}
+              onChange={(event) => {
+                setVisibility(event.target.value as SpaceVisibility);
+              }}
+            >
+              {allowedVisibilityOptions.map((option) => (
+                <option key={option} value={option}>
+                  {VISIBILITY_LABELS[option]}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
         <button
           type="button"
           className="rounded border px-4 py-2 text-sm"
+          disabled={createSpaceMutation.isPending}
           onClick={() => {
             createSpace();
           }}
         >
-          Create space
+          {createSpaceMutation.isPending ? "Creating…" : "Create space"}
         </button>
-        {error ? <p className="text-sm text-destructive-text">{error}</p> : null}
+        {error ? (
+          <p role="alert" className="text-sm text-destructive-text">
+            {error}
+          </p>
+        ) : null}
       </section>
+
+      {listError ? (
+        <p role="alert" className="text-sm text-destructive-text">
+          {listError}
+        </p>
+      ) : null}
 
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b text-left">
             <th className="py-2">Name</th>
-            <th className="py-2">Slug</th>
-            <th className="py-2">Visibility</th>
+            <th className="py-2">Web address</th>
+            <th className="py-2">Who can see it</th>
             <th className="py-2">Actions</th>
           </tr>
         </thead>
@@ -207,7 +281,7 @@ export function AdminSpacesEditor({
             <tr key={space.id} className="border-b">
               <td className="py-2">{space.name}</td>
               <td className="py-2">{space.slug}</td>
-              <td className="py-2">{space.visibility}</td>
+              <td className="py-2">{VISIBILITY_LABELS[space.visibility]}</td>
               <td className="py-2">
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -239,36 +313,48 @@ export function AdminSpacesEditor({
         <section className="space-y-3 rounded-lg border p-4">
           <h2 className="font-medium">Edit space</h2>
           <div className="grid gap-3 md:grid-cols-3">
-            <input
-              className="rounded border px-3 py-2 text-sm"
-              placeholder="slug"
-              value={editSlug}
-              onChange={(event) => {
-                setEditSlug(event.target.value);
-              }}
-            />
-            <input
-              className="rounded border px-3 py-2 text-sm"
-              placeholder="Name"
-              value={editName}
-              onChange={(event) => {
-                setEditName(event.target.value);
-              }}
-            />
-            <select
-              className="rounded border px-3 py-2 text-sm"
-              value={editVisibility}
-              onChange={(event) => {
-                setEditVisibility(event.target.value as SpaceVisibility);
-              }}
-            >
-              {(["TENANT", "PUBLIC", "PRIVATE", "UNLISTED"] as const).map((option) => (
-                <option key={option} value={option}>
-                  {VISIBILITY_LABELS[option]}
-                </option>
-              ))}
-            </select>
+            <label className={fieldLabelClassName}>
+              Name
+              <input
+                className="rounded border px-3 py-2 text-sm font-normal"
+                value={editName}
+                onChange={(event) => {
+                  setEditName(event.target.value);
+                }}
+              />
+            </label>
+            <label className={fieldLabelClassName}>
+              Web address
+              <input
+                className="rounded border px-3 py-2 text-sm font-normal"
+                value={editSlug}
+                onChange={(event) => {
+                  setEditSlug(event.target.value);
+                }}
+              />
+            </label>
+            <label className={fieldLabelClassName}>
+              Who can see it
+              <select
+                className="rounded border px-3 py-2 text-sm font-normal"
+                value={editVisibility}
+                onChange={(event) => {
+                  setEditVisibility(event.target.value as SpaceVisibility);
+                }}
+              >
+                {(["TENANT", "PUBLIC", "PRIVATE", "UNLISTED"] as const).map((option) => (
+                  <option key={option} value={option}>
+                    {VISIBILITY_LABELS[option]}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
+          {editError ? (
+            <p role="alert" className="text-sm text-destructive-text">
+              {editError}
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -276,7 +362,7 @@ export function AdminSpacesEditor({
               disabled={saveEditMutation.isPending}
               onClick={saveEdit}
             >
-              Save changes
+              {saveEditMutation.isPending ? "Saving…" : "Save changes"}
             </button>
             <button
               type="button"
@@ -303,8 +389,7 @@ export function AdminSpacesEditor({
               Delete community space
             </h2>
             <p className="mt-2 text-sm">
-              Confirm deleting this space. Existing posts remain preserved according to tenant
-              policy.
+              Delete this space? Learners will no longer see it in the community.
             </p>
             <div className="mt-4 flex flex-col gap-2 sm:flex-row-reverse sm:justify-start">
               <button

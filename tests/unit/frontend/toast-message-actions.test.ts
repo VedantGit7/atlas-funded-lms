@@ -34,31 +34,21 @@ const methods: MutationHttpMethod[] = ["POST", "PUT", "PATCH", "DELETE"];
 
 describe("mutation notification wording", () => {
   it.each(actions)("formats the %s action without changing the message", (action) => {
-    expect(formatToastSuccessMessage("Record", action)).toBe(`Record ${action} successfully`);
+    expect(formatToastSuccessMessage("Record", action)).toBe(`Record ${action}`);
   });
 
   it("keeps the written messages for known actions", () => {
-    expect(resolveMutationSuccessToast("assessment-publish", "POST")).toBe(
-      "Assessment submitted successfully",
-    );
-    expect(resolveMutationSuccessToast("course-branding-save", "PATCH")).toBe(
-      "Branding saved successfully",
-    );
-    expect(resolveMutationSuccessToast("domain-set-primary", "POST")).toBe(
-      "Primary domain set successfully",
-    );
+    expect(resolveMutationSuccessToast("assessment-publish", "POST")).toBe("Assessment submitted");
+    expect(resolveMutationSuccessToast("course-branding-save", "PATCH")).toBe("Branding saved");
+    expect(resolveMutationSuccessToast("domain-set-primary", "POST")).toBe("Primary domain set");
     expect(resolveMutationSuccessToast("lesson-progress-save", "PATCH", "  Done  ")).toBe("Done");
   });
 
   it("names course building blocks the way authors see them", () => {
-    expect(resolveMutationSuccessToast("module-create", "POST")).toBe(
-      "Section created successfully",
-    );
-    expect(resolveMutationSuccessToast("create-item", "POST")).toBe(
-      "Question created successfully",
-    );
+    expect(resolveMutationSuccessToast("module-create", "POST")).toBe("Section created");
+    expect(resolveMutationSuccessToast("create-item", "POST")).toBe("Question created");
     expect(resolveMutationSuccessToast("create-item-collection", "POST")).toBe(
-      "Collection created successfully",
+      "Collection created",
     );
   });
 
