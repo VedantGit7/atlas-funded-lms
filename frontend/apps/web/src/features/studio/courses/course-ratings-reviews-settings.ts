@@ -10,8 +10,12 @@ export type CourseRatingsReviewsSettings = {
 const FEATURES_TAG_KEY = "studioFeatures";
 const SETTINGS_TAG_KEY = "ratingsReviews";
 
+/**
+ * On unless the author turns it off, for new and old courses alike, matching
+ * the server's `courseTakesReviews` (QA review 1 m32).
+ */
 const DEFAULT_SETTINGS: CourseRatingsReviewsSettings = {
-  enabled: false,
+  enabled: true,
 };
 
 function readStudioFeature(tags: Record<string, unknown> | undefined, key: string): boolean | null {

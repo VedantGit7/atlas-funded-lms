@@ -5,7 +5,12 @@ import { useMemo, useState, type ReactNode } from "react";
 type VirtualizedTableProps<TRow> = {
   rows: TRow[];
   rowHeight?: number;
-  maxHeight?: number;
+  /**
+   * Height of the inner scroll box. `null` renders every row in the page's
+   * own flow, for tables that are already paged (QA review 1 m7: the
+   * Members table was a short box with its own scrollbar).
+   */
+  maxHeight?: number | null;
   getRowKey: (row: TRow, index: number) => string;
   renderRow: (row: TRow, index: number) => ReactNode;
   header: ReactNode;
@@ -28,6 +33,9 @@ export function VirtualizedTable<TRow>({
   const [scrollTop, setScrollTop] = useState(0);
 
   const { startIndex, endIndex, totalHeight, offsetY } = useMemo(() => {
+    if (maxHeight === null) {
+      return { startIndex: 0, endIndex: rows.length, totalHeight: 0, offsetY: 0 };
+    }
     const visibleCount = Math.ceil(maxHeight / rowHeight) + 4;
     const start = Math.max(0, Math.floor(scrollTop / rowHeight) - 2);
     const end = Math.min(rows.length, start + visibleCount);
@@ -51,6 +59,19 @@ export function VirtualizedTable<TRow>({
   }
 
   const windowRows = rows.slice(startIndex, endIndex);
+
+  if (maxHeight === null) {
+    return (
+      <div className={shellClassName}>
+        {header}
+        {windowRows.map((row, index) => (
+          <div key={getRowKey(row, index)} style={{ minHeight: rowHeight }}>
+            {renderRow(row, index)}
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className={shellClassName}>

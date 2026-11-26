@@ -148,11 +148,11 @@ export function CourseAttachInstructorScreen({
           </button>
 
           <p className="text-sm font-semibold text-[var(--admin-primary-strong)]">
-            Add Instructors
+            Add instructors
           </p>
           <header className="mb-6 mt-1">
             <h1 className="text-2xl font-bold text-[var(--admin-on-surface)] md:text-3xl">
-              Add Instructors
+              Add instructors
             </h1>
             <p className={`${builderHelperClassName} mt-2`}>
               Choose team members to associate with this course.

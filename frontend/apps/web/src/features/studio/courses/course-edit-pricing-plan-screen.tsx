@@ -294,7 +294,7 @@ function CourseEditStandardPricingPlanScreen({
                 className={lessonInputClassName}
                 value={draft.title}
                 disabled={disabled || saving}
-                placeholder="Base plan"
+                placeholder="e.g. Full course access"
                 onChange={(event) => {
                   setDraft((current) => ({ ...current, title: event.target.value }));
                 }}

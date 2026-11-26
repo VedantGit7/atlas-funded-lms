@@ -681,7 +681,7 @@ export function AdminScoreAttemptReviewPage({
                 className={`${ghostButtonClassName} inline-flex items-center gap-2`}
               >
                 <User className="h-4 w-4" aria-hidden="true" />
-                Open Profile
+                Open profile
               </Link>
               <button
                 type="button"
@@ -689,7 +689,7 @@ export function AdminScoreAttemptReviewPage({
                 disabled={busy || dirtyItems.length === 0}
                 onClick={() => void handleSave()}
               >
-                Save Grading
+                Save grading
               </button>
             </div>
           </header>
@@ -1087,7 +1087,7 @@ export function AdminScoreAttemptReviewPage({
                     onClick={() => void handleReset()}
                   >
                     <RefreshCw className="h-4 w-4" aria-hidden="true" />
-                    Reset Attempt
+                    Reset attempt
                   </button>
                   <p className="font-mono text-[10px] text-[var(--admin-on-surface-variant)]">
                     Voids this attempt so the learner can use the slot again.
@@ -1212,7 +1212,7 @@ export function AdminScoreAttemptReviewPage({
                     disabled={busy}
                     onClick={() => void handleSave()}
                   >
-                    Save Grading
+                    Save grading
                   </button>
                 </div>
               </div>

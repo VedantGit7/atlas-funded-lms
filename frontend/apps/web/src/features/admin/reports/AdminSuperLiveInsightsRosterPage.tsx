@@ -885,7 +885,7 @@ export function AdminSuperLiveInsightsRosterPage({
                 router.replace("/admin/reports/super-live-insights");
               }}
             >
-              Back to Sessions
+              Back to sessions
             </button>
           </section>
         ) : null}

@@ -200,7 +200,7 @@ function CourseCertificateAddTestDialog({
         <div className="flex items-start justify-between gap-4 border-b border-[var(--admin-border)] px-6 py-5">
           <div className="min-w-0">
             <h2 id={titleId} className="text-xl font-bold text-[var(--admin-on-surface)]">
-              Add Test Criteria
+              Add test criteria
             </h2>
             <p className={`${builderHelperClassName} mt-1.5 leading-relaxed`}>
               Add test and assign passing marks required for the test to issue certificates to

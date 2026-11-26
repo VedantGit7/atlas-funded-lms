@@ -85,7 +85,7 @@ export function LocationAddPanel({
 
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
-          Add New Location
+          Add new location
         </h1>
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
           Sell your content to multiple geo-locations with their own currency and rates.

@@ -552,7 +552,7 @@ function ConfirmUpdatesModal({
             disabled={busy}
             onClick={onConfirm}
           >
-            Confirm Updates
+            Confirm updates
           </button>
         </div>
       </div>
@@ -1045,7 +1045,7 @@ function CustomFieldLearnerValuesReport({
             className="inline-flex w-fit items-center gap-1.5 text-[13px] text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            Back to Learner Report
+            Back to learner report
           </Link>
         ) : null}
 
@@ -1056,7 +1056,7 @@ function CustomFieldLearnerValuesReport({
             onClick={discardEdit}
           >
             <ArrowLeft className="h-4 w-4" aria-hidden />
-            Back to Profile
+            Back to profile
           </button>
         ) : null}
 

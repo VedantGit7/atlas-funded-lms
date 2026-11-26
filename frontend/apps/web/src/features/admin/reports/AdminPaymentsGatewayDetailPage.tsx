@@ -490,7 +490,7 @@ export function AdminPaymentsGatewayDetailPage({
         className="inline-flex w-fit items-center gap-1 font-mono text-xs text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-primary)]"
       >
         <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-        Back to Gateways
+        Back to gateways
       </Link>
 
       {detailError && !detail ? (

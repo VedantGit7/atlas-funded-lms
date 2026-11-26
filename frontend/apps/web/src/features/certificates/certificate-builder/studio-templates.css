@@ -4,19 +4,19 @@
  */
 
 .cert-tpl {
-  --ct-bg: #070b10;
-  --ct-surface: #0f1419;
-  --ct-surface-container: #1f1f23;
-  --ct-surface-high: #2a292e;
-  --ct-surface-variant: #353439;
-  --ct-on-surface: #e4e1e7;
-  --ct-on-variant: #e1bfb8;
-  --ct-muted: rgba(228, 225, 231, 0.55);
-  --ct-primary: #10d9a3;
-  --ct-on-primary: #070b10;
+  --ct-bg: var(--admin-bg);
+  --ct-surface: var(--admin-surface);
+  --ct-surface-container: var(--admin-surface-variant);
+  --ct-surface-high: var(--admin-surface-high);
+  --ct-surface-variant: var(--admin-surface-variant);
+  --ct-on-surface: var(--admin-on-surface);
+  --ct-on-variant: var(--admin-on-surface-variant);
+  --ct-muted: var(--admin-on-surface-variant);
+  --ct-primary: var(--admin-primary);
+  --ct-on-primary: var(--admin-on-primary);
   --ct-paper: #f7f4ef;
   --ct-ink: #1f1b16;
-  --ct-hairline: rgba(255, 255, 255, 0.05);
+  --ct-hairline: var(--admin-border);
   --ct-panel: 280px;
   --ct-margin: 24px;
   --ct-gutter: 16px;
@@ -54,7 +54,7 @@
 
 .cert-tpl::-webkit-scrollbar-thumb,
 .cert-tpl *::-webkit-scrollbar-thumb {
-  background: #2c2c33;
+  background: var(--admin-surface-high);
   border-radius: 10px;
 }
 
@@ -269,7 +269,7 @@
   width: min(300px, 70vw);
   height: 42px;
   padding: 0 16px 0 40px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--admin-border);
   border-radius: 8px;
   background: var(--ct-surface);
   color: var(--ct-on-surface);

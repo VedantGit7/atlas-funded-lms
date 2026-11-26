@@ -341,7 +341,7 @@ export function FormsListPanel() {
         <div>
           <nav
             aria-label="Breadcrumb"
-            className="mb-2 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-primary)]"
+            className="mb-2 flex items-center gap-2 text-xs text-[var(--admin-primary)]"
           >
             <Link
               href={CONTACTS_HREF}
@@ -363,7 +363,7 @@ export function FormsListPanel() {
           <Link
             href={CONTACTS_HREF}
             prefetch={false}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2.5 text-xs font-bold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
           >
             <Users className="h-4 w-4" aria-hidden="true" />
             Contacts
@@ -371,7 +371,7 @@ export function FormsListPanel() {
           <Link
             href={FORMS_CREATE_HREF}
             prefetch={false}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--admin-on-primary)] transition-all hover:bg-[var(--admin-primary-strong)] active:scale-95"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-xs font-bold text-[var(--admin-on-primary)] transition-all hover:bg-[var(--admin-primary-strong)] active:scale-95"
           >
             <Plus className="h-5 w-5" aria-hidden="true" />
             Create form

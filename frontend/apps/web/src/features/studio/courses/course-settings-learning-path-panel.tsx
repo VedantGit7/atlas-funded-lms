@@ -314,7 +314,7 @@ export function CourseSettingsLearningPathPanel({
 
         <div className={`space-y-2 ${inlineExpandClassName}`}>
           <label htmlFor="learning-path-score-percent" className={builderFieldLabelClassName}>
-            Set Score Percentage
+            Set score percentage
           </label>
           <div className="flex overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm focus-within:border-[var(--admin-primary)] focus-within:ring-2 focus-within:ring-[var(--admin-primary)]/25">
             <input

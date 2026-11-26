@@ -113,7 +113,7 @@ export function AdminPaymentOrderDetailPage({
   }
 
   const breadcrumb = (
-    <nav aria-label="Breadcrumb" className="font-data flex items-center gap-1.5 text-xs">
+    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
       <Link
         href={ORDERS_HREF}
         className="text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]"

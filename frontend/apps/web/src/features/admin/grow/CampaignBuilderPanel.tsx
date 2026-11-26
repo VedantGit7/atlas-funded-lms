@@ -593,7 +593,7 @@ export function CampaignBuilderPanel({
     <div className="space-y-6 pb-24">
       <nav
         aria-label="Breadcrumb"
-        className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+        className="flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
       >
         <Link
           href={MARKETING_HREF}
@@ -924,7 +924,7 @@ export function CampaignBuilderPanel({
                   <button
                     type="button"
                     onClick={addTouchpoint}
-                    className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
+                    className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
                   >
                     <Plus className="h-4 w-4" aria-hidden="true" />
                     Add step
@@ -1303,7 +1303,7 @@ export function CampaignBuilderPanel({
                 onClick={() => {
                   void launchCampaign();
                 }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-3 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-3 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -1316,7 +1316,7 @@ export function CampaignBuilderPanel({
               <Link
                 href={campaignAnalyticsHref(defined(campaign).id)}
                 prefetch={false}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-3 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-3 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90"
               >
                 View analytics
               </Link>
@@ -1397,14 +1397,14 @@ export function CampaignBuilderPanel({
                 <Link
                   href={campaignAnalyticsHref(campaign.id)}
                   prefetch={false}
-                  className="inline-flex flex-1 items-center justify-center rounded-lg bg-[var(--admin-primary)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)]"
+                  className="inline-flex flex-1 items-center justify-center rounded-lg bg-[var(--admin-primary)] px-4 py-2.5 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)]"
                 >
                   View analytics
                 </Link>
                 <Link
                   href={CAMPAIGNS_HREF}
                   prefetch={false}
-                  className="inline-flex flex-1 items-center justify-center rounded-lg border border-[var(--admin-border)] px-4 py-2.5 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)]"
+                  className="inline-flex flex-1 items-center justify-center rounded-lg border border-[var(--admin-border)] px-4 py-2.5 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)]"
                 >
                   Back to list
                 </Link>

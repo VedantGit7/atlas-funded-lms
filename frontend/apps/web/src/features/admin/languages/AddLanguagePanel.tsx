@@ -67,10 +67,7 @@ export function AddLanguagePanel({ supported }: { supported: LanguageRow[] }) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 pb-16">
-      <nav
-        aria-label="Breadcrumb"
-        className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
-      >
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs">
         <Link
           href={LANGUAGES_HREF}
           prefetch={false}
@@ -86,7 +83,7 @@ export function AddLanguagePanel({ supported }: { supported: LanguageRow[] }) {
 
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] sm:text-3xl">
-          Add Language
+          Add language
         </h1>
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
           Add language for translation

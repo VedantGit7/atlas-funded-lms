@@ -85,7 +85,7 @@ export function CourseCouponChecker({ courseId }: { courseId: string }) {
         <label className="block text-sm">
           <span className="sr-only">Coupon code</span>
           <input
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground uppercase outline-none focus:border-primary"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
             placeholder="CODE"
             value={code}
             onChange={(e) => {

@@ -165,7 +165,7 @@ export function SystemEmailListPanel() {
 
       <Link href={MESSENGER_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Messenger Hub
+        Back to messenger hub
       </Link>
 
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

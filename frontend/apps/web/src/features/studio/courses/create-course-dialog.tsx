@@ -49,7 +49,8 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
     }, 0);
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && !busy) {
+      // An open list inside the dialog handles its own Esc first.
+      if (event.key === "Escape" && !busy && !event.defaultPrevented) {
         closeDialog();
       }
     }
@@ -144,7 +145,7 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
       >
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
           <h2 id={titleId} className="text-xl font-bold text-[var(--admin-on-surface)]">
-            New Course
+            New course
           </h2>
           <button
             type="button"

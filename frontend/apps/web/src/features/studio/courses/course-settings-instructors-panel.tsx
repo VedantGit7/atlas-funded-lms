@@ -121,7 +121,7 @@ export function CourseSettingsInstructorsPanel({
           disabled={disabled || loading}
           onClick={onAddInstructors}
         >
-          Add Instructors
+          Add instructors
         </button>
       </div>
 

@@ -314,12 +314,12 @@ export function AnnouncementsCreatePanel() {
         className={generalSettingsBackLinkClassName}
       >
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Announcements
+        Back to announcements
       </Link>
 
       <nav
         aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-1.5 text-[12px] font-bold text-[var(--admin-on-surface-variant)]"
+        className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--admin-on-surface-variant)]"
       >
         <Link
           href={ANNOUNCEMENTS_LIST_HREF}

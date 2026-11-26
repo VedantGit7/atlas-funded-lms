@@ -506,7 +506,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
 
       <nav
         aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+        className="flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
       >
         <Link
           href={MARKETING_HREF}
@@ -552,7 +552,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
           {live ? (
             <button
               type="button"
-              className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
+              className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
               disabled={busy}
               onClick={() => {
                 void unpublish();
@@ -563,7 +563,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
           ) : (
             <button
               type="button"
-              className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
               disabled={busy}
               onClick={() => {
                 void publish();
@@ -631,7 +631,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
           </div>
           <button
             type="button"
-            className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+            className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
             disabled={busy}
             onClick={() => {
               void saveBasics();
@@ -833,7 +833,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
                             updateSlide(selectedIndex, { imageFit: option.value });
                           }}
                           className={[
-                            "rounded-lg border px-3 py-2 text-[12px] font-bold uppercase tracking-[0.04em] transition-all",
+                            "rounded-lg border px-3 py-2 text-[12px] font-bold tracking-[0.04em] transition-all",
                             active
                               ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] text-[var(--admin-primary)]"
                               : "border-[var(--admin-border)] bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)] hover:border-[var(--admin-outline)]",
@@ -932,7 +932,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
 
                 <button
                   type="button"
-                  className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+                  className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
                   disabled={busy || live}
                   onClick={() => {
                     void saveSlides();
@@ -972,7 +972,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
             {live ? (
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] disabled:opacity-50"
+                className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   void unpublish();
@@ -983,7 +983,7 @@ export function PromoSliderBuilderPanel({ sliderId }: { sliderId: string }) {
             ) : (
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   void publish();

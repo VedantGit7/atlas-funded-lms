@@ -945,7 +945,7 @@ export function AdminZoomInsightsParticipantDetailPage({
                 className={secondaryButtonClassName}
               >
                 <User className="h-4 w-4" aria-hidden="true" />
-                View Profile
+                View profile
               </Link>
             ) : null}
             {detail.matchState === "matched" && detail.membershipId ? (

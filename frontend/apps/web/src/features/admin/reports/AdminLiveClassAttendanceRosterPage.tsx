@@ -664,7 +664,7 @@ export function AdminLiveClassAttendanceRosterPage({
               setModuleTab("sessions");
             }}
           >
-            Back to Sessions
+            Back to sessions
           </button>
         </section>
       ) : null}

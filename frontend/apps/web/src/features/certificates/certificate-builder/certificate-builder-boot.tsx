@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { CertificateBuilderSplash } from "./certificate-builder-splash";
 
 const SPLASH_SESSION_KEY = "certificate-studio:splash-done";
@@ -12,6 +12,11 @@ function splashAlreadyDone(): boolean {
   } catch {
     return false;
   }
+}
+
+/** sessionStorage has no change events within a tab worth listening to here. */
+function subscribeToNothing(): () => void {
+  return () => {};
 }
 
 function markSplashDone(): void {
@@ -32,11 +37,16 @@ type CertificateBuilderBootProps = {
  * Nested Studio routes share this so navigating home ↔ studio does not re-splash.
  */
 export function CertificateBuilderBoot({ publicName, children }: CertificateBuilderBootProps) {
-  const [bootDone, setBootDone] = useState(() => splashAlreadyDone());
+  // Read through useSyncExternalStore so the first browser render matches the
+  // server's (which can't see sessionStorage) and React then switches over,
+  // instead of a hydration error on every visit after the first.
+  const seenThisSession = useSyncExternalStore(subscribeToNothing, splashAlreadyDone, () => false);
+  const [finished, setFinished] = useState(false);
+  const bootDone = seenThisSession || finished;
 
   const handleFinished = useCallback(() => {
     markSplashDone();
-    setBootDone(true);
+    setFinished(true);
   }, []);
 
   if (!bootDone) {

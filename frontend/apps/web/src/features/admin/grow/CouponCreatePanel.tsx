@@ -152,12 +152,12 @@ export function CouponCreatePanel() {
     <div className="mx-auto flex min-h-[70vh] max-w-[640px] flex-col justify-center space-y-6 motion-safe:animate-[admin-dropdown-in_0.18s_cubic-bezier(0.16,1,0.3,1)]">
       <Link href={COUPONS_LIST_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
         <ChevronLeft className="h-4 w-4" />
-        Back to Coupons
+        Back to coupons
       </Link>
 
       <header>
         <h1 className="text-[28px] font-bold tracking-[-0.02em] text-[var(--admin-on-surface)] md:text-[32px]">
-          Create Coupon
+          Create coupon
         </h1>
         <p className="mt-1 text-[16px] text-[var(--admin-on-surface-variant)]">
           Configure a new promotional code or a batch of unique identifiers.

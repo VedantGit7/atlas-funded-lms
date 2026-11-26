@@ -6,11 +6,13 @@ import { ClientApiError, clientApi } from "../../../../lib/client-api";
 import { builderHelperClassName } from "../course-builder-shared";
 import { inlineLessonSecondaryButtonClassName } from "./inline-lesson-editor-shared";
 import { uploadLessonAssetFile, attachLessonAssetReference } from "../upload-lesson-asset";
+import { lessonAssetLabel } from "../../../lessons/lesson-asset-label";
 
 type LessonAsset = {
   id: string;
   assetType: string;
   fileName: string | null;
+  externalUrl?: string | null;
 };
 
 type LessonAttachmentsSidebarProps = {
@@ -25,10 +27,12 @@ function formatError(error: unknown): string {
 
 export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmentsSidebarProps) {
   const linkInputId = useId();
+  const linkTitleId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [assets, setAssets] = useState<LessonAsset[]>([]);
   const [showLinkForm, setShowLinkForm] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
+  const [linkTitle, setLinkTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -56,10 +60,12 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
           assetType: "link",
           provider: "external",
           objectKeyOrUrl: linkUrl.trim(),
+          ...(linkTitle.trim() ? { metadata: { fileName: linkTitle.trim().slice(0, 240) } } : {}),
         },
         "lesson-asset-link",
       );
       setLinkUrl("");
+      setLinkTitle("");
       setShowLinkForm(false);
       await refreshAssets();
     } catch (attachError) {
@@ -108,7 +114,7 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
               aria-hidden="true"
             />
             <p className="text-sm font-medium text-[var(--admin-on-surface-variant)]">
-              Add Attachments
+              No attachments yet
             </p>
           </div>
         ) : (
@@ -118,7 +124,7 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
                 key={asset.id}
                 className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface)]"
               >
-                {asset.fileName ?? asset.assetType}
+                {lessonAssetLabel(asset)}
               </li>
             ))}
           </ul>
@@ -127,7 +133,7 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
         {showLinkForm ? (
           <div className="mt-4 space-y-2 motion-safe:animate-[admin-dropdown-in_0.18s_cubic-bezier(0.16,1,0.3,1)]">
             <label htmlFor={linkInputId} className="sr-only">
-              Attachment link URL
+              Link address
             </label>
             <input
               id={linkInputId}
@@ -137,6 +143,20 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
               disabled={busy}
               onChange={(event) => {
                 setLinkUrl(event.target.value);
+              }}
+            />
+            <label htmlFor={linkTitleId} className="sr-only">
+              Link title (optional)
+            </label>
+            <input
+              id={linkTitleId}
+              className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-3 py-2 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
+              placeholder="Title learners see (optional)"
+              value={linkTitle}
+              maxLength={240}
+              disabled={busy}
+              onChange={(event) => {
+                setLinkTitle(event.target.value);
               }}
             />
             <div className="flex gap-2">
@@ -156,6 +176,7 @@ export function LessonAttachmentsSidebar({ lessonId, editable }: LessonAttachmen
                 onClick={() => {
                   setShowLinkForm(false);
                   setLinkUrl("");
+                  setLinkTitle("");
                 }}
               >
                 Cancel

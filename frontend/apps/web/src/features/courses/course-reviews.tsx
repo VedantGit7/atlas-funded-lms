@@ -26,6 +26,8 @@ type ReviewsResponse = {
     aggregate: { average: number | null; count: number };
     myReview: ReviewItem | null;
     pageInfo: { nextCursor: string | null; hasNextPage: boolean };
+    /** False when the course turned ratings and reviews off (QA review 1 m32). */
+    enabled?: boolean;
   };
 };
 
@@ -145,6 +147,9 @@ export function CourseReviews({ courseId, canReview }: { courseId: string; canRe
 
   const aggregate = state?.aggregate;
   const hasReviews = (aggregate?.count ?? 0) > 0;
+
+  // The course's author turned ratings and reviews off: no section at all.
+  if (state?.enabled === false) return null;
 
   return (
     <section className="space-y-6">

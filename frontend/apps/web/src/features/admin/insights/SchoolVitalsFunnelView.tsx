@@ -338,7 +338,7 @@ function EmptyFunnel({
             prefetch={false}
             className="mt-2 text-sm text-[var(--admin-primary)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/30"
           >
-            Open Progress and Score
+            Open progress and score
           </Link>
         </div>
       </div>
@@ -588,7 +588,7 @@ export function SchoolVitalsFunnelView({
               prefetch={false}
               className={insightPrimaryButtonClassName}
             >
-              Open Progress and Score
+              Open progress and score
               <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>

@@ -44,6 +44,8 @@ export const courseReviewsResponseSchema = z.object({
     aggregate: courseReviewAggregateSchema,
     myReview: courseReviewItemSchema.nullable(),
     pageInfo: pageInfoSchema,
+    /** False when the course turned ratings and reviews off in Studio. */
+    enabled: z.boolean().optional(),
   }),
 });
 

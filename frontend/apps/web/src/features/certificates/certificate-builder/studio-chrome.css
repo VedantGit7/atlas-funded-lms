@@ -1,27 +1,27 @@
 /* Certificate Studio chrome — FundedBeyond canvas editor (coral primary, teal tertiary) */
 
 .cert-studio {
-  --studio-chrome-bg: #070b10;
-  --studio-surface: #131317;
-  --studio-surface-lowest: #0e0e12;
-  --studio-surface-low: #1b1b1f;
-  --studio-panel-bg: #0f1419;
-  --studio-panel-elevated: #2a292e;
-  --studio-panel-highest: #353439;
-  --studio-hairline: rgba(255, 255, 255, 0.05);
-  --studio-primary: #ffb4a3;
-  --studio-primary-container: #ff6b4a;
-  --studio-on-primary-container: #661000;
-  --studio-accent-teal: #10d9a3;
-  --studio-accent-blue: #2e6bff;
-  --studio-on-surface: #e4e1e7;
-  --studio-on-secondary: #b9b8b4;
-  --studio-muted: #474744;
-  --studio-outline-variant: #59413c;
+  --studio-chrome-bg: var(--admin-bg);
+  --studio-surface: var(--admin-surface);
+  --studio-surface-lowest: var(--admin-bg);
+  --studio-surface-low: var(--admin-surface-low);
+  --studio-panel-bg: var(--admin-surface);
+  --studio-panel-elevated: var(--admin-surface-high);
+  --studio-panel-highest: var(--admin-surface-high);
+  --studio-hairline: var(--admin-border);
+  --studio-primary: var(--admin-primary);
+  --studio-primary-container: var(--admin-primary);
+  --studio-on-primary-container: var(--admin-on-primary);
+  --studio-accent-teal: var(--admin-success);
+  --studio-accent-blue: var(--admin-primary);
+  --studio-on-surface: var(--admin-on-surface);
+  --studio-on-secondary: var(--admin-on-surface-variant);
+  --studio-muted: var(--admin-outline);
+  --studio-outline-variant: var(--admin-border);
   --studio-paper: #f7f4ef;
   --studio-ink: #1a1f26;
-  --studio-danger: #ffb4ab;
-  --studio-danger-container: #93000a;
+  --studio-danger: var(--admin-danger);
+  --studio-danger-container: var(--admin-danger);
   --studio-font-ui: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
   --studio-font-display: var(--font-cormorant), "Cormorant Garamond", "Times New Roman", serif;
   --studio-font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", Menlo, monospace;
@@ -142,7 +142,7 @@
 .cert-studio__divider-v {
   width: 1px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--admin-border);
   flex-shrink: 0;
 }
 
@@ -169,13 +169,13 @@
 }
 
 .cert-studio__name-input:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--admin-border);
 }
 
 .cert-studio__name-input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background: var(--admin-border);
+  box-shadow: 0 0 0 1px var(--admin-border);
 }
 
 .cert-studio__sync-row {
@@ -391,8 +391,6 @@
   font-family: var(--studio-font-mono);
   font-size: 9px;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   cursor: pointer;
   transition:
     opacity 150ms ease,
@@ -493,7 +491,7 @@
   border: none;
   border-radius: 12px;
   background: var(--studio-panel-elevated);
-  color: #e1bfb8;
+  color: var(--admin-on-surface-variant);
   font-family: var(--studio-font-ui);
   font-size: 10px;
   cursor: pointer;
@@ -632,7 +630,7 @@
 }
 
 .cert-studio__layer:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--admin-border);
 }
 
 .cert-studio__layer.is-selected {
@@ -718,7 +716,7 @@
   height: 32px;
   padding: 0;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--admin-border);
   cursor: pointer;
   transition: transform 150ms ease;
 }
@@ -737,7 +735,7 @@
   align-items: center;
   justify-content: center;
   background: var(--studio-panel-elevated);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--admin-border);
   color: var(--studio-on-secondary);
 }
 
@@ -769,7 +767,7 @@
   justify-content: center;
   padding: 12px;
   scrollbar-width: thin;
-  scrollbar-color: #2a292e transparent;
+  scrollbar-color: var(--admin-surface-high) transparent;
 }
 
 .cert-studio__stage-viewport.is-fit {
@@ -782,7 +780,7 @@
 }
 
 .cert-studio__stage-viewport::-webkit-scrollbar-thumb {
-  background: #2a292e;
+  background: var(--admin-surface-high);
   border-radius: 8px;
 }
 
@@ -822,7 +820,7 @@
   gap: 6px;
   height: 40px;
   padding: 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--admin-border);
   border-radius: 999px;
   background: color-mix(in srgb, var(--studio-panel-highest) 90%, transparent);
   backdrop-filter: blur(16px);
@@ -848,7 +846,7 @@
   gap: 4px;
   height: 24px;
   padding: 0 10px;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--admin-border);
 }
 
 .cert-studio__magic-seg:last-child {
@@ -875,7 +873,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--admin-border);
   padding: 0;
   cursor: pointer;
 }
@@ -972,7 +970,7 @@
 }
 
 .cert-studio__input:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--admin-border);
 }
 
 .cert-studio__input:focus-visible {
@@ -1093,7 +1091,7 @@ select.cert-studio__input {
   border: none;
   border-radius: 8px;
   background: var(--studio-panel-elevated);
-  color: #e1bfb8;
+  color: var(--admin-on-surface-variant);
   cursor: pointer;
   transition:
     background 150ms ease,
@@ -1186,8 +1184,6 @@ select.cert-studio__input {
   padding: 0;
   font-family: var(--studio-font-mono);
   font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--studio-muted);
   cursor: pointer;
   transition: color 150ms ease;

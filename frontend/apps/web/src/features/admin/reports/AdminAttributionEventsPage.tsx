@@ -359,7 +359,7 @@ export function AdminAttributionEventsPage({
           </Link>
           <Link href={MARKETING_INSIGHT_HREF} className={manageSecondaryButtonClassName}>
             <TrendingUp className="h-4 w-4" aria-hidden="true" />
-            Open Marketing Insight
+            Open marketing insight
           </Link>
           {/* Where the tracking that fills this log is configured, and what is
               fixed in code. Read-only. */}

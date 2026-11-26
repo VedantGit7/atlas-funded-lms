@@ -797,7 +797,7 @@ function ScoresAssessmentListReport({
                 href={openProductHref(productType)}
                 className={`${primaryButtonClassName} inline-flex h-12 items-center gap-2 rounded-sm px-8 uppercase tracking-[0.12em]`}
               >
-                Open Product
+                Open product
                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </Link>
             </section>

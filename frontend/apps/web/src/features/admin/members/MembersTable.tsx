@@ -742,6 +742,7 @@ export function MembersTable({
             <div className="overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)]">
               <VirtualizedTable
                 rows={items}
+                maxHeight={null}
                 getRowKey={(member) => member.id}
                 header={
                   <Table className="table-fixed">

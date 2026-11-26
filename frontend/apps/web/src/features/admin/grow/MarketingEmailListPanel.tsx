@@ -345,14 +345,14 @@ export function MarketingEmailListPanel() {
     <div className="mx-auto w-full max-w-[1440px] space-y-6 pb-10">
       <Link href={MESSENGER_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Messenger
+        Back to messenger
       </Link>
 
       <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0 space-y-2">
           <nav
             aria-label="Breadcrumb"
-            className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]"
+            className="flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
           >
             <Link
               href={MESSENGER_HREF}

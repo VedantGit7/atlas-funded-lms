@@ -4,27 +4,27 @@
  */
 
 .cert-home {
-  --ch-surface-lowest: #0e0e12;
-  --ch-surface: #131317;
-  --ch-surface-dim: #131317;
-  --ch-surface-low: #1b1b1f;
-  --ch-surface-container: #1f1f23;
-  --ch-surface-high: #2a292e;
-  --ch-surface-highest: #353439;
-  --ch-surface-bright: #39393d;
-  --ch-surface-variant: #353439;
-  --ch-background: #0c0c0f;
-  --ch-on-bg: #e4e1e7;
-  --ch-on-surface: #e4e1e7;
-  --ch-on-surface-variant: #e1bfb8;
-  --ch-outline: #a88a83;
-  --ch-outline-variant: #59413c;
-  --ch-primary: #ffb4a3;
-  --ch-primary-container: #ff6b4a;
-  --ch-on-primary: #630f00;
-  --ch-on-primary-container: #661000;
-  --ch-tertiary: #56d9d8;
-  --ch-error: #ffb4ab;
+  --ch-surface-lowest: var(--admin-bg);
+  --ch-surface: var(--admin-surface);
+  --ch-surface-dim: var(--admin-surface);
+  --ch-surface-low: var(--admin-surface-low);
+  --ch-surface-container: var(--admin-surface-variant);
+  --ch-surface-high: var(--admin-surface-high);
+  --ch-surface-highest: var(--admin-surface-high);
+  --ch-surface-bright: var(--admin-surface-high);
+  --ch-surface-variant: var(--admin-surface-variant);
+  --ch-background: var(--admin-bg);
+  --ch-on-bg: var(--admin-on-surface);
+  --ch-on-surface: var(--admin-on-surface);
+  --ch-on-surface-variant: var(--admin-on-surface-variant);
+  --ch-outline: var(--admin-outline);
+  --ch-outline-variant: var(--admin-border);
+  --ch-primary: var(--admin-primary);
+  --ch-primary-container: var(--admin-primary);
+  --ch-on-primary: var(--admin-on-primary);
+  --ch-on-primary-container: var(--admin-on-primary);
+  --ch-tertiary: var(--admin-primary);
+  --ch-error: var(--admin-danger);
   --ch-paper: #fffdf8;
   --ch-ink: #1f1b16;
   --ch-panel-width: 280px;
@@ -38,8 +38,8 @@
   --ch-font-sans: var(--font-studio-sans), "Inter", system-ui, sans-serif;
   --ch-font-display: var(--font-studio-display), "Playfair Display", Georgia, serif;
   --ch-font-mono: var(--font-studio-mono), "Geist Mono", ui-monospace, monospace;
-  --ch-fb-teal: #10d9a3;
-  --ch-fb-blue: #2e6bff;
+  --ch-fb-teal: var(--admin-success);
+  --ch-fb-blue: var(--admin-primary);
   --ch-fb-ink: #1a1f26;
   --ch-fb-gold: #d4af37;
 
@@ -74,7 +74,7 @@
   height: var(--ch-nav-h);
   padding: 0 var(--ch-margin);
   background: var(--ch-surface-low);
-  border-bottom: 1px solid rgb(255 255 255 / 0.05);
+  border-bottom: 1px solid var(--admin-border);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
 }
 
@@ -94,6 +94,32 @@
   letter-spacing: -0.01em;
   color: var(--ch-on-surface);
   white-space: nowrap;
+  /* Shortens instead of running under the Back and Create buttons on narrow
+     screens. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .cert-home__brand-title {
+    font-size: 18px;
+    line-height: 24px;
+  }
+}
+
+/* Phones: the page heading below names the studio, so the bar keeps only
+   the menu and the actions (QA review 2 H9: admin pages overflowed phones). */
+@media (max-width: 640px) {
+  .cert-home__topbar {
+    padding: 0 12px;
+  }
+  .cert-home__brand-title {
+    display: none;
+  }
+  .cert-home__topbar-actions {
+    gap: 0.5rem;
+  }
 }
 
 .cert-home__search {
@@ -140,6 +166,7 @@
 
 .cert-home__topbar-actions {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 1rem;
 }
@@ -157,9 +184,7 @@
   font-size: 11px;
   line-height: 14px;
   font-weight: 600;
-  letter-spacing: 0.04em;
   text-decoration: none;
-  text-transform: uppercase;
   transition:
     color 150ms ease,
     background 150ms ease,
@@ -190,8 +215,6 @@
   font-size: 11px;
   line-height: 14px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   cursor: pointer;
   transition: transform 150ms ease;
 }
@@ -272,7 +295,7 @@
   height: calc(100dvh - var(--ch-nav-h));
   padding: var(--ch-margin) 1rem;
   background: var(--ch-surface-low);
-  border-right: 1px solid rgb(255 255 255 / 0.05);
+  border-right: 1px solid var(--admin-border);
   transform: translateX(-100%);
   transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -393,7 +416,7 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: var(--ch-radius-lg);
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1);
+  box-shadow: 0 0 0 1px var(--admin-border);
 }
 
 .cert-home__logo-well {
@@ -1002,7 +1025,7 @@
 }
 
 .cert-home__badge--archived {
-  background: rgb(255 255 255 / 0.06);
+  background: var(--admin-border);
   color: var(--ch-on-surface-variant);
 }
 

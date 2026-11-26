@@ -199,10 +199,7 @@ export function CopyProductWizardPanel({ subSchool, kind }: CopyProductWizardPan
           {step === "destination" ? config.title : "Copy Product"}
         </Link>
 
-        <nav
-          aria-label="Breadcrumb"
-          className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-wide"
-        >
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs">
           <span className="text-[var(--admin-on-surface-variant)]">utilities</span>
           <span className="text-[var(--admin-on-surface-variant)]" aria-hidden="true">
             &gt;
@@ -212,7 +209,7 @@ export function CopyProductWizardPanel({ subSchool, kind }: CopyProductWizardPan
             prefetch={false}
             className="text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-on-surface)]"
           >
-            Copy Product
+            Copy product
           </Link>
           <span className="text-[var(--admin-on-surface-variant)]" aria-hidden="true">
             &gt;

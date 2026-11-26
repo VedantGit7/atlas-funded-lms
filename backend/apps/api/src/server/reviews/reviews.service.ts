@@ -13,7 +13,7 @@ import {
   upsertCourseReview,
   type CourseReviewRecord,
 } from "./reviews.repository";
-import { reviewRequiresEnrollment } from "./reviews.errors";
+import { reviewRequiresEnrollment, reviewsTurnedOff } from "./reviews.errors";
 import type { CourseReviewsQuery, SubmitReviewBody } from "./schemas";
 
 type ServiceCtx = {
@@ -26,6 +26,20 @@ function assertPublished(status: string): void {
   if (status !== "PUBLISHED") {
     throw courseNotFound();
   }
+}
+
+/**
+ * Whether a course takes ratings and reviews: on unless its author turned it
+ * off in Studio (Course settings › Ratings & reviews). QA review 1 m32: Studio
+ * showed the switch off for courses that had never set it, while learners
+ * could review every course, because nothing read the setting.
+ */
+export function courseTakesReviews(metadata: Record<string, unknown> | null): boolean {
+  const tags = metadata?.["tags"];
+  if (!tags || typeof tags !== "object" || Array.isArray(tags)) return true;
+  const features = (tags as Record<string, unknown>)["studioFeatures"];
+  if (!features || typeof features !== "object" || Array.isArray(features)) return true;
+  return (features as Record<string, unknown>)["ratingsReviews"] !== false;
 }
 
 function serializeReview(review: CourseReviewRecord, viewerMembershipId: string) {
@@ -54,6 +68,9 @@ export async function submitCourseReview(
     throw courseNotFound();
   }
   assertPublished(course.status);
+  if (!courseTakesReviews(course.metadataJson)) {
+    throw reviewsTurnedOff();
+  }
 
   const enrollment = await findEnrollmentForMembership({
     tx,
@@ -127,6 +144,7 @@ export async function getCourseReviews(
       aggregate,
       myReview: mine ? serializeReview(mine, ctx.actorMembershipId) : null,
       pageInfo: page.pageInfo,
+      enabled: courseTakesReviews(course.metadataJson),
     },
   };
 }

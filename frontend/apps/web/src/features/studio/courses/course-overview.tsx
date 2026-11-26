@@ -310,7 +310,7 @@ export function CourseOverview({ course, modules, courseId }: CourseOverviewProp
   const primaryCreator = creators[0];
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <div className="mx-auto grid grid-cols-[minmax(0,1fr)] w-full max-w-6xl gap-8 px-4 py-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_300px]">
       <div className="min-w-0 space-y-8">
         <header className="space-y-4">
           <h1 className="text-3xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-4xl">

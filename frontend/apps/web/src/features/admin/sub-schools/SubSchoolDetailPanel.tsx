@@ -24,10 +24,7 @@ export function SubSchoolDetailPanel({ subSchool }: SubSchoolDetailPanelProps) {
         Sub-Schools
       </Link>
 
-      <nav
-        aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em]"
-      >
+      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs">
         <Link
           href={SUB_SCHOOLS_HREF}
           prefetch={false}

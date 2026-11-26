@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
   ChevronDown,
   ChevronLeft,
@@ -109,6 +109,11 @@ function CopyCheckoutButton({ value }: { value: string }) {
   );
 }
 
+/** The site address doesn't change while the page is open. */
+function subscribeToNothing(): () => void {
+  return () => {};
+}
+
 export function CourseSettingsPricingPlansPanel({
   course,
   disabled,
@@ -118,6 +123,11 @@ export function CourseSettingsPricingPlansPanel({
   onCourseChange,
 }: CourseSettingsPricingPlansPanelProps) {
   const searchId = useId();
+  const siteOrigin = useSyncExternalStore(
+    subscribeToNothing,
+    () => window.location.origin,
+    () => null,
+  );
   const columnsMenuRef = useRef<HTMLDivElement>(null);
   const [statusTab, setStatusTab] = useState<PricingPlanStatusTab>("ALL");
   const [search, setSearch] = useState("");
@@ -219,7 +229,7 @@ export function CourseSettingsPricingPlansPanel({
       case "paymentGateway":
         return plan.paymentGateway ?? "—";
       case "checkoutUrl": {
-        const checkoutUrl = resolvePlanCheckoutUrl(course, plan);
+        const checkoutUrl = resolvePlanCheckoutUrl(course, plan, siteOrigin);
         if (!checkoutUrl) return "—";
         return (
           <span className="inline-flex max-w-[16rem] items-center gap-1">
@@ -259,7 +269,7 @@ export function CourseSettingsPricingPlansPanel({
           onClick={onAddPlan}
         >
           <Plus className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
-          Add Pricing Plans
+          Add pricing plans
         </button>
       </div>
 
@@ -298,7 +308,7 @@ export function CourseSettingsPricingPlansPanel({
             onChange={(event) => {
               setSearch(event.target.value);
             }}
-            placeholder="Search by Title"
+            placeholder="Search by title"
             className={catalogSearchClassName}
           />
         </div>

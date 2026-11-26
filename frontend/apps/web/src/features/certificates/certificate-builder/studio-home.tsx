@@ -294,7 +294,10 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
   );
 
   return (
-    <div className={`cert-home ${fontClass}`} style={{ fontFamily: "var(--ch-font-sans)" }}>
+    <div
+      className={`admin-theme cert-home ${fontClass}`}
+      style={{ fontFamily: "var(--ch-font-sans)" }}
+    >
       <link
         rel="preload"
         href="/fonts/inter/v20/normal-latin.c940764593d0.woff2"
@@ -371,8 +374,8 @@ export function CertificateStudioHome({ publicName, onOpenStudio }: CertificateS
             <BookOpen size={22} strokeWidth={1.75} aria-hidden />
           </div>
           <div>
-            <div className="cert-home__chrome-title">Studio Chrome</div>
-            <div className="cert-home__chrome-sub">Professional Edition</div>
+            <div className="cert-home__chrome-title">Certificate Studio</div>
+            <div className="cert-home__chrome-sub">Certificates for your academy</div>
           </div>
         </div>
 

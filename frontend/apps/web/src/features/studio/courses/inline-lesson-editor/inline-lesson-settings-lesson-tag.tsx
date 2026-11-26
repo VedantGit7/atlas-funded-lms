@@ -124,7 +124,7 @@ export function StudioTagListSection({
           disabled={disabled || loading}
           onClick={onCreateTag}
         >
-          Create Tag
+          Create tag
         </button>
       </div>
 

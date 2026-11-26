@@ -427,7 +427,7 @@ function LearnerDevicesReport({
             Retry
           </button>
           <Link href="/admin/reports/active-devices" className={ghostButtonClassName}>
-            Back to Active Devices
+            Back to active devices
           </Link>
         </div>
       </div>
@@ -463,7 +463,7 @@ function LearnerDevicesReport({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <nav
           aria-label="Breadcrumb"
-          className="flex flex-wrap items-center gap-1 font-mono text-[13px] text-[var(--admin-on-surface-variant)]"
+          className="flex flex-wrap items-center gap-1 text-[13px] text-[var(--admin-on-surface-variant)] text-xs"
         >
           <Link href="/admin/reports" className="hover:text-[var(--admin-primary)]">
             Reports

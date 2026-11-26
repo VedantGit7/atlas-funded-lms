@@ -489,13 +489,19 @@ export function buildCoursePricingPlansUpdatePayload(
   };
 }
 
+/**
+ * `origin` is the site's address, read by the caller in a way that is the same
+ * on the server and in the first browser render (null until then), so the
+ * table doesn't cause a hydration error.
+ */
 export function resolvePlanCheckoutUrl(
   course: CourseDetail,
   plan: CoursePricingPlanItem,
+  origin: string | null,
 ): string | null {
   if (plan.checkoutUrl) return plan.checkoutUrl;
-  if (typeof window === "undefined") return null;
-  return `${window.location.origin}/courses/${course.slug}?plan=${plan.id}`;
+  if (!origin) return null;
+  return `${origin}/courses/${course.slug}?plan=${plan.id}`;
 }
 
 export function formatPricingPlanPrice(plan: CoursePricingPlanItem): string {
@@ -550,11 +556,12 @@ export function createPricingPlanDraftFromKind(
   existingPlans: CoursePricingPlanItem[],
   kind: CoursePricingPlanKind,
 ): Omit<CoursePricingPlanItem, "id" | "position"> {
-  const option = PRICING_PLAN_KIND_OPTIONS.find((item) => item.kind === kind);
   const isFree = kind === "FREE";
 
+  // The title starts empty and the field shows an example (QA review 1 M24:
+  // "One Time Payment Plan" was real text, so typing added to it).
   return {
-    title: option?.title ?? "",
+    title: "",
     planKind: kind,
     type: isFree ? "FREE" : "PAID",
     priceCents: isFree ? 0 : (course.priceCents ?? 0),
@@ -568,16 +575,9 @@ export function createPricingPlanDraftFromKind(
     accessibility: "PUBLIC",
     status: "DRAFT",
     ...defaultFreePlanFields(),
-    ...(isFree ? { title: "Free Plan" } : {}),
-    ...(kind === "ONE_TIME"
-      ? {
-          title: "One Time Payment Plan",
-          allowCouponCode: true,
-        }
-      : {}),
+    ...(kind === "ONE_TIME" ? { allowCouponCode: true } : {}),
     ...(kind === "LIMITED_TIME"
       ? {
-          title: "Limited time offer plan",
           allowCouponCode: true,
           coursePriceCents: course.priceCents ?? 0,
           priceCents: 0,

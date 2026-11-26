@@ -59,7 +59,7 @@ export function PaymentGatewayPublishForm({ gateway }: { gateway: PaymentGateway
     <div className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)]">
-          Publish Payment Gateway
+          Publish payment gateway
         </h1>
         <p className="text-sm text-[var(--admin-on-surface-variant)]">
           Publish or unpublish {gateway.displayName} for your school.

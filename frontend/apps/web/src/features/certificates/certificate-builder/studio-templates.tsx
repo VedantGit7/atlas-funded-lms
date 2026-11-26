@@ -121,7 +121,7 @@ export function CertificateStudioTemplates({
   );
 
   return (
-    <div className={`cert-tpl ${fontClass}`}>
+    <div className={`admin-theme cert-tpl ${fontClass}`}>
       <button
         type="button"
         className="cert-tpl__menu-btn"
@@ -145,8 +145,8 @@ export function CertificateStudioTemplates({
 
       <aside className="cert-tpl__aside" data-open={sidebarOpen ? "true" : "false"}>
         <div className="cert-tpl__brand">
-          <h1 className="cert-tpl__brand-title">Studio Chrome</h1>
-          <p className="cert-tpl__brand-sub">Professional Edition</p>
+          <h1 className="cert-tpl__brand-title">Certificate Studio</h1>
+          <p className="cert-tpl__brand-sub">Certificates for your academy</p>
         </div>
 
         <nav className="cert-tpl__nav" aria-label="Certificate studio">

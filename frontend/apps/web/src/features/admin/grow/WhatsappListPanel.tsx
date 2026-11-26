@@ -542,7 +542,7 @@ export function WhatsappListPanel() {
             className={managePrimaryButtonClassName}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
-            Create Message
+            Create message
           </Link>
           <div ref={moreRef} className="relative">
             <button
@@ -655,8 +655,8 @@ export function WhatsappListPanel() {
             onChange={(event) => {
               setQuery(event.target.value);
             }}
-            placeholder="Search by Title"
-            aria-label="Search by Title"
+            placeholder="Search by title"
+            aria-label="Search by title"
             className="w-full rounded-lg border border-[var(--admin-outline)] bg-[var(--admin-surface)] py-2.5 pl-9 pr-3 text-sm text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)] transition-[border-color,box-shadow] focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/30"
           />
         </div>

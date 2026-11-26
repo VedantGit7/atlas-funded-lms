@@ -173,6 +173,26 @@ export function DropdownField({
     };
   }, [open, onToggle]);
 
+  // Esc closes this list only (QA review 1 m29, review 2 H12: it closed the
+  // whole New course dialog and lost what was typed). Listening on window in
+  // the capture phase runs before the dialog's own Esc handler.
+  useEffect(() => {
+    if (!open) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      onToggle();
+      triggerRef.current?.focus();
+    }
+
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, [open, onToggle]);
+
   const portaledPanel =
     open && mounted
       ? createPortal(

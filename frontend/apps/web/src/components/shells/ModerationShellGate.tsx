@@ -40,11 +40,10 @@ export async function ModerationShellGate({ children }: ModerationShellGateProps
   if (context.kind === "entitlement_blocked") {
     return (
       <main className="mx-auto max-w-3xl px-4 py-10">
-        <h1 className="text-xl font-semibold">Community entitlement required</h1>
+        <h1 className="text-xl font-semibold">Community isn&apos;t part of your plan</h1>
         <p role="alert" className="mt-2 text-sm">
           {context.message}
         </p>
-        <p className="mt-4 text-xs opacity-70">Request ID: {context.requestId}</p>
       </main>
     );
   }

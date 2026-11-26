@@ -287,7 +287,7 @@ export function CourseEditLimitedTimePricingPlanScreen({
             value={draft.title}
             maxLength={PRICING_PLAN_TITLE_MAX_LENGTH}
             disabled={disabled || saving}
-            placeholder="Limited time offer plan"
+            placeholder="e.g. Launch offer"
             onChange={(value) => {
               setDraft((current) => ({ ...current, title: value }));
             }}

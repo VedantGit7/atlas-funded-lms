@@ -496,7 +496,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
 
       <nav
         aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+        className="flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
       >
         <Link
           href={MARKETING_HREF}
@@ -528,7 +528,8 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
           <div className="flex flex-wrap items-center gap-4 text-[13px] text-[var(--admin-on-surface-variant)]">
             <span className="inline-flex items-center gap-1.5">
               <Users className="h-4 w-4" aria-hidden="true" />
-              {formatEventCount(event.registrationCount)} registrations
+              {formatEventCount(event.registrationCount)}{" "}
+              {event.registrationCount === 1 ? "registration" : "registrations"}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="h-4 w-4" aria-hidden="true" />
@@ -549,7 +550,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
           {live ? (
             <button
               type="button"
-              className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
+              className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
               disabled={busy}
               onClick={() => {
                 void unpublish();
@@ -560,7 +561,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
           ) : (
             <button
               type="button"
-              className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
               disabled={busy}
               onClick={() => {
                 void publish();
@@ -607,7 +608,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
               </p>
               <button
                 type="button"
-                className="inline-flex shrink-0 items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
+                className="inline-flex shrink-0 items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   void unpublish();
@@ -772,7 +773,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
               </div>
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
                 disabled={busy || live}
                 onClick={() => {
                   void saveDetails();
@@ -817,7 +818,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
             </div>
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
               disabled={filteredRegistrations.length === 0}
               onClick={exportCsv}
             >
@@ -885,7 +886,8 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
                 <div className="flex flex-col gap-3 border-t border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
                   <p className="text-[13px] text-[var(--admin-on-surface-variant)]">
                     Showing {String(regRangeStart)} to {String(regRangeEnd)} of{" "}
-                    {String(filteredRegistrations.length)} registrations
+                    {String(filteredRegistrations.length)}{" "}
+                    {filteredRegistrations.length === 1 ? "registration" : "registrations"}
                   </p>
                   <div className="flex items-center gap-2">
                     <button
@@ -941,7 +943,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
             {live ? (
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
+                className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   void unpublish();
@@ -952,7 +954,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
             ) : (
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   void publish();
@@ -963,7 +965,7 @@ export function EventsBuilderPanel({ eventId }: { eventId: string }) {
             )}
             <button
               type="button"
-              className="inline-flex items-center rounded-lg border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-danger)] transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="inline-flex items-center rounded-lg border border-[var(--admin-danger)] bg-[color-mix(in_srgb,var(--admin-danger)_8%,var(--admin-surface))] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-danger)] transition-opacity hover:opacity-90 disabled:opacity-50"
               disabled={busy || live}
               onClick={() => {
                 setDeleteOpen(true);

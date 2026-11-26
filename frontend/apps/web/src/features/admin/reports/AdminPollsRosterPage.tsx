@@ -640,7 +640,7 @@ export function AdminPollsRosterPage({
                   >
                     <div>
                       <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--admin-success)]">
-                        Open Now
+                        Open now
                       </p>
                       <p className="font-mono text-xl font-semibold text-[var(--admin-on-surface)]">
                         {(summary?.openNowCount ?? 0).toLocaleString(viewer.locale)}

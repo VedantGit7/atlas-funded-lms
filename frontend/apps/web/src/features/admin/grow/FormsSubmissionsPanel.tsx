@@ -143,7 +143,7 @@ export function FormsSubmissionsPanel({ formId }: { formId: string }) {
         <div>
           <nav
             aria-label="Breadcrumb"
-            className="mb-2 flex flex-wrap items-center gap-2 text-[12px] font-bold text-[var(--admin-on-surface-variant)]"
+            className="mb-2 flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
           >
             <Link
               href={FORMS_LIST_HREF}

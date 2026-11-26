@@ -334,7 +334,7 @@ function ResultsRail({
       <div className="flex-1 overflow-y-auto p-4">
         <div className="mb-4 flex items-center justify-between">
           <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface)]">
-            Preview List
+            Preview list
           </span>
           <Link
             href="/admin/reports/custom-field"

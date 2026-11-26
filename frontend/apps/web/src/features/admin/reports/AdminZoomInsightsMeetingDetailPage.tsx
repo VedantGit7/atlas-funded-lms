@@ -1217,7 +1217,7 @@ function ZoomMeetingDetailReport({
                       <div className="absolute right-0 top-[calc(100%+8px)] z-50 flex w-[280px] flex-col overflow-hidden rounded border border-[var(--admin-outline)] bg-[var(--admin-surface)] shadow-[0_8px_24px_rgba(27,27,35,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
                         <div className="flex items-center justify-between border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-3">
                           <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                            Manage Columns
+                            Manage columns
                           </h3>
                           <button
                             type="button"
@@ -1449,7 +1449,7 @@ function ZoomMeetingDetailReport({
                   onClick={() => void loadParticipants()}
                 >
                   <RefreshCw className="h-4 w-4" aria-hidden="true" />
-                  Retry Connection
+                  Retry connection
                 </button>
               </div>
             ) : null}

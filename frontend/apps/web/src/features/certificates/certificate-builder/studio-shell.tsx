@@ -473,7 +473,7 @@ export const CertificateStudioShell = observer(function CertificateStudioShell({
           : "cert-studio__sync-dot";
 
   return (
-    <div className="cert-studio" style={rootStyle}>
+    <div className="admin-theme cert-studio" style={rootStyle}>
       {preview.open ? (
         <div
           className="cert-studio__preview-backdrop"

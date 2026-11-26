@@ -454,7 +454,7 @@ export function AdminResourceUsageRosterPage({
         <div>
           <nav
             aria-label="Breadcrumb"
-            className="mb-2 text-[11px] tracking-wide text-[var(--admin-on-surface-variant)]"
+            className="mb-2 text-xs text-[var(--admin-on-surface-variant)]"
           >
             <ol className="inline-flex items-center gap-1">
               <li>

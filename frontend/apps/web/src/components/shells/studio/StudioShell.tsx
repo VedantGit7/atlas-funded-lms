@@ -291,17 +291,16 @@ export function StudioShell({
           </div>
 
           <div className="ml-auto flex items-center gap-4">
-            <span
-              className={[
-                "hidden items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold md:inline-flex",
-                mfaEnabled
-                  ? "bg-[var(--admin-success)]/15 text-[var(--admin-success)]"
-                  : "bg-[var(--admin-warning)]/15 text-[var(--admin-warning)]",
-              ].join(" ")}
-            >
-              <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-              {mfaEnabled ? "MFA enrolled" : "MFA not enrolled"}
-            </span>
+            {mfaEnabled ? null : (
+              <Link
+                href="/profile/security?setup=mfa"
+                prefetch={false}
+                className="hidden items-center gap-1.5 rounded-full bg-[var(--admin-warning)]/15 px-3 py-1 text-xs font-semibold text-[var(--admin-warning)] transition-opacity hover:opacity-80 md:inline-flex"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                Set up two-step sign-in
+              </Link>
+            )}
 
             <ThemeModeToggle className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--admin-on-surface-variant)] transition-colors hover:text-[var(--admin-primary)]" />
 
@@ -343,7 +342,7 @@ export function StudioShell({
           </div>
         </header>
 
-        <main id="studio-main" className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8">
+        <main id="studio-main" className="min-w-0 flex-1 overflow-x-clip px-4 py-6 md:px-8 md:py-8">
           {children}
         </main>
 

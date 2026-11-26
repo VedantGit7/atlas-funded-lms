@@ -199,7 +199,7 @@ export function AddNewMemberDialog({
       >
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
           <h2 id={titleId} className="text-xl font-bold text-[var(--admin-on-surface)]">
-            Add New Member
+            Add new member
           </h2>
           <button
             type="button"

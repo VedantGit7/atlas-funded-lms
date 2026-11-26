@@ -62,7 +62,7 @@ export function CourseEditorWorkspace({
         <BookOpen className="h-7 w-7" strokeWidth={1.75} aria-hidden="true" />
       </div>
       <p className="max-w-sm text-sm font-medium text-[var(--admin-on-surface-variant)]">
-        Select a lesson on the right to start editing, or add a new lesson to a chapter.
+        Pick a lesson in Sections to start editing, or add a lesson to a section.
       </p>
     </div>
   );

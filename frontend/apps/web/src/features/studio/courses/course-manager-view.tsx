@@ -126,7 +126,7 @@ export function CourseManagerView({ courses, canCreate }: CourseManagerViewProps
               }}
               className={`${outlineButtonClassName} inline-flex items-center gap-2 px-4 py-2.5`}
             >
-              Manage
+              View
               <ChevronDown
                 className={[
                   "h-4 w-4 transition-transform duration-200",
@@ -145,7 +145,7 @@ export function CourseManagerView({ courses, canCreate }: CourseManagerViewProps
                     setManageOpen(false);
                   }}
                 >
-                  {showArchived ? "Hide archived" : "Show archived"}
+                  {showArchived ? "Hide archived courses" : "Show archived courses"}
                 </button>
                 <button
                   type="button"
@@ -194,7 +194,7 @@ export function CourseManagerView({ courses, canCreate }: CourseManagerViewProps
             onChange={(event) => {
               setSearch(event.target.value);
             }}
-            placeholder="Search by Title"
+            placeholder="Search by title"
             className={catalogSearchClassName}
           />
         </div>
@@ -226,7 +226,7 @@ export function CourseManagerView({ courses, canCreate }: CourseManagerViewProps
               className={catalogFilterButtonClassName}
             >
               <Calendar className="h-4 w-4" aria-hidden="true" />
-              Published Date
+              Sort: {sortLabel}
             </button>
             {dateMenuOpen ? (
               <div className="absolute right-0 top-[calc(100%+6px)] z-20 min-w-[11rem] overflow-hidden rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] py-1 shadow-lg motion-safe:animate-[admin-dropdown-in_0.18s_cubic-bezier(0.16,1,0.3,1)]">
@@ -297,7 +297,7 @@ export function CourseManagerView({ courses, canCreate }: CourseManagerViewProps
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Course" value={stats.total} icon={BookOpen} />
+        <StatCard label="All courses" value={stats.total} icon={BookOpen} />
         <StatCard label="Published" value={stats.published} icon={Lock} />
         <StatCard label="Unpublished" value={stats.unpublished} icon={LockOpen} />
         <StatCard label="In review" value={stats.inReview} icon={Clock} />
