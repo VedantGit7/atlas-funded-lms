@@ -54,7 +54,6 @@ import {
   exportStatusBadgeClassName,
   formatExpiresLabel,
   formatRelativeTime,
-  formatRequestedBy,
   hasPendingExports,
   paginateJobs,
   resolveExportDisplayStatus,
@@ -348,7 +347,12 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
                                   </time>
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-sm text-[var(--admin-on-surface)] sm:px-5">
-                                  {formatRequestedBy(job.requestedByMembershipId)}
+                                  <span
+                                    className="block max-w-[14rem] truncate"
+                                    title={job.requestedByName ?? undefined}
+                                  >
+                                    {job.requestedByName ?? "—"}
+                                  </span>
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-sm text-[var(--admin-on-surface)] sm:px-5">
                                   {formatExpiresLabel(job, displayStatus)}
@@ -454,37 +458,36 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-primary)]">
                 <CloudDownload className="h-5 w-5" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                  Retention
+                  Download links expire
                 </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Completed exports show an expiry timestamp. Download signed URLs before that time —
-                files are not kept indefinitely.
+                Each finished snapshot shows when its file expires. Download it before then; files
+                are not kept forever.
               </p>
             </article>
             <article className={exportsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-success)]">
                 <Shield className="h-5 w-5" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                  Access control
+                  Who can use this
                 </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Export jobs require the <code className="text-xs">data.export.enable</code>{" "}
-                entitlement and appropriate admin permissions. Downloads use short-lived signed
-                URLs.
+                Admins with export permission, on plans that include data snapshots. Each download
+                link works for a short time only.
               </p>
             </article>
             <article className={exportsInfoCardClassName}>
               <div className="mb-2 flex items-center gap-2 text-[var(--admin-on-surface-variant)]">
                 <Workflow className="h-5 w-5" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-[var(--admin-on-surface)]">
-                  Background jobs
+                  Runs in the background
                 </h3>
               </div>
               <p className="text-sm text-[var(--admin-on-surface-variant)]">
-                Exports run asynchronously. Queued and running jobs refresh automatically every few
-                seconds until they complete.
+                You can leave this page while a snapshot runs. Snapshots that are waiting or running
+                update here every few seconds until they finish.
               </p>
             </article>
           </div>
@@ -493,7 +496,7 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
 
       <AdminConfirmDialog
         open={confirmOpen}
-        title="Run tenant export?"
+        title="Take a data snapshot?"
         description="This queues a partial snapshot of academy records: membership IDs, status and join dates; profile membership IDs and display names; course IDs, slugs, titles and status; enrollment IDs, course and membership IDs and status. Assessment submissions, billing records, files and other records are omitted. This is not a complete data-rights export."
         confirmLabel="Run export"
         busyLabel="Queueing…"

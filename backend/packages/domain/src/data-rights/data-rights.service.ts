@@ -51,12 +51,13 @@ function mapExportErrorCode(errorJson: unknown): string | null {
   return typeof code === "string" ? code : null;
 }
 
-function mapExportJobBaseDto(job: ExportJobRow) {
+function mapExportJobBaseDto(job: ExportJobRow, requestedByName: string | null = null) {
   const scope = exportScopeSchema.safeParse(job.scope_json);
   return exportJobDtoSchema.omit({ download: true }).parse({
     id: job.id,
     status: job.status,
     requestedByMembershipId: job.requested_by_membership_id,
+    requestedByName,
     createdAt: job.created_at.toISOString(),
     updatedAt: job.updated_at.toISOString(),
     expiresAt: job.expires_at?.toISOString() ?? null,
@@ -162,10 +163,16 @@ export async function listExportJobs(tx: TenantTx, ctx: ServiceCtx, rawQuery: un
 
   const hasNextPage = rows.length > query.limit;
   const pageRows = hasNextPage ? rows.slice(0, query.limit) : rows;
+  const names = await dataRightsRepository.memberDisplayNames(
+    tx,
+    pageRows.map((row) => row.requested_by_membership_id),
+  );
 
   return exportListResponseSchema.parse({
     data: {
-      items: pageRows.map(mapExportJobBaseDto),
+      items: pageRows.map((row) =>
+        mapExportJobBaseDto(row, names.get(row.requested_by_membership_id) ?? null),
+      ),
       pageInfo: {
         nextCursor: hasNextPage ? (pageRows.at(-1)?.id ?? null) : null,
         hasNextPage,

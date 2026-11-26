@@ -135,6 +135,27 @@ describeWithDb("data-rights API integration", () => {
 
     expect(listed.data.items.length).toBeGreaterThan(0);
     expect(JSON.stringify(listed.data.items)).not.toContain("r2_object_key");
+
+    // Each job names who asked for it (profile, else account name, else email), never an ID.
+    const expected = await withTenantTx(
+      authoringTenantTx(fixture, fixture.adminMembershipId),
+      (tx) =>
+        tx.$queryRaw<Array<{ name: string | null }>>`
+        select coalesce(
+          nullif(btrim(mp.display_name), ''), nullif(btrim(ap.name), ''), ap.email
+        ) as name
+        from memberships m
+        left join member_profiles mp
+          on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
+        left join auth_principals ap on ap.id = m.auth_principal_id
+        where m.id = ${fixture.adminMembershipId}::uuid
+      `,
+    );
+    for (const item of listed.data.items) {
+      expect(item.requestedByName).toBeTruthy();
+      expect(item.requestedByName).toBe(expected[0]?.name);
+      expect(item.requestedByName).not.toBe(item.requestedByMembershipId);
+    }
   });
 
   it("GET /exports/:id omits download for non-success jobs", async () => {
