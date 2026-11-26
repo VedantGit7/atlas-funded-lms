@@ -213,7 +213,7 @@ export function ProtectedRoleEditor({ role }: ProtectedRoleEditorProps) {
             className="inline-flex cursor-not-allowed items-center gap-2 px-4 py-2 text-sm font-bold text-[var(--admin-danger)]/50"
           >
             <LockKeyhole className="h-5 w-5" aria-hidden="true" />
-            Delete System Role
+            Delete system role
           </button>
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <button
@@ -229,7 +229,7 @@ export function ProtectedRoleEditor({ role }: ProtectedRoleEditorProps) {
               className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-[var(--admin-on-surface)]/20 px-8 py-2.5 text-sm font-bold text-[var(--admin-on-surface-variant)]"
             >
               <Lock className="h-5 w-5" aria-hidden="true" />
-              Save Changes
+              Save changes
             </button>
           </div>
         </footer>

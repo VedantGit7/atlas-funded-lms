@@ -135,7 +135,7 @@ export function CtaCreatePanel() {
       <div>
         <nav
           aria-label="Breadcrumb"
-          className="mb-2 flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+          className="mb-2 flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
         >
           <Link
             href={MARKETING_HREF}
@@ -269,7 +269,7 @@ export function CtaCreatePanel() {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={busy}
           onClick={() => {
             void onCreate();
@@ -280,7 +280,7 @@ export function CtaCreatePanel() {
         <Link
           href={CTA_LIST_HREF}
           prefetch={false}
-          className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
+          className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-2.5 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
         >
           Discard
         </Link>

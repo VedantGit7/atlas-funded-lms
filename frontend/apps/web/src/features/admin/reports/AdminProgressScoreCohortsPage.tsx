@@ -487,7 +487,7 @@ export function AdminProgressScoreCohortsPage({
                   }}
                 >
                   <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
-                  New Message
+                  New message
                 </button>
               </div>
             ) : (

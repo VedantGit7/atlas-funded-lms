@@ -128,7 +128,7 @@ export function CourseBuilder({
           <div className="min-w-0 space-y-1">
             <nav
               aria-label="Breadcrumb"
-              className="flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.06em] text-[var(--admin-on-surface-variant)]"
+              className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--admin-on-surface-variant)]"
             >
               <Link href="/studio" className="transition-colors hover:text-[var(--admin-primary)]">
                 Studio

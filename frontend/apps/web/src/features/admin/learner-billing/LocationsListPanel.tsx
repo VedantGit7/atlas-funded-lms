@@ -117,7 +117,7 @@ export function LocationsListPanel({
           className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-sm font-bold text-[var(--admin-on-primary)] shadow-sm transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--admin-bg)]"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
-          Add Location
+          Add location
         </Link>
       </header>
 

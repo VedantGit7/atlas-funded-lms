@@ -60,7 +60,7 @@ export function deriveCourseFeatureFlags(course: CourseRow): CourseFeatureFlag[]
     feature(
       "ratings-reviews",
       "Ratings & Reviews",
-      false,
+      true,
       readStudioFeature(tags, "ratingsReviews"),
     ),
     feature(

@@ -420,14 +420,15 @@ function StudioRulers({
   const sceneFunc = useCallback(
     (context: Konva.Context) => {
       const c = context._context;
+      const colors = rulerColors(c.canvas);
       const pxPerMm = PX_PER_MM * zoom;
       const minor = RULER_STEPS_MM.find((s) => s * pxPerMm >= 7) ?? 100;
       const major = minor * 5;
 
-      c.fillStyle = "#0f1419";
+      c.fillStyle = colors.background;
       c.fillRect(0, 0, stageWidth, RULER_PX);
       c.fillRect(0, 0, RULER_PX, stageHeight);
-      c.fillStyle = "rgba(255,255,255,0.08)";
+      c.fillStyle = colors.line;
       c.fillRect(0, RULER_PX - 1, stageWidth, 1);
       c.fillRect(RULER_PX - 1, 0, 1, stageHeight);
 
@@ -441,10 +442,10 @@ function StudioRulers({
         const sx = Math.round(originX + mm * pxPerMm);
         if (sx < RULER_PX) continue;
         const isMajor = mm % major === 0;
-        c.fillStyle = isMajor ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.22)";
+        c.fillStyle = isMajor ? colors.majorTick : colors.line;
         c.fillRect(sx, RULER_PX - (isMajor ? 9 : 5), 1, isMajor ? 9 : 5);
         if (isMajor) {
-          c.fillStyle = "#8b95a5";
+          c.fillStyle = colors.label;
           c.fillText(String(mm), sx + 3, 9);
         }
       }
@@ -456,10 +457,10 @@ function StudioRulers({
         const sy = Math.round(originY + mm * pxPerMm);
         if (sy < RULER_PX) continue;
         const isMajor = mm % major === 0;
-        c.fillStyle = isMajor ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.22)";
+        c.fillStyle = isMajor ? colors.majorTick : colors.line;
         c.fillRect(RULER_PX - (isMajor ? 9 : 5), sy, isMajor ? 9 : 5, 1);
         if (isMajor) {
-          c.fillStyle = "#8b95a5";
+          c.fillStyle = colors.label;
           c.save();
           c.translate(9, sy - 3);
           c.rotate(-Math.PI / 2);
@@ -469,9 +470,9 @@ function StudioRulers({
       }
 
       // Corner square with the unit label.
-      c.fillStyle = "#161c24";
+      c.fillStyle = colors.corner;
       c.fillRect(0, 0, RULER_PX - 1, RULER_PX - 1);
-      c.fillStyle = "#8b95a5";
+      c.fillStyle = colors.label;
       c.fillText("mm", 3, 13);
     },
     [zoom, originX, originY, stageWidth, stageHeight],
@@ -482,6 +483,23 @@ function StudioRulers({
       <Shape sceneFunc={sceneFunc} />
     </Layer>
   );
+}
+
+/**
+ * Ruler colours from the app theme, so the rulers match light and dark mode
+ * (QA review 2 7.7: Certificate Studio had its own dark theme). The canvas
+ * sits inside the admin theme, which defines these colours.
+ */
+function rulerColors(canvas: HTMLCanvasElement) {
+  const style = getComputedStyle(canvas);
+  const read = (name: string, fallback: string) => style.getPropertyValue(name).trim() || fallback;
+  return {
+    background: read("--admin-surface", "#0f1419"),
+    corner: read("--admin-surface-low", "#161c24"),
+    line: read("--admin-border", "rgba(255,255,255,0.12)"),
+    majorTick: read("--admin-outline", "rgba(255,255,255,0.45)"),
+    label: read("--admin-on-surface-variant", "#8b95a5"),
+  };
 }
 
 export const CertificateStudioCanvas = observer(function CertificateStudioCanvas({

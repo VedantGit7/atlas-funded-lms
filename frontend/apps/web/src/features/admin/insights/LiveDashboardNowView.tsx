@@ -494,7 +494,7 @@ export function LiveDashboardNowView({
               className={insightGhostButtonClassName}
             >
               <Users className="h-[18px] w-[18px]" aria-hidden="true" />
-              Open Live Class Attendance
+              Open live class attendance
             </Link>
             <button
               type="button"

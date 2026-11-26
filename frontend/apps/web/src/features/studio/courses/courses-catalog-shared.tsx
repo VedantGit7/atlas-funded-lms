@@ -54,10 +54,17 @@ export function courseCardStatusLabel(status: CourseCatalogStatus): string {
   return "Unpublished";
 }
 
-export function courseAgeDays(createdAt: string): number {
-  const created = new Date(createdAt).getTime();
-  if (Number.isNaN(created)) return 1;
-  return Math.max(1, Math.ceil((Date.now() - created) / (1000 * 60 * 60 * 24)));
+/**
+ * "Updated 3 days ago" for a course card (QA review 1 m28: a bare "1 Day" on
+ * every card said neither what it counted nor that it was a minimum).
+ */
+export function courseUpdatedLabel(updatedAt: string, now: number = Date.now()): string {
+  const updated = new Date(updatedAt).getTime();
+  if (Number.isNaN(updated)) return "Updated recently";
+  const days = Math.floor((now - updated) / (1000 * 60 * 60 * 24));
+  if (days <= 0) return "Updated today";
+  if (days === 1) return "Updated yesterday";
+  return `Updated ${String(days)} days ago`;
 }
 
 export function formatCoursePrice(course: {

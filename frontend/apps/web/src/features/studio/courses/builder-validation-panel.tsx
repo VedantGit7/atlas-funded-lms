@@ -92,7 +92,7 @@ export function BuilderValidationPanel({
     <>
       <div className="sticky top-0 z-10 border-b border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-3">
         <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]">
-          Publish Checklist
+          Publish checklist
         </span>
       </div>
 

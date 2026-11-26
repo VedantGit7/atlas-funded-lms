@@ -448,7 +448,7 @@ export function LiveDashboardAttendanceView({
             prefetch={false}
             className={insightPrimaryButtonClassName}
           >
-            Open Live Class Attendance
+            Open live class attendance
             <ExternalLink className="h-[18px] w-[18px]" aria-hidden="true" />
           </Link>
           <button
@@ -553,7 +553,7 @@ export function LiveDashboardAttendanceView({
                   prefetch={false}
                   className={insightGhostButtonClassName}
                 >
-                  Open Live Sessions
+                  Open live sessions
                 </Link>
               </div>
             </>

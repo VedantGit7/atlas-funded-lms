@@ -105,10 +105,7 @@ export function CopyProductPanel({ subSchool, history = [] }: CopyProductPanelPr
         {subSchool.name}
       </Link>
 
-      <nav
-        aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em]"
-      >
+      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs">
         <Link
           href={detailHref}
           prefetch={false}
@@ -124,7 +121,7 @@ export function CopyProductPanel({ subSchool, history = [] }: CopyProductPanelPr
 
       <header className="space-y-1.5">
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] sm:text-3xl">
-          Copy Product
+          Copy product
         </h1>
         <p className="max-w-2xl text-sm text-[var(--admin-on-surface-variant)]">
           Create a copy of an existing product and view the completion status of your copied

@@ -173,7 +173,7 @@ function KpiTile({
         {hint ? <Info className="h-3 w-3 opacity-70" aria-hidden="true" /> : null}
       </p>
       <p
-        className={`mt-1.5 truncate font-bold text-[var(--admin-on-surface)] ${emphasise ? "text-lg" : "text-2xl"}`}
+        className={`mt-1.5 break-words font-bold text-[var(--admin-on-surface)] ${emphasise ? "text-lg" : "text-2xl"}`}
       >
         {value}
       </p>

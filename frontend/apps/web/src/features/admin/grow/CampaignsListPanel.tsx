@@ -351,7 +351,7 @@ export function CampaignsListPanel() {
         <div>
           <nav
             aria-label="Breadcrumb"
-            className="mb-2 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+            className="mb-2 flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
           >
             <Link
               href={MARKETING_HREF}
@@ -377,7 +377,7 @@ export function CampaignsListPanel() {
               downloadCsv(filtered);
             }}
             disabled={filtered.length === 0}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-[18px] w-[18px]" aria-hidden="true" />
             Export CSV
@@ -385,7 +385,7 @@ export function CampaignsListPanel() {
           <Link
             href={CAMPAIGN_CREATE_HREF}
             prefetch={false}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90"
           >
             <Plus className="h-[18px] w-[18px]" aria-hidden="true" />
             New campaign
@@ -512,7 +512,7 @@ export function CampaignsListPanel() {
                           <button
                             type="button"
                             onClick={clearFilters}
-                            className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)]"
+                            className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)]"
                           >
                             Clear filters
                           </button>
@@ -520,7 +520,7 @@ export function CampaignsListPanel() {
                           <Link
                             href={CAMPAIGN_CREATE_HREF}
                             prefetch={false}
-                            className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)]"
+                            className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)]"
                           >
                             <Plus className="h-5 w-5" aria-hidden="true" />
                             Create your first campaign
@@ -764,7 +764,7 @@ export function CampaignsListPanel() {
                   setDeleteRow(null);
                   setDeleteConfirm("");
                 }}
-                className="rounded-lg border border-[var(--admin-border)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)]"
+                className="rounded-lg border border-[var(--admin-border)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)]"
               >
                 Cancel
               </button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { BadgeCheck } from "lucide-react";
 import { AdminConfirmDialog } from "../../../components/shells/admin/AdminConfirmDialog";
 import type { WorkflowQueueItem } from "../api";
@@ -36,6 +37,7 @@ function successMessageForAction(item: WorkflowQueueItem, action: PendingAction)
 }
 
 export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecisionControlsProps) {
+  const router = useRouter();
   const [comment, setComment] = useState("");
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [confirmAction, setConfirmAction] = useState<PendingAction | null>(null);
@@ -62,7 +64,7 @@ export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecision
     if (!currentItem || actionInFlightRef.current) return;
 
     if ((action === "reject" || action === "return") && comment.trim().length < 3) {
-      setError("A review note of at least 3 characters is required for reject or return.");
+      setError("Add a review note (at least 3 characters) so the author knows what to change.");
       return;
     }
 
@@ -82,6 +84,10 @@ export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecision
       setComment("");
       setConfirmAction(null);
       onCompleted({ action });
+      // The sidebar's "Review & Approvals" count is drawn by the server with
+      // the page frame, which client navigation keeps; refresh it so it drops
+      // as the queue empties (QA review 1 m8: it stayed at 2).
+      router.refresh();
     } catch (err) {
       const message = formatWorkflowApiError(err);
       if (isStaleWorkflowConflictError(message)) {
@@ -89,6 +95,7 @@ export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecision
         setComment("");
         setError(null);
         onCompleted({ stale: true, action });
+        router.refresh();
         return;
       }
       setError(message);
@@ -107,12 +114,10 @@ export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecision
       <footer className={decisionFooterClassName} aria-label="Workflow decision controls">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-6">
           <div className="min-w-0 flex-1">
+            {/* One rule, said once (QA review 1 m9: the label was marked
+                required while the hint said optional). */}
             <label className={labelClass} htmlFor="review-justification">
               Review note
-              {(item.availableActions.includes("reject") ||
-                item.availableActions.includes("return")) && (
-                <span className="text-[var(--admin-danger)]"> *</span>
-              )}
             </label>
             <textarea
               id="review-justification"
@@ -123,11 +128,15 @@ export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecision
               rows={3}
               maxLength={2000}
               disabled={busy}
+              aria-describedby="review-justification-help"
               className={`${inputClass} mt-1 resize-none`}
-              placeholder="Required for reject or return. Optional for approval."
+              placeholder="What should the author know or change?"
             />
-            <p className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]">
-              Required when rejecting or returning an item for changes.
+            <p
+              id="review-justification-help"
+              className="mt-1 text-[11px] text-[var(--admin-on-surface-variant)]"
+            >
+              Needed to reject or request changes. Optional when you approve.
             </p>
           </div>
 

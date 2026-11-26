@@ -155,7 +155,7 @@ export function CampaignAnalyticsPanel({ campaignId }: CampaignAnalyticsPanelPro
     <div className="space-y-6">
       <nav
         aria-label="Breadcrumb"
-        className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+        className="flex items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
       >
         <Link
           href={MARKETING_HREF}
@@ -203,7 +203,7 @@ export function CampaignAnalyticsPanel({ campaignId }: CampaignAnalyticsPanelPro
             onClick={() => {
               downloadChannelCsv(analytics);
             }}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-[18px] w-[18px]" aria-hidden="true" />
             Export CSV
@@ -211,7 +211,7 @@ export function CampaignAnalyticsPanel({ campaignId }: CampaignAnalyticsPanelPro
           <Link
             href={CAMPAIGNS_HREF}
             prefetch={false}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
           >
             Campaign list
           </Link>

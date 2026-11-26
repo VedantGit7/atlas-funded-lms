@@ -5,7 +5,7 @@ import { Clock } from "lucide-react";
 import type { z } from "zod";
 import type { studioCourseListItemSchema } from "@atlas/contracts/courses/course-authoring-schemas";
 import { CourseFeaturesPopover } from "./course-features-popover";
-import { courseAgeDays, courseCardStatusLabel } from "./courses-catalog-shared";
+import { courseCardStatusLabel, courseUpdatedLabel } from "./courses-catalog-shared";
 import { StudioCoursePrice } from "./StudioCoursePrice";
 
 type CourseRow = z.infer<typeof studioCourseListItemSchema>;
@@ -16,7 +16,7 @@ type CourseCatalogCardProps = {
 
 export function CourseCatalogCard({ course }: CourseCatalogCardProps) {
   const href = `/studio/courses/${course.id}`;
-  const ageDays = courseAgeDays(course.createdAt);
+  const updatedLabel = courseUpdatedLabel(course.updatedAt);
   const statusLabel = courseCardStatusLabel(course.status);
   const category =
     typeof course.tags?.["category"] === "string"
@@ -39,7 +39,7 @@ export function CourseCatalogCard({ course }: CourseCatalogCardProps) {
           )}
           <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/35 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-            {ageDays} {ageDays === 1 ? "Day" : "Days"}
+            {updatedLabel}
           </div>
         </div>
 

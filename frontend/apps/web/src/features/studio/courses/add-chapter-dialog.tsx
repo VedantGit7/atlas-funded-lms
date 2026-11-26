@@ -161,7 +161,7 @@ export function AddChapterDialog({ open, courseId, onClose, onCreated }: AddChap
       >
         <div className="flex items-center justify-between border-b border-[var(--admin-border)] px-6 py-5">
           <h2 id={titleId} className="text-xl font-bold text-[var(--admin-on-surface)]">
-            Add Chapter
+            Add section
           </h2>
           <button
             type="button"
@@ -208,7 +208,7 @@ export function AddChapterDialog({ open, courseId, onClose, onCreated }: AddChap
               }}
             />
             <p className={builderHelperClassName}>
-              Enable this only if you want to upload a SCORM package as a chapter.
+              Turn this on only to upload a SCORM package as a section.
             </p>
           </div>
 

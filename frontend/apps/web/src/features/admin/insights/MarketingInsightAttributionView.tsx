@@ -1250,7 +1250,7 @@ export function MarketingInsightAttributionView({
               prefetch={false}
               className={insightPrimaryButtonClassName}
             >
-              Open Sales Insight
+              Open sales insight
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>

@@ -100,7 +100,7 @@ export function CertificateBuilderSplash({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#05080a",
+        background: "var(--admin-bg, #05080a)",
       }}
     >
       <div

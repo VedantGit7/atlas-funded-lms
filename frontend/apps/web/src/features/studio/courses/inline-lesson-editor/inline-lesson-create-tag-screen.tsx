@@ -121,7 +121,7 @@ export function StudioCreateTagScreen({
           <p className="text-sm font-semibold text-[var(--admin-primary-strong)]">Create Tag</p>
           <header className="mb-8 mt-1">
             <h1 className="text-2xl font-bold text-[var(--admin-on-surface)] md:text-3xl">
-              Create Tag
+              Create tag
             </h1>
             <p className={`${builderHelperClassName} mt-2`}>
               Create a tag to classify your content.

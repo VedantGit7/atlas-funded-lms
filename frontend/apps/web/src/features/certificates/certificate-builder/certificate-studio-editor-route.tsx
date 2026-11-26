@@ -188,11 +188,11 @@ export function CertificateStudioEditorRoute({
       <main style={{ minHeight: "100dvh", margin: 0 }}>
         {loadError ? (
           <div
-            className="cert-studio"
+            className="admin-theme cert-studio"
             style={{
               padding: "2rem",
               color: "#f5f5f5",
-              background: "#070b10",
+              background: "var(--admin-bg)",
             }}
           >
             <p role="alert">{loadError}</p>

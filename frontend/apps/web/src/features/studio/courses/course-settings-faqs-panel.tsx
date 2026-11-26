@@ -65,7 +65,7 @@ export function CourseSettingsFaqsPanel({
           disabled={disabled}
           onClick={onAddFaq}
         >
-          Add Faqs
+          Add FAQs
         </button>
       </div>
 

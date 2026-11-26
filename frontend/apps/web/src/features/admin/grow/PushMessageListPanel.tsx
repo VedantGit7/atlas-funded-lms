@@ -336,7 +336,7 @@ export function PushMessageListPanel() {
     <div className="mx-auto w-full max-w-[1440px] space-y-6 pb-10">
       <Link href={MESSENGER_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Messenger
+        Back to messenger
       </Link>
 
       <header className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">

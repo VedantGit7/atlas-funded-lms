@@ -749,10 +749,7 @@ function CouponRedemptions({ couponId, initialData }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <nav
-        aria-label="Breadcrumb"
-        className="font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
-      >
+      <nav aria-label="Breadcrumb" className="text-xs text-[var(--admin-on-surface-variant)]">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
             <Link href="/admin" className="hover:text-[var(--admin-primary)]">

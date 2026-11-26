@@ -115,7 +115,7 @@ export function BadgeGrid({ badges }: BadgeGridProps) {
                     className="mt-3 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <Download className="h-3.5 w-3.5" strokeWidth={2} aria-hidden="true" />
-                    Open Badge
+                    Open badge
                   </a>
                 </li>
               );

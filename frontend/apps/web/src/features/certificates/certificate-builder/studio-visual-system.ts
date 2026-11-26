@@ -64,29 +64,16 @@ export const STUDIO_DEFAULT_SWATCHES: { color: string; label: string }[] = [
 ];
 
 /** CSS custom-property map for `.cert-studio` chrome. */
+/**
+ * Inline variables for the editor root. Colours are not set here: they come
+ * from studio-chrome.css, which maps them to the app theme so the editor
+ * follows light and dark mode (QA review 2 7.7). STUDIO_COLORS stays for
+ * what is drawn on the canvas, which can't read CSS variables.
+ */
 export function studioChromeStyleVars(): Record<string, string> {
   return {
-    "--studio-chrome-bg": STUDIO_COLORS.chromeBg,
-    "--studio-surface": STUDIO_COLORS.surface,
-    "--studio-surface-lowest": STUDIO_COLORS.surfaceLowest,
-    "--studio-surface-low": STUDIO_COLORS.surfaceLow,
-    "--studio-panel-bg": STUDIO_COLORS.panelBg,
-    "--studio-panel-elevated": STUDIO_COLORS.panelElevated,
-    "--studio-panel-highest": STUDIO_COLORS.panelHighest,
-    "--studio-hairline": STUDIO_COLORS.hairline,
-    "--studio-primary": STUDIO_COLORS.primary,
-    "--studio-primary-container": STUDIO_COLORS.primaryContainer,
-    "--studio-on-primary-container": STUDIO_COLORS.onPrimaryContainer,
-    "--studio-accent-teal": STUDIO_COLORS.accentTeal,
-    "--studio-accent-blue": STUDIO_COLORS.accentBlue,
-    "--studio-on-surface": STUDIO_COLORS.onSurface,
-    "--studio-on-secondary": STUDIO_COLORS.onSecondary,
-    "--studio-muted": STUDIO_COLORS.muted,
-    "--studio-outline-variant": STUDIO_COLORS.outlineVariant,
     "--studio-paper": STUDIO_COLORS.paper,
     "--studio-ink": STUDIO_COLORS.ink,
-    "--studio-danger": STUDIO_COLORS.danger,
-    "--studio-danger-container": STUDIO_COLORS.dangerContainer,
     "--studio-font-ui": STUDIO_FONTS.ui,
     "--studio-font-display": STUDIO_FONTS.display,
     "--studio-font-mono": STUDIO_FONTS.mono,

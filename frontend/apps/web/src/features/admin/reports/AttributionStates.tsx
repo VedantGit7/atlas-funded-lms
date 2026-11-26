@@ -61,7 +61,7 @@ export function AttributionEmptyState({ insightHref }: { insightHref: string }) 
       </p>
       <Link href={insightHref} className={`${manageSecondaryButtonClassName} mt-6`}>
         <TrendingUp className="h-4 w-4" aria-hidden="true" />
-        Open Marketing Insight
+        Open marketing insight
       </Link>
     </div>
   );

@@ -52,7 +52,7 @@ export function PromoSliderCreatePanel() {
       <div>
         <nav
           aria-label="Breadcrumb"
-          className="mb-2 flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+          className="mb-2 flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
         >
           <Link
             href={MARKETING_HREF}
@@ -73,7 +73,7 @@ export function PromoSliderCreatePanel() {
           <span className="text-[var(--admin-primary)]">Create</span>
         </nav>
         <h1 className="text-[28px] font-bold tracking-[-0.02em] text-[var(--admin-on-surface)] md:text-[32px]">
-          Create Promo Slider
+          Create promo slider
         </h1>
         <p className="mt-1 max-w-xl text-[15px] leading-6 text-[var(--admin-on-surface-variant)]">
           Title and description are for admin reference only. Learners see slide images and links on
@@ -148,7 +148,7 @@ export function PromoSliderCreatePanel() {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--admin-primary)] px-5 py-2.5 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={busy}
           onClick={() => {
             void onCreate();
@@ -159,7 +159,7 @@ export function PromoSliderCreatePanel() {
         <Link
           href={PROMO_SLIDER_LIST_HREF}
           prefetch={false}
-          className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
+          className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-2.5 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
         >
           Discard
         </Link>

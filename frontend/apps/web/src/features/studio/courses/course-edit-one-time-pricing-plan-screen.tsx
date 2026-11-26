@@ -257,7 +257,7 @@ export function CourseEditOneTimePricingPlanScreen({
             value={draft.title}
             maxLength={PRICING_PLAN_TITLE_MAX_LENGTH}
             disabled={disabled || saving}
-            placeholder="One Time Payment Plan"
+            placeholder="e.g. Lifetime access"
             onChange={(value) => {
               setDraft((current) => ({ ...current, title: value }));
             }}

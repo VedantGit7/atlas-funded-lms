@@ -591,7 +591,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
 
       <nav
         aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)]"
+        className="flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
       >
         <Link
           href={MARKETING_HREF}
@@ -646,7 +646,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
           {live ? (
             <button
               type="button"
-              className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
+              className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)] disabled:opacity-50"
               disabled={busy}
               onClick={() => {
                 void unpublish();
@@ -657,7 +657,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
           ) : (
             <button
               type="button"
-              className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] transition-opacity hover:opacity-90 disabled:opacity-50"
               disabled={busy}
               onClick={() => {
                 void publish();
@@ -725,7 +725,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
           </div>
           <button
             type="button"
-            className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+            className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
             disabled={busy}
             onClick={() => {
               void saveBasics();
@@ -911,7 +911,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
                     </pre>
                     <button
                       type="button"
-                      className="mt-2 inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
+                      className="mt-2 inline-flex items-center gap-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
                       onClick={() => {
                         void navigator.clipboard.writeText(embedSnippet).then(() => {
                           toast.success("Embed code copied.");
@@ -927,7 +927,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
 
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
                 disabled={busy || live}
                 onClick={() => {
                   void saveDesign();
@@ -1054,7 +1054,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
           </div>
           <button
             type="button"
-            className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+            className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
             disabled={busy || live}
             onClick={() => {
               void saveTargeting();
@@ -1082,7 +1082,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
             {live ? (
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-surface)] disabled:opacity-50"
+                className="inline-flex items-center rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-surface)] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   void unpublish();
@@ -1093,7 +1093,7 @@ export function CtaBuilderPanel({ ctaId }: { ctaId: string }) {
             ) : (
               <button
                 type="button"
-                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
+                className="inline-flex items-center rounded-lg bg-[var(--admin-primary)] px-4 py-2 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] disabled:opacity-50"
                 disabled={busy}
                 onClick={() => {
                   void publish();

@@ -60,7 +60,7 @@ export function PricingPlanFormShell({
             Back
           </button>
 
-          <nav aria-label="Breadcrumb" className="mb-4">
+          <nav aria-label="Breadcrumb" className="mb-4 text-xs">
             <ol className="flex flex-wrap items-center gap-2 text-sm text-[var(--admin-on-surface-variant)]">
               <li>
                 <button

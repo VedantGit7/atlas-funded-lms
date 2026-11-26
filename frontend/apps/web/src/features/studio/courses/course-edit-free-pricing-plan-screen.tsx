@@ -244,7 +244,7 @@ export function CourseEditFreePricingPlanScreen({
             value={draft.title}
             maxLength={PRICING_PLAN_TITLE_MAX_LENGTH}
             disabled={disabled || saving}
-            placeholder="Free Plan"
+            placeholder="e.g. Free access"
             onChange={(value) => {
               setDraft((current) => ({ ...current, title: value }));
             }}

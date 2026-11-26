@@ -288,12 +288,12 @@ export function WorkflowsListPanel() {
 
       <Link href={MARKETING_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Marketing
+        Back to marketing
       </Link>
 
       <nav
         aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--admin-on-surface-variant)]"
+        className="flex flex-wrap items-center gap-2 text-xs text-[var(--admin-on-surface-variant)]"
       >
         <span>Automations</span>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />

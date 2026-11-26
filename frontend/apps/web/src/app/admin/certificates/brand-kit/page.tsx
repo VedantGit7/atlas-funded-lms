@@ -34,7 +34,7 @@ export default async function AdminCertificateBrandKitPage() {
                 className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--admin-border)] px-3 py-2 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-low)]"
               >
                 <PenTool className="h-4 w-4" aria-hidden="true" strokeWidth={2.25} />
-                Open Studio
+                Open studio
               </Link>
               <Link
                 href="/admin/certificates/templates"

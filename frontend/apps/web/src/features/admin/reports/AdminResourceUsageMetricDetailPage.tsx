@@ -764,10 +764,7 @@ function ResourceUsageMetricDetailScreen({ metricKey, initialData }: Props) {
   return (
     <div className="mx-auto w-full max-w-[1200px] space-y-8 pb-16">
       <div className="space-y-4">
-        <nav
-          aria-label="Breadcrumb"
-          className="text-[11px] tracking-wide text-[var(--admin-on-surface-variant)]"
-        >
+        <nav aria-label="Breadcrumb" className="text-xs text-[var(--admin-on-surface-variant)]">
           <ol className="inline-flex flex-wrap items-center gap-1">
             <li>
               <Link href="/admin" prefetch={false} className="hover:text-[var(--admin-primary)]">

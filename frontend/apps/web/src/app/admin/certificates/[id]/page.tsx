@@ -42,7 +42,7 @@ export default async function AdminCertificateDetailPage({
             </Link>
           </header>
 
-          <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <section className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <article className="overflow-hidden rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] shadow-sm">
               <div className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-6 py-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">

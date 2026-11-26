@@ -80,7 +80,7 @@ export function BandProminenceRulesPanel({
                 </label>
                 <input
                   id={`band-key-${String(index)}`}
-                  className={`${monoClassName} w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5 uppercase text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] duration-200 focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/25 disabled:opacity-60`}
+                  className={`${monoClassName} w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-2.5 text-[var(--admin-on-surface)] outline-none transition-[border-color,box-shadow] duration-200 focus:border-[var(--admin-primary)] focus:ring-2 focus:ring-[var(--admin-primary)]/25 disabled:opacity-60`}
                   value={rule.bandKey}
                   placeholder="band_key"
                   disabled={disabled}

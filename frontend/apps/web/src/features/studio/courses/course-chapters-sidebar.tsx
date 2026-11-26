@@ -514,7 +514,7 @@ export function CourseChaptersSidebar({
                 className="mt-4 inline-flex w-full max-w-xs items-center justify-center gap-1.5 rounded-lg border border-dashed border-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))] px-4 py-2.5 text-sm font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))]"
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
-                Add Section
+                Add section
               </button>
             ) : (
               <p className={`${courseDetailMutedTextClassName} mt-2`}>
@@ -537,10 +537,11 @@ export function CourseChaptersSidebar({
 
               return (
                 <li key={module.id}>
-                  <div className="flex items-center gap-1 px-2 py-3">
+                  <div className="relative flex cursor-pointer items-center gap-1 px-2 py-3 hover:bg-[var(--admin-surface-high)]/50">
+                    {/* The whole row opens or closes the section (QA review 1 m20). */}
                     <button
                       type="button"
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)]"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] outline-none transition-colors after:absolute after:inset-0 after:content-[''] hover:bg-[var(--admin-surface-high)] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-[var(--admin-primary)]"
                       aria-expanded={isExpanded}
                       aria-label={isExpanded ? "Collapse section" : "Expand section"}
                       onClick={() => {
@@ -557,8 +558,9 @@ export function CourseChaptersSidebar({
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
                         <p
+                          title={module.title}
                           className={[
-                            "truncate text-sm font-semibold",
+                            "line-clamp-2 break-words text-sm font-semibold",
                             isContentHidden(module.status)
                               ? "text-[var(--admin-on-surface-variant)]"
                               : "text-[var(--admin-on-surface)]",
@@ -592,13 +594,15 @@ export function CourseChaptersSidebar({
                       />
                     ) : null}
                     {showActionMenus ? (
-                      <DropdownMenu
-                        label={`Actions for ${module.title}`}
-                        align="end"
-                        trigger={<MoreHorizontal className="h-4 w-4" aria-hidden="true" />}
-                        triggerClassName="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
-                        items={sectionMenuItems(module)}
-                      />
+                      <span className="relative z-10 shrink-0">
+                        <DropdownMenu
+                          label={`Actions for ${module.title}`}
+                          align="end"
+                          trigger={<MoreHorizontal className="h-4 w-4" aria-hidden="true" />}
+                          triggerClassName="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface-high)] hover:text-[var(--admin-on-surface)]"
+                          items={sectionMenuItems(module)}
+                        />
+                      </span>
                     ) : null}
                   </div>
 
@@ -626,7 +630,7 @@ export function CourseChaptersSidebar({
                               <li key={lesson.id}>
                                 <div
                                   className={[
-                                    "group flex items-center gap-2 px-3 py-2.5 transition-colors",
+                                    "group relative flex cursor-pointer items-center gap-2 px-3 py-2.5 transition-colors",
                                     isSelected
                                       ? "bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))]"
                                       : "hover:bg-[var(--admin-surface-high)]",
@@ -638,9 +642,14 @@ export function CourseChaptersSidebar({
 
                                   <LessonTypeIcon lesson={lesson} />
 
+                                  {/* The whole row opens the lesson and long titles
+                                      wrap instead of being cut off (QA review 1 m20):
+                                      the button's click area covers the row, and
+                                      the actions menu sits above it. */}
                                   <button
                                     type="button"
-                                    className="min-w-0 flex-1 truncate text-left text-sm font-medium text-[var(--admin-on-surface)]"
+                                    title={lesson.title}
+                                    className="line-clamp-2 min-w-0 flex-1 break-words text-left text-sm font-medium text-[var(--admin-on-surface)] outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-[var(--admin-primary)]"
                                     aria-current={isSelected ? "true" : undefined}
                                     onClick={() => {
                                       onSelectLesson(module.id, lesson.id);
@@ -652,15 +661,17 @@ export function CourseChaptersSidebar({
                                   <LessonStatusBadges lesson={lesson} courseStatus={courseStatus} />
 
                                   {showActionMenus ? (
-                                    <DropdownMenu
-                                      label={`Actions for ${lesson.title}`}
-                                      align="end"
-                                      trigger={
-                                        <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-                                      }
-                                      triggerClassName="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface)] hover:text-[var(--admin-on-surface)]"
-                                      items={lessonMenuItems(module, lesson, moduleLessons)}
-                                    />
+                                    <span className="relative z-10 shrink-0">
+                                      <DropdownMenu
+                                        label={`Actions for ${lesson.title}`}
+                                        align="end"
+                                        trigger={
+                                          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                                        }
+                                        triggerClassName="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--admin-on-surface-variant)] transition-colors hover:bg-[var(--admin-surface)] hover:text-[var(--admin-on-surface)]"
+                                        items={lessonMenuItems(module, lesson, moduleLessons)}
+                                      />
+                                    </span>
                                   ) : null}
                                 </div>
                               </li>
@@ -707,7 +718,7 @@ export function CourseChaptersSidebar({
               className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))] px-4 py-2.5 text-sm font-semibold text-[var(--admin-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))]"
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
-              Add Section
+              Add section
             </button>
           </div>
         ) : null}

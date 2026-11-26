@@ -309,7 +309,7 @@ export function AnnouncementsListPanel() {
 
       <Link href={MESSENGER_HREF} prefetch={false} className={generalSettingsBackLinkClassName}>
         <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        Back to Messenger Hub
+        Back to messenger hub
       </Link>
 
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -322,7 +322,7 @@ export function AnnouncementsListPanel() {
         <Link
           href={ANNOUNCEMENTS_CREATE_HREF}
           prefetch={false}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--admin-primary)] px-6 py-3 text-[12px] font-bold uppercase tracking-[0.04em] text-[var(--admin-on-primary)] shadow-[0_8px_20px_color-mix(in_srgb,var(--admin-primary)_18%,transparent)] transition-colors hover:bg-[var(--admin-primary-strong)]"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--admin-primary)] px-6 py-3 text-[12px] font-bold tracking-[0.04em] text-[var(--admin-on-primary)] shadow-[0_8px_20px_color-mix(in_srgb,var(--admin-primary)_18%,transparent)] transition-colors hover:bg-[var(--admin-primary-strong)]"
         >
           <Send className="h-4 w-4" aria-hidden="true" />
           Create

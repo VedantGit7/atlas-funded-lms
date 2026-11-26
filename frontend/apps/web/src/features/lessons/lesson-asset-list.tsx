@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { clientApi } from "../../lib/client-api";
+import { lessonAssetLabel } from "./lesson-asset-label";
 
 type LessonAsset = {
   id: string;
@@ -43,10 +44,10 @@ export function LessonAssetList({ lessonId }: LessonAssetListProps) {
             <li key={asset.id}>
               {href ? (
                 <a href={href} target="_blank" rel="noreferrer">
-                  {asset.fileName ?? asset.assetType}
+                  {lessonAssetLabel(asset)}
                 </a>
               ) : (
-                <span>{asset.fileName ?? asset.assetType}</span>
+                <span>{lessonAssetLabel(asset)}</span>
               )}
             </li>
           );

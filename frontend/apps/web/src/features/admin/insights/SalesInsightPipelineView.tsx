@@ -533,7 +533,7 @@ export function SalesInsightPipelineView({
             prefetch={false}
             className={insightPrimaryButtonClassName}
           >
-            Open Reports
+            Open reports
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>

@@ -233,7 +233,7 @@ export function CreateCourseInstructorsPicker({
             className={`${dropdownFooterButtonClassName} inline-flex items-center gap-1`}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
-            Create New
+            Create new
           </button>
         </div>
       </DropdownField>

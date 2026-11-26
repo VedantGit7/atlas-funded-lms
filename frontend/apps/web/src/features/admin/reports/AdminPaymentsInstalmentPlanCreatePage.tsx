@@ -502,7 +502,7 @@ export function AdminPaymentsInstalmentPlanCreatePage({
           Back to plans
         </Link>
         <h1 className="text-2xl font-bold tracking-tight text-[var(--admin-on-surface)] md:text-3xl">
-          New Instalment Plan
+          New instalment plan
         </h1>
         <p className="font-mono text-xs text-[var(--admin-on-surface-variant)]">
           /admin/reports/payments/instalments/new

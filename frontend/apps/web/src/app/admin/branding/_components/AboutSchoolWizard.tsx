@@ -182,10 +182,7 @@ export function AboutSchoolWizard({ initial }: { initial: AboutSchoolView }) {
 
   return (
     <div className="mx-auto max-w-3xl pb-28">
-      <nav
-        aria-label="Breadcrumb"
-        className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
-      >
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs">
         <Link
           href="/admin/branding"
           prefetch={false}
