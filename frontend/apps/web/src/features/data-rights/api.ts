@@ -4,6 +4,8 @@ export type ExportJobItem = {
   id: string;
   status: string;
   requestedByMembershipId: string;
+  /** Profile name, else account name, else email. */
+  requestedByName?: string | null;
   createdAt: string;
   updatedAt: string;
   expiresAt: string | null;

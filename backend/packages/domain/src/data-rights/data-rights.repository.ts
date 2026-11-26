@@ -79,6 +79,33 @@ export const dataRightsRepository = {
     return mapExportJobRow(row);
   },
 
+  /**
+   * A readable name for each membership: profile name, else account name,
+   * else email (QA S2.7, review 1 m18 — names, not IDs).
+   */
+  async memberDisplayNames(tx: TenantTx, membershipIds: string[]): Promise<Map<string, string>> {
+    const ids = [...new Set(membershipIds)];
+    if (ids.length === 0) return new Map();
+    const rows = await tx.$queryRaw<Array<{ id: string; name: string | null }>>`
+      select
+        m.id::text as id,
+        coalesce(
+          nullif(btrim(mp.display_name), ''),
+          nullif(btrim(ap.name), ''),
+          ap.email,
+          m.invited_email_normalized
+        ) as name
+      from memberships m
+      left join member_profiles mp
+        on mp.membership_id = m.id and mp.tenant_id = m.tenant_id and mp.deleted_at is null
+      left join auth_principals ap on ap.id = m.auth_principal_id
+      where m.id = any(${ids}::uuid[])
+    `;
+    return new Map(
+      rows.flatMap((row) => (row.name ? [[row.id, row.name] as [string, string]] : [])),
+    );
+  },
+
   async listExportJobs(
     tx: TenantTx,
     args: {

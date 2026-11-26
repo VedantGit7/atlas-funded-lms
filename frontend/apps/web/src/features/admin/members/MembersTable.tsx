@@ -751,12 +751,12 @@ export function MembersTable({
                           Role
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className={`${colWidths.joined} hidden uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)] lg:table-cell`}
+                          className={`${colWidths.joined} hidden uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)] xl:table-cell`}
                         >
                           Joined
                         </TableHeaderCell>
                         <TableHeaderCell
-                          className={`${colWidths.lastActive} hidden uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)] lg:table-cell`}
+                          className={`${colWidths.lastActive} hidden uppercase tracking-[0.08em] text-[var(--admin-on-surface-variant)] xl:table-cell`}
                         >
                           Last active
                         </TableHeaderCell>
@@ -832,11 +832,11 @@ export function MembersTable({
                             )}
                           </TableCell>
                           <TableCell
-                            className={`${colWidths.joined} hidden text-sm text-[var(--admin-on-surface-variant)] lg:table-cell`}
+                            className={`${colWidths.joined} hidden text-sm text-[var(--admin-on-surface-variant)] xl:table-cell`}
                           >
                             {formatJoined(member.joinedAt)}
                           </TableCell>
-                          <TableCell className={`${colWidths.lastActive} hidden lg:table-cell`}>
+                          <TableCell className={`${colWidths.lastActive} hidden xl:table-cell`}>
                             <PresenceCell iso={member.lastActiveAt} status={member.status} />
                           </TableCell>
                           <TableCell className={colWidths.status}>

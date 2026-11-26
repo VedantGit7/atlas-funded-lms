@@ -37,6 +37,7 @@ export const exportJobDtoSchema = z
     id: z.uuid(),
     status: z.enum(JOB_STATUSES),
     requestedByMembershipId: z.uuid(),
+    requestedByName: z.string().nullable().default(null),
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime(),
     expiresAt: z.iso.datetime().nullable(),
