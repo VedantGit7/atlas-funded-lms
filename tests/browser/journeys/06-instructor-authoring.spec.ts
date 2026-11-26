@@ -24,7 +24,7 @@ test.describe("J06 instructor authoring and independent review", () => {
     await waitForHydration(page);
     await expect(page.getByRole("heading", { name: "Courses", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Create", exact: true }).click();
-    const dialog = page.getByRole("dialog", { name: "New Course", exact: true });
+    const dialog = page.getByRole("dialog", { name: "New course", exact: true });
     await dialog.getByLabel(/^Title/).fill(title);
     await dialog.getByLabel(/^Short introduction/).fill("A browser-authored course for review.");
     await dialog
@@ -46,10 +46,10 @@ test.describe("J06 instructor authoring and independent review", () => {
     );
     await page.goto(`/studio/courses/${course.id}/editor`);
     await waitForHydration(page);
-    const addSection = page.getByRole("button", { name: "Add Section", exact: true });
+    const addSection = page.getByRole("button", { name: "Add section", exact: true });
     await waitForClickHandler(addSection);
     await addSection.click();
-    const chapter = page.getByRole("dialog", { name: "Add Chapter" });
+    const chapter = page.getByRole("dialog", { name: "Add section" });
     await chapter.getByLabel(/^Title/).fill("Browser chapter");
     const moduleCreation = page.waitForResponse(
       (response) =>

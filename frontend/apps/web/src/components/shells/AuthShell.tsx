@@ -119,10 +119,19 @@ export function AuthShell({ branding, requestId, children }: AuthShellProps) {
             </div>
           </Link>
 
+          {children}
+
           {/* The request reference stays in the page for support, not on
               screen: "Request ID: req_…" under every sign-in form meant
-              nothing to a learner (QA review 2 7.7). */}
-          <div data-request-id={requestId}>{children}</div>
+              nothing to a learner (QA review 2 7.7). The empty line keeps
+              the form where it was in the vertically centred layout. */}
+          <p
+            aria-hidden="true"
+            data-request-id={requestId}
+            className="mt-10 select-none text-center text-[11px]"
+          >
+            &nbsp;
+          </p>
         </main>
       </section>
     </div>
