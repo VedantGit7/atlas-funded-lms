@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { withTenantTx, type TenantTx } from "@atlas/db";
+import { listMembers } from "@atlas/membership";
 import { buildReportDataset } from "@atlas/domain/reports/reports.datasets";
 import { renderReportCsv } from "@atlas/domain/reports/reports-export-runner";
 import { createReportRun } from "@atlas/domain/reports/reports.service";
@@ -58,6 +59,28 @@ describeWithDb("members export (S2.7)", () => {
     );
     const admin = dataset.rows.find((row) => row["email"] === expected[0]?.email);
     expect(admin?.["name"] ?? null).toBe(expected[0]?.name ?? null);
+  });
+
+  it("returns the account name in the members list, so the page can show it (m18)", async () => {
+    const fixture = await createCourseAuthoringFixture();
+    await asAdmin(
+      fixture,
+      (tx) =>
+        tx.$executeRaw`
+        update auth_principals set name = 'Account Name Only'
+        where id = ${fixture.adminPrincipalId}::uuid
+      `,
+    );
+    const list = await asAdmin(fixture, (tx) =>
+      listMembers(tx, { tenantId: fixture.tenantId }, { limit: 100 }),
+    );
+    const admin = list.data.items.find((item) => item.id === fixture.adminMembershipId);
+    expect(admin?.accountName).toBe("Account Name Only");
+
+    const found = await asAdmin(fixture, (tx) =>
+      listMembers(tx, { tenantId: fixture.tenantId }, { limit: 100, search: "Name Only" }),
+    );
+    expect(found.data.items.map((item) => item.id)).toContain(fixture.adminMembershipId);
   });
 
   it("filters like the Members page and writes dates in one format (M15)", async () => {
