@@ -51,6 +51,7 @@ export async function listMembersPaginated(args: {
       status: string;
       invited_email_normalized: string | null;
       account_email: string | null;
+      account_name: string | null;
       joined_at: Date | null;
       last_active_at: Date | null;
       archived_at: Date | null;
@@ -66,6 +67,7 @@ export async function listMembersPaginated(args: {
       m.status::text as status,
       m.invited_email_normalized,
       ap.email as account_email,
+      nullif(btrim(ap.name), '') as account_name,
       m.joined_at,
       m.last_active_at,
       m.archived_at,
@@ -107,6 +109,7 @@ export async function listMembersPaginated(args: {
       and (
         ${searchLike}::text is null
         or mp.display_name ilike ${searchLike}
+        or ap.name ilike ${searchLike}
         or m.invited_email_normalized ilike ${searchLike}
         or ap.email ilike ${searchLike}
       )
@@ -140,6 +143,7 @@ export async function listMembersPaginated(args: {
     status: row.status,
     invitedEmail: row.invited_email_normalized,
     accountEmail: row.account_email,
+    accountName: row.account_name,
     joinedAt: row.joined_at,
     lastActiveAt: row.last_active_at,
     archivedAt: row.archived_at,
@@ -168,6 +172,7 @@ export async function listMembersPaginated(args: {
       and (
         ${searchLike}::text is null
         or mp.display_name ilike ${searchLike}
+        or ap.name ilike ${searchLike}
         or m.invited_email_normalized ilike ${searchLike}
         or ap.email ilike ${searchLike}
       )

@@ -211,6 +211,23 @@ export const SYSTEM_REPORT_DEFINITIONS: SystemReportDefinition[] = [
       },
     },
   }),
+  def({
+    key: "members",
+    category: "members",
+    title: "Members",
+    description: "Learners and staff with their roles, status and activity.",
+    datasetKey: "members",
+    defaultFormat: "csv",
+    paramSchemaJson: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        status: { type: "string", enum: ["ACTIVE", "INVITED", "SUSPENDED"] },
+        role: { type: "string" },
+        q: { type: "string" },
+      },
+    },
+  }),
 ];
 
 export const SYSTEM_REPORT_DEFINITION_KEYS = SYSTEM_REPORT_DEFINITIONS.map((item) => item.key);

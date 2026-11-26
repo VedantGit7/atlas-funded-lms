@@ -2595,6 +2595,67 @@ async function queryCertificates(tx: TenantTx): Promise<ReportDatasetResult> {
   ]);
 }
 
+/**
+ * Members, for the export centre (QA review 1 M15, m18). The Members page's
+ * CSV used to be built in the browser: not logged, no history, two date
+ * formats. It is a report run now, like every other export.
+ *
+ * Name: the member's profile name, else the name on their account (the
+ * owner usually has only that), never the email again (m18). Filters match
+ * the Members page: status, role key and a search over name and email.
+ */
+async function queryMembers(tx: TenantTx, params: DatasetParams): Promise<ReportDatasetResult> {
+  const status = asString(params["status"]);
+  const role = asString(params["role"]);
+  const search = asString(params["q"]);
+  const searchLike = search ? `%${search.replace(/[\\%_]/g, (char) => `\\${char}`)}%` : null;
+
+  const rows = await tx.$queryRaw<Array<Record<string, unknown>>>`
+    select
+      coalesce(nullif(btrim(mp.display_name), ''), nullif(btrim(ap.name), '')) as name,
+      coalesce(ap.email, m.invited_email_normalized) as email,
+      initcap(lower(m.status::text)) as status,
+      coalesce(
+        (
+          select string_agg(r.name, '; ' order by r.name)
+          from user_roles ur
+          join roles r on r.id = ur.role_id and r.tenant_id = ur.tenant_id and r.deleted_at is null
+          where ur.tenant_id = m.tenant_id and ur.membership_id = m.id
+        ),
+        ''
+      ) as roles,
+      m.joined_at,
+      m.last_active_at
+    from memberships m
+    left join member_profiles mp
+      on mp.tenant_id = m.tenant_id and mp.membership_id = m.id and mp.deleted_at is null
+    left join auth_principals ap on ap.id = m.auth_principal_id
+    where m.tenant_id = current_setting('app.tenant_id', true)::uuid
+      and m.status <> 'REMOVED'
+      and (${status}::text is null or m.status::text = ${status})
+      and (
+        ${role}::text is null
+        or exists (
+          select 1
+          from user_roles ur
+          join roles r on r.id = ur.role_id and r.tenant_id = ur.tenant_id and r.deleted_at is null
+          where ur.tenant_id = m.tenant_id and ur.membership_id = m.id and r.key = ${role}
+        )
+      )
+      and (
+        ${searchLike}::text is null
+        or mp.display_name ilike ${searchLike}
+        or ap.name ilike ${searchLike}
+        or ap.email ilike ${searchLike}
+        or m.invited_email_normalized ilike ${searchLike}
+      )
+    order by m.created_at desc, m.id desc
+    limit ${REPORT_ROW_CAP + 1}
+  `;
+
+  return mapRows(rows, ["name", "email", "status", "roles", "joined_at", "last_active_at"]);
+}
+
 async function queryAtRiskRoster(
   tx: TenantTx,
   params: DatasetParams,
@@ -2649,6 +2710,7 @@ const DATASET_BUILDERS: Record<
   "assessment-items": queryAssessmentItems,
   certificates: queryCertificates,
   "at-risk-roster": queryAtRiskRoster,
+  members: queryMembers,
 };
 
 export async function buildReportDataset(

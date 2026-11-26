@@ -33,6 +33,7 @@ export const EXPORTS_REPORT_DEFINITIONS = [
   { key: "assessment-items", title: "Assessment Items" },
   { key: "certificates", title: "Certificates" },
   { key: "at-risk-roster", title: "At-Risk Roster" },
+  { key: "members", title: "Members" },
 ] as const;
 
 export const PII_DEFINITION_KEYS = new Set<string>([
@@ -47,6 +48,7 @@ export const PII_DEFINITION_KEYS = new Set<string>([
   "live-class-attendance",
   "zoom-insights",
   "super-live-insights",
+  "members",
 ]);
 
 export type ExportsHistoryItem = {

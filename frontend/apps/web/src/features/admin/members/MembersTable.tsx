@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { startReportExportRun } from "../reports/admin-reports-api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Ban,
@@ -42,6 +43,7 @@ export type MemberRow = {
   status: string;
   invitedEmail?: string | null | undefined;
   accountEmail?: string | null | undefined;
+  accountName?: string | null | undefined;
   joinedAt?: string | null | undefined;
   lastActiveAt?: string | null | undefined;
   profile: {
@@ -122,7 +124,12 @@ function memberEmail(member: MemberRow): string | null {
 }
 
 function memberLabel(member: MemberRow): string {
-  return member.profile?.displayName ?? memberEmail(member) ?? "Unnamed member";
+  return (
+    member.profile?.displayName?.trim() ||
+    member.accountName?.trim() ||
+    memberEmail(member) ||
+    "Unnamed member"
+  );
 }
 
 function roleLabel(member: MemberRow): string | null {
@@ -204,14 +211,6 @@ function PresenceCell({ iso, status }: { iso: string | null | undefined; status:
       </span>
     </span>
   );
-}
-
-function csvCell(value: string): string {
-  return `"${value.replaceAll('"', '""')}"`;
-}
-
-function rolesToText(member: MemberRow): string {
-  return (member.roles ?? []).map((role) => role.name).join(", ");
 }
 
 export function MembersTable({
@@ -489,44 +488,27 @@ export function MembersTable({
     }
   }
 
+  // Exports go through the export centre (QA review 1 M15): the run is logged,
+  // listed in Reports › Exports with its history, and its page shows progress
+  // and the download. Same filters as the list on screen.
   async function exportCsv() {
     setExporting(true);
     setErrorMessage(null);
     try {
-      const header = ["Name", "Email", "Status", "Roles", "Joined", "Last active"];
-      const rows: string[][] = [header];
-      let cursor: string | undefined = undefined;
-      for (let page = 0; page < 100; page += 1) {
-        const result: MembersListResponse = await clientApi.get<MembersListResponse>(
-          `/api/v1/members?${buildQuery(cursor)}`,
-        );
-        for (const member of result.data.items) {
-          rows.push([
-            memberLabel(member),
-            memberEmail(member) ?? "",
-            statusLabel(member.status),
-            rolesToText(member),
-            formatJoined(member.joinedAt),
-            member.lastActiveAt ? new Date(member.lastActiveAt).toISOString() : "",
-          ]);
-        }
-        if (!result.data.pageInfo.hasNextPage || !result.data.pageInfo.nextCursor) break;
-        cursor = result.data.pageInfo.nextCursor;
-      }
-
-      const csv = rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `members-${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(url);
+      const params: Record<string, string> = {};
+      if (statusFilter !== "ALL") params["status"] = statusFilter;
+      if (roleFilter !== "ALL") params["role"] = roleFilter;
+      if (search.trim()) params["q"] = search.trim();
+      const created = await startReportExportRun({
+        definitionKey: "members",
+        format: "csv",
+        params,
+      });
+      router.push(
+        `/admin/reports/exports/${encodeURIComponent(created.data.id)}?source=report_run`,
+      );
     } catch (error) {
       setErrorMessage(formatClientError(error));
-    } finally {
       setExporting(false);
     }
   }

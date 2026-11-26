@@ -333,8 +333,8 @@ export const ADMIN_SETTINGS_SECTIONS: readonly AdminSettingsSection[] = [
       },
       {
         id: "exports",
-        title: "Data exports",
-        description: "Export academy data for reporting or migration.",
+        title: "Academy data snapshot",
+        description: "A snapshot of member, course and enrollment records.",
         href: "/admin/exports",
         iconKey: "download",
         entitlement: "data.export.enable",

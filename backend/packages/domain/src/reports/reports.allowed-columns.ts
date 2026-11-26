@@ -304,6 +304,7 @@ export const ALLOWED_COLUMNS: Record<ApprovedDatasetKey, readonly string[]> = {
     "triggered_at",
     "acknowledged_at",
   ],
+  members: ["name", "email", "status", "roles", "joined_at", "last_active_at"],
 };
 
 export const SELECTED_COLUMNS_SCHEMA_KEY = "x-selectedColumns" as const;
