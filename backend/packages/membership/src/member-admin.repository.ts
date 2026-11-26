@@ -19,6 +19,7 @@ export type MemberListRow = {
   status: string;
   invitedEmail: string | null;
   accountEmail: string | null;
+  accountName: string | null;
   joinedAt: Date | null;
   lastActiveAt: Date | null;
   archivedAt: Date | null;

@@ -70,6 +70,7 @@ export async function listMembers(tx: TenantTx, ctx: { tenantId: string }, query
         status: membershipStatusSchema.parse(item.status),
         invitedEmail: item.invitedEmail,
         accountEmail: item.accountEmail,
+        accountName: item.accountName,
         joinedAt: item.joinedAt?.toISOString() ?? null,
         lastActiveAt: item.lastActiveAt?.toISOString() ?? null,
         archivedAt: item.archivedAt?.toISOString() ?? null,
