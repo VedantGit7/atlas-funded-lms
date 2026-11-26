@@ -17,6 +17,7 @@ export const APPROVED_REPORT_DATASETS = [
   { key: "assessment-items", label: "Assessment Items" },
   { key: "certificates", label: "Certificates" },
   { key: "at-risk-roster", label: "At-Risk Roster" },
+  { key: "members", label: "Members" },
 ] as const;
 
 export const ALLOWED_REPORT_COLUMNS: Record<string, readonly string[]> = {
@@ -276,6 +277,7 @@ export const ALLOWED_REPORT_COLUMNS: Record<string, readonly string[]> = {
     "triggered_at",
     "acknowledged_at",
   ],
+  members: ["name", "email", "status", "roles", "joined_at", "last_active_at"],
 };
 
 function labelizeColumn(column: string): string {

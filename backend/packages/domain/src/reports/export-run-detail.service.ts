@@ -34,6 +34,7 @@ const PII_DEFINITION_KEYS = new Set([
   "live-class-attendance",
   "zoom-insights",
   "super-live-insights",
+  "members",
 ]);
 
 const STAGE_LABELS: Record<ExportPipelineStageKey, string> = {

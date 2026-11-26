@@ -156,7 +156,7 @@ describe("truthful partial profile export", () => {
         canRunExport: true,
       }),
     );
-    expect(exports).toContain("partial school snapshot");
+    expect(exports).toContain("partial snapshot");
     expect(exports).toContain("not a complete personal-data export");
     expect(exports).toContain("Assessment submissions, billing records, files");
   });

@@ -21,6 +21,8 @@ export const memberListItemSchema = z.object({
   status: membershipStatusSchema,
   invitedEmail: z.email().nullable().optional(),
   accountEmail: z.email().nullable().optional(),
+  /** The name on the account, for members with no profile name (QA m18). */
+  accountName: z.string().nullable().optional(),
   joinedAt: z.iso.datetime().nullable().optional(),
   lastActiveAt: z.iso.datetime().nullable().optional(),
   archivedAt: z.iso.datetime().nullable().optional(),

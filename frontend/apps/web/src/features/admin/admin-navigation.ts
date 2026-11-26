@@ -61,7 +61,7 @@ export const ADMIN_PRIMARY_NAV: readonly AdminNavItem[] = [
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/insights", label: "Insights" },
   { href: "/admin/audit", label: "Audit Log" },
-  { href: "/admin/exports", label: "Data Exports", entitlement: "data.export.enable" },
+  { href: "/admin/exports", label: "Academy data snapshot", entitlement: "data.export.enable" },
   { href: "/admin/deletion-requests", label: "Data deletion", mobilePrimary: true },
 ] as const;
 

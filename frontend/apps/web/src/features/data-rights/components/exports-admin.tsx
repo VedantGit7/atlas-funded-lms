@@ -206,12 +206,12 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
           <div className={exportsPageHeaderClassName}>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-[var(--admin-on-surface)]">
-                Data Exports
+                Academy data snapshot
               </h1>
               <p className="mt-1 text-sm text-[var(--admin-on-surface-variant)]">
-                Download a partial school snapshot of selected membership, profile, course, and
-                enrollment fields. This is not a complete personal-data export or a full backup.
-                Review omitted records separately for a data-rights request.
+                Download a partial snapshot of member, profile, course and enrollment records. It is
+                not a complete personal-data export or a full backup. For members, enrollments,
+                payments and other reports, use Reports › Exports.
               </p>
             </div>
             {canRunExport ? (
@@ -273,7 +273,7 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
               <EmptyState
                 className={exportsEmptyStateClassName}
                 title="No export jobs yet"
-                description="Run an export to download selected school records. Assessment submissions, billing records, files, and other records are outside this export."
+                description="Run an export to download a partial snapshot of academy records. Assessment submissions, billing records, files, and other records are outside this export."
               />
             ) : (
               <>
@@ -494,7 +494,7 @@ export function ExportsAdmin({ initialJobs, canRunExport }: ExportsAdminProps) {
       <AdminConfirmDialog
         open={confirmOpen}
         title="Run tenant export?"
-        description="This queues a partial school snapshot: membership IDs, status and join dates; profile membership IDs and display names; course IDs, slugs, titles and status; enrollment IDs, course and membership IDs and status. Assessment submissions, billing records, files and other records are omitted. This is not a complete data-rights export."
+        description="This queues a partial snapshot of academy records: membership IDs, status and join dates; profile membership IDs and display names; course IDs, slugs, titles and status; enrollment IDs, course and membership IDs and status. Assessment submissions, billing records, files and other records are omitted. This is not a complete data-rights export."
         confirmLabel="Run export"
         busyLabel="Queueing…"
         busy={busy}
