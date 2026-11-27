@@ -12,6 +12,7 @@ import {
   type OutlineLessonStatus,
 } from "../lessons/course-outline-model";
 import { LessonStatusIcon, lessonTypeIcon } from "../lessons/lesson-outline-nav";
+import { outlineUpNextLessonId } from "./course-page-model";
 
 type CourseModuleOutlineItem = {
   id: string;
@@ -128,7 +129,7 @@ export function CourseOutline(props: CourseOutlineProps) {
   const { courseId, enrolled, tagId } = props;
   const tagged = useTaggedLessons(props.modules, tagId, enrolled);
   const rows = rowsFor(props, tagged);
-  const resumeLessonId = enrolled ? (props.outline?.resumeLessonId ?? null) : null;
+  const resumeLessonId = enrolled ? outlineUpNextLessonId(props.outline ?? null) : null;
 
   if (rows.length === 0) {
     return (

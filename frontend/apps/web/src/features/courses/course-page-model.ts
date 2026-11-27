@@ -75,6 +75,17 @@ export function courseNextStep(outline: LearnerCourseOutline | null): CourseNext
   };
 }
 
+/**
+ * The lesson the outline badges "Up next": the enrolled learner's resume
+ * lesson, or none once every lesson is done (the course is finished, so
+ * nothing is next).
+ */
+export function outlineUpNextLessonId(outline: LearnerCourseOutline | null): string | null {
+  const step = courseNextStep(outline);
+  if (!step || step.complete) return null;
+  return step.lessonId;
+}
+
 /** Only YouTube and Vimeo links play on the course page. */
 export function promoVideoEmbedUrl(url: string | null): string | null {
   if (!url) return null;

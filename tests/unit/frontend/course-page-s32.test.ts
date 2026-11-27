@@ -6,6 +6,7 @@ import {
   instructorsLabel,
   learnerCountLabel,
   outlineTotalSeconds,
+  outlineUpNextLessonId,
   promoVideoEmbedUrl,
 } from "../../../frontend/apps/web/src/features/courses/course-page-model";
 import {
@@ -147,6 +148,21 @@ describe("the course page's one action (m40)", () => {
       lessonId: lessonA,
       complete: true,
     });
+  });
+
+  it("badges the resume lesson 'Up next' until the course is finished", () => {
+    expect(outlineUpNextLessonId(outline({ enrolled: false }))).toBeNull();
+    expect(outlineUpNextLessonId(outline())).toBe(lessonA);
+    const started = withStatuses(outline({ resumeLessonId: lessonB, completedLessons: 1 }), {
+      [lessonA]: "completed",
+      [lessonB]: "in_progress",
+    });
+    expect(outlineUpNextLessonId(started)).toBe(lessonB);
+    const finished = withStatuses(
+      outline({ completedLessons: 3, progressPct: 100, resumeLessonId: lessonA }),
+      { [lessonA]: "completed", [lessonB]: "completed", [lessonC]: "completed" },
+    );
+    expect(outlineUpNextLessonId(finished)).toBeNull();
   });
 });
 
