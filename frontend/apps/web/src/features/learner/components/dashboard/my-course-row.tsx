@@ -1,12 +1,40 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, GraduationCap } from "lucide-react";
 import type { MyCourse } from "@atlas/contracts/enrollments/my-courses.schemas";
-import { CoverArt } from "../../../courses/course-card";
 import { LessonStatusTrack, lessonsDoneLabel } from "../../../lessons/lesson-track";
 import { courseActionHref, courseActionLabel, courseStatusLabel } from "./dashboard-model";
 
 const quietLinkClass =
   "inline-flex items-center gap-1.5 rounded text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+/** Course images are stored as an address; only render ones that look like one. */
+function isImageUrl(value: string | null): value is string {
+  return typeof value === "string" && /^(https?:\/\/|\/)\S/i.test(value.trim());
+}
+
+/**
+ * The course image, rendered on the server: the catalogue's client-side card
+ * art would add its code to every page that lists courses (the Progress page's
+ * first-load budget, QA remediation S3.3).
+ */
+function CourseThumb({ coverKey }: { coverKey: string | null }) {
+  return (
+    <div className="relative hidden aspect-[16/9] w-28 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 sm:block">
+      <GraduationCap
+        className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 text-primary/70"
+        aria-hidden="true"
+      />
+      {isImageUrl(coverKey) ? (
+        <img
+          src={coverKey}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * One enrolled course with its lesson track and next step: the home page's
@@ -15,13 +43,7 @@ const quietLinkClass =
 export function MyCourseRow({ course }: { course: MyCourse }) {
   return (
     <li className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4">
-      <CoverArt
-        coverKey={course.coverKey}
-        category={course.category}
-        title={course.title}
-        className="hidden aspect-[16/9] w-28 shrink-0 rounded-lg sm:block"
-        iconClassName="h-6 w-6"
-      />
+      <CourseThumb coverKey={course.coverKey} />
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link
