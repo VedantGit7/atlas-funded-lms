@@ -57,7 +57,8 @@ export const updateCourseBodySchema = mutationBodySchema({
     .optional(),
   description: z.string().trim().max(5000).nullable().optional(),
   shortDescription: z.string().trim().max(500).optional(),
-  coverKey: z.string().trim().min(1).max(500).optional(),
+  /** null removes the course image. */
+  coverKey: z.string().trim().min(1).max(500).nullable().optional(),
   thumbnailAssetId: z.uuid().optional(),
   estimatedDuration: z.coerce.number().int().min(0).max(100000).optional(),
   level: z.string().trim().min(1).max(100).optional(),

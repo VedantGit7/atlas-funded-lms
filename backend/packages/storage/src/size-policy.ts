@@ -11,7 +11,8 @@ export function assertAllowedSize(args: {
     args.purpose === "branding.favicon" ||
     args.purpose === "branding.og-image" ||
     args.purpose === "lesson.thumbnail" ||
-    args.purpose === "member.avatar"
+    args.purpose === "member.avatar" ||
+    args.purpose === "course.cover"
       ? args.env.STORAGE_MAX_BRANDING_ASSET_BYTES
       : args.purpose === "lesson.asset" || args.purpose === "lesson.attachment"
         ? args.env.STORAGE_MAX_LESSON_ASSET_BYTES

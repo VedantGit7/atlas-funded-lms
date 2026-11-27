@@ -27,6 +27,11 @@ export const learnerOutlineModuleSchema = z.object({
 
 export const learnerCourseOutlineSchema = z.object({
   courseId: z.uuid(),
+  /**
+   * False before the learner enrols: the outline is a preview of what the
+   * course covers, every lesson "not started" (QA review 1 M38).
+   */
+  enrolled: z.boolean(),
   modules: z.array(learnerOutlineModuleSchema),
   /** Counted the way course completion counts them: every published lesson. */
   completedLessons: z.number().int().nonnegative(),

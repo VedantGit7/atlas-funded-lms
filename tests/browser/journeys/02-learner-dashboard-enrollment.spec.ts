@@ -41,7 +41,9 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
       await page.locator(`a[href="${coursePath}"]`).click();
       await expect(page).toHaveURL(new RegExp(`${coursePath}$`), coldRouteNavigationOptions());
       await waitForHydration(page);
-      await page.getByRole("button", { name: "Enroll", exact: true }).click();
+      // Before enrolling the course page lists the lessons, without links (S3.2, M38).
+      await expect(page.locator(`ol a[href="${lessonPath}"]`)).toHaveCount(0);
+      await page.getByRole("button", { name: "Enroll for free", exact: true }).click();
       const enrollmentResponse = page.waitForResponse(
         (response) =>
           new URL(response.url()).pathname === "/api/v1/enrollments" &&
@@ -57,7 +59,11 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
       expect(await enrolled.json()).toMatchObject({
         data: { courseId: fixture.courseId, status: "active", created: true },
       });
-      await expect(page.getByText(/You are enrolled/)).toBeVisible();
+      await expect(page.getByText(/^Enrolled on /)).toBeVisible();
+      // Straight after enrolling the page offers the first lesson (QA review 1 m40).
+      await expect(
+        page.getByRole("link", { name: "Start the course", exact: true }),
+      ).toHaveAttribute("href", lessonPath);
     });
 
     const afterEnrollment = await probePhase("J02 course after enrollment", () =>
@@ -150,10 +156,12 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     await expect(page.getByText("You've finished the course", { exact: true })).toBeVisible();
 
     await page.reload();
+    // The saved completion, read back after a reload: this is the assertion the
+    // completion-not-saved failure probe expects to trip first.
+    await expect(page.getByRole("status").filter({ hasText: "Lesson completed" })).toBeVisible();
     await expect(
       page.locator("article header").getByText("Completed", { exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole("status").filter({ hasText: "Lesson completed" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Mark complete", exact: true })).toHaveCount(0);
 
     const persistedLesson = await page.request.get(`/api/v1/lessons/${fixture.lessonId}`);

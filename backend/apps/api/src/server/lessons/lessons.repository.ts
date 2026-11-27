@@ -915,6 +915,17 @@ export async function findResumeLessonIdForLearner(args: {
     order by ol.ord asc
   `;
 
+  return pickResumeLesson(rows);
+}
+
+/**
+ * The lesson "Continue" opens, from the course's published lessons in order
+ * with the learner's progress: the one last seen while in progress, else the
+ * first not completed, else the first.
+ */
+export function pickResumeLesson(
+  rows: Array<{ lesson_id: string; status: string | null; last_seen_at: Date | null }>,
+): string | null {
   if (rows.length === 0) {
     return null;
   }

@@ -60,7 +60,7 @@ function pricingProjection(metadata: Record<string, unknown> | null): {
 
 export function buildMetadataPatch(input: {
   shortDescription?: string;
-  coverKey?: string;
+  coverKey?: string | null;
   thumbnailAssetId?: string;
   estimatedDuration?: number;
   level?: string;
@@ -73,7 +73,11 @@ export function buildMetadataPatch(input: {
   const patch: Record<string, unknown> = {};
 
   if (input.shortDescription !== undefined) patch["shortDescription"] = input.shortDescription;
-  if (input.coverKey !== undefined) patch["coverKey"] = input.coverKey;
+  if (input.coverKey !== undefined) {
+    patch["coverKey"] = input.coverKey;
+    // A removed image takes its uploaded file's link with it.
+    if (input.coverKey === null) patch["coverAssetId"] = null;
+  }
   if (input.thumbnailAssetId !== undefined) patch["thumbnailAssetId"] = input.thumbnailAssetId;
   if (input.estimatedDuration !== undefined) patch["estimatedDuration"] = input.estimatedDuration;
   if (input.level !== undefined) patch["level"] = input.level;

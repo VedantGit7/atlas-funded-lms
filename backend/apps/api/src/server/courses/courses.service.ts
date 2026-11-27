@@ -2,14 +2,23 @@ import type { TenantTx } from "@atlas/db";
 import type { ResourceRef } from "@atlas/authorization";
 import { getLoadedCourseProjection } from "./load-course-resource-ref";
 import { courseNotFound } from "./courses.errors";
-import { findResumeLessonIdForLearner } from "../lessons/lessons.repository";
 import {
   findCourseAuthProjection,
   findEnrollmentForMembership,
   listPublishedCourseModules,
   listPublishedCoursesPaginated,
+  readCourseCatalogMeta,
   readCoursePricing,
 } from "./courses.repository";
+import {
+  courseTags,
+  loadCourseDetailExtras,
+  readCourseCategory,
+  readCourseFaqs,
+  readCourseOutcomes,
+  readCoursePromoVideoUrl,
+  readCourseShortDescription,
+} from "./course-presentation";
 import type { CourseListQuery } from "./schemas";
 import { studioCourseListQuerySchema, type CourseDetailQuery } from "./course-authoring-schemas";
 import {
@@ -92,6 +101,7 @@ export async function listPublishedCourses(tx: TenantTx, ctx: ServiceCtx, query:
         trending: item.trending,
         compareAtPriceCents: item.compareAtPriceCents,
         durationSeconds: item.durationSeconds,
+        lessonCount: item.lessonCount,
         studentCount: item.studentCount,
         instructor: item.instructor,
         progressPct: item.progressPct,
@@ -144,14 +154,15 @@ export async function getPublishedCourseDetail(
   const meta = learnerMetadataProjection(course.metadataJson);
   const pricing = readCoursePricing(course.metadataJson);
   const enrollmentStatus = enrollment ? ("enrolled" as const) : ("not_enrolled" as const);
-  const resumeLessonId =
-    enrollment != null
-      ? await findResumeLessonIdForLearner({
-          tx,
-          courseId,
-          membershipId: ctx.actorMembershipId,
-        })
-      : null;
+
+  const tags = courseTags(course.metadataJson);
+  const { instructors, studentCount, resumeLessonId } = await loadCourseDetailExtras({
+    tx,
+    courseId,
+    tags,
+    createdByMembershipId: course.createdByMembershipId,
+    enrolledMembershipId: enrollment != null ? ctx.actorMembershipId : null,
+  });
 
   return {
     data: {
@@ -161,7 +172,6 @@ export async function getPublishedCourseDetail(
       description: course.description,
       status: "PUBLISHED" as const,
       coverKey: meta.coverKey,
-      tags: meta.tags,
       accessTier: pricing.accessTier,
       priceCents: pricing.priceCents,
       currency: pricing.currency,
@@ -169,6 +179,14 @@ export async function getPublishedCourseDetail(
       enrollmentStatus,
       enrolledAt: enrollment?.enrolledAt.toISOString() ?? null,
       resumeLessonId,
+      shortDescription: readCourseShortDescription(course.metadataJson),
+      level: readCourseCatalogMeta(course.metadataJson).level,
+      category: readCourseCategory(course.metadataJson),
+      instructors,
+      outcomes: readCourseOutcomes(tags),
+      faqs: readCourseFaqs(tags),
+      promoVideoUrl: readCoursePromoVideoUrl(tags),
+      studentCount,
       updatedAt: course.updatedAt.toISOString(),
       createdAt: course.createdAt.toISOString(),
     },

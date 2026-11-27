@@ -17,6 +17,8 @@ type EnrollCourseDialogProps = {
   isPaid?: boolean;
   priceCents?: number | null;
   currency?: string | null;
+  /** The button's look where it's placed; a plain outlined button by default. */
+  triggerClassName?: string;
 };
 
 type QuoteResponse = {
@@ -91,6 +93,7 @@ export function EnrollCourseDialog({
   isPaid = false,
   priceCents = null,
   currency = "USD",
+  triggerClassName,
 }: EnrollCourseDialogProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -309,13 +312,13 @@ export function EnrollCourseDialog({
     <>
       <button
         type="button"
-        className="rounded-md border px-4 py-2 text-sm font-medium"
+        className={triggerClassName ?? "rounded-md border px-4 py-2 text-sm font-medium"}
         onClick={() => {
           setOpen(true);
           setError(null);
         }}
       >
-        {isPaid ? "Buy now" : "Enroll"}
+        {isPaid ? "Buy now" : "Enroll for free"}
       </button>
 
       {open ? (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  BookOpen,
   Calculator,
   GraduationCap,
   Heart,
@@ -32,6 +33,8 @@ export type CourseCardData = {
   trending: boolean;
   compareAtPriceCents: number | null;
   durationSeconds: number | null;
+  /** Published lessons; older responses may not include it. */
+  lessonCount?: number;
   studentCount: number;
   instructor: { name: string | null; avatarKey: string | null } | null;
   progressPct: number | null;
@@ -243,10 +246,19 @@ export function CourseCard({ course, wishlisted, onToggleWishlist }: CourseCardP
                 New
               </span>
             )}
+            {course.lessonCount ? (
+              <span className="flex items-center gap-1">
+                <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                {formatNumber(course.lessonCount)} {course.lessonCount === 1 ? "lesson" : "lessons"}
+              </span>
+            ) : null}
             {course.studentCount > 0 ? (
               <span className="flex items-center gap-1">
                 <Users className="h-3.5 w-3.5" aria-hidden="true" />
                 {formatNumber(course.studentCount)}
+                <span className="sr-only">
+                  {course.studentCount === 1 ? " learner" : " learners"}
+                </span>
               </span>
             ) : null}
           </div>

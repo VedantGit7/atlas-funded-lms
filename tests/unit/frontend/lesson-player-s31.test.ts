@@ -27,6 +27,7 @@ const lessonB = "018f0000-0000-7000-8000-0000000000b2";
 function outline(): LearnerCourseOutline {
   return {
     courseId: "018f0000-0000-7000-8000-0000000000c0",
+    enrolled: true,
     modules: [
       {
         id: "018f0000-0000-7000-8000-0000000000d0",

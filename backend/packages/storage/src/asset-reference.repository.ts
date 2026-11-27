@@ -120,6 +120,28 @@ export async function findReadyMemberAvatar(
 }
 
 /**
+ * A confirmed, public-safe image uploaded as a course's image, of the current
+ * tenant, or null (QA review 1 M21, M49).
+ */
+export async function findReadyCourseCover(
+  tx: TenantTx,
+  assetReferenceId: string,
+): Promise<StorageReferenceRow | null> {
+  const rows = await tx.$queryRaw<StorageReferenceRow[]>`
+    SELECT *
+    FROM storage_references
+    WHERE id = ${assetReferenceId}::uuid
+      AND tenant_id = app.current_tenant_id()
+      AND purpose = 'course.cover'
+      AND resource_type = 'course'
+      AND visibility = 'public-safe'
+      AND status = 'READY'
+    LIMIT 1
+  `;
+  return rows[0] ?? null;
+}
+
+/**
  * Uploads that were signed but never confirmed, older than `before`. A signed
  * upload URL lasts minutes, so these will never complete.
  */

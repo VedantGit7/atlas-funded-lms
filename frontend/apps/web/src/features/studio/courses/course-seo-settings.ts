@@ -45,6 +45,13 @@ function parseSeoFromTags(tags?: Record<string, unknown>): CourseSeoSettings {
   };
 }
 
+function readBrandingRecord(tags?: Record<string, unknown>): Record<string, unknown> {
+  const raw = tags?.[BRANDING_TAG_KEY];
+  return raw && typeof raw === "object" && !Array.isArray(raw)
+    ? (raw as Record<string, unknown>)
+    : {};
+}
+
 function readBrandingPromoVideo(tags?: Record<string, unknown>): string {
   const raw = tags?.[BRANDING_TAG_KEY];
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
@@ -88,7 +95,9 @@ export function mergeCourseSeoIntoTags(
         pageTitle: seo.pageTitle.trim(),
         seoDescription: seo.seoDescription.trim(),
       },
+      // Keep everything Branding saved (the video link, "What you'll learn").
       [BRANDING_TAG_KEY]: {
+        ...readBrandingRecord(tags),
         promoVideoUrl: readBrandingPromoVideo(tags),
       },
     },

@@ -5,7 +5,6 @@ import { findCourseAuthProjection, findEnrollmentForMembership } from "./courses
 import { getLoadedCourseProjection } from "./load-course-resource-ref";
 import { listLearnerOutlineRows, type LearnerOutlineRow } from "./course-outline.repository";
 import type { LearnerCourseOutline, LearnerOutlineLessonStatus } from "./course-outline.schemas";
-import { lessonEnrollmentRequired } from "../lessons/lessons.errors";
 import { resolveLessonType } from "../lessons/lessons.repository";
 
 type ServiceCtx = {
@@ -46,6 +45,7 @@ function resumeLessonOf(rows: LearnerOutlineRow[]): string | null {
 export function buildLearnerCourseOutline(
   courseId: string,
   rows: LearnerOutlineRow[],
+  enrolled = true,
 ): LearnerCourseOutline {
   const modules: LearnerCourseOutline["modules"] = [];
   const byId = new Map<string, LearnerCourseOutline["modules"][number]>();
@@ -87,6 +87,7 @@ export function buildLearnerCourseOutline(
 
   return {
     courseId,
+    enrolled,
     modules,
     completedLessons,
     totalLessons,
@@ -115,15 +116,19 @@ export async function getLearnerCourseOutline(
         courseId,
         membershipId: ctx.actorMembershipId,
       });
-  if (!enrollment) {
-    throw lessonEnrollmentRequired();
-  }
-
   const rows = await listLearnerOutlineRows({
     tx,
     courseId,
     membershipId: ctx.actorMembershipId,
   });
+
+  // Before enrolling, the course page still lists every chapter and lesson so
+  // a learner can see what the course covers (QA review 1 M38). Progress from
+  // an earlier enrollment isn't shown until they enrol again.
+  if (!enrollment) {
+    const preview = rows.map((row) => ({ ...row, progress_status: null, last_seen_at: null }));
+    return { data: buildLearnerCourseOutline(courseId, preview, false) };
+  }
 
   return { data: buildLearnerCourseOutline(courseId, rows) };
 }

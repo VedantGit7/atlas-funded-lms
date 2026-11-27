@@ -18,6 +18,16 @@ vi.mock("../../../backend/apps/api/src/server/courses/courses.repository", async
   findEnrollmentForMembership: mocks.enrollment,
 }));
 vi.mock("../../../backend/apps/api/src/server/courses/course-authoring.service", () => ({}));
+// The course page's instructors, learner count and resume lesson come from
+// one read (S3.2), not the course or enrollment this test counts.
+vi.mock("../../../backend/apps/api/src/server/courses/course-presentation", async (original) => ({
+  ...(await original<object>()),
+  loadCourseDetailExtras: vi.fn(async (args: { enrolledMembershipId: string | null }) => ({
+    instructors: [],
+    studentCount: 0,
+    resumeLessonId: args.enrolledMembershipId ? await mocks.resume() : null,
+  })),
+}));
 vi.mock("../../../backend/apps/api/src/server/lessons/lessons.repository", async (original) => ({
   ...(await original<object>()),
   findLessonWithModuleAndCourse: mocks.lesson,
