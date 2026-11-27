@@ -294,8 +294,9 @@ export function LearnerShellClient({
         </div>
       ) : null}
 
-      {/* Main column */}
-      <div className="flex min-h-screen flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:ml-64 lg:pb-0">
+      {/* Main column; min-w-0 keeps wide content (the activity heatmap) scrolling
+          inside its own box instead of widening the page on a phone. */}
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:ml-64 lg:pb-0">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur md:px-8">
           <button
             type="button"

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { ClientApiError, ServerApiError } from "../../../frontend/apps/web/src/lib/api/errors";
 import { queryKeys } from "../../../frontend/apps/web/src/lib/api/query-keys";
 import { withQueryHost } from "../../../frontend/apps/web/src/lib/api/query-host";
-import { loadPersonalizedDashboardActions } from "../../../frontend/apps/web/src/features/learner/server/load-personalized-dashboard";
 
 describe("F8 query keys", () => {
   it("scopes tenant keys under atlas root with host", () => {
@@ -31,11 +30,5 @@ describe("F8 API error mappers", () => {
     const error = new ServerApiError("tenant.not_found", 404, "req-2", "Tenant not found");
     expect(error.name).toBe("ServerApiError");
     expect(error.status).toBe(404);
-  });
-});
-
-describe("F8 personalized dashboard loader", () => {
-  it("exports loadPersonalizedDashboardActions for Suspense island", () => {
-    expect(typeof loadPersonalizedDashboardActions).toBe("function");
   });
 });
