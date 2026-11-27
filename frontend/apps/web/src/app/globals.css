@@ -206,6 +206,16 @@ body {
   border: 0;
 }
 
+/* The lesson player's "Up next" countdown: the bar empties as the next lesson nears. */
+@keyframes lesson-up-next {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 /* Branded loading screen motion (BrandLoadingScreen). Limited to transform/
    opacity and neutralised by the prefers-reduced-motion rule below. */
 @keyframes fba-loader-spin {

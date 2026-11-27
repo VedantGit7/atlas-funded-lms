@@ -21,13 +21,8 @@ export function LessonProgressPanel() {
     void updatePosition(progress.positionSeconds ?? 0);
   }, [lessonId, progress.positionSeconds, progress.status, updatePosition]);
 
-  return (
-    <section className="rounded border p-4 text-sm">
-      <h2 className="font-medium">Progress</h2>
-      <p>
-        Status: {progress.status} · {progress.progressPct}% complete
-      </p>
-      {progress.positionSeconds != null ? <p>Resume at {progress.positionSeconds}s</p> : null}
-    </section>
-  );
+  // The lesson's status shows in the course outline beside the lesson, so
+  // nothing is drawn here: this used to print the raw "in_progress" value and
+  // a position no player reports (QA review 1 m41).
+  return null;
 }

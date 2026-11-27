@@ -64,7 +64,17 @@ export function LessonArticleWorkspace({ lesson, editable, onSaved }: LessonArti
         Note: Article lesson content will not be encrypted.
       </div>
 
-      <MarkdownToolbar textareaRef={textareaRef} disabled={!editable} />
+      <MarkdownToolbar
+        textareaRef={textareaRef}
+        value={content}
+        onChange={(next) => {
+          setContent(next);
+          setSaved(false);
+        }}
+        lessonId={lesson.id}
+        variant="article"
+        disabled={!editable}
+      />
 
       <div className="flex-1 overflow-y-auto p-5">
         {error ? (
@@ -75,7 +85,7 @@ export function LessonArticleWorkspace({ lesson, editable, onSaved }: LessonArti
         <textarea
           ref={textareaRef}
           className="min-h-[20rem] w-full resize-y border-none bg-transparent text-sm leading-relaxed text-[var(--admin-on-surface)] outline-none placeholder:text-[var(--admin-on-surface-variant)]"
-          placeholder="Write the article here. Use the toolbar for bold, italic, links and lists."
+          placeholder="Write the article here. Use the toolbar for headings, lists, images and tables."
           value={content}
           disabled={!editable}
           onChange={(event) => {

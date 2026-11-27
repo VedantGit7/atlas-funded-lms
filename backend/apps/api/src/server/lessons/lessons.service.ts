@@ -46,6 +46,7 @@ import {
 import { listTagIdsForLessons, listTagsForLesson, mapTagSummary } from "../tags/tags.service";
 import { parseContentMetadata, getEffectiveFeatures } from "./lesson-content-metadata";
 import { findStorageReferenceById } from "./lesson-assets.repository";
+import { resolveArticleImages } from "./lesson-article-images";
 import { buildPlayerContent } from "./lesson-player-content";
 import { loadQuizSummary } from "./quiz-summary";
 import type { LessonPlayerFile } from "./lesson-schemas";
@@ -404,11 +405,16 @@ async function playerContentFor(
     videoUrl: lesson.videoUrl,
     videoProvider: lesson.videoProvider,
   });
-  const content = buildPlayerContent({
+  const built = buildPlayerContent({
     lessonType,
     contentJson: lesson.contentJson,
     primaryFile: await signPrimaryFile(tx, ctx, lesson.id, lesson.contentJson),
   });
+  // Images uploaded into the article get a fresh signed link (QA review 1 m19).
+  const content = {
+    ...built,
+    body: await resolveArticleImages(tx, ctx, lesson.id, built.body),
+  };
   if (content.kind === "quiz" && content.assessmentId) {
     return {
       ...content,

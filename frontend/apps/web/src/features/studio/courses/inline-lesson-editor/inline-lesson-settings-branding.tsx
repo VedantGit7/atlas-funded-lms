@@ -145,7 +145,14 @@ export function LessonSettingsBrandingSection({
             disabled ? "opacity-60" : "",
           ].join(" ")}
         >
-          <MarkdownToolbar textareaRef={richDescriptionRef} disabled={disabled} />
+          <MarkdownToolbar
+            textareaRef={richDescriptionRef}
+            value={form.richDescription}
+            onChange={(richDescription) => {
+              onChange({ richDescription });
+            }}
+            disabled={disabled}
+          />
           <textarea
             ref={richDescriptionRef}
             id={richDescriptionId}
