@@ -156,10 +156,12 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     await expect(page.getByText("You've finished the course", { exact: true })).toBeVisible();
 
     await page.reload();
+    // The saved completion, read back after a reload: this is the assertion the
+    // completion-not-saved failure probe expects to trip first.
+    await expect(page.getByRole("status").filter({ hasText: "Lesson completed" })).toBeVisible();
     await expect(
       page.locator("article header").getByText("Completed", { exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole("status").filter({ hasText: "Lesson completed" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Mark complete", exact: true })).toHaveCount(0);
 
     const persistedLesson = await page.request.get(`/api/v1/lessons/${fixture.lessonId}`);
