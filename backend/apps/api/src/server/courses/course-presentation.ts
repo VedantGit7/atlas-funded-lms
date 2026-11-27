@@ -79,6 +79,14 @@ export function readCourseCategory(metadata: Record<string, unknown> | null): st
   return null;
 }
 
+/** The course image: the uploaded image's address, or an older thumbnail key. */
+export function readCourseCoverKey(metadata: Record<string, unknown> | null): string | null {
+  for (const raw of [metadata?.["coverKey"], metadata?.["thumbnailKey"]]) {
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
+  }
+  return null;
+}
+
 export type CourseInstructor = { name: string; avatarUrl: string | null };
 
 export type CourseDetailExtras = {

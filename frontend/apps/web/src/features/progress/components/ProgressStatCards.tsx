@@ -25,8 +25,8 @@ type ProgressStatCardsProps = {
   xpTotal: number;
   weeklyXp: number;
   streak: { currentCount: number; longestCount: number };
-  certificatesCount: number;
-  certificatesHasMore: boolean;
+  /** Null when certificates are off for the academy: no card. */
+  certificates: { count: number; hasMore: boolean } | null;
 };
 
 const cardBase = "flex flex-col rounded-2xl border border-border bg-card p-6";
@@ -59,14 +59,18 @@ export function ProgressStatCards({
   xpTotal,
   weeklyXp,
   streak,
-  certificatesCount,
-  certificatesHasMore,
+  certificates,
 }: ProgressStatCardsProps) {
   const reduce = useReducedMotion();
   const atPersonalBest = streak.currentCount > 0 && streak.currentCount >= streak.longestCount;
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-6 sm:grid-cols-2",
+        certificates ? "lg:grid-cols-4" : "lg:grid-cols-3",
+      )}
+    >
       {/* Level + XP progress (featured, offset shadow echoes the source style) */}
       <section
         aria-label="Current level"
@@ -76,7 +80,7 @@ export function ProgressStatCards({
         )}
       >
         <div className="mb-4 flex items-start justify-between gap-3">
-          <span className={label}>Current Level</span>
+          <span className={label}>Level</span>
           <IconChip>
             <Gauge className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
           </IconChip>
@@ -122,9 +126,9 @@ export function ProgressStatCards({
       </section>
 
       {/* Daily momentum / streak */}
-      <section aria-label="Daily momentum" className={cardBase}>
+      <section aria-label="Streak" className={cardBase}>
         <div className="mb-1 flex items-start justify-between gap-3">
-          <span className={label}>Daily Momentum</span>
+          <span className={label}>Streak</span>
           <IconChip tone="success">
             <Flame className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
           </IconChip>
@@ -145,15 +149,15 @@ export function ProgressStatCards({
               Best {streak.longestCount} days
             </span>
           ) : (
-            <span className="text-xs text-muted-foreground">Complete a lesson to begin</span>
+            <span className="text-xs text-muted-foreground">Learn on any day to start one</span>
           )}
         </div>
       </section>
 
       {/* Lifetime XP + weekly trend */}
-      <section aria-label="Lifetime mastery" className={cardBase}>
+      <section aria-label="Total XP" className={cardBase}>
         <div className="mb-1 flex items-start justify-between gap-3">
-          <span className={label}>Lifetime Mastery</span>
+          <span className={label}>Total XP</span>
           <IconChip>
             <Sparkles className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
           </IconChip>
@@ -176,30 +180,35 @@ export function ProgressStatCards({
         </div>
       </section>
 
-      {/* Certificates count */}
-      <section aria-label="Validations" className={cardBase}>
-        <div className="mb-1 flex items-start justify-between gap-3">
-          <span className={label}>Validations</span>
-          <IconChip>
-            <Award className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-          </IconChip>
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-semibold leading-none tracking-tight text-primary tabular-nums">
-            {padCount(certificatesCount)}
-            {certificatesHasMore ? "+" : ""}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {certificatesCount === 1 ? "Certificate" : "Certificates"}
-          </span>
-        </div>
-        <a
-          href="#credentials"
-          className="mt-3 inline-flex w-fit items-center rounded-md border border-primary px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          View all
-        </a>
-      </section>
+      {certificates ? (
+        <section aria-label="Certificates" className={cardBase}>
+          <div className="mb-1 flex items-start justify-between gap-3">
+            <span className={label}>Certificates</span>
+            <IconChip>
+              <Award className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
+            </IconChip>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-semibold leading-none tracking-tight text-primary tabular-nums">
+              {padCount(certificates.count)}
+              {certificates.hasMore ? "+" : ""}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {certificates.count === 1 ? "Certificate" : "Certificates"}
+            </span>
+          </div>
+          {certificates.count > 0 ? (
+            <a
+              href="#credentials"
+              className="mt-3 inline-flex w-fit items-center rounded-md border border-primary px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              See all
+            </a>
+          ) : (
+            <span className="mt-3 text-xs text-muted-foreground">None earned yet</span>
+          )}
+        </section>
+      ) : null}
     </div>
   );
 }

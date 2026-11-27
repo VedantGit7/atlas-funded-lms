@@ -12,6 +12,7 @@ import type {
   UpdateNotificationTemplateBody,
 } from "./notification.contract";
 import {
+  ANNOUNCEMENT_TEMPLATE_KEY,
   extractArchiveReceiptAt,
   extractInboxPayload,
   extractReadReceiptAt,
@@ -214,6 +215,7 @@ export async function listMyNotifications(
     membershipId: ctx.actorMembershipId,
     limit,
     includeArchived: query.includeArchived,
+    templateKey: query.kind === "announcement" ? ANNOUNCEMENT_TEMPLATE_KEY : null,
     ...(query.cursor !== undefined ? { cursor: query.cursor } : {}),
   });
 

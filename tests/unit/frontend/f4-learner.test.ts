@@ -63,26 +63,21 @@ describe("F4 learner wire gaps + lesson player", () => {
   });
 
   it("enriches continue-learning on the learner dashboard", () => {
-    expect(
-      existsSync(resolve(webRoot, "features/learner/components/ContinueLearningCard.tsx")),
-    ).toBe(true);
-
-    const dashboardView = readFileSync(
-      resolve(webRoot, "features/learner/components/LearnerDashboardView.tsx"),
+    // QA remediation S3.3: one read of the learner's courses with progress
+    // (named by the course, not the learner) feeds "Continue learning".
+    const loader = readFileSync(
+      resolve(webRoot, "features/learner/components/dashboard/dashboard-data.server.ts"),
       "utf8",
     );
-    expect(dashboardView).toContain("personalizedSection");
+    expect(loader).toContain("/api/v1/me/courses");
+    expect(loader).not.toContain("/api/v1/enrollments");
 
-    const homePage = readFileSync(resolve(webRoot, "app/page.tsx"), "utf8");
-    expect(homePage).toContain("DashboardPersonalizedIsland");
-    expect(homePage).toContain("Suspense");
-
-    const personalizedLoader = readFileSync(
-      resolve(webRoot, "features/learner/server/load-personalized-dashboard.ts"),
+    const dashboard = readFileSync(
+      resolve(webRoot, "features/learner/components/dashboard/LearnerDashboard.tsx"),
       "utf8",
     );
-    expect(personalizedLoader).toContain("/api/v1/enrollments");
-    expect(personalizedLoader).toContain("resumeLessonId");
+    expect(dashboard).toContain("ContinueCard");
+    expect(dashboard).toContain("nextLesson");
   });
 });
 

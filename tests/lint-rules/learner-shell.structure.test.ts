@@ -44,16 +44,15 @@ describe("ATL-STORY-038 learner shell e2e wiring", () => {
 
   it("L1 dashboard limits primary viewport CTAs", () => {
     const source = readFileSync(
-      resolve(webRoot, "features/learner/components/LearnerDashboardView.tsx"),
+      resolve(webRoot, "features/learner/components/dashboard/LearnerDashboard.tsx"),
       "utf8",
     );
-    // This pinned three section headings that the dashboard redesign replaced
-    // ("Build your plan", "Sharpen daily", ...). Copy is the wrong thing to
-    // assert: renaming a heading is not a regression, but losing the dedicated
-    // next-best-action slot would be. That slot is `personalizedSection`, which
-    // the home page streams under Suspense so it loads independently.
-    expect(source).toContain("personalizedSection");
-    expect(source).toContain("LearnerDashboard");
+    // Copy is the wrong thing to assert: renaming a heading is not a
+    // regression, but losing the one next step would be. Since QA remediation
+    // S3.3 that step is the "Continue learning" card (the course to continue
+    // and its next lesson), or the card that sends a learner to the catalogue.
+    expect(source).toContain("<ContinueCard");
+    expect(source).toContain("<NextCourseCard");
   });
 
   it("settings includes Story 037 deletion entry and logout confirmation", () => {

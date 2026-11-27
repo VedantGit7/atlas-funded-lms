@@ -1,19 +1,8 @@
-import type { ReactNode } from "react";
 import { LearnerDashboard, type LearnerDashboardData } from "./dashboard/LearnerDashboard";
 
 export type { LearnerDashboardData };
 
-/**
- * `personalizedSection` is a server-rendered slot (streamed under Suspense by
- * the home page) so the personalized next-best-action can load independently of
- * the dashboard shell.
- */
-export function LearnerDashboardView({
-  data,
-  personalizedSection,
-}: {
-  data: LearnerDashboardData;
-  personalizedSection?: ReactNode;
-}) {
-  return <LearnerDashboard data={data} personalizedSection={personalizedSection} />;
+/** The learner home (QA remediation S3.3); the data is read on the server by the home page. */
+export function LearnerDashboardView({ data }: { data: LearnerDashboardData }) {
+  return <LearnerDashboard data={data} />;
 }

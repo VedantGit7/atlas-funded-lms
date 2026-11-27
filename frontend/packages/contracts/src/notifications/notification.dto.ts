@@ -172,6 +172,12 @@ export const notificationInboxListQuerySchema = z
         if (typeof value === "boolean") return value;
         return value === "true" || value === "1";
       }),
+    /**
+     * "announcement" lists only the academy's announcements (Marketing ›
+     * Announcements), never a learner's private notices such as security
+     * alerts; the home page headline uses it (QA review 1 M35).
+     */
+    kind: z.enum(["all", "announcement"]).optional().default("all"),
     tenant_id: z.never().optional(),
     tenantId: z.never().optional(),
   })
@@ -250,6 +256,8 @@ function validateDeclaredVariables(
 
 export const NOTIFICATION_READ_RECEIPT_TEMPLATE_KEY = "__inbox_read__" as const;
 export const NOTIFICATION_ARCHIVE_TEMPLATE_KEY = "__inbox_archive__" as const;
+/** In-app notices sent from Marketing › Announcements. */
+export const ANNOUNCEMENT_TEMPLATE_KEY = "marketing.announcement" as const;
 
 export function isInboxSentinelTemplateKey(templateKey: string | null | undefined): boolean {
   return (

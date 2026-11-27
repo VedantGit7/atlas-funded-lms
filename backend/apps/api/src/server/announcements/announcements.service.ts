@@ -4,6 +4,7 @@ import type { TenantTx } from "@atlas/db";
 import type { ServiceCtx } from "@atlas/domain/shared/domain.types";
 import { notificationRepository } from "../notifications/notification.repository";
 import { buildSafeInboxPayload } from "../notifications/notification.service";
+import { ANNOUNCEMENT_TEMPLATE_KEY } from "../notifications/notification.dto";
 import {
   announcementResponseSchema,
   announcementsListQuerySchema,
@@ -100,7 +101,7 @@ async function deliverAnnouncement(
       tenantId: ctx.tenantId,
       membershipId,
       channel: "in_app",
-      templateKey: "marketing.announcement",
+      templateKey: ANNOUNCEMENT_TEMPLATE_KEY,
       destination: null,
       idempotencyKey,
       status: "SENT",

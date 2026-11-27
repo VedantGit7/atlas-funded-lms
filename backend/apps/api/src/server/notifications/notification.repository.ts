@@ -435,11 +435,14 @@ export const notificationRepository = {
       limit: number;
       cursor?: string;
       includeArchived?: boolean;
+      /** Only this kind of notice (e.g. announcements); null lists every kind. */
+      templateKey?: string | null;
     },
   ): Promise<
     Array<NotificationDispatchRow & { read_at: string | null; archived_at: string | null }>
   > {
     const includeArchived = args.includeArchived === true;
+    const templateKey = args.templateKey ?? null;
 
     if (args.cursor) {
       return tx.$queryRaw`
@@ -475,6 +478,7 @@ export const notificationRepository = {
           and d.status = 'SENT'::"DispatchStatus"
           and d.template_key <> ${INBOX_READ_TEMPLATE_KEY}
           and d.template_key <> ${INBOX_ARCHIVE_TEMPLATE_KEY}
+          and (${templateKey}::text is null or d.template_key = ${templateKey}::text)
           and (
             case
               when ${includeArchived} then ar.id is not null
@@ -522,6 +526,7 @@ export const notificationRepository = {
         and d.status = 'SENT'::"DispatchStatus"
         and d.template_key <> ${INBOX_READ_TEMPLATE_KEY}
         and d.template_key <> ${INBOX_ARCHIVE_TEMPLATE_KEY}
+        and (${templateKey}::text is null or d.template_key = ${templateKey}::text)
         and (
           case
             when ${includeArchived} then ar.id is not null

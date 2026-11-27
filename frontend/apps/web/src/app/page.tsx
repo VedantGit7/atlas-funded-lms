@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { PublicSiteShell } from "../components/shells/PublicSiteShell";
@@ -7,7 +6,6 @@ import { resolvePlatformHost } from "../lib/server/platform-host-gate";
 import { LearnerShellGate } from "../components/shells/LearnerShellGate";
 import { PageGate } from "../components/patterns/PageGate";
 import { LearnerDashboardView } from "../features/learner/components/LearnerDashboardView";
-import { DashboardPersonalizedIsland } from "../features/learner/components/DashboardPersonalizedIsland";
 import { loadLearnerDashboardData } from "../features/learner/components/dashboard/dashboard-data.server";
 import { PublicLandingView } from "../features/public/components/PublicLandingView";
 import { publicLandingServerApi } from "../modules/public/public-landing.server-api";
@@ -104,16 +102,7 @@ export default async function HomePage({
       <LearnerShellGate>
         <AchievementToastListener />
         <PageGate state="ready" title="Dashboard">
-          <LearnerDashboardView
-            data={dashboard}
-            personalizedSection={
-              // Streamed separately so a slow personalization call cannot block
-              // the dashboard shell from rendering.
-              <Suspense fallback={<PersonalizedSectionFallback />}>
-                <DashboardPersonalizedIsland paths={null} />
-              </Suspense>
-            }
-          />
+          <LearnerDashboardView data={dashboard} />
         </PageGate>
       </LearnerShellGate>
     );
@@ -142,17 +131,4 @@ export default async function HomePage({
 
     throw error;
   }
-}
-
-/** Skeleton matching the personalized island's shape while it streams in. */
-function PersonalizedSectionFallback() {
-  return (
-    <div className="space-y-4" aria-hidden="true">
-      <div className="h-28 animate-pulse rounded-2xl border border-border bg-muted" />
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="h-24 animate-pulse rounded-2xl border border-border bg-muted" />
-        <div className="h-24 animate-pulse rounded-2xl border border-border bg-muted" />
-      </div>
-    </div>
-  );
 }

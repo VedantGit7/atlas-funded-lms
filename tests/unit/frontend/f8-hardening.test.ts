@@ -16,7 +16,7 @@ describe("F8 hardening infrastructure", () => {
 
   // Lighthouse CI (@lhci/cli) was removed on 2026-10-06 (SEC-09); the page-load
   // check now runs on Playwright (pnpm perf:web-vitals).
-  it("includes Playwright, the page-load check and the Suspense dashboard island", () => {
+  it("includes Playwright and the page-load check", () => {
     expect(existsSync(resolve(repoRoot, "playwright.config.ts"))).toBe(true);
     expect(existsSync(resolve(repoRoot, "playwright.web-vitals.config.mjs"))).toBe(true);
     expect(existsSync(resolve(repoRoot, "tests/performance/web-vitals.spec.ts"))).toBe(true);
@@ -24,9 +24,6 @@ describe("F8 hardening infrastructure", () => {
       scripts: Record<string, string>;
     };
     expect(manifest.scripts["perf:web-vitals"]).toContain("playwright.web-vitals.config.mjs");
-    const homePage = readFileSync(resolve(repoRoot, "frontend/apps/web/src/app/page.tsx"), "utf8");
-    expect(homePage).toContain("Suspense");
-    expect(homePage).toContain("DashboardPersonalizedIsland");
   });
 
   it("includes strict API closure and bundle boundary scripts", () => {
