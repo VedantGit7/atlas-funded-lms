@@ -280,4 +280,59 @@ describeWithDb("lesson player content", () => {
     expect(byId.get(fixture.publishedLessonId)).toEqual({ type: "article" });
     expect(byId.get(extra)).toEqual(extraJson);
   });
+
+  // QA review 1 m19: images uploaded into an article are signed afresh each
+  // time the lesson opens, and only an image uploaded to that same lesson.
+  it("signs images uploaded to the lesson and leaves any other reference alone", async () => {
+    const fixture = await createLessonEngineFixture();
+    const own = await insertReference(fixture, {
+      resourceId: fixture.publishedLessonId,
+      fileName: "chart.png",
+      contentType: "image/png",
+    });
+    const otherLesson = await insertReference(fixture, {
+      resourceId: fixture.draftLessonId,
+      fileName: "secret.png",
+      contentType: "image/png",
+    });
+    const ownPdf = await insertReference(fixture, { resourceId: fixture.publishedLessonId });
+    const pending = await insertReference(fixture, {
+      resourceId: fixture.publishedLessonId,
+      contentType: "image/png",
+      status: "PENDING_UPLOAD",
+    });
+    const missing = randomUUID();
+    await setLesson(fixture, fixture.publishedLessonId, {
+      type: "article",
+      body: [
+        "## Support and resistance",
+        `![The daily chart](asset:${own})`,
+        `![Another lesson's image](asset:${otherLesson})`,
+        `![A PDF](asset:${ownPdf})`,
+        `![Not uploaded yet](asset:${pending})`,
+        `![Deleted](asset:${missing})`,
+      ].join("\n"),
+    });
+
+    const sent = learnerLessonDetailResponseSchema.parse(
+      await asLearner(fixture, fixture.publishedLessonId),
+    );
+    const body = sent.data.content?.body ?? "";
+
+    expect(body).not.toContain(`asset:${own}`);
+    expect(body).toMatch(/!\[The daily chart\]\(https?:\/\/[^)]+\)/);
+    for (const id of [otherLesson, ownPdf, pending, missing]) {
+      expect(body).toContain(`asset:${id}`);
+    }
+
+    // The Studio preview shows the same signed image.
+    const studio = studioLessonDetailResponseSchema.parse(
+      await withTenantTx(lessonTenantTx(fixture), (tx) =>
+        getLessonForEditor(tx, instructorCtx(fixture), fixture.publishedLessonId),
+      ),
+    );
+    expect(studio.data.playerContent?.body ?? "").not.toContain(`asset:${own}`);
+    // The text the author edits keeps the reference, not a link that expires.
+    expect(JSON.stringify(studio.data.content)).toContain(`asset:${own}`);
+  });
 });

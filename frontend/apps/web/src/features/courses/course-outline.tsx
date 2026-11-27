@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Package } from "lucide-react";
 import { clientApi } from "../../lib/client-api";
+import {
+  formatLessonDuration,
+  lessonStatusLabel,
+  type LearnerCourseOutline,
+  type OutlineLessonStatus,
+} from "../lessons/course-outline-model";
+import { LessonStatusIcon } from "../lessons/lesson-outline-nav";
 
 type CourseModuleOutlineItem = {
   id: string;
@@ -16,16 +23,20 @@ type CourseModuleOutlineItem = {
 
 type LessonOutlineItem = {
   id: string;
-  slug: string;
+  slug?: string;
   title: string;
   position: number;
   durationSeconds: number | null;
+  /** Set when the lessons come from the learner's own outline. */
+  status?: OutlineLessonStatus;
 };
 
 type CourseOutlineProps = {
   courseId: string;
   modules: CourseModuleOutlineItem[];
   enrolled: boolean;
+  /** The learner's outline with progress; used instead of loading each chapter. */
+  outline?: LearnerCourseOutline | null;
   tagId?: string;
 };
 
@@ -34,15 +45,27 @@ export function courseModuleLessonsPath(moduleId: string, tagId?: string): strin
   return tagId ? `${path}?tagId=${encodeURIComponent(tagId)}` : path;
 }
 
-export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutlineProps) {
-  const [moduleLessons, setModuleLessons] = useState<Record<string, LessonOutlineItem[]>>({});
+export function CourseOutline({
+  courseId,
+  modules,
+  enrolled,
+  outline = null,
+  tagId,
+}: CourseOutlineProps) {
+  const [fetchedLessons, setModuleLessons] = useState<Record<string, LessonOutlineItem[]>>({});
   const [loading, setLoading] = useState(false);
+  // Without a tag filter the learner's outline already has every chapter's
+  // lessons and what's done in each (QA review 2 H20).
+  const fromOutline = outline && !tagId ? outline : null;
+  const moduleLessons: Record<string, LessonOutlineItem[]> = fromOutline
+    ? Object.fromEntries(fromOutline.modules.map((module) => [module.id, module.lessons]))
+    : fetchedLessons;
 
   useEffect(() => {
     let cancelled = false;
     setModuleLessons({});
 
-    if (!enrolled) {
+    if (!enrolled || fromOutline) {
       setLoading(false);
       return;
     }
@@ -79,7 +102,7 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
     return () => {
       cancelled = true;
     };
-  }, [tagId, enrolled, modules]);
+  }, [tagId, enrolled, modules, fromOutline]);
 
   const showLessons = enrolled;
 
@@ -135,16 +158,30 @@ export function CourseOutline({ courseId, modules, enrolled, tagId }: CourseOutl
 
             {hasLessons ? (
               <ol className="mt-3 space-y-1 border-t pt-3">
-                {lessons.map((lesson, index) => (
-                  <li key={lesson.id}>
-                    <Link
-                      href={`/courses/${courseId}/lessons/${lesson.id}`}
-                      className="block rounded px-2 py-1.5 text-sm transition-colors hover:bg-muted"
-                    >
-                      <span className="opacity-60">{index + 1}.</span> {lesson.title}
-                    </Link>
-                  </li>
-                ))}
+                {lessons.map((lesson, index) => {
+                  const duration = formatLessonDuration(lesson.durationSeconds);
+                  return (
+                    <li key={lesson.id}>
+                      <Link
+                        href={`/courses/${courseId}/lessons/${lesson.id}`}
+                        className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                      >
+                        {lesson.status ? (
+                          <LessonStatusIcon status={lesson.status} />
+                        ) : (
+                          <span className="w-4 text-right text-muted-foreground">{index + 1}.</span>
+                        )}
+                        <span className="min-w-0 flex-1">{lesson.title}</span>
+                        {duration ? (
+                          <span className="shrink-0 text-xs text-muted-foreground">{duration}</span>
+                        ) : null}
+                        {lesson.status ? (
+                          <span className="sr-only">, {lessonStatusLabel(lesson.status)}</span>
+                        ) : null}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ol>
             ) : showLessons && !loading && !isScorm && lessons.length === 0 ? (
               <p className="mt-3 border-t pt-3 text-sm text-muted-foreground">

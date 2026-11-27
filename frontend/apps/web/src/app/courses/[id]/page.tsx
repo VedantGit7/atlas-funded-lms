@@ -12,9 +12,12 @@ import type {
   courseDetailResponseSchema,
   courseModulesResponseSchema,
 } from "@atlas/contracts/courses/schemas";
+import type { learnerCourseOutlineResponseSchema } from "@atlas/contracts/courses/course-outline.schemas";
+import { courseOutlinePath } from "../../../features/lessons/course-outline-model";
 
 type CourseDetailResponse = z.infer<typeof courseDetailResponseSchema>;
 type CourseModulesResponse = z.infer<typeof courseModulesResponseSchema>;
+type LearnerCourseOutlineResponse = z.infer<typeof learnerCourseOutlineResponseSchema>;
 
 type CourseDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -30,12 +33,22 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
       serverApi.get<CourseDetailResponse>(`/api/v1/courses/${id}`),
       serverApi.get<CourseModulesResponse>(`/api/v1/courses/${id}/modules`),
     ]);
+    // An enrolled learner's own progress (QA review 2 H20); the page still
+    // shows the chapters if it can't be loaded.
+    const outline =
+      course.data.enrollmentStatus === "enrolled"
+        ? await serverApi
+            .get<LearnerCourseOutlineResponse>(courseOutlinePath(id))
+            .then((response) => response.data)
+            .catch(() => null)
+        : null;
 
     return (
       <PageGate state="ready" title={course.data.title}>
         <CourseDetail
           course={course.data}
           modules={modules.data.items}
+          outline={outline}
           {...(tagId ? { tagId } : {})}
         />
         <CourseCouponChecker courseId={id} />

@@ -6,6 +6,8 @@ import { CoverArt } from "./course-card";
 import { type CourseAccessTier } from "./course-pricing";
 import { CoursePrice } from "./CoursePrice";
 import { formatDateTime } from "../../lib/format/academy-format";
+import { CourseProgressSummary } from "./course-progress-summary";
+import type { LearnerCourseOutline } from "../lessons/course-outline-model";
 
 type CourseDetailData = {
   id: string;
@@ -18,6 +20,7 @@ type CourseDetailData = {
   enrollmentStatus: "enrolled" | "not_enrolled";
   enrolledAt: string | null;
   coverKey?: string | null | undefined;
+  resumeLessonId?: string | null | undefined;
 };
 
 type CourseModuleOutlineItem = {
@@ -32,10 +35,12 @@ type CourseModuleOutlineItem = {
 type CourseDetailProps = {
   course: CourseDetailData;
   modules: CourseModuleOutlineItem[];
+  /** The enrolled learner's outline with their progress; null otherwise. */
+  outline?: LearnerCourseOutline | null;
   tagId?: string;
 };
 
-export function CourseDetail({ course, modules, tagId }: CourseDetailProps) {
+export function CourseDetail({ course, modules, outline = null, tagId }: CourseDetailProps) {
   const isEnrolled = course.enrollmentStatus === "enrolled";
   const isPaid = course.accessTier === "PAID";
 
@@ -85,6 +90,10 @@ export function CourseDetail({ course, modules, tagId }: CourseDetailProps) {
         </div>
       </header>
 
+      {isEnrolled && outline ? (
+        <CourseProgressSummary courseId={course.id} outline={outline} />
+      ) : null}
+
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Sections</h2>
         {tagId ? (
@@ -99,6 +108,7 @@ export function CourseDetail({ course, modules, tagId }: CourseDetailProps) {
           courseId={course.id}
           modules={modules}
           enrolled={isEnrolled}
+          outline={outline}
           {...(tagId ? { tagId } : {})}
         />
       </section>

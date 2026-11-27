@@ -221,7 +221,14 @@ export function CourseSettingsBrandingPanel({
             Description
           </label>
           <div className={courseSettingsRichEditorShellClassName(disabled)}>
-            <MarkdownToolbar textareaRef={descriptionRef} disabled={disabled} />
+            <MarkdownToolbar
+              textareaRef={descriptionRef}
+              value={form.description}
+              onChange={(description) => {
+                patchForm({ description });
+              }}
+              disabled={disabled}
+            />
             <textarea
               ref={descriptionRef}
               id={descriptionId}
