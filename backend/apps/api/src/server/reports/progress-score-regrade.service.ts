@@ -5,7 +5,9 @@ import {
   type RegradeScoreAttemptsBody,
 } from "@atlas/domain/reports/progress-score-roster.dto";
 import { progressScoreAssessmentNotFound } from "@atlas/domain/reports/progress-score-roster.errors";
+import { extractAssessmentConfig } from "../assessments/assessments.repository";
 import { scoreAttempt, type ScoringItem } from "../assessments/scoring.service";
+import { itemsInAttempt, readPresentationOrder } from "../attempts/presentation-order";
 import { decodeExplanationJson } from "../item-registry/item-registry.repository";
 import { sendScoreRosterMessage } from "./progress-score-roster-actions.service";
 
@@ -132,9 +134,13 @@ export async function regradeScoreAttempts(
 
   for (const attemptId of attemptIds) {
     const attemptRows = await tx.$queryRaw<
-      Array<{ id: string; membership_id: string; status: string }>
+      Array<{ id: string; membership_id: string; status: string; metadata_json: unknown }>
     >`
-      select id::text as id, membership_id::text as membership_id, status::text as status
+      select
+        id::text as id,
+        membership_id::text as membership_id,
+        status::text as status,
+        metadata_json
       from attempts
       where id = ${attemptId}::uuid
         and assessment_id = ${assessmentId}::uuid
@@ -165,7 +171,23 @@ export async function regradeScoreAttempts(
       );
     }
 
-    const scored = scoreAttempt({ items: scoringItems, answers: answerMap });
+    // Marked on the questions this attempt asked (a random draw asks some),
+    // with the quiz's negative marking.
+    const presentation =
+      attempt.metadata_json &&
+      typeof attempt.metadata_json === "object" &&
+      !Array.isArray(attempt.metadata_json)
+        ? (attempt.metadata_json as Record<string, unknown>)["presentation"]
+        : undefined;
+    const asked = itemsInAttempt(
+      scoringItems.map((item) => ({ ...item, id: item.assessmentItemId })),
+      readPresentationOrder(presentation),
+    );
+    const scored = scoreAttempt({
+      items: asked,
+      answers: answerMap,
+      negativeMarkPercent: extractAssessmentConfig(meta[0].config_json).negativeMarkPercent,
+    });
     for (const itemResult of scored.itemResults) {
       await tx.$executeRaw`
         update attempt_answers

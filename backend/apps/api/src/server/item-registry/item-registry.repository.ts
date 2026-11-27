@@ -104,11 +104,13 @@ export const itemRegistryRepository = {
       status?: string | undefined;
       q?: string | undefined;
       importBatchId?: string | undefined;
+      collectionId?: string | undefined;
     },
   ) {
     const type = args.itemTypeKey ?? null;
     const status = args.status ?? null;
     const batch = args.importBatchId ?? null;
+    const collection = args.collectionId ?? null;
     const pattern = args.q ? `%${args.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null;
     const cursor = args.cursor ?? null;
 
@@ -120,6 +122,9 @@ export const itemRegistryRepository = {
            and (${type}::text is null or i.item_type_key = ${type}::text)
            and (${status}::text is null or i.status::text = ${status}::text)
            and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+           and (${collection}::uuid is null
+                or exists (select 1 from item_collection_items ci
+                            where ci.item_id = i.id and ci.collection_id = ${collection}::uuid))
            and (${pattern}::text is null
                 or i.stem_json->>'stem' ilike ${pattern}::text
                 or i.import_reference ilike ${pattern}::text
@@ -137,6 +142,9 @@ export const itemRegistryRepository = {
            and (${type}::text is null or i.item_type_key = ${type}::text)
            and (${status}::text is null or i.status::text = ${status}::text)
            and (${batch}::uuid is null or i.import_batch_id = ${batch}::uuid)
+           and (${collection}::uuid is null
+                or exists (select 1 from item_collection_items ci
+                            where ci.item_id = i.id and ci.collection_id = ${collection}::uuid))
            and (${pattern}::text is null
                 or i.stem_json->>'stem' ilike ${pattern}::text
                 or i.import_reference ilike ${pattern}::text

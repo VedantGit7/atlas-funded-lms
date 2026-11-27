@@ -34,6 +34,11 @@ type QuestionPickerDialogProps = {
   initialStatus?: "" | "PUBLISHED" | "DRAFT";
   /** Shown above the list, e.g. which questions a deck can use. */
   note?: ReactNode;
+  /**
+   * Offer a collection filter and "Select all matching", for adding a whole
+   * tag or collection as a quiz's random pool (S3.4).
+   */
+  poolTools?: boolean;
   busy?: boolean;
   error?: string | null;
   onCancel: () => void;
@@ -52,6 +57,7 @@ export function QuestionPickerDialog({
   addedIds,
   initialStatus = "",
   note,
+  poolTools = false,
   busy = false,
   error = null,
   onCancel,
@@ -70,7 +76,28 @@ export function QuestionPickerDialog({
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Map<string, ItemDto>>(new Map());
+  const [collectionId, setCollectionId] = useState("");
+  const [collections, setCollections] = useState<Array<{ id: string; title: string }>>([]);
+  const [selectingAll, setSelectingAll] = useState(false);
   const requestRef = useRef(0);
+
+  useEffect(() => {
+    if (!open || !poolTools) return;
+    let cancelled = false;
+    void itemRegistryApi
+      .listItemCollections({ limit: 100 })
+      .then((response) => {
+        if (!cancelled) {
+          setCollections(response.data.map((entry) => ({ id: entry.id, title: entry.title })));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCollections([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, poolTools]);
 
   useEffect(() => {
     if (!open) return;
@@ -79,6 +106,7 @@ export function QuestionPickerDialog({
     setDebounced("");
     setItemTypeKey("");
     setStatus(initialStatus);
+    setCollectionId("");
     window.setTimeout(() => searchRef.current?.focus(), 0);
   }, [open, initialStatus]);
 
@@ -102,6 +130,7 @@ export function QuestionPickerDialog({
           ...(debounced ? { q: debounced } : {}),
           ...(itemTypeKey ? { itemTypeKey } : {}),
           ...(status ? { status } : {}),
+          ...(collectionId ? { collectionId } : {}),
           ...(after ? { cursor: after } : {}),
         });
         if (request !== requestRef.current) return;
@@ -114,8 +143,41 @@ export function QuestionPickerDialog({
         if (request === requestRef.current) setLoading(false);
       }
     },
-    [debounced, itemTypeKey, status],
+    [debounced, itemTypeKey, status, collectionId],
   );
+
+  /**
+   * Ticks every question the search and filters match (up to the most added
+   * at once), loading the pages not shown yet.
+   */
+  async function selectAllMatching() {
+    setSelectingAll(true);
+    setLoadError(null);
+    try {
+      const next = new Map(selected);
+      let after: string | null = null;
+      do {
+        const page = await itemRegistryApi.listItems({
+          limit: 100,
+          ...(debounced ? { q: debounced } : {}),
+          ...(itemTypeKey ? { itemTypeKey } : {}),
+          ...(status ? { status } : {}),
+          ...(collectionId ? { collectionId } : {}),
+          ...(after ? { cursor: after } : {}),
+        });
+        for (const row of page.data) {
+          if (next.size >= QUESTION_PICKER_MAX) break;
+          if (!addedIds.has(row.id)) next.set(row.id, row);
+        }
+        after = page.page.hasMore ? page.page.nextCursor : null;
+      } while (after && next.size < QUESTION_PICKER_MAX);
+      setSelected(next);
+    } catch (err) {
+      setLoadError(formatItemRegistryApiError(err));
+    } finally {
+      setSelectingAll(false);
+    }
+  }
 
   useEffect(() => {
     if (open) void load(null);
@@ -217,7 +279,13 @@ export function QuestionPickerDialog({
               className={`${inputClass} pl-9`}
             />
           </div>
-          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center">
+          <div
+            className={`grid gap-2 sm:items-center ${
+              poolTools
+                ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]"
+                : "sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+            }`}
+          >
             <select
               aria-label="Question type"
               value={itemTypeKey}
@@ -245,13 +313,49 @@ export function QuestionPickerDialog({
               <option value="PUBLISHED">Published</option>
               <option value="DRAFT">Draft</option>
             </select>
+            {poolTools ? (
+              <select
+                aria-label="Collection"
+                value={collectionId}
+                onChange={(event) => {
+                  setCollectionId(event.target.value);
+                }}
+                className={inputClass}
+              >
+                <option value="">Any collection</option>
+                {collections.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.title}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <p
               role="status"
-              className="text-xs sm:text-right text-[var(--admin-on-surface-variant)]"
+              className={`text-xs text-[var(--admin-on-surface-variant)] ${
+                poolTools ? "sm:col-span-3" : "sm:text-right"
+              }`}
             >
               {total == null
                 ? "Loading…"
                 : `Showing ${String(rows.length)} of ${String(total)} question${total === 1 ? "" : "s"}`}
+              {poolTools && total != null && total > rows.length ? (
+                <>
+                  {" · "}
+                  <button
+                    type="button"
+                    disabled={selectingAll || atLimit}
+                    onClick={() => {
+                      void selectAllMatching();
+                    }}
+                    className="rounded font-semibold text-[var(--admin-primary)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--admin-primary)]/40 disabled:opacity-50"
+                  >
+                    {selectingAll
+                      ? "Selecting…"
+                      : `Select all ${String(Math.min(total, QUESTION_PICKER_MAX))} matching`}
+                  </button>
+                </>
+              ) : null}
             </p>
           </div>
           {note ? (
@@ -277,7 +381,7 @@ export function QuestionPickerDialog({
             </p>
           ) : rows.length === 0 && !loading ? (
             <p className="px-5 py-10 text-center text-sm text-[var(--admin-on-surface-variant)]">
-              {debounced || itemTypeKey || status
+              {debounced || itemTypeKey || status || collectionId
                 ? "No questions match. Try other words or filters."
                 : "The Question bank has no questions yet."}
             </p>

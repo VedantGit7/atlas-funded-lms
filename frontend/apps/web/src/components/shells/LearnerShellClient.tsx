@@ -309,13 +309,17 @@ export function LearnerShellClient({
             <Menu className="h-5 w-5" aria-hidden="true" />
           </button>
 
+          {/* One line at any width: on a phone the long placeholder wrapped to
+              three lines inside the pill (seen on staging at 386 px). */}
           <Link
             href="/search"
             prefetch={false}
-            className="group flex flex-1 items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-[var(--ring)] sm:max-w-md"
+            aria-label="Search courses, lessons, and more"
+            className="group flex min-w-0 flex-1 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-card px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-[var(--ring)] sm:max-w-md"
           >
-            <Search className="h-4 w-4" aria-hidden="true" />
-            <span>Search courses, lessons, and more</span>
+            <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="truncate sm:hidden">Search</span>
+            <span className="hidden truncate sm:inline">Search courses, lessons, and more</span>
           </Link>
 
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">

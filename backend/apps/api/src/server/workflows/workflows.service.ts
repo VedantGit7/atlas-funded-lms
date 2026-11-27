@@ -1,3 +1,4 @@
+import { publishLiveLessonQuizzes } from "../courses/course-quiz-publishing";
 import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { outbox } from "@atlas/events";
@@ -266,6 +267,12 @@ async function actOnCourseWorkflow(
     input.action === "approve"
       ? await publishCourseContentForWorkflow({ tx, courseId: pending.targetId })
       : null;
+  // Its quizzes go live with their lessons; they have no review of their own
+  // (QA review 2 4.1, S3.4).
+  const quizzesPublished =
+    input.action === "approve"
+      ? await publishLiveLessonQuizzes(tx, { courseId: pending.targetId })
+      : 0;
 
   await auditWriter.write(
     tx,
@@ -286,7 +293,7 @@ async function actOnCourseWorkflow(
         workflowDefinitionId: pending.workflowDefinitionId,
         fromState: "REVIEW",
         toState: nextStatus,
-        ...(contentPublished ?? {}),
+        ...(contentPublished ? { ...contentPublished, quizzesPublished } : {}),
       },
     },
   );

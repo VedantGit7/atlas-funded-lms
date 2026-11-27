@@ -31,12 +31,27 @@ export const AssessmentConfigSchema = z
     proctoringLevel: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]).default(0),
     l1ProctoringEnabled: z.boolean().default(false),
     showAnswersPolicy: ShowAnswersPolicySchema.default("after_submit"),
+    /**
+     * Ask this many of the quiz's questions, drawn at random when each attempt
+     * starts (QA review 2 4.1 "random N from a pool"). Absent: every question.
+     */
+    questionsPerAttempt: z.number().int().min(1).max(500).optional(),
+    /**
+     * Negative marking: a wrong answer to an automatically marked question
+     * loses this share of the question's marks. Unanswered questions lose
+     * nothing, and the total never goes below zero.
+     */
+    negativeMarkPercent: z.number().min(0).max(100).default(0),
   })
   .strict();
 
-/** Partial config for PUT updates; `timeLimitSeconds: null` clears the limit. */
+/**
+ * Partial config for PUT updates; `timeLimitSeconds: null` clears the limit and
+ * `questionsPerAttempt: null` asks every question again.
+ */
 export const AssessmentConfigPartialSchema = AssessmentConfigSchema.partial().extend({
   timeLimitSeconds: z.number().int().min(60).max(86400).nullable().optional(),
+  questionsPerAttempt: z.number().int().min(1).max(500).nullable().optional(),
 });
 
 export const AssessmentItemInputSchema = z.object({

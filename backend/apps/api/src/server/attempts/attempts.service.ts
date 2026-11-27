@@ -33,6 +33,7 @@ import {
 } from "../item-registry/item-registry.repository";
 import { finalizeProctoringReport, startProctoringSession } from "../proctoring/proctoring.service";
 import {
+  itemsInAttempt,
   orderItems,
   orderOptions,
   planPresentationOrder,
@@ -132,11 +133,20 @@ async function planAttemptPresentation(
     items,
     shuffleItems: config.shuffleItems,
     shuffleOptions: config.shuffleOptions,
+    drawCount: config.questionsPerAttempt ?? null,
   });
 }
 
-async function loadScoringItems(tx: TenantTx, assessmentId: string): Promise<ScoringItem[]> {
-  const rows = await assessmentsRepository.listAssessmentItems(tx, assessmentId);
+/** The questions this attempt is marked on: the ones it asked. */
+async function loadScoringItems(
+  tx: TenantTx,
+  assessmentId: string,
+  order: PresentationOrder | undefined,
+): Promise<ScoringItem[]> {
+  const rows = itemsInAttempt(
+    await assessmentsRepository.listAssessmentItems(tx, assessmentId),
+    order,
+  );
   const loaded = await itemRegistryRepository.loadItemsWithOptions(
     tx,
     rows.map((row) => row.item_id),
@@ -563,7 +573,11 @@ export async function saveAttemptAnswer(
     tx,
     attempt.assessment_id,
   );
-  const assessmentItem = assessmentItems.find((row) => row.item_id === input.itemId);
+  // Only the questions this attempt asks (a random draw asks some of them).
+  const assessmentItem = itemsInAttempt(
+    assessmentItems,
+    readPresentationOrder(metadata.presentation),
+  ).find((row) => row.item_id === input.itemId);
   if (!assessmentItem) {
     throw invalidAttemptItem();
   }
@@ -746,7 +760,11 @@ async function finalizeLockedAttempt(
   }
 
   const config = extractAssessmentConfig(assessment.config_json);
-  const scoringItems = await loadScoringItems(tx, attempt.assessment_id);
+  const scoringItems = await loadScoringItems(
+    tx,
+    attempt.assessment_id,
+    readPresentationOrder(metadata.presentation),
+  );
   const answers = new Map<string, Record<string, unknown> | null>();
 
   for (const item of scoringItems) {
@@ -754,7 +772,11 @@ async function finalizeLockedAttempt(
     answers.set(item.assessmentItemId, draft?.answerJson ?? null);
   }
 
-  const scoring = scoreAttempt({ items: scoringItems, answers });
+  const scoring = scoreAttempt({
+    items: scoringItems,
+    answers,
+    negativeMarkPercent: config.negativeMarkPercent,
+  });
   const passed =
     scoring.scorePercent != null ? scoring.scorePercent >= config.passMarkPercent : null;
   const nextStatus: SubmittedAttemptStatus = scoring.requiresManualGrading ? "SUBMITTED" : "GRADED";
