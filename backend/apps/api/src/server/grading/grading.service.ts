@@ -160,6 +160,7 @@ export async function getGradingTaskDetail(tx: TenantTx, ctx: ServiceCtx, taskId
   const manualAnswers = await gradingRepository.loadManualAnswerRows(tx, {
     attemptId: attempt.id,
     assessmentId: attempt.assessmentId,
+    askedItemIds: attempt.askedItemIds,
   });
   const manualPossiblePoints = manualAnswers.reduce((sum, item) => sum + item.points, 0);
   const existingResult = parseGradingResult(task.result_json);
@@ -269,6 +270,7 @@ export async function gradeGradingTask(
   const manualPossiblePoints = await gradingRepository.sumManualPossiblePoints(
     tx,
     attempt.assessmentId,
+    attempt.askedItemIds,
   );
   const idempotencyKey = ctx.idempotencyKey ?? input.idempotencyKey;
   const existingResult = parseGradingResult(task.result_json);
@@ -298,6 +300,7 @@ export async function gradeGradingTask(
   const manualAnswers = await gradingRepository.loadManualAnswerRows(tx, {
     attemptId: attempt.id,
     assessmentId: attempt.assessmentId,
+    askedItemIds: attempt.askedItemIds,
   });
   const itemScores = distributeManualScore({
     manualItems: manualAnswers.map((item) => ({
@@ -308,8 +311,13 @@ export async function gradeGradingTask(
   });
 
   const objectiveEarned = await gradingRepository.sumObjectivePointsAwarded(tx, attempt.id);
-  const totalPossible = await gradingRepository.sumTotalPossiblePoints(tx, attempt.assessmentId);
-  const totalEarned = objectiveEarned + input.score;
+  const totalPossible = await gradingRepository.sumTotalPossiblePoints(
+    tx,
+    attempt.assessmentId,
+    attempt.askedItemIds,
+  );
+  // Negative marks can take the total down to zero, not below.
+  const totalEarned = Math.max(0, objectiveEarned + input.score);
   const scorePercent = computeScorePercent(totalEarned, totalPossible);
 
   const gradedAt = new Date().toISOString();

@@ -1,5 +1,6 @@
 import type { TenantTx } from "@atlas/db";
 import { MANUAL_ITEM_TYPE_KEYS } from "./grading.constants";
+import { readPresentationOrder } from "../attempts/presentation-order";
 
 export type GradingTaskRow = {
   id: string;
@@ -134,6 +135,15 @@ function decimalToNumber(value: unknown): number {
   }
 
   return 0;
+}
+
+/** The drawn questions of an attempt that asked a random selection, else null. */
+function askedItemIdsOf(metadataJson: unknown): string[] | null {
+  if (!metadataJson || typeof metadataJson !== "object" || Array.isArray(metadataJson)) {
+    return null;
+  }
+  const order = readPresentationOrder((metadataJson as Record<string, unknown>)["presentation"]);
+  return order?.drawn ? order.itemOrder : null;
 }
 
 export const gradingRepository = {
@@ -295,7 +305,7 @@ export const gradingRepository = {
 
   async loadManualAnswerRows(
     tx: TenantTx,
-    args: { attemptId: string; assessmentId: string },
+    args: { attemptId: string; assessmentId: string; askedItemIds?: string[] | null },
   ): Promise<
     Array<{
       assessmentItemId: string;
@@ -307,6 +317,7 @@ export const gradingRepository = {
     }>
   > {
     const manualTypes = [...MANUAL_ITEM_TYPE_KEYS];
+    const asked = args.askedItemIds ?? null;
 
     const rows = await tx.$queryRaw<
       Array<{
@@ -332,6 +343,7 @@ export const gradingRepository = {
         and aa.attempt_id = ${args.attemptId}::uuid
       where ai.assessment_id = ${args.assessmentId}::uuid
         and items.item_type_key = any(${manualTypes}::text[])
+        and (${asked == null} or ai.id::text = any(${asked ?? []}::text[]))
       order by ai.position asc
     `;
 
@@ -359,17 +371,26 @@ export const gradingRepository = {
     return decimalToNumber(rows[0]?.total ?? 0);
   },
 
-  async sumTotalPossiblePoints(tx: TenantTx, assessmentId: string): Promise<number> {
+  async sumTotalPossiblePoints(
+    tx: TenantTx,
+    assessmentId: string,
+    askedItemIds: string[] | null = null,
+  ): Promise<number> {
     const rows = await tx.$queryRaw<Array<{ total: unknown }>>`
       select coalesce(sum(points), 0) as total
       from assessment_items
       where assessment_id = ${assessmentId}::uuid
+        and (${askedItemIds == null} or id::text = any(${askedItemIds ?? []}::text[]))
     `;
 
     return decimalToNumber(rows[0]?.total ?? 0);
   },
 
-  async sumManualPossiblePoints(tx: TenantTx, assessmentId: string): Promise<number> {
+  async sumManualPossiblePoints(
+    tx: TenantTx,
+    assessmentId: string,
+    askedItemIds: string[] | null = null,
+  ): Promise<number> {
     const manualTypes = [...MANUAL_ITEM_TYPE_KEYS];
     const rows = await tx.$queryRaw<Array<{ total: unknown }>>`
       select coalesce(sum(ai.points), 0) as total
@@ -377,6 +398,7 @@ export const gradingRepository = {
       inner join items on items.id = ai.item_id and items.tenant_id = ai.tenant_id
       where ai.assessment_id = ${assessmentId}::uuid
         and items.item_type_key = any(${manualTypes}::text[])
+        and (${askedItemIds == null} or ai.id::text = any(${askedItemIds ?? []}::text[]))
     `;
 
     return decimalToNumber(rows[0]?.total ?? 0);
@@ -392,6 +414,8 @@ export const gradingRepository = {
     status: string;
     submittedAt: Date | null;
     scorePct: number | null;
+    /** The questions the attempt asked, when it drew a random selection. */
+    askedItemIds: string[] | null;
   } | null> {
     const rows = await tx.$queryRaw<
       Array<{
@@ -401,6 +425,7 @@ export const gradingRepository = {
         status: string;
         submitted_at: Date | null;
         score_pct: unknown;
+        metadata_json: unknown;
       }>
     >`
       select
@@ -409,7 +434,8 @@ export const gradingRepository = {
         membership_id::text,
         status::text,
         submitted_at,
-        score_pct
+        score_pct,
+        metadata_json
       from attempts
       where id = ${attemptId}::uuid
       limit 1
@@ -427,6 +453,7 @@ export const gradingRepository = {
       status: row.status,
       submittedAt: row.submitted_at,
       scorePct: row.score_pct == null ? null : decimalToNumber(row.score_pct),
+      askedItemIds: askedItemIdsOf(row.metadata_json),
     };
   },
 

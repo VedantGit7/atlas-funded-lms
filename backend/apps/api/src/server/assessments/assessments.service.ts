@@ -24,10 +24,13 @@ import {
   assessmentWorkflowNotConfigured,
 } from "./assessments.errors";
 import {
+  AnsweredAssessmentItemError,
   assessmentsRepository,
   buildAssessmentConfigJson,
   extractAssessmentConfig,
   extraAttemptsGranted,
+  preservedAssessmentConfig,
+  questionsAskedPerAttempt,
   readCreatedByMembershipId,
   readDescription,
   readItemRequired,
@@ -85,10 +88,48 @@ function mapAssessmentSummary(row: {
       proctoringLevel: config.proctoringLevel,
       l1ProctoringEnabled: config.l1ProctoringEnabled,
       showAnswersPolicy: config.showAnswersPolicy,
+      questionsPerAttempt: config.questionsPerAttempt ?? null,
+      negativeMarkPercent: config.negativeMarkPercent,
     },
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
   };
+}
+
+/**
+ * Saves a quiz's questions (shared by the Assessments editor and the course's
+ * quiz lesson). A question learners have answered can't be taken out.
+ */
+export async function saveAssessmentItems(
+  tx: TenantTx,
+  args: {
+    tenantId: string;
+    assessmentId: string;
+    items: Array<{ itemId: string; position: number; points: number; required: boolean }>;
+  },
+) {
+  validateAssessmentItemPositions(args.items.map((item) => item.position));
+  validateUniqueItemIds(args.items.map((item) => item.itemId));
+
+  for (const item of args.items) {
+    const exists = await assessmentsRepository.itemExistsInTenant(tx, item.itemId);
+    if (!exists) {
+      throw assessmentItemConflict("One or more items do not exist in this tenant.");
+    }
+  }
+
+  try {
+    await assessmentsRepository.replaceAssessmentItems(tx, args);
+  } catch (error) {
+    if (error instanceof AnsweredAssessmentItemError) {
+      throw assessmentItemConflict(
+        error.itemIds.length === 1
+          ? "Learners have already answered one of the questions you removed, so it has to stay. Set its marks to 0 instead."
+          : `Learners have already answered ${String(error.itemIds.length)} of the questions you removed, so they have to stay. Set their marks to 0 instead.`,
+      );
+    }
+    throw error;
+  }
 }
 
 async function isAdminBypass(tx: TenantTx, ctx: ServiceCtx): Promise<boolean> {
@@ -297,8 +338,40 @@ export async function getAssessment(
     data: {
       ...mapAssessmentSummary(assessment),
       items: await hydrateAssessmentItems(tx, assessmentId, includeAnswerKeys),
+      courseLesson: includeAnswerKeys ? await findCourseLessonOf(tx, assessmentId) : null,
     },
   };
+}
+
+/** The course lesson a quiz belongs to (its first, in course order), if any. */
+async function findCourseLessonOf(tx: TenantTx, assessmentId: string) {
+  const rows = await tx.$queryRaw<
+    Array<{ course_id: string; course_title: string; lesson_id: string; lesson_title: string }>
+  >`
+    select
+      c.id::text as course_id,
+      c.title as course_title,
+      l.id::text as lesson_id,
+      l.title as lesson_title
+    from lessons l
+    inner join course_modules m on m.id = l.module_id and m.tenant_id = l.tenant_id
+    inner join courses c on c.id = m.course_id and c.tenant_id = m.tenant_id
+    where l.content_json->>'assessmentId' = ${assessmentId}
+      and l.deleted_at is null
+      and m.deleted_at is null
+      and c.deleted_at is null
+    order by c.created_at asc, m.position asc, l.position asc
+    limit 1
+  `;
+  const row = rows[0];
+  return row
+    ? {
+        courseId: row.course_id,
+        courseTitle: row.course_title,
+        lessonId: row.lesson_id,
+        lessonTitle: row.lesson_title,
+      }
+    : null;
 }
 
 export async function getLearnerAssessmentOverview(
@@ -344,8 +417,10 @@ export async function getLearnerAssessmentOverview(
         proctoringLevel: config.proctoringLevel,
         l1ProctoringEnabled: config.l1ProctoringEnabled,
         showAnswersPolicy: config.showAnswersPolicy,
+        questionsPerAttempt: config.questionsPerAttempt ?? null,
+        negativeMarkPercent: config.negativeMarkPercent,
       },
-      itemCount,
+      itemCount: questionsAskedPerAttempt(config, itemCount),
       attemptsUsed,
       attemptsRemaining,
     },
@@ -363,25 +438,10 @@ export async function updateAssessment(
   const before = await assessmentSnapshot(tx, assessment, assessmentId);
 
   if (input.items) {
-    validateAssessmentItemPositions(input.items.map((item) => item.position));
-    validateUniqueItemIds(input.items.map((item) => item.itemId));
-
-    for (const item of input.items) {
-      const exists = await assessmentsRepository.itemExistsInTenant(tx, item.itemId);
-      if (!exists) {
-        throw assessmentItemConflict("One or more items do not exist in this tenant.");
-      }
-    }
-
-    await assessmentsRepository.replaceAssessmentItems(tx, {
+    await saveAssessmentItems(tx, {
       tenantId: ctx.tenantId,
       assessmentId,
-      items: input.items.map((item) => ({
-        itemId: item.itemId,
-        position: item.position,
-        points: item.points,
-        required: item.required,
-      })),
+      items: input.items,
     });
   }
 
@@ -392,6 +452,9 @@ export async function updateAssessment(
   };
   if (input.config?.timeLimitSeconds === null) {
     delete mergedConfig["timeLimitSeconds"];
+  }
+  if (input.config?.questionsPerAttempt === null) {
+    delete mergedConfig["questionsPerAttempt"];
   }
   const nextConfig = AssessmentConfigSchema.parse(mergedConfig);
   const currentDescription = readDescription(assessment.config_json);
@@ -405,6 +468,7 @@ export async function updateAssessment(
       createdByMembershipId: ctx.actorMembershipId,
       description: nextDescription,
       config: nextConfig,
+      preserved: preservedAssessmentConfig(assessment.config_json),
     }),
   });
 

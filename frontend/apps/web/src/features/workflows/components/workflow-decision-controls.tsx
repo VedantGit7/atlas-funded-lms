@@ -42,7 +42,14 @@ export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecision
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [confirmAction, setConfirmAction] = useState<PendingAction | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The dialogs portal into <body> only after mounting: checking `document`
+  // during render made the server and browser HTML differ (a hydration error).
+  const [mounted, setMounted] = useState(false);
   const actionInFlightRef = useRef(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const itemRef = useRef(item);
 
   itemRef.current = item;
@@ -189,7 +196,7 @@ export function WorkflowDecisionControls({ item, onCompleted }: WorkflowDecision
         ) : null}
       </footer>
 
-      {typeof document !== "undefined"
+      {mounted
         ? createPortal(
             <div className="admin-theme">
               <AdminConfirmDialog

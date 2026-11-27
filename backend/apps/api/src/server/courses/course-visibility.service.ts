@@ -10,6 +10,7 @@ import {
   setCourseModuleStatus,
   updateCourseStatus,
 } from "./course-authoring.repository";
+import { publishLiveLessonQuizzes } from "./course-quiz-publishing";
 import { courseNotFound, moduleNotFound } from "./courses.errors";
 import { findCourseAuthProjection } from "./courses.repository";
 import type { CourseLifecycleStatus } from "./course-state-guards";
@@ -103,6 +104,8 @@ export async function setModuleVisibility(
     status === "PUBLISHED" ? await publishDraftLessonsInModule({ tx, moduleId }) : 0;
   if (module.status !== status || lessonsPublished > 0) {
     if (module.status !== status) await setCourseModuleStatus({ tx, moduleId, status });
+    // Its quizzes go live with its lessons (S3.4).
+    if (status === "PUBLISHED") await publishLiveLessonQuizzes(tx, { moduleId });
     await auditWriter.write(tx, auditCtx(ctx), {
       action: input.visible ? "course_module.shown" : "course_module.hidden",
       target: { type: "course_module", id: moduleId },
@@ -135,6 +138,8 @@ export async function setLessonVisibility(
   const status = statusFor(lesson.courseStatus, input.visible);
   if (lesson.status !== status) {
     await setLessonStatus({ tx, lessonId, status });
+    // A quiz lesson's quiz goes live with it (S3.4).
+    if (status === "PUBLISHED") await publishLiveLessonQuizzes(tx, { lessonId });
     await auditWriter.write(tx, auditCtx(ctx), {
       action: input.visible ? "lesson.shown" : "lesson.hidden",
       target: { type: "lesson", id: lessonId },

@@ -70,6 +70,8 @@ export type ItemListQuery = {
   status?: string;
   q?: string;
   importBatchId?: string;
+  /** Only the questions in this collection. */
+  collectionId?: string;
   limit?: number;
   cursor?: string;
 };
@@ -80,6 +82,7 @@ export async function listItems(query?: ItemListQuery): Promise<ItemListResponse
   if (query?.status) params.set("status", query.status);
   if (query?.q) params.set("q", query.q);
   if (query?.importBatchId) params.set("importBatchId", query.importBatchId);
+  if (query?.collectionId) params.set("collectionId", query.collectionId);
   if (query?.limit != null) params.set("limit", String(query.limit));
   if (query?.cursor) params.set("cursor", query.cursor);
 

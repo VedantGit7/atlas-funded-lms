@@ -17,6 +17,7 @@ import {
   studioHrefForTarget,
   submitterLabel,
 } from "../review-studio-shared";
+import { ReviewQuizContent } from "./review-quiz-content";
 
 type ReviewDetailPanelProps = {
   item: WorkflowQueueItem | null;
@@ -132,6 +133,10 @@ export function ReviewDetailPanel({ item }: ReviewDetailPanelProps) {
             </div>
           </dl>
         </div>
+
+        {item.target.type === "course" || item.target.type === "assessment" ? (
+          <ReviewQuizContent transitionId={item.id} />
+        ) : null}
       </div>
     </section>
   );

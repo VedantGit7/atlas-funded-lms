@@ -3,6 +3,7 @@ import {
   assessmentsRepository,
   extractAssessmentConfig,
   extraAttemptsGranted,
+  questionsAskedPerAttempt,
 } from "../assessments/assessments.repository";
 import type { LessonQuizSummary } from "./lesson-schemas";
 
@@ -19,7 +20,11 @@ export async function loadQuizSummary(
   if (!assessment || assessment.tenant_id !== args.tenantId) return null;
 
   const config = extractAssessmentConfig(assessment.config_json);
-  const questionCount = await assessmentsRepository.countAssessmentItems(tx, args.assessmentId);
+  // A quiz that asks a random selection asks that many, not all of them.
+  const questionCount = questionsAskedPerAttempt(
+    config,
+    await assessmentsRepository.countAssessmentItems(tx, args.assessmentId),
+  );
 
   const attempts = args.membershipId
     ? await tx.attempt.findMany({

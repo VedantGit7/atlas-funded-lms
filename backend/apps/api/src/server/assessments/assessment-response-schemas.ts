@@ -11,6 +11,8 @@ export const assessmentConfigResponseSchema = z.object({
   proctoringLevel: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
   l1ProctoringEnabled: z.boolean(),
   showAnswersPolicy: ShowAnswersPolicySchema,
+  questionsPerAttempt: z.number().int().nullable(),
+  negativeMarkPercent: z.number(),
 });
 
 export const assessmentItemResponseSchema = z.object({
@@ -46,6 +48,19 @@ export const assessmentSummarySchema = z.object({
 
 export const assessmentDetailSchema = assessmentSummarySchema.extend({
   items: z.array(assessmentItemResponseSchema),
+  /**
+   * The course lesson this quiz belongs to: it's edited there and goes live
+   * with the lesson (S3.4). Null for a quiz of its own.
+   */
+  courseLesson: z
+    .object({
+      courseId: z.uuid(),
+      courseTitle: z.string(),
+      lessonId: z.uuid(),
+      lessonTitle: z.string(),
+    })
+    .nullable()
+    .optional(),
 });
 
 export const assessmentListResponseSchema = z.object({

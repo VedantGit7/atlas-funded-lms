@@ -120,6 +120,10 @@ export function AssessmentBuilder({ initialAssessment }: AssessmentBuilderProps)
   const [confirmError, setConfirmError] = useState<string | null>(null);
 
   const editable = assessment.status === "DRAFT" || assessment.status === "REVIEW";
+  // A course lesson's quiz is edited in the course and goes live with its
+  // lesson; it has no review of its own (S3.4).
+  const courseLesson = initialAssessment.courseLesson ?? null;
+  const canSubmitForReview = assessment.status === "DRAFT" && !courseLesson;
   const typeCfg = ASSESSMENT_TYPE_CONFIG[assessment.assessmentType] ?? DEFAULT_ASSESSMENT_TYPE;
 
   const nextPosition = useMemo(
@@ -302,7 +306,7 @@ export function AssessmentBuilder({ initialAssessment }: AssessmentBuilderProps)
               Delete
             </button>
           ) : null}
-          {assessment.status === "DRAFT" ? (
+          {canSubmitForReview ? (
             <button
               type="button"
               className={outlineButtonClassName}
@@ -329,6 +333,23 @@ export function AssessmentBuilder({ initialAssessment }: AssessmentBuilderProps)
           ) : null}
         </div>
       </header>
+
+      {courseLesson ? (
+        <div className="flex flex-col gap-3 rounded-lg border border-[color-mix(in_srgb,var(--admin-primary)_25%,var(--admin-border))] bg-[color-mix(in_srgb,var(--admin-primary)_6%,var(--admin-surface))] px-4 py-3 text-sm text-[var(--admin-on-surface)] sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            This is the quiz of the lesson{" "}
+            <span className="font-semibold">&ldquo;{courseLesson.lessonTitle}&rdquo;</span> in{" "}
+            <span className="font-semibold">{courseLesson.courseTitle}</span>. Edit its questions
+            and settings in the course; it goes live with the lesson.
+          </p>
+          <Link
+            href={`/studio/courses/${courseLesson.courseId}/lessons/${courseLesson.lessonId}`}
+            className={`${primaryButtonClassName} shrink-0`}
+          >
+            Edit in the course
+          </Link>
+        </div>
+      ) : null}
 
       {error ? (
         <div
@@ -636,7 +657,7 @@ export function AssessmentBuilder({ initialAssessment }: AssessmentBuilderProps)
                   </span>
                 </div>
               ))}
-              {assessment.status === "DRAFT" ? (
+              {canSubmitForReview ? (
                 <button
                   type="button"
                   className={`${primaryButtonClassName} w-full`}
@@ -651,6 +672,9 @@ export function AssessmentBuilder({ initialAssessment }: AssessmentBuilderProps)
               ) : (
                 <p className="text-xs text-[var(--admin-on-surface-variant)]">
                   Status: {STATUS_LABELS[assessment.status] ?? assessment.status}
+                  {courseLesson
+                    ? ". It goes live with its lesson, without a review of its own."
+                    : null}
                 </p>
               )}
             </div>

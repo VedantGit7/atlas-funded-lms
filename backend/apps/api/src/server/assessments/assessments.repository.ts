@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { TenantTx } from "@atlas/db";
 import type { AssessmentConfig } from "../assessments/schemas";
 
-type AssessmentRow = {
+export type AssessmentRow = {
   id: string;
   tenant_id: string;
   slug: string;
@@ -118,12 +118,15 @@ export function buildAssessmentConfigJson(args: {
   createdByMembershipId: string;
   description?: string | null;
   config: AssessmentConfig;
+  /** From preservedAssessmentConfig(current config_json). */
+  preserved?: Record<string, unknown>;
 }): Record<string, unknown> {
   let proctoringLevel = args.config.proctoringLevel;
   if (args.config.l1ProctoringEnabled && proctoringLevel === 0) {
     proctoringLevel = 1;
   }
   return {
+    ...(args.preserved ?? {}),
     createdByMembershipId: args.createdByMembershipId,
     ...(args.description != null ? { description: args.description } : {}),
     ...args.config,
@@ -168,7 +171,66 @@ export function extractAssessmentConfig(configJson: unknown): AssessmentConfig {
       base["showAnswersPolicy"] === "after_graded"
         ? base["showAnswersPolicy"]
         : "after_submit",
+    ...(typeof base["questionsPerAttempt"] === "number" &&
+    Number.isInteger(base["questionsPerAttempt"]) &&
+    base["questionsPerAttempt"] >= 1
+      ? { questionsPerAttempt: base["questionsPerAttempt"] }
+      : {}),
+    negativeMarkPercent:
+      typeof base["negativeMarkPercent"] === "number" &&
+      base["negativeMarkPercent"] >= 0 &&
+      base["negativeMarkPercent"] <= 100
+        ? base["negativeMarkPercent"]
+        : 0,
   };
+}
+
+/** Stored settings a save rewrites: the author's settings and who made it. */
+const REBUILT_CONFIG_KEYS = new Set([
+  "createdByMembershipId",
+  "description",
+  "attemptsAllowed",
+  "timeLimitSeconds",
+  "passMarkPercent",
+  "shuffleItems",
+  "shuffleOptions",
+  "secureMode",
+  "proctoringLevel",
+  "l1ProctoringEnabled",
+  "showAnswersPolicy",
+  "questionsPerAttempt",
+  "negativeMarkPercent",
+]);
+
+/**
+ * What else a quiz's stored settings hold (extra attempts granted to
+ * learners, the answer key version). A save rebuilds the settings, so these
+ * are carried over; they used to be dropped by any save.
+ */
+export function preservedAssessmentConfig(configJson: unknown): Record<string, unknown> {
+  if (!configJson || typeof configJson !== "object" || Array.isArray(configJson)) return {};
+  return Object.fromEntries(
+    Object.entries(configJson as Record<string, unknown>).filter(
+      ([key]) => !REBUILT_CONFIG_KEYS.has(key),
+    ),
+  );
+}
+
+/** How many questions each attempt asks: every one, or the random draw's size. */
+export function questionsAskedPerAttempt(
+  config: Pick<AssessmentConfig, "questionsPerAttempt">,
+  questionCount: number,
+): number {
+  return config.questionsPerAttempt != null
+    ? Math.min(config.questionsPerAttempt, questionCount)
+    : questionCount;
+}
+
+/** A save tried to remove a question learners have already answered. */
+export class AnsweredAssessmentItemError extends Error {
+  constructor(readonly itemIds: string[]) {
+    super("Learners have answered these questions.");
+  }
 }
 
 /** Extra attempts an instructor granted this learner beyond the quiz's limit. */
@@ -362,6 +424,14 @@ export const assessmentsRepository = {
     return Number(rows[0]?.count ?? 0);
   },
 
+  /**
+   * Sets the quiz's questions: rows for questions that stay are updated in
+   * place (their position, marks and settings), new ones are added and
+   * removed ones deleted. Learners' saved answers point at these rows, so a
+   * question learners have answered can't be removed
+   * (AnsweredAssessmentItemError); it used to be deleted and re-added on every
+   * save, which failed once anyone had answered.
+   */
   async replaceAssessmentItems(
     tx: TenantTx,
     args: {
@@ -375,12 +445,48 @@ export const assessmentsRepository = {
       }>;
     },
   ): Promise<void> {
+    const existing = await tx.$queryRaw<Array<{ id: string; item_id: string; answered: boolean }>>`
+      select
+        ai.id::text,
+        ai.item_id::text,
+        exists (
+          select 1 from attempt_answers aa where aa.assessment_item_id = ai.id
+        ) as answered
+      from assessment_items ai
+      where ai.assessment_id = ${args.assessmentId}::uuid
+    `;
+    const wanted = new Set(args.items.map((item) => item.itemId));
+    const removed = existing.filter((row) => !wanted.has(row.item_id));
+    const blocked = removed.filter((row) => row.answered).map((row) => row.item_id);
+    if (blocked.length > 0) {
+      throw new AnsweredAssessmentItemError(blocked);
+    }
+
+    for (const row of removed) {
+      await tx.$executeRaw`delete from assessment_items where id = ${row.id}::uuid`;
+    }
+
+    // Positions are unique per quiz: move the kept rows out of the way first.
     await tx.$executeRaw`
-      delete from assessment_items
+      update assessment_items
+      set position = position + 100000
       where assessment_id = ${args.assessmentId}::uuid
     `;
 
+    const byItemId = new Map(existing.map((row) => [row.item_id, row.id]));
     for (const item of args.items) {
+      const configJson = JSON.stringify({ required: item.required });
+      const rowId = byItemId.get(item.itemId);
+      if (rowId && !removed.some((row) => row.id === rowId)) {
+        await tx.$executeRaw`
+          update assessment_items
+          set position = ${item.position},
+              points = ${item.points},
+              config_json = ${configJson}::jsonb
+          where id = ${rowId}::uuid
+        `;
+        continue;
+      }
       await tx.$executeRaw`
         insert into assessment_items (
           id,
@@ -399,7 +505,7 @@ export const assessmentsRepository = {
           ${item.itemId}::uuid,
           ${item.position},
           ${item.points},
-          ${JSON.stringify({ required: item.required })}::jsonb,
+          ${configJson}::jsonb,
           now()
         )
       `;

@@ -18,6 +18,12 @@ export type PresentationOrder = {
   itemOrder: string[];
   /** Option ids per assessment item id, for items whose options are shuffled. */
   optionOrder: Record<string, string[]>;
+  /**
+   * Set when the attempt asks a random selection of the quiz's questions
+   * (`questionsPerAttempt`): `itemOrder` is then the whole attempt, and
+   * questions outside it are never shown, answered or marked.
+   */
+  drawn?: true;
 };
 
 type Positioned = { id: string; position: number };
@@ -36,13 +42,23 @@ export function secureShuffle<T>(items: readonly T[]): T[] {
 
 const byPosition = <T extends Positioned>(a: T, b: T) => a.position - b.position;
 
-/** Draw the order once, at attempt start. */
+/**
+ * Draw the order once, at attempt start. With `drawCount` below the number of
+ * questions, the attempt asks that many, picked at random; they keep the
+ * quiz's order unless questions are shuffled too.
+ */
 export function planPresentationOrder(args: {
   items: Array<Positioned & { options: Positioned[] }>;
   shuffleItems: boolean;
   shuffleOptions: boolean;
+  drawCount?: number | null;
 }): PresentationOrder {
-  const ordered = [...args.items].sort(byPosition);
+  const all = [...args.items].sort(byPosition);
+  const drawn =
+    args.drawCount != null && args.drawCount < all.length
+      ? secureShuffle(all).slice(0, Math.max(1, args.drawCount)).sort(byPosition)
+      : null;
+  const ordered = drawn ?? all;
   const items = args.shuffleItems ? secureShuffle(ordered) : ordered;
   const optionOrder: Record<string, string[]> = {};
   if (args.shuffleOptions) {
@@ -52,7 +68,21 @@ export function planPresentationOrder(args: {
       }
     }
   }
-  return { itemOrder: items.map((item) => item.id), optionOrder };
+  return {
+    itemOrder: items.map((item) => item.id),
+    optionOrder,
+    ...(drawn ? { drawn: true as const } : {}),
+  };
+}
+
+/** The questions an attempt asks: its drawn selection, or all of them. */
+export function itemsInAttempt<T extends { id: string }>(
+  rows: readonly T[],
+  order: PresentationOrder | undefined,
+): T[] {
+  if (!order?.drawn) return [...rows];
+  const asked = new Set(order.itemOrder);
+  return rows.filter((row) => asked.has(row.id));
 }
 
 /**
@@ -80,7 +110,7 @@ export function orderItems<T extends Positioned>(
   rows: readonly T[],
   args: { order: PresentationOrder | undefined; attemptId: string; shuffleItems: boolean },
 ): T[] {
-  if (args.order) return orderBy(rows, args.order.itemOrder);
+  if (args.order) return orderBy(itemsInAttempt(rows, args.order), args.order.itemOrder);
   const ordered = [...rows].sort(byPosition);
   return args.shuffleItems ? stableShuffle(args.attemptId, ordered) : ordered;
 }
@@ -118,5 +148,9 @@ export function readPresentationOrder(value: unknown): PresentationOrder | undef
       }
     }
   }
-  return { itemOrder, optionOrder: options };
+  return {
+    itemOrder,
+    optionOrder: options,
+    ...(candidate["drawn"] === true ? { drawn: true as const } : {}),
+  };
 }

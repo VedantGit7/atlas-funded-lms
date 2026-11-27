@@ -195,10 +195,57 @@ function scoreObjectiveItem(
   }
 }
 
+/**
+ * Whether the learner gave an answer at all. Negative marking takes marks
+ * only for a wrong answer, never for a question left blank.
+ */
+export function hasObjectiveAnswer(
+  itemTypeKey: string,
+  answerJson: Record<string, unknown> | null,
+): boolean {
+  if (!answerJson) return false;
+  switch (itemTypeKey) {
+    case "mcq_single":
+      return typeof answerJson["selectedOptionId"] === "string";
+    case "mcq_multi":
+      return (
+        Array.isArray(answerJson["selectedOptionIds"]) && answerJson["selectedOptionIds"].length > 0
+      );
+    case "true_false":
+      return typeof answerJson["value"] === "boolean";
+    case "fill_blank":
+      return normalizeString(answerJson["value"]).length > 0;
+    case "matching": {
+      const pairs = answerJson["pairs"];
+      return (
+        !!pairs &&
+        typeof pairs === "object" &&
+        !Array.isArray(pairs) &&
+        Object.keys(pairs).length > 0
+      );
+    }
+    case "ordering":
+      return Array.isArray(answerJson["order"]) && answerJson["order"].length > 0;
+    case "swipe":
+      return answerJson["action"] === "known" || answerJson["action"] === "unknown";
+    default:
+      return false;
+  }
+}
+
+/** Marks taken for a wrong answer, to two decimal places. */
+export function negativeMarks(points: number, negativeMarkPercent: number): number {
+  if (!(negativeMarkPercent > 0) || !(points > 0)) return 0;
+  return Math.round(points * negativeMarkPercent) / 100;
+}
+
 export function scoreAttempt(args: {
   items: ScoringItem[];
   answers: Map<string, Record<string, unknown> | null>;
+  /** Share of a question's marks lost for a wrong answer (0 = off). */
+  negativeMarkPercent?: number;
 }): ScoringResult {
+  const negativePercent = args.negativeMarkPercent ?? 0;
   let earnedPoints = 0;
   let possibleObjectivePoints = 0;
   let requiresManualGrading = false;
@@ -231,15 +278,22 @@ export function scoreAttempt(args: {
 
     possibleObjectivePoints += item.points;
     const result = scoreObjectiveItem(item, answer);
-    earnedPoints += result.pointsAwarded;
+    const lost =
+      !result.isCorrect && hasObjectiveAnswer(item.itemTypeKey, answer)
+        ? negativeMarks(item.points, negativePercent)
+        : 0;
+    const pointsAwarded = lost > 0 ? -lost : result.pointsAwarded;
+    earnedPoints += pointsAwarded;
     itemResults.push({
       assessmentItemId: item.assessmentItemId,
       isCorrect: result.isCorrect,
-      pointsAwarded: result.pointsAwarded,
+      pointsAwarded,
       requiresManualGrading: false,
     });
   }
 
+  // Negative marks can take the total down to zero, not below.
+  earnedPoints = Math.max(0, earnedPoints);
   const scorePercent =
     !requiresManualGrading && possibleObjectivePoints > 0
       ? Number(((earnedPoints / possibleObjectivePoints) * 100).toFixed(4))

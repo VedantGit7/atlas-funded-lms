@@ -52,6 +52,8 @@ export const ListItemsQuerySchema = z.object({
   q: z.string().trim().max(120).optional(),
   /** Only the questions one import added. */
   importBatchId: IdSchema.optional(),
+  /** Only the questions in one collection (a quiz's random pool, S3.4). */
+  collectionId: IdSchema.optional(),
   limit: z.coerce.number().int().min(1).max(100).default(25),
   /** The last item id of the previous page (page.nextCursor). */
   cursor: IdSchema.optional(),
