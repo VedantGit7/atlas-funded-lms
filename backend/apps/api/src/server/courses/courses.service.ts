@@ -2,7 +2,6 @@ import type { TenantTx } from "@atlas/db";
 import type { ResourceRef } from "@atlas/authorization";
 import { getLoadedCourseProjection } from "./load-course-resource-ref";
 import { courseNotFound } from "./courses.errors";
-import { findResumeLessonIdForLearner } from "../lessons/lessons.repository";
 import {
   findCourseAuthProjection,
   findEnrollmentForMembership,
@@ -12,9 +11,8 @@ import {
   readCoursePricing,
 } from "./courses.repository";
 import {
-  countCourseLearners,
   courseTags,
-  listCourseInstructors,
+  loadCourseDetailExtras,
   readCourseCategory,
   readCourseFaqs,
   readCourseOutcomes,
@@ -156,20 +154,15 @@ export async function getPublishedCourseDetail(
   const meta = learnerMetadataProjection(course.metadataJson);
   const pricing = readCoursePricing(course.metadataJson);
   const enrollmentStatus = enrollment ? ("enrolled" as const) : ("not_enrolled" as const);
-  const resumeLessonId =
-    enrollment != null
-      ? await findResumeLessonIdForLearner({
-          tx,
-          courseId,
-          membershipId: ctx.actorMembershipId,
-        })
-      : null;
 
   const tags = courseTags(course.metadataJson);
-  const [instructors, studentCount] = await Promise.all([
-    listCourseInstructors({ tx, tags, createdByMembershipId: course.createdByMembershipId }),
-    countCourseLearners(tx, courseId),
-  ]);
+  const { instructors, studentCount, resumeLessonId } = await loadCourseDetailExtras({
+    tx,
+    courseId,
+    tags,
+    createdByMembershipId: course.createdByMembershipId,
+    enrolledMembershipId: enrollment != null ? ctx.actorMembershipId : null,
+  });
 
   return {
     data: {
