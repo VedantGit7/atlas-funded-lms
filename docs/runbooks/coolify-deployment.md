@@ -60,7 +60,7 @@ Set on the production server on 29 October 2026. Check after any proxy change or
 
 ## TLS and DNS
 
-Visitors reach the server only through Cloudflare. The staging addresses arrive through a **Cloudflare Tunnel** (below). Until the production addresses move to it too, the firewall still allows ports 80 and 443 from Cloudflare's ranges only. The decision behind this is in the hosting decision doc, section 4.
+Visitors reach the server only through Cloudflare. All four LMS addresses arrive through a **Cloudflare Tunnel** (below). The firewall still allows ports 80 and 443 from Cloudflare's ranges only, as a fallback. The decision behind this is in the hosting decision doc, section 4.
 
 - **Edge:** Cloudflare's Universal SSL covers every name one level under `fundedbeyond.com`.
 - **Origin:** a **Cloudflare Origin CA certificate** in Traefik covers the four LMS addresses: `academy`, `platform`, `staging-academy` and `staging-platform`.
@@ -106,11 +106,11 @@ Visitors reach the server only through Cloudflare. The staging addresses arrive 
 
 **Cloudflare settings for the LMS addresses.** The zone also serves the company site and email, so these settings are scoped to the LMS addresses. The zone-wide SSL mode (Full) and Always Use HTTPS (off) stay as they are.
 
-| Setting        | Where                                                     | Value                                                                                                                                                                                                                                   |
-| -------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| DNS            | DNS → Records                                             | Staging: a proxied CNAME to the tunnel, created by its routes (below). Production until it moves: A record → `201.18.202.220`, **proxied**. The `*` wildcard (Porkbun's forwarding) stays; an explicit record takes precedence over it. |
-| SSL mode       | Rules → Configuration Rules, `LMS staging: Full (strict)` | `(http.host in {"staging-academy.fundedbeyond.com" "staging-platform.fundedbeyond.com"})` → SSL **Full (strict)**                                                                                                                       |
-| HTTPS redirect | Rules → Redirect Rules, `LMS staging: HTTP to HTTPS`      | `(http.host in {...the same names...} and not ssl)` → dynamic `concat("https://", http.host, http.request.uri.path)`, 301, preserve query string                                                                                        |
+| Setting        | Where                                                     | Value                                                                                                                                                                                                                                                      |
+| -------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DNS            | DNS → Records                                             | All four addresses: a proxied CNAME to `<tunnel id>.cfargotunnel.com`, created by the tunnel's routes (below) or added by hand when the route can't create it. The `*` wildcard (Porkbun's forwarding) stays; an explicit record takes precedence over it. |
+| SSL mode       | Rules → Configuration Rules, `LMS staging: Full (strict)` | `(http.host in {"staging-academy.fundedbeyond.com" "staging-platform.fundedbeyond.com"})` → SSL **Full (strict)**                                                                                                                                          |
+| HTTPS redirect | Rules → Redirect Rules, `LMS staging: HTTP to HTTPS`      | `(http.host in {...the same names...} and not ssl)` → dynamic `concat("https://", http.host, http.request.uri.path)`, 301, preserve query string                                                                                                           |
 
 **At launch,** add `academy.fundedbeyond.com` and `platform.fundedbeyond.com` to both rules, in the same change as their DNS records. Until then they must stay out: `academy` currently reaches Porkbun's redirect through the wildcard, and Full (strict) would break it.
 
@@ -129,7 +129,7 @@ curl -sS -o /dev/null -w "%{http_code} %{redirect_url}\n" "http://staging-academ
 
 **Why.** On the free plan, Cloudflare often serves visitors in India from Singapore, Tokyo or even Boston. Each new connection from there to this server crossed the public internet to Mumbai, and some never arrived or broke mid-handshake: intermittent 525 and 520 errors, 15-second stalls and 6-second responses (Sentry ATLAS-LMS-B, 5 November 2026). The server and the firewall were fine. With the tunnel, `cloudflared` on the server keeps four outbound connections open to Cloudflare's Mumbai locations, and requests travel to it over Cloudflare's network. After the switch, 120 of 120 test requests through Boston, Singapore, Tokyo and Hong Kong succeeded, none slower than 2 seconds.
 
-**What runs.** One tunnel for the server, `atlas-hostinger-mumbai` (Cloudflare → **Zero Trust → Networks → Tunnels**). `cloudflared` runs from `/root/atlas/tunnel` with [`deploy/cloudflare-tunnel/compose.yaml`](../../deploy/cloudflare-tunnel/compose.yaml), outside Coolify, on Coolify's `coolify` network:
+**What runs.** One tunnel for the server, `atlas-hostinger-mumbai-2` (id `74de50a7-1877-4305-a42d-0369d05306bb`; Cloudflare → **Zero Trust → Networks → Tunnels**). `cloudflared` runs from `/root/atlas/tunnel` with [`deploy/cloudflare-tunnel/compose.yaml`](../../deploy/cloudflare-tunnel/compose.yaml), outside Coolify, on Coolify's `coolify` network:
 
 | File in `/root/atlas/tunnel` | What it is                                                                                       |
 | ---------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -163,7 +163,7 @@ The Configuration Rule's SSL mode doesn't apply to tunnel traffic. The HTTP-to-H
 
    ```powershell
    $t = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'Tunnel token')).Password
-   "TUNNEL_TOKEN=$t" | ssh root@201.18.202.220 "umask 077; sed '1s/^\xEF\xBB\xBF//' | tr -d '\r' > /root/atlas/tunnel/tunnel.env"; $t = $null
+   "TUNNEL_TOKEN=$t" | ssh root@189.72.181.53 "umask 077; sed '1s/^\xEF\xBB\xBF//' | tr -d '\r' > /root/atlas/tunnel/tunnel.env"; $t = $null
    ```
 
 4. `docker compose -f /root/atlas/tunnel/compose.yaml up -d`. Its log should show four `Registered tunnel connection` lines with `location=bom…`.
@@ -173,13 +173,15 @@ The Configuration Rule's SSL mode doesn't apply to tunnel traffic. The HTTP-to-H
 
 **Updating `cloudflared`:** change the tag and digest in the repository's `compose.yaml`, copy it to the server, `docker compose up -d`. The four connections drop and reconnect within seconds, so expect a few failed requests.
 
-**Rolling back an address:** delete its route, and recreate its A record → `201.18.202.220`, proxied. That works only while ports 80 and 443 are open.
+**Rolling back an address:** delete its route, and recreate its A record → `189.72.181.53`, proxied. That works only while ports 80 and 443 are open.
 
-**Still to do:** move `academy` and `platform` to the tunnel at launch, then remove the "HTTP/HTTPS from Cloudflare" rules from `scripts/deploy/hostinger-firewall.mjs` so no web ports are open at all. Also rebuild `ca-bundle.crt` after the server's CA certificates change (`ca-certificates` updates). A stale bundle still verifies the Origin certificate, so this isn't urgent.
+**Moving to another server** (done 26 November 2026): create a new tunnel there, add the routes to it, then point each address's CNAME at the new tunnel's id. The switch is immediate; the old tunnel can then be deleted. If adding a route can't create the DNS record because one exists, edit the record's target by hand (`docs/engineering/server-move-2026-11-26.md`).
+
+**Still to do:** remove the "HTTP/HTTPS from Cloudflare" rules from `scripts/deploy/hostinger-firewall.mjs` so no web ports are open at all. Also rebuild `ca-bundle.crt` after the server's CA certificates change (`ca-certificates` updates). A stale bundle still verifies the Origin certificate, so this isn't urgent.
 
 ## Server access and firewall
 
-The production server is a Hostinger VPS that Coolify Cloud manages over SSH (launch plan tasks 2.1 and 2.2).
+The production server is a Hostinger VPS that Coolify Cloud manages over SSH (launch plan tasks 2.1 and 2.2): `srv2201154`, `189.72.181.53` and `2a02:4780:63:2c9a::1`, in Coolify as `hostinger-mumbai-2`. It replaced `201.18.202.220` on 26 November 2026 (`docs/engineering/server-move-2026-11-26.md`) and sits on a different Hostinger account from the old one, so the API token for the firewall must come from that account. Home IPv4 addresses change; the firewall also allows the admin's IPv6 range, and the `atlas-server-2` alias in `~/.ssh/config` connects over IPv6.
 
 - **SSH is key only.** `/etc/ssh/sshd_config.d/00-atlas-hardening.conf` turns off passwords and allows `root` by key only. It is named to sort before Hostinger's `50-cloud-init.conf`, which turns passwords on, because sshd keeps the first value it reads. `/root/.ssh/authorized_keys` holds exactly two keys: the administrator's and Coolify's (`coolify-hostinger-mumbai`). Coolify logs in as `root` because its non-root mode is experimental and still needs passwordless sudo.
 - **The firewall is Hostinger's, not UFW.** It filters before traffic reaches the server, so it also covers the ports Docker publishes, which UFW does not ([Coolify's firewall guide](https://coolify.io/docs/knowledge-base/server/firewall)). Everything is dropped except:
@@ -202,7 +204,7 @@ The production server is a Hostinger VPS that Coolify Cloud manages over SSH (la
    $env:HOSTINGER_API_TOKEN = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'Hostinger API token')).Password
    ```
 
-3. Run `node scripts/deploy/hostinger-firewall.mjs plan --server 201.18.202.220` to see the rules. Then run `apply` (with `--admin-ip a,b` to allow other addresses), then `status`. The rules take effect within two minutes, and open connections survive.
+3. Run `node scripts/deploy/hostinger-firewall.mjs plan --server 189.72.181.53` to see the rules. Then run `apply` (with `--admin-ip a,b` to allow other addresses), then `status`. The rules take effect within two minutes, and open connections survive.
 4. Revoke the token.
 
 **Locked out of SSH?** Use hPanel's **Web console**. It is the server's own console, not SSH, so neither the firewall nor the SSH settings affect it, and it signs in with the root password (keep that password in a password manager). Or turn the firewall off with `deactivate` (or in hPanel → **Security → Firewall**), fix the problem and `activate` again.
@@ -287,7 +289,7 @@ Each environment has its own PostgreSQL 16 and Redis, created in Coolify on that
   - `login-roles` sets the runtime logins' passwords.
   - `verify` prints the owner, migrations, RLS tables and policies, the permission catalogue, the logins' attributes and TLS. It fails if anything is unsafe, or if a role is granted a permission the catalogue lacks.
 - **CI guards the non-superuser owner.** `migration-validation` provisions as one and then reruns the release sequence, so a migration that only a superuser could apply fails CI, not a deploy.
-- **The database's certificate** comes from Coolify, signed by Coolify's CA (valid ten years). It names the PostgreSQL container (for example `z5xw99119qtqv6bc4yvzayxe`) and the server's public IP, so the URLs use the **container name** as host, as Coolify's internal URL does. It is valid for **one year**: Coolify shows the expiry on the database's **General** page. Before then, use **Regenerate SSL Certificates** and restart the database. Staging's first certificate expires on 28 October 2027.
+- **The database's certificate** comes from Coolify, signed by Coolify's CA (valid ten years). It names the PostgreSQL container (for example `7qpiz6irjq4cpjhz79otxbmp`) and the server's public IP, so the URLs use the **container name** as host, as Coolify's internal URL does. It is valid for **one year**: Coolify shows the expiry on the database's **General** page. Before then, use **Regenerate SSL Certificates** and restart the database. On the current server, staging's certificate expires on 26 November 2027 and production's the same day; Coolify's CA on 23 November 2036.
 - **Server-side TLS isn't enforced.** Coolify's `pg_hba.conf` also accepts unencrypted logins (`host all all all scram-sha-256`). The database has no public port, and every client here insists on `verify-full`, so nothing connects unencrypted.
 
 **One-time setup per environment**, as root on the server, once its PostgreSQL is running with SSL on. It creates the owner and the database, and keeps the passwords in `/root/atlas/<environment>/` (mode 700, files 600). Neither file leaves the server: Coolify gets the runtime URLs from `runtime.env`.
@@ -396,7 +398,7 @@ Nothing may write to the database between the backup and the drill, or the compa
 $env:R2_ACCESS_KEY_ID = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'R2 read-only Access Key ID')).Password
 $env:R2_SECRET_ACCESS_KEY = [Net.NetworkCredential]::new('', (Read-Host -AsSecureString 'R2 read-only Secret Access Key')).Password
 $env:R2_ACCOUNT_ID = 'ae645de64b709479a18bbd90942fdb28'; $env:R2_BUCKET = 'atlas-staging-backups'
-$env:BACKUP_DRILL_ENV = 'staging'; $env:BACKUP_DRILL_DOCKER_HOST = 'ssh://root@201.18.202.220'
+$env:BACKUP_DRILL_ENV = 'staging'; $env:BACKUP_DRILL_DOCKER_HOST = 'ssh://atlas-server-2'
 $env:BACKUP_DRILL_MIGRATE_IMAGE = 'ghcr.io/vedantgit7/atlas-migrate:<a published SHA>'
 $env:BACKUP_DRILL_QUIESCED = '1'
 pnpm release:backup:drill
