@@ -9,6 +9,8 @@ const STORAGE_VALIDATION_MESSAGES: Partial<Record<string, string>> = {
   [STORAGE_ERROR_CODES.UNSUPPORTED_BRANDING_ASSET_TYPE]:
     "Unsupported branding asset type. Use PNG, JPEG, WebP, SVG, or ICO.",
   [STORAGE_ERROR_CODES.UNSUPPORTED_LESSON_ASSET_TYPE]: "Unsupported lesson asset type.",
+  [STORAGE_ERROR_CODES.UNSUPPORTED_COURSE_COVER_TYPE]:
+    "Use a PNG, JPEG or WebP image for the course image.",
   [STORAGE_ERROR_CODES.ASSET_SIZE_LIMIT_EXCEEDED]: "File exceeds the maximum allowed upload size.",
   [STORAGE_ERROR_CODES.SELF_HOSTED_VIDEO_FORBIDDEN]: "Self-hosted video uploads are not allowed.",
   [STORAGE_ERROR_CODES.ASSET_CONTENT_MISMATCH]:

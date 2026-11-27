@@ -65,11 +65,16 @@ export function LessonNextAction({
           href={`/courses/${courseId}`}
           className={`${baseButton} justify-end text-right ${compact ? "px-3 py-2" : "px-3 py-2.5"}`}
         >
+          {/* The small bar has room for one line: say where the button goes. */}
           <span className="min-w-0">
-            <span className="block text-xs text-muted-foreground">Last lesson</span>
-            {!compact ? (
-              <span className="block truncate font-medium text-foreground">Back to course</span>
-            ) : null}
+            {compact ? (
+              <span className="block text-xs text-muted-foreground">Back to course</span>
+            ) : (
+              <>
+                <span className="block text-xs text-muted-foreground">Last lesson</span>
+                <span className="block truncate font-medium text-foreground">Back to course</span>
+              </>
+            )}
           </span>
           <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         </Link>

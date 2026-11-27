@@ -77,6 +77,15 @@ export function assertAllowedMimeType(args: { purpose: AssetPurpose; contentType
     return;
   }
 
+  // A course image is shown on every course card and page: raster only, like
+  // an OG image, so nothing a browser would run as a document.
+  if (args.purpose === "course.cover") {
+    if (!OG_IMAGE_MIME_TYPES.has(contentType)) {
+      throw new Error("UNSUPPORTED_COURSE_COVER_TYPE");
+    }
+    return;
+  }
+
   if (args.purpose === "module.scorm") {
     if (contentType !== "application/zip" && contentType !== "application/x-zip-compressed") {
       throw new Error("UNSUPPORTED_SCORM_PACKAGE_TYPE");

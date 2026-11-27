@@ -38,6 +38,11 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   assignment: ClipboardList,
 };
 
+/** The icon for a lesson's type: play for video, a page for an article… */
+export function lessonTypeIcon(lessonType: string | null): LucideIcon {
+  return (lessonType ? TYPE_ICONS[lessonType] : undefined) ?? FileText;
+}
+
 export function LessonStatusIcon({
   status,
   className = "h-4 w-4",
@@ -110,8 +115,7 @@ export function LessonOutlineNav({
               <ol className="mt-1.5 space-y-0.5">
                 {module.lessons.map((lesson) => {
                   const current = lesson.id === currentLessonId;
-                  const TypeIcon =
-                    (lesson.lessonType ? TYPE_ICONS[lesson.lessonType] : undefined) ?? FileText;
+                  const TypeIcon = lessonTypeIcon(lesson.lessonType);
                   const duration = formatLessonDuration(lesson.durationSeconds);
                   return (
                     <li key={lesson.id}>

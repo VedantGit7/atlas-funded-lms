@@ -178,18 +178,26 @@ describeWithDb("learner course outline", () => {
     expect((await asLearner(fixture)).data.completedLessons).toBe(1);
   });
 
-  it("refuses someone who isn't enrolled, and a course that isn't published", async () => {
+  it("previews the course for someone not enrolled, and refuses a course that isn't published", async () => {
     const fixture = await createLessonEngineFixture();
 
-    await expect(
-      withTenantTx(lessonTenantTx(fixture, fixture.otherInstructorMembershipId), (tx) =>
+    // Before enrolling the outline shows what the course covers, with no
+    // progress (S3.2, QA review 1 M38).
+    const preview = await withTenantTx(
+      lessonTenantTx(fixture, fixture.otherInstructorMembershipId),
+      (tx) =>
         getLearnerCourseOutline(
           tx,
           { tenantId: fixture.tenantId, actorMembershipId: fixture.otherInstructorMembershipId },
           fixture.publishedCourseId,
         ),
-      ),
-    ).rejects.toMatchObject({ status: 403 });
+    );
+    expect(preview.data.enrolled).toBe(false);
+    expect(preview.data.totalLessons).toBe(1);
+    expect(preview.data.completedLessons).toBe(0);
+    expect(preview.data.modules.flatMap((module) => module.lessons.map((l) => l.status))).toEqual([
+      "not_started",
+    ]);
 
     await expect(
       withTenantTx(lessonTenantTx(fixture), (tx) =>

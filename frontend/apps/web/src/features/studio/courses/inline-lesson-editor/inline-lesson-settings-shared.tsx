@@ -227,6 +227,7 @@ export function LessonSettingsTextInput({
   disabled,
   maxLength,
   placeholder,
+  "aria-describedby": describedBy,
 }: {
   id: string;
   value: string;
@@ -234,10 +235,12 @@ export function LessonSettingsTextInput({
   disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
+  "aria-describedby"?: string;
 }) {
   return (
     <input
       id={id}
+      aria-describedby={describedBy}
       className={lessonInputClassName}
       value={value}
       maxLength={maxLength}
@@ -258,6 +261,7 @@ export function LessonSettingsTextarea({
   maxLength,
   placeholder,
   rows = 4,
+  "aria-describedby": describedBy,
 }: {
   id: string;
   value: string;
@@ -266,10 +270,12 @@ export function LessonSettingsTextarea({
   maxLength?: number;
   placeholder?: string;
   rows?: number;
+  "aria-describedby"?: string;
 }) {
   return (
     <textarea
       id={id}
+      aria-describedby={describedBy}
       className={builderTextareaClassName}
       rows={rows}
       value={value}

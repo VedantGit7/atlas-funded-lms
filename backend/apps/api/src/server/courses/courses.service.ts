@@ -8,8 +8,19 @@ import {
   findEnrollmentForMembership,
   listPublishedCourseModules,
   listPublishedCoursesPaginated,
+  readCourseCatalogMeta,
   readCoursePricing,
 } from "./courses.repository";
+import {
+  countCourseLearners,
+  courseTags,
+  listCourseInstructors,
+  readCourseCategory,
+  readCourseFaqs,
+  readCourseOutcomes,
+  readCoursePromoVideoUrl,
+  readCourseShortDescription,
+} from "./course-presentation";
 import type { CourseListQuery } from "./schemas";
 import { studioCourseListQuerySchema, type CourseDetailQuery } from "./course-authoring-schemas";
 import {
@@ -92,6 +103,7 @@ export async function listPublishedCourses(tx: TenantTx, ctx: ServiceCtx, query:
         trending: item.trending,
         compareAtPriceCents: item.compareAtPriceCents,
         durationSeconds: item.durationSeconds,
+        lessonCount: item.lessonCount,
         studentCount: item.studentCount,
         instructor: item.instructor,
         progressPct: item.progressPct,
@@ -153,6 +165,12 @@ export async function getPublishedCourseDetail(
         })
       : null;
 
+  const tags = courseTags(course.metadataJson);
+  const [instructors, studentCount] = await Promise.all([
+    listCourseInstructors({ tx, tags, createdByMembershipId: course.createdByMembershipId }),
+    countCourseLearners(tx, courseId),
+  ]);
+
   return {
     data: {
       id: course.id,
@@ -161,7 +179,6 @@ export async function getPublishedCourseDetail(
       description: course.description,
       status: "PUBLISHED" as const,
       coverKey: meta.coverKey,
-      tags: meta.tags,
       accessTier: pricing.accessTier,
       priceCents: pricing.priceCents,
       currency: pricing.currency,
@@ -169,6 +186,14 @@ export async function getPublishedCourseDetail(
       enrollmentStatus,
       enrolledAt: enrollment?.enrolledAt.toISOString() ?? null,
       resumeLessonId,
+      shortDescription: readCourseShortDescription(course.metadataJson),
+      level: readCourseCatalogMeta(course.metadataJson).level,
+      category: readCourseCategory(course.metadataJson),
+      instructors,
+      outcomes: readCourseOutcomes(tags),
+      faqs: readCourseFaqs(tags),
+      promoVideoUrl: readCoursePromoVideoUrl(tags),
+      studentCount,
       updatedAt: course.updatedAt.toISOString(),
       createdAt: course.createdAt.toISOString(),
     },

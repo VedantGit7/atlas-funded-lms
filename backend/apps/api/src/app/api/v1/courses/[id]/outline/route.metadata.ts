@@ -1,7 +1,10 @@
 import type { RouteMetadata } from "@atlas/api/route-metadata";
 import { loadCourseResourceRef } from "../../../../../../server/courses/load-course-resource-ref";
 
-/** The learner's own outline and progress for a course they are enrolled in. */
+/**
+ * A published course's outline: with the learner's own progress once enrolled,
+ * and as a preview of what it covers before.
+ */
 export const getRouteMetadata = {
   permission: "course.read",
   entitlement: null,

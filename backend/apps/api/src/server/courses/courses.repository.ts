@@ -1,5 +1,6 @@
 import { decodeListCursor, encodeListCursor } from "@atlas/membership/schemas/shared";
 import type { CourseListQuery } from "./schemas";
+import { readCourseCategory } from "./course-presentation";
 
 type Tx = {
   $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
@@ -129,6 +130,7 @@ type CourseListRow = {
   instructor_name: string | null;
   instructor_avatar_key: string | null;
   duration_seconds: bigint | null;
+  lesson_count: bigint;
   student_count: bigint;
   progress_pct: number | null;
   rating_average: number | null;
@@ -171,8 +173,16 @@ async function queryPublishedCourses(args: {
         c.updated_at,
         c.created_at,
         e.id::text as enrollment_id,
-        mp.display_name as instructor_name,
+        coalesce(nullif(btrim(mp.display_name), ''), nullif(btrim(ap.name), '')) as instructor_name,
         mp.avatar_key as instructor_avatar_key,
+        (
+          select count(*)::bigint
+          from lessons l
+          join course_modules cm on cm.id = l.module_id and cm.tenant_id = l.tenant_id
+          where cm.course_id = c.id
+            and cm.status = 'PUBLISHED' and cm.deleted_at is null
+            and l.status = 'PUBLISHED' and l.deleted_at is null
+        ) as lesson_count,
         (
           select coalesce(sum(l.duration_seconds), 0)::bigint
           from lessons l
@@ -213,9 +223,22 @@ async function queryPublishedCourses(args: {
         on e.course_id = c.id
        and e.membership_id = ${common.membershipId}::uuid
        and e.status = 'active'
+      left join memberships im
+        on im.tenant_id = c.tenant_id
+       and im.id = coalesce(
+         case
+           when c.metadata_json->'tags'->'instructorMembershipIds'->>0
+             ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+           then (c.metadata_json->'tags'->'instructorMembershipIds'->>0)::uuid
+         end,
+         c.created_by_membership_id
+       )
       left join member_profiles mp
-        on mp.membership_id = c.created_by_membership_id
+        on mp.membership_id = im.id
        and mp.tenant_id = c.tenant_id
+       and mp.deleted_at is null
+      left join auth_principals ap
+        on ap.id = im.auth_principal_id
       where c.deleted_at is null
         and c.status = 'PUBLISHED'
         and (${common.q}::text is null or c.title ilike ${common.q} or coalesce(c.description, '') ilike ${common.q})
@@ -250,8 +273,16 @@ async function queryPublishedCourses(args: {
         c.updated_at,
         c.created_at,
         e.id::text as enrollment_id,
-        mp.display_name as instructor_name,
+        coalesce(nullif(btrim(mp.display_name), ''), nullif(btrim(ap.name), '')) as instructor_name,
         mp.avatar_key as instructor_avatar_key,
+        (
+          select count(*)::bigint
+          from lessons l
+          join course_modules cm on cm.id = l.module_id and cm.tenant_id = l.tenant_id
+          where cm.course_id = c.id
+            and cm.status = 'PUBLISHED' and cm.deleted_at is null
+            and l.status = 'PUBLISHED' and l.deleted_at is null
+        ) as lesson_count,
         (
           select coalesce(sum(l.duration_seconds), 0)::bigint
           from lessons l
@@ -292,9 +323,22 @@ async function queryPublishedCourses(args: {
         on e.course_id = c.id
        and e.membership_id = ${common.membershipId}::uuid
        and e.status = 'active'
+      left join memberships im
+        on im.tenant_id = c.tenant_id
+       and im.id = coalesce(
+         case
+           when c.metadata_json->'tags'->'instructorMembershipIds'->>0
+             ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+           then (c.metadata_json->'tags'->'instructorMembershipIds'->>0)::uuid
+         end,
+         c.created_by_membership_id
+       )
       left join member_profiles mp
-        on mp.membership_id = c.created_by_membership_id
+        on mp.membership_id = im.id
        and mp.tenant_id = c.tenant_id
+       and mp.deleted_at is null
+      left join auth_principals ap
+        on ap.id = im.auth_principal_id
       where c.deleted_at is null
         and c.status = 'PUBLISHED'
         and (${common.q}::text is null or c.title ilike ${common.q} or coalesce(c.description, '') ilike ${common.q})
@@ -328,8 +372,16 @@ async function queryPublishedCourses(args: {
       c.updated_at,
       c.created_at,
       e.id::text as enrollment_id,
-      mp.display_name as instructor_name,
+      coalesce(nullif(btrim(mp.display_name), ''), nullif(btrim(ap.name), '')) as instructor_name,
       mp.avatar_key as instructor_avatar_key,
+      (
+        select count(*)::bigint
+        from lessons l
+        join course_modules cm on cm.id = l.module_id and cm.tenant_id = l.tenant_id
+        where cm.course_id = c.id
+          and cm.status = 'PUBLISHED' and cm.deleted_at is null
+          and l.status = 'PUBLISHED' and l.deleted_at is null
+      ) as lesson_count,
       (
         select coalesce(sum(l.duration_seconds), 0)::bigint
         from lessons l
@@ -370,9 +422,22 @@ async function queryPublishedCourses(args: {
       on e.course_id = c.id
      and e.membership_id = ${common.membershipId}::uuid
      and e.status = 'active'
+    left join memberships im
+      on im.tenant_id = c.tenant_id
+     and im.id = coalesce(
+       case
+         when c.metadata_json->'tags'->'instructorMembershipIds'->>0
+           ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+         then (c.metadata_json->'tags'->'instructorMembershipIds'->>0)::uuid
+       end,
+       c.created_by_membership_id
+     )
     left join member_profiles mp
-      on mp.membership_id = c.created_by_membership_id
+      on mp.membership_id = im.id
      and mp.tenant_id = c.tenant_id
+     and mp.deleted_at is null
+    left join auth_principals ap
+      on ap.id = im.auth_principal_id
     where c.deleted_at is null
       and c.status = 'PUBLISHED'
       and (${common.q}::text is null or c.title ilike ${common.q} or coalesce(c.description, '') ilike ${common.q})
@@ -501,6 +566,7 @@ export async function listPublishedCoursesPaginated(args: {
     trending: boolean;
     compareAtPriceCents: number | null;
     durationSeconds: number | null;
+    lessonCount: number;
     studentCount: number;
     instructor: { name: string | null; avatarKey: string | null } | null;
     progressPct: number | null;
@@ -560,11 +626,12 @@ export async function listPublishedCoursesPaginated(args: {
       currency: pricing.currency,
       locked: pricing.accessTier === "PAID" && enrollmentStatus !== "enrolled",
       level: catalog.level,
-      category: catalog.category,
+      category: readCourseCategory(row.metadata_json),
       featured: catalog.featured,
       trending: catalog.trending,
       compareAtPriceCents: catalog.compareAtPriceCents,
       durationSeconds: durationSeconds != null && durationSeconds > 0 ? durationSeconds : null,
+      lessonCount: Number(row.lesson_count),
       studentCount: Number(row.student_count),
       instructor,
       progressPct:

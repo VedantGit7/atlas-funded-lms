@@ -4,6 +4,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
 import { ImageIcon, X } from "lucide-react";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
+import { toast } from "../../../lib/feedback/toast";
+import {
+  COURSE_COVER_ACCEPT,
+  courseCoverFileProblem,
+  uploadCourseCover,
+} from "./upload-course-cover";
 import { CourseDescriptionField } from "./course-description-field";
 import { CreateCourseCategoryPicker } from "./create-course-category-picker";
 import { CreateCourseInstructorsPicker } from "./create-course-instructors-picker";
@@ -39,6 +45,7 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
   const [description, setDescription] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [thumbnailName, setThumbnailName] = useState<string | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,7 +84,15 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
 
   function handleThumbnailChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
+
+    const problem = courseCoverFileProblem(file);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    setError(null);
 
     if (thumbnailPreview) {
       URL.revokeObjectURL(thumbnailPreview);
@@ -85,6 +100,7 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
 
     setThumbnailPreview(URL.createObjectURL(file));
     setThumbnailName(file.name);
+    setThumbnailFile(file);
   }
 
   const canSubmit =
@@ -118,6 +134,17 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
         },
         "course-create",
       );
+      // The image goes up once the course exists (QA review 1 M21). The course
+      // is already saved, so a failed upload is reported, not a failed create.
+      if (thumbnailFile) {
+        try {
+          await uploadCourseCover(response.data.id, thumbnailFile);
+        } catch (uploadError) {
+          toast.error(
+            `The course was created, but its image couldn't be uploaded: ${formatError(uploadError)} Add it in Settings › Branding.`,
+          );
+        }
+      }
       router.push(`/studio/courses/${response.data.id}`);
       router.refresh();
     } catch (submitError) {
@@ -197,7 +224,7 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
               />
 
               <div>
-                <span className={dialogLabelClassName}>Course thumbnail</span>
+                <span className={dialogLabelClassName}>Course image</span>
                 <div className="flex items-start gap-3">
                   <div className="flex h-24 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-lg border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)]">
                     {thumbnailPreview ? (
@@ -214,7 +241,8 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
                     <input
                       ref={thumbnailInputRef}
                       type="file"
-                      accept="image/*"
+                      accept={COURSE_COVER_ACCEPT}
+                      aria-label="Course image"
                       className="sr-only"
                       onChange={handleThumbnailChange}
                       disabled={busy}
@@ -227,7 +255,7 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
                       }}
                       className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 py-2 text-sm font-semibold text-[var(--admin-on-surface)] transition-colors hover:bg-[var(--admin-surface-high)] disabled:opacity-50"
                     >
-                      Upload
+                      {thumbnailFile ? "Change" : "Choose image"}
                     </button>
                     {thumbnailName ? (
                       <p className="max-w-[8rem] truncate text-[11px] text-[var(--admin-on-surface-variant)]">
@@ -235,7 +263,7 @@ export function CreateCourseDialog({ onClose }: CreateCourseDialogProps) {
                       </p>
                     ) : (
                       <p className="max-w-[8rem] text-[11px] leading-snug text-[var(--admin-on-surface-variant)]">
-                        Add after save in course settings
+                        PNG, JPEG or WebP. Uploaded when you create the course.
                       </p>
                     )}
                   </div>

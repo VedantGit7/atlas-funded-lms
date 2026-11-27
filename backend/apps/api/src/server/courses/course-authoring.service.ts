@@ -66,7 +66,7 @@ function slugifyTitle(title: string): string {
     .slice(0, 120);
 }
 
-async function requireOwnedCourse(tx: TenantTx, ctx: ServiceCtx, courseId: string) {
+export async function requireOwnedCourse(tx: TenantTx, ctx: ServiceCtx, courseId: string) {
   const course = await findCourseAuthProjection({ tx, courseId });
 
   if (!course || course.tenantId !== ctx.tenantId) {

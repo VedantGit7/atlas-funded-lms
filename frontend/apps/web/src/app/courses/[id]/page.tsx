@@ -33,15 +33,13 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
       serverApi.get<CourseDetailResponse>(`/api/v1/courses/${id}`),
       serverApi.get<CourseModulesResponse>(`/api/v1/courses/${id}/modules`),
     ]);
-    // An enrolled learner's own progress (QA review 2 H20); the page still
-    // shows the chapters if it can't be loaded.
-    const outline =
-      course.data.enrollmentStatus === "enrolled"
-        ? await serverApi
-            .get<LearnerCourseOutlineResponse>(courseOutlinePath(id))
-            .then((response) => response.data)
-            .catch(() => null)
-        : null;
+    // Every chapter and lesson, with the learner's own progress once enrolled
+    // (QA review 1 M38, review 2 H20); the page still shows the chapters if it
+    // can't be loaded.
+    const outline = await serverApi
+      .get<LearnerCourseOutlineResponse>(courseOutlinePath(id))
+      .then((response) => response.data)
+      .catch(() => null);
 
     return (
       <PageGate state="ready" title={course.data.title}>
@@ -51,7 +49,10 @@ export default async function CourseDetailPage({ params, searchParams }: CourseD
           outline={outline}
           {...(tagId ? { tagId } : {})}
         />
-        <CourseCouponChecker courseId={id} />
+        {/* A coupon only matters for a paid course the learner hasn't bought (QA review 2). */}
+        {course.data.accessTier === "PAID" && course.data.enrollmentStatus !== "enrolled" ? (
+          <CourseCouponChecker courseId={id} />
+        ) : null}
         <CourseStorePricing courseId={id} />
       </PageGate>
     );

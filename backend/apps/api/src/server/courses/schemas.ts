@@ -62,6 +62,8 @@ export const courseCatalogFields = {
   trending: z.boolean(),
   compareAtPriceCents: z.number().int().nonnegative().nullable(),
   durationSeconds: z.number().int().nonnegative().nullable(),
+  /** Published lessons in published chapters. */
+  lessonCount: z.number().int().nonnegative(),
   studentCount: z.number().int().nonnegative(),
   instructor: courseInstructorSchema.nullable(),
   progressPct: z.number().int().min(0).max(100).nullable(),
@@ -102,6 +104,25 @@ export const courseDetailSchema = z.object({
   enrollmentStatus: z.enum(["enrolled", "not_enrolled"]),
   enrolledAt: z.iso.datetime().nullable(),
   resumeLessonId: z.uuid().nullable().optional(),
+  /**
+   * The course page's presentation (QA review 1 M38, M50): the summary under
+   * the title, who teaches it, what learners will learn, the FAQs and the
+   * promotional video. Read from the course's settings; Studio's other
+   * settings are not sent to learners.
+   */
+  shortDescription: z.string().nullable(),
+  level: courseLevelSchema.nullable(),
+  category: z.string().nullable(),
+  instructors: z.array(
+    z.object({
+      name: z.string(),
+      avatarUrl: z.string().nullable(),
+    }),
+  ),
+  outcomes: z.array(z.string()),
+  faqs: z.array(z.object({ question: z.string(), answer: z.string() })),
+  promoVideoUrl: z.string().nullable(),
+  studentCount: z.number().int().nonnegative(),
   updatedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
 });
