@@ -92,7 +92,8 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
         response.request().postDataJSON()?.completed === false,
     );
     // Follow the published outline: a missing learner link is a product failure.
-    await page.locator(`a[href="${lessonPath}"]`).click();
+    // The chapter list's link, not the progress card's Start button (S3.1).
+    await page.locator(`ol a[href="${lessonPath}"]`).click();
     await expect(page).toHaveURL(new RegExp(`${lessonPath}$`), coldRouteNavigationOptions());
     const firstProgress = await firstProgressResponse;
     expect(firstProgress.status()).toBe(200);
@@ -117,9 +118,16 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     };
     expect(savedBody.data.progress.status).toBe("in_progress");
     expect(savedBody.data.progress.positionSeconds).toBe(firstSaved.data.positionSeconds);
-    await page.locator(`a[href="${lessonPath}"]`).click();
+    // The course page offers to continue the started lesson (S3.1, QA review 2 H20).
+    await expect(page.getByRole("link", { name: "Continue", exact: true })).toHaveAttribute(
+      "href",
+      lessonPath,
+    );
+    await expect(page.getByText("0 of 1 lesson done")).toBeVisible();
+    await page.locator(`ol a[href="${lessonPath}"]`).click();
+    // The lesson header names its status in words, not the raw "in_progress" (QA review 1 m41).
     await expect(
-      page.getByText(`Resume at ${savedBody.data.progress.positionSeconds}s`, { exact: true }),
+      page.locator("article header").getByText("In progress", { exact: true }),
     ).toBeVisible();
 
     await waitForHydration(page);
@@ -138,10 +146,12 @@ test.describe("J02 learner enrollment and persisted lesson progress", () => {
     expect(await completed.json()).toMatchObject({
       data: { status: "completed", progressPct: 100 },
     });
+    // The only lesson is done, so there is no next lesson to open: the course is finished.
+    await expect(page.getByText("You've finished the course", { exact: true })).toBeVisible();
 
     await page.reload();
     await expect(
-      page.getByText("Status: completed · 100% complete", { exact: true }),
+      page.locator("article header").getByText("Completed", { exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "Lesson completed" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Mark complete", exact: true })).toHaveCount(0);
