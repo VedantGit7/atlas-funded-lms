@@ -8,7 +8,7 @@ import {
 import {
   ITEM_IMPORT_MAX_ROWS,
   isBlankImportRow,
-  isImportableItemType,
+  isImportTemplateType,
   type ImportRow,
 } from "@atlas/contracts/item-registry/item-import.contract";
 
@@ -69,7 +69,7 @@ export async function readImportFile(file: File): Promise<ImportFile> {
 
   const values = new Map(meta.data.map((row) => [text(row[0]), text(row[1])]));
   const itemTypeKey = values.get("itemTypeKey") ?? "";
-  if (!isImportableItemType(itemTypeKey)) throw new ImportFileError(NOT_A_TEMPLATE);
+  if (!isImportTemplateType(itemTypeKey)) throw new ImportFileError(NOT_A_TEMPLATE);
   const columns = (values.get("columns") ?? "").split(",").filter(Boolean);
 
   const [headerRow = [], ...body] = questions.data;

@@ -412,6 +412,7 @@ export function ItemEditorForm({
               value={answerKeyJson}
               onChange={setAnswerKeyJson}
               options={options}
+              stem={stem}
               {...(requiresOptions ? { onOptionsChange: setOptions } : {})}
             />
 

@@ -57,3 +57,12 @@ export function attemptKeyConflict(): AtlasHttpError {
       "This Idempotency-Key was already used for a different request. Use a new key for a new operation.",
   });
 }
+
+/** A long answer over its word limit (S3.4b). */
+export function answerOverWordLimit(limit: number, words: number): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 400,
+    message: `Keep this answer to ${limit.toLocaleString("en")} words. It has ${words.toLocaleString("en")}.`,
+  });
+}

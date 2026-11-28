@@ -1,3 +1,4 @@
+import { ANSWER_RULE_LIMITS } from "./answer-rules.contract";
 import {
   ITEM_DEFINITION_LIMITS,
   VALIDATED_ITEM_TYPES,
@@ -6,8 +7,9 @@ import {
 } from "./item-definition.contract";
 
 /**
- * The spreadsheet format for importing questions, one template per question
- * type. The server builds the template from these columns, the browser reads
+ * The spreadsheet format for importing questions: one template per question
+ * type, and a mixed template whose rows say their own type (QA review 2 4.1,
+ * S3.4b). The server builds the template from these columns, the browser reads
  * an upload with them, and both turn a row into a question with
  * `rowToItemDefinition`, which then goes through the same
  * `validateItemDefinition` the item service enforces. One description of the
@@ -18,8 +20,12 @@ import {
  */
 
 export const ITEM_IMPORT_FORMAT = "atlas-item-import";
-/** Bump when columns change; an upload from another version is refused. */
-export const ITEM_IMPORT_TEMPLATE_VERSION = "1";
+/**
+ * Bump when columns change; an upload from another version is refused.
+ * 2 (S3.4b): fill in the blank takes answers per blank, short answer takes
+ * keywords, long answer a word limit, and the mixed template exists.
+ */
+export const ITEM_IMPORT_TEMPLATE_VERSION = "2";
 /** Questions per file (owner decision, 19 Nov 2026). */
 export const ITEM_IMPORT_MAX_ROWS = 5_000;
 export const ITEM_IMPORT_MAX_TAGS = 50;
@@ -30,7 +36,7 @@ const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"] as const;
 const MATCHING_PAIRS = 8;
 const MATCHING_EXTRA_RIGHT = 3;
 const ORDERING_STEPS = 10;
-const FILL_BLANK_ANSWERS = 5;
+const FILL_BLANK_BLANKS = 5;
 
 export const TRUE_FALSE_VALUES = ["TRUE", "FALSE"] as const;
 export const SWIPE_VALUES = ["Known (right)", "Unknown (left)"] as const;
@@ -91,6 +97,38 @@ export const ITEM_IMPORT_TYPE_NAMES: Record<ValidatedItemTypeKey, string> = {
 
 export function isImportableItemType(key: string): key is ValidatedItemTypeKey {
   return (VALIDATED_ITEM_TYPES as readonly string[]).includes(key);
+}
+
+/** The template whose rows can be any type, each naming its own (S3.4b). */
+export const ITEM_IMPORT_MIXED = "mixed";
+
+/** A template: one question type, or mixed. */
+export type ImportTemplateType = ValidatedItemTypeKey | typeof ITEM_IMPORT_MIXED;
+
+export const ITEM_IMPORT_TEMPLATE_TYPES = [...VALIDATED_ITEM_TYPES, ITEM_IMPORT_MIXED] as const;
+
+export function isImportTemplateType(key: string): key is ImportTemplateType {
+  return key === ITEM_IMPORT_MIXED || isImportableItemType(key);
+}
+
+/** What a template is called, for messages and the download's name. */
+export function importTemplateName(type: ImportTemplateType): string {
+  return type === ITEM_IMPORT_MIXED ? "Mixed (any type)" : ITEM_IMPORT_TYPE_NAMES[type];
+}
+
+/** The question type a mixed template's row names: its name, or its key. */
+export function readImportRowType(value: string): ValidatedItemTypeKey | null {
+  const wanted = value.trim().toLocaleLowerCase();
+  if (!wanted) return null;
+  for (const type of VALIDATED_ITEM_TYPES) {
+    if (
+      ITEM_IMPORT_TYPE_NAMES[type].toLocaleLowerCase() === wanted ||
+      type === wanted.replace(/[\s/-]+/g, "_")
+    ) {
+      return type;
+    }
+  }
+  return null;
 }
 
 const L = ITEM_DEFINITION_LIMITS;
@@ -179,16 +217,16 @@ function typeColumns(type: ValidatedItemTypeKey): ImportColumn[] {
         ),
       ];
     case "fill_blank":
-      return Array.from({ length: FILL_BLANK_ANSWERS }, (_, index) =>
+      return Array.from({ length: FILL_BLANK_BLANKS }, (_, index) =>
         text(
-          `accepted_${String(index + 1)}`,
-          `Accepted answer ${String(index + 1)}`,
+          `blank_${String(index + 1)}`,
+          `Blank ${String(index + 1)} answers`,
           index === 0,
           index === 0
-            ? "An answer that counts as correct. Capitals and spaces around it are ignored when marking."
-            : "Another answer that also counts as correct (optional).",
-          L.acceptedValueMaxLength,
-          22,
+            ? "Every answer that counts as right for the first blank, separated by semicolons, for example: Doji; Doji candle. Capitals and extra spaces are ignored."
+            : `Answers for blank ${String(index + 1)}, if the question has that many blanks (optional).`,
+          2_000,
+          24,
         ),
       );
     case "short_answer":
@@ -210,6 +248,45 @@ function typeColumns(type: ValidatedItemTypeKey): ImportColumn[] {
           L.rubricMaxLength,
           40,
         ),
+        ...(type === "short_answer"
+          ? [
+              text(
+                "keywords",
+                "Keywords",
+                false,
+                "Words or phrases that mark the answer automatically, separated by semicolons, for example: stop loss; risk (optional). Leave empty for a person to mark it.",
+                2_000,
+                30,
+              ),
+              {
+                key: "keywords_needed",
+                header: "Keywords needed",
+                required: false,
+                help: "How many of the keywords an answer needs for full marks (optional; all of them if empty).",
+                width: 14,
+                format: "number" as const,
+                validation: {
+                  kind: "decimal" as const,
+                  min: 1,
+                  max: ANSWER_RULE_LIMITS.maxKeywords,
+                },
+              },
+            ]
+          : [
+              {
+                key: "max_words",
+                header: "Word limit",
+                required: false,
+                help: "The most words an answer may have (optional; no limit if empty).",
+                width: 12,
+                format: "number" as const,
+                validation: {
+                  kind: "decimal" as const,
+                  min: 1,
+                  max: ANSWER_RULE_LIMITS.maxWordLimit,
+                },
+              },
+            ]),
       ];
     case "file_upload":
       return [
@@ -298,11 +375,42 @@ function typeColumns(type: ValidatedItemTypeKey): ImportColumn[] {
   }
 }
 
+/**
+ * The mixed template's own columns: every type's columns once each, saying
+ * which types use them. A row fills only the ones its type needs.
+ */
+function mixedTypeColumns(): ImportColumn[] {
+  const byKey = new Map<string, { column: ImportColumn; types: ValidatedItemTypeKey[] }>();
+  for (const type of VALIDATED_ITEM_TYPES) {
+    for (const column of typeColumns(type)) {
+      const entry = byKey.get(column.key);
+      if (entry) entry.types.push(type);
+      else byKey.set(column.key, { column, types: [type] });
+    }
+  }
+  return [...byKey.values()].map(({ column, types }) => ({
+    ...column,
+    required: false,
+    help: `${types.map((type) => ITEM_IMPORT_TYPE_NAMES[type]).join(", ")}: ${column.help}`,
+  }));
+}
+
 export function itemImportColumns(
-  type: ValidatedItemTypeKey,
+  type: ImportTemplateType,
   dimensions: ImportDimension[],
 ): ImportColumn[] {
+  const typeNames = VALIDATED_ITEM_TYPES.map((key) => ITEM_IMPORT_TYPE_NAMES[key]);
   return [
+    ...(type === ITEM_IMPORT_MIXED
+      ? [
+          choice(
+            "question_type",
+            "Question type",
+            "The type of this question. Choose from the list; fill only the columns that type uses.",
+            typeNames,
+          ),
+        ]
+      : []),
     text(
       "question",
       "Question",
@@ -311,7 +419,7 @@ export function itemImportColumns(
       L.stemMaxLength,
       50,
     ),
-    ...typeColumns(type),
+    ...(type === ITEM_IMPORT_MIXED ? mixedTypeColumns() : typeColumns(type)),
     text(
       "explanation",
       "Explanation",
@@ -351,7 +459,15 @@ export function itemImportColumns(
 }
 
 /** One complete, valid example per type, shown on the Examples sheet. */
-export function itemImportExamples(type: ValidatedItemTypeKey): ImportRow[] {
+export function itemImportExamples(type: ImportTemplateType): ImportRow[] {
+  if (type === ITEM_IMPORT_MIXED) {
+    return VALIDATED_ITEM_TYPES.flatMap((each) =>
+      itemImportExamples(each).map((row) => ({
+        question_type: ITEM_IMPORT_TYPE_NAMES[each],
+        ...row,
+      })),
+    );
+  }
   const common = (tags: string) => ({ tags, reference: "" });
   switch (type) {
     case "mcq_single":
@@ -394,10 +510,16 @@ export function itemImportExamples(type: ValidatedItemTypeKey): ImportRow[] {
         {
           question:
             "A candle where the open and close are almost equal, with no real body, is called a ____.",
-          accepted_1: "Doji",
-          accepted_2: "Doji candle",
+          blank_1: "Doji; Doji candle",
           explanation: "A doji shows indecision between buyers and sellers.",
           ...common("candlesticks"),
+        },
+        {
+          question: "Price bouncing off a ____ level twice forms a double ____.",
+          blank_1: "support",
+          blank_2: "bottom",
+          explanation: "Two lows at the same support make a double bottom.",
+          ...common("patterns"),
         },
       ];
     case "short_answer":
@@ -406,6 +528,8 @@ export function itemImportExamples(type: ValidatedItemTypeKey): ImportRow[] {
           question: "In one sentence, what is position sizing?",
           model_answer: "Choosing how much to trade so a loss stays within your risk limit.",
           rubric: "Mentions trade size and limiting the loss to a set amount or percentage.",
+          keywords: "size; risk; loss",
+          keywords_needed: 2,
           ...common("risk"),
         },
       ];
@@ -417,6 +541,7 @@ export function itemImportExamples(type: ValidatedItemTypeKey): ImportRow[] {
             "Compare the trade with my plan, note what I did differently, and record one change for next time.",
           rubric:
             "Refers to the trading plan, separates the decision from the outcome, ends with an action.",
+          max_words: 200,
           ...common("journaling"),
         },
       ];
@@ -467,7 +592,21 @@ export function itemImportExamples(type: ValidatedItemTypeKey): ImportRow[] {
 }
 
 /** Plain-language instructions for the template's first sheet. */
-export function itemImportInstructions(type: ValidatedItemTypeKey): string[] {
+export function itemImportInstructions(type: ImportTemplateType): string[] {
+  if (type === ITEM_IMPORT_MIXED) {
+    return [
+      "This template takes questions of any type in one file.",
+      "Fill in the Questions sheet: one question per row, starting on row 2.",
+      "Choose each row's Question type first, then fill the Question and only the columns that type uses. Each column's hint says which types use it.",
+      "Do not rename, move or delete the header row or its columns.",
+      `Up to ${ITEM_IMPORT_MAX_ROWS.toLocaleString("en")} questions per file. Empty rows are skipped.`,
+      "Fill in the blank: mark each blank in the question with ____ and give each blank's answers, separated by semicolons.",
+      "Short answer: add keywords to mark it automatically; leave them empty for a person to mark it.",
+      "Tags are separated by commas. Weight columns take a number from 0 to 1 and can be left empty.",
+      "The Examples sheet shows one complete question of each type. It is never imported.",
+      "Every imported question starts as a Draft, so you can review it before learners see it.",
+    ];
+  }
   const name = ITEM_IMPORT_TYPE_NAMES[type];
   const typeNotes: Record<ValidatedItemTypeKey, string[]> = {
     mcq_single: [
@@ -480,11 +619,18 @@ export function itemImportInstructions(type: ValidatedItemTypeKey): string[] {
     ],
     true_false: ["Write the question as a statement. Correct answer is TRUE or FALSE."],
     fill_blank: [
-      "Show the blank in the question with ____.",
-      "Add every answer that should count as correct. Capitals and spaces around the answer are ignored when marking.",
+      "Mark each blank in the question with ____ (three or more underscores). A question can have up to five blanks.",
+      "For each blank, list every answer that counts as right, separated by semicolons, for example: Doji; Doji candle. Capitals and extra spaces are ignored.",
+      "With several blanks, each right blank earns an equal share of the question's marks.",
     ],
-    short_answer: ["Short answers are graded by a person. The model answer and rubric help them."],
-    long_answer: ["Long answers are graded by a person. The model answer and rubric help them."],
+    short_answer: [
+      "With Keywords (separated by semicolons), answers are marked automatically: full marks when an answer has enough of them. Keywords needed says how many; all of them if empty.",
+      "Without keywords a person marks the answer. The model answer and rubric help them.",
+    ],
+    long_answer: [
+      "Long answers are graded by a person. The model answer and rubric help them.",
+      "Word limit is the most words an answer may have; leave it empty for no limit.",
+    ],
     file_upload: [
       "Learners upload a file, and a person grades it.",
       "Accepted file types are extensions such as pdf or png, separated by commas.",
@@ -497,7 +643,7 @@ export function itemImportInstructions(type: ValidatedItemTypeKey): string[] {
     swipe: ["Each row is one card. Correct swipe is Known (right) or Unknown (left)."],
   };
   return [
-    `This template is for ${name} questions only. Use the matching template for other types.`,
+    `This template is for ${name} questions only. Use the matching template for other types, or the Mixed template for several types in one file.`,
     "Fill in the Questions sheet: one question per row, starting on row 2.",
     "Columns marked * are required. Select a cell to see a hint for its column.",
     "Do not rename, move or delete the header row or its columns.",
@@ -534,6 +680,20 @@ function splitList(value: string): string[] {
     .filter(Boolean);
 }
 
+/** Answers and keywords: separated by semicolons (answers may hold commas, as in 1,000). */
+function splitAnswers(value: string): string[] {
+  return value
+    .split(/[;\n]/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function readWholeNumber(raw: ImportCell, textValue: string): number | null {
+  if (textValue === "") return null;
+  const number = typeof raw === "number" ? raw : Number(textValue);
+  return Number.isFinite(number) ? number : Number.NaN;
+}
+
 /** Which template columns a definition issue refers to, for highlighting. */
 function columnsForField(type: ValidatedItemTypeKey, field: string): string[] {
   switch (field) {
@@ -550,7 +710,15 @@ function columnsForField(type: ValidatedItemTypeKey, field: string): string[] {
     case "value":
       return ["correct_answer"];
     case "acceptedValues":
-      return Array.from({ length: FILL_BLANK_ANSWERS }, (_, i) => `accepted_${String(i + 1)}`);
+      return ["blank_1"];
+    case "blanks":
+      return Array.from({ length: FILL_BLANK_BLANKS }, (_, i) => `blank_${String(i + 1)}`);
+    case "keywords":
+      return ["keywords"];
+    case "keywordsRequired":
+      return ["keywords_needed"];
+    case "maxWords":
+      return ["max_words"];
     case "rubric":
       return ["rubric"];
     case "modelAnswer":
@@ -578,7 +746,7 @@ function columnsForField(type: ValidatedItemTypeKey, field: string): string[] {
  * question itself is then checked by `validateItemDefinition`.
  */
 export function rowToItemDefinition(
-  type: ValidatedItemTypeKey,
+  templateType: ImportTemplateType,
   row: ImportRow,
   dimensions: ImportDimension[],
 ): ImportRowResult {
@@ -586,6 +754,29 @@ export function rowToItemDefinition(
   const issue = (columns: string[], message: string) => {
     issues.push({ columns, message });
   };
+
+  // A mixed template's row names its own type (S3.4b).
+  let type: ValidatedItemTypeKey;
+  if (templateType === ITEM_IMPORT_MIXED) {
+    const named = cellText(row["question_type"]);
+    const resolved = readImportRowType(named);
+    if (!resolved) {
+      return {
+        ok: false,
+        issues: [
+          {
+            columns: ["question_type"],
+            message: named
+              ? `"${named}" is not a question type. Choose one from the list.`
+              : "Choose the question type.",
+          },
+        ],
+      };
+    }
+    type = resolved;
+  } else {
+    type = templateType;
+  }
   const columns = itemImportColumns(type, dimensions);
 
   for (const column of columns) {
@@ -655,16 +846,53 @@ export function rowToItemDefinition(
       break;
     }
 
-    case "fill_blank":
-      answerKey["acceptedValues"] = Array.from({ length: FILL_BLANK_ANSWERS }, (_, i) =>
-        get(`accepted_${String(i + 1)}`),
+    case "fill_blank": {
+      // One column per blank; the last filled one says how many there are.
+      const cells = Array.from({ length: FILL_BLANK_BLANKS }, (_, i) =>
+        get(`blank_${String(i + 1)}`),
       );
+      let last = 0;
+      cells.forEach((cell, index) => {
+        if (cell) last = index + 1;
+      });
+      const sets = cells.slice(0, Math.max(last, 1)).map(splitAnswers);
+      sets.forEach((set, index) => {
+        if (set.length === 0 && index > 0) {
+          issue(
+            [`blank_${String(index + 1)}`],
+            `Blank ${String(index + 1)} has no answers, but a later blank does. Fill blanks in order.`,
+          );
+        }
+      });
+      if (sets.length <= 1) answerKey["acceptedValues"] = sets[0] ?? [];
+      else answerKey["blanks"] = sets.map((acceptedValues) => ({ acceptedValues }));
       break;
+    }
 
     case "short_answer":
     case "long_answer":
       answerKey["modelAnswer"] = get("model_answer");
       answerKey["rubric"] = get("rubric");
+      if (type === "short_answer") {
+        const keywords = splitAnswers(get("keywords"));
+        if (keywords.length > 0) answerKey["keywords"] = keywords;
+        const needed = readWholeNumber(row["keywords_needed"], get("keywords_needed"));
+        if (needed !== null) {
+          if (keywords.length === 0) {
+            issue(["keywords_needed"], "Keywords needed is set, but there are no keywords.");
+          } else if (Number.isNaN(needed)) {
+            issue(["keywords_needed"], "Keywords needed must be a whole number.");
+          } else {
+            answerKey["keywordsRequired"] = needed;
+          }
+        }
+      } else {
+        const limit = readWholeNumber(row["max_words"], get("max_words"));
+        if (limit !== null) {
+          if (Number.isNaN(limit)) issue(["max_words"], "Word limit must be a whole number.");
+          else answerKey["maxWords"] = limit;
+        }
+      }
       break;
 
     case "file_upload":

@@ -1,12 +1,13 @@
 import { z } from "zod";
-import { VALIDATED_ITEM_TYPES, type ValidatedItemTypeKey } from "./item-definition.contract";
 import {
   ITEM_IMPORT_FORMAT,
   ITEM_IMPORT_MAX_ROWS,
   ITEM_IMPORT_TAG_MAX_LENGTH,
+  ITEM_IMPORT_TEMPLATE_TYPES,
   ITEM_IMPORT_TEMPLATE_VERSION,
-  ITEM_IMPORT_TYPE_NAMES,
+  importTemplateName,
   itemImportColumns,
+  type ImportTemplateType,
   type ImportCell,
   type ImportDimension,
   type ImportRow,
@@ -71,7 +72,8 @@ export const ImportTemplateIdentitySchema = z
   .object({
     format: z.string().max(80),
     version: z.string().max(20),
-    itemTypeKey: z.enum(VALIDATED_ITEM_TYPES),
+    /** A question type, or "mixed" (S3.4b). */
+    itemTypeKey: z.enum(ITEM_IMPORT_TEMPLATE_TYPES),
     columns: z.array(z.string().max(COLUMNS_MAX)).max(COLUMNS_MAX),
     headers: z.array(z.string().max(300)).max(200),
   })
@@ -307,7 +309,7 @@ export type TemplateCheck = { ok: true; columns: string[] } | { ok: false; messa
  */
 export function checkImportTemplate(
   identity: ImportTemplateIdentity,
-  expectedType: ValidatedItemTypeKey,
+  expectedType: ImportTemplateType,
   dimensions: ImportDimension[],
 ): TemplateCheck {
   const fresh = "Download a new template from Create item and copy your questions into it.";
@@ -326,7 +328,7 @@ export function checkImportTemplate(
   if (identity.itemTypeKey !== expectedType) {
     return {
       ok: false,
-      message: `This is the ${ITEM_IMPORT_TYPE_NAMES[identity.itemTypeKey]} template, but you are importing ${ITEM_IMPORT_TYPE_NAMES[expectedType]} questions. Choose ${ITEM_IMPORT_TYPE_NAMES[identity.itemTypeKey]} or upload the right template.`,
+      message: `This is the ${importTemplateName(identity.itemTypeKey)} template, but you are importing ${importTemplateName(expectedType)} questions. Choose ${importTemplateName(identity.itemTypeKey)} or upload the right template.`,
     };
   }
 

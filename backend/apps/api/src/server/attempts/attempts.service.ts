@@ -1,3 +1,4 @@
+import { countWords, longAnswerWordLimit } from "../item-registry/answer-rules.contract";
 import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { outbox } from "@atlas/events";
@@ -9,7 +10,12 @@ import {
   readCreatedByMembershipId,
   readItemRequired,
 } from "../assessments/assessments.repository";
-import { canReviewAnswers, scoreAttempt, type ScoringItem } from "../assessments/scoring.service";
+import {
+  canReviewAnswers,
+  isManualScoringItem,
+  scoreAttempt,
+  type ScoringItem,
+} from "../assessments/scoring.service";
 import { assessmentNotFound } from "../assessments/assessments.errors";
 import {
   attemptKeyConflict,
@@ -17,6 +23,7 @@ import {
   attemptNotFound,
   attemptNotInProgress,
   attemptTimeExpired,
+  answerOverWordLimit,
   assessmentNotPublished,
   invalidAttemptItem,
 } from "./attempts.errors";
@@ -187,15 +194,6 @@ function optionLabel(optionJson: unknown, position: number): string {
   return typeof label === "string" && label.trim() ? label : `Option ${String(position)}`;
 }
 
-function isManualGradingType(itemTypeKey: string): boolean {
-  return (
-    itemTypeKey === "short_answer" ||
-    itemTypeKey === "long_answer" ||
-    itemTypeKey === "file_upload" ||
-    itemTypeKey === "assignment"
-  );
-}
-
 /**
  * The attempt's questions.
  *
@@ -263,11 +261,12 @@ async function buildRunnerItems(
           })
         : null;
     const points = Number(row.points);
+    const maxWords = item.item_type_key === "long_answer" ? longAnswerWordLimit(answerKey) : null;
 
     let review = null;
     if (mode === "review") {
       const answerRow = graded.get(row.id);
-      const manual = isManualGradingType(item.item_type_key);
+      const manual = isManualScoringItem(item.item_type_key, answerKey);
       review = {
         isCorrect: manual ? null : (answerRow?.is_correct ?? false),
         pointsAwarded: manual ? null : Number(answerRow?.points_awarded ?? 0),
@@ -311,6 +310,7 @@ async function buildRunnerItems(
             })
           : saved,
       ...(choices ? { choices } : {}),
+      ...(maxWords != null ? { answerLimits: { maxWords } } : {}),
       ...(review ? { review } : {}),
     });
   }
@@ -582,13 +582,26 @@ export async function saveAttemptAnswer(
     throw invalidAttemptItem();
   }
 
+  const loaded = (await itemRegistryRepository.loadItemsWithOptions(tx, [input.itemId])).get(
+    input.itemId,
+  );
+
+  // A long answer over its word limit isn't saved (S3.4b); the learner's
+  // counter shows the limit as they type.
+  if (loaded?.item.item_type_key === "long_answer") {
+    const limit = longAnswerWordLimit(
+      decodeExplanationJson(loaded.item.explanation_json).answerKeyJson,
+    );
+    const words = countWords(input.answerJson["value"]);
+    if (limit != null && words > limit) {
+      throw answerOverWordLimit(limit, words);
+    }
+  }
+
   // Matching and ordering answers arrive in the attempt's opaque tokens and
   // are stored with the real ids, so grading is unchanged (attempt-choices.ts).
   let answerJson = input.answerJson;
   if (metadata.choiceSalt) {
-    const loaded = (await itemRegistryRepository.loadItemsWithOptions(tx, [input.itemId])).get(
-      input.itemId,
-    );
     if (loaded) {
       answerJson = decodeChoiceAnswer({
         itemTypeKey: loaded.item.item_type_key,

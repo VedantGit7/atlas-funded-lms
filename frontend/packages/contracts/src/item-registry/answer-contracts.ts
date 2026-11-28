@@ -1,5 +1,11 @@
 import { z } from "zod";
 import { responseToWire, responseFromWire } from "./answer-ui";
+import {
+  fillBlankAnswerSets,
+  markFillBlank,
+  matchedKeywords,
+  shortAnswerKeywordRule,
+} from "./answer-rules.contract";
 export {
   emptyResponseState,
   responseFromWire,
@@ -89,6 +95,8 @@ export const TrueFalseAnswerKeySchema = z
 export const FillBlankAnswerKeySchema = z.object({
   value: z.string().optional(),
   acceptedValues: z.array(z.string()).optional(),
+  /** One entry per blank when the question has several (S3.4b). */
+  blanks: z.array(z.object({ acceptedValues: z.array(z.string()) }).loose()).optional(),
 });
 
 export const StructuredAnswerKeySchema = z.object({
@@ -106,13 +114,18 @@ export const ManualAnswerKeySchema = z.object({
   rubric: z.string().optional(),
   modelAnswer: z.string().optional(),
   acceptedFileTypes: z.array(z.string()).optional(),
+  /** Short answer: marked automatically by these (S3.4b). */
+  keywords: z.array(z.string()).optional(),
+  keywordsRequired: z.number().int().optional(),
+  /** Long answer: word limit (S3.4b). */
+  maxWords: z.number().int().optional(),
 });
 
 export type ItemResponseUiState =
   | { type: "mcq_single"; selectedOptionId: string | null }
   | { type: "mcq_multi"; selectedOptionIds: string[] }
   | { type: "true_false"; value: boolean | null }
-  | { type: "fill_blank"; value: string }
+  | { type: "fill_blank"; values: string[] }
   | { type: "short_answer"; value: string }
   | { type: "long_answer"; value: string }
   | { type: "matching"; pairs: Record<string, string> }
@@ -124,9 +137,15 @@ export type ItemAnswerKeyUiState =
   | { type: "mcq_single"; correctOptionId: string | null }
   | { type: "mcq_multi"; correctOptionIds: string[] }
   | { type: "true_false"; value: boolean }
-  | { type: "fill_blank"; acceptedValues: string[] }
-  | { type: "short_answer"; rubric: string; modelAnswer: string }
-  | { type: "long_answer"; rubric: string; modelAnswer: string }
+  | { type: "fill_blank"; blanks: string[][] }
+  | {
+      type: "short_answer";
+      rubric: string;
+      modelAnswer: string;
+      keywords: string[];
+      keywordsRequired: number | null;
+    }
+  | { type: "long_answer"; rubric: string; modelAnswer: string; maxWords: number | null }
   | { type: "matching"; pairs: Record<string, string> }
   | { type: "ordering"; order: string[] }
   | { type: "file_upload"; rubric: string; acceptedFileTypes: string[] }
@@ -267,23 +286,25 @@ export function answerKeyToUiState(
     case "fill_blank":
       return {
         type: "fill_blank",
-        acceptedValues: Array.isArray(raw["acceptedValues"])
-          ? raw["acceptedValues"].filter((entry): entry is string => typeof entry === "string")
-          : typeof raw["value"] === "string" && raw["value"].trim()
-            ? [raw["value"]]
-            : [""],
+        blanks: fillBlankAnswerSets(raw).map((values) => (values.length > 0 ? values : [""])),
       };
     case "short_answer":
       return {
         type: "short_answer",
         rubric: typeof raw["rubric"] === "string" ? raw["rubric"] : "",
         modelAnswer: typeof raw["modelAnswer"] === "string" ? raw["modelAnswer"] : "",
+        keywords: Array.isArray(raw["keywords"])
+          ? raw["keywords"].filter((entry): entry is string => typeof entry === "string")
+          : [],
+        keywordsRequired:
+          typeof raw["keywordsRequired"] === "number" ? raw["keywordsRequired"] : null,
       };
     case "long_answer":
       return {
         type: "long_answer",
         rubric: typeof raw["rubric"] === "string" ? raw["rubric"] : "",
         modelAnswer: typeof raw["modelAnswer"] === "string" ? raw["modelAnswer"] : "",
+        maxWords: typeof raw["maxWords"] === "number" ? raw["maxWords"] : null,
       };
     case "matching":
       return {
@@ -327,12 +348,26 @@ export function uiStateToAnswerKey(state: ItemAnswerKeyUiState): Record<string, 
     case "true_false":
       return { value: state.value };
     case "fill_blank":
-      return {
-        acceptedValues: state.acceptedValues.map((entry) => entry.trim()).filter(Boolean),
-      };
+      // Empty rows stay while the author types; saving drops them
+      // (validateItemDefinition). One blank keeps the older key.
+      return state.blanks.length <= 1
+        ? { acceptedValues: state.blanks[0] ?? [""] }
+        : { blanks: state.blanks.map((acceptedValues) => ({ acceptedValues })) };
     case "short_answer":
+      return {
+        rubric: state.rubric,
+        modelAnswer: state.modelAnswer,
+        ...(state.keywords.length > 0 ? { keywords: state.keywords } : {}),
+        ...(state.keywords.length > 0 && state.keywordsRequired != null
+          ? { keywordsRequired: state.keywordsRequired }
+          : {}),
+      };
     case "long_answer":
-      return { rubric: state.rubric, modelAnswer: state.modelAnswer };
+      return {
+        rubric: state.rubric,
+        modelAnswer: state.modelAnswer,
+        ...(state.maxWords != null ? { maxWords: state.maxWords } : {}),
+      };
     case "matching":
       return { pairs: state.pairs };
     case "ordering":
@@ -378,11 +413,6 @@ function readStringRecord(value: unknown): Record<string, string> {
   );
 }
 
-function normalizeString(value: unknown): string {
-  if (typeof value !== "string") return "";
-  return value.trim().toLowerCase();
-}
-
 function compareSets(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   const sortedA = [...a].sort();
@@ -398,7 +428,7 @@ export function scorePreviewAnswer(args: {
 }): PreviewScoreResult {
   const { itemTypeKey, answerKey, answerJson, options } = args;
 
-  if (isManualGradingType(itemTypeKey)) {
+  if (isManualGradingType(itemTypeKey) && shortAnswerKeywordRule(answerKey) === null) {
     const rubric =
       typeof answerKey["rubric"] === "string" && answerKey["rubric"].trim().length > 0
         ? answerKey["rubric"]
@@ -412,7 +442,7 @@ export function scorePreviewAnswer(args: {
     };
   }
 
-  if (!supportsAutoCheck(itemTypeKey)) {
+  if (!supportsAutoCheck(itemTypeKey) && itemTypeKey !== "short_answer") {
     return {
       kind: "neutral",
       title: "Preview only",
@@ -475,17 +505,44 @@ export function scorePreviewAnswer(args: {
           };
     }
     case "fill_blank": {
-      const value = normalizeString(answerJson["value"]);
-      const accepted = Array.isArray(answerKey["acceptedValues"])
-        ? answerKey["acceptedValues"].map((entry) => normalizeString(entry))
-        : [normalizeString(answerKey["value"])];
-      const isCorrect = accepted.includes(value) && value.length > 0;
-      return isCorrect
+      const { right, total } = markFillBlank(answerKey, answerJson);
+      if (total > 1) {
+        return right === total
+          ? { kind: "correct", title: "Correct", detail: "Every blank has an accepted answer." }
+          : {
+              kind: "incorrect",
+              title: right > 0 ? "Partly right" : "Incorrect",
+              detail: `Blanks right: ${String(right)} of ${String(total)}. Each right blank earns an equal share of the marks.`,
+            };
+      }
+      return right === 1
         ? { kind: "correct", title: "Correct", detail: "That's an accepted answer." }
         : {
             kind: "incorrect",
             title: "Incorrect",
             detail: "That isn't one of the accepted answers.",
+          };
+    }
+    case "short_answer": {
+      const rule = shortAnswerKeywordRule(answerKey);
+      if (!rule) {
+        return {
+          kind: "manual",
+          title: "Marked by an instructor",
+          detail: "An instructor marks learners' answers to this question.",
+        };
+      }
+      const found = matchedKeywords(answerJson["value"], rule.keywords);
+      return found.length >= rule.required
+        ? {
+            kind: "correct",
+            title: "Correct",
+            detail: `It mentions ${found.join(", ")}: enough keywords for full marks.`,
+          }
+        : {
+            kind: "incorrect",
+            title: "Incorrect",
+            detail: `It needs ${String(rule.required)} of the keywords and mentions ${String(found.length)}${found.length > 0 ? ` (${found.join(", ")})` : ""}.`,
           };
     }
     case "matching": {
@@ -585,15 +642,16 @@ export function schemaJsonForItemType(itemTypeKey: string): ItemTypeSchemaJson {
     case "fill_blank":
       return {
         fields: ["stem"],
-        answerKeyShape: "{ acceptedValues: string[] }",
-        responseShape: "{ value: string }",
+        answerKeyShape: "{ acceptedValues: string[] } | { blanks: { acceptedValues: string[] }[] }",
+        responseShape: "{ value: string } | { values: string[] }",
         requiresOptions: false,
         gradingMode: "auto",
       };
     case "short_answer":
       return {
         fields: ["stem"],
-        answerKeyShape: "{ rubric?: string, modelAnswer?: string }",
+        answerKeyShape:
+          "{ rubric?: string, modelAnswer?: string, keywords?: string[], keywordsRequired?: number }",
         responseShape: "{ value: string }",
         requiresOptions: false,
         gradingMode: "manual",
@@ -601,7 +659,7 @@ export function schemaJsonForItemType(itemTypeKey: string): ItemTypeSchemaJson {
     case "long_answer":
       return {
         fields: ["stem"],
-        answerKeyShape: "{ rubric?: string, modelAnswer?: string }",
+        answerKeyShape: "{ rubric?: string, modelAnswer?: string, maxWords?: number }",
         responseShape: "{ value: string }",
         requiresOptions: false,
         gradingMode: "manual",

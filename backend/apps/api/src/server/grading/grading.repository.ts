@@ -1,5 +1,9 @@
 import type { TenantTx } from "@atlas/db";
 import { MANUAL_ITEM_TYPE_KEYS } from "./grading.constants";
+
+// A question is marked by a person when its type is one of MANUAL_ITEM_TYPE_KEYS,
+// except a short answer with keywords, which is marked automatically (S3.4b).
+// The queries below spell that out in SQL.
 import { readPresentationOrder } from "../attempts/presentation-order";
 
 export type GradingTaskRow = {
@@ -202,7 +206,7 @@ export const gradingRepository = {
         mp.display_name as learner_display_name,
         ap.email as learner_email,
         coalesce(min(items.item_type_key), 'short_answer') as item_type_key,
-        coalesce(sum(case when items.item_type_key = any(${manualTypes}::text[]) then ai.points else 0 end), 0) as manual_possible_points,
+        coalesce(sum(case when (items.item_type_key = any(${manualTypes}::text[]) and not (items.item_type_key = 'short_answer' and coalesce(jsonb_array_length(case when jsonb_typeof(items.explanation_json->'answerKey'->'keywords') = 'array' then items.explanation_json->'answerKey'->'keywords' end), 0) > 0)) then ai.points else 0 end), 0) as manual_possible_points,
         a.submitted_at
       from grading_tasks gt
       inner join attempts a on a.id = gt.attempt_id and a.tenant_id = gt.tenant_id
@@ -342,7 +346,7 @@ export const gradingRepository = {
         on aa.assessment_item_id = ai.id
         and aa.attempt_id = ${args.attemptId}::uuid
       where ai.assessment_id = ${args.assessmentId}::uuid
-        and items.item_type_key = any(${manualTypes}::text[])
+        and (items.item_type_key = any(${manualTypes}::text[]) and not (items.item_type_key = 'short_answer' and coalesce(jsonb_array_length(case when jsonb_typeof(items.explanation_json->'answerKey'->'keywords') = 'array' then items.explanation_json->'answerKey'->'keywords' end), 0) > 0))
         and (${asked == null} or ai.id::text = any(${asked ?? []}::text[]))
       order by ai.position asc
     `;
@@ -365,7 +369,7 @@ export const gradingRepository = {
       inner join assessment_items ai on ai.id = aa.assessment_item_id and ai.tenant_id = aa.tenant_id
       inner join items on items.id = ai.item_id and items.tenant_id = aa.tenant_id
       where aa.attempt_id = ${attemptId}::uuid
-        and items.item_type_key <> all(${manualTypes}::text[])
+        and not (items.item_type_key = any(${manualTypes}::text[]) and not (items.item_type_key = 'short_answer' and coalesce(jsonb_array_length(case when jsonb_typeof(items.explanation_json->'answerKey'->'keywords') = 'array' then items.explanation_json->'answerKey'->'keywords' end), 0) > 0))
     `;
 
     return decimalToNumber(rows[0]?.total ?? 0);
@@ -397,7 +401,7 @@ export const gradingRepository = {
       from assessment_items ai
       inner join items on items.id = ai.item_id and items.tenant_id = ai.tenant_id
       where ai.assessment_id = ${assessmentId}::uuid
-        and items.item_type_key = any(${manualTypes}::text[])
+        and (items.item_type_key = any(${manualTypes}::text[]) and not (items.item_type_key = 'short_answer' and coalesce(jsonb_array_length(case when jsonb_typeof(items.explanation_json->'answerKey'->'keywords') = 'array' then items.explanation_json->'answerKey'->'keywords' end), 0) > 0))
         and (${askedItemIds == null} or ai.id::text = any(${askedItemIds ?? []}::text[]))
     `;
 

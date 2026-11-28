@@ -165,6 +165,8 @@ const runnerItemSchema = z.object({
   options: z.array(safeOptionSchema),
   savedAnswer: z.record(z.string(), z.unknown()).nullable(),
   choices: attemptChoicesSchema.optional(),
+  /** Limits the learner sees while answering, such as a long answer's word limit (S3.4b). */
+  answerLimits: z.object({ maxWords: z.number().int().optional() }).optional(),
   review: attemptItemReviewSchema.optional(),
 });
 

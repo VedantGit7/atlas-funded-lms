@@ -7,6 +7,7 @@ import {
   type ItemAnswerKeyUiState,
   uiStateToAnswerKey,
 } from "@atlas/contracts/item-registry/answer-contracts";
+import { countBlanks } from "@atlas/contracts/item-registry/answer-rules.contract";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { EditorOptionRow } from "../shared/item-options-builder";
@@ -21,12 +22,17 @@ import {
 } from "../shared/editor-styles";
 import { getItemTypeVisual } from "../item-type-config";
 
+/** A small number box: the shared input style without its full width. */
+const editorNumberInputClassName = `${editorInputClassName.replace("w-full ", "")} text-right tabular-nums`;
+
 type AnswerKeyEditorProps = {
   itemTypeKey: string;
   value: Record<string, unknown>;
   onChange: (value: Record<string, unknown>) => void;
   options: EditorOptionRow[];
   onOptionsChange?: (options: EditorOptionRow[]) => void;
+  /** The question, so a fill-in-the-blank can follow its blanks (____). */
+  stem?: string;
 };
 
 type LabeledId = { id: string; label: string };
@@ -54,6 +60,7 @@ export function AnswerKeyEditor({
   onChange,
   options,
   onOptionsChange,
+  stem = "",
 }: AnswerKeyEditorProps) {
   const uiState = useMemo(() => answerKeyToUiState(itemTypeKey, value), [itemTypeKey, value]);
   const typeVisual = getItemTypeVisual(itemTypeKey);
@@ -114,12 +121,12 @@ export function AnswerKeyEditor({
     );
   } else if (uiState.type === "fill_blank") {
     typeEditor = (
-      <AcceptedValuesEditor
-        values={uiState.acceptedValues}
-        onChange={(acceptedValues) => {
-          commit({ type: "fill_blank", acceptedValues });
+      <BlanksEditor
+        blanks={uiState.blanks}
+        blanksInStem={countBlanks(stem)}
+        onChange={(blanks) => {
+          commit({ type: "fill_blank", blanks });
         }}
-        addLabel="Add accepted answer"
       />
     );
   } else if (uiState.type === "swipe") {
@@ -146,16 +153,49 @@ export function AnswerKeyEditor({
         ))}
       </div>
     );
-  } else if (uiState.type === "short_answer" || uiState.type === "long_answer") {
+  } else if (uiState.type === "short_answer") {
     typeEditor = (
-      <ManualRubricEditor
-        rubric={uiState.rubric}
-        modelAnswer={uiState.modelAnswer}
-        onChange={(patch) => {
-          commit({ ...uiState, ...patch });
-        }}
-        long={uiState.type === "long_answer"}
-      />
+      <div className="space-y-4">
+        <KeywordsEditor
+          keywords={uiState.keywords}
+          required={uiState.keywordsRequired}
+          onChange={(keywords, keywordsRequired) => {
+            commit({ ...uiState, keywords, keywordsRequired });
+          }}
+        />
+        <ManualRubricEditor
+          rubric={uiState.rubric}
+          modelAnswer={uiState.modelAnswer}
+          onChange={(patch) => {
+            commit({ ...uiState, ...patch });
+          }}
+          long={false}
+          rubricHint={
+            uiState.keywords.some((keyword) => keyword.trim())
+              ? "Marked by its keywords; the rubric and model answer are shown with the result."
+              : null
+          }
+        />
+      </div>
+    );
+  } else if (uiState.type === "long_answer") {
+    typeEditor = (
+      <div className="space-y-4">
+        <WordLimitEditor
+          maxWords={uiState.maxWords}
+          onChange={(maxWords) => {
+            commit({ ...uiState, maxWords });
+          }}
+        />
+        <ManualRubricEditor
+          rubric={uiState.rubric}
+          modelAnswer={uiState.modelAnswer}
+          onChange={(patch) => {
+            commit({ ...uiState, ...patch });
+          }}
+          long
+        />
+      </div>
     );
   } else if (uiState.type === "file_upload") {
     typeEditor = (
@@ -273,21 +313,206 @@ function AcceptedValuesEditor({
   );
 }
 
+/**
+ * Accepted answers for each blank (QA review 1 M48: one blank only, and no
+ * word on how it's marked). Follows the blanks written in the question.
+ */
+function BlanksEditor({
+  blanks,
+  blanksInStem,
+  onChange,
+}: {
+  blanks: string[][];
+  blanksInStem: number;
+  onChange: (blanks: string[][]) => void;
+}) {
+  const count = Math.max(blanksInStem, blanks.length, 1);
+  const shown = Array.from({ length: count }, (_, index) => blanks[index] ?? [""]);
+  const several = count > 1;
+
+  return (
+    <div className="space-y-3">
+      <p className={editorHintClassName}>
+        Mark each blank in the question with ____ (three or more underscores).
+        {blanksInStem > 0
+          ? ` The question has ${String(blanksInStem)} ${blanksInStem === 1 ? "blank" : "blanks"}.`
+          : " The question has no blank marked yet."}{" "}
+        Every accepted answer counts as right; capitals and extra spaces are ignored.
+        {several ? " Each right blank earns an equal share of the question's marks." : ""}
+      </p>
+      {shown.map((values, index) => (
+        <div key={`blank-${String(index)}`} className="space-y-1.5">
+          {several ? (
+            <div className="flex items-center justify-between gap-2">
+              <span className={editorLabelClassName}>Blank {index + 1}</span>
+              {index >= blanksInStem && count > 1 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChange(shown.filter((_, position) => position !== index));
+                  }}
+                  className="text-xs font-medium text-[var(--admin-danger)] hover:underline"
+                >
+                  Remove this blank
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+          <AcceptedValuesEditor
+            values={values}
+            onChange={(next) => {
+              onChange(shown.map((entry, position) => (position === index ? next : entry)));
+            }}
+            addLabel="Add another accepted answer"
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Keywords that mark a short answer automatically (QA review 1 m25). Empty:
+ * a person marks it.
+ */
+function KeywordsEditor({
+  keywords,
+  required,
+  onChange,
+}: {
+  keywords: string[];
+  required: number | null;
+  onChange: (keywords: string[], required: number | null) => void;
+}) {
+  const filled = keywords.filter((keyword) => keyword.trim()).length;
+  const rows = keywords.length > 0 ? keywords : [""];
+  const needed = required ?? filled;
+
+  return (
+    <div className={`${editorPanelClassName} space-y-3`}>
+      <div>
+        <span className={editorLabelClassName}>Keywords (optional)</span>
+        <p className={editorHintClassName}>
+          With keywords, the answer is marked automatically: full marks when it contains enough of
+          them as whole words or phrases (capitals ignored), none otherwise. Leave empty to mark
+          answers yourself.
+        </p>
+      </div>
+      {rows.map((keyword, index) => (
+        <div key={`keyword-${String(index)}`} className="flex gap-2">
+          <input
+            type="text"
+            value={keyword}
+            placeholder="Keyword or phrase, e.g. stop loss"
+            aria-label={`Keyword ${String(index + 1)}`}
+            onChange={(event) => {
+              const next = [...rows];
+              next[index] = event.target.value;
+              onChange(next, required);
+            }}
+            className={editorInputClassName}
+          />
+          <button
+            type="button"
+            aria-label={`Remove keyword ${String(index + 1)}`}
+            disabled={rows.length <= 1 && !keyword}
+            onClick={() => {
+              const next = rows.filter((_, position) => position !== index);
+              onChange(next, required != null && required > next.length ? null : required);
+            }}
+            className="rounded-lg border border-[var(--admin-border)] px-2 text-[var(--admin-on-surface-variant)] hover:text-[var(--admin-danger)] disabled:opacity-40"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => {
+          onChange([...rows, ""], required);
+        }}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--admin-primary)]"
+      >
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        Add keyword
+      </button>
+      {filled > 1 ? (
+        <label className="flex flex-wrap items-center gap-2 text-sm text-[var(--admin-on-surface)]">
+          Full marks when the answer has at least
+          <input
+            type="number"
+            min={1}
+            max={filled}
+            value={needed}
+            onChange={(event) => {
+              const value = Math.floor(Number(event.target.value));
+              onChange(rows, Number.isFinite(value) && value >= 1 ? Math.min(value, filled) : null);
+            }}
+            className={`${editorNumberInputClassName} w-16`}
+            aria-label="Keywords needed for full marks"
+          />
+          of the {filled} keywords.
+        </label>
+      ) : null}
+    </div>
+  );
+}
+
+/** A long answer's word limit (QA review 1 m25). Empty: no limit. */
+function WordLimitEditor({
+  maxWords,
+  onChange,
+}: {
+  maxWords: number | null;
+  onChange: (maxWords: number | null) => void;
+}) {
+  return (
+    <div className={`${editorPanelClassName} space-y-2`}>
+      <label className={editorLabelClassName} htmlFor="answer-key-word-limit">
+        Word limit (optional)
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          id="answer-key-word-limit"
+          type="number"
+          min={1}
+          max={5000}
+          value={maxWords ?? ""}
+          placeholder="None"
+          onChange={(event) => {
+            const raw = event.target.value.trim();
+            const value = Math.floor(Number(raw));
+            onChange(raw && Number.isFinite(value) && value >= 1 ? value : null);
+          }}
+          className={`${editorNumberInputClassName} w-28`}
+        />
+        <span className="text-sm text-[var(--admin-on-surface-variant)]">words</span>
+      </div>
+      <p className={editorHintClassName}>
+        Learners see a word count as they write, and an answer over the limit isn&apos;t saved.
+      </p>
+    </div>
+  );
+}
+
 function ManualRubricEditor({
   rubric,
   modelAnswer,
   onChange,
   long,
   modelAnswerLabel = "Model answer (optional)",
+  rubricHint = null,
 }: {
   rubric: string;
   modelAnswer: string;
   onChange: (patch: { rubric: string; modelAnswer: string }) => void;
   long: boolean;
   modelAnswerLabel?: string;
+  rubricHint?: string | null;
 }) {
   return (
     <div className={`${editorPanelClassName} space-y-4`}>
+      {rubricHint ? <p className={editorHintClassName}>{rubricHint}</p> : null}
       <div>
         <label className={editorLabelClassName}>Grading rubric</label>
         <textarea

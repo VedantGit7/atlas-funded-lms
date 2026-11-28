@@ -8,6 +8,11 @@ import {
   type ItemOptionWire,
   type ItemResponseUiState,
 } from "@atlas/contracts/item-registry/answer-ui";
+import {
+  countBlanks,
+  countWords,
+  longAnswerWordLimit,
+} from "@atlas/contracts/item-registry/answer-rules.contract";
 import { ArrowDown, ArrowUp, Upload } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getItemTypeVisual } from "../item-type-config";
@@ -41,6 +46,12 @@ export type ItemResponseRendererProps = {
    * preview) they are read from the answer key.
    */
   choices?: ResponseChoices | undefined;
+  /**
+   * Limits in a real attempt, from the server (learners never get the answer
+   * key): a long answer's word limit (S3.4b). In the author's preview they are
+   * read from the answer key.
+   */
+  answerLimits?: { maxWords?: number | undefined } | undefined;
 };
 
 type LabeledId = { id: string; label: string };
@@ -127,6 +138,7 @@ export function ItemResponseRenderer({
   swipeResetToken = 0,
   showStem = true,
   choices,
+  answerLimits,
 }: ItemResponseRendererProps) {
   const [state, setState] = useState<ItemResponseUiState>(() =>
     responseFromWire(itemTypeKey, savedAnswer),
@@ -174,6 +186,9 @@ export function ItemResponseRenderer({
     answerKey,
     mode,
     choices,
+    stem,
+    answerLimits,
+    setState,
   });
 
   if (!showStem) {
@@ -204,6 +219,10 @@ function renderInteraction(args: {
   answerKey: Record<string, unknown>;
   mode: "preview" | "attempt";
   choices: ResponseChoices | undefined;
+  stem: string;
+  answerLimits: { maxWords?: number | undefined } | undefined;
+  /** Updates the box without reporting the answer (a long answer over its limit). */
+  setState: (next: ItemResponseUiState) => void;
 }) {
   const {
     itemTypeKey,
@@ -216,6 +235,9 @@ function renderInteraction(args: {
     answerKey,
     mode,
     choices,
+    stem,
+    answerLimits,
+    setState,
   } = args;
 
   if (itemTypeKey === "true_false" && state.type === "true_false") {
@@ -373,13 +395,79 @@ function renderInteraction(args: {
     );
   }
 
+  if (itemTypeKey === "fill_blank" && state.type === "fill_blank") {
+    // One box per blank (____) in the question (QA review 1 M48).
+    const blanks = Math.max(countBlanks(stem), state.values.length, 1);
+    if (blanks === 1) {
+      return (
+        <div className="space-y-2">
+          <label
+            className="text-sm font-medium text-[var(--admin-on-surface)]"
+            htmlFor="item-response-text"
+          >
+            Your response
+          </label>
+          <input
+            id="item-response-text"
+            type="text"
+            disabled={disabled}
+            value={state.values[0] ?? ""}
+            onChange={(event) => {
+              updateState({ type: "fill_blank", values: [event.target.value] });
+            }}
+            className={editorInputClassName}
+            placeholder="Type the missing word..."
+          />
+        </div>
+      );
+    }
+    return (
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-medium text-[var(--admin-on-surface)]">
+          Fill each blank, in order
+        </legend>
+        {Array.from({ length: blanks }, (_, index) => {
+          const id = `item-response-blank-${String(index + 1)}`;
+          return (
+            <div key={id} className="flex items-center gap-3">
+              <label
+                htmlFor={id}
+                className="w-16 shrink-0 text-sm text-[var(--admin-on-surface-variant)]"
+              >
+                Blank {index + 1}
+              </label>
+              <input
+                id={id}
+                type="text"
+                disabled={disabled}
+                value={state.values[index] ?? ""}
+                onChange={(event) => {
+                  const values = Array.from(
+                    { length: blanks },
+                    (__, position) => state.values[position] ?? "",
+                  );
+                  values[index] = event.target.value;
+                  updateState({ type: "fill_blank", values });
+                }}
+                className={editorInputClassName}
+              />
+            </div>
+          );
+        })}
+      </fieldset>
+    );
+  }
+
   if (
-    (itemTypeKey === "fill_blank" ||
-      itemTypeKey === "short_answer" ||
-      itemTypeKey === "long_answer") &&
-    (state.type === "fill_blank" || state.type === "short_answer" || state.type === "long_answer")
+    (itemTypeKey === "short_answer" || itemTypeKey === "long_answer") &&
+    (state.type === "short_answer" || state.type === "long_answer")
   ) {
     const isLong = itemTypeKey === "long_answer";
+    const maxWords = isLong
+      ? (answerLimits?.maxWords ?? longAnswerWordLimit(answerKey) ?? null)
+      : null;
+    const words = countWords(state.value);
+    const over = maxWords != null && words > maxWords;
     return (
       <div className="space-y-2">
         <label
@@ -394,8 +482,17 @@ function renderInteraction(args: {
             rows={6}
             disabled={disabled}
             value={state.value}
+            aria-describedby={maxWords != null ? "item-response-word-count" : undefined}
+            aria-invalid={over || undefined}
             onChange={(event) => {
-              updateState({ ...state, value: event.target.value });
+              const next = { ...state, value: event.target.value };
+              // Over the word limit (S3.4b): kept on screen, not saved, until
+              // it's short enough. The last answer within the limit stays saved.
+              if (maxWords != null && countWords(next.value) > maxWords) {
+                setState(next);
+                return;
+              }
+              updateState(next);
             }}
             className={`${editorInputClassName} resize-y leading-relaxed`}
             placeholder="Write your answer..."
@@ -410,11 +507,24 @@ function renderInteraction(args: {
               updateState({ ...state, value: event.target.value });
             }}
             className={editorInputClassName}
-            placeholder={
-              itemTypeKey === "fill_blank" ? "Type the missing word..." : "Type your answer..."
-            }
+            placeholder="Type your answer..."
           />
         )}
+        {maxWords != null ? (
+          <p
+            id="item-response-word-count"
+            aria-live="polite"
+            className={`text-xs ${over ? "font-medium text-[var(--admin-danger)]" : "text-[var(--admin-on-surface-variant)]"}`}
+          >
+            {over
+              ? `${words.toLocaleString("en")} of ${maxWords.toLocaleString("en")} words. Shorten it by ${(words - maxWords).toLocaleString("en")} to save it.`
+              : `${words.toLocaleString("en")} of ${maxWords.toLocaleString("en")} words`}
+          </p>
+        ) : isLong ? (
+          <p className="text-xs text-[var(--admin-on-surface-variant)]">
+            {words.toLocaleString("en")} {words === 1 ? "word" : "words"}
+          </p>
+        ) : null}
       </div>
     );
   }

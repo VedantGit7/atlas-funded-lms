@@ -9,6 +9,7 @@ import {
   Download,
   Eye,
   FileSpreadsheet,
+  Shapes,
   Loader2,
   RotateCcw,
   Upload,
@@ -22,10 +23,13 @@ import {
 import {
   ITEM_IMPORT_MAX_ROWS,
   ITEM_IMPORT_TAG_MAX_LENGTH,
+  ITEM_IMPORT_MIXED,
   ITEM_IMPORT_TYPE_NAMES,
+  importTemplateName,
+  isImportTemplateType,
   isImportableItemType,
+  type ImportTemplateType,
 } from "@atlas/contracts/item-registry/item-import.contract";
-import type { ValidatedItemTypeKey } from "@atlas/contracts/item-registry/item-definition.contract";
 import { createClientUuid } from "../../../lib/api/client";
 import {
   catalogFilterButtonClassName,
@@ -172,8 +176,8 @@ export function ItemImportWizard({
     () => itemTypes.filter((type) => isImportableItemType(type.key)),
     [itemTypes],
   );
-  const [type, setType] = useState<ValidatedItemTypeKey>(() => {
-    if (initialType && isImportableItemType(initialType)) return initialType;
+  const [type, setType] = useState<ImportTemplateType>(() => {
+    if (initialType && isImportTemplateType(initialType)) return initialType;
     const first = importable[0]?.key;
     return first && isImportableItemType(first) ? first : "mcq_single";
   });
@@ -322,7 +326,7 @@ export function ItemImportWizard({
     void onFile(event.dataTransfer.files[0]);
   }
 
-  const typeName = ITEM_IMPORT_TYPE_NAMES[type];
+  const typeName = importTemplateName(type);
   const tags = parseTags(tagsText);
   const tagProblem =
     tags.length > ITEM_IMPORT_EXTRA_TAGS_MAX
@@ -472,7 +476,30 @@ export function ItemImportWizard({
                   </button>
                 );
               })}
+              {/* Several types in one file, each row naming its own (S3.4b). */}
+              <button
+                type="button"
+                role="radio"
+                aria-checked={type === ITEM_IMPORT_MIXED}
+                disabled={busy}
+                onClick={() => {
+                  setType(ITEM_IMPORT_MIXED);
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors motion-safe:active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
+                  type === ITEM_IMPORT_MIXED
+                    ? "border-[var(--admin-primary)] bg-[color-mix(in_srgb,var(--admin-primary)_10%,var(--admin-surface))] text-[var(--admin-primary)]"
+                    : "border-[var(--admin-border)] bg-[var(--admin-surface-low)] text-[var(--admin-on-surface-variant)] hover:bg-[var(--admin-surface-high)]"
+                }`}
+              >
+                <Shapes className="h-4 w-4" aria-hidden="true" />
+                {importTemplateName(ITEM_IMPORT_MIXED)}
+              </button>
             </div>
+            {type === ITEM_IMPORT_MIXED ? (
+              <p className="text-sm text-[var(--admin-on-surface-variant)]">
+                One file for questions of any type: each row says its type in the first column.
+              </p>
+            ) : null}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
               <button
                 type="button"
@@ -624,7 +651,7 @@ function PreviewPanel(props: {
             {file.fileName}
           </h2>
           <p className="text-sm text-[var(--admin-on-surface-variant)]">
-            {ITEM_IMPORT_TYPE_NAMES[file.identity.itemTypeKey]} ·{" "}
+            {importTemplateName(file.identity.itemTypeKey)} ·{" "}
             {plural(rows.length, "question", "questions")}
           </p>
         </div>
