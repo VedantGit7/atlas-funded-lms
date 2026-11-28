@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ChevronRight,
   Clock3,
+  FileText,
   ShieldAlert,
   ShieldCheck,
 } from "lucide-react";
@@ -36,12 +37,82 @@ import {
   sectionHeaderClassName,
 } from "../grading-studio-shared";
 import { formatDateTime } from "../../../lib/format/academy-format";
+import { openAnswerFile } from "../../assessments/lib/attempt-files";
 
 type GradingDetailPanelProps = {
   task: GradingTaskDetail;
 };
 
-function AnswerBody({ value }: { value: unknown }) {
+/** A learner's uploaded file (S3.4c): its name and size, and a button to open it. */
+function readAnswerFile(
+  value: unknown,
+): { assetReferenceId: string; fileName: string; sizeBytes: number | null } | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const id = record["assetReferenceId"];
+  const name = record["fileName"];
+  if (typeof id !== "string" || typeof name !== "string") return null;
+  return {
+    assetReferenceId: id,
+    fileName: name,
+    sizeBytes: typeof record["sizeBytes"] === "number" ? record["sizeBytes"] : null,
+  };
+}
+
+function AnswerFile({
+  taskId,
+  file,
+}: {
+  taskId: string;
+  file: { assetReferenceId: string; fileName: string; sizeBytes: number | null };
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const size =
+    file.sizeBytes == null
+      ? null
+      : file.sizeBytes < 1024 * 1024
+        ? `${String(Math.max(1, Math.round(file.sizeBytes / 1024)))} KB`
+        : `${(file.sizeBytes / (1024 * 1024)).toFixed(1)} MB`;
+  return (
+    <div className="space-y-1">
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-surface-high)] px-3 py-2.5">
+        <FileText
+          className="h-5 w-5 shrink-0 text-[var(--admin-on-surface-variant)]"
+          aria-hidden="true"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-[var(--admin-on-surface)]">
+            {file.fileName}
+          </p>
+          {size ? <p className="text-xs text-[var(--admin-on-surface-variant)]">{size}</p> : null}
+        </div>
+        <button
+          type="button"
+          className={outlineButtonClassName}
+          onClick={() => {
+            setError(null);
+            void openAnswerFile(
+              `/api/v1/grading-tasks/${taskId}/files/${file.assetReferenceId}`,
+            ).catch((err: unknown) => {
+              setError(formatGradingApiError(err));
+            });
+          }}
+        >
+          Open file
+        </button>
+      </div>
+      {error ? (
+        <p role="alert" className="text-xs text-[var(--admin-danger)]">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function AnswerBody({ value, taskId }: { value: unknown; taskId: string }) {
+  const file = readAnswerFile(value);
+  if (file) return <AnswerFile taskId={taskId} file={file} />;
   const formatted = formatLearnerAnswer(value);
 
   if (formatted.isCode) {
@@ -322,7 +393,7 @@ export function GradingDetailPanel({ task }: GradingDetailPanelProps) {
                     {answer.itemType.replaceAll("_", " ")}
                   </span>
                   <div className="mt-3">
-                    <AnswerBody value={answer.learnerAnswer} />
+                    <AnswerBody value={answer.learnerAnswer} taskId={task.id} />
                   </div>
                 </div>
               </article>

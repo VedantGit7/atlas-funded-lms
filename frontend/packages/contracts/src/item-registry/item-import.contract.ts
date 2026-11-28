@@ -1,4 +1,9 @@
-import { ANSWER_RULE_LIMITS } from "./answer-rules.contract";
+import {
+  ANSWER_FILE_LIMITS,
+  ANSWER_FILE_TYPES,
+  ANSWER_RULE_LIMITS,
+  DEFAULT_ANSWER_FILE_TYPES,
+} from "./answer-rules.contract";
 import {
   ITEM_DEFINITION_LIMITS,
   VALIDATED_ITEM_TYPES,
@@ -24,8 +29,9 @@ export const ITEM_IMPORT_FORMAT = "atlas-item-import";
  * Bump when columns change; an upload from another version is refused.
  * 2 (S3.4b): fill in the blank takes answers per blank, short answer takes
  * keywords, long answer a word limit, and the mixed template exists.
+ * 3 (S3.4c): file upload takes the largest file size.
  */
-export const ITEM_IMPORT_TEMPLATE_VERSION = "2";
+export const ITEM_IMPORT_TEMPLATE_VERSION = "3";
 /** Questions per file (owner decision, 19 Nov 2026). */
 export const ITEM_IMPORT_MAX_ROWS = 5_000;
 export const ITEM_IMPORT_MAX_TAGS = 50;
@@ -302,10 +308,19 @@ function typeColumns(type: ValidatedItemTypeKey): ImportColumn[] {
           "accepted_file_types",
           "Accepted file types",
           false,
-          "File extensions learners may upload, separated by commas, for example: pdf, png. Leave empty to allow any.",
+          `File extensions learners may upload, separated by commas, for example: pdf, png. Choose from ${Object.keys(ANSWER_FILE_TYPES).join(", ")}. Leave empty for ${DEFAULT_ANSWER_FILE_TYPES.join(", ")}.`,
           200,
           22,
         ),
+        {
+          key: "max_file_size_mb",
+          header: "Largest file (MB)",
+          required: false,
+          help: `The largest file a learner may upload, in MB, from 1 to ${String(ANSWER_FILE_LIMITS.maxMb)} (optional; ${String(ANSWER_FILE_LIMITS.defaultMaxMb)} if empty).`,
+          width: 14,
+          format: "number" as const,
+          validation: { kind: "decimal" as const, min: 1, max: ANSWER_FILE_LIMITS.maxMb },
+        },
         text(
           "reference_file_name",
           "Reference file name",
@@ -551,6 +566,7 @@ export function itemImportExamples(type: ImportTemplateType): ImportRow[] {
           question: "Upload a screenshot of your chart with support and resistance marked.",
           rubric: "At least one support and one resistance level, both clearly labelled.",
           accepted_file_types: "png, jpg, pdf",
+          max_file_size_mb: 5,
           reference_file_name: "",
           ...common("charting"),
         },
@@ -633,7 +649,8 @@ export function itemImportInstructions(type: ImportTemplateType): string[] {
     ],
     file_upload: [
       "Learners upload a file, and a person grades it.",
-      "Accepted file types are extensions such as pdf or png, separated by commas.",
+      "Accepted file types are extensions such as pdf or png, separated by commas. Leave it empty for everyday documents and images.",
+      "Largest file (MB) is the size limit; 10 MB if empty.",
     ],
     matching: [
       "Each Left / Right pair is one correct match. Fill at least two pairs, and up to eight.",
@@ -725,6 +742,8 @@ function columnsForField(type: ValidatedItemTypeKey, field: string): string[] {
       return type === "file_upload" ? ["reference_file_name"] : ["model_answer"];
     case "acceptedFileTypes":
       return ["accepted_file_types"];
+    case "maxFileSizeMb":
+      return ["max_file_size_mb"];
     case "pairs":
       return Array.from({ length: MATCHING_PAIRS }, (_, i) => [
         `left_${String(i + 1)}`,
@@ -899,6 +918,16 @@ export function rowToItemDefinition(
       answerKey["rubric"] = get("rubric");
       answerKey["modelAnswer"] = get("reference_file_name");
       answerKey["acceptedFileTypes"] = splitList(get("accepted_file_types"));
+      {
+        const size = readWholeNumber(row["max_file_size_mb"], get("max_file_size_mb"));
+        if (size !== null) {
+          if (Number.isNaN(size)) {
+            issue(["max_file_size_mb"], "Largest file (MB) must be a whole number.");
+          } else {
+            answerKey["maxFileSizeMb"] = size;
+          }
+        }
+      }
       break;
 
     case "matching": {

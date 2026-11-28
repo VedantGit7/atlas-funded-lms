@@ -18,6 +18,8 @@ export const AssetPurposeSchema = z.enum([
   "temp.upload",
   "member.avatar",
   "course.cover",
+  /** A learner's file answering an upload question (S3.4c). Private. */
+  "attempt.answer",
 ]);
 
 export const AssetStatusSchema = z.enum(["PENDING_UPLOAD", "READY", "FAILED", "DELETED"]);

@@ -1,4 +1,9 @@
-import { countWords, longAnswerWordLimit } from "../item-registry/answer-rules.contract";
+import {
+  answerFileRules,
+  countWords,
+  longAnswerWordLimit,
+} from "../item-registry/answer-rules.contract";
+import { canonicalFileAnswer } from "./attempt-file-answers";
 import type { TenantTx } from "@atlas/db";
 import { auditWriter } from "@atlas/audit";
 import { outbox } from "@atlas/events";
@@ -262,6 +267,7 @@ async function buildRunnerItems(
         : null;
     const points = Number(row.points);
     const maxWords = item.item_type_key === "long_answer" ? longAnswerWordLimit(answerKey) : null;
+    const fileRules = item.item_type_key === "file_upload" ? answerFileRules(answerKey) : null;
 
     let review = null;
     if (mode === "review") {
@@ -311,6 +317,9 @@ async function buildRunnerItems(
           : saved,
       ...(choices ? { choices } : {}),
       ...(maxWords != null ? { answerLimits: { maxWords } } : {}),
+      ...(fileRules
+        ? { answerLimits: { fileTypes: fileRules.types, maxFileSizeMb: fileRules.maxMb } }
+        : {}),
       ...(review ? { review } : {}),
     });
   }
@@ -601,6 +610,15 @@ export async function saveAttemptAnswer(
   // Matching and ordering answers arrive in the attempt's opaque tokens and
   // are stored with the real ids, so grading is unchanged (attempt-choices.ts).
   let answerJson = input.answerJson;
+  // An upload answer names a confirmed file of this attempt (S3.4c); what's
+  // stored comes from the file's record, not the browser.
+  if (loaded?.item.item_type_key === "file_upload") {
+    answerJson = await canonicalFileAnswer(tx, {
+      attemptId,
+      answerJson,
+      answerKey: decodeExplanationJson(loaded.item.explanation_json).answerKeyJson,
+    });
+  }
   if (metadata.choiceSalt) {
     if (loaded) {
       answerJson = decodeChoiceAnswer({
@@ -608,7 +626,8 @@ export async function saveAttemptAnswer(
         answerKey: decodeExplanationJson(loaded.item.explanation_json).answerKeyJson,
         salt: metadata.choiceSalt,
         assessmentItemId: assessmentItem.id,
-        answerJson: input.answerJson,
+        // The answer so far (an upload answer is already checked above).
+        answerJson,
       });
     }
   }

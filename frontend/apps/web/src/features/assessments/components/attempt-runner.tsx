@@ -8,6 +8,7 @@ import { ConfirmDialog } from "../../../components/patterns/ConfirmDialog";
 import { ClientApiError, clientApi } from "../../../lib/client-api";
 import { captureProductEvent } from "../../../observability/capture-product-event";
 import type { attemptRunnerResponseSchema } from "../assessment-response-schemas";
+import { openAnswerFile, uploadAttemptFile } from "../lib/attempt-files";
 import { ItemResponseRenderer } from "../../item-registry/components/renderers/item-response-renderer";
 import { getItemTypeVisual } from "../../item-registry/components/item-type-config";
 import {
@@ -318,6 +319,12 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
                 }))}
                 choices={activeItem.choices}
                 answerLimits={activeItem.answerLimits}
+                onUploadFile={(file) => uploadAttemptFile(attempt.id, activeItem.itemId, file)}
+                onOpenFile={(assetReferenceId) => {
+                  void openAnswerFile(
+                    `/api/v1/attempts/${attempt.id}/files/${assetReferenceId}`,
+                  ).catch(() => undefined);
+                }}
                 onAnswerChange={(answerJson) => {
                   if (!answerJson) return;
                   saveAnswer(activeItem, answerJson);

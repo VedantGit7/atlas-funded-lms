@@ -148,3 +148,116 @@ export function longAnswerWordLimit(answerKey: unknown): number | null {
   const raw = asRecord(answerKey)["maxWords"];
   return typeof raw === "number" && Number.isInteger(raw) && raw >= 1 ? raw : null;
 }
+
+/**
+ * Upload questions (QA review 1 m26; S3.4c): the file types a learner may
+ * upload, by extension, with the type each is stored as. The type is decided
+ * here from the extension, not taken from the browser (Windows, for one,
+ * labels CSV files as Excel), and the bytes are checked against it.
+ */
+export const ANSWER_FILE_TYPES = {
+  pdf: { label: "PDF", contentType: "application/pdf" },
+  doc: { label: "Word (.doc)", contentType: "application/msword" },
+  docx: {
+    label: "Word",
+    contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  },
+  xls: { label: "Excel (.xls)", contentType: "application/vnd.ms-excel" },
+  xlsx: {
+    label: "Excel",
+    contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  },
+  csv: { label: "CSV", contentType: "text/csv" },
+  ppt: { label: "PowerPoint (.ppt)", contentType: "application/vnd.ms-powerpoint" },
+  pptx: {
+    label: "PowerPoint",
+    contentType: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  },
+  txt: { label: "Text", contentType: "text/plain" },
+  png: { label: "PNG", contentType: "image/png" },
+  jpg: { label: "JPG", contentType: "image/jpeg" },
+  jpeg: { label: "JPEG", contentType: "image/jpeg" },
+  webp: { label: "WebP", contentType: "image/webp" },
+  gif: { label: "GIF", contentType: "image/gif" },
+  zip: { label: "ZIP", contentType: "application/zip" },
+} as const;
+
+export type AnswerFileType = keyof typeof ANSWER_FILE_TYPES;
+
+/** What a question allows when its author picks no types: everyday documents and images. */
+export const DEFAULT_ANSWER_FILE_TYPES: AnswerFileType[] = [
+  "pdf",
+  "docx",
+  "xlsx",
+  "csv",
+  "txt",
+  "png",
+  "jpg",
+  "jpeg",
+  "webp",
+];
+
+export const ANSWER_FILE_LIMITS = { defaultMaxMb: 10, maxMb: 25 } as const;
+
+export function isAnswerFileType(value: string): value is AnswerFileType {
+  return Object.prototype.hasOwnProperty.call(ANSWER_FILE_TYPES, value);
+}
+
+/** A file name's extension, lower case, without the dot. */
+export function fileExtension(fileName: string): string {
+  const match = /\.([a-z0-9]{1,10})$/i.exec(fileName.trim());
+  return match?.[1]?.toLowerCase() ?? "";
+}
+
+export type AnswerFileRules = {
+  /** The extensions allowed, in a stable order. */
+  types: AnswerFileType[];
+  maxMb: number;
+};
+
+/** An upload question's rules: its own types and size, or the defaults. */
+export function answerFileRules(answerKey: unknown): AnswerFileRules {
+  const key = asRecord(answerKey);
+  const listed = strings(key["acceptedFileTypes"])
+    .map((value) => value.trim().replace(/^\.+/, "").toLowerCase())
+    .filter(isAnswerFileType);
+  const raw = key["maxFileSizeMb"];
+  const maxMb =
+    typeof raw === "number" && Number.isInteger(raw) && raw >= 1
+      ? Math.min(raw, ANSWER_FILE_LIMITS.maxMb)
+      : ANSWER_FILE_LIMITS.defaultMaxMb;
+  return {
+    types: listed.length > 0 ? [...new Set(listed)] : [...DEFAULT_ANSWER_FILE_TYPES],
+    maxMb,
+  };
+}
+
+/** What's wrong with a file for this question, in words, or null when it's fine. */
+export function answerFileProblem(
+  rules: AnswerFileRules,
+  file: { fileName: string; sizeBytes: number },
+): string | null {
+  const extension = fileExtension(file.fileName);
+  if (!extension || !(rules.types as string[]).includes(extension)) {
+    return `Upload one of these file types: ${describeAnswerFileTypes(rules.types)}.`;
+  }
+  if (file.sizeBytes <= 0) return "This file is empty. Choose another file.";
+  if (file.sizeBytes > rules.maxMb * 1024 * 1024) {
+    return `This file is larger than ${String(rules.maxMb)} MB. Choose a smaller file.`;
+  }
+  return null;
+}
+
+/** "PDF, Word, PNG or JPG" (JPEG folded into JPG). */
+export function describeAnswerFileTypes(types: readonly string[]): string {
+  const labels = [
+    ...new Set(
+      types
+        .filter(isAnswerFileType)
+        .filter((type) => !(type === "jpeg" && types.includes("jpg")))
+        .map((type) => ANSWER_FILE_TYPES[type].label),
+    ),
+  ];
+  if (labels.length <= 1) return labels[0] ?? "";
+  return `${labels.slice(0, -1).join(", ")} or ${labels[labels.length - 1] ?? ""}`;
+}

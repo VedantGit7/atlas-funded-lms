@@ -27,6 +27,28 @@ const LESSON_ASSET_MIME_TYPES = new Set([
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ]);
 
+/**
+ * A learner's answer to an upload question (S3.4c): documents, spreadsheets,
+ * slides, images, text and ZIP. Never a type a browser runs (HTML, SVG) and
+ * never video. Each question narrows this further.
+ */
+export const ATTEMPT_ANSWER_MIME_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/csv",
+  "text/plain",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+  "application/zip",
+]);
+
 function isAllowedLessonAssetMimeType(contentType: string): boolean {
   if (contentType.startsWith("audio/")) {
     return true;
@@ -82,6 +104,13 @@ export function assertAllowedMimeType(args: { purpose: AssetPurpose; contentType
   if (args.purpose === "course.cover") {
     if (!OG_IMAGE_MIME_TYPES.has(contentType)) {
       throw new Error("UNSUPPORTED_COURSE_COVER_TYPE");
+    }
+    return;
+  }
+
+  if (args.purpose === "attempt.answer") {
+    if (!ATTEMPT_ANSWER_MIME_TYPES.has(contentType)) {
+      throw new Error("UNSUPPORTED_ATTEMPT_ANSWER_TYPE");
     }
     return;
   }

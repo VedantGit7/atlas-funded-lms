@@ -64,6 +64,10 @@ export const TextValueAnswerWireSchema = z.object({
 
 export const FileUploadAnswerWireSchema = z.object({
   fileName: z.string().min(1),
+  /** The confirmed file, in a real attempt (S3.4c). */
+  assetReferenceId: z.string().optional(),
+  sizeBytes: z.number().int().optional(),
+  contentType: z.string().optional(),
 });
 
 export const MatchingAnswerWireSchema = z.object({
@@ -119,6 +123,8 @@ export const ManualAnswerKeySchema = z.object({
   keywordsRequired: z.number().int().optional(),
   /** Long answer: word limit (S3.4b). */
   maxWords: z.number().int().optional(),
+  /** Upload question: the largest file, in MB (S3.4c). */
+  maxFileSizeMb: z.number().int().optional(),
 });
 
 export type ItemResponseUiState =
@@ -131,7 +137,14 @@ export type ItemResponseUiState =
   | { type: "matching"; pairs: Record<string, string> }
   | { type: "ordering"; order: string[] }
   | { type: "swipe"; action: "known" | "unknown" | null }
-  | { type: "file_upload"; fileName: string };
+  | {
+      type: "file_upload";
+      fileName: string;
+      /** Set once the file is uploaded and confirmed in a real attempt (S3.4c). */
+      assetReferenceId?: string | undefined;
+      sizeBytes?: number | undefined;
+      contentType?: string | undefined;
+    };
 
 export type ItemAnswerKeyUiState =
   | { type: "mcq_single"; correctOptionId: string | null }
@@ -148,7 +161,12 @@ export type ItemAnswerKeyUiState =
   | { type: "long_answer"; rubric: string; modelAnswer: string; maxWords: number | null }
   | { type: "matching"; pairs: Record<string, string> }
   | { type: "ordering"; order: string[] }
-  | { type: "file_upload"; rubric: string; acceptedFileTypes: string[] }
+  | {
+      type: "file_upload";
+      rubric: string;
+      acceptedFileTypes: string[];
+      maxFileSizeMb: number | null;
+    }
   | { type: "swipe"; direction: "left" | "right" };
 
 export function isBuiltinItemTypeKey(key: string): key is BuiltinItemTypeKey {
@@ -328,6 +346,7 @@ export function answerKeyToUiState(
         acceptedFileTypes: Array.isArray(raw["acceptedFileTypes"])
           ? raw["acceptedFileTypes"].filter((entry): entry is string => typeof entry === "string")
           : [],
+        maxFileSizeMb: typeof raw["maxFileSizeMb"] === "number" ? raw["maxFileSizeMb"] : null,
       };
     case "swipe":
       return {
@@ -373,7 +392,11 @@ export function uiStateToAnswerKey(state: ItemAnswerKeyUiState): Record<string, 
     case "ordering":
       return { order: state.order };
     case "file_upload":
-      return { rubric: state.rubric, acceptedFileTypes: state.acceptedFileTypes };
+      return {
+        rubric: state.rubric,
+        acceptedFileTypes: state.acceptedFileTypes,
+        ...(state.maxFileSizeMb != null ? { maxFileSizeMb: state.maxFileSizeMb } : {}),
+      };
     case "swipe":
       return { direction: state.direction };
   }
@@ -683,8 +706,8 @@ export function schemaJsonForItemType(itemTypeKey: string): ItemTypeSchemaJson {
     case "file_upload":
       return {
         fields: ["stem"],
-        answerKeyShape: "{ rubric?: string, acceptedFileTypes?: string[] }",
-        responseShape: "{ fileName: string }",
+        answerKeyShape: "{ rubric?: string, acceptedFileTypes?: string[], maxFileSizeMb?: number }",
+        responseShape: "{ assetReferenceId: string, fileName: string, sizeBytes: number }",
         requiresOptions: false,
         gradingMode: "manual",
       };

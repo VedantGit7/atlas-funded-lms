@@ -155,7 +155,7 @@ describeWithDb("item import", () => {
         );
 
       await expect(check(identity("mcq_single", [], { version: "0" }))).rejects.toThrow(
-        /version 0, and the current version is 2/,
+        new RegExp(`version 0, and the current version is ${ITEM_IMPORT_TEMPLATE_VERSION}`),
       );
       const moved = identity("mcq_single");
       moved.headers = [moved.headers[1] ?? "", moved.headers[0] ?? "", ...moved.headers.slice(2)];

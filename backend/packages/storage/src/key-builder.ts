@@ -60,6 +60,9 @@ export function buildTenantStorageKey(input: BuildStorageKeyInput): string {
     case "course.cover":
       if (!input.resourceId) throw new Error("RESOURCE_ID_REQUIRED_FOR_COURSE_COVER");
       return `tenants/${input.tenantId}/courses/${input.resourceId}/cover/${objectId}-${safeFileName}`;
+    case "attempt.answer":
+      if (!input.resourceId) throw new Error("RESOURCE_ID_REQUIRED_FOR_ATTEMPT_ANSWER");
+      return `tenants/${input.tenantId}/attempts/${input.resourceId}/${objectId}-${safeFileName}`;
     case "temp.upload":
       return `tenants/${input.tenantId}/temp/uploads/${objectId}-${safeFileName}`;
     default:
