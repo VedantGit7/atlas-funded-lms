@@ -317,6 +317,7 @@ export function AttemptRunner({ initialAttempt }: AttemptRunnerProps) {
                   position: option.position,
                 }))}
                 choices={activeItem.choices}
+                answerLimits={activeItem.answerLimits}
                 onAnswerChange={(answerJson) => {
                   if (!answerJson) return;
                   saveAnswer(activeItem, answerJson);

@@ -1,4 +1,9 @@
 import { readChoiceItems } from "./attempt-choices";
+import {
+  fillBlankAnswerSets,
+  fillBlankResponses,
+  shortAnswerKeywordRule,
+} from "../item-registry/answer-rules.contract";
 
 /**
  * An attempt's answers in words, for the result page (QA review 2 H23).
@@ -92,17 +97,29 @@ export function reviewItem(input: ReviewItemInput): ItemReview {
       };
 
     case "fill_blank": {
-      const accepted = strings(key["acceptedValues"])
-        .map((value) => value.trim())
-        .filter(Boolean);
-      const single = text(key["value"]);
-      const values = accepted.length > 0 ? accepted : single ? [single] : [];
-      const given = text(answer["value"]);
+      const sets = fillBlankAnswerSets(key).map((values) =>
+        values.map((value) => value.trim()).filter(Boolean),
+      );
+      const given = fillBlankResponses(answer).map((value) => value.trim());
+      // One blank: as before. Several: a line per blank (S3.4b).
+      if (sets.length <= 1) {
+        const values = sets[0] ?? [];
+        return {
+          ...base,
+          correctAnswerLabel: values.length > 1 ? "Accepted answers" : "Correct answer",
+          yourAnswer: given[0] ? [given[0]] : [],
+          correctAnswer: values,
+        };
+      }
       return {
         ...base,
-        correctAnswerLabel: values.length > 1 ? "Accepted answers" : "Correct answer",
-        yourAnswer: given ? [given] : [],
-        correctAnswer: values,
+        correctAnswerLabel: "Accepted answers",
+        yourAnswer: given.some(Boolean)
+          ? sets.map((_, index) => `Blank ${String(index + 1)}: ${given[index] || "(empty)"}`)
+          : [],
+        correctAnswer: sets.map(
+          (values, index) => `Blank ${String(index + 1)}: ${values.join(" / ")}`,
+        ),
       };
     }
 
@@ -110,6 +127,20 @@ export function reviewItem(input: ReviewItemInput): ItemReview {
     case "long_answer": {
       const given = text(answer["value"]);
       const model = text(key["modelAnswer"]);
+      const rule = input.itemTypeKey === "short_answer" ? shortAnswerKeywordRule(key) : null;
+      if (rule) {
+        // Marked by keywords (S3.4b): say which ones count.
+        const needs =
+          rule.required === rule.keywords.length
+            ? `All of: ${rule.keywords.join(", ")}`
+            : `At least ${String(rule.required)} of: ${rule.keywords.join(", ")}`;
+        return {
+          ...base,
+          correctAnswerLabel: "Keywords",
+          yourAnswer: given ? [given] : [],
+          correctAnswer: [needs, ...(model ? [`Model answer: ${model}`] : [])],
+        };
+      }
       return {
         ...base,
         correctAnswerLabel: "Model answer",

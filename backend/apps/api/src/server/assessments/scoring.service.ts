@@ -1,3 +1,10 @@
+import {
+  isKeywordMarked,
+  markFillBlank,
+  matchedKeywords,
+  shortAnswerKeywordRule,
+} from "../item-registry/answer-rules.contract";
+
 const OBJECTIVE_ITEM_TYPES = new Set([
   "mcq_single",
   "mcq_multi",
@@ -145,11 +152,23 @@ function scoreObjectiveItem(
       };
     }
     case "fill_blank": {
-      const value = normalizeString(answerJson["value"]);
-      const accepted = Array.isArray(answerKey["acceptedValues"])
-        ? answerKey["acceptedValues"].map((entry) => normalizeString(entry))
-        : [normalizeString(answerKey["value"])];
-      const correct = accepted.includes(value) && value.length > 0;
+      // Each right blank earns an equal share of the marks (S3.4b); one
+      // blank is all or nothing, as before.
+      const { right, total } = markFillBlank(answerKey, answerJson);
+      const correct = total > 0 && right === total;
+      return {
+        isCorrect: correct,
+        pointsAwarded: total > 0 ? Math.round(((item.points * right) / total) * 100) / 100 : 0,
+        requiresManualGrading: false,
+      };
+    }
+    case "short_answer": {
+      // Marked by its keywords (S3.4b): all marks when the answer has enough
+      // of them, none otherwise.
+      const rule = shortAnswerKeywordRule(answerKey);
+      const correct =
+        rule !== null &&
+        matchedKeywords(answerJson["value"], rule.keywords).length >= rule.required;
       return {
         isCorrect: correct,
         pointsAwarded: correct ? item.points : 0,
@@ -214,6 +233,12 @@ export function hasObjectiveAnswer(
     case "true_false":
       return typeof answerJson["value"] === "boolean";
     case "fill_blank":
+      return (
+        normalizeString(answerJson["value"]).length > 0 ||
+        (Array.isArray(answerJson["values"]) &&
+          answerJson["values"].some((value) => normalizeString(value).length > 0))
+      );
+    case "short_answer":
       return normalizeString(answerJson["value"]).length > 0;
     case "matching": {
       const pairs = answerJson["pairs"];
@@ -254,7 +279,7 @@ export function scoreAttempt(args: {
   for (const item of args.items) {
     const answer = args.answers.get(item.assessmentItemId) ?? null;
 
-    if (MANUAL_ITEM_TYPES.has(item.itemTypeKey)) {
+    if (isManualScoringItem(item.itemTypeKey, item.answerKeyJson)) {
       requiresManualGrading = true;
       itemResults.push({
         assessmentItemId: item.assessmentItemId,
@@ -265,7 +290,10 @@ export function scoreAttempt(args: {
       continue;
     }
 
-    if (!OBJECTIVE_ITEM_TYPES.has(item.itemTypeKey)) {
+    if (
+      !OBJECTIVE_ITEM_TYPES.has(item.itemTypeKey) &&
+      !isKeywordMarked(item.itemTypeKey, item.answerKeyJson)
+    ) {
       requiresManualGrading = true;
       itemResults.push({
         assessmentItemId: item.assessmentItemId,
@@ -278,8 +306,12 @@ export function scoreAttempt(args: {
 
     possibleObjectivePoints += item.points;
     const result = scoreObjectiveItem(item, answer);
+    // Negative marks only for an answer that earned nothing: a fill-in-the-
+    // blank with some blanks right keeps its share.
     const lost =
-      !result.isCorrect && hasObjectiveAnswer(item.itemTypeKey, answer)
+      !result.isCorrect &&
+      result.pointsAwarded === 0 &&
+      hasObjectiveAnswer(item.itemTypeKey, answer)
         ? negativeMarks(item.points, negativePercent)
         : 0;
     const pointsAwarded = lost > 0 ? -lost : result.pointsAwarded;
@@ -308,6 +340,14 @@ export function scoreAttempt(args: {
     requiresManualGrading,
     itemResults,
   };
+}
+
+/**
+ * Whether a person marks this question: written and uploaded answers, except
+ * a short answer with keywords, which is marked automatically (S3.4b).
+ */
+export function isManualScoringItem(itemTypeKey: string, answerKeyJson: unknown): boolean {
+  return MANUAL_ITEM_TYPES.has(itemTypeKey) && !isKeywordMarked(itemTypeKey, answerKeyJson);
 }
 
 export function isObjectiveItemType(itemTypeKey: string): boolean {

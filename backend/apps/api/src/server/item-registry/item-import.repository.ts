@@ -38,6 +38,8 @@ export type ImportBatchHistoryRow = ImportBatchRow & {
 
 export type ImportItemInsert = {
   id: string;
+  /** The question's own type (a mixed import has several, S3.4b). */
+  itemTypeKey: string;
   rowNumber: number;
   stemJson: unknown;
   explanationJson: unknown;
@@ -292,7 +294,6 @@ export const itemImportRepository = {
     tx: TenantTx,
     args: {
       tenantId: string;
-      itemTypeKey: string;
       batchId: string;
       createdByMembershipId: string;
       items: ImportItemInsert[];
@@ -302,6 +303,7 @@ export const itemImportRepository = {
 
     const items = args.items.map((item) => ({
       id: item.id,
+      item_type_key: item.itemTypeKey,
       row_number: item.rowNumber,
       stem_json: item.stemJson,
       explanation_json: item.explanationJson,
@@ -314,13 +316,13 @@ export const itemImportRepository = {
         created_by_membership_id, created_at, updated_at,
         import_batch_id, import_row_number, import_reference
       )
-      select r.id, ${args.tenantId}::uuid, ${args.itemTypeKey}, r.stem_json,
+      select r.id, ${args.tenantId}::uuid, r.item_type_key, r.stem_json,
              r.explanation_json, 'DRAFT'::"PublishStatus",
              array(select jsonb_array_elements_text(r.tags)),
              ${args.createdByMembershipId}::uuid, now(), now(),
              ${args.batchId}::uuid, r.row_number, r.reference
         from jsonb_to_recordset(${JSON.stringify(items)}::jsonb) as r(
-          id uuid, row_number int, stem_json jsonb, explanation_json jsonb,
+          id uuid, item_type_key text, row_number int, stem_json jsonb, explanation_json jsonb,
           tags jsonb, reference text
         )
     `;

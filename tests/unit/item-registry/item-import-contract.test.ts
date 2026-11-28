@@ -128,7 +128,7 @@ describe("reading a spreadsheet row", () => {
       ),
     ).toMatchObject({ ok: true, item: { answerKeyJson: { value: true } } });
     expect(
-      rowToItemDefinition("fill_blank", { question: "2 + 2 = ____", accepted_1: 4 }, dimensions),
+      rowToItemDefinition("fill_blank", { question: "2 + 2 = ____", blank_1: 4 }, dimensions),
     ).toMatchObject({ ok: true, item: { answerKeyJson: { acceptedValues: ["4"] } } });
     expect(
       rowToItemDefinition("mcq_single", mcqRow({ correct_option: " b " }), dimensions),
@@ -152,9 +152,9 @@ describe("reading a spreadsheet row", () => {
 
   it("reports a date where text belongs", () => {
     expect(
-      issuesFor("fill_blank", { question: "Q", accepted_1: new Date(2026, 0, 2) })[0],
+      issuesFor("fill_blank", { question: "Q", blank_1: new Date(2026, 0, 2) })[0],
     ).toMatchObject({
-      columns: ["accepted_1"],
+      columns: ["blank_1"],
       message: expect.stringContaining("contains a date"),
     });
   });

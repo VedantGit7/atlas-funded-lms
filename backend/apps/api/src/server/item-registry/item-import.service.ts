@@ -95,6 +95,30 @@ function rowCells(row: ImportRowPayload, columns: Set<string>): ImportRow {
   return Object.fromEntries(Object.entries(cells).filter(([key]) => columns.has(key)));
 }
 
+/**
+ * Questions in the bank that repeat these, by type: a question repeats one of
+ * the same type with the same text. A mixed import checks each type (S3.4b).
+ * Keyed `${type}:${fingerprint}`.
+ */
+async function bankByTypedFingerprint(
+  tx: TenantTx,
+  tenantId: string,
+  entries: Array<{ itemTypeKey: string; fingerprint: string }>,
+): Promise<Map<string, string>> {
+  const found = new Map<string, string>();
+  for (const itemTypeKey of new Set(entries.map((entry) => entry.itemTypeKey))) {
+    const matches = await itemImportRepository.findByFingerprints(tx, {
+      tenantId,
+      itemTypeKey,
+      fingerprints: entries
+        .filter((entry) => entry.itemTypeKey === itemTypeKey)
+        .map((entry) => entry.fingerprint),
+    });
+    for (const [fingerprint, id] of matches) found.set(`${itemTypeKey}:${fingerprint}`, id);
+  }
+  return found;
+}
+
 function sameTag(a: string, b: string) {
   return a.toLocaleLowerCase() === b.toLocaleLowerCase();
 }
@@ -131,11 +155,14 @@ export const itemImportService = {
       tx,
       ready.map((item) => item.contentJson.stem),
     );
-    const bankByFingerprint = await itemImportRepository.findByFingerprints(tx, {
-      tenantId: ctx.tenantId,
-      itemTypeKey: type,
-      fingerprints,
-    });
+    const bankByFingerprint = await bankByTypedFingerprint(
+      tx,
+      ctx.tenantId,
+      ready.map((item, index) => ({
+        itemTypeKey: item.itemTypeKey,
+        fingerprint: fingerprints[index] ?? "",
+      })),
+    );
     const bankByReference = await itemImportRepository.findByReferences(tx, {
       tenantId: ctx.tenantId,
       references: ready.flatMap((item) => (item.reference ? [item.reference] : [])),
@@ -156,7 +183,9 @@ export const itemImportService = {
       const item = row.result.item;
       const fingerprint = fingerprints[readyIndex] ?? null;
       readyIndex += 1;
-      const byQuestion = fingerprint ? bankByFingerprint.get(fingerprint) : undefined;
+      const byQuestion = fingerprint
+        ? bankByFingerprint.get(`${item.itemTypeKey}:${fingerprint}`)
+        : undefined;
       const byReference = item.reference ? bankByReference.get(item.reference) : undefined;
       const duplicateOf = byQuestion
         ? { itemId: byQuestion, reason: "question" as const }
@@ -283,15 +312,22 @@ export const itemImportService = {
 
     let toInsert = accepted;
     if (batch.skip_duplicates && accepted.length > 0) {
-      const fingerprints = await itemImportRepository.fingerprints(
+      // A repeat is the same text in the same type.
+      const textFingerprints = await itemImportRepository.fingerprints(
         tx,
         accepted.map((entry) => entry.item.contentJson.stem),
       );
-      const bankByFingerprint = await itemImportRepository.findByFingerprints(tx, {
-        tenantId: ctx.tenantId,
-        itemTypeKey: type,
-        fingerprints,
-      });
+      const fingerprints = textFingerprints.map(
+        (fingerprint, index) => `${accepted[index]?.item.itemTypeKey ?? ""}:${fingerprint}`,
+      );
+      const bankByFingerprint = await bankByTypedFingerprint(
+        tx,
+        ctx.tenantId,
+        accepted.map((entry, index) => ({
+          itemTypeKey: entry.item.itemTypeKey,
+          fingerprint: textFingerprints[index] ?? "",
+        })),
+      );
       const bankByReference = await itemImportRepository.findByReferences(tx, {
         tenantId: ctx.tenantId,
         references: accepted.flatMap((entry) =>
@@ -339,13 +375,14 @@ export const itemImportService = {
 
     const inserts: ImportItemInsert[] = toInsert.map((entry) => {
       const definition = resolveItemDefinition({
-        itemTypeKey: type,
+        itemTypeKey: entry.item.itemTypeKey,
         contentJson: entry.item.contentJson,
         answerKeyJson: entry.item.answerKeyJson,
         options: entry.item.options,
       });
       return {
         id: randomUUID(),
+        itemTypeKey: entry.item.itemTypeKey,
         rowNumber: entry.rowNumber,
         stemJson: entry.item.contentJson,
         explanationJson: encodeExplanationJson({ answerKeyJson: definition.answerKeyJson }),
@@ -363,7 +400,6 @@ export const itemImportService = {
 
     await itemImportRepository.insertItems(tx, {
       tenantId: ctx.tenantId,
-      itemTypeKey: type,
       batchId,
       createdByMembershipId: ctx.actorMembershipId,
       items: inserts,
@@ -378,7 +414,7 @@ export const itemImportService = {
         target: { type: "item", id: insert.id },
         before: null,
         after: {
-          itemTypeKey: type,
+          itemTypeKey: insert.itemTypeKey,
           status: "DRAFT",
           tags: insert.tags,
           contentJson: insert.stemJson,

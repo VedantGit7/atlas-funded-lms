@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ANSWER_RULE_LIMITS, countBlanks, fillBlankAnswerSets } from "./answer-rules.contract";
 
 /**
  * What makes a question gradeable, per built-in item type.
@@ -12,7 +13,8 @@ import { z } from "zod";
  * and the spreadsheet importer validates each row with it, so the three can
  * never disagree.
  *
- * It is a contract (synced to the web app), so it imports only zod.
+ * It is a contract (synced to the web app), so it imports only zod and other
+ * contracts.
  */
 
 export const ITEM_DEFINITION_LIMITS = {
@@ -219,22 +221,58 @@ export function validateItemDefinition(input: ItemDefinitionInput): ItemDefiniti
     }
 
     case "fill_blank": {
-      const listed = Array.isArray(raw["acceptedValues"])
-        ? (raw["acceptedValues"] as unknown[])
-        : [raw["value"]];
-      const accepted: string[] = [];
-      for (const value of listed.map(clean).filter(Boolean)) {
-        if (!accepted.some((other) => sameText(other, value))) accepted.push(value);
+      // One set of accepted answers per blank (____) in the question; a
+      // question with one blank keeps the older `acceptedValues` key.
+      const sets = fillBlankAnswerSets(raw).map((listed) => {
+        const accepted: string[] = [];
+        for (const value of listed.map(clean).filter(Boolean)) {
+          if (!accepted.some((other) => sameText(other, value))) accepted.push(value);
+        }
+        return accepted;
+      });
+      const blanksInStem = countBlanks(stem);
+      const multiple = sets.length > 1;
+      if (sets.length > ANSWER_RULE_LIMITS.maxBlanks) {
+        issue("blanks", `Use at most ${String(ANSWER_RULE_LIMITS.maxBlanks)} blanks.`);
       }
-      if (accepted.length === 0) issue("acceptedValues", "Add at least one accepted answer.");
-      if (accepted.length > L.maxAcceptedValues)
-        issue("acceptedValues", `Use at most ${String(L.maxAcceptedValues)} accepted answers.`);
-      if (accepted.some((value) => value.length > L.acceptedValueMaxLength))
+      if (multiple && blanksInStem !== sets.length) {
         issue(
-          "acceptedValues",
-          `Each accepted answer must be at most ${String(L.acceptedValueMaxLength)} characters.`,
+          "blanks",
+          blanksInStem < sets.length
+            ? `There are answers for ${String(sets.length)} blanks, but the question shows ${String(blanksInStem)}. Mark each blank in the question with ____.`
+            : `The question shows ${String(blanksInStem)} blanks (____) but has answers for ${String(sets.length)}. Add the accepted answers for each blank.`,
         );
-      answerKey["acceptedValues"] = accepted;
+      } else if (!multiple && blanksInStem > 1) {
+        issue(
+          "blanks",
+          `The question shows ${String(blanksInStem)} blanks (____). Add the accepted answers for each blank.`,
+        );
+      }
+      sets.forEach((accepted, index) => {
+        const which = multiple ? `blank ${String(index + 1)}` : "the blank";
+        if (accepted.length === 0)
+          issue(
+            multiple ? "blanks" : "acceptedValues",
+            multiple
+              ? `Add at least one accepted answer for ${which}.`
+              : "Add at least one accepted answer.",
+          );
+        if (accepted.length > L.maxAcceptedValues)
+          issue(
+            multiple ? "blanks" : "acceptedValues",
+            `Use at most ${String(L.maxAcceptedValues)} accepted answers for ${which}.`,
+          );
+        if (accepted.some((value) => value.length > L.acceptedValueMaxLength))
+          issue(
+            multiple ? "blanks" : "acceptedValues",
+            `Each accepted answer must be at most ${String(L.acceptedValueMaxLength)} characters.`,
+          );
+      });
+      if (multiple) {
+        answerKey["blanks"] = sets.map((acceptedValues) => ({ acceptedValues }));
+      } else {
+        answerKey["acceptedValues"] = sets[0] ?? [];
+      }
       break;
     }
 
@@ -255,6 +293,53 @@ export function validateItemDefinition(input: ItemDefinitionInput): ItemDefiniti
         );
       if (rubric) answerKey["rubric"] = rubric;
       if (modelAnswer) answerKey["modelAnswer"] = modelAnswer;
+
+      // Short answer: keywords mark it automatically (S3.4b).
+      if (input.itemTypeKey === "short_answer") {
+        const keywords: string[] = [];
+        const listedKeywords = Array.isArray(raw["keywords"]) ? (raw["keywords"] as unknown[]) : [];
+        for (const value of listedKeywords.map(clean).filter(Boolean)) {
+          if (!keywords.some((other) => sameText(other, value))) keywords.push(value);
+        }
+        if (keywords.length > ANSWER_RULE_LIMITS.maxKeywords)
+          issue("keywords", `Use at most ${String(ANSWER_RULE_LIMITS.maxKeywords)} keywords.`);
+        if (keywords.some((value) => value.length > ANSWER_RULE_LIMITS.keywordMaxLength))
+          issue(
+            "keywords",
+            `Each keyword must be at most ${String(ANSWER_RULE_LIMITS.keywordMaxLength)} characters.`,
+          );
+        if (keywords.length > 0) {
+          answerKey["keywords"] = keywords;
+          const required = raw["keywordsRequired"];
+          if (required !== undefined && required !== null && required !== "") {
+            const count = typeof required === "number" ? required : Number(required);
+            if (!Number.isInteger(count) || count < 1 || count > keywords.length) {
+              issue(
+                "keywordsRequired",
+                `Keywords needed must be a whole number from 1 to ${String(keywords.length)}.`,
+              );
+            } else {
+              answerKey["keywordsRequired"] = count;
+            }
+          }
+        }
+      }
+
+      // Long answer: an optional word limit (S3.4b).
+      if (input.itemTypeKey === "long_answer") {
+        const limit = raw["maxWords"];
+        if (limit !== undefined && limit !== null && limit !== "") {
+          const count = typeof limit === "number" ? limit : Number(limit);
+          if (!Number.isInteger(count) || count < 1 || count > ANSWER_RULE_LIMITS.maxWordLimit) {
+            issue(
+              "maxWords",
+              `The word limit must be a whole number from 1 to ${ANSWER_RULE_LIMITS.maxWordLimit.toLocaleString("en")}.`,
+            );
+          } else {
+            answerKey["maxWords"] = count;
+          }
+        }
+      }
 
       if (input.itemTypeKey === "file_upload") {
         const listed = Array.isArray(raw["acceptedFileTypes"])

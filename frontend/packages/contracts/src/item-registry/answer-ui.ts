@@ -9,7 +9,7 @@ export function emptyResponseState(itemTypeKey: string): ItemResponseUiState {
     case "true_false":
       return { type: "true_false", value: null };
     case "fill_blank":
-      return { type: "fill_blank", value: "" };
+      return { type: "fill_blank", values: [""] };
     case "short_answer":
       return { type: "short_answer", value: "" };
     case "long_answer":
@@ -53,7 +53,13 @@ export function responseFromWire(
         type: "true_false",
         value: typeof wire["value"] === "boolean" ? wire["value"] : null,
       };
-    case "fill_blank":
+    case "fill_blank": {
+      // `values` for several blanks (S3.4b), `value` for one.
+      const values = Array.isArray(wire["values"])
+        ? wire["values"].map((entry) => (typeof entry === "string" ? entry : ""))
+        : [typeof wire["value"] === "string" ? wire["value"] : ""];
+      return { type: "fill_blank", values: values.length > 0 ? values : [""] };
+    }
     case "short_answer":
     case "long_answer":
       return {
@@ -101,6 +107,8 @@ export function responseToWire(state: ItemResponseUiState): Record<string, unkno
     case "true_false":
       return state.value === null ? null : { value: state.value };
     case "fill_blank":
+      if (!state.values.some((value) => value.trim())) return null;
+      return state.values.length <= 1 ? { value: state.values[0] ?? "" } : { values: state.values };
     case "short_answer":
     case "long_answer":
       return state.value.trim() ? { value: state.value } : null;

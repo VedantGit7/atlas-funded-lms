@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { createTenantRoute } from "@atlas/api";
-import { VALIDATED_ITEM_TYPES } from "@atlas/api-server/item-registry/item-definition.contract";
+import { ITEM_IMPORT_TEMPLATE_TYPES } from "@atlas/api-server/item-registry/item-import.contract";
 import { buildItemImportTemplate } from "@atlas/api-server/item-registry/item-import-template.service";
 import { getItemImportTemplateRouteMetadata } from "./route.metadata";
 
 const paramsSchema = z.object({
-  typeKey: z.enum(VALIDATED_ITEM_TYPES),
+  typeKey: z.enum(ITEM_IMPORT_TEMPLATE_TYPES),
 });
 
 const templateResponseSchema = z.object({
