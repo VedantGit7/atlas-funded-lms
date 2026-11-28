@@ -66,3 +66,17 @@ export function answerOverWordLimit(limit: number, words: number): AtlasHttpErro
     message: `Keep this answer to ${limit.toLocaleString("en")} words. It has ${words.toLocaleString("en")}.`,
   });
 }
+
+/** An upload answer without a confirmed file of this attempt (S3.4c). */
+export function answerFileMissing(): AtlasHttpError {
+  return new AtlasHttpError({
+    code: "VALIDATION_ERROR",
+    status: 400,
+    message: "The file wasn't found. Upload it again.",
+  });
+}
+
+/** A file the upload question doesn't allow (S3.4c). */
+export function answerFileInvalid(message: string): AtlasHttpError {
+  return new AtlasHttpError({ code: "VALIDATION_ERROR", status: 400, message });
+}

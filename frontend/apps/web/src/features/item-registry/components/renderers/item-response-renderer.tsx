@@ -13,10 +13,11 @@ import {
   countWords,
   longAnswerWordLimit,
 } from "@atlas/contracts/item-registry/answer-rules.contract";
-import { ArrowDown, ArrowUp, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getItemTypeVisual } from "../item-type-config";
 import { SwipeCardPreview } from "../swipe-card-preview";
+import { FileUploadResponse, type UploadedFile } from "./file-upload-response";
 import {
   chipButtonClassName,
   choiceClassName,
@@ -51,7 +52,17 @@ export type ItemResponseRendererProps = {
    * key): a long answer's word limit (S3.4b). In the author's preview they are
    * read from the answer key.
    */
-  answerLimits?: { maxWords?: number | undefined } | undefined;
+  answerLimits?:
+    | {
+        maxWords?: number | undefined;
+        fileTypes?: string[] | undefined;
+        maxFileSizeMb?: number | undefined;
+      }
+    | undefined;
+  /** Uploads a file for an upload question, in a real attempt (S3.4c). */
+  onUploadFile?: ((file: File) => Promise<UploadedFile>) | undefined;
+  /** Opens a file this attempt uploaded. */
+  onOpenFile?: ((assetReferenceId: string) => void) | undefined;
 };
 
 type LabeledId = { id: string; label: string };
@@ -139,6 +150,8 @@ export function ItemResponseRenderer({
   showStem = true,
   choices,
   answerLimits,
+  onUploadFile,
+  onOpenFile,
 }: ItemResponseRendererProps) {
   const [state, setState] = useState<ItemResponseUiState>(() =>
     responseFromWire(itemTypeKey, savedAnswer),
@@ -189,6 +202,8 @@ export function ItemResponseRenderer({
     stem,
     answerLimits,
     setState,
+    onUploadFile,
+    onOpenFile,
   });
 
   if (!showStem) {
@@ -220,9 +235,11 @@ function renderInteraction(args: {
   mode: "preview" | "attempt";
   choices: ResponseChoices | undefined;
   stem: string;
-  answerLimits: { maxWords?: number | undefined } | undefined;
+  answerLimits: ItemResponseRendererProps["answerLimits"];
   /** Updates the box without reporting the answer (a long answer over its limit). */
   setState: (next: ItemResponseUiState) => void;
+  onUploadFile: ItemResponseRendererProps["onUploadFile"];
+  onOpenFile: ItemResponseRendererProps["onOpenFile"];
 }) {
   const {
     itemTypeKey,
@@ -238,6 +255,8 @@ function renderInteraction(args: {
     stem,
     answerLimits,
     setState,
+    onUploadFile,
+    onOpenFile,
   } = args;
 
   if (itemTypeKey === "true_false" && state.type === "true_false") {
@@ -371,27 +390,15 @@ function renderInteraction(args: {
 
   if (itemTypeKey === "file_upload" && state.type === "file_upload") {
     return (
-      <div className="rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-low)] px-4 py-8 text-center motion-safe:transition-colors motion-safe:duration-200 hover:border-[color-mix(in_srgb,var(--admin-primary)_35%,var(--admin-border))]">
-        <Upload
-          className="mx-auto h-8 w-8 text-[var(--admin-on-surface-variant)]"
-          aria-hidden="true"
-        />
-        <p className="mt-2 text-sm font-medium text-[var(--admin-on-surface)]">Drop a file here</p>
-        <p className="mt-1 text-xs text-[var(--admin-on-surface-variant)]">
-          Or enter a file name for preview simulation.
-        </p>
-        <input
-          type="text"
-          disabled={disabled}
-          value={state.fileName}
-          onChange={(event) => {
-            updateState({ type: "file_upload", fileName: event.target.value });
-          }}
-          placeholder="example-chart.png"
-          className={`${editorInputClassName} mx-auto mt-4 max-w-sm`}
-          aria-label="Simulated file name"
-        />
-      </div>
+      <FileUploadResponse
+        state={state}
+        updateState={updateState}
+        disabled={disabled}
+        answerKey={answerKey}
+        limits={answerLimits}
+        onUploadFile={onUploadFile}
+        onOpenFile={onOpenFile}
+      />
     );
   }
 

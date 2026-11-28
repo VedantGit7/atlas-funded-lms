@@ -7,7 +7,14 @@ import {
   type ItemAnswerKeyUiState,
   uiStateToAnswerKey,
 } from "@atlas/contracts/item-registry/answer-contracts";
-import { countBlanks } from "@atlas/contracts/item-registry/answer-rules.contract";
+import {
+  ANSWER_FILE_LIMITS,
+  ANSWER_FILE_TYPES,
+  DEFAULT_ANSWER_FILE_TYPES,
+  countBlanks,
+  describeAnswerFileTypes,
+  type AnswerFileType,
+} from "@atlas/contracts/item-registry/answer-rules.contract";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { EditorOptionRow } from "../shared/item-options-builder";
@@ -209,13 +216,12 @@ export function AnswerKeyEditor({
           long={false}
           modelAnswerLabel="Reference file name (optional)"
         />
-        <AcceptedValuesEditor
-          values={uiState.acceptedFileTypes.length > 0 ? uiState.acceptedFileTypes : ["pdf"]}
-          onChange={(acceptedFileTypes) => {
-            commit({ ...uiState, acceptedFileTypes });
+        <FileRulesEditor
+          types={uiState.acceptedFileTypes}
+          maxMb={uiState.maxFileSizeMb}
+          onChange={(acceptedFileTypes, maxFileSizeMb) => {
+            commit({ ...uiState, acceptedFileTypes, maxFileSizeMb });
           }}
-          addLabel="Add file extension"
-          placeholder=".pdf"
         />
       </div>
     );
@@ -454,6 +460,104 @@ function KeywordsEditor({
           of the {filled} keywords.
         </label>
       ) : null}
+    </div>
+  );
+}
+
+/** File groups, as authors think of them. */
+const FILE_TYPE_GROUPS: Array<{ label: string; types: AnswerFileType[] }> = [
+  { label: "Documents", types: ["pdf", "docx", "doc", "txt"] },
+  { label: "Spreadsheets", types: ["xlsx", "xls", "csv"] },
+  { label: "Slides", types: ["pptx", "ppt"] },
+  { label: "Images", types: ["png", "jpg", "jpeg", "webp", "gif"] },
+  { label: "Other", types: ["zip"] },
+];
+
+/**
+ * Which files learners may upload, and how large (QA review 1 m26: PDF only
+ * by default, no size limit). Nothing ticked: everyday documents and images.
+ */
+function FileRulesEditor({
+  types,
+  maxMb,
+  onChange,
+}: {
+  types: string[];
+  maxMb: number | null;
+  onChange: (types: string[], maxMb: number | null) => void;
+}) {
+  const chosen = new Set(types.map((type) => type.replace(/^\.+/, "").toLowerCase()));
+  const usingDefault = chosen.size === 0;
+
+  return (
+    <div className="space-y-4">
+      <fieldset className="space-y-3">
+        <legend className={editorLabelClassName}>File types learners can upload</legend>
+        <p className={editorHintClassName}>
+          {usingDefault
+            ? `None ticked: learners can upload ${describeAnswerFileTypes(DEFAULT_ANSWER_FILE_TYPES)}.`
+            : `Learners can upload ${describeAnswerFileTypes([...chosen])}.`}
+        </p>
+        {FILE_TYPE_GROUPS.map((group) => (
+          <div key={group.label}>
+            <p className="mb-1 text-xs font-semibold text-[var(--admin-on-surface-variant)]">
+              {group.label}
+            </p>
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+              {group.types.map((type) => (
+                <label
+                  key={type}
+                  className="inline-flex items-center gap-1.5 text-sm text-[var(--admin-on-surface)]"
+                >
+                  <input
+                    type="checkbox"
+                    checked={chosen.has(type)}
+                    onChange={(event) => {
+                      const next = new Set(chosen);
+                      if (event.target.checked) next.add(type);
+                      else next.delete(type);
+                      onChange([...next], maxMb);
+                    }}
+                    className="h-4 w-4 accent-[var(--admin-primary)]"
+                  />
+                  {ANSWER_FILE_TYPES[type].label}{" "}
+                  <span className="text-[var(--admin-on-surface-variant)]">.{type}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </fieldset>
+      <div>
+        <label className={editorLabelClassName} htmlFor="answer-key-max-file-size">
+          Largest file
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            id="answer-key-max-file-size"
+            type="number"
+            min={1}
+            max={ANSWER_FILE_LIMITS.maxMb}
+            value={maxMb ?? ""}
+            placeholder={String(ANSWER_FILE_LIMITS.defaultMaxMb)}
+            onChange={(event) => {
+              const raw = event.target.value.trim();
+              const value = Math.floor(Number(raw));
+              onChange(
+                [...chosen],
+                raw && Number.isFinite(value) && value >= 1
+                  ? Math.min(value, ANSWER_FILE_LIMITS.maxMb)
+                  : null,
+              );
+            }}
+            className={`${editorNumberInputClassName} w-24`}
+          />
+          <span className="text-sm text-[var(--admin-on-surface-variant)]">MB</span>
+        </div>
+        <p className={editorHintClassName}>
+          Up to {ANSWER_FILE_LIMITS.maxMb} MB; {ANSWER_FILE_LIMITS.defaultMaxMb} MB if empty.
+        </p>
+      </div>
     </div>
   );
 }

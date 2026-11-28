@@ -153,6 +153,12 @@ const EXPECTED: Record<string, readonly SniffedKind[]> = {
   "application/vnd.apple.pkpass": ["zip"],
   "application/vnd.openxmlformats-officedocument.presentationml.presentation": ["zip"],
   "application/vnd.ms-powerpoint": ["ole"],
+  // Learners' answer files (S3.4c): Office files are ZIP (new) or OLE (old).
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["zip"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["zip"],
+  "application/msword": ["ole"],
+  "application/vnd.ms-excel": ["ole"],
+  "image/gif": ["gif"],
   "text/plain": ["text"],
   "text/csv": ["text"],
 };

@@ -1,0 +1,19 @@
+import type { RouteMetadata } from "@atlas/api/route-metadata";
+import { loadAttemptResourceRef } from "../../../../../../../server/attempts/attempt.resource-loaders";
+
+/** A learner uploading a file to answer an upload question in their own attempt (S3.4c). */
+export const postAttemptFileRouteMetadata = {
+  permission: "attempt.submit",
+  entitlement: null,
+  audit: "none",
+  auditExempt: "learner_activity",
+  rateLimit: "tenantMutation",
+  idempotency: "required",
+  resourceLoader: async ({ tx, ctx, params }) => {
+    const attemptId = params["id"];
+    if (!attemptId) throw new Error("Missing attempt id");
+    return loadAttemptResourceRef({ tx, ctx, attemptId });
+  },
+} satisfies RouteMetadata;
+
+export const routeMetadata = postAttemptFileRouteMetadata;

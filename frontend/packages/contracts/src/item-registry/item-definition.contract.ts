@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { ANSWER_RULE_LIMITS, countBlanks, fillBlankAnswerSets } from "./answer-rules.contract";
+import {
+  ANSWER_FILE_LIMITS,
+  ANSWER_FILE_TYPES,
+  ANSWER_RULE_LIMITS,
+  countBlanks,
+  describeAnswerFileTypes,
+  fillBlankAnswerSets,
+  isAnswerFileType,
+} from "./answer-rules.contract";
 
 /**
  * What makes a question gradeable, per built-in item type.
@@ -345,11 +353,18 @@ export function validateItemDefinition(input: ItemDefinitionInput): ItemDefiniti
         const listed = Array.isArray(raw["acceptedFileTypes"])
           ? (raw["acceptedFileTypes"] as unknown[])
           : [];
+        // Only types learners can actually upload (S3.4c). Empty: the
+        // everyday default set.
         const types: string[] = [];
         for (const value of listed.map(clean).filter(Boolean)) {
           const type = value.replace(/^\.+/, "").toLowerCase();
           if (!/^[a-z0-9]{1,10}$/.test(type)) {
             issue("acceptedFileTypes", `"${value}" is not a file extension, such as pdf or png.`);
+          } else if (!isAnswerFileType(type)) {
+            issue(
+              "acceptedFileTypes",
+              `Learners can't upload .${type} files. Choose from ${describeAnswerFileTypes(Object.keys(ANSWER_FILE_TYPES))}.`,
+            );
           } else if (!types.includes(type)) {
             types.push(type);
           }
@@ -357,6 +372,23 @@ export function validateItemDefinition(input: ItemDefinitionInput): ItemDefiniti
         if (types.length > L.maxFileTypes)
           issue("acceptedFileTypes", `Use at most ${String(L.maxFileTypes)} file types.`);
         answerKey["acceptedFileTypes"] = types;
+
+        const size = raw["maxFileSizeMb"];
+        if (size !== undefined && size !== null && size !== "") {
+          const megabytes = typeof size === "number" ? size : Number(size);
+          if (
+            !Number.isInteger(megabytes) ||
+            megabytes < 1 ||
+            megabytes > ANSWER_FILE_LIMITS.maxMb
+          ) {
+            issue(
+              "maxFileSizeMb",
+              `The largest file must be a whole number of MB from 1 to ${String(ANSWER_FILE_LIMITS.maxMb)}.`,
+            );
+          } else {
+            answerKey["maxFileSizeMb"] = megabytes;
+          }
+        }
       }
       break;
     }

@@ -90,6 +90,10 @@ export function responseFromWire(
       return {
         type: "file_upload",
         fileName: typeof wire["fileName"] === "string" ? wire["fileName"] : "",
+        assetReferenceId:
+          typeof wire["assetReferenceId"] === "string" ? wire["assetReferenceId"] : undefined,
+        sizeBytes: typeof wire["sizeBytes"] === "number" ? wire["sizeBytes"] : undefined,
+        contentType: typeof wire["contentType"] === "string" ? wire["contentType"] : undefined,
       };
     default:
       return empty;
@@ -119,7 +123,17 @@ export function responseToWire(state: ItemResponseUiState): Record<string, unkno
     case "swipe":
       return state.action ? { action: state.action } : null;
     case "file_upload":
-      return state.fileName.trim() ? { fileName: state.fileName } : null;
+      if (!state.fileName.trim()) return null;
+      // A real attempt saves the confirmed file (S3.4c); the author's preview
+      // only has a name.
+      return state.assetReferenceId
+        ? {
+            assetReferenceId: state.assetReferenceId,
+            fileName: state.fileName,
+            ...(state.sizeBytes != null ? { sizeBytes: state.sizeBytes } : {}),
+            ...(state.contentType ? { contentType: state.contentType } : {}),
+          }
+        : { fileName: state.fileName };
   }
 }
 

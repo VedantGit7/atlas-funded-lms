@@ -166,7 +166,14 @@ const runnerItemSchema = z.object({
   savedAnswer: z.record(z.string(), z.unknown()).nullable(),
   choices: attemptChoicesSchema.optional(),
   /** Limits the learner sees while answering, such as a long answer's word limit (S3.4b). */
-  answerLimits: z.object({ maxWords: z.number().int().optional() }).optional(),
+  answerLimits: z
+    .object({
+      maxWords: z.number().int().optional(),
+      /** Upload question (S3.4c): the file types allowed and the largest file. */
+      fileTypes: z.array(z.string()).optional(),
+      maxFileSizeMb: z.number().int().optional(),
+    })
+    .optional(),
   review: attemptItemReviewSchema.optional(),
 });
 
