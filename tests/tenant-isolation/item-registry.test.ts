@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import { withTenantTx } from "@atlas/db";
 import { itemRegistryService } from "../../backend/apps/api/src/server/item-registry/item-registry.service";
 import { itemImportService } from "../../backend/apps/api/src/server/item-registry/item-import.service";
-import { itemImportColumns } from "../../backend/apps/api/src/server/item-registry/item-import.contract";
+import {
+  ITEM_IMPORT_FORMAT,
+  ITEM_IMPORT_TEMPLATE_VERSION,
+  itemImportColumns,
+} from "../../backend/apps/api/src/server/item-registry/item-import.contract";
 import {
   authoringTenantTx,
   createItemRegistryFixture,
@@ -114,8 +118,8 @@ describeWithDb("item registry tenant isolation", () => {
     const tenantB = await createItemRegistryFixture();
     const columns = itemImportColumns("true_false", []);
     const template = {
-      format: "atlas-item-import",
-      version: "1",
+      format: ITEM_IMPORT_FORMAT,
+      version: ITEM_IMPORT_TEMPLATE_VERSION,
       itemTypeKey: "true_false" as const,
       columns: columns.map((column) => column.key),
       headers: columns.map((column) => column.header),
